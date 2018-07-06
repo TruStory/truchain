@@ -4,7 +4,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/cosmos/cosmos-sdk/examples/basecoin/types"
+	"github.com/TruStory/trucoin/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/wire"
 	"github.com/cosmos/cosmos-sdk/x/auth"
@@ -15,7 +15,7 @@ import (
 	"github.com/tendermint/tendermint/libs/log"
 )
 
-func setGenesis(baseApp *BasecoinApp, accounts ...*types.AppAccount) (types.GenesisState, error) {
+func setGenesis(baseApp *TruStoryApp, accounts ...*types.AppAccount) (types.GenesisState, error) {
 	genAccts := make([]*types.GenesisAccount, len(accounts))
 	for i, appAct := range accounts {
 		genAccts[i] = types.NewGenesisAccount(appAct)
