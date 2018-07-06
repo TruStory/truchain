@@ -18,7 +18,7 @@ import (
 )
 
 const (
-	appName = "BasecoinApp"
+	appName = "TruStoryApp"
 )
 
 // TruStoryApp implements an extended ABCI application. It contains a BaseApp,
