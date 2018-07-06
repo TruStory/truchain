@@ -41,12 +41,12 @@ type TruStoryApp struct {
 	ibcMapper           ibc.Mapper
 }
 
-// NewBasecoinApp returns a reference to a new BasecoinApp given a logger and
+// NewTruStoryApp returns a reference to a new TruStoryApp given a logger and
 // database. Internally, a codec is created along with all the necessary keys.
 // In addition, all necessary mappers and keepers are created, routes
 // registered, and finally the stores being mounted along with any necessary
 // chain initialization.
-func NewBasecoinApp(logger log.Logger, db dbm.DB) *TruStoryApp {
+func NewTruStoryApp(logger log.Logger, db dbm.DB) *TruStoryApp {
 	// create and register app-level codec for TXs and accounts
 	cdc := MakeCodec()
 

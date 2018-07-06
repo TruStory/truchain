@@ -39,7 +39,7 @@ func setGenesis(baseApp *TruStoryApp, accounts ...*types.AppAccount) (types.Gene
 func TestGenesis(t *testing.T) {
 	logger := log.NewTMLogger(log.NewSyncWriter(os.Stdout)).With("module", "sdk/app")
 	db := dbm.NewMemDB()
-	baseApp := NewBasecoinApp(logger, db)
+	baseApp := NewTruStoryApp(logger, db)
 
 	// construct a pubkey and an address for the test account
 	pubkey := crypto.GenPrivKeyEd25519().PubKey()
@@ -65,7 +65,7 @@ func TestGenesis(t *testing.T) {
 	require.Equal(t, appAcct, res)
 
 	// reload app and ensure the account is still there
-	baseApp = NewBasecoinApp(logger, db)
+	baseApp = NewTruStoryApp(logger, db)
 
 	stateBytes, err := wire.MarshalJSONIndent(baseApp.cdc, genState)
 	require.Nil(t, err)
