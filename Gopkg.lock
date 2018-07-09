@@ -185,6 +185,7 @@
     ".",
     "hcl/ast",
     "hcl/parser",
+    "hcl/printer",
     "hcl/scanner",
     "hcl/strconv",
     "hcl/token",
@@ -380,6 +381,19 @@
   version = "0.10.1"
 
 [[projects]]
+  name = "github.com/tendermint/go-crypto"
+  packages = [
+    ".",
+    "keys",
+    "keys/bcrypt",
+    "keys/words",
+    "keys/words/wordlist",
+    "tmhash"
+  ]
+  revision = "6a6b591a3d7592a04b46af95451cb5be3b114f76"
+  version = "v0.9.0"
+
+[[projects]]
   name = "github.com/tendermint/iavl"
   packages = ["."]
   revision = "35f66e53d9b01e83b30de68b931f54b2477a94c9"
@@ -448,6 +462,15 @@
 [[projects]]
   name = "github.com/tendermint/tmlibs"
   packages = ["cli"]
+    "bech32",
+    "cli",
+    "cli/flags",
+    "common",
+    "db",
+    "log",
+    "merkle",
+    "merkle/tmhash"
+  ]
   revision = "49596e0a1f48866603813df843c9409fc19805c6"
   version = "v0.9.0"
 
