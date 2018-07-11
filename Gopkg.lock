@@ -3,6 +3,12 @@
 
 [[projects]]
   branch = "master"
+  name = "github.com/bartekn/go-bip39"
+  packages = ["."]
+  revision = "a05967ea095d81c8fe4833776774cfaff8e5036c"
+
+[[projects]]
+  branch = "master"
   name = "github.com/beorn7/perks"
   packages = ["quantile"]
   revision = "3a771d992973f24aa725d07868b467d1ddfceafb"
@@ -32,6 +38,7 @@
   revision = "ab6388e0c60ae4834a1f57511e20c17b5f78be4b"
 
 [[projects]]
+  branch = "master"
   name = "github.com/cosmos/cosmos-sdk"
   packages = [
     "baseapp",
@@ -42,7 +49,13 @@
     "client/rpc",
     "client/tx",
     "cmd/gaia/app",
+    "crypto",
+    "crypto/keys",
+    "crypto/keys/bcrypt",
+    "crypto/keys/bip39",
+    "crypto/keys/hd",
     "server",
+    "server/config",
     "store",
     "tests",
     "types",
@@ -55,16 +68,22 @@
     "x/bank/client",
     "x/bank/client/cli",
     "x/bank/client/rest",
+    "x/gov",
+    "x/gov/client/rest",
     "x/ibc",
     "x/ibc/client/cli",
     "x/ibc/client/rest",
+    "x/mock",
     "x/slashing",
+    "x/slashing/client/rest",
     "x/stake",
     "x/stake/client/cli",
-    "x/stake/client/rest"
+    "x/stake/client/rest",
+    "x/stake/keeper",
+    "x/stake/tags",
+    "x/stake/types"
   ]
-  revision = "1e6d26ad3dce18fd1dde9bbee7d2aa192c196310"
-  version = "v0.19.1-rc1"
+  revision = "e56379821c2c8a46c9dc396defde5a569e5ed0ee"
 
 [[projects]]
   name = "github.com/davecgh/go-spew"
@@ -132,8 +151,8 @@
     "ptypes/duration",
     "ptypes/timestamp"
   ]
-  revision = "925541529c1fa6821df4e44ce2723319eb2be768"
-  version = "v1.0.0"
+  revision = "b4deda0973fb4c70b50d226b1af49f3da59f5265"
+  version = "v1.1.0"
 
 [[projects]]
   branch = "master"
@@ -166,6 +185,7 @@
     ".",
     "hcl/ast",
     "hcl/parser",
+    "hcl/printer",
     "hcl/scanner",
     "hcl/strconv",
     "hcl/token",
@@ -174,12 +194,6 @@
     "json/token"
   ]
   revision = "ef8a98b0bbce4a65b5aa4c368430a80ddc533168"
-
-[[projects]]
-  branch = "master"
-  name = "github.com/howeyc/crc16"
-  packages = ["."]
-  revision = "2b2a61e366a66d3efb279e46176e7291001e0354"
 
 [[projects]]
   name = "github.com/inconshreveable/mousetrap"
@@ -242,13 +256,13 @@
   version = "v1.0.0"
 
 [[projects]]
+  branch = "master"
   name = "github.com/prometheus/client_golang"
   packages = [
     "prometheus",
     "prometheus/promhttp"
   ]
-  revision = "c5b7fccd204277076155f10851dad72b76a49317"
-  version = "v0.8.0"
+  revision = "ee1c9d7e23df7f011bdf6f12a5c9e7f0ae10a1fe"
 
 [[projects]]
   branch = "master"
@@ -328,8 +342,8 @@
     "assert",
     "require"
   ]
-  revision = "f35b8ab0b5a2cef36673838d662e249dd9c94686"
-  version = "v1.2.2"
+  revision = "12b6f73e6084dad08a7c6e575284b177ecafbc71"
+  version = "v1.2.1"
 
 [[projects]]
   branch = "master"
@@ -351,15 +365,6 @@
   revision = "c4c61651e9e37fa117f53c5a906d3b63090d8445"
 
 [[projects]]
-  name = "github.com/tendermint/abci"
-  packages = [
-    "server",
-    "types"
-  ]
-  revision = "68592f4d8ee34e97db94b7a7976b1309efdb7eb9"
-  version = "v0.10.0"
-
-[[projects]]
   branch = "master"
   name = "github.com/tendermint/ed25519"
   packages = [
@@ -376,26 +381,10 @@
   version = "0.10.1"
 
 [[projects]]
-  name = "github.com/tendermint/go-crypto"
-  packages = [
-    ".",
-    "keys",
-    "keys/bcrypt",
-    "keys/words",
-    "keys/words/wordlist",
-    "tmhash"
-  ]
-  revision = "6a6b591a3d7592a04b46af95451cb5be3b114f76"
-  version = "v0.9.0"
-
-[[projects]]
   name = "github.com/tendermint/iavl"
-  packages = [
-    ".",
-    "sha256truncated"
-  ]
-  revision = "2de525d09cca7c45c3f43d178817947a6cfa242c"
-  version = "v0.8.1"
+  packages = ["."]
+  revision = "35f66e53d9b01e83b30de68b931f54b2477a94c9"
+  version = "v0.9.2"
 
 [[projects]]
   name = "github.com/tendermint/tendermint"
@@ -403,6 +392,7 @@
     "abci/client",
     "abci/example/code",
     "abci/example/kvstore",
+    "abci/server",
     "abci/types",
     "blockchain",
     "cmd/tendermint/commands",
@@ -414,6 +404,7 @@
     "crypto/tmhash",
     "evidence",
     "libs/autofile",
+    "libs/bech32",
     "libs/cli",
     "libs/cli/flags",
     "libs/clist",
@@ -452,28 +443,13 @@
     "types",
     "version"
   ]
-  revision = "dfa9a9a30a666132425b29454e90a472aa579a48"
-  version = "v0.22.0"
-
-[[projects]]
-  name = "github.com/tendermint/tmlibs"
-  packages = [
-    "bech32",
-    "cli",
-    "cli/flags",
-    "common",
-    "db",
-    "log",
-    "merkle",
-    "merkle/tmhash"
-  ]
-  revision = "fb7ec62b2925f48de159aeea73b254ae8c58a738"
-  version = "v0.9.0-rc1"
+  revision = "5ff65274b84ea905787a48512cc3124385bddf2f"
+  version = "v0.22.2"
 
 [[projects]]
   name = "github.com/zondax/ledger-goclient"
   packages = ["."]
-  revision = "3e2146609cdb97894c064d59e9d00accd8c2b1dd"
+  revision = "065cbf938a16f20335c40cfe180f9cd4955c6a5a"
 
 [[projects]]
   branch = "master"
@@ -486,6 +462,7 @@
     "nacl/secretbox",
     "openpgp/armor",
     "openpgp/errors",
+    "pbkdf2",
     "poly1305",
     "ripemd160",
     "salsa20/salsa"
@@ -505,7 +482,7 @@
     "netutil",
     "trace"
   ]
-  revision = "6f138e0f60713a248abf7046f1014a3ba90f5341"
+  revision = "039a4258aec0ad3c79b905677cceeab13b296a77"
 
 [[projects]]
   branch = "master"
@@ -535,9 +512,10 @@
   version = "v0.3.0"
 
 [[projects]]
+  branch = "master"
   name = "google.golang.org/genproto"
   packages = ["googleapis/rpc/status"]
-  revision = "7fd901a49ba6a7f87732eb344f6e3c5b19d1b200"
+  revision = "e92b116572682a5b432ddd840aeaba2a559eeff1"
 
 [[projects]]
   name = "google.golang.org/grpc"
@@ -578,6 +556,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "e07bbed193fd11b579ec699b8e6c9226c8fc33fab7537fa30280a61effcceef5"
+  inputs-digest = "09f1f4b78b6bf61b8bbfb1143e2c538030092abf90300c0bb369a41b8bbe2cfc"
   solver-name = "gps-cdcl"
   solver-version = 1
