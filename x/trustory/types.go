@@ -20,3 +20,17 @@ func NewStory(body string, creator sdk.Address, blockHeight int64) Story {
 		NoVotes:     0,
 	}
 }
+
+// updateVote updates the votes for each
+func (s *Story) updateVote(option string, amount int64) sdk.Error {
+	switch option {
+	case "Yes":
+		s.YesVotes += amount
+		return nil
+	case "No":
+		s.NoVotes += amount
+		return nil
+	default:
+		return ErrInvalidOption("Invalid option: " + option)
+	}
+}
