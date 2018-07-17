@@ -34,3 +34,19 @@ func (s *Story) updateVote(option string, amount int64) sdk.Error {
 		return ErrInvalidOption("Invalid option: " + option)
 	}
 }
+
+//--------------------------------------------------------
+//--------------------------------------------------------
+
+// SubmitStory defines a message to create a story
+type SubmitStoryMsg struct {
+	Body    string
+	Creator sdk.Address
+}
+
+// VoteMsg defines a message to vote on a story
+type VoteMsg struct {
+	StoryID int64
+	Option  string
+	Voter   sdk.Address
+}
