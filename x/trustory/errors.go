@@ -8,8 +8,9 @@ const (
 	DefaultCodespace sdk.CodespaceType = 7
 
 	// TruStory errors reserve 700 ~ 799.
-	CodeInvalidOption CodeType = 701
-	CodeInvalidBody   CodeType = 702
+	CodeInvalidOption  CodeType = 701
+	CodeInvalidBody    CodeType = 702
+	CodeInvalidStoryID CodeType = 703
 )
 
 func codeToDefaultMsg(code CodeType) string {
@@ -18,6 +19,8 @@ func codeToDefaultMsg(code CodeType) string {
 		return "Invalid option"
 	case CodeInvalidBody:
 		return "Invalid story body"
+	case CodeInvalidStoryID:
+		return "Invalid storyID"
 	default:
 		return sdk.CodeToDefaultMsg(code)
 	}
@@ -34,6 +37,11 @@ func ErrInvalidOption(msg string) sdk.Error {
 // ErrInvalidBody throws an error on invalid title
 func ErrInvalidBody(msg string) sdk.Error {
 	return newError(DefaultCodespace, CodeInvalidBody, msg)
+}
+
+// ErrInvalidStoryID throws an error on invalid proposaID
+func ErrInvalidStoryID(msg string) sdk.Error {
+	return newError(DefaultCodespace, CodeInvalidStoryID, msg)
 }
 
 //----------------------------------------
