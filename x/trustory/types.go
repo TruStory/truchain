@@ -10,16 +10,16 @@ import (
 
 // Story defines the basic properties of a votable story
 type Story struct {
-	Body        string      `json:"body"`
-	Creator     sdk.Address `json:"creator"`
-	SubmitBlock int64       `json:"submit_block`
-	State       string      `json:"state"`
-	YesVotes    int64       `json:"yes_votes`
-	NoVotes     int64       `json:"no_votes"`
+	Body        string         `json:"body"`
+	Creator     sdk.AccAddress `json:"creator"`
+	SubmitBlock int64          `json:"submit_block`
+	State       string         `json:"state"`
+	YesVotes    int64          `json:"yes_votes`
+	NoVotes     int64          `json:"no_votes"`
 }
 
 // NewStory creates a new story
-func NewStory(body string, creator sdk.Address, blockHeight int64) Story {
+func NewStory(body string, creator sdk.AccAddress, blockHeight int64) Story {
 	return Story{
 		Body:        body,
 		Creator:     creator,
@@ -50,11 +50,11 @@ func (s *Story) updateVote(option string, amount int64) sdk.Error {
 // SubmitStoryMsg defines a message to create a story
 type SubmitStoryMsg struct {
 	Body    string
-	Creator sdk.Address
+	Creator sdk.AccAddress
 }
 
 // NewSubmitStoryMsg submits a message with a new story
-func NewSubmitStoryMsg(body string, creator sdk.Address) SubmitStoryMsg {
+func NewSubmitStoryMsg(body string, creator sdk.AccAddress) SubmitStoryMsg {
 	return SubmitStoryMsg{
 		Body:    body,
 		Creator: creator,
@@ -81,7 +81,7 @@ func (msg SubmitStoryMsg) GetSignBytes() []byte {
 }
 
 // GetSigners implements Msg
-func (msg SubmitStoryMsg) GetSigners() []sdk.Address {
+func (msg SubmitStoryMsg) GetSigners() []sdk.AccAddress {
 	return []sdk.Address{msg.Submitter}
 }
 
@@ -105,11 +105,11 @@ func (msg SubmitStoryMsg) String() string {
 type VoteMsg struct {
 	StoryID int64
 	Option  string
-	Voter   sdk.Address
+	Voter   sdk.AccAddress
 }
 
 // NewVoteMsg creates a VoteMsg instance
-func NewVoteMsg(storyID int64, option string, voter sdk.Address) VoteMsg {
+func NewVoteMsg(storyID int64, option string, voter sdk.AccAddress) VoteMsg {
 	return VoteMsg{
 		StoryID: storyID,
 		Option:  option,
@@ -137,8 +137,8 @@ func (msg VoteMsg) GetSignBytes() []byte {
 }
 
 // GetSigners implements Msg
-func (msg VoteMsg) GetSigners() []sdk.Address {
-	return []sdk.Address{msg.Voter}
+func (msg VoteMsg) GetSigners() []sdk.AccAddress {
+	return []sdk.AccAddress{msg.Voter}
 }
 
 // ValidateBasic implements Msg
