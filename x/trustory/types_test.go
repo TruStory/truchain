@@ -10,12 +10,16 @@ import (
 func TestNewSubmitStoryMsg(t *testing.T) {
 	goodBody := "Jae Kwon invented Tendermint"
 	addr1 := sdk.AccAddress([]byte{1, 2})
+	emptyStr := ""
+	emptyAddr := sdk.AccAddress{}
 
 	cases := []struct {
 		valid bool
 		ssMsg SubmitStoryMsg
 	}{
 		{true, NewSubmitStoryMsg(goodBody, addr1)},
+		{false, NewSubmitStoryMsg(emptyStr, addr1)},
+		{false, NewSubmitStoryMsg(goodBody, emptyAddr)},
 	}
 
 	for i, msg := range cases {
