@@ -9,7 +9,7 @@ import (
 
 func TestNewSubmitStoryMsg(t *testing.T) {
 	goodBody := "Jae Kwon invented Tendermint"
-	addr1 := sdk.Address([]byte{1, 2})
+	addr1 := sdk.AccAddress([]byte{1, 2})
 
 	cases := []struct {
 		valid bool
@@ -23,7 +23,7 @@ func TestNewSubmitStoryMsg(t *testing.T) {
 		if msg.valid {
 			assert.Nil(t, err, "%d: %+v", i, err)
 		} else {
-			assert.NotNil(r, err, "%d", i)
+			assert.NotNil(t, err, "%d", i)
 		}
 	}
 }
