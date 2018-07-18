@@ -146,6 +146,10 @@ func (msg VoteMsg) ValidateBasic() sdk.Error {
 	if len(msg.Voter) == 0 {
 		return sdk.ErrInvalidAddress("Invalid address: " + msg.Voter.String())
 	}
+	if msg.StoryID <= 0 {
+		return ErrInvalidStoryID("StoryID cannot be negative")
+	}
+
 	if len(strings.TrimSpace(msg.Option)) <= 0 {
 		return ErrInvalidOption("Option can't be blank")
 	}
