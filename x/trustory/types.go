@@ -1,9 +1,9 @@
 package trustory
 
 import (
-	"strings"
 	"encoding/json"
 	"fmt"
+	"strings"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
@@ -142,9 +142,9 @@ func (msg VoteMsg) GetSigners() []sdk.Address {
 }
 
 // ValidateBasic implements Msg
-func (msg VoteMsg) ValidateBasic sdk.Error {
+func (msg VoteMsg) ValidateBasic() sdk.Error {
 	if len(msg.Voter) == 0 {
-		return sdk.ErrInvalidAddress("Invalid address: " +  msg.Voter.String())
+		return sdk.ErrInvalidAddress("Invalid address: " + msg.Voter.String())
 	}
 	if len(strings.TrimSpace(msg.Option)) <= 0 {
 		return ErrInvalidOption("Option can't be blank")
