@@ -82,7 +82,7 @@ func (msg SubmitStoryMsg) GetSignBytes() []byte {
 
 // GetSigners implements Msg
 func (msg SubmitStoryMsg) GetSigners() []sdk.AccAddress {
-	return []sdk.Address{msg.Submitter}
+	return []sdk.AccAddress{msg.Creator}
 }
 
 // ValidateBasic implements Msg
@@ -90,7 +90,7 @@ func (msg SubmitStoryMsg) ValidateBasic() sdk.Error {
 	if len(msg.Creator) == 0 {
 		return sdk.ErrInvalidAddress("Invalid address: " + msg.Creator.String())
 	}
-	if len(strings.TimeSpace(msg.Body)) <= 0 {
+	if len(strings.TrimSpace(msg.Body)) <= 0 {
 		return ErrInvalidBody("Cannot submit a story with an empty body")
 	}
 

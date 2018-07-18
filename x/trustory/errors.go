@@ -33,7 +33,7 @@ func ErrInvalidOption(msg string) sdk.Error {
 
 // ErrInvalidBody throws an error on invalid title
 func ErrInvalidBody(msg string) sdk.Error {
-	return newError(DefaultCodespace, CodeInvalidTitle, msg)
+	return newError(DefaultCodespace, CodeInvalidBody, msg)
 }
 
 //----------------------------------------
