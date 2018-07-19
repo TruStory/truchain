@@ -1,11 +1,24 @@
 package trustory
 
 import (
+	"encoding/binary"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/wire"
 	"github.com/cosmos/cosmos-sdk/x/bank"
 	"github.com/cosmos/cosmos-sdk/x/stake"
 )
+
+// GenerateStoryKey creates a key of the form "story"|{storyID}
+func GenerateStoryKey(storyID int64) []byte {
+	var key []byte
+	storyIDBytes := make([]byte, 8)
+	binary.LittleEndian.PutUint64(storyIDBytes, uint64(storyID))
+
+	key = []byte("stories")
+	key = append(key, storyIDBytes...)
+	return key
+}
 
 // Keeper data type
 type Keeper struct {
@@ -45,4 +58,24 @@ func (k Keeper) NewStoryID(ctx sdk.Context) int64 {
 	}
 
 	return (*totalID + 1)
+}
+
+// GetStory gets the story with the given id from the context
+func (k Keeper) GetStory(ctx sdk.Context, storyID int64) (Story, sdk.Error) {
+	store := ctx.KVStore(k.TruStory)
+
+	key := GenerateStoryKey(storyID)
+	bp := store.Get(key)
+	if bp == nil {
+		return Story{}, ErrStoryNotFound(storyID)
+	}
+
+	story := Story{}
+
+	err := k.cdc.UnmarshalBinary(bp, story)
+	if err != nil {
+		panic(err)
+	}
+
+	return story, nil
 }

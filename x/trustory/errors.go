@@ -1,6 +1,10 @@
 package trustory
 
-import sdk "github.com/cosmos/cosmos-sdk/types"
+import (
+	"strconv"
+
+	sdk "github.com/cosmos/cosmos-sdk/types"
+)
 
 type CodeType = sdk.CodeType
 
@@ -11,6 +15,7 @@ const (
 	CodeInvalidOption  CodeType = 701
 	CodeInvalidBody    CodeType = 702
 	CodeInvalidStoryID CodeType = 703
+	CodeStoryNotFound  CodeType = 704
 )
 
 func codeToDefaultMsg(code CodeType) string {
@@ -21,6 +26,8 @@ func codeToDefaultMsg(code CodeType) string {
 		return "Invalid story body"
 	case CodeInvalidStoryID:
 		return "Invalid storyID"
+	case CodeStoryNotFound:
+		return "Story not found"
 	default:
 		return sdk.CodeToDefaultMsg(code)
 	}
@@ -42,6 +49,12 @@ func ErrInvalidBody(msg string) sdk.Error {
 // ErrInvalidStoryID throws an error on invalid proposaID
 func ErrInvalidStoryID(msg string) sdk.Error {
 	return newError(DefaultCodespace, CodeInvalidStoryID, msg)
+}
+
+// ErrStoryNotFound throws an error when the searched proposal is not found
+func ErrStoryNotFound(storyID int64) sdk.Error {
+	return newError(DefaultCodespace, CodeStoryNotFound, "Story with id "+
+		strconv.Itoa(int(storyID))+" not found")
 }
 
 //----------------------------------------
