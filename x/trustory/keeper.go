@@ -29,3 +29,20 @@ func NewKeeper(TruStory sdk.StoreKey, ck bank.Keeper, sm stake.Keeper, codespace
 		codespace: codespace,
 	}
 }
+
+// NewStoryID created a new id for a story: not sure how this works
+func (k Keeper) NewStoryID(ctx sdk.Context) int64 {
+	store := ctx.KVStore(k.TruStory)
+	bid := store.Get([]byte("TotalID"))
+	if bid == nil {
+		return 0
+	}
+
+	totalID := new(int64)
+	err := k.cdc.UnmarshalBinary(bid, totalID)
+	if err != nil {
+		panic(err)
+	}
+
+	return (*totalID + 1)
+}
