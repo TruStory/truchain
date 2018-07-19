@@ -4,6 +4,7 @@ import (
 	"reflect"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	abci "github.com/tendermint/abci/types"
 )
 
 // NewHandler creates a new handler for all TruStory type messages
@@ -38,4 +39,21 @@ func handleVoteMsg(ctx sdk.Context, k Keeper, msg VoteMsg) sdk.Result {
 	}
 
 	return sdk.Result{}
+}
+
+// NewEndBlocker checks stories and generates an EndBlocker
+func NewEndBlocker(k Keeper) sdk.EndBlocker {
+	return func(ctx sdk.Context, req abci.RequestEndBlock) (res abci.ResponseEndBlock) {
+		err := checkStory(ctx, k)
+		if err != nil {
+			panic(err)
+		}
+		return
+	}
+}
+
+// checkStory checks if the story reached the end of the voting period
+// and handles the logic of ending voting
+func checkStory(ctx sdk.Context, k Keeper) sdk.Error {
+	return nil
 }
