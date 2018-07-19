@@ -79,3 +79,18 @@ func (k Keeper) GetStory(ctx sdk.Context, storyID int64) (Story, sdk.Error) {
 
 	return story, nil
 }
+
+// SetStory sets a story to the context
+func (k Keeper) SetStory(ctx sdk.Context, storyID int64, story Story) sdk.Error {
+	store := ctx.KVStore(k.TruStory)
+
+	bp, err := k.cdc.MarshalBinary(story)
+	if err != nil {
+		panic(err)
+	}
+
+	key := GenerateStoryKey(storyID)
+
+	store.Set(key, bp)
+	return nil
+}
