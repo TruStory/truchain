@@ -10,6 +10,7 @@ import (
 
 // Story defines the basic properties of a votable story
 type Story struct {
+	ID          int64          `json:"id"`
 	Body        string         `json:"body"`
 	Creator     sdk.AccAddress `json:"creator"`
 	SubmitBlock int64          `json:"submit_block`
@@ -19,8 +20,13 @@ type Story struct {
 }
 
 // NewStory creates a new story
-func NewStory(body string, creator sdk.AccAddress, blockHeight int64) Story {
+func NewStory(
+	id int64,
+	body string,
+	creator sdk.AccAddress,
+	blockHeight int64) Story {
 	return Story{
+		ID:          id,
 		Body:        body,
 		Creator:     creator,
 		SubmitBlock: blockHeight,
