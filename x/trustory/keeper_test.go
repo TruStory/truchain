@@ -1,6 +1,7 @@
 package trustory
 
 import (
+	"fmt"
 	"testing"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -52,6 +53,9 @@ func TestTruStoryKeeper(t *testing.T) {
 
 	mapp.BeginBlock(abci.RequestBeginBlock{})
 	ctx := mapp.NewContext(false, abci.Header{})
+
+	fmt.Printf("The type of k.TruStory is: %T \n", k.TruStory)
+
 	if ctx.KVStore(k.TruStory) == nil {
 		panic("Nil interface")
 	}
@@ -88,6 +92,8 @@ func CreateMockApp(
 	// story keeper
 	keeper := NewKeeper(storyKey, ck, sk, mapp.RegisterCodespace(DefaultCodespace))
 	mapp.Router().AddRoute("trustory", NewHandler(keeper))
+
+	fmt.Printf("The type of mapp is: %T \n", mapp)
 
 	return mapp, keeper, sk
 }
