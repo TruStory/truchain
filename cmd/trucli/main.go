@@ -16,7 +16,11 @@ import (
 	ibccmd "github.com/cosmos/cosmos-sdk/x/ibc/client/cli"
 	stakecmd "github.com/cosmos/cosmos-sdk/x/stake/client/cli"
 	"github.com/spf13/cobra"
-	"github.com/tendermint/tendermint/libs/cli"
+	"github.com/tendermint/tmlibs/cli"
+
+	// "github.com/tendermint/tendermint/libs/cli"
+
+	trustorycmd "github.com/TruStory/trucoin/x/trustory/client/cli"
 )
 
 // rootCmd is the entry point for this binary
@@ -63,6 +67,12 @@ func main() {
 			stakecmd.GetCmdEditValidator(cdc),
 			stakecmd.GetCmdDelegate(cdc),
 			stakecmd.GetCmdUnbond("stake", cdc),
+		)...)
+
+	// add trustory specific commands
+	rootCmd.AddCommand(
+		client.GetCommands(
+			trustorycmd.GetCmdQueryStories("stories", cdc),
 		)...)
 
 	// add proxy, version and key info

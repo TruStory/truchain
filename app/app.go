@@ -2,6 +2,7 @@ package app
 
 import (
 	"encoding/json"
+	// "log"
 
 	"github.com/TruStory/trucoin/types"
 	bam "github.com/cosmos/cosmos-sdk/baseapp"
