@@ -7,7 +7,6 @@ import (
 	"github.com/TruStory/trucoin/types"
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/keys"
-	"github.com/cosmos/cosmos-sdk/client/lcd"
 	"github.com/cosmos/cosmos-sdk/client/rpc"
 	"github.com/cosmos/cosmos-sdk/client/tx"
 	"github.com/cosmos/cosmos-sdk/version"
@@ -21,6 +20,7 @@ import (
 	// "github.com/tendermint/tendermint/libs/cli"
 
 	trustorycmd "github.com/TruStory/trucoin/x/trustory/client/cli"
+	trustoryrest "github.com/TruStory/trucoin/x/trustory/client/rest"
 )
 
 // rootCmd is the entry point for this binary
@@ -78,7 +78,8 @@ func main() {
 	// add proxy, version and key info
 	rootCmd.AddCommand(
 		client.LineBreak,
-		lcd.ServeCommand(cdc),
+		// lcd.ServeCommand(cdc),
+		trustoryrest.ServeCommand(cdc),
 		keys.Commands(),
 		client.LineBreak,
 		version.VersionCmd,
