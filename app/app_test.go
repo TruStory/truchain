@@ -46,7 +46,7 @@ func TestGenesis(t *testing.T) {
 	addr := sdk.AccAddress(pubkey.Address())
 
 	// construct some test coins
-	coins, err := sdk.ParseCoins("77foocoin,99barcoin")
+	coins, err := sdk.ParseCoins("77trustake,99bitcoincred")
 	require.Nil(t, err)
 
 	// create an auth.BaseAccount for the given test account and set it's coins
