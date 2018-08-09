@@ -12,39 +12,59 @@ import (
 // Bond placed on a story
 type Bond struct {
 	ID           int64          `json:"id"`
+	StoryID      int64          `json:"story_id"`
 	Amount       float64        `json:"amount"`
 	CreatedBlock int64          `json:"created_block"`
 	Creator      sdk.AccAddress `json:"creator"`
 	Period       int64          `json:"period"`
-	StoryID      int64          `json:"story_id"`
 }
 
 // NewBond creates a new bond
-func NewBond(id int64, amount float64, createdBlock int64, creator sdk.AccAddress, period int64, storyID int64) Bond {
+func NewBond(id int64, storyID int64, amount float64, createdBlock int64, creator sdk.AccAddress, period int64) Bond {
 	return Bond{
 		ID:           id,
+		StoryID:      storyID,
 		Amount:       amount,
 		CreatedBlock: createdBlock,
 		Creator:      creator,
 		Period:       period,
-		StoryID:      storyID,
 	}
 }
 
 // Comment for a story
 type Comment struct {
 	ID      int64          `json:"id"`
+	StoryID int64          `json:"story_id"`
 	Body    string         `json:"body"`
 	Creator sdk.AccAddress `json:"creator"`
-	StoryID int64          `json:"story_id"`
+}
+
+// NewComment creates a new comment for a given story
+func NewComment(id int64, storyID int64, body string, creator sdk.AccAddress) Comment {
+	return Comment{
+		ID:      id,
+		StoryID: storyID,
+		Body:    body,
+		Creator: creator,
+	}
 }
 
 // Evidence for a story
 type Evidence struct {
 	ID      int64          `json:"id"`
-	Creator sdk.AccAddress `json:"creator"`
 	StoryID int64          `json:"story_id"`
+	Creator sdk.AccAddress `json:"creator"`
 	URI     string         `json:"uri"`
+}
+
+// NewEvidence creates new evidence for a story
+func NewEvidence(id int64, storyID int64, creator sdk.AccAddress, uri string) Evidence {
+	return Evidence{
+		ID:      id,
+		StoryID: storyID,
+		Creator: creator,
+		URI:     uri,
+	}
 }
 
 // Story type
