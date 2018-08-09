@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"strings"
+	"time"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
@@ -31,15 +32,24 @@ type Evidence struct {
 	URI     string      `json:"uri"`
 }
 
-// Story defines the basic properties of a votable story
 type Story struct {
-	ID          int64          `json:"id"`
-	Body        string         `json:"body"`
-	Creator     sdk.AccAddress `json:"creator"`
-	SubmitBlock int64          `json:"submit_block`
-	State       string         `json:"state"`
-	YesVotes    int64          `json:"yes_votes`
-	NoVotes     int64          `json:"no_votes"`
+	ID           int64            `json:"id"`
+	Body         string           `json:"body"`
+	BondIDs      []int64          `json:"bond_i_ds,omitempty"`
+	Category     string           `json:"category"`
+	CommentIDs   []int64          `json:"comment_i_ds,omitempty"`
+	CreatedBlock int64            `json:"created_block"`
+	Creator      sdk.AccAddress   `json:"creator"`
+	EvidenceIDs  []int64          `json:"evidence_i_ds,omitempty"`
+	Expiration   time.Time        `json:"expiration,omitempty"`
+	Rank         float64          `json:"rank"`
+	State        string           `json:"state"`
+	SubmitBlock  int64            `json:"submit_block"`
+	Thread       []int64          `json:"thread,omitempty"`
+	Type         string           `json:"type"`
+	UpdatedBlock int64            `json:"updated_block"`
+	Users        []sdk.AccAddress `json:"users"`
+	VoteIDs      []int64          `json:"vote_i_ds"`
 }
 
 // NewStory creates a new story
