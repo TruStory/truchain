@@ -9,6 +9,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
+// Bond placed on a story
 type Bond struct {
 	ID           int64          `json:"id"`
 	Amount       float64        `json:"amount"`
@@ -18,6 +19,19 @@ type Bond struct {
 	StoryID      int64          `json:"story_id"`
 }
 
+// NewBond creates a new bond
+func NewBond(id int64, amount float64, createdBlock int64, creator sdk.AccAddress, period int64, storyID int64) Bond {
+	return Bond{
+		ID:           id,
+		Amount:       amount,
+		CreatedBlock: createdBlock,
+		Creator:      creator,
+		Period:       period,
+		StoryID:      storyID,
+	}
+}
+
+// Comment for a story
 type Comment struct {
 	ID      int64          `json:"id"`
 	Body    string         `json:"body"`
@@ -25,13 +39,15 @@ type Comment struct {
 	StoryID int64          `json:"story_id"`
 }
 
+// Evidence for a story
 type Evidence struct {
-	ID      int64       `json:"id"`
-	Creator sdk.Address `json:"creator"`
-	StoryID int64       `json:"story_id"`
-	URI     string      `json:"uri"`
+	ID      int64          `json:"id"`
+	Creator sdk.AccAddress `json:"creator"`
+	StoryID int64          `json:"story_id"`
+	URI     string         `json:"uri"`
 }
 
+// Story type
 type Story struct {
 	ID           int64            `json:"id"`
 	Body         string           `json:"body"`
@@ -52,6 +68,7 @@ type Story struct {
 	VoteIDs      []int64          `json:"vote_i_ds"`
 }
 
+// Vote for a story
 type Vote struct {
 	ID           int64          `json:"id"`
 	CreatedBlock int64          `json:"created_block"`
@@ -61,35 +78,35 @@ type Vote struct {
 }
 
 // NewStory creates a new story
-func NewStory(
-	id int64,
-	body string,
-	creator sdk.AccAddress,
-	blockHeight int64) Story {
-	return Story{
-		ID:          id,
-		Body:        body,
-		Creator:     creator,
-		SubmitBlock: blockHeight,
-		State:       "Created",
-		YesVotes:    0,
-		NoVotes:     0,
-	}
-}
+// func NewStory(
+// 	id int64,
+// 	body string,
+// 	creator sdk.AccAddress,
+// 	blockHeight int64) Story {
+// 	return Story{
+// 		ID:          id,
+// 		Body:        body,
+// 		Creator:     creator,
+// 		SubmitBlock: blockHeight,
+// 		State:       "Created",
+// 		YesVotes:    0,
+// 		NoVotes:     0,
+// 	}
+// }
 
 // updateVote updates the votes for each
-func (s *Story) updateVote(option string, amount int64) sdk.Error {
-	switch option {
-	case "Yes":
-		s.YesVotes += amount
-		return nil
-	case "No":
-		s.NoVotes += amount
-		return nil
-	default:
-		return ErrInvalidOption("Invalid option: " + option)
-	}
-}
+// func (s *Story) updateVote(option string, amount int64) sdk.Error {
+// 	switch option {
+// 	case "Yes":
+// 		s.YesVotes += amount
+// 		return nil
+// 	case "No":
+// 		s.NoVotes += amount
+// 		return nil
+// 	default:
+// 		return ErrInvalidOption("Invalid option: " + option)
+// 	}
+// }
 
 //--------------------------------------------------------
 //--------------------------------------------------------
