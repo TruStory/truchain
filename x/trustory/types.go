@@ -143,19 +143,21 @@ type Vote struct {
 	Vote         bool           `json:"vote"`
 }
 
-// updateVote updates the votes for each
-// func (s *Story) updateVote(option string, amount int64) sdk.Error {
-// 	switch option {
-// 	case "Yes":
-// 		s.YesVotes += amount
-// 		return nil
-// 	case "No":
-// 		s.NoVotes += amount
-// 		return nil
-// 	default:
-// 		return ErrInvalidOption("Invalid option: " + option)
-// 	}
-// }
+// NewVote creates a new vote for a story
+func NewVote(
+	id int64,
+	storyID int64,
+	createdBlock int64,
+	creator sdk.AccAddress,
+	vote bool) Vote {
+	return Vote{
+		ID:           id,
+		StoryID:      storyID,
+		CreatedBlock: createdBlock,
+		Creator:      creator,
+		Vote:         vote,
+	}
+}
 
 //--------------------------------------------------------
 //--------------------------------------------------------
