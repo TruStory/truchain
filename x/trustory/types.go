@@ -20,7 +20,13 @@ type Bond struct {
 }
 
 // NewBond creates a new bond
-func NewBond(id int64, storyID int64, amount float64, createdBlock int64, creator sdk.AccAddress, period int64) Bond {
+func NewBond(
+	id int64,
+	storyID int64,
+	amount float64,
+	createdBlock int64,
+	creator sdk.AccAddress,
+	period int64) Bond {
 	return Bond{
 		ID:           id,
 		StoryID:      storyID,
@@ -70,22 +76,62 @@ func NewEvidence(id int64, storyID int64, creator sdk.AccAddress, uri string) Ev
 // Story type
 type Story struct {
 	ID           int64            `json:"id"`
-	Body         string           `json:"body"`
 	BondIDs      []int64          `json:"bond_i_ds,omitempty"`
-	Category     string           `json:"category"`
 	CommentIDs   []int64          `json:"comment_i_ds,omitempty"`
+	EvidenceIDs  []int64          `json:"evidence_i_ds,omitempty"`
+	Thread       []int64          `json:"thread,omitempty"`
+	VoteIDs      []int64          `json:"vote_i_ds"`
+	Body         string           `json:"body"`
+	Category     string           `json:"category"`
 	CreatedBlock int64            `json:"created_block"`
 	Creator      sdk.AccAddress   `json:"creator"`
-	EvidenceIDs  []int64          `json:"evidence_i_ds,omitempty"`
 	Expiration   time.Time        `json:"expiration,omitempty"`
 	Rank         float64          `json:"rank"`
 	State        string           `json:"state"`
 	SubmitBlock  int64            `json:"submit_block"`
-	Thread       []int64          `json:"thread,omitempty"`
-	Type         string           `json:"type"`
+	StoryType    string           `json:"type"`
 	UpdatedBlock int64            `json:"updated_block"`
 	Users        []sdk.AccAddress `json:"users"`
-	VoteIDs      []int64          `json:"vote_i_ds"`
+}
+
+// NewStory creates a new story
+func NewStory(
+	id int64,
+	bondIDs []int64,
+	commentIDs []int64,
+	evidenceIDs []int64,
+	thread []int64,
+	voteIDs []int64,
+	body string,
+	category string,
+	createdBlock int64,
+	creator sdk.AccAddress,
+	expiration time.Time,
+	rank float64,
+	state string,
+	submitBlock int64,
+	storyType string,
+	updatedBlock int64,
+	users []sdk.AccAddress) Story {
+	return Story{
+		ID:           id,
+		BondIDs:      bondIDs,
+		CommentIDs:   commentIDs,
+		EvidenceIDs:  evidenceIDs,
+		Thread:       thread,
+		VoteIDs:      voteIDs,
+		Body:         body,
+		Category:     category,
+		CreatedBlock: createdBlock,
+		Creator:      creator,
+		Expiration:   expiration,
+		Rank:         rank,
+		State:        "Created",
+		SubmitBlock:  submitBlock,
+		StoryType:    storyType,
+		UpdatedBlock: updatedBlock,
+		Users:        users,
+	}
 }
 
 // Vote for a story
@@ -96,23 +142,6 @@ type Vote struct {
 	StoryID      int64          `json:"story_id"`
 	Vote         bool           `json:"vote"`
 }
-
-// NewStory creates a new story
-// func NewStory(
-// 	id int64,
-// 	body string,
-// 	creator sdk.AccAddress,
-// 	blockHeight int64) Story {
-// 	return Story{
-// 		ID:          id,
-// 		Body:        body,
-// 		Creator:     creator,
-// 		SubmitBlock: blockHeight,
-// 		State:       "Created",
-// 		YesVotes:    0,
-// 		NoVotes:     0,
-// 	}
-// }
 
 // updateVote updates the votes for each
 // func (s *Story) updateVote(option string, amount int64) sdk.Error {
