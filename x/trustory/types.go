@@ -52,6 +52,14 @@ type Story struct {
 	VoteIDs      []int64          `json:"vote_i_ds"`
 }
 
+type Vote struct {
+	ID           int64          `json:"id"`
+	CreatedBlock int64          `json:"created_block"`
+	Creator      sdk.AccAddress `json:"creator"`
+	StoryID      int64          `json:"story_id"`
+	Vote         bool           `json:"vote"`
+}
+
 // NewStory creates a new story
 func NewStory(
 	id int64,
