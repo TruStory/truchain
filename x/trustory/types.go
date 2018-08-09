@@ -24,6 +24,13 @@ type Comment struct {
 	StoryID int64          `json:"story_id"`
 }
 
+type Evidence struct {
+	ID      int64       `json:"id"`
+	Creator sdk.Address `json:"creator"`
+	StoryID int64       `json:"story_id"`
+	URI     string      `json:"uri"`
+}
+
 // Story defines the basic properties of a votable story
 type Story struct {
 	ID          int64          `json:"id"`
