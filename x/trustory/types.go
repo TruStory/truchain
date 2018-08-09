@@ -8,6 +8,15 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
+type Bond struct {
+	ID           int64          `json:"id"`
+	Amount       float64        `json:"amount"`
+	CreatedBlock int64          `json:"created_block"`
+	Creator      sdk.AccAddress `json:"creator"`
+	Period       int64          `json:"period"`
+	StoryID      int64          `json:"story_id"`
+}
+
 // Story defines the basic properties of a votable story
 type Story struct {
 	ID          int64          `json:"id"`
