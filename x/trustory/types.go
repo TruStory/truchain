@@ -17,6 +17,13 @@ type Bond struct {
 	StoryID      int64          `json:"story_id"`
 }
 
+type Comment struct {
+	ID      int64          `json:"id"`
+	Body    string         `json:"body"`
+	Creator sdk.AccAddress `json:"creator"`
+	StoryID int64          `json:"story_id"`
+}
+
 // Story defines the basic properties of a votable story
 type Story struct {
 	ID          int64          `json:"id"`
