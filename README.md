@@ -61,10 +61,13 @@ type Vote struct {
 
 These are the messages needed to modify the above state.
 
-- `SubmitStoryMsg`: to submit stories
-- `VoteMsg`: to vote on stories
+- `PlaceBondMsg`: to place a bond on a story
+- `AddCommentMsg`: to add a comment to a story
+- `SubmitEvidenceMsg`: to submit evidence for a story
+- `SubmitStoryMsg`: to submit a story
+- `VoteMsg`: to vote on a story
 
-```go
+<!-- ```go
 type SubmitStoryMsg struct {
     Body            string          // body of story
     Creator         sdk.Address     // address of creator
@@ -78,4 +81,4 @@ type VoteMsg struct {
     Stake           sdk.Coins       // stake for vote
     Voter           sdk.Address     // address of voter
 }
-```
+``` -->
