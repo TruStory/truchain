@@ -13,24 +13,24 @@ import (
 type Bond struct {
 	ID           int64          `json:"id"`
 	StoryID      int64          `json:"story_id"`
-	Amount       float64        `json:"amount"`
+	Stake        sdk.Coins      `json:"amount"`
 	CreatedBlock int64          `json:"created_block"`
 	Creator      sdk.AccAddress `json:"creator"`
-	Period       int64          `json:"period"`
+	Period       time.Time      `json:"period"`
 }
 
 // NewBond creates a new bond
 func NewBond(
 	id int64,
 	storyID int64,
-	amount float64,
+	stake float64,
 	createdBlock int64,
 	creator sdk.AccAddress,
-	period int64) Bond {
+	period time.Time) Bond {
 	return Bond{
 		ID:           id,
 		StoryID:      storyID,
-		Amount:       amount,
+		Stake:        stake,
 		CreatedBlock: createdBlock,
 		Creator:      creator,
 		Period:       period,
