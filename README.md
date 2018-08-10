@@ -7,7 +7,7 @@ All state is stored in these types.
 ```go
 type Bond struct {
     ID              int64               // id of the bond
-    Amount          float64             // amount of the bond
+    Stake           sdk.Coins           // amount of the bond
     CreatedBlock    int64               // block at which bond was created
     Creator         sdk.AccAddress      // address of the creator
     Period          int64               // period of the bond    
@@ -65,20 +65,45 @@ These are the messages needed to modify the above state.
 - `AddCommentMsg`: to add a comment to a story
 - `SubmitEvidenceMsg`: to submit evidence for a story
 - `SubmitStoryMsg`: to submit a story
+- `UpdateStoryMsg`: update a story
 - `VoteMsg`: to vote on a story
 
-<!-- ```go
+```go
+type PlaceBondMsg struct {
+    StoryID         int64           // id of the story
+    Stake           sdk.Coins       // amount of bond
+    Creator         sdk.AccAddress  // person who is placing the bond
+    Period          time.Time       // time period of bond
+}
+
+type AddCommentMsg struct {
+    StoryID         int64           // id of the story
+    Body            string          // body of comment
+    Creator         sdk.AccAddress  // creator of comment
+}
+
+type SubmitEvidenceMsg struct {
+    StoryID         int64           // id of the story
+    Creator         sdk.AccAddress  // creator of evidence submission
+    URI             string          // uri of evidence
+}
+
 type SubmitStoryMsg struct {
-    Body            string          // body of story
-    Creator         sdk.Address     // address of creator
+    Body            string              // body of story
+    Category        string              // category of story
+    Creator         sdk.AccAddress      // creator of story
+    StoryType       string              // type of story
+    Users           []sdk.AccAddress    // addresses of mentioned users
+}
+
+type UpdateStoryMsg struct {
+    ID              int64               // id of story    
+    // TODO: how do we add bonds, evidence, etc?
+}
+
+type VoteMsg struct {
+    StoryID         int64               // if of the story
+    Creator         sdk.AccAddress      // creator of vote
+    Vote            bool                // value of vote
 }
 ```
-
-```go
-type VoteMsg struct {
-    StoryID         int64           // id of the story
-    Option          string          // "yes" or "no"
-    Stake           sdk.Coins       // stake for vote
-    Voter           sdk.Address     // address of voter
-}
-``` -->
