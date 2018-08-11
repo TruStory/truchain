@@ -12,10 +12,12 @@ const (
 	DefaultCodespace sdk.CodespaceType = 7
 
 	// TruStory errors reserve 700 ~ 799.
-	CodeInvalidOption  CodeType = 701
-	CodeInvalidBody    CodeType = 702
-	CodeInvalidStoryID CodeType = 703
-	CodeStoryNotFound  CodeType = 704
+	CodeInvalidOption     CodeType = 701
+	CodeInvalidBody       CodeType = 702
+	CodeInvalidStoryID    CodeType = 703
+	CodeStoryNotFound     CodeType = 704
+	CodeInvalidBondAmount CodyType = 705
+	CodeInvalidBondPeriod CodeType = 706
 )
 
 func codeToDefaultMsg(code CodeType) string {
@@ -28,6 +30,10 @@ func codeToDefaultMsg(code CodeType) string {
 		return "Invalid storyID"
 	case CodeStoryNotFound:
 		return "Story not found"
+	case CodeInvalidBondAmount:
+		return "Invalid bond amount"
+	case CodeInvalidBondPeriod:
+		return "Invalid bond period"
 	default:
 		return sdk.CodeToDefaultMsg(code)
 	}
@@ -49,6 +55,16 @@ func ErrInvalidBody(msg string) sdk.Error {
 // ErrInvalidStoryID throws an error on invalid proposaID
 func ErrInvalidStoryID(msg string) sdk.Error {
 	return newError(DefaultCodespace, CodeInvalidStoryID, msg)
+}
+
+// ErrInvalidBondAmount throws an error when bond amount is invalid
+func ErrInvalidBondAmount(msg string) sdk.Error {
+	return newError(DefaultCodespace, CodeInvalidBondAmount, msg)
+}
+
+// ErrInvalidBondPeriod throws an error when bond period is invalid
+func ErrInvalidBondPeriod(msg string) sdk.Error {
+	return newError(DefaultCodespace, CodeInvalidBondPeriod, msg)
 }
 
 // ErrStoryNotFound throws an error when the searched proposal is not found
