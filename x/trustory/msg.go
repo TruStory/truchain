@@ -10,10 +10,10 @@ import (
 
 // PlaceBondMsg defines a message to bond to a story
 type PlaceBondMsg struct {
-	StoryID int64
-	Stake   sdk.Coins
-	Creator sdk.AccAddress
-	Period  time.Time
+	StoryID int64          `json:"story_id"`
+	Stake   sdk.Coins      `json:"stake"`
+	Creator sdk.AccAddress `json:"creator"`
+	Period  time.Time      `json:"period"`
 }
 
 // NewPlaceBondMsg creates a message to place a new bond
