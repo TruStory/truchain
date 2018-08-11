@@ -10,7 +10,7 @@ import (
 type Bond struct {
 	ID           int64          `json:"id"`
 	StoryID      int64          `json:"story_id"`
-	Stake        sdk.Coins      `json:"amount"`
+	Stake        sdk.Coin       `json:"amount"`
 	CreatedBlock int64          `json:"created_block"`
 	Creator      sdk.AccAddress `json:"creator"`
 	Period       time.Time      `json:"period"`
@@ -20,7 +20,7 @@ type Bond struct {
 func NewBond(
 	id int64,
 	storyID int64,
-	stake sdk.Coins,
+	stake sdk.Coin,
 	createdBlock int64,
 	creator sdk.AccAddress,
 	period time.Time) Bond {

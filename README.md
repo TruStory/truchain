@@ -7,7 +7,7 @@ All state is stored in these types.
 ```go
 type Bond struct {
     ID              int64               // id of the bond
-    Stake           sdk.Coins           // amount of the bond
+    Stake           sdk.Coin            // amount of the bond
     CreatedBlock    int64               // block at which bond was created
     Creator         sdk.AccAddress      // address of the creator
     Period          int64               // period of the bond    
@@ -71,7 +71,7 @@ These are the messages needed to modify the above state.
 ```go
 type PlaceBondMsg struct {
     StoryID         int64           // id of the story
-    Stake           sdk.Coins       // amount of bond
+    Stake           sdk.Coin       // amount of bond
     Creator         sdk.AccAddress  // person who is placing the bond
     Period          time.Time       // time period of bond
 }
