@@ -6,34 +6,20 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
-type CodeType = sdk.CodeType
-
+// TruStory errors reserve 700 ~ 799.
 const (
 	DefaultCodespace sdk.CodespaceType = 7
 
-	// TruStory errors reserve 700 ~ 799.
-	CodeInvalidOption     CodeType = 701
-	CodeInvalidBody       CodeType = 702
-	CodeInvalidStoryID    CodeType = 703
-	CodeStoryNotFound     CodeType = 704
-	CodeInvalidBondAmount CodyType = 705
-	CodeInvalidBondPeriod CodeType = 706
+	CodeInvalidOption     sdk.CodeType = 701
+	CodeInvalidBody       sdk.CodeType = 702
+	CodeInvalidStoryID    sdk.CodeType = 703
+	CodeStoryNotFound     sdk.CodeType = 704
+	CodeInvalidBondAmount sdk.CodyType = 705
+	CodeInvalidBondPeriod sdk.CodeType = 706
 )
 
-func codeToDefaultMsg(code CodeType) string {
+func codeToDefaultMsg(code sdk.CodeType) string {
 	switch code {
-	case CodeInvalidOption:
-		return "Invalid option"
-	case CodeInvalidBody:
-		return "Invalid story body"
-	case CodeInvalidStoryID:
-		return "Invalid storyID"
-	case CodeStoryNotFound:
-		return "Story not found"
-	case CodeInvalidBondAmount:
-		return "Invalid bond amount"
-	case CodeInvalidBondPeriod:
-		return "Invalid bond period"
 	default:
 		return sdk.CodeToDefaultMsg(code)
 	}
@@ -67,7 +53,7 @@ func ErrInvalidBondPeriod(msg string) sdk.Error {
 	return newError(DefaultCodespace, CodeInvalidBondPeriod, msg)
 }
 
-// ErrStoryNotFound throws an error when the searched proposal is not found
+// ErrStoryNotFound throws an error when the searched story is not found
 func ErrStoryNotFound(storyID int64) sdk.Error {
 	return newError(DefaultCodespace, CodeStoryNotFound, "Story with id "+
 		strconv.Itoa(int(storyID))+" not found")
@@ -75,14 +61,14 @@ func ErrStoryNotFound(storyID int64) sdk.Error {
 
 //----------------------------------------
 
-func msgOrDefaultMsg(msg string, code CodeType) string {
+func msgOrDefaultMsg(msg string, code sdk.CodeType) string {
 	if msg != "" {
 		return msg
 	}
 	return codeToDefaultMsg(code)
 }
 
-func newError(codespace sdk.CodespaceType, code CodeType, msg string) sdk.Error {
+func newError(codespace sdk.CodespaceType, code sdk.CodeType, msg string) sdk.Error {
 	msg = msgOrDefaultMsg(msg, code)
 	return sdk.NewError(codespace, code, msg)
 }
