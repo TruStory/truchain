@@ -35,7 +35,7 @@ func NewPlaceBondMsg(
 
 // Type implements Msg
 func (msg PlaceBondMsg) Type() string {
-	return "truStory"
+	return "PlaceBond"
 }
 
 // GetSignBytes implements Msg
@@ -89,7 +89,7 @@ func NewAddCommentMsg(storyID int64, body string, creator sdk.AccAddress) AddCom
 
 // Type implements Msg
 func (msg AddCommentMsg) Type() string {
-	return "truStory"
+	return "AddComment"
 }
 
 // GetSignBytes implements Msg
@@ -140,7 +140,7 @@ func NewSubmitEvidenceMsg(storyID int64, creator sdk.AccAddress, uri string) Sub
 
 // Type implements Msg
 func (msg SubmitEvidenceMsg) Type() string {
-	return "truStory"
+	return "SubmitEvidence"
 }
 
 // GetSignBytes implements Msg
@@ -194,7 +194,7 @@ func NewSubmitStoryMsg(body string, category string, creator sdk.AccAddress, sto
 
 // Type implements Msg
 func (msg SubmitStoryMsg) Type() string {
-	return "truStory"
+	return "SubmitStory"
 }
 
 // GetSignBytes implements Msg
@@ -250,7 +250,7 @@ func NewVoteMsg(storyID int64, creator sdk.AccAddress, stake sdk.Coin, vote bool
 
 // Type implements Msg
 func (msg VoteMsg) Type() string {
-	return "truStory"
+	return "VoteMsg"
 }
 
 // GetSignBytes implements Msg
