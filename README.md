@@ -65,7 +65,6 @@ These are the messages needed to modify the above state.
 - `AddCommentMsg`: to add a comment to a story
 - `SubmitEvidenceMsg`: to submit evidence for a story
 - `SubmitStoryMsg`: to submit a story
-- `UpdateStoryMsg`: update a story
 - `VoteMsg`: to vote on a story
 
 ```go
@@ -94,11 +93,6 @@ type SubmitStoryMsg struct {
     Creator         sdk.AccAddress      // creator of story
     StoryType       string              // type of story
     Users           []sdk.AccAddress    // addresses of mentioned users
-}
-
-type UpdateStoryMsg struct {
-    ID              int64               // id of story    
-    // TODO: how do we add bonds, evidence, etc?
 }
 
 type VoteMsg struct {
