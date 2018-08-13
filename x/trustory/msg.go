@@ -5,7 +5,6 @@ import (
 	"net/url"
 	"time"
 
-	"github.com/TruStory/cosmos-sdk/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
@@ -48,24 +47,24 @@ func (msg PlaceBondMsg) GetSignBytes() []byte {
 }
 
 // ValidateBasic implements Msg
-func (msg PlaceBondMsg) ValidateBasic() types.Error {
+func (msg PlaceBondMsg) ValidateBasic() sdk.Error {
 	if msg.StoryID <= 0 {
 		return ErrInvalidStoryID("StoryID cannot be negative")
 	}
 	if len(msg.Creator) == 0 {
 		return sdk.ErrInvalidAddress("Invalid address: " + msg.Creator.String())
 	}
-	if msg.Stake.IsValid == false {
-		return sdk.ErrInvalidAmount("Invalid bond amount: " + msg.Stake.String())
+	if msg.Stake.IsZero() == true {
+		return ErrInvalidAmount("Invalid bond amount: " + msg.Stake.String())
 	}
-	if msg.Period.Seconds == 0 {
-		return sdk.ErrInvalidBondPeriod("Invalid bond period: " + msg.Period.String())
+	if msg.Period == 0 {
+		return ErrInvalidBondPeriod("Invalid bond period: " + msg.Period.String())
 	}
 	return nil
 }
 
 // GetSigners implements Msg
-func (msg PlaceBondMsg) GetSigners() []types.Address {
+func (msg PlaceBondMsg) GetSigners() []sdk.AccAddress {
 	return []sdk.AccAddress{msg.Creator}
 }
 
@@ -102,7 +101,7 @@ func (msg AddCommentMsg) GetSignBytes() []byte {
 }
 
 // ValidateBasic implements Msg
-func (msg AddCommentMsg) ValidateBasic() types.Error {
+func (msg AddCommentMsg) ValidateBasic() sdk.Error {
 	if msg.StoryID <= 0 {
 		return ErrInvalidStoryID("StoryID cannot be negative")
 	}
@@ -110,13 +109,13 @@ func (msg AddCommentMsg) ValidateBasic() types.Error {
 		return sdk.ErrInvalidAddress("Invalid address: " + msg.Creator.String())
 	}
 	if len(msg.Body) == 0 {
-		return sdk.ErrInvalidBody("Invalid comment body: " + msg.Body.String())
+		return ErrInvalidBody("Invalid comment body: " + msg.Body)
 	}
 	return nil
 }
 
 // GetSigners implements Msg
-func (msg AddCommentMsg) GetSigners() []types.Address {
+func (msg AddCommentMsg) GetSigners() []sdk.AccAddress {
 	return []sdk.AccAddress{msg.Creator}
 }
 
@@ -153,22 +152,22 @@ func (msg SubmitEvidenceMsg) GetSignBytes() []byte {
 }
 
 // ValidateBasic implements Msg
-func (msg SubmitEvidenceMsg) ValidateBasic() types.Error {
+func (msg SubmitEvidenceMsg) ValidateBasic() sdk.Error {
 	if msg.StoryID <= 0 {
 		return ErrInvalidStoryID("StoryID cannot be negative")
 	}
 	if len(msg.Creator) == 0 {
 		return sdk.ErrInvalidAddress("Invalid address: " + msg.Creator.String())
 	}
-	err := url.ParseRequestURI(msg.URI)
+	_, err := url.ParseRequestURI(msg.URI)
 	if err != nil {
-		return sdk.ErrInvalidURL("Invalid URL: " + msg.URI.String())
+		return ErrInvalidURL("Invalid URL: " + msg.URI)
 	}
 	return nil
 }
 
 // GetSigners implements Msg
-func (msg SubmitEvidenceMsg) GetSigners() []types.Address {
+func (msg SubmitEvidenceMsg) GetSigners() []sdk.AccAddress {
 	return []sdk.AccAddress{msg.Creator}
 }
 
@@ -207,24 +206,24 @@ func (msg SubmitStoryMsg) GetSignBytes() []byte {
 }
 
 // ValidateBasic implements Msg
-func (msg SubmitStoryMsg) ValidateBasic() types.Error {
+func (msg SubmitStoryMsg) ValidateBasic() sdk.Error {
 	if len(msg.Body) == 0 {
-		return sdk.ErrInvalidBody("Invalid body: " + msg.Body.String())
+		return ErrInvalidBody("Invalid body: " + msg.Body)
 	}
 	if len(msg.Category) == 0 {
-		return sdk.ErrInvalidCategory("Invalid category: " + msg.Category.String())
+		return ErrInvalidCategory("Invalid category: " + msg.Category)
 	}
 	if len(msg.Creator) == 0 {
 		return sdk.ErrInvalidAddress("Invalid address: " + msg.Creator.String())
 	}
 	if len(msg.StoryType) == 0 {
-		return sdk.ErrInvalidStoryType("Invalid story type: " + msg.StoryType.String())
+		return ErrInvalidStoryType("Invalid story type: " + msg.StoryType)
 	}
 	return nil
 }
 
 // GetSigners implements Msg
-func (msg SubmitStoryMsg) GetSigners() []types.Address {
+func (msg SubmitStoryMsg) GetSigners() []sdk.AccAddress {
 	return []sdk.AccAddress{msg.Creator}
 }
 
@@ -263,20 +262,20 @@ func (msg VoteMsg) GetSignBytes() []byte {
 }
 
 // ValidateBasic implements Msg
-func (msg VoteMsg) ValidateBasic() types.Error {
+func (msg VoteMsg) ValidateBasic() sdk.Error {
 	if msg.StoryID <= 0 {
 		return ErrInvalidStoryID("StoryID cannot be negative")
 	}
 	if len(msg.Creator) == 0 {
 		return sdk.ErrInvalidAddress("Invalid address: " + msg.Creator.String())
 	}
-	if msg.Stake.IsValid == false {
-		return sdk.ErrInvalidAmount("Invalid stake amount: " + msg.Stake.String())
+	if msg.Stake.IsZero() == true {
+		return ErrInvalidAmount("Invalid stake amount: " + msg.Stake.String())
 	}
 	return nil
 }
 
 // GetSigners implements Msg
-func (msg VoteMsg) GetSigners() []types.Address {
+func (msg VoteMsg) GetSigners() []sdk.AccAddress {
 	return []sdk.AccAddress{msg.Creator}
 }
