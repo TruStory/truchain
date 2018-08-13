@@ -14,7 +14,7 @@ const (
 	CodeInvalidBody       sdk.CodeType = 702
 	CodeInvalidStoryID    sdk.CodeType = 703
 	CodeStoryNotFound     sdk.CodeType = 704
-	CodeInvalidAmount     sdk.CodyType = 705
+	CodeInvalidAmount     sdk.CodeType = 705
 	CodeInvalidBondPeriod sdk.CodeType = 706
 	CodeInvalidURL        sdk.CodeType = 707
 	CodeInvalidCategory   sdk.CodeType = 708
@@ -46,7 +46,7 @@ func ErrInvalidCategory(msg string) sdk.Error {
 	return newError(DefaultCodespace, CodeInvalidCategory, msg)
 }
 
-// ErrInvalidStoryID throws an error on invalid proposaID
+// ErrInvalidStoryID throws an error on invalid storyID
 func ErrInvalidStoryID(msg string) sdk.Error {
 	return newError(DefaultCodespace, CodeInvalidStoryID, msg)
 }
