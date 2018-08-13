@@ -270,3 +270,49 @@ func (msg UpdateStoryMsg) GetSigners() []types.Address {
 }
 
 // ============================================================================
+
+// VoteMsg defines a message to vote on a story
+type VoteMsg struct {
+	StoryID int64
+	Creator sdk.AccAddress
+	Vote    bool
+}
+
+// NewVoteMsg creates a new message to vote on a story
+func NewVoteMsg(storyID int64, creator sdk.AccAddress, vote bool) VoteMsg {
+	return VoteMsg{
+		StoryID: storyID,
+		Creator: creator,
+		Vote:    vote,
+	}
+}
+
+// Type implements Msg
+func (msg VoteMsg) Type() string {
+	return "truStory"
+}
+
+// GetSignBytes implements Msg
+func (msg VoteMsg) GetSignBytes() []byte {
+	b, err := json.Marshal(msg)
+	if err != nil {
+		panic(err)
+	}
+	return b
+}
+
+// ValidateBasic implements Msg
+func (msg VoteMsg) ValidateBasic() types.Error {
+	if msg.StoryID <= 0 {
+		return ErrInvalidStoryID("StoryID cannot be negative")
+	}
+	if len(msg.Creator) == 0 {
+		return sdk.ErrInvalidAddress("Invalid address: " + msg.Creator.String())
+	}
+	return nil
+}
+
+// GetSigners implements Msg
+func (msg VoteMsg) GetSigners() []types.Address {
+	return []sdk.AccAddress{msg.Creator}
+}
