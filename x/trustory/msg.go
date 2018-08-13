@@ -124,9 +124,9 @@ func (msg AddCommentMsg) GetSigners() []types.Address {
 
 // SubmitEvidenceMsg defines a message to submit evidence for a story
 type SubmitEvidenceMsg struct {
-	StoryID int64
-	Creator sdk.AccAddress
-	URL     url.URL
+	StoryID int64          `json:"story_id"`
+	Creator sdk.AccAddress `json:"creator"`
+	URL     url.URL        `json:"url"`
 }
 
 // NewSubmitEvidenceMsg creates a new message to submit evidence for a story
