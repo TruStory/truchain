@@ -56,7 +56,7 @@ func (msg PlaceBondMsg) ValidateBasic() types.Error {
 		return sdk.ErrInvalidAddress("Invalid address: " + msg.Creator.String())
 	}
 	if msg.Stake.IsValid == false {
-		return sdk.ErrInvalidBondAmount("Invalid bond amount: " + msg.Stake.String())
+		return sdk.ErrInvalidAmount("Invalid bond amount: " + msg.Stake.String())
 	}
 	if msg.Period.IsZero == true {
 		return sdk.ErrInvalidBondPeriod("Invalid bond period: " + msg.Period.String())
@@ -173,3 +173,110 @@ func (msg SubmitEvidenceMsg) GetSigners() []types.Address {
 }
 
 // ============================================================================
+
+// SubmitStoryMsg defines a message to submit a story
+type SubmitStoryMsg struct {
+	Body      string         `json:"body"`
+	Category  string         `json:"category"`
+	Creator   sdk.AccAddress `json:"creator"`
+	StoryType string         `json:"story_type"`
+}
+
+// NewSubmitStoryMsg creates a new message to submit a story
+func NewSubmitStoryMsg(body string, category string, creator sdk.AccAddress, storyType string) SubmitStoryMsg {
+	return SubmitStoryMsg{
+		Body:      body,
+		Category:  category,
+		Creator:   creator,
+		StoryType: storyType,
+	}
+}
+
+// Type implements Msg
+func (msg SubmitStoryMsg) Type() string {
+	return "truStory"
+}
+
+// GetSignBytes implements Msg
+func (msg SubmitStoryMsg) GetSignBytes() []byte {
+	b, err := json.Marshal(msg)
+	if err != nil {
+		panic(err)
+	}
+	return b
+}
+
+// ValidateBasic implements Msg
+func (msg SubmitStoryMsg) ValidateBasic() types.Error {
+	if len(msg.Body) == 0 {
+		return sdk.ErrInvalidBody("Invalid body: " + msg.Body.String())
+	}
+	if len(msg.Category) == 0 {
+		return sdk.ErrInvalidCategory("Invalid category: " + msg.Category.String())
+	}
+	if len(msg.Creator) == 0 {
+		return sdk.ErrInvalidAddress("Invalid address: " + msg.Creator.String())
+	}
+	if len(msg.StoryType) == 0 {
+		return sdk.ErrInvalidStoryType("Invalid story type: " + msg.StoryType.String())
+	}
+	return nil
+}
+
+// GetSigners implements Msg
+func (msg SubmitStoryMsg) GetSigners() []types.Address {
+	return []sdk.AccAddress{msg.Creator}
+}
+
+// ============================================================================
+
+// VoteMsg defines a message to vote on a story
+type VoteMsg struct {
+	StoryID int64
+	Creator sdk.AccAddress
+	Stake   sdk.Coin
+	Vote    bool
+}
+
+// NewVoteMsg creates a new message to vote on a story
+func NewVoteMsg(storyID int64, creator sdk.AccAddress, stake sdk.Coin, vote bool) VoteMsg {
+	return VoteMsg{
+		StoryID: storyID,
+		Creator: creator,
+		Stake:   stake,
+		Vote:    vote,
+	}
+}
+
+// Type implements Msg
+func (msg VoteMsg) Type() string {
+	return "truStory"
+}
+
+// GetSignBytes implements Msg
+func (msg VoteMsg) GetSignBytes() []byte {
+	b, err := json.Marshal(msg)
+	if err != nil {
+		panic(err)
+	}
+	return b
+}
+
+// ValidateBasic implements Msg
+func (msg VoteMsg) ValidateBasic() types.Error {
+	if msg.StoryID <= 0 {
+		return ErrInvalidStoryID("StoryID cannot be negative")
+	}
+	if len(msg.Creator) == 0 {
+		return sdk.ErrInvalidAddress("Invalid address: " + msg.Creator.String())
+	}
+	if msg.Stake.IsValid == false {
+		return sdk.ErrInvalidAmount("Invalid stake amount: " + msg.Stake.String())
+	}
+	return nil
+}
+
+// GetSigners implements Msg
+func (msg VoteMsg) GetSigners() []types.Address {
+	return []sdk.AccAddress{msg.Creator}
+}
