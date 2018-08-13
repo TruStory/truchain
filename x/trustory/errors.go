@@ -14,7 +14,7 @@ const (
 	CodeInvalidBody       sdk.CodeType = 702
 	CodeInvalidStoryID    sdk.CodeType = 703
 	CodeStoryNotFound     sdk.CodeType = 704
-	CodeInvalidBondAmount sdk.CodyType = 705
+	CodeInvalidAmount     sdk.CodyType = 705
 	CodeInvalidBondPeriod sdk.CodeType = 706
 	CodeInvalidURL        sdk.CodeType = 707
 	CodeInvalidCategory   sdk.CodeType = 708
@@ -56,9 +56,9 @@ func ErrInvalidStoryType(msg string) sdk.Error {
 	return newError(DefaultCodespace, CodeInvalidStoryType, msg)
 }
 
-// ErrInvalidBondAmount throws an error when bond amount is invalid
-func ErrInvalidBondAmount(msg string) sdk.Error {
-	return newError(DefaultCodespace, CodeInvalidBondAmount, msg)
+// ErrInvalidAmount throws an error when a stake amount is invalid
+func ErrInvalidAmount(msg string) sdk.Error {
+	return newError(DefaultCodespace, CodeInvalidAmount, msg)
 }
 
 // ErrInvalidBondPeriod throws an error when bond period is invalid

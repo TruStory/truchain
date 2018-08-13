@@ -137,6 +137,7 @@ type Vote struct {
 	CreatedBlock int64          `json:"created_block"`
 	Creator      sdk.AccAddress `json:"creator"`
 	StoryID      int64          `json:"story_id"`
+	Stake        sdk.Coin       `json:"stake"`
 	Vote         bool           `json:"vote"`
 }
 
@@ -146,12 +147,14 @@ func NewVote(
 	storyID int64,
 	createdBlock int64,
 	creator sdk.AccAddress,
+	stake sdk.Coin,
 	vote bool) Vote {
 	return Vote{
 		ID:           id,
 		StoryID:      storyID,
 		CreatedBlock: createdBlock,
 		Creator:      creator,
+		Stake:        stake,
 		Vote:         vote,
 	}
 }

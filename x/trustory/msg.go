@@ -56,7 +56,7 @@ func (msg PlaceBondMsg) ValidateBasic() types.Error {
 		return sdk.ErrInvalidAddress("Invalid address: " + msg.Creator.String())
 	}
 	if msg.Stake.IsValid == false {
-		return sdk.ErrInvalidBondAmount("Invalid bond amount: " + msg.Stake.String())
+		return sdk.ErrInvalidAmount("Invalid bond amount: " + msg.Stake.String())
 	}
 	if msg.Period.IsZero == true {
 		return sdk.ErrInvalidBondPeriod("Invalid bond period: " + msg.Period.String())
@@ -234,14 +234,16 @@ func (msg SubmitStoryMsg) GetSigners() []types.Address {
 type VoteMsg struct {
 	StoryID int64
 	Creator sdk.AccAddress
+	Stake   sdk.Coin
 	Vote    bool
 }
 
 // NewVoteMsg creates a new message to vote on a story
-func NewVoteMsg(storyID int64, creator sdk.AccAddress, vote bool) VoteMsg {
+func NewVoteMsg(storyID int64, creator sdk.AccAddress, stake sdk.Coin, vote bool) VoteMsg {
 	return VoteMsg{
 		StoryID: storyID,
 		Creator: creator,
+		Stake:   stake,
 		Vote:    vote,
 	}
 }
@@ -267,6 +269,9 @@ func (msg VoteMsg) ValidateBasic() types.Error {
 	}
 	if len(msg.Creator) == 0 {
 		return sdk.ErrInvalidAddress("Invalid address: " + msg.Creator.String())
+	}
+	if msg.Stake.IsValid == false {
+		return sdk.ErrInvalidAmount("Invalid stake amount: " + msg.Stake.String())
 	}
 	return nil
 }
