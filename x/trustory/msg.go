@@ -2,6 +2,7 @@ package trustory
 
 import (
 	"encoding/json"
+	"net/url"
 	"time"
 
 	"github.com/TruStory/cosmos-sdk/types"
@@ -121,8 +122,18 @@ func (msg AddCommentMsg) GetSigners() []types.Address {
 
 // ============================================================================
 
-// type SubmitEvidenceMsg struct {
-//     StoryID         int64           // id of the story
-//     Creator         sdk.AccAddress  // creator of evidence submission
-//     URI             string          // uri of evidence
-// }
+// SubmitEvidenceMsg defines a message to submit evidence for a story
+type SubmitEvidenceMsg struct {
+	StoryID int64
+	Creator sdk.AccAddress
+	URL     url.URL
+}
+
+// NewSubmitEvidenceMsg creates a new message to submit evidence for a story
+func NewSubmitEvidenceMsg(storyID int64, creator sdk.AccAddress, url url.URL) SubmitEvidenceMsg {
+	return SubmitEvidenceMsg{
+		StoryID: storyID,
+		Creator: creator,
+		URL:     url,
+	}
+}
