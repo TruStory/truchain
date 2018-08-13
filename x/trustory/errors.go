@@ -16,6 +16,7 @@ const (
 	CodeStoryNotFound     sdk.CodeType = 704
 	CodeInvalidBondAmount sdk.CodyType = 705
 	CodeInvalidBondPeriod sdk.CodeType = 706
+	CodeInvalidURL        sdk.CodeType = 707
 )
 
 func codeToDefaultMsg(code sdk.CodeType) string {
@@ -51,6 +52,11 @@ func ErrInvalidBondAmount(msg string) sdk.Error {
 // ErrInvalidBondPeriod throws an error when bond period is invalid
 func ErrInvalidBondPeriod(msg string) sdk.Error {
 	return newError(DefaultCodespace, CodeInvalidBondPeriod, msg)
+}
+
+// ErrInvalidURL throws an error when a URL in invalid
+func ErrInvalidURL(msg string) sdk.Error {
+	return newError(DefaultCodespace, CodeInvalidURL, msg)
 }
 
 // ErrStoryNotFound throws an error when the searched story is not found
