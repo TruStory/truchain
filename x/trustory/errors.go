@@ -17,6 +17,8 @@ const (
 	CodeInvalidBondAmount sdk.CodyType = 705
 	CodeInvalidBondPeriod sdk.CodeType = 706
 	CodeInvalidURL        sdk.CodeType = 707
+	CodeInvalidCategory   sdk.CodeType = 708
+	CodeInvalidStoryType  sdk.CodeType = 709
 )
 
 func codeToDefaultMsg(code sdk.CodeType) string {
@@ -39,9 +41,19 @@ func ErrInvalidBody(msg string) sdk.Error {
 	return newError(DefaultCodespace, CodeInvalidBody, msg)
 }
 
+// ErrInvalidCategory throws an error when the category is invalid
+func ErrInvalidCategory(msg string) sdk.Error {
+	return newError(DefaultCodespace, CodeInvalidCategory, msg)
+}
+
 // ErrInvalidStoryID throws an error on invalid proposaID
 func ErrInvalidStoryID(msg string) sdk.Error {
 	return newError(DefaultCodespace, CodeInvalidStoryID, msg)
+}
+
+// ErrInvalidStoryType throws an error on invalid story type
+func ErrInvalidStoryType(msg string) sdk.Error {
+	return newError(DefaultCodespace, CodeInvalidStoryType, msg)
 }
 
 // ErrInvalidBondAmount throws an error when bond amount is invalid

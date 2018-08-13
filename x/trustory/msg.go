@@ -173,3 +173,59 @@ func (msg SubmitEvidenceMsg) GetSigners() []types.Address {
 }
 
 // ============================================================================
+
+// SubmitStoryMsg defines a message to submit a story
+type SubmitStoryMsg struct {
+	Body      string         `json:"body"`
+	Category  string         `json:"category"`
+	Creator   sdk.AccAddress `json:"creator"`
+	StoryType string         `json:"story_type"`
+}
+
+// NewSubmitStoryMsg creates a new message to submit a story
+func NewSubmitStoryMsg(body string, category string, creator sdk.AccAddress, storyType string) SubmitStoryMsg {
+	return SubmitStoryMsg{
+		Body:      body,
+		Category:  category,
+		Creator:   creator,
+		StoryType: storyType,
+	}
+}
+
+// Type implements Msg
+func (msg SubmitStoryMsg) Type() string {
+	return "truStory"
+}
+
+// GetSignBytes implements Msg
+func (msg SubmitStoryMsg) GetSignBytes() []byte {
+	b, err := json.Marshal(msg)
+	if err != nil {
+		panic(err)
+	}
+	return b
+}
+
+// ValidateBasic implements Msg
+func (msg SubmitStoryMsg) ValidateBasic() types.Error {
+	if len(msg.Body) == 0 {
+		return sdk.ErrInvalidBody("Invalid body: " + msg.Body.String())
+	}
+	if len(msg.Category) == 0 {
+		return sdk.ErrInvalidCategory("Invalid category: " + msg.Category.String())
+	}
+	if len(msg.Creator) == 0 {
+		return sdk.ErrInvalidAddress("Invalid address: " + msg.Creator.String())
+	}
+	if len(msg.StoryType) == 0 {
+		return sdk.ErrInvalidStoryType("Invalid story type: " + msg.StoryType.String())
+	}
+	return nil
+}
+
+// GetSigners implements Msg
+func (msg SubmitStoryMsg) GetSigners() []types.Address {
+	return []sdk.AccAddress{msg.Creator}
+}
+
+// ============================================================================
