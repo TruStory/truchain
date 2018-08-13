@@ -11,10 +11,14 @@ import (
 
 func TestValidPlaceBondMsg(t *testing.T) {
 	storyID := 1
-	coin := sdk.Coin{Denom: "truconsenus", Amount: 100}
+	stake := sdk.Coin{Denom: "truconsenus", Amount: 100}
 	creator := sdk.AccAddress([]byte{1, 2})
-	period := time.Duration(1)
-	msg := NewPlaceBondMsg()
+	period := time.Duration(10 * time.Hour)
+	msg := NewPlaceBondMsg(storyID, stake, creator, period)
+
+	err := msg.ValidateBasic()
+
+	assert.Nil(t, err)
 }
 
 func TestNewSubmitStoryMsg(t *testing.T) {
