@@ -9,28 +9,37 @@ import (
 )
 
 func TestValidPlaceBondMsg(t *testing.T) {
-	storyID := int64(1)
-	stake := sdk.Coin{Denom: "trusomecoin", Amount: sdk.NewInt(100)}
-	creator := sdk.AccAddress([]byte{1, 2})
-	period := time.Duration(10 * time.Hour)
-	msg := NewPlaceBondMsg(storyID, stake, creator, period)
-
+	validStoryID := int64(1)
+	validStake := sdk.Coin{Denom: "trusomecoin", Amount: sdk.NewInt(100)}
+	validCreator := sdk.AccAddress([]byte{1, 2})
+	validPeriod := time.Duration(10 * time.Hour)
+	msg := NewPlaceBondMsg(validStoryID, validStake, validCreator, validPeriod)
 	err := msg.ValidateBasic()
 
 	assert.Nil(t, err)
 }
 
 func TestInvalidStoryIdPlaceBondMsg(t *testing.T) {
-	storyID := int64(-1)
-	stake := sdk.Coin{Denom: "trusomecoin", Amount: sdk.NewInt(100)}
-	creator := sdk.AccAddress([]byte{1, 2})
-	period := time.Duration(10 * time.Hour)
-	msg := NewPlaceBondMsg(storyID, stake, creator, period)
-
+	invalidStoryID := int64(-1)
+	validStake := sdk.Coin{Denom: "trusomecoin", Amount: sdk.NewInt(100)}
+	validCreator := sdk.AccAddress([]byte{1, 2})
+	validPeriod := time.Duration(10 * time.Hour)
+	msg := NewPlaceBondMsg(invalidStoryID, validStake, validCreator, validPeriod)
 	err := msg.ValidateBasic()
 
 	assert.Equal(t, sdk.CodeType(703), err.Code(), err.Error())
 }
+
+// func TestInvalidAddressPlaceBondMsg(t *testing.T) {
+// 	validStoryID := int64(1)
+// 	validStake := sdk.Coin{Denom: "trusomecoin", Amount: sdk.NewInt(100)}
+// 	invalidCreator := sdk.AccAddress([]byte{1})
+// 	validPeriod := time.Duration(10 * time.Hour)
+// 	msg := NewPlaceBondMsg(validStoryID, validStake, invalidCreator, validPeriod)
+// 	err := msg.ValidateBasic()
+
+// 	assert.Equal(t, sdk.CodeType(703), err.Code(), err.Error())
+// }
 
 // func TestNewSubmitStoryMsg(t *testing.T) {
 // 	goodBody := "Jae Kwon invented Tendermint"
