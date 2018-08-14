@@ -20,6 +20,18 @@ func TestValidPlaceBondMsg(t *testing.T) {
 	assert.Nil(t, err)
 }
 
+func TestInvalidStoryIdPlaceBondMsg(t *testing.T) {
+	storyID := int64(-1)
+	stake := sdk.Coin{Denom: "trusomecoin", Amount: sdk.NewInt(100)}
+	creator := sdk.AccAddress([]byte{1, 2})
+	period := time.Duration(10 * time.Hour)
+	msg := NewPlaceBondMsg(storyID, stake, creator, period)
+
+	err := msg.ValidateBasic()
+
+	assert.Equal(t, sdk.CodeType(703), err.Code(), err.Error())
+}
+
 // func TestNewSubmitStoryMsg(t *testing.T) {
 // 	goodBody := "Jae Kwon invented Tendermint"
 // 	addr1 := sdk.AccAddress([]byte{1, 2})
