@@ -5,8 +5,6 @@ import (
 	"testing"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/stretchr/testify/assert"
-	abci "github.com/tendermint/tendermint/abci/types"
 
 	"github.com/cosmos/cosmos-sdk/x/bank"
 	"github.com/cosmos/cosmos-sdk/x/mock"
@@ -46,26 +44,26 @@ var (
 )
 
 func TestTruStoryKeeper(t *testing.T) {
-	keyStake := sdk.NewKVStoreKey("stake")
-	keyStory := sdk.NewKVStoreKey("trustory")
+	// keyStake := sdk.NewKVStoreKey("stake")
+	// keyStory := sdk.NewKVStoreKey("trustory")
 
-	mapp, k, _ := CreateMockApp(100, keyStake, keyStory)
+	// mapp, k, _ := CreateMockApp(100, keyStake, keyStory)
 
-	mapp.BeginBlock(abci.RequestBeginBlock{})
-	ctx := mapp.NewContext(false, abci.Header{})
+	// mapp.BeginBlock(abci.RequestBeginBlock{})
+	// ctx := mapp.NewContext(false, abci.Header{})
 
-	fmt.Printf("The type of k.TruStory is: %T \n", k.TruStory)
+	// fmt.Printf("The type of k.TruStory is: %T \n", k.TruStory)
 
-	if ctx.KVStore(k.TruStory) == nil {
-		panic("Nil interface")
-	}
+	// if ctx.KVStore(k.TruStory) == nil {
+	// 	panic("Nil interface")
+	// }
 
-	// create stories
-	story := NewStory(int64(1), stories[1], addrs[1], ctx.BlockHeight())
+	// // create stories
+	// story := NewStory(int64(1), stories[1], addrs[1], ctx.BlockHeight())
 
-	// ---- Test SetStory ----
-	err := k.SetStory(ctx, 1, story)
-	assert.Nil(t, err)
+	// // ---- Test SetStory ----
+	// err := k.SetStory(ctx, 1, story)
+	// assert.Nil(t, err)
 }
 
 // CreateMockApp creates a new Mock application for testing
