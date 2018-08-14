@@ -17,6 +17,7 @@ func TestValidPlaceBondMsg(t *testing.T) {
 	err := msg.ValidateBasic()
 
 	assert.Nil(t, err)
+	assert.Equal(t, "PlaceBond", msg.Type())
 }
 
 func TestInvalidStoryIdPlaceBondMsg(t *testing.T) {
@@ -30,16 +31,38 @@ func TestInvalidStoryIdPlaceBondMsg(t *testing.T) {
 	assert.Equal(t, sdk.CodeType(703), err.Code(), err.Error())
 }
 
-// func TestInvalidAddressPlaceBondMsg(t *testing.T) {
-// 	validStoryID := int64(1)
-// 	validStake := sdk.Coin{Denom: "trusomecoin", Amount: sdk.NewInt(100)}
-// 	invalidCreator := sdk.AccAddress([]byte{1})
-// 	validPeriod := time.Duration(10 * time.Hour)
-// 	msg := NewPlaceBondMsg(validStoryID, validStake, invalidCreator, validPeriod)
-// 	err := msg.ValidateBasic()
+func TestInvalidAddressPlaceBondMsg(t *testing.T) {
+	validStoryID := int64(1)
+	validStake := sdk.Coin{Denom: "trusomecoin", Amount: sdk.NewInt(100)}
+	invalidCreator := sdk.AccAddress([]byte{})
+	validPeriod := time.Duration(10 * time.Hour)
+	msg := NewPlaceBondMsg(validStoryID, validStake, invalidCreator, validPeriod)
+	err := msg.ValidateBasic()
 
-// 	assert.Equal(t, sdk.CodeType(703), err.Code(), err.Error())
-// }
+	assert.Equal(t, sdk.CodeType(7), err.Code(), err.Error())
+}
+
+func TestInValidStakePlaceBondMsg(t *testing.T) {
+	validStoryID := int64(1)
+	invalidStake := sdk.Coin{Denom: "trusomecoin", Amount: sdk.NewInt(0)}
+	validCreator := sdk.AccAddress([]byte{1, 2})
+	validPeriod := time.Duration(10 * time.Hour)
+	msg := NewPlaceBondMsg(validStoryID, invalidStake, validCreator, validPeriod)
+	err := msg.ValidateBasic()
+
+	assert.Equal(t, sdk.CodeType(705), err.Code(), err.Error())
+}
+
+func TestInValidBondPeriodPlaceBondMsg(t *testing.T) {
+	validStoryID := int64(1)
+	validStake := sdk.Coin{Denom: "trusomecoin", Amount: sdk.NewInt(100)}
+	validCreator := sdk.AccAddress([]byte{1, 2})
+	invalidPeriod := time.Duration(0 * time.Hour)
+	msg := NewPlaceBondMsg(validStoryID, validStake, validCreator, invalidPeriod)
+	err := msg.ValidateBasic()
+
+	assert.Equal(t, sdk.CodeType(706), err.Code(), err.Error())
+}
 
 // func TestNewSubmitStoryMsg(t *testing.T) {
 // 	goodBody := "Jae Kwon invented Tendermint"
