@@ -8,6 +8,8 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+// ============================================================================
+
 func TestValidPlaceBondMsg(t *testing.T) {
 	validStoryID := int64(1)
 	validStake := sdk.Coin{Denom: "trusomecoin", Amount: sdk.NewInt(100)}
@@ -63,6 +65,51 @@ func TestInValidBondPeriodPlaceBondMsg(t *testing.T) {
 
 	assert.Equal(t, sdk.CodeType(706), err.Code(), err.Error())
 }
+
+// ============================================================================
+
+func TestValidAddCommentMsg(t *testing.T) {
+	validStoryID := int64(1)
+	validBody := "This is a test comment on a story."
+	validCreator := sdk.AccAddress([]byte{1, 2})
+	msg := NewAddCommentMsg(validStoryID, validBody, validCreator)
+	err := msg.ValidateBasic()
+
+	assert.Nil(t, err)
+	assert.Equal(t, "AddComment", msg.Type())
+}
+
+func TestInValidStoryIDAddCommentMsg(t *testing.T) {
+	invalidStoryID := int64(-1)
+	validBody := "This is a test comment on a story."
+	validCreator := sdk.AccAddress([]byte{1, 2})
+	msg := NewAddCommentMsg(invalidStoryID, validBody, validCreator)
+	err := msg.ValidateBasic()
+
+	assert.Equal(t, sdk.CodeType(703), err.Code(), err.Error())
+}
+
+func TestInValidCreatorAddCommentMsg(t *testing.T) {
+	validStoryID := int64(1)
+	validBody := "This is a test comment on a story."
+	invalidCreator := sdk.AccAddress([]byte{})
+	msg := NewAddCommentMsg(validStoryID, validBody, invalidCreator)
+	err := msg.ValidateBasic()
+
+	assert.Equal(t, sdk.CodeType(7), err.Code(), err.Error())
+}
+
+func TestInValidBodyAddCommentMsg(t *testing.T) {
+	validStoryID := int64(1)
+	invalidBody := ""
+	validCreator := sdk.AccAddress([]byte{1, 2})
+	msg := NewAddCommentMsg(validStoryID, invalidBody, validCreator)
+	err := msg.ValidateBasic()
+
+	assert.Equal(t, sdk.CodeType(702), err.Code(), err.Error())
+}
+
+// ============================================================================
 
 // func TestNewSubmitStoryMsg(t *testing.T) {
 // 	goodBody := "Jae Kwon invented Tendermint"
