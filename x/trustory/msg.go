@@ -249,7 +249,7 @@ func NewVoteMsg(storyID int64, creator sdk.AccAddress, stake sdk.Coin, vote bool
 
 // Type implements Msg
 func (msg VoteMsg) Type() string {
-	return "VoteMsg"
+	return "Vote"
 }
 
 // GetSignBytes implements Msg
