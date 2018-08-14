@@ -111,6 +111,49 @@ func TestInValidBodyAddCommentMsg(t *testing.T) {
 
 // ============================================================================
 
+func TestValidSubmitEvidencetMsg(t *testing.T) {
+	validStoryID := int64(1)
+	validCreator := sdk.AccAddress([]byte{1, 2})
+	validURI := "http://www.trustory.io"
+	msg := NewSubmitEvidenceMsg(validStoryID, validCreator, validURI)
+	err := msg.ValidateBasic()
+
+	assert.Nil(t, err)
+	assert.Equal(t, "SubmitEvidence", msg.Type())
+}
+
+func TestInValidStoryIDSubmitEvidencetMsg(t *testing.T) {
+	invalidStoryID := int64(-1)
+	validCreator := sdk.AccAddress([]byte{1, 2})
+	validURI := "http://www.trustory.io"
+	msg := NewSubmitEvidenceMsg(invalidStoryID, validCreator, validURI)
+	err := msg.ValidateBasic()
+
+	assert.Equal(t, sdk.CodeType(703), err.Code(), err.Error())
+}
+
+func TestInValidCreatorSubmitEvidencetMsg(t *testing.T) {
+	validStoryID := int64(1)
+	invalidCreator := sdk.AccAddress([]byte{})
+	validURI := "http://www.trustory.io"
+	msg := NewSubmitEvidenceMsg(validStoryID, invalidCreator, validURI)
+	err := msg.ValidateBasic()
+
+	assert.Equal(t, sdk.CodeType(7), err.Code(), err.Error())
+}
+
+func TestInValidURISubmitEvidencetMsg(t *testing.T) {
+	validStoryID := int64(1)
+	validCreator := sdk.AccAddress([]byte{1, 2})
+	invalidURI := ""
+	msg := NewSubmitEvidenceMsg(validStoryID, validCreator, invalidURI)
+	err := msg.ValidateBasic()
+
+	assert.Equal(t, sdk.CodeType(707), err.Code(), err.Error())
+}
+
+// ============================================================================
+
 // func TestNewSubmitStoryMsg(t *testing.T) {
 // 	goodBody := "Jae Kwon invented Tendermint"
 // 	addr1 := sdk.AccAddress([]byte{1, 2})
