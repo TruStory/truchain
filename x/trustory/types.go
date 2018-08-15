@@ -83,7 +83,6 @@ type Story struct {
 	CreatedBlock int64            `json:"created_block"`
 	Creator      sdk.AccAddress   `json:"creator"`
 	Expiration   time.Time        `json:"expiration,omitempty"`
-	Rank         float64          `json:"rank"`
 	State        string           `json:"state"`
 	SubmitBlock  int64            `json:"submit_block"`
 	StoryType    string           `json:"type"`
@@ -104,7 +103,6 @@ func NewStory(
 	createdBlock int64,
 	creator sdk.AccAddress,
 	expiration time.Time,
-	rank float64,
 	state string,
 	submitBlock int64,
 	storyType string,
@@ -122,7 +120,6 @@ func NewStory(
 		CreatedBlock: createdBlock,
 		Creator:      creator,
 		Expiration:   expiration,
-		Rank:         rank,
 		State:        "Created",
 		SubmitBlock:  submitBlock,
 		StoryType:    storyType,

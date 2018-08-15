@@ -38,7 +38,6 @@ type Story struct {
     Creator         sdk.AccAddress      // address of creator
     EvidenceIDs     []int64             // ids of evidence
     Expiration      time.Time           // expiration time of story
-    Rank            float64             // story rank
     State           string              // "created", "validated", "rejected", "unverifiable", "challenged", "revoked"
     SubmitBlock     int64               // block at which voting begins
     Thread          []int64             // associated story ids
