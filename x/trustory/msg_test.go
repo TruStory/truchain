@@ -1,6 +1,7 @@
 package trustory
 
 import (
+	"fmt"
 	"testing"
 	"time"
 
@@ -20,6 +21,11 @@ func TestValidPlaceBondMsg(t *testing.T) {
 
 	assert.Nil(t, err)
 	assert.Equal(t, "PlaceBond", msg.Type())
+	assert.Equal(
+		t,
+		`{"story_id":1,"amount":{"denom":"trusomecoin","amount":"100"},"creator":"cosmosaccaddr1qypq8zs0ka","period":259200000000000}`,
+		fmt.Sprintf("%s", msg.GetSignBytes()),
+	)
 }
 
 func TestInvalidStoryIdPlaceBondMsg(t *testing.T) {
