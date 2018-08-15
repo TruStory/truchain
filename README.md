@@ -10,7 +10,7 @@ type Bond struct {
     Amount          sdk.Coin            // amount of the bond
     CreatedBlock    int64               // block at which bond was created
     Creator         sdk.AccAddress      // address of the creator
-    Period          int64               // period of the bond    
+    Period          time.Duration       // time period of the bond (days)    
     StoryID         int64               // id of the associated story
 }
 
@@ -70,9 +70,9 @@ These are the messages needed to modify the above state.
 ```go
 type PlaceBondMsg struct {
     StoryID         int64           // id of the story
-    Stake           sdk.Coin       // amount of bond
+    Stake           sdk.Coin        // amount of bond
     Creator         sdk.AccAddress  // person who is placing the bond
-    Period          time.Time       // time period of bond
+    Period          time.Duration   // time period of bond (days)
 }
 
 type AddCommentMsg struct {
