@@ -13,7 +13,7 @@ import (
 // PlaceBondMsg defines a message to bond to a story
 type PlaceBondMsg struct {
 	StoryID int64          `json:"story_id"`
-	Stake   sdk.Coin       `json:"stake"`
+	Amount  sdk.Coin       `json:"amount"`
 	Creator sdk.AccAddress `json:"creator"`
 	Period  time.Duration  `json:"period"`
 }
@@ -21,12 +21,12 @@ type PlaceBondMsg struct {
 // NewPlaceBondMsg creates a message to place a new bond
 func NewPlaceBondMsg(
 	storyID int64,
-	stake sdk.Coin,
+	amount sdk.Coin,
 	creator sdk.AccAddress,
 	period time.Duration) PlaceBondMsg {
 	return PlaceBondMsg{
 		StoryID: storyID,
-		Stake:   stake,
+		Amount:  amount,
 		Creator: creator,
 		Period:  period,
 	}
@@ -54,8 +54,8 @@ func (msg PlaceBondMsg) ValidateBasic() sdk.Error {
 	if len(msg.Creator) == 0 {
 		return sdk.ErrInvalidAddress("Invalid address: " + msg.Creator.String())
 	}
-	if msg.Stake.IsZero() == true {
-		return ErrInvalidAmount("Invalid bond amount: " + msg.Stake.String())
+	if msg.Amount.IsZero() == true {
+		return ErrInvalidAmount("Invalid bond amount: " + msg.Amount.String())
 	}
 	if msg.Period == 0 {
 		return ErrInvalidBondPeriod("Invalid bond period: " + msg.Period.String())
