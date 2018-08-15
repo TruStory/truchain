@@ -161,16 +161,47 @@ func (msg SubmitEvidenceMsg) GetSigners() []sdk.AccAddress {
 
 // ============================================================================
 
+// StoryCategory is a type that defines a story category
+type StoryCategory int
+
+// List of accepted categories
+const (
+	Unknown StoryCategory = iota
+	Bitcoin
+	Consensus
+	DEX
+	Ethereum
+	StableCoins
+)
+
+// IsValid returns true if the value is listed in the enum defintion, false otherwise.
+func (i StoryCategory) IsValid() bool {
+	switch i {
+	case Unknown, Bitcoin, Consensus, DEX, Ethereum, StableCoins:
+		return true
+	}
+	return false
+}
+
+// Slug is the short name for a category
+func (i StoryCategory) Slug() string {
+	return [...]string{"unknown", "btc", "consensus", "dex", "eth", "stablecoins"}[i]
+}
+
+func (i StoryCategory) String() string {
+	return [...]string{"Unknown", "Bitcoin", "Consensus", "Decentralized Exchanges", "Ethereum", "Stable Coins"}[i]
+}
+
 // SubmitStoryMsg defines a message to submit a story
 type SubmitStoryMsg struct {
 	Body      string         `json:"body"`
-	Category  string         `json:"category"`
+	Category  StoryCategory  `json:"category"`
 	Creator   sdk.AccAddress `json:"creator"`
 	StoryType string         `json:"story_type"`
 }
 
 // NewSubmitStoryMsg creates a new message to submit a story
-func NewSubmitStoryMsg(body string, category string, creator sdk.AccAddress, storyType string) SubmitStoryMsg {
+func NewSubmitStoryMsg(body string, category StoryCategory, creator sdk.AccAddress, storyType string) SubmitStoryMsg {
 	return SubmitStoryMsg{
 		Body:      body,
 		Category:  category,
@@ -194,8 +225,8 @@ func (msg SubmitStoryMsg) ValidateBasic() sdk.Error {
 	if len(msg.Body) == 0 {
 		return ErrInvalidBody("Invalid body: " + msg.Body)
 	}
-	if len(msg.Category) == 0 {
-		return ErrInvalidCategory("Invalid category: " + msg.Category)
+	if msg.Category.IsValid() == false {
+		return ErrInvalidCategory("Invalid category: " + msg.Category.String())
 	}
 	if len(msg.Creator) == 0 {
 		return sdk.ErrInvalidAddress("Invalid address: " + msg.Creator.String())

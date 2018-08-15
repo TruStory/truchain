@@ -175,7 +175,7 @@ func TestInValidURISubmitEvidencetMsg(t *testing.T) {
 
 func TestValidSubmitStoryMsg(t *testing.T) {
 	validBody := "This is a valid story body @shanev amirite?"
-	validCategory := "dex"
+	validCategory := DEX
 	validCreator := sdk.AccAddress([]byte{1, 2})
 	validStoryType := "default"
 	msg := NewSubmitStoryMsg(validBody, validCategory, validCreator, validStoryType)
@@ -185,7 +185,7 @@ func TestValidSubmitStoryMsg(t *testing.T) {
 	assert.Equal(t, "SubmitStory", msg.Type())
 	assert.Equal(
 		t,
-		`{"body":"This is a valid story body @shanev amirite?","category":"dex","creator":"cosmosaccaddr1qypq8zs0ka","story_type":"default"}`,
+		`{"body":"This is a valid story body @shanev amirite?","category":3,"creator":"cosmosaccaddr1qypq8zs0ka","story_type":"default"}`,
 		fmt.Sprintf("%s", msg.GetSignBytes()),
 	)
 	assert.Equal(t, []sdk.AccAddress{validCreator}, msg.GetSigners())
@@ -193,7 +193,7 @@ func TestValidSubmitStoryMsg(t *testing.T) {
 
 func TestInValidBodySubmitStoryMsg(t *testing.T) {
 	invalidBody := ""
-	validCategory := "dex"
+	validCategory := DEX
 	validCreator := sdk.AccAddress([]byte{1, 2})
 	validStoryType := "default"
 	msg := NewSubmitStoryMsg(invalidBody, validCategory, validCreator, validStoryType)
@@ -202,20 +202,9 @@ func TestInValidBodySubmitStoryMsg(t *testing.T) {
 	assert.Equal(t, sdk.CodeType(702), err.Code(), err.Error())
 }
 
-func TestInValidCategorySubmitStoryMsg(t *testing.T) {
-	validBody := "This is a valid story body @shanev amirite?"
-	invalidCategory := ""
-	validCreator := sdk.AccAddress([]byte{1, 2})
-	validStoryType := "default"
-	msg := NewSubmitStoryMsg(validBody, invalidCategory, validCreator, validStoryType)
-	err := msg.ValidateBasic()
-
-	assert.Equal(t, sdk.CodeType(708), err.Code(), err.Error())
-}
-
 func TestInValidCreatorSubmitStoryMsg(t *testing.T) {
 	validBody := "This is a valid story body @shanev amirite?"
-	validCategory := "dex"
+	validCategory := DEX
 	invalidCreator := sdk.AccAddress([]byte{})
 	validStoryType := "default"
 	msg := NewSubmitStoryMsg(validBody, validCategory, invalidCreator, validStoryType)
@@ -226,7 +215,7 @@ func TestInValidCreatorSubmitStoryMsg(t *testing.T) {
 
 func TestInValidStoryTypeSubmitStoryMsg(t *testing.T) {
 	validBody := "This is a valid story body @shanev amirite?"
-	validCategory := "dex"
+	validCategory := DEX
 	validCreator := sdk.AccAddress([]byte{1, 2})
 	invalidStoryType := ""
 	msg := NewSubmitStoryMsg(validBody, validCategory, validCreator, invalidStoryType)
