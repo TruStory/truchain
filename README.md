@@ -7,7 +7,7 @@ All state is stored in these types.
 ```go
 type Bond struct {
     ID              int64               // id of the bond
-    Stake           sdk.Coin            // amount of the bond
+    Amount          sdk.Coin            // amount of the bond
     CreatedBlock    int64               // block at which bond was created
     Creator         sdk.AccAddress      // address of the creator
     Period          int64               // period of the bond    
