@@ -26,6 +26,7 @@ func TestValidPlaceBondMsg(t *testing.T) {
 		`{"story_id":1,"amount":{"denom":"trusomecoin","amount":"100"},"creator":"cosmosaccaddr1qypq8zs0ka","period":259200000000000}`,
 		fmt.Sprintf("%s", msg.GetSignBytes()),
 	)
+	assert.Equal(t, []sdk.AccAddress{validCreator}, msg.GetSigners())
 }
 
 func TestInvalidStoryIdPlaceBondMsg(t *testing.T) {
@@ -83,6 +84,12 @@ func TestValidAddCommentMsg(t *testing.T) {
 
 	assert.Nil(t, err)
 	assert.Equal(t, "AddComment", msg.Type())
+	assert.Equal(
+		t,
+		`{"story_id":1,"body":"This is a test comment on a story.","creator":"cosmosaccaddr1qypq8zs0ka"}`,
+		fmt.Sprintf("%s", msg.GetSignBytes()),
+	)
+	assert.Equal(t, []sdk.AccAddress{validCreator}, msg.GetSigners())
 }
 
 func TestInValidStoryIDAddCommentMsg(t *testing.T) {
@@ -126,6 +133,12 @@ func TestValidSubmitEvidencetMsg(t *testing.T) {
 
 	assert.Nil(t, err)
 	assert.Equal(t, "SubmitEvidence", msg.Type())
+	assert.Equal(
+		t,
+		`{"story_id":1,"creator":"cosmosaccaddr1qypq8zs0ka","url":"http://www.trustory.io"}`,
+		fmt.Sprintf("%s", msg.GetSignBytes()),
+	)
+	assert.Equal(t, []sdk.AccAddress{validCreator}, msg.GetSigners())
 }
 
 func TestInValidStoryIDSubmitEvidencetMsg(t *testing.T) {
@@ -170,6 +183,12 @@ func TestValidSubmitStoryMsg(t *testing.T) {
 
 	assert.Nil(t, err)
 	assert.Equal(t, "SubmitStory", msg.Type())
+	assert.Equal(
+		t,
+		`{"body":"This is a valid story body @shanev amirite?","category":"dex","creator":"cosmosaccaddr1qypq8zs0ka","story_type":"default"}`,
+		fmt.Sprintf("%s", msg.GetSignBytes()),
+	)
+	assert.Equal(t, []sdk.AccAddress{validCreator}, msg.GetSigners())
 }
 
 func TestInValidBodySubmitStoryMsg(t *testing.T) {
@@ -228,6 +247,12 @@ func TestValidVoteMsg(t *testing.T) {
 
 	assert.Nil(t, err)
 	assert.Equal(t, "Vote", msg.Type())
+	assert.Equal(
+		t,
+		`{"StoryID":1,"Creator":"cosmosaccaddr1qypq8zs0ka","Stake":{"denom":"trusomecoin","amount":"100"},"Vote":true}`,
+		fmt.Sprintf("%s", msg.GetSignBytes()),
+	)
+	assert.Equal(t, []sdk.AccAddress{validCreator}, msg.GetSigners())
 }
 
 func TestInValidStoryIDVoteMsg(t *testing.T) {
