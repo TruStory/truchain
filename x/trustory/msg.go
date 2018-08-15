@@ -39,11 +39,7 @@ func (msg PlaceBondMsg) Type() string {
 
 // GetSignBytes implements Msg
 func (msg PlaceBondMsg) GetSignBytes() []byte {
-	b, err := json.Marshal(msg)
-	if err != nil {
-		panic(err)
-	}
-	return b
+	return getSignBytes(msg)
 }
 
 // ValidateBasic implements Msg
@@ -65,7 +61,7 @@ func (msg PlaceBondMsg) ValidateBasic() sdk.Error {
 
 // GetSigners implements Msg
 func (msg PlaceBondMsg) GetSigners() []sdk.AccAddress {
-	return []sdk.AccAddress{msg.Creator}
+	return getSigners(msg.Creator)
 }
 
 // ============================================================================
@@ -93,11 +89,7 @@ func (msg AddCommentMsg) Type() string {
 
 // GetSignBytes implements Msg
 func (msg AddCommentMsg) GetSignBytes() []byte {
-	b, err := json.Marshal(msg)
-	if err != nil {
-		panic(err)
-	}
-	return b
+	return getSignBytes(msg)
 }
 
 // ValidateBasic implements Msg
@@ -116,7 +108,7 @@ func (msg AddCommentMsg) ValidateBasic() sdk.Error {
 
 // GetSigners implements Msg
 func (msg AddCommentMsg) GetSigners() []sdk.AccAddress {
-	return []sdk.AccAddress{msg.Creator}
+	return getSigners(msg.Creator)
 }
 
 // ============================================================================
@@ -144,11 +136,7 @@ func (msg SubmitEvidenceMsg) Type() string {
 
 // GetSignBytes implements Msg
 func (msg SubmitEvidenceMsg) GetSignBytes() []byte {
-	b, err := json.Marshal(msg)
-	if err != nil {
-		panic(err)
-	}
-	return b
+	return getSignBytes(msg)
 }
 
 // ValidateBasic implements Msg
@@ -168,7 +156,7 @@ func (msg SubmitEvidenceMsg) ValidateBasic() sdk.Error {
 
 // GetSigners implements Msg
 func (msg SubmitEvidenceMsg) GetSigners() []sdk.AccAddress {
-	return []sdk.AccAddress{msg.Creator}
+	return getSigners(msg.Creator)
 }
 
 // ============================================================================
@@ -198,11 +186,7 @@ func (msg SubmitStoryMsg) Type() string {
 
 // GetSignBytes implements Msg
 func (msg SubmitStoryMsg) GetSignBytes() []byte {
-	b, err := json.Marshal(msg)
-	if err != nil {
-		panic(err)
-	}
-	return b
+	return getSignBytes(msg)
 }
 
 // ValidateBasic implements Msg
@@ -224,7 +208,7 @@ func (msg SubmitStoryMsg) ValidateBasic() sdk.Error {
 
 // GetSigners implements Msg
 func (msg SubmitStoryMsg) GetSigners() []sdk.AccAddress {
-	return []sdk.AccAddress{msg.Creator}
+	return getSigners(msg.Creator)
 }
 
 // ============================================================================
@@ -254,11 +238,7 @@ func (msg VoteMsg) Type() string {
 
 // GetSignBytes implements Msg
 func (msg VoteMsg) GetSignBytes() []byte {
-	b, err := json.Marshal(msg)
-	if err != nil {
-		panic(err)
-	}
-	return b
+	return getSignBytes(msg)
 }
 
 // ValidateBasic implements Msg
@@ -277,5 +257,19 @@ func (msg VoteMsg) ValidateBasic() sdk.Error {
 
 // GetSigners implements Msg
 func (msg VoteMsg) GetSigners() []sdk.AccAddress {
-	return []sdk.AccAddress{msg.Creator}
+	return getSigners(msg.Creator)
+}
+
+// ============================================================================
+
+func getSignBytes(msg sdk.Msg) []byte {
+	b, err := json.Marshal(msg)
+	if err != nil {
+		panic(err)
+	}
+	return b
+}
+
+func getSigners(addr sdk.AccAddress) []sdk.AccAddress {
+	return []sdk.AccAddress{addr}
 }
