@@ -177,7 +177,7 @@ func TestValidSubmitStoryMsg(t *testing.T) {
 	validBody := "This is a valid story body @shanev amirite?"
 	validCategory := DEX
 	validCreator := sdk.AccAddress([]byte{1, 2})
-	validStoryType := "default"
+	validStoryType := Default
 	msg := NewSubmitStoryMsg(validBody, validCategory, validCreator, validStoryType)
 	err := msg.ValidateBasic()
 
@@ -185,7 +185,7 @@ func TestValidSubmitStoryMsg(t *testing.T) {
 	assert.Equal(t, "SubmitStory", msg.Type())
 	assert.Equal(
 		t,
-		`{"body":"This is a valid story body @shanev amirite?","category":3,"creator":"cosmosaccaddr1qypq8zs0ka","story_type":"default"}`,
+		`{"body":"This is a valid story body @shanev amirite?","category":3,"creator":"cosmosaccaddr1qypq8zs0ka","story_type":0}`,
 		fmt.Sprintf("%s", msg.GetSignBytes()),
 	)
 	assert.Equal(t, []sdk.AccAddress{validCreator}, msg.GetSigners())
@@ -195,7 +195,7 @@ func TestInValidBodySubmitStoryMsg(t *testing.T) {
 	invalidBody := ""
 	validCategory := DEX
 	validCreator := sdk.AccAddress([]byte{1, 2})
-	validStoryType := "default"
+	validStoryType := Default
 	msg := NewSubmitStoryMsg(invalidBody, validCategory, validCreator, validStoryType)
 	err := msg.ValidateBasic()
 
@@ -206,22 +206,11 @@ func TestInValidCreatorSubmitStoryMsg(t *testing.T) {
 	validBody := "This is a valid story body @shanev amirite?"
 	validCategory := DEX
 	invalidCreator := sdk.AccAddress([]byte{})
-	validStoryType := "default"
+	validStoryType := Default
 	msg := NewSubmitStoryMsg(validBody, validCategory, invalidCreator, validStoryType)
 	err := msg.ValidateBasic()
 
 	assert.Equal(t, sdk.CodeType(7), err.Code(), err.Error())
-}
-
-func TestInValidStoryTypeSubmitStoryMsg(t *testing.T) {
-	validBody := "This is a valid story body @shanev amirite?"
-	validCategory := DEX
-	validCreator := sdk.AccAddress([]byte{1, 2})
-	invalidStoryType := ""
-	msg := NewSubmitStoryMsg(validBody, validCategory, validCreator, invalidStoryType)
-	err := msg.ValidateBasic()
-
-	assert.Equal(t, sdk.CodeType(709), err.Code(), err.Error())
 }
 
 // ============================================================================

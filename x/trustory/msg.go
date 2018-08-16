@@ -192,16 +192,39 @@ func (i StoryCategory) String() string {
 	return [...]string{"Unknown", "Bitcoin", "Consensus", "Decentralized Exchanges", "Ethereum", "Stable Coins"}[i]
 }
 
+// StoryType is a type that defines a story type
+type StoryType int
+
+// List of acceptable story types
+const (
+	Default StoryType = iota
+	Identity
+	Recovery
+)
+
+// IsValid returns true if a story type is valid, false otherwise.
+func (i StoryType) IsValid() bool {
+	switch i {
+	case Default, Identity, Recovery:
+		return true
+	}
+	return false
+}
+
+func (i StoryType) String() string {
+	return [...]string{"Default", "Identity", "Recovery"}[i]
+}
+
 // SubmitStoryMsg defines a message to submit a story
 type SubmitStoryMsg struct {
 	Body      string         `json:"body"`
 	Category  StoryCategory  `json:"category"`
 	Creator   sdk.AccAddress `json:"creator"`
-	StoryType string         `json:"story_type"`
+	StoryType StoryType      `json:"story_type"`
 }
 
 // NewSubmitStoryMsg creates a new message to submit a story
-func NewSubmitStoryMsg(body string, category StoryCategory, creator sdk.AccAddress, storyType string) SubmitStoryMsg {
+func NewSubmitStoryMsg(body string, category StoryCategory, creator sdk.AccAddress, storyType StoryType) SubmitStoryMsg {
 	return SubmitStoryMsg{
 		Body:      body,
 		Category:  category,
@@ -231,8 +254,8 @@ func (msg SubmitStoryMsg) ValidateBasic() sdk.Error {
 	if len(msg.Creator) == 0 {
 		return sdk.ErrInvalidAddress("Invalid address: " + msg.Creator.String())
 	}
-	if len(msg.StoryType) == 0 {
-		return ErrInvalidStoryType("Invalid story type: " + msg.StoryType)
+	if msg.StoryType.IsValid() == false {
+		return ErrInvalidStoryType("Invalid story type: " + msg.StoryType.String())
 	}
 	return nil
 }
