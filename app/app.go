@@ -2,9 +2,10 @@ package app
 
 import (
 	"encoding/json"
-	// "log"
 
 	"github.com/TruStory/trucoin/types"
+	ts "github.com/TruStory/trucoin/x/trustory"
+	sdb "github.com/TruStory/trucoin/x/trustory/db"
 	bam "github.com/cosmos/cosmos-sdk/baseapp"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/wire"
@@ -34,12 +35,16 @@ type TruStoryApp struct {
 	keyMain    *sdk.KVStoreKey
 	keyAccount *sdk.KVStoreKey
 	keyIBC     *sdk.KVStoreKey
+	keyStory   *sdk.KVStoreKey
 
 	// manage getting and setting accounts
 	accountMapper       auth.AccountMapper
 	feeCollectionKeeper auth.FeeCollectionKeeper
 	coinKeeper          bank.Keeper
 	ibcMapper           ibc.Mapper
+
+	// access story database
+	storyKeeper sdb.StoryKeeper
 }
 
 // NewTruStoryApp returns a reference to a new TruStoryApp given a logger and
@@ -58,6 +63,7 @@ func NewTruStoryApp(logger log.Logger, db dbm.DB) *TruStoryApp {
 		keyMain:    sdk.NewKVStoreKey("main"),
 		keyAccount: sdk.NewKVStoreKey("acc"),
 		keyIBC:     sdk.NewKVStoreKey("ibc"),
+		keyStory:   sdk.NewKVStoreKey("stories"),
 	}
 
 	// define and attach the mappers and keepers
@@ -68,11 +74,13 @@ func NewTruStoryApp(logger log.Logger, db dbm.DB) *TruStoryApp {
 	)
 	app.coinKeeper = bank.NewKeeper(app.accountMapper)
 	app.ibcMapper = ibc.NewMapper(app.cdc, app.keyIBC, app.RegisterCodespace(ibc.DefaultCodespace))
+	app.storyKeeper = sdb.NewStoryKeeper(app.keyStory, app.cdc)
 
 	// register message routes
 	app.Router().
 		AddRoute("bank", bank.NewHandler(app.coinKeeper)).
-		AddRoute("ibc", ibc.NewHandler(app.ibcMapper, app.coinKeeper))
+		AddRoute("ibc", ibc.NewHandler(app.ibcMapper, app.coinKeeper)).
+		AddRoute("stories", ts.NewHandler(app.storyKeeper))
 
 	// perform initialization logic
 	app.SetInitChainer(app.initChainer)
@@ -81,7 +89,7 @@ func NewTruStoryApp(logger log.Logger, db dbm.DB) *TruStoryApp {
 	app.SetAnteHandler(auth.NewAnteHandler(app.accountMapper, app.feeCollectionKeeper))
 
 	// mount the multistore and load the latest state
-	app.MountStoresIAVL(app.keyMain, app.keyAccount, app.keyIBC)
+	app.MountStoresIAVL(app.keyMain, app.keyAccount, app.keyIBC, app.keyStory)
 	err := app.LoadLatestVersion(app.keyMain)
 	if err != nil {
 		cmn.Exit(err.Error())
