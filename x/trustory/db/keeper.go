@@ -1,8 +1,9 @@
-package trustory
+package db
 
 import (
 	"encoding/binary"
 
+	ts "github.com/TruStory/trucoin/x/trustory/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/wire"
 	amino "github.com/tendermint/go-amino"
@@ -25,14 +26,14 @@ func NewStoryKeeper(storyKey sdk.StoreKey, cdc *amino.Codec) StoryKeeper {
 }
 
 // GetStory gets the story with the given id from the key-value store
-func (sk StoryKeeper) GetStory(ctx sdk.Context, storyID int64) (Story, sdk.Error) {
+func (sk StoryKeeper) GetStory(ctx sdk.Context, storyID int64) (ts.Story, sdk.Error) {
 	store := ctx.KVStore(sk.StoryKey)
 	key := generateStoryKey(storyID)
 	val := store.Get(key)
 	if val == nil {
-		return Story{}, ErrStoryNotFound(storyID)
+		return ts.Story{}, ts.ErrStoryNotFound(storyID)
 	}
-	story := &Story{}
+	story := &ts.Story{}
 	err := sk.Cdc.UnmarshalBinary(val, story)
 	if err != nil {
 		panic(err)
@@ -44,7 +45,7 @@ func (sk StoryKeeper) GetStory(ctx sdk.Context, storyID int64) (Story, sdk.Error
 func (sk StoryKeeper) AddStory(ctx sdk.Context, body string, creator sdk.AccAddress) (int64, sdk.Error) {
 	store := ctx.KVStore(sk.StoryKey)
 
-	story := Story{
+	story := ts.Story{
 		ID:   sk.newStoryID(store),
 		Body: body,
 		// Category: category,
