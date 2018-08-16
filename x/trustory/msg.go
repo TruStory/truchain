@@ -6,6 +6,7 @@ import (
 	"time"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	amino "github.com/tendermint/go-amino"
 )
 
 // ============================================================================
@@ -312,6 +313,17 @@ func (msg VoteMsg) ValidateBasic() sdk.Error {
 // GetSigners implements Msg
 func (msg VoteMsg) GetSigners() []sdk.AccAddress {
 	return getSigners(msg.Creator)
+}
+
+// ============================================================================
+
+// RegisterAmino registers messages into the codec
+func RegisterAmino(cdc *amino.Codec) {
+	cdc.RegisterConcrete(PlaceBondMsg{}, "types/PlaceBondMsg", nil)
+	cdc.RegisterConcrete(AddCommentMsg{}, "types/AddCommentMsg", nil)
+	cdc.RegisterConcrete(SubmitEvidenceMsg{}, "types/SubmitEvidenceMsg", nil)
+	cdc.RegisterConcrete(SubmitStoryMsg{}, "types/SubmitStoryMsg", nil)
+	cdc.RegisterConcrete(VoteMsg{}, "types/VoteMsg", nil)
 }
 
 // ============================================================================
