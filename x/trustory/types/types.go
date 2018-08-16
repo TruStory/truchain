@@ -1,4 +1,4 @@
-package trustory
+package types
 
 import (
 	"time"

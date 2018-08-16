@@ -1,8 +1,9 @@
-package trustory
+package db
 
 import (
 	"testing"
 
+	ts "github.com/TruStory/trucoin/x/trustory/types"
 	"github.com/cosmos/cosmos-sdk/store"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth"
@@ -30,7 +31,7 @@ func TestAddGetStory(t *testing.T) {
 	savedStory, err := keeper.GetStory(ctx, storyID)
 	assert.Nil(t, err)
 
-	story := Story{
+	story := ts.Story{
 		ID:      storyID,
 		Body:    body,
 		Creator: creator,
@@ -54,7 +55,7 @@ func setupMultiStore() (sdk.MultiStore, *sdk.KVStoreKey) {
 
 func makeCodec() *amino.Codec {
 	cdc := amino.NewCodec()
-	RegisterAmino(cdc)
+	ts.RegisterAmino(cdc)
 	crypto.RegisterAmino(cdc)
 	cdc.RegisterInterface((*auth.Account)(nil), nil)
 	cdc.RegisterConcrete(&auth.BaseAccount{}, "cosmos-sdk/BaseAccount", nil)
