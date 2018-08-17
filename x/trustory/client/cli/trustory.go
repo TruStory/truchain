@@ -3,7 +3,7 @@ package cli
 import (
 	"fmt"
 
-	"github.com/TruStory/trucoin/x/trustory"
+	ts "github.com/TruStory/trucoin/x/trustory/types"
 	"github.com/cosmos/cosmos-sdk/client/context"
 	"github.com/cosmos/cosmos-sdk/wire"
 	"github.com/spf13/cobra"
@@ -37,9 +37,9 @@ func GetCmdQueryStories(storeName string, cdc *wire.Codec) *cobra.Command {
 			// }
 
 			// parse out the stories
-			var stories []trustory.Story
+			var stories []ts.Story
 			for _, KV := range resKVs {
-				var story trustory.Story
+				var story ts.Story
 				cdc.MustUnmarshalBinary(KV.Value, &story)
 				stories = append(stories, story)
 			}
