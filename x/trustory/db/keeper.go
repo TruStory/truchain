@@ -12,16 +12,14 @@ import (
 // StoryKeeper data type
 type StoryKeeper struct {
 	StoryKey sdk.StoreKey
-	// CoinKey  bank.Keeper
-	Cdc *wire.Codec
+	Cdc      *wire.Codec
 }
 
 // NewStoryKeeper creates a new keeper with write and read access
 func NewStoryKeeper(storyKey sdk.StoreKey, cdc *amino.Codec) StoryKeeper {
 	return StoryKeeper{
 		StoryKey: storyKey,
-		// CoinKey:  coinKey,
-		Cdc: cdc,
+		Cdc:      cdc,
 	}
 }
 
