@@ -30,7 +30,7 @@ func handleSubmitStoryMsg(ctx sdk.Context, sk db.StoryKeeper, msg ts.SubmitStory
 		return err.Result()
 	}
 
-	storyID, err := sk.AddStory(ctx, msg.Body, msg.Creator)
+	storyID, err := sk.AddStory(ctx, msg.Body, msg.Category, msg.Creator, msg.StoryType)
 	if err != nil {
 		panic(err)
 	}

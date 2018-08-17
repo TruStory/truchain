@@ -32,16 +32,16 @@ type Story struct {
     ID              int64               // id of story
     Body            string              // body of story
     BondIDs         []int64             // bonds ids for story
-    Category        string              // category slug, "btc", "eth", "cp" (consensus protocols)
+    Category        StoryCategory       // category slug, "btc", "eth", "cp" (consensus protocols)
     CommentIDs      []int64             // ids of comments
     CreatedBlock    int64               // block at which story was created
     Creator         sdk.AccAddress      // address of creator
     EvidenceIDs     []int64             // ids of evidence
     Expiration      time.Time           // expiration time of story
-    State           string              // "created", "validated", "rejected", "unverifiable", "challenged", "revoked"
+    State           StoryState          // "created", "validated", "rejected", "unverifiable", "challenged", "revoked"
     SubmitBlock     int64               // block at which voting begins
     Thread          []int64             // associated story ids
-    Type            string              // "identity", "recovery", "default"
+    Type            StoryType           // "identity", "recovery", "default"
     UpdatedBlock    int64               // block at which story was updated
     Users           []sdk.AccAddress    // users mention in story body
     VoteIDs         []int64             // vote ids for story
@@ -88,9 +88,9 @@ type SubmitEvidenceMsg struct {
 
 type SubmitStoryMsg struct {
     Body            string              // body of story
-    Category        string              // category of story
+    Category        StoryCategory       // category of story
     Creator         sdk.AccAddress      // creator of story
-    StoryType       string              // type of story
+    StoryType       StoryType           // type of story
     Users           []sdk.AccAddress    // addresses of mentioned users
 }
 

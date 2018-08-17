@@ -23,18 +23,24 @@ func TestAddGetStory(t *testing.T) {
 
 	ctx := sdk.NewContext(ms, abci.Header{}, false, log.NewNopLogger())
 	body := "Body of story."
+	category := ts.DEX
 	creator := sdk.AccAddress([]byte{1, 2})
+	storyType := ts.Default
 
-	storyID, err := keeper.AddStory(ctx, body, creator)
+	storyID, err := keeper.AddStory(ctx, body, category, creator, storyType)
 	assert.Nil(t, err)
 
 	savedStory, err := keeper.GetStory(ctx, storyID)
 	assert.Nil(t, err)
 
 	story := ts.Story{
-		ID:      storyID,
-		Body:    body,
-		Creator: creator,
+		ID:           storyID,
+		Body:         body,
+		Category:     ts.DEX,
+		CreatedBlock: int64(0),
+		Creator:      creator,
+		State:        ts.Created,
+		StoryType:    storyType,
 	}
 
 	assert.Equal(t, savedStory, story, "Story received from store does not match expected value")
@@ -45,10 +51,8 @@ func TestAddGetStory(t *testing.T) {
 func setupMultiStore() (sdk.MultiStore, *sdk.KVStoreKey) {
 	db := dbm.NewMemDB()
 	storyKey := sdk.NewKVStoreKey("StoryKey")
-	// coinKey := sdk.NewKVStoreKey("CoinKey")
 	ms := store.NewCommitMultiStore(db)
 	ms.MountStoreWithDB(storyKey, sdk.StoreTypeIAVL, db)
-	// ms.MountStoreWithDB(coinKey, sdk.StoreTypeIAVL, db)
 	ms.LoadLatestVersion()
 	return ms, storyKey
 }
