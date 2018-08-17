@@ -40,14 +40,22 @@ func (sk StoryKeeper) GetStory(ctx sdk.Context, storyID int64) (ts.Story, sdk.Er
 }
 
 // AddStory adds a story to the key-value store
-func (sk StoryKeeper) AddStory(ctx sdk.Context, body string, creator sdk.AccAddress) (int64, sdk.Error) {
+func (sk StoryKeeper) AddStory(
+	ctx sdk.Context,
+	body string,
+	category ts.StoryCategory,
+	creator sdk.AccAddress,
+	storyType ts.StoryType) (int64, sdk.Error) {
 	store := ctx.KVStore(sk.StoryKey)
 
 	story := ts.Story{
-		ID:   sk.newStoryID(store),
-		Body: body,
-		// Category: category,
-		Creator: creator,
+		ID:           sk.newStoryID(store),
+		Body:         body,
+		Category:     category,
+		CreatedBlock: ctx.BlockHeight(),
+		Creator:      creator,
+		State:        ts.Created,
+		StoryType:    storyType,
 	}
 
 	val, err := sk.Cdc.MarshalBinary(story)
