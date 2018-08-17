@@ -5,6 +5,8 @@ all: get_tools get_vendor_deps build test
 get_tools:
 	go get github.com/golang/dep/cmd/dep
 
+buidl: build
+
 build:
 	go build -o bin/trucli cmd/trucli/main.go && go build -o bin/trucoind cmd/trucoind/main.go
 
