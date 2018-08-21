@@ -44,10 +44,15 @@ func handleSubmitStoryMsg(ctx sdk.Context, sk db.StoryKeeper, msg ts.SubmitStory
 }
 
 func handleVoteMsg(ctx sdk.Context, sk db.StoryKeeper, msg ts.VoteMsg) sdk.Result {
-	// err := msg.ValidateBasic()
-	// if err != nil {
-	// 	return err.Result()
-	// }
+	err := msg.ValidateBasic()
+	if err != nil {
+		return err.Result()
+	}
+
+	err = sk.VoteStory(ctx, msg.StoryID, msg.Creator, msg.Vote, msg.Stake)
+	if err != nil {
+		panic(err)
+	}
 
 	return sdk.Result{}
 }
