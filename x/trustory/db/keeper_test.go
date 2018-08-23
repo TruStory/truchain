@@ -16,10 +16,10 @@ import (
 )
 
 func TestAddGetStory(t *testing.T) {
-	ms, storyKey := setupMultiStore()
+	ms, storyKey, voteKey := setupMultiStore()
 	cdc := makeCodec()
 
-	keeper := NewStoryKeeper(storyKey, cdc)
+	keeper := NewTruKeeper(storyKey, voteKey, cdc)
 
 	ctx := sdk.NewContext(ms, abci.Header{}, false, log.NewNopLogger())
 	body := "Body of story."
@@ -48,13 +48,14 @@ func TestAddGetStory(t *testing.T) {
 
 // ============================================================================
 
-func setupMultiStore() (sdk.MultiStore, *sdk.KVStoreKey) {
+func setupMultiStore() (sdk.MultiStore, *sdk.KVStoreKey, *sdk.KVStoreKey) {
 	db := dbm.NewMemDB()
 	storyKey := sdk.NewKVStoreKey("StoryKey")
+	voteKey := sdk.NewKVStoreKey("VoteKey")
 	ms := store.NewCommitMultiStore(db)
 	ms.MountStoreWithDB(storyKey, sdk.StoreTypeIAVL, db)
 	ms.LoadLatestVersion()
-	return ms, storyKey
+	return ms, storyKey, voteKey
 }
 
 func makeCodec() *amino.Codec {

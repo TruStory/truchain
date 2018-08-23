@@ -10,30 +10,32 @@ import (
 
 // ============================================================================
 
-// StoryKeeper data type
-type StoryKeeper struct {
+// TruKeeper data type
+type TruKeeper struct {
 	StoryKey sdk.StoreKey
+	VoteKey  sdk.StoreKey
 	Cdc      *amino.Codec
 }
 
-// NewStoryKeeper creates a new keeper with write and read access
-func NewStoryKeeper(storyKey sdk.StoreKey, cdc *amino.Codec) StoryKeeper {
-	return StoryKeeper{
+// NewTruKeeper creates a new keeper with write and read access
+func NewTruKeeper(storyKey sdk.StoreKey, voteKey sdk.StoreKey, cdc *amino.Codec) TruKeeper {
+	return TruKeeper{
 		StoryKey: storyKey,
+		VoteKey:  voteKey,
 		Cdc:      cdc,
 	}
 }
 
 // GetStory gets the story with the given id from the key-value store
-func (sk StoryKeeper) GetStory(ctx sdk.Context, storyID int64) (ts.Story, sdk.Error) {
-	store := ctx.KVStore(sk.StoryKey)
-	key := generateKey(sk.StoryKey.String(), storyID)
+func (k TruKeeper) GetStory(ctx sdk.Context, storyID int64) (ts.Story, sdk.Error) {
+	store := ctx.KVStore(k.StoryKey)
+	key := generateKey(k.StoryKey.String(), storyID)
 	val := store.Get(key)
 	if val == nil {
 		return ts.Story{}, ts.ErrStoryNotFound(storyID)
 	}
 	story := &ts.Story{}
-	err := sk.Cdc.UnmarshalBinary(val, story)
+	err := k.Cdc.UnmarshalBinary(val, story)
 	if err != nil {
 		panic(err)
 	}
@@ -41,16 +43,16 @@ func (sk StoryKeeper) GetStory(ctx sdk.Context, storyID int64) (ts.Story, sdk.Er
 }
 
 // AddStory adds a story to the key-value store
-func (sk StoryKeeper) AddStory(
+func (k TruKeeper) AddStory(
 	ctx sdk.Context,
 	body string,
 	category ts.StoryCategory,
 	creator sdk.AccAddress,
 	storyType ts.StoryType) (int64, sdk.Error) {
-	store := ctx.KVStore(sk.StoryKey)
+	store := ctx.KVStore(k.StoryKey)
 
 	story := ts.Story{
-		ID:           sk.newStoryID(store),
+		ID:           k.newStoryID(store),
 		Body:         body,
 		Category:     category,
 		CreatedBlock: ctx.BlockHeight(),
@@ -59,21 +61,21 @@ func (sk StoryKeeper) AddStory(
 		StoryType:    storyType,
 	}
 
-	val, err := sk.Cdc.MarshalBinary(story)
+	val, err := k.Cdc.MarshalBinary(story)
 	if err != nil {
 		panic(err)
 	}
 
-	key := generateKey(sk.StoryKey.String(), story.ID)
+	key := generateKey(k.StoryKey.String(), story.ID)
 	store.Set(key, val)
 
 	return story.ID, nil
 }
 
 // VoteStory saves a vote to a story
-func (sk StoryKeeper) VoteStory(ctx sdk.Context, storyID int64, creator sdk.AccAddress, vote bool, stake sdk.Coin) sdk.Error {
-	storyStore := ctx.KVStore(sk.StoryKey)
-	storyKey := generateKey(sk.StoryKey.String(), storyID)
+func (k TruKeeper) VoteStory(ctx sdk.Context, storyID int64, creator sdk.AccAddress, vote bool, stake sdk.Coin) sdk.Error {
+	storyStore := ctx.KVStore(k.StoryKey)
+	storyKey := generateKey(k.StoryKey.String(), storyID)
 	storyVal := storyStore.Get(storyKey)
 	if storyVal != nil {
 		return ts.ErrStoryNotFound(storyID)
@@ -81,13 +83,13 @@ func (sk StoryKeeper) VoteStory(ctx sdk.Context, storyID int64, creator sdk.AccA
 
 	// get existing story
 	story := &ts.Story{}
-	err := sk.Cdc.UnmarshalBinary(storyVal, story)
+	err := k.Cdc.UnmarshalBinary(storyVal, story)
 	if err != nil {
 		panic(err)
 	}
 
 	// TODO: add vote to story
-	vote := ts.Vote{}
+	// vote := ts.Vote{}
 
 	// create new story with vote
 	// replace old story with new one in store
@@ -97,22 +99,8 @@ func (sk StoryKeeper) VoteStory(ctx sdk.Context, storyID int64, creator sdk.AccA
 
 // ============================================================================
 
-// VoteKeeper data type
-type VoteKeeper struct {
-	VoteKey sdk.StoreKey
-	Cdc     *amino.Codec
-}
-
-// NewVoteKeeper creates a new keeper with write and read access
-func NewVoteKeeper(voteKey sdk.StoreKey, cdc *amino.Codec) VoteKeeper {
-	return VoteKeeper{
-		VoteKey: voteKey,
-		Cdc:     cdc,
-	}
-}
-
 // GetVote gets a vote with the given id from the key-value store
-func (k VoteKeeper) GetVote(ctx sdk.Context, voteID int64) (ts.Vote, sdk.Error) {
+func (k TruKeeper) GetVote(ctx sdk.Context, voteID int64) (ts.Vote, sdk.Error) {
 	store := ctx.KVStore(k.VoteKey)
 	key := generateKey(k.VoteKey.String(), voteID)
 	val := store.Get(key)
@@ -130,14 +118,14 @@ func (k VoteKeeper) GetVote(ctx sdk.Context, voteID int64) (ts.Vote, sdk.Error) 
 // ============================================================================
 
 // newStoryID creates a new id for a story by incrementing the last story id by 1
-func (sk StoryKeeper) newStoryID(store sdk.KVStore) int64 {
+func (k TruKeeper) newStoryID(store sdk.KVStore) int64 {
 	lastStoryID := store.Get([]byte("StoryID"))
 	if lastStoryID == nil {
 		return 0
 	}
 
 	storyID := new(int64)
-	err := sk.Cdc.UnmarshalBinary(lastStoryID, storyID)
+	err := k.Cdc.UnmarshalBinary(lastStoryID, storyID)
 	if err != nil {
 		panic(err)
 	}
@@ -148,7 +136,7 @@ func (sk StoryKeeper) newStoryID(store sdk.KVStore) int64 {
 // TODO: duplicated code, create interface
 // Does vote need an ID?
 // newVoteID creates a new id for a vote by incrementing the last vote id by 1
-func (k VoteKeeper) newVoteID(store sdk.KVStore) int64 {
+func (k TruKeeper) newVoteID(store sdk.KVStore) int64 {
 	lastID := store.Get([]byte("VoteID"))
 	if lastID == nil {
 		return 0
