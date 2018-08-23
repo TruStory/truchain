@@ -49,10 +49,11 @@ func (k TruKeeper) AddStory(
 	category ts.StoryCategory,
 	creator sdk.AccAddress,
 	storyType ts.StoryType) (int64, sdk.Error) {
+
 	store := ctx.KVStore(k.StoryKey)
 
 	story := ts.Story{
-		ID:           k.newStoryID(store),
+		ID:           k.newID(ctx, k.StoryKey),
 		Body:         body,
 		Category:     category,
 		CreatedBlock: ctx.BlockHeight(),
@@ -73,12 +74,14 @@ func (k TruKeeper) AddStory(
 }
 
 // VoteStory saves a vote to a story
-func (k TruKeeper) VoteStory(ctx sdk.Context, storyID int64, creator sdk.AccAddress, vote bool, stake sdk.Coin) sdk.Error {
+func (k TruKeeper) VoteStory(ctx sdk.Context, storyID int64, creator sdk.AccAddress, choice bool, stake sdk.Coin) (int64, sdk.Error) {
+	// access story DB
 	storyStore := ctx.KVStore(k.StoryKey)
 	storyKey := generateKey(k.StoryKey.String(), storyID)
 	storyVal := storyStore.Get(storyKey)
-	if storyVal != nil {
-		return ts.ErrStoryNotFound(storyID)
+
+	if storyVal == nil {
+		return -1, ts.ErrStoryNotFound(storyID)
 	}
 
 	// get existing story
@@ -88,13 +91,39 @@ func (k TruKeeper) VoteStory(ctx sdk.Context, storyID int64, creator sdk.AccAddr
 		panic(err)
 	}
 
-	// TODO: add vote to story
-	// vote := ts.Vote{}
+	// create new vote struct
+	vote := ts.Vote{
+		ID:           k.newID(ctx, k.VoteKey),
+		StoryID:      story.ID,
+		CreatedBlock: ctx.BlockHeight(),
+		Creator:      creator,
+		Round:        story.Round + 1,
+		Stake:        stake,
+		Vote:         choice,
+	}
+
+	// store vote in vote store
+	voteStore := ctx.KVStore(k.VoteKey)
+	voteKey := generateKey(k.VoteKey.String(), vote.ID)
+	voteVal, err := k.Cdc.MarshalBinary(vote)
+	if err != nil {
+		panic(err)
+	}
+	voteStore.Set(voteKey, voteVal)
+
+	// add vote id to story
+	story.VoteIDs = append(story.VoteIDs, vote.ID)
 
 	// create new story with vote
-	// replace old story with new one in store
-	// check out https://github.com/cosmos/cosmos-academy/pull/59/files/#diff-e07e9be37dc27aff278c0ac2bba706faR165
-	return nil
+	newStory, err := k.Cdc.MarshalBinary(*story)
+	if err != nil {
+		panic(err)
+	}
+
+	// replace old story with new one in story store
+	storyStore.Set(storyKey, newStory)
+
+	return vote.ID, nil
 }
 
 // ============================================================================
@@ -117,38 +146,42 @@ func (k TruKeeper) GetVote(ctx sdk.Context, voteID int64) (ts.Vote, sdk.Error) {
 
 // ============================================================================
 
-// newStoryID creates a new id for a story by incrementing the last story id by 1
-func (k TruKeeper) newStoryID(store sdk.KVStore) int64 {
-	lastStoryID := store.Get([]byte("StoryID"))
-	if lastStoryID == nil {
-		return 0
-	}
+// newID creates a new id for a key by incrementing the last one by 1
+func (k TruKeeper) newID(ctx sdk.Context, storeKey sdk.StoreKey) int64 {
+	store := ctx.KVStore(storeKey)
 
-	storyID := new(int64)
-	err := k.Cdc.UnmarshalBinary(lastStoryID, storyID)
-	if err != nil {
-		panic(err)
-	}
+	// create key of form "keyName|TotalID", i.e: "stories|TotalID" or "votes|TotalID"
+	key := storeKey.Name() + "|TotalID"
+	keyVal := []byte(key)
+	lastID := store.Get(keyVal)
 
-	return (*storyID + 1)
-}
-
-// TODO: duplicated code, create interface
-// Does vote need an ID?
-// newVoteID creates a new id for a vote by incrementing the last vote id by 1
-func (k TruKeeper) newVoteID(store sdk.KVStore) int64 {
-	lastID := store.Get([]byte("VoteID"))
+	// if we don't have an ID yet, set it to zero
 	if lastID == nil {
+		zero, err := k.Cdc.MarshalBinary(int64(0))
+		if err != nil {
+			panic(err)
+		}
+		store.Set(keyVal, zero)
+
 		return 0
 	}
 
+	// convert from binary to int64
 	ID := new(int64)
 	err := k.Cdc.UnmarshalBinary(lastID, ID)
 	if err != nil {
 		panic(err)
 	}
 
-	return (*ID + 1)
+	// increment id by 1 and update value in blockchain
+	newID := *ID + 1
+	newIDVal, err := k.Cdc.MarshalBinary(newID)
+	if err != nil {
+		panic(err)
+	}
+	store.Set(keyVal, newIDVal)
+
+	return newID
 }
 
 // generateKey creates a key of the form "keyName"|{id}
@@ -160,17 +193,3 @@ func generateKey(keyName string, id int64) []byte {
 	key = append(key, idBytes...)
 	return key
 }
-
-// newID creates a new id by incrementing the last id by 1
-// func newID(keyName string, store sdk.KVStore) int64 {
-// 	lastID := store.Get([]byte(keyName))
-// 	if lastID == nil {
-// 		return 0
-// 	}
-// 	ID := new(int64)
-// 	err := sk.Cdc.UnmarshalBinary(lastID, ID)
-// 	if err != nil {
-// 		panic(err)
-// 	}
-// 	return (*ID + 1)
-// }
