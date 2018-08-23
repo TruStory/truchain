@@ -2,12 +2,6 @@
 
 
 [[projects]]
-  name = "github.com/TruStory/cosmos-sdk"
-  packages = ["types"]
-  revision = "9f2b83cbe9e1b35b350703366b5e7f5806c5547e"
-  version = "v0.22.0"
-
-[[projects]]
   branch = "master"
   name = "github.com/bartekn/go-bip39"
   packages = ["."]
@@ -567,6 +561,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "4c372d726b3e605bfd5cbfc097929948d1af34603da9d6b552699da2ead976d4"
+  inputs-digest = "4624828eac08ca65dd84dd7a9af354229affee0c7837e12d73587c21926600fd"
   solver-name = "gps-cdcl"
   solver-version = 1
