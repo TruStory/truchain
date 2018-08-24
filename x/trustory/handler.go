@@ -9,7 +9,7 @@ import (
 )
 
 // NewHandler creates a new handler for all TruStory messages
-func NewHandler(sk db.StoryKeeper) sdk.Handler {
+func NewHandler(sk db.TruKeeper) sdk.Handler {
 	return func(ctx sdk.Context, msg sdk.Msg) sdk.Result {
 		switch msg := msg.(type) {
 		case ts.SubmitStoryMsg:
@@ -24,7 +24,7 @@ func NewHandler(sk db.StoryKeeper) sdk.Handler {
 }
 
 // handleSubmitStoryMsg handles the logic of a SubmitStoryMsg
-func handleSubmitStoryMsg(ctx sdk.Context, sk db.StoryKeeper, msg ts.SubmitStoryMsg) sdk.Result {
+func handleSubmitStoryMsg(ctx sdk.Context, sk db.TruKeeper, msg ts.SubmitStoryMsg) sdk.Result {
 	err := msg.ValidateBasic()
 	if err != nil {
 		return err.Result()
@@ -43,18 +43,23 @@ func handleSubmitStoryMsg(ctx sdk.Context, sk db.StoryKeeper, msg ts.SubmitStory
 	return sdk.Result{Data: data}
 }
 
-func handleVoteMsg(ctx sdk.Context, sk db.StoryKeeper, msg ts.VoteMsg) sdk.Result {
+func handleVoteMsg(ctx sdk.Context, sk db.TruKeeper, msg ts.VoteMsg) sdk.Result {
 	err := msg.ValidateBasic()
 	if err != nil {
 		return err.Result()
 	}
 
-	err = sk.VoteStory(ctx, msg.StoryID, msg.Creator, msg.Vote, msg.Stake)
+	voteID, err := sk.VoteStory(ctx, msg.StoryID, msg.Creator, msg.Vote, msg.Stake)
 	if err != nil {
 		panic(err)
 	}
 
-	return sdk.Result{}
+	data, error := sk.Cdc.MarshalBinary(voteID)
+	if error != nil {
+		panic(error)
+	}
+
+	return sdk.Result{Data: data}
 }
 
 // NewEndBlocker checks stories and generates an EndBlocker
@@ -70,6 +75,6 @@ func handleVoteMsg(ctx sdk.Context, sk db.StoryKeeper, msg ts.VoteMsg) sdk.Resul
 
 // checkStory checks if the story reached the end of the voting period
 // and handles the logic of ending voting
-func checkStory(ctx sdk.Context, sk db.StoryKeeper) sdk.Error {
+func checkStory(ctx sdk.Context, sk db.TruKeeper) sdk.Error {
 	return nil
 }
