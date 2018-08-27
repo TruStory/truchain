@@ -9,13 +9,13 @@ import (
 )
 
 // NewHandler creates a new handler for all TruStory messages
-func NewHandler(sk db.TruKeeper) sdk.Handler {
+func NewHandler(k db.TruKeeper) sdk.Handler {
 	return func(ctx sdk.Context, msg sdk.Msg) sdk.Result {
 		switch msg := msg.(type) {
 		case ts.SubmitStoryMsg:
-			return handleSubmitStoryMsg(ctx, sk, msg)
+			return handleSubmitStoryMsg(ctx, k, msg)
 		case ts.VoteMsg:
-			return handleVoteMsg(ctx, sk, msg)
+			return handleVoteMsg(ctx, k, msg)
 		default:
 			errMsg := "Unrecognized Msg type: " + reflect.TypeOf(msg).Name()
 			return sdk.ErrUnknownRequest(errMsg).Result()
@@ -24,18 +24,18 @@ func NewHandler(sk db.TruKeeper) sdk.Handler {
 }
 
 // handleSubmitStoryMsg handles the logic of a SubmitStoryMsg
-func handleSubmitStoryMsg(ctx sdk.Context, sk db.TruKeeper, msg ts.SubmitStoryMsg) sdk.Result {
+func handleSubmitStoryMsg(ctx sdk.Context, k db.TruKeeper, msg ts.SubmitStoryMsg) sdk.Result {
 	err := msg.ValidateBasic()
 	if err != nil {
 		return err.Result()
 	}
 
-	storyID, err := sk.AddStory(ctx, msg.Body, msg.Category, msg.Creator, msg.StoryType)
+	storyID, err := k.AddStory(ctx, msg.Body, msg.Category, msg.Creator, msg.StoryType)
 	if err != nil {
 		panic(err)
 	}
 
-	data, error := sk.Cdc.MarshalBinary(storyID)
+	data, error := k.Cdc.MarshalBinary(storyID)
 	if error != nil {
 		panic(error)
 	}
@@ -43,18 +43,18 @@ func handleSubmitStoryMsg(ctx sdk.Context, sk db.TruKeeper, msg ts.SubmitStoryMs
 	return sdk.Result{Data: data}
 }
 
-func handleVoteMsg(ctx sdk.Context, sk db.TruKeeper, msg ts.VoteMsg) sdk.Result {
+func handleVoteMsg(ctx sdk.Context, k db.TruKeeper, msg ts.VoteMsg) sdk.Result {
 	err := msg.ValidateBasic()
 	if err != nil {
 		return err.Result()
 	}
 
-	voteID, err := sk.VoteStory(ctx, msg.StoryID, msg.Creator, msg.Vote, msg.Stake)
+	voteID, err := k.VoteStory(ctx, msg.StoryID, msg.Creator, msg.Vote, msg.Stake)
 	if err != nil {
 		panic(err)
 	}
 
-	data, error := sk.Cdc.MarshalBinary(voteID)
+	data, error := k.Cdc.MarshalBinary(voteID)
 	if error != nil {
 		panic(error)
 	}
@@ -75,6 +75,6 @@ func handleVoteMsg(ctx sdk.Context, sk db.TruKeeper, msg ts.VoteMsg) sdk.Result 
 
 // checkStory checks if the story reached the end of the voting period
 // and handles the logic of ending voting
-func checkStory(ctx sdk.Context, sk db.TruKeeper) sdk.Error {
+func checkStory(ctx sdk.Context, k db.TruKeeper) sdk.Error {
 	return nil
 }

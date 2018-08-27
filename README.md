@@ -1,4 +1,4 @@
-# TruStory Cosmos app
+# TruStory Sidechain
 
 ### API
 
