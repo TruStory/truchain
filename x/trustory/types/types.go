@@ -171,6 +171,7 @@ type Story struct {
 	CreatedBlock int64            `json:"created_block"`
 	Creator      sdk.AccAddress   `json:"creator"`
 	Expiration   time.Time        `json:"expiration,omitempty"`
+	Round        int64            `json:"round"`
 	State        StoryState       `json:"state"`
 	SubmitBlock  int64            `json:"submit_block"`
 	StoryType    StoryType        `json:"type"`
@@ -191,6 +192,7 @@ func NewStory(
 	createdBlock int64,
 	creator sdk.AccAddress,
 	expiration time.Time,
+	round int64,
 	state StoryState,
 	submitBlock int64,
 	storyType StoryType,
@@ -208,6 +210,7 @@ func NewStory(
 		CreatedBlock: createdBlock,
 		Creator:      creator,
 		Expiration:   expiration,
+		Round:        round,
 		State:        Created,
 		SubmitBlock:  submitBlock,
 		StoryType:    storyType,
@@ -221,9 +224,10 @@ func NewStory(
 // Vote for a story
 type Vote struct {
 	ID           int64          `json:"id"`
+	StoryID      int64          `json:"story_id"`
 	CreatedBlock int64          `json:"created_block"`
 	Creator      sdk.AccAddress `json:"creator"`
-	StoryID      int64          `json:"story_id"`
+	Round        int64          `json:"round"`
 	Stake        sdk.Coin       `json:"stake"`
 	Vote         bool           `json:"vote"`
 }
@@ -234,6 +238,7 @@ func NewVote(
 	storyID int64,
 	createdBlock int64,
 	creator sdk.AccAddress,
+	round int64,
 	stake sdk.Coin,
 	vote bool) Vote {
 	return Vote{
@@ -241,6 +246,7 @@ func NewVote(
 		StoryID:      storyID,
 		CreatedBlock: createdBlock,
 		Creator:      creator,
+		Round:        round,
 		Stake:        stake,
 		Vote:         vote,
 	}
