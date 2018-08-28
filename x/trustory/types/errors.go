@@ -19,6 +19,7 @@ const (
 	CodeInvalidURL        sdk.CodeType = 707
 	CodeInvalidCategory   sdk.CodeType = 708
 	CodeInvalidStoryType  sdk.CodeType = 709
+	CodeVoteNotFoundType  sdk.CodeType = 710
 )
 
 func codeToDefaultMsg(code sdk.CodeType) string {
@@ -75,6 +76,12 @@ func ErrInvalidURL(msg string) sdk.Error {
 func ErrStoryNotFound(storyID int64) sdk.Error {
 	return newError(DefaultCodespace, CodeStoryNotFound, "Story with id "+
 		strconv.Itoa(int(storyID))+" not found")
+}
+
+// ErrVoteNotFound throws an error when a vote is not found
+func ErrVoteNotFound(voteID int64) sdk.Error {
+	return newError(DefaultCodespace, CodeVoteNotFoundType, "Vote with id "+
+		strconv.Itoa(int(voteID))+" not found")
 }
 
 //----------------------------------------
