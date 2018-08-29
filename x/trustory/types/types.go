@@ -177,6 +177,8 @@ type Story struct {
 	StoryType    StoryType        `json:"type"`
 	UpdatedBlock int64            `json:"updated_block"`
 	Users        []sdk.AccAddress `json:"users"`
+	VoteStart    time.Time        `json:"vote_start"`
+	VoteEnd      time.Time        `json:"vote_end"`
 }
 
 // NewStory creates a new story
@@ -197,7 +199,9 @@ func NewStory(
 	submitBlock int64,
 	storyType StoryType,
 	updatedBlock int64,
-	users []sdk.AccAddress) Story {
+	users []sdk.AccAddress,
+	voteStart time.Time,
+	voteEnd time.Time) Story {
 	return Story{
 		ID:           id,
 		BondIDs:      bondIDs,
@@ -216,6 +220,8 @@ func NewStory(
 		StoryType:    storyType,
 		UpdatedBlock: updatedBlock,
 		Users:        users,
+		VoteStart:    voteStart,
+		VoteEnd:      voteEnd,
 	}
 }
 
@@ -225,10 +231,10 @@ func NewStory(
 type Vote struct {
 	ID           int64          `json:"id"`
 	StoryID      int64          `json:"story_id"`
+	Amount       sdk.Coins      `json:"amount"`
 	CreatedBlock int64          `json:"created_block"`
 	Creator      sdk.AccAddress `json:"creator"`
 	Round        int64          `json:"round"`
-	Stake        sdk.Coin       `json:"stake"`
 	Vote         bool           `json:"vote"`
 }
 
@@ -236,18 +242,18 @@ type Vote struct {
 func NewVote(
 	id int64,
 	storyID int64,
+	amount sdk.Coins,
 	createdBlock int64,
 	creator sdk.AccAddress,
 	round int64,
-	stake sdk.Coin,
 	vote bool) Vote {
 	return Vote{
 		ID:           id,
 		StoryID:      storyID,
+		Amount:       amount,
 		CreatedBlock: createdBlock,
 		Creator:      creator,
 		Round:        round,
-		Stake:        stake,
 		Vote:         vote,
 	}
 }

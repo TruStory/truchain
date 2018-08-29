@@ -36,6 +36,7 @@ type TruStoryApp struct {
 	keyAccount *sdk.KVStoreKey
 	keyIBC     *sdk.KVStoreKey
 	keyStory   *sdk.KVStoreKey
+	keyVote    *sdk.KVStoreKey
 
 	// manage getting and setting accounts
 	accountMapper       auth.AccountMapper
@@ -43,8 +44,8 @@ type TruStoryApp struct {
 	coinKeeper          bank.Keeper
 	ibcMapper           ibc.Mapper
 
-	// access story database
-	storyKeeper sdb.StoryKeeper
+	// access story and vote database
+	keeper sdb.TruKeeper
 }
 
 // NewTruStoryApp returns a reference to a new TruStoryApp given a logger and
@@ -64,6 +65,7 @@ func NewTruStoryApp(logger log.Logger, db dbm.DB) *TruStoryApp {
 		keyAccount: sdk.NewKVStoreKey("acc"),
 		keyIBC:     sdk.NewKVStoreKey("ibc"),
 		keyStory:   sdk.NewKVStoreKey("stories"),
+		keyVote:    sdk.NewKVStoreKey("votes"),
 	}
 
 	// define and attach the mappers and keepers
@@ -74,18 +76,18 @@ func NewTruStoryApp(logger log.Logger, db dbm.DB) *TruStoryApp {
 	)
 	app.coinKeeper = bank.NewKeeper(app.accountMapper)
 	app.ibcMapper = ibc.NewMapper(app.cdc, app.keyIBC, app.RegisterCodespace(ibc.DefaultCodespace))
-	app.storyKeeper = sdb.NewStoryKeeper(app.keyStory, app.cdc)
+	app.keeper = sdb.NewTruKeeper(app.keyStory, app.keyVote, app.accountMapper, app.cdc)
 
 	// register message routes
 	app.Router().
 		AddRoute("bank", bank.NewHandler(app.coinKeeper)).
 		AddRoute("ibc", ibc.NewHandler(app.ibcMapper, app.coinKeeper)).
-		AddRoute("stories", ts.NewHandler(app.storyKeeper))
+		AddRoute("stories", ts.NewHandler(app.keeper))
 
 	// perform initialization logic
 	app.SetInitChainer(app.initChainer)
 	app.SetBeginBlocker(app.BeginBlocker)
-	app.SetEndBlocker(app.EndBlocker)
+	app.SetEndBlocker(ts.NewEndBlocker(app.keeper))
 	app.SetAnteHandler(auth.NewAnteHandler(app.accountMapper, app.feeCollectionKeeper))
 
 	// mount the multistore and load the latest state
@@ -121,12 +123,6 @@ func MakeCodec() *wire.Codec {
 // by the application.
 func (app *TruStoryApp) BeginBlocker(_ sdk.Context, _ abci.RequestBeginBlock) abci.ResponseBeginBlock {
 	return abci.ResponseBeginBlock{}
-}
-
-// EndBlocker reflects logic to run after all TXs are processed by the
-// application.
-func (app *TruStoryApp) EndBlocker(_ sdk.Context, _ abci.RequestEndBlock) abci.ResponseEndBlock {
-	return abci.ResponseEndBlock{}
 }
 
 // initChainer implements the custom application logic that the BaseApp will
