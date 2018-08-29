@@ -7,6 +7,8 @@ import (
 	"github.com/cosmos/cosmos-sdk/store"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth"
+	"github.com/cosmos/cosmos-sdk/x/bank"
+
 	"github.com/stretchr/testify/assert"
 	amino "github.com/tendermint/go-amino"
 	abci "github.com/tendermint/tendermint/abci/types"
@@ -18,7 +20,7 @@ import (
 func TestAddGetStory(t *testing.T) {
 	ms, storyKey, voteKey := setupMultiStore()
 	cdc := makeCodec()
-	keeper := NewTruKeeper(storyKey, voteKey, cdc)
+	keeper := NewTruKeeper(storyKey, voteKey, auth.AccountMapper{}, bank.Keeper{}, cdc)
 	ctx := sdk.NewContext(ms, abci.Header{}, false, log.NewNopLogger())
 	storyID := createFakeStory(ms, keeper)
 
@@ -55,14 +57,14 @@ func TestAddGetStory(t *testing.T) {
 func TestVoteStory(t *testing.T) {
 	ms, storyKey, voteKey := setupMultiStore()
 	cdc := makeCodec()
-	keeper := NewTruKeeper(storyKey, voteKey, cdc)
+	keeper := NewTruKeeper(storyKey, voteKey, auth.AccountMapper{}, bank.Keeper{}, cdc)
 	ctx := sdk.NewContext(ms, abci.Header{}, false, log.NewNopLogger())
 
 	storyID := createFakeStory(ms, keeper)
 
 	creator := sdk.AccAddress([]byte{3, 4})
 	vote := true
-	stake, _ := sdk.ParseCoin("10trustake")
+	stake, _ := sdk.ParseCoins("10trustake")
 
 	// test voting on a non-existant story
 	_, err := keeper.VoteStory(ctx, int64(5), creator, vote, stake)
@@ -81,8 +83,8 @@ func TestVoteStory(t *testing.T) {
 	savedVote, err := keeper.GetVote(ctx, voteID)
 	assert.Nil(t, err)
 	assert.Equal(t, savedVote.Vote, true, "Vote choice  does not match")
-	assert.Equal(t, savedVote.Stake.Amount, sdk.NewInt(10), "Vote stake amount does not match")
-	assert.Equal(t, savedVote.Stake.Denom, "trustake", "Vote stake denom does not match")
+
+	assert.Equal(t, savedVote.Amount.AmountOf("trustake"), sdk.NewInt(10), "Vote amount does not match")
 }
 
 // ============================================================================

@@ -23,7 +23,7 @@ func TestValidPlaceBondMsg(t *testing.T) {
 	assert.Equal(t, "PlaceBond", msg.Type())
 	assert.Equal(
 		t,
-		`{"story_id":1,"amount":{"denom":"trusomecoin","amount":"100"},"creator":"cosmosaccaddr1qypq8zs0ka","period":259200000000000}`,
+		`{"amount":{"amount":"100","denom":"trusomecoin"},"creator":"cosmosaccaddr1qypq8zs0ka","period":259200000000000,"story_id":1}`,
 		fmt.Sprintf("%s", msg.GetSignBytes()),
 	)
 	assert.Equal(t, []sdk.AccAddress{validCreator}, msg.GetSigners())
@@ -86,7 +86,7 @@ func TestValidAddCommentMsg(t *testing.T) {
 	assert.Equal(t, "AddComment", msg.Type())
 	assert.Equal(
 		t,
-		`{"story_id":1,"body":"This is a test comment on a story.","creator":"cosmosaccaddr1qypq8zs0ka"}`,
+		`{"body":"This is a test comment on a story.","creator":"cosmosaccaddr1qypq8zs0ka","story_id":1}`,
 		fmt.Sprintf("%s", msg.GetSignBytes()),
 	)
 	assert.Equal(t, []sdk.AccAddress{validCreator}, msg.GetSigners())
@@ -135,7 +135,7 @@ func TestValidSubmitEvidencetMsg(t *testing.T) {
 	assert.Equal(t, "SubmitEvidence", msg.Type())
 	assert.Equal(
 		t,
-		`{"story_id":1,"creator":"cosmosaccaddr1qypq8zs0ka","url":"http://www.trustory.io"}`,
+		`{"creator":"cosmosaccaddr1qypq8zs0ka","story_id":1,"url":"http://www.trustory.io"}`,
 		fmt.Sprintf("%s", msg.GetSignBytes()),
 	)
 	assert.Equal(t, []sdk.AccAddress{validCreator}, msg.GetSigners())
@@ -227,7 +227,7 @@ func TestValidVoteMsg(t *testing.T) {
 	assert.Equal(t, "Vote", msg.Type())
 	assert.Equal(
 		t,
-		`{"StoryID":1,"Creator":"cosmosaccaddr1qypq8zs0ka","Stake":{"denom":"trusomecoin","amount":"100"},"Vote":true}`,
+		`{"amount":{"amount":"100","denom":"trusomecoin"},"creator":"cosmosaccaddr1qypq8zs0ka","story_id":1,"vote":true}`,
 		fmt.Sprintf("%s", msg.GetSignBytes()),
 	)
 	assert.Equal(t, []sdk.AccAddress{validCreator}, msg.GetSigners())

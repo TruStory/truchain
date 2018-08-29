@@ -216,18 +216,18 @@ func (msg SubmitStoryMsg) GetSigners() []sdk.AccAddress {
 
 // VoteMsg defines a message to vote on a story
 type VoteMsg struct {
-	StoryID int64
-	Creator sdk.AccAddress
-	Stake   sdk.Coin
-	Vote    bool
+	StoryID int64          `json:"story_id"`
+	Creator sdk.AccAddress `json:"creator"`
+	Amount  sdk.Coin       `json:"amount"`
+	Vote    bool           `json:"vote"`
 }
 
 // NewVoteMsg creates a new message to vote on a story
-func NewVoteMsg(storyID int64, creator sdk.AccAddress, stake sdk.Coin, vote bool) VoteMsg {
+func NewVoteMsg(storyID int64, creator sdk.AccAddress, amount sdk.Coin, vote bool) VoteMsg {
 	return VoteMsg{
 		StoryID: storyID,
 		Creator: creator,
-		Stake:   stake,
+		Amount:  amount,
 		Vote:    vote,
 	}
 }
@@ -250,8 +250,8 @@ func (msg VoteMsg) ValidateBasic() sdk.Error {
 	if len(msg.Creator) == 0 {
 		return sdk.ErrInvalidAddress("Invalid address: " + msg.Creator.String())
 	}
-	if msg.Stake.IsZero() == true {
-		return ErrInvalidAmount("Invalid stake amount: " + msg.Stake.String())
+	if msg.Amount.IsZero() == true {
+		return ErrInvalidAmount("Invalid stake amount: " + msg.Amount.String())
 	}
 	return nil
 }
@@ -265,11 +265,11 @@ func (msg VoteMsg) GetSigners() []sdk.AccAddress {
 
 // RegisterAmino registers messages into the codec
 func RegisterAmino(cdc *amino.Codec) {
-	cdc.RegisterConcrete(PlaceBondMsg{}, "types/PlaceBondMsg", nil)
-	cdc.RegisterConcrete(AddCommentMsg{}, "types/AddCommentMsg", nil)
-	cdc.RegisterConcrete(SubmitEvidenceMsg{}, "types/SubmitEvidenceMsg", nil)
-	cdc.RegisterConcrete(SubmitStoryMsg{}, "types/SubmitStoryMsg", nil)
-	cdc.RegisterConcrete(VoteMsg{}, "types/VoteMsg", nil)
+	cdc.RegisterConcrete(PlaceBondMsg{}, "trustory/PlaceBondMsg", nil)
+	cdc.RegisterConcrete(AddCommentMsg{}, "trustory/AddCommentMsg", nil)
+	cdc.RegisterConcrete(SubmitEvidenceMsg{}, "trustory/SubmitEvidenceMsg", nil)
+	cdc.RegisterConcrete(SubmitStoryMsg{}, "trustory/SubmitStoryMsg", nil)
+	cdc.RegisterConcrete(VoteMsg{}, "trustory/VoteMsg", nil)
 }
 
 // ============================================================================
@@ -279,7 +279,7 @@ func getSignBytes(msg sdk.Msg) []byte {
 	if err != nil {
 		panic(err)
 	}
-	return b
+	return sdk.MustSortJSON(b)
 }
 
 func getSigners(addr sdk.AccAddress) []sdk.AccAddress {
