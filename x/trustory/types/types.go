@@ -170,6 +170,7 @@ type Story struct {
 	Category     StoryCategory    `json:"category"`
 	CreatedBlock int64            `json:"created_block"`
 	Creator      sdk.AccAddress   `json:"creator"`
+	Escrow       sdk.AccAddress   `json:"escrow"`
 	Expiration   time.Time        `json:"expiration,omitempty"`
 	Round        int64            `json:"round"`
 	State        StoryState       `json:"state"`
@@ -193,6 +194,7 @@ func NewStory(
 	category StoryCategory,
 	createdBlock int64,
 	creator sdk.AccAddress,
+	escrow sdk.AccAddress,
 	expiration time.Time,
 	round int64,
 	state StoryState,
@@ -213,6 +215,7 @@ func NewStory(
 		Category:     category,
 		CreatedBlock: createdBlock,
 		Creator:      creator,
+		Escrow:       escrow,
 		Expiration:   expiration,
 		Round:        round,
 		State:        Created,
