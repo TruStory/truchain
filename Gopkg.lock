@@ -32,10 +32,9 @@
   revision = "fdfc19097e7ac6b57035062056f5b7b4638b8898"
 
 [[projects]]
-  branch = "master"
   name = "github.com/btcsuite/btcutil"
   packages = ["bech32"]
-  revision = "ab6388e0c60ae4834a1f57511e20c17b5f78be4b"
+  revision = "d4cc87b860166d00d6b5b9e0d3b3d71d6088d4d4"
 
 [[projects]]
   branch = "master"
@@ -92,7 +91,6 @@
   version = "v1.1.0"
 
 [[projects]]
-  branch = "master"
   name = "github.com/ebuchman/fail-test"
   packages = ["."]
   revision = "95f809107225be108efcf10a3509e4ea6ceef3c4"
@@ -139,8 +137,8 @@
     "sortkeys",
     "types"
   ]
-  revision = "1adfc126b41513cc696b209667c8656ea7aac67c"
-  version = "v1.0.0"
+  revision = "636bf0302bc95575d69441b25a2603156ffdddf1"
+  version = "v1.1.1"
 
 [[projects]]
   name = "github.com/golang/protobuf"
@@ -256,13 +254,12 @@
   version = "v1.0.0"
 
 [[projects]]
-  branch = "master"
   name = "github.com/prometheus/client_golang"
   packages = [
     "prometheus",
     "prometheus/promhttp"
   ]
-  revision = "ee1c9d7e23df7f011bdf6f12a5c9e7f0ae10a1fe"
+  revision = "ae27198cdd90bf12cd134ad79d1366a6cf49f632"
 
 [[projects]]
   branch = "master"
@@ -292,7 +289,6 @@
   revision = "ae68e2d4c00fed4943b5f6698d504a5fe083da8a"
 
 [[projects]]
-  branch = "master"
   name = "github.com/rcrowley/go-metrics"
   packages = ["."]
   revision = "e2704e165165ec55d062f5919b4b29494e9fa790"
@@ -377,8 +373,8 @@
 [[projects]]
   name = "github.com/tendermint/go-amino"
   packages = ["."]
-  revision = "2106ca61d91029c931fd54968c2bb02dc96b1412"
-  version = "0.10.1"
+  revision = "a8328986c1608950fa5d3d1c0472cccc4f8fc02c"
+  version = "v0.12.0-rc0"
 
 [[projects]]
   name = "github.com/tendermint/go-crypto"
@@ -413,7 +409,10 @@
     "consensus",
     "consensus/types",
     "crypto",
+    "crypto/ed25519",
+    "crypto/encoding/amino",
     "crypto/merkle",
+    "crypto/secp256k1",
     "crypto/tmhash",
     "evidence",
     "libs/autofile",
@@ -456,8 +455,8 @@
     "types",
     "version"
   ]
-  revision = "5ff65274b84ea905787a48512cc3124385bddf2f"
-  version = "v0.22.2"
+  revision = "81df19e68ab1519399fccf0cab81cb75bf9d782e"
+  version = "v0.23.1-rc0"
 
 [[projects]]
   name = "github.com/tendermint/tmlibs"
@@ -484,12 +483,13 @@
   name = "golang.org/x/crypto"
   packages = [
     "blowfish",
+    "chacha20poly1305",
     "curve25519",
+    "hkdf",
+    "internal/chacha20",
     "internal/subtle",
     "nacl/box",
     "nacl/secretbox",
-    "openpgp/armor",
-    "openpgp/errors",
     "pbkdf2",
     "poly1305",
     "ripemd160",
@@ -498,7 +498,6 @@
   revision = "a49355c7e3f8fe157a85be2f77e6e269a0f89602"
 
 [[projects]]
-  branch = "master"
   name = "golang.org/x/net"
   packages = [
     "context",
@@ -510,12 +509,15 @@
     "netutil",
     "trace"
   ]
-  revision = "039a4258aec0ad3c79b905677cceeab13b296a77"
+  revision = "292b43bbf7cb8d35ddf40f8d5100ef3837cced3f"
 
 [[projects]]
   branch = "master"
   name = "golang.org/x/sys"
-  packages = ["unix"]
+  packages = [
+    "cpu",
+    "unix"
+  ]
   revision = "1b2967e3c290b7c545b3db0deeda16e9be4f98a2"
 
 [[projects]]
@@ -557,9 +559,11 @@
     "credentials",
     "encoding",
     "encoding/proto",
-    "grpclb/grpc_lb_v1/messages",
     "grpclog",
     "internal",
+    "internal/backoff",
+    "internal/channelz",
+    "internal/grpcrand",
     "keepalive",
     "metadata",
     "naming",
@@ -572,8 +576,8 @@
     "tap",
     "transport"
   ]
-  revision = "d11072e7ca9811b1100b80ca0269ac831f06d024"
-  version = "v1.11.3"
+  revision = "168a6198bcb0ef175f7dacec0b8691fc141dc9b8"
+  version = "v1.13.0"
 
 [[projects]]
   name = "gopkg.in/yaml.v2"
@@ -584,6 +588,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "4624828eac08ca65dd84dd7a9af354229affee0c7837e12d73587c21926600fd"
+  inputs-digest = "9d134164786457ceba10ee3a9e4b2add50297e1937834809d6ef6050d7cad3e1"
   solver-name = "gps-cdcl"
   solver-version = 1

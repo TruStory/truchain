@@ -56,11 +56,15 @@ func checkStory(ctx sdk.Context, k db.TruKeeper) sdk.Error {
 		// check if we have enough votes to proceed, get votes
 		votes, err := k.GetActiveVotes(ctx, story.ID)
 		if err != nil {
+			// process next story
 			return checkStory(ctx, k)
 		}
 
 		// didn't achieve max number of votes, mark story as unverifiable
 		if len(votes) < maxNumVotes {
+			story.State = ts.Unverifiable
+			// TODO: persist story mutation
+			// process next story
 			return checkStory(ctx, k)
 		}
 
@@ -92,10 +96,6 @@ func checkStory(ctx sdk.Context, k db.TruKeeper) sdk.Error {
 			story.State = ts.Unverifiable
 		}
 
-		// how do we mutate stories?
-		// simple gov example just sets propsal state, but doesn't mutate it in keeper
-		// doesn't it have to be serialized back into the key-value store?
-
 		// reward winning voters
 		if story.State == ts.Validated {
 			if len(yesVotes) > len(noVotes) {
@@ -111,7 +111,10 @@ func checkStory(ctx sdk.Context, k db.TruKeeper) sdk.Error {
 			}
 		}
 
-		// how do we handle the unverifiable state?
+		// TODO: how do we handle the unverifiable state?
+		// return coins back?
+
+		// TODO: create new story with changes, persist in keeper
 
 		// process next in queue
 		return checkStory(ctx, k)
