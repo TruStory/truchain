@@ -11,6 +11,8 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/auth"
 	"github.com/cosmos/cosmos-sdk/x/bank"
 	amino "github.com/tendermint/go-amino"
+	"github.com/tendermint/tendermint/crypto"
+	"github.com/tendermint/tendermint/crypto/ed25519"
 )
 
 // ============================================================================
@@ -69,12 +71,18 @@ func (k TruKeeper) AddStory(
 
 	store := ctx.KVStore(k.storyKey)
 
+	// create new escrow account
+	_, _, escrowAddr := keyPubAddr()
+	escrow := k.Am.NewAccountWithAddress(ctx, escrowAddr)
+	k.Am.SetAccount(ctx, escrow)
+
 	story := ts.Story{
 		ID:           k.newID(ctx, k.storyKey),
 		Body:         body,
 		Category:     category,
 		CreatedBlock: ctx.BlockHeight(),
 		Creator:      creator,
+		Escrow:       escrowAddr,
 		State:        ts.Created,
 		StoryType:    storyType,
 		VoteStart:    voteStart,
@@ -90,6 +98,42 @@ func (k TruKeeper) AddStory(
 	store.Set(key, val)
 
 	return story.ID, nil
+}
+
+// UpdateStory updates an existing story in the store
+func (k TruKeeper) UpdateStory(ctx sdk.Context, story ts.Story) sdk.Error {
+	newStory := ts.NewStory(
+		story.ID,
+		story.BondIDs,
+		story.CommentIDs,
+		story.EvidenceIDs,
+		story.Thread,
+		story.VoteIDs,
+		story.Body,
+		story.Category,
+		story.CreatedBlock,
+		story.Creator,
+		story.Escrow,
+		story.Expiration,
+		story.Round,
+		story.State,
+		story.SubmitBlock,
+		story.StoryType,
+		ctx.BlockHeight(),
+		story.Users,
+		story.VoteStart,
+		story.VoteEnd)
+
+	val, err := k.cdc.MarshalBinary(newStory)
+	if err != nil {
+		panic(err)
+	}
+
+	store := ctx.KVStore(k.storyKey)
+	key := generateKey(k.storyKey.String(), story.ID)
+	store.Set(key, val)
+
+	return nil
 }
 
 // VoteStory saves a vote to a story
@@ -252,4 +296,12 @@ func generateKey(keyName string, id int64) []byte {
 // generateVoteListKey creates a key for a vote list of form "stories|ID|votes"
 func generateVoteListKey(storyID int64) []byte {
 	return []byte(strings.Join([]string{"stories", strconv.Itoa(int(storyID)), "votes"}, ""))
+}
+
+// keyPubAddr generates a new address
+func keyPubAddr() (crypto.PrivKey, crypto.PubKey, sdk.AccAddress) {
+	key := ed25519.GenPrivKey()
+	pub := key.PubKey()
+	addr := sdk.AccAddress(pub.Address())
+	return key, pub, addr
 }

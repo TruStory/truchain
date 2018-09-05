@@ -3,6 +3,7 @@ package trustory
 import (
 	"encoding/binary"
 	"reflect"
+	"time"
 
 	db "github.com/TruStory/trucoin/x/trustory/db"
 	ts "github.com/TruStory/trucoin/x/trustory/types"
@@ -10,7 +11,7 @@ import (
 	abci "github.com/tendermint/tendermint/abci/types"
 )
 
-const votingPeriod = 24 * 60 * 60 * 100 // 24 hours in ms
+const votingPeriod = 24 // hours
 const maxNumVotes = 10
 
 // NewHandler creates a new handler for all TruStory messages
@@ -27,6 +28,8 @@ func NewHandler(k db.TruKeeper) sdk.Handler {
 		}
 	}
 }
+
+// type EndBlocker func(ctx Context, req abci.RequestEndBlock) abci.ResponseEndBlock
 
 // NewEndBlocker checks stories and generates an EndBlocker
 func NewEndBlocker(k db.TruKeeper) sdk.EndBlocker {
@@ -50,20 +53,30 @@ func checkStory(ctx sdk.Context, k db.TruKeeper) sdk.Error {
 	}
 
 	// story reached the end of the voting period
-	if ctx.BlockHeader().Time >= story.VoteEnd {
+	if ctx.BlockHeader().Time.After(story.VoteEnd) {
 		k.ActiveStoryQueuePop(ctx)
 
-		// check if we have enough votes to proceed, get votes
+		story.Round++
+
+		// check if we have enough votes to proceed
 		votes, err := k.GetActiveVotes(ctx, story.ID)
 		if err != nil {
 			// process next story
 			return checkStory(ctx, k)
 		}
 
-		// didn't achieve max number of votes, mark story as unverifiable
+		// didn't achieve max number of votes
+		// mark story as unverifiable and return coins
 		if len(votes) < maxNumVotes {
 			story.State = ts.Unverifiable
-			// TODO: persist story mutation
+			err := k.UpdateStory(ctx, story)
+			if err != nil {
+				return err
+			}
+			err = returnCoins(ctx, k, story.Escrow, votes)
+			if err != nil {
+				return err
+			}
 			// process next story
 			return checkStory(ctx, k)
 		}
@@ -86,11 +99,8 @@ func checkStory(ctx sdk.Context, k db.TruKeeper) sdk.Error {
 			}
 		}
 
-		// mutate story state based on tally
-		// assume odd number of votes?
-		// can there be a draw?
-
-		if len(yesVotes) > len(noVotes) || len(yesVotes) < len(noVotes) {
+		superMajority := 0.66 * maxNumVotes
+		if float64(len(yesVotes)) > superMajority || float64(len(noVotes)) > superMajority {
 			story.State = ts.Validated
 		} else {
 			story.State = ts.Unverifiable
@@ -99,22 +109,23 @@ func checkStory(ctx sdk.Context, k db.TruKeeper) sdk.Error {
 		// reward winning voters
 		if story.State == ts.Validated {
 			if len(yesVotes) > len(noVotes) {
-				err := rewardWinners(ctx, k, yesVotes, noVotes)
+				err := rewardWinners(ctx, k, story.Escrow, story.Category, yesVotes, noVotes)
 				if err != nil {
 					return err
 				}
 			} else {
-				err := rewardWinners(ctx, k, noVotes, yesVotes)
+				err := rewardWinners(ctx, k, story.Escrow, story.Category, noVotes, yesVotes)
 				if err != nil {
 					return err
 				}
 			}
 		}
 
-		// TODO: how do we handle the unverifiable state?
-		// return coins back?
-
-		// TODO: create new story with changes, persist in keeper
+		// update story with changes, persist in keeper
+		err = k.UpdateStory(ctx, story)
+		if err != nil {
+			return err
+		}
 
 		// process next in queue
 		return checkStory(ctx, k)
@@ -131,7 +142,7 @@ func handleSubmitStoryMsg(ctx sdk.Context, k db.TruKeeper, msg ts.SubmitStoryMsg
 
 	// calculate voting period
 	voteStart := ctx.BlockHeader().Time
-	voteEnd := voteStart + votingPeriod
+	voteEnd := voteStart.Add(time.Hour * time.Duration(votingPeriod))
 
 	storyID, err := k.AddStory(ctx, msg.Body, msg.Category, msg.Creator, msg.StoryType, voteStart, voteEnd)
 	if err != nil {
@@ -161,19 +172,34 @@ func i2b(x int64) []byte {
 	return b[:binary.PutVarint(b[:], x)]
 }
 
+// returnCoins returns coins back to voters for unverified stories
+func returnCoins(ctx sdk.Context, k db.TruKeeper, escrow sdk.AccAddress, voteIDs []int64) sdk.Error {
+	for _, voteID := range voteIDs {
+		vote, err := k.GetVote(ctx, voteID)
+		if err != nil {
+			return err
+		}
+		// return coins back to voter
+		_, err = k.Ck.SendCoins(ctx, escrow, vote.Creator, vote.Amount)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
 // rewardWinners rewards winners of the voting process
-func rewardWinners(ctx sdk.Context, k db.TruKeeper, win []ts.Vote, lose []ts.Vote) sdk.Error {
-	// create a new account for escrow
-	// TODO: escrow account for story should be created when story is created
-	// get the escrow account directly from the story
-	// coin denoms == slug
-	// TODO: define this elsewhere
-	escrowAddr := sdk.AccAddress([]byte{1, 2})
-	escrow := k.Am.NewAccount(ctx, k.Am.GetAccount(ctx, escrowAddr))
+func rewardWinners(
+	ctx sdk.Context,
+	k db.TruKeeper,
+	escrowAddr sdk.AccAddress,
+	category ts.StoryCategory,
+	win []ts.Vote,
+	lose []ts.Vote) sdk.Error {
 
 	for _, vote := range lose {
-		// send loser coins to new escrow account
-		_, err := k.Ck.SendCoins(ctx, vote.Creator, escrow.GetAddress(), vote.Amount)
+		_, err := k.Ck.SendCoins(ctx, vote.Creator, escrowAddr, vote.Amount)
 		if err != nil {
 			return err
 		}
@@ -181,13 +207,13 @@ func rewardWinners(ctx sdk.Context, k db.TruKeeper, win []ts.Vote, lose []ts.Vot
 
 	// calculate winning amount
 	numWinners := int64(len(win))
-	escrowAmount := escrow.GetCoins().AmountOf("truCategory")
+	escrowAmount := k.Am.GetAccount(ctx, escrowAddr).GetCoins().AmountOf(category.Slug())
 	winnerAmount := escrowAmount.Div(sdk.NewInt(numWinners))
-	amt := sdk.NewCoin("truCategory", winnerAmount)
+	amt := sdk.NewCoin(category.Slug(), winnerAmount)
 
 	// reward winners
 	for _, vote := range win {
-		_, err := k.Ck.SendCoins(ctx, escrow.GetAddress(), vote.Creator, sdk.Coins{amt})
+		_, err := k.Ck.SendCoins(ctx, escrowAddr, vote.Creator, sdk.Coins{amt})
 		if err != nil {
 			return err
 		}
