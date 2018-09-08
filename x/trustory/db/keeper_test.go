@@ -2,6 +2,7 @@ package db
 
 import (
 	"testing"
+	"time"
 
 	ts "github.com/TruStory/trucoin/x/trustory/types"
 	"github.com/cosmos/cosmos-sdk/store"
@@ -12,7 +13,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	amino "github.com/tendermint/go-amino"
 	abci "github.com/tendermint/tendermint/abci/types"
-	"github.com/tendermint/tendermint/crypto"
+
 	dbm "github.com/tendermint/tendermint/libs/db"
 	"github.com/tendermint/tendermint/libs/log"
 )
@@ -20,7 +21,7 @@ import (
 func TestAddGetStory(t *testing.T) {
 	ms, storyKey, voteKey := setupMultiStore()
 	cdc := makeCodec()
-	keeper := NewTruKeeper(storyKey, voteKey, auth.AccountMapper{}, bank.Keeper{}, cdc)
+	keeper := NewTruKeeper(storyKey, voteKey, bank.Keeper{}, cdc)
 	ctx := sdk.NewContext(ms, abci.Header{}, false, log.NewNopLogger())
 	storyID := createFakeStory(ms, keeper)
 
@@ -32,14 +33,19 @@ func TestAddGetStory(t *testing.T) {
 	savedStory, err := keeper.GetStory(ctx, storyID)
 	assert.Nil(t, err)
 
+	ti := time.Date(2018, time.September, 13, 23, 0, 0, 0, time.UTC)
+
 	story := ts.Story{
 		ID:           storyID,
 		Body:         "Body of story.",
 		Category:     ts.DEX,
 		CreatedBlock: int64(0),
 		Creator:      sdk.AccAddress([]byte{1, 2}),
+		Escrow:       sdk.AccAddress([]byte{3, 4}),
 		State:        ts.Created,
 		StoryType:    ts.Default,
+		VoteStart:    ti,
+		VoteEnd:      ti,
 	}
 
 	assert.Equal(t, savedStory, story, "Story received from store does not match expected value")
@@ -48,16 +54,17 @@ func TestAddGetStory(t *testing.T) {
 	body := "Body of story 2."
 	category := ts.Bitcoin
 	creator := sdk.AccAddress([]byte{3, 4})
+	escrow := sdk.AccAddress([]byte{4, 5})
 	storyType := ts.Default
 
-	storyID, _ = keeper.AddStory(ctx, body, category, creator, storyType)
+	storyID, _ = keeper.AddStory(ctx, body, category, creator, escrow, storyType, time.Now(), time.Now())
 	assert.Equal(t, int64(1), storyID, "Story ID did not increment properly")
 }
 
 func TestVoteStory(t *testing.T) {
 	ms, storyKey, voteKey := setupMultiStore()
 	cdc := makeCodec()
-	keeper := NewTruKeeper(storyKey, voteKey, auth.AccountMapper{}, bank.Keeper{}, cdc)
+	keeper := NewTruKeeper(storyKey, voteKey, bank.Keeper{}, cdc)
 	ctx := sdk.NewContext(ms, abci.Header{}, false, log.NewNopLogger())
 
 	storyID := createFakeStory(ms, keeper)
@@ -94,9 +101,11 @@ func createFakeStory(ms sdk.MultiStore, k TruKeeper) int64 {
 	body := "Body of story."
 	category := ts.DEX
 	creator := sdk.AccAddress([]byte{1, 2})
+	escrow := sdk.AccAddress([]byte{3, 4})
 	storyType := ts.Default
+	t := time.Date(2018, time.September, 13, 23, 0, 0, 0, time.UTC)
 
-	storyID, _ := k.AddStory(ctx, body, category, creator, storyType)
+	storyID, _ := k.AddStory(ctx, body, category, creator, escrow, storyType, t, t)
 	return storyID
 }
 
@@ -114,7 +123,6 @@ func setupMultiStore() (sdk.MultiStore, *sdk.KVStoreKey, *sdk.KVStoreKey) {
 func makeCodec() *amino.Codec {
 	cdc := amino.NewCodec()
 	ts.RegisterAmino(cdc)
-	crypto.RegisterAmino(cdc)
 	cdc.RegisterInterface((*auth.Account)(nil), nil)
 	cdc.RegisterConcrete(&auth.BaseAccount{}, "cosmos-sdk/BaseAccount", nil)
 	return cdc
