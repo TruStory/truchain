@@ -11,18 +11,14 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/auth"
 	"github.com/cosmos/cosmos-sdk/x/bank"
 	amino "github.com/tendermint/go-amino"
-	"github.com/tendermint/tendermint/crypto"
-	"github.com/tendermint/tendermint/crypto/ed25519"
 )
 
 // ============================================================================
 
 // TruKeeper data type storing keys to the key-value store
 type TruKeeper struct {
-	// key to access account mapper
-	Am auth.AccountMapper
 	// key to access coin store
-	Ck bank.Keeper
+	ck bank.Keeper
 
 	// unexposed keys to access store from context
 	storyKey sdk.StoreKey
@@ -35,8 +31,7 @@ type TruKeeper struct {
 // NewTruKeeper creates a new keeper with write and read access
 func NewTruKeeper(storyKey sdk.StoreKey, voteKey sdk.StoreKey, am auth.AccountMapper, ck bank.Keeper, cdc *amino.Codec) TruKeeper {
 	return TruKeeper{
-		Am:       am,
-		Ck:       ck,
+		ck:       ck,
 		storyKey: storyKey,
 		voteKey:  voteKey,
 		cdc:      cdc,
@@ -65,16 +60,12 @@ func (k TruKeeper) AddStory(
 	body string,
 	category ts.StoryCategory,
 	creator sdk.AccAddress,
+	escrow sdk.AccAddress,
 	storyType ts.StoryType,
 	voteStart time.Time,
 	voteEnd time.Time) (int64, sdk.Error) {
 
 	store := ctx.KVStore(k.storyKey)
-
-	// create new escrow account
-	_, _, escrowAddr := keyPubAddr()
-	escrow := k.Am.NewAccountWithAddress(ctx, escrowAddr)
-	k.Am.SetAccount(ctx, escrow)
 
 	story := ts.Story{
 		ID:           k.newID(ctx, k.storyKey),
@@ -82,7 +73,7 @@ func (k TruKeeper) AddStory(
 		Category:     category,
 		CreatedBlock: ctx.BlockHeight(),
 		Creator:      creator,
-		Escrow:       escrowAddr,
+		Escrow:       escrow,
 		State:        ts.Created,
 		StoryType:    storyType,
 		VoteStart:    voteStart,
@@ -296,12 +287,4 @@ func generateKey(keyName string, id int64) []byte {
 // generateVoteListKey creates a key for a vote list of form "stories|ID|votes"
 func generateVoteListKey(storyID int64) []byte {
 	return []byte(strings.Join([]string{"stories", strconv.Itoa(int(storyID)), "votes"}, ""))
-}
-
-// keyPubAddr generates a new address
-func keyPubAddr() (crypto.PrivKey, crypto.PubKey, sdk.AccAddress) {
-	key := ed25519.GenPrivKey()
-	pub := key.PubKey()
-	addr := sdk.AccAddress(pub.Address())
-	return key, pub, addr
 }
