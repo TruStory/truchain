@@ -5,6 +5,7 @@ import (
 
 	ts "github.com/TruStory/trucoin/x/trustory/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/cosmos/cosmos-sdk/x/bank"
 	"github.com/stretchr/testify/assert"
 	abci "github.com/tendermint/tendermint/abci/types"
 	"github.com/tendermint/tendermint/libs/log"
@@ -13,7 +14,7 @@ import (
 func TestActiveStoryQueue(t *testing.T) {
 	ms, storyKey, voteKey := setupMultiStore()
 	cdc := makeCodec()
-	k := NewTruKeeper(storyKey, voteKey, cdc)
+	k := NewTruKeeper(storyKey, voteKey, bank.Keeper{}, cdc)
 	ctx := sdk.NewContext(ms, abci.Header{}, false, log.NewNopLogger())
 	storyID := createFakeStory(ms, k)
 

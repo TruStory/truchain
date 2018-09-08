@@ -10,7 +10,6 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/auth"
 	"github.com/stretchr/testify/require"
 	abci "github.com/tendermint/tendermint/abci/types"
-	"github.com/tendermint/tendermint/crypto"
 	dbm "github.com/tendermint/tendermint/libs/db"
 	"github.com/tendermint/tendermint/libs/log"
 )
@@ -40,10 +39,7 @@ func TestGenesis(t *testing.T) {
 	logger := log.NewTMLogger(log.NewSyncWriter(os.Stdout)).With("module", "sdk/app")
 	db := dbm.NewMemDB()
 	baseApp := NewTruStoryApp(logger, db)
-
-	// construct a pubkey and an address for the test account
-	pubkey := crypto.GenPrivKeyEd25519().PubKey()
-	addr := sdk.AccAddress(pubkey.Address())
+	addr := sdk.AccAddress([]byte{2, 3})
 
 	// construct some test coins
 	coins, err := sdk.ParseCoins("77trustake,99bitcoincred")

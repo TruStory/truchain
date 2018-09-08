@@ -87,7 +87,7 @@ func NewTruStoryApp(logger log.Logger, db dbm.DB) *TruStoryApp {
 	// perform initialization logic
 	app.SetInitChainer(app.initChainer)
 	app.SetBeginBlocker(app.BeginBlocker)
-	app.SetEndBlocker(ts.NewEndBlocker(app.keeper))
+	app.SetEndBlocker(app.EndBlocker)
 	app.SetAnteHandler(auth.NewAnteHandler(app.accountMapper, app.feeCollectionKeeper))
 
 	// mount the multistore and load the latest state
@@ -123,6 +123,12 @@ func MakeCodec() *wire.Codec {
 // by the application.
 func (app *TruStoryApp) BeginBlocker(_ sdk.Context, _ abci.RequestBeginBlock) abci.ResponseBeginBlock {
 	return abci.ResponseBeginBlock{}
+}
+
+// EndBlocker reflects logic to run after all TXs are processed by the
+// application.
+func (app *TruStoryApp) EndBlocker(_ sdk.Context, _ abci.RequestEndBlock) abci.ResponseEndBlock {
+	return app.keeper.NewResponseEndBlock()
 }
 
 // initChainer implements the custom application logic that the BaseApp will
