@@ -29,11 +29,9 @@ func NewHandler(k db.TruKeeper) sdk.Handler {
 	}
 }
 
-// type EndBlocker func(ctx Context, req abci.RequestEndBlock) abci.ResponseEndBlock
-
 // NewEndBlocker checks stories and generates an EndBlocker
 func NewEndBlocker(k db.TruKeeper) sdk.EndBlocker {
-	return func(ctx sdk.Context, req abci.RequestEndBlock) (res abci.ResponseEndBlock) {
+	return func(ctx sdk.Context, req abci.RequestEndBlock) abci.ResponseEndBlock {
 		err := checkStory(ctx, k)
 		if err != nil {
 			panic(err)
