@@ -22,14 +22,14 @@ func ServeCommand(cdc *wire.Codec) *cobra.Command {
 }
 
 // RegisterRoutes - Central function to define routes that get registered by the main application
-func RegisterRoutes(ctx context.CoreContext, r *mux.Router, cdc *wire.Codec, kb keys.Keybase) {
+func RegisterRoutes(ctx context.CLIContext, r *mux.Router, cdc *wire.Codec, kb keys.Keybase) {
 	// GET /stories
 	r.HandleFunc("/stories",
 		GetStoriesHandlerFn(cdc, kb, ctx)).Methods("GET")
 }
 
 // GetStoriesHandlerFn - http request handler to get stories
-func GetStoriesHandlerFn(cdc *wire.Codec, kb keys.Keybase, ctx context.CoreContext) http.HandlerFunc {
+func GetStoriesHandlerFn(cdc *wire.Codec, kb keys.Keybase, ctx context.CLIContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		// body, err := ioutil.ReadAll(r.Body)
 		_, err := ioutil.ReadAll(r.Body)
