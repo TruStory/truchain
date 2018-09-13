@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"io"
 	"os"
 
 	"github.com/TruStory/trucoin/app"
@@ -39,11 +40,11 @@ func main() {
 	}
 }
 
-func newApp(logger log.Logger, db dbm.DB) abci.Application {
+func newApp(logger log.Logger, db dbm.DB, _ io.Writer) abci.Application {
 	return app.NewTruStoryApp(logger, db)
 }
 
-func exportAppStateAndTMValidators(logger log.Logger, db dbm.DB) (json.RawMessage, []tmtypes.GenesisValidator, error) {
+func exportAppStateAndTMValidators(logger log.Logger, db dbm.DB, _ io.Writer) (json.RawMessage, []tmtypes.GenesisValidator, error) {
 	bapp := app.NewTruStoryApp(logger, db)
 	return bapp.ExportAppStateAndValidators()
 }
