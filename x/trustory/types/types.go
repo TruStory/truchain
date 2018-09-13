@@ -251,3 +251,16 @@ func NewVote(
 		Vote:         vote,
 	}
 }
+
+// ============================================================================
+
+// ActiveStoryQueue is a queue of in-progress stories -- `Created` and `Challenged`
+type ActiveStoryQueue []int64
+
+// IsEmpty checks if the queue is empty
+func (asq ActiveStoryQueue) IsEmpty() bool {
+	if len(asq) == 0 {
+		return true
+	}
+	return false
+}
