@@ -48,19 +48,19 @@ type TruStoryApp struct {
 	keeper sdb.TruKeeper
 }
 
-// NewTruStoryApp returns a reference to a new TruStoryApp given a logger and
-// database. Internally, a codec is created along with all the necessary keys.
+// NewTruStoryApp returns a reference to a new TruStoryApp. Internally,
+// a codec is created along with all the necessary keys.
 // In addition, all necessary mappers and keepers are created, routes
 // registered, and finally the stores being mounted along with any necessary
 // chain initialization.
-func NewTruStoryApp(logger log.Logger, db dbm.DB) *TruStoryApp {
+func NewTruStoryApp(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *TruStoryApp {
 	// create and register app-level codec for TXs and accounts
 	cdc := MakeCodec()
 
 	// create your application type
 	var app = &TruStoryApp{
 		cdc:        cdc,
-		BaseApp:    bam.NewBaseApp(appName, cdc, logger, db),
+		BaseApp:    bam.NewBaseApp(appName, logger, db, auth.DefaultTxDecoder(cdc), options...),
 		keyMain:    sdk.NewKVStoreKey("main"),
 		keyAccount: sdk.NewKVStoreKey("acc"),
 		keyIBC:     sdk.NewKVStoreKey("ibc"),
@@ -76,7 +76,7 @@ func NewTruStoryApp(logger log.Logger, db dbm.DB) *TruStoryApp {
 	)
 	app.coinKeeper = bank.NewKeeper(app.accountMapper)
 	app.ibcMapper = ibc.NewMapper(app.cdc, app.keyIBC, app.RegisterCodespace(ibc.DefaultCodespace))
-	app.keeper = sdb.NewTruKeeper(app.keyStory, app.keyVote, app.accountMapper, app.cdc)
+	app.keeper = sdb.NewTruKeeper(app.keyStory, app.keyVote, app.coinKeeper, app.cdc)
 
 	// register message routes
 	app.Router().
@@ -127,8 +127,8 @@ func (app *TruStoryApp) BeginBlocker(_ sdk.Context, _ abci.RequestBeginBlock) ab
 
 // EndBlocker reflects logic to run after all TXs are processed by the
 // application.
-func (app *TruStoryApp) EndBlocker(_ sdk.Context, _ abci.RequestEndBlock) abci.ResponseEndBlock {
-	return app.keeper.NewResponseEndBlock()
+func (app *TruStoryApp) EndBlocker(ctx sdk.Context, _ abci.RequestEndBlock) abci.ResponseEndBlock {
+	return app.keeper.NewResponseEndBlock(ctx)
 }
 
 // initChainer implements the custom application logic that the BaseApp will

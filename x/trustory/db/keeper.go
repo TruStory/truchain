@@ -8,7 +8,6 @@ import (
 
 	ts "github.com/TruStory/trucoin/x/trustory/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/cosmos/cosmos-sdk/x/auth"
 	"github.com/cosmos/cosmos-sdk/x/bank"
 	amino "github.com/tendermint/go-amino"
 )
@@ -29,7 +28,7 @@ type TruKeeper struct {
 }
 
 // NewTruKeeper creates a new keeper with write and read access
-func NewTruKeeper(storyKey sdk.StoreKey, voteKey sdk.StoreKey, am auth.AccountMapper, ck bank.Keeper, cdc *amino.Codec) TruKeeper {
+func NewTruKeeper(storyKey sdk.StoreKey, voteKey sdk.StoreKey, ck bank.Keeper, cdc *amino.Codec) TruKeeper {
 	return TruKeeper{
 		ck:       ck,
 		storyKey: storyKey,
