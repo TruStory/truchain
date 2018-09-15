@@ -47,9 +47,12 @@ func (k TruKeeper) ActiveStoryQueuePop(ctx sdk.Context) (ts.Story, sdk.Error) {
 // ActiveStoryQueuePush pushes a story to the tail of the FIFO queue
 func (k TruKeeper) ActiveStoryQueuePush(ctx sdk.Context, storyID int64) sdk.Error {
 	storyQueue, err := k.getActiveStoryQueue(ctx)
-	if err != nil {
-		return err
+
+	// if queue is empty, create new one
+	if err == ts.ErrActiveStoryQueueNotFound() {
+		storyQueue = ts.ActiveStoryQueue{}
 	}
+
 	storyQueue = append(storyQueue, storyID)
 	k.setActiveStoryQueue(ctx, storyQueue)
 	return nil

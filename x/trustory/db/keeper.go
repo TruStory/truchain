@@ -87,6 +87,12 @@ func (k TruKeeper) AddStory(
 	key := generateKey(k.storyKey.String(), story.ID)
 	store.Set(key, val)
 
+	// add story to the active story queue (for in-progress stories)
+	err = k.ActiveStoryQueuePush(ctx, story.ID)
+	if err != nil {
+		panic(err)
+	}
+
 	return story.ID, nil
 }
 

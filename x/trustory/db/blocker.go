@@ -1,6 +1,8 @@
 package db
 
 import (
+	"fmt"
+
 	ts "github.com/TruStory/trucoin/x/trustory/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	abci "github.com/tendermint/tendermint/abci/types"
@@ -24,6 +26,9 @@ func (k TruKeeper) NewResponseEndBlock(ctx sdk.Context) abci.ResponseEndBlock {
 func checkStory(ctx sdk.Context, k TruKeeper) sdk.Error {
 	story, err := k.ActiveStoryQueueHead(ctx)
 	if err != nil {
+		if err.Code() == ts.CodeActiveStoryQueueEmpty {
+			return nil
+		}
 		return err
 	}
 
@@ -31,14 +36,21 @@ func checkStory(ctx sdk.Context, k TruKeeper) sdk.Error {
 	if ctx.BlockHeader().Time.After(story.VoteEnd) {
 		k.ActiveStoryQueuePop(ctx)
 
+		fmt.Printf("hello2")
+
 		story.Round++
 
 		// check if we have enough votes to proceed
 		votes, err := k.GetActiveVotes(ctx, story.ID)
+
+		fmt.Printf("num votes %d", len(votes))
+
 		if err != nil {
 			// process next story
 			return checkStory(ctx, k)
 		}
+
+		fmt.Printf("hello3")
 
 		// didn't achieve max number of votes
 		// mark story as unverifiable and return coins
@@ -48,13 +60,21 @@ func checkStory(ctx sdk.Context, k TruKeeper) sdk.Error {
 			if err != nil {
 				return err
 			}
+
+			fmt.Printf("hello4")
+
 			err = returnCoins(ctx, k, story.Escrow, votes)
 			if err != nil {
 				return err
 			}
+
+			fmt.Printf("hello5")
+
 			// process next story
 			return checkStory(ctx, k)
 		}
+
+		fmt.Printf("hello6")
 
 		// reset active votes list
 		defer k.SetActiveVotes(ctx, story.ID, []int64{})
@@ -105,6 +125,8 @@ func checkStory(ctx sdk.Context, k TruKeeper) sdk.Error {
 		// process next in queue
 		return checkStory(ctx, k)
 	}
+
+	// TODO: shouldn't return nil, since it will panic
 	return nil
 }
 
@@ -116,6 +138,8 @@ func returnCoins(ctx sdk.Context, k TruKeeper, escrow sdk.AccAddress, voteIDs []
 			return err
 		}
 		// return coins back to voter
+		fmt.Print(vote.Creator)
+		fmt.Print(vote.Amount)
 		_, err = k.ck.SendCoins(ctx, escrow, vote.Creator, vote.Amount)
 		if err != nil {
 			return err
