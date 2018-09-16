@@ -12,19 +12,17 @@ import (
 )
 
 func TestActiveStoryQueue(t *testing.T) {
-	ms, storyKey, voteKey := setupMultiStore()
+	ms, _, storyKey, voteKey := setupMultiStore()
 	cdc := makeCodec()
 	k := NewTruKeeper(storyKey, voteKey, bank.Keeper{}, cdc)
 	ctx := sdk.NewContext(ms, abci.Header{}, false, log.NewNopLogger())
 	storyID := createFakeStory(ms, k)
 
 	_, err := k.ActiveStoryQueueHead(ctx)
-	assert.NotNil(t, err)
-	assert.Equal(t, sdk.CodeType(711), err.Code(), err.Error())
+	assert.Nil(t, err)
 
 	_, err = k.ActiveStoryQueuePop(ctx)
-	assert.NotNil(t, err)
-	assert.Equal(t, sdk.CodeType(711), err.Code(), err.Error())
+	assert.Nil(t, err)
 
 	// create an empty story queue
 	k.setActiveStoryQueue(ctx, ts.ActiveStoryQueue{})
