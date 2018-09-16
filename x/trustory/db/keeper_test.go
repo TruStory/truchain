@@ -16,10 +16,12 @@ import (
 
 	dbm "github.com/tendermint/tendermint/libs/db"
 	"github.com/tendermint/tendermint/libs/log"
+
+	"github.com/tendermint/tendermint/crypto/encoding/amino"
 )
 
 func TestAddGetStory(t *testing.T) {
-	ms, storyKey, voteKey := setupMultiStore()
+	ms, _, storyKey, voteKey := setupMultiStore()
 	cdc := makeCodec()
 	keeper := NewTruKeeper(storyKey, voteKey, bank.Keeper{}, cdc)
 	ctx := sdk.NewContext(ms, abci.Header{}, false, log.NewNopLogger())
@@ -62,7 +64,7 @@ func TestAddGetStory(t *testing.T) {
 }
 
 func TestVoteStory(t *testing.T) {
-	ms, storyKey, voteKey := setupMultiStore()
+	ms, _, storyKey, voteKey := setupMultiStore()
 	cdc := makeCodec()
 	keeper := NewTruKeeper(storyKey, voteKey, bank.Keeper{}, cdc)
 	ctx := sdk.NewContext(ms, abci.Header{}, false, log.NewNopLogger())
@@ -101,7 +103,14 @@ func createFakeStory(ms sdk.MultiStore, k TruKeeper) int64 {
 	body := "Body of story."
 	category := ts.DEX
 	creator := sdk.AccAddress([]byte{1, 2})
+
+	// add coins to escrow account
 	escrow := sdk.AccAddress([]byte{3, 4})
+	// coins, _ := sdk.ParseCoins("100memecoin")
+	// _ = k.ck.SetCoins(ctx, escrow, coins)
+	// hasCoins := k.ck.HasCoins(ctx, escrow, coins)
+	// fmt.Print(hasCoins)
+
 	storyType := ts.Default
 	t := time.Date(2018, time.September, 13, 23, 0, 0, 0, time.UTC)
 
@@ -109,19 +118,22 @@ func createFakeStory(ms sdk.MultiStore, k TruKeeper) int64 {
 	return storyID
 }
 
-func setupMultiStore() (sdk.MultiStore, *sdk.KVStoreKey, *sdk.KVStoreKey) {
+func setupMultiStore() (sdk.MultiStore, *sdk.KVStoreKey, *sdk.KVStoreKey, *sdk.KVStoreKey) {
 	db := dbm.NewMemDB()
+	accKey := sdk.NewKVStoreKey("acc")
 	storyKey := sdk.NewKVStoreKey("stories")
 	voteKey := sdk.NewKVStoreKey("votes")
 	ms := store.NewCommitMultiStore(db)
+	ms.MountStoreWithDB(accKey, sdk.StoreTypeIAVL, db)
 	ms.MountStoreWithDB(storyKey, sdk.StoreTypeIAVL, db)
 	ms.MountStoreWithDB(voteKey, sdk.StoreTypeIAVL, db)
 	ms.LoadLatestVersion()
-	return ms, storyKey, voteKey
+	return ms, accKey, storyKey, voteKey
 }
 
 func makeCodec() *amino.Codec {
 	cdc := amino.NewCodec()
+	cryptoAmino.RegisterAmino(cdc)
 	ts.RegisterAmino(cdc)
 	cdc.RegisterInterface((*auth.Account)(nil), nil)
 	cdc.RegisterConcrete(&auth.BaseAccount{}, "cosmos-sdk/BaseAccount", nil)
