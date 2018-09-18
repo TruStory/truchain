@@ -74,7 +74,6 @@ func (k TruKeeper) UpdateStory(ctx sdk.Context, story ts.Story) sdk.Error {
 		story.CreatedBlock,
 		story.Creator,
 		story.Escrow,
-		story.Expiration,
 		story.Round,
 		story.State,
 		story.SubmitBlock,

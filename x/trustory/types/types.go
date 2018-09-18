@@ -40,19 +40,21 @@ func NewBond(
 
 // Comment for a story
 type Comment struct {
-	ID      int64          `json:"id"`
-	StoryID int64          `json:"story_id"`
-	Body    string         `json:"body"`
-	Creator sdk.AccAddress `json:"creator"`
+	ID           int64          `json:"id"`
+	StoryID      int64          `json:"story_id"`
+	Body         string         `json:"body"`
+	CreatedBlock int64          `json:"created_block"`
+	Creator      sdk.AccAddress `json:"creator"`
 }
 
 // NewComment creates a new comment for a given story
-func NewComment(id int64, storyID int64, body string, creator sdk.AccAddress) Comment {
+func NewComment(id int64, storyID int64, body string, createdBlock int64, creator sdk.AccAddress) Comment {
 	return Comment{
-		ID:      id,
-		StoryID: storyID,
-		Body:    body,
-		Creator: creator,
+		ID:           id,
+		StoryID:      storyID,
+		Body:         body,
+		CreatedBlock: createdBlock,
+		Creator:      creator,
 	}
 }
 
@@ -60,19 +62,21 @@ func NewComment(id int64, storyID int64, body string, creator sdk.AccAddress) Co
 
 // Evidence for a story
 type Evidence struct {
-	ID      int64          `json:"id"`
-	StoryID int64          `json:"story_id"`
-	Creator sdk.AccAddress `json:"creator"`
-	URI     string         `json:"uri"`
+	ID           int64          `json:"id"`
+	StoryID      int64          `json:"story_id"`
+	CreatedBlock int64          `json:"created_block"`
+	Creator      sdk.AccAddress `json:"creator"`
+	URI          string         `json:"uri"`
 }
 
 // NewEvidence creates new evidence for a story
-func NewEvidence(id int64, storyID int64, creator sdk.AccAddress, uri string) Evidence {
+func NewEvidence(id int64, storyID int64, createdBlock int64, creator sdk.AccAddress, uri string) Evidence {
 	return Evidence{
-		ID:      id,
-		StoryID: storyID,
-		Creator: creator,
-		URI:     uri,
+		ID:           id,
+		StoryID:      storyID,
+		CreatedBlock: createdBlock,
+		Creator:      creator,
+		URI:          uri,
 	}
 }
 
@@ -171,7 +175,6 @@ type Story struct {
 	CreatedBlock int64            `json:"created_block"`
 	Creator      sdk.AccAddress   `json:"creator"`
 	Escrow       sdk.AccAddress   `json:"escrow"`
-	Expiration   time.Time        `json:"expiration,omitempty"`
 	Round        int64            `json:"round"`
 	State        StoryState       `json:"state"`
 	SubmitBlock  int64            `json:"submit_block"`
@@ -195,7 +198,6 @@ func NewStory(
 	createdBlock int64,
 	creator sdk.AccAddress,
 	escrow sdk.AccAddress,
-	expiration time.Time,
 	round int64,
 	state StoryState,
 	submitBlock int64,
@@ -216,7 +218,6 @@ func NewStory(
 		CreatedBlock: createdBlock,
 		Creator:      creator,
 		Escrow:       escrow,
-		Expiration:   expiration,
 		Round:        round,
 		State:        Created,
 		SubmitBlock:  submitBlock,
