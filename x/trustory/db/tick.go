@@ -49,10 +49,7 @@ func checkStory(ctx sdk.Context, k TruKeeper) sdk.Error {
 		// mark story as unverifiable and return coins
 		if len(votes) < maxNumVotes {
 			story.State = ts.Unverifiable
-			err := k.UpdateStory(ctx, story)
-			if err != nil {
-				return err
-			}
+			k.UpdateStory(ctx, story)
 
 			err = returnCoins(ctx, k, story.Escrow, votes)
 			if err != nil {
@@ -105,10 +102,7 @@ func checkStory(ctx sdk.Context, k TruKeeper) sdk.Error {
 		}
 
 		// update story with changes, persist in keeper
-		err = k.UpdateStory(ctx, story)
-		if err != nil {
-			return err
-		}
+		k.UpdateStory(ctx, story)
 
 		// process next in queue
 		return checkStory(ctx, k)

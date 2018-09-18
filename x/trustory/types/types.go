@@ -8,6 +8,19 @@ import (
 
 // ============================================================================
 
+// ActiveStoryQueue is a queue of in-progress stories -- `Created` and `Challenged`
+type ActiveStoryQueue []int64
+
+// IsEmpty checks if the queue is empty
+func (asq ActiveStoryQueue) IsEmpty() bool {
+	if len(asq) == 0 {
+		return true
+	}
+	return false
+}
+
+// ============================================================================
+
 // Bond placed on a story
 type Bond struct {
 	ID           int64          `json:"id"`
@@ -16,24 +29,6 @@ type Bond struct {
 	CreatedBlock int64          `json:"created_block"`
 	Creator      sdk.AccAddress `json:"creator"`
 	Period       time.Duration  `json:"period"`
-}
-
-// NewBond creates a new bond
-func NewBond(
-	id int64,
-	storyID int64,
-	amount sdk.Coin,
-	createdBlock int64,
-	creator sdk.AccAddress,
-	period time.Duration) Bond {
-	return Bond{
-		ID:           id,
-		StoryID:      storyID,
-		Amount:       amount,
-		CreatedBlock: createdBlock,
-		Creator:      creator,
-		Period:       period,
-	}
 }
 
 // ============================================================================
@@ -47,17 +42,6 @@ type Comment struct {
 	Creator      sdk.AccAddress `json:"creator"`
 }
 
-// NewComment creates a new comment for a given story
-func NewComment(id int64, storyID int64, body string, createdBlock int64, creator sdk.AccAddress) Comment {
-	return Comment{
-		ID:           id,
-		StoryID:      storyID,
-		Body:         body,
-		CreatedBlock: createdBlock,
-		Creator:      creator,
-	}
-}
-
 // ============================================================================
 
 // Evidence for a story
@@ -67,17 +51,6 @@ type Evidence struct {
 	CreatedBlock int64          `json:"created_block"`
 	Creator      sdk.AccAddress `json:"creator"`
 	URI          string         `json:"uri"`
-}
-
-// NewEvidence creates new evidence for a story
-func NewEvidence(id int64, storyID int64, createdBlock int64, creator sdk.AccAddress, uri string) Evidence {
-	return Evidence{
-		ID:           id,
-		StoryID:      storyID,
-		CreatedBlock: createdBlock,
-		Creator:      creator,
-		URI:          uri,
-	}
 }
 
 // ============================================================================
@@ -185,50 +158,6 @@ type Story struct {
 	VoteEnd      time.Time        `json:"vote_end"`
 }
 
-// NewStory creates a new story
-func NewStory(
-	id int64,
-	bondIDs []int64,
-	commentIDs []int64,
-	evidenceIDs []int64,
-	thread []int64,
-	voteIDs []int64,
-	body string,
-	category StoryCategory,
-	createdBlock int64,
-	creator sdk.AccAddress,
-	escrow sdk.AccAddress,
-	round int64,
-	state StoryState,
-	submitBlock int64,
-	storyType StoryType,
-	updatedBlock int64,
-	users []sdk.AccAddress,
-	voteStart time.Time,
-	voteEnd time.Time) Story {
-	return Story{
-		ID:           id,
-		BondIDs:      bondIDs,
-		CommentIDs:   commentIDs,
-		EvidenceIDs:  evidenceIDs,
-		Thread:       thread,
-		VoteIDs:      voteIDs,
-		Body:         body,
-		Category:     category,
-		CreatedBlock: createdBlock,
-		Creator:      creator,
-		Escrow:       escrow,
-		Round:        round,
-		State:        Created,
-		SubmitBlock:  submitBlock,
-		StoryType:    storyType,
-		UpdatedBlock: updatedBlock,
-		Users:        users,
-		VoteStart:    voteStart,
-		VoteEnd:      voteEnd,
-	}
-}
-
 // ============================================================================
 
 // Vote for a story
@@ -240,37 +169,4 @@ type Vote struct {
 	Creator      sdk.AccAddress `json:"creator"`
 	Round        int64          `json:"round"`
 	Vote         bool           `json:"vote"`
-}
-
-// NewVote creates a new vote for a story
-func NewVote(
-	id int64,
-	storyID int64,
-	amount sdk.Coins,
-	createdBlock int64,
-	creator sdk.AccAddress,
-	round int64,
-	vote bool) Vote {
-	return Vote{
-		ID:           id,
-		StoryID:      storyID,
-		Amount:       amount,
-		CreatedBlock: createdBlock,
-		Creator:      creator,
-		Round:        round,
-		Vote:         vote,
-	}
-}
-
-// ============================================================================
-
-// ActiveStoryQueue is a queue of in-progress stories -- `Created` and `Challenged`
-type ActiveStoryQueue []int64
-
-// IsEmpty checks if the queue is empty
-func (asq ActiveStoryQueue) IsEmpty() bool {
-	if len(asq) == 0 {
-		return true
-	}
-	return false
 }
