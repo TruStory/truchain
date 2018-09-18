@@ -8,19 +8,25 @@ import (
 
 const maxNumVotes = 10
 
-// NewResponseEndBlock checks stories and generates a ResponseEndBlock
+// NewResponseEndBlock checks stories and generates a ResponseEndBlock.
+// It is called at the end of every block, and processes any timing-related
+// acitivities within the app -- currently handling the end of the voting
+// period.
 func (k TruKeeper) NewResponseEndBlock(ctx sdk.Context) abci.ResponseEndBlock {
 	err := checkStory(ctx, k)
 	if err != nil {
 		panic(err)
 	}
+
 	return abci.ResponseEndBlock{}
 }
 
 // ============================================================================
 
 // checkStory checks if the story reached the end of the voting period
-// and handles distributing rewards
+// and handles distributing rewards. It calls itself recursively until
+// all stories in the in-progress state are processed, or until there
+// are no more stories to process.
 func checkStory(ctx sdk.Context, k TruKeeper) sdk.Error {
 	story, err := k.ActiveStoryQueueHead(ctx)
 	if err != nil {
@@ -133,7 +139,9 @@ func returnCoins(ctx sdk.Context, k TruKeeper, escrow sdk.AccAddress, voteIDs []
 	return nil
 }
 
-// rewardWinners rewards winners of the voting process
+// rewardWinners rewards winners of the voting process. It sends all coins from
+// the losing side to an escrow account. Then it calculates the winning amount
+// and distributes coins from the escrow account evenly to all the winners.
 func rewardWinners(
 	ctx sdk.Context,
 	k TruKeeper,
