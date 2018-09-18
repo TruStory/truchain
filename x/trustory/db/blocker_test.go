@@ -10,8 +10,6 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/bank"
 	"github.com/stretchr/testify/assert"
 	abci "github.com/tendermint/tendermint/abci/types"
-	"github.com/tendermint/tendermint/crypto"
-	"github.com/tendermint/tendermint/crypto/ed25519"
 	"github.com/tendermint/tendermint/libs/log"
 )
 
@@ -35,16 +33,7 @@ func TestNotMeetVoteMinNewResponseEndBlock(t *testing.T) {
 }
 
 func TestMeetVoteMinNewResponseEndBlock(t *testing.T) {
-	ms, accKey, storyKey, voteKey := setupMultiStore()
-	cdc := makeCodec()
-	am := auth.NewAccountMapper(cdc, accKey, auth.ProtoBaseAccount)
-	ck := bank.NewKeeper(am)
-	k := NewTruKeeper(storyKey, voteKey, ck, cdc)
-
-	// create fake context with fake block time in header
-	time := time.Date(2018, time.September, 14, 23, 0, 0, 0, time.UTC)
-	header := abci.Header{Time: time}
-	ctx := sdk.NewContext(ms, header, false, log.NewNopLogger())
+	ctx, ms, am, k := mockDB()
 
 	// create fake story with vote end after block time
 	storyID := createFakeStoryWithEscrow(ctx, am, ms, k)
@@ -81,11 +70,4 @@ func createFakeStoryWithEscrow(ctx sdk.Context, am auth.AccountMapper, ms sdk.Mu
 
 	storyID, _ := k.AddStory(ctx, body, category, creator, escrowAddr, storyType, t, t)
 	return storyID
-}
-
-func keyPubAddr() (crypto.PrivKey, crypto.PubKey, sdk.AccAddress) {
-	key := ed25519.GenPrivKey()
-	pub := key.PubKey()
-	addr := sdk.AccAddress(pub.Address())
-	return key, pub, addr
 }

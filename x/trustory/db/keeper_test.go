@@ -7,13 +7,16 @@ import (
 	"github.com/cosmos/cosmos-sdk/store"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth"
+	"github.com/cosmos/cosmos-sdk/x/bank"
 
 	amino "github.com/tendermint/go-amino"
 	abci "github.com/tendermint/tendermint/abci/types"
+	"github.com/tendermint/tendermint/crypto"
 
 	dbm "github.com/tendermint/tendermint/libs/db"
 	"github.com/tendermint/tendermint/libs/log"
 
+	"github.com/tendermint/tendermint/crypto/ed25519"
 	"github.com/tendermint/tendermint/crypto/encoding/amino"
 )
 
@@ -32,6 +35,46 @@ func createFakeStory(ms sdk.MultiStore, k TruKeeper) int64 {
 	return storyID
 }
 
+func createFundedAccount(ctx sdk.Context, am auth.AccountMapper, coins sdk.Coins) sdk.AccAddress {
+	_, _, addr := keyPubAddr()
+	baseAcct := auth.NewBaseAccountWithAddress(addr)
+	_ = baseAcct.SetCoins(coins)
+	am.SetAccount(ctx, &baseAcct)
+
+	return addr
+}
+
+func keyPubAddr() (crypto.PrivKey, crypto.PubKey, sdk.AccAddress) {
+	key := ed25519.GenPrivKey()
+	pub := key.PubKey()
+	addr := sdk.AccAddress(pub.Address())
+	return key, pub, addr
+}
+
+func makeCodec() *amino.Codec {
+	cdc := amino.NewCodec()
+	cryptoAmino.RegisterAmino(cdc)
+	ts.RegisterAmino(cdc)
+	cdc.RegisterInterface((*auth.Account)(nil), nil)
+	cdc.RegisterConcrete(&auth.BaseAccount{}, "cosmos-sdk/BaseAccount", nil)
+	return cdc
+}
+
+func mockDB() (sdk.Context, sdk.MultiStore, auth.AccountMapper, TruKeeper) {
+	ms, accKey, storyKey, voteKey := setupMultiStore()
+	cdc := makeCodec()
+	am := auth.NewAccountMapper(cdc, accKey, auth.ProtoBaseAccount)
+	ck := bank.NewKeeper(am)
+	k := NewTruKeeper(storyKey, voteKey, ck, cdc)
+
+	// create fake context with fake block time in header
+	time := time.Date(2018, time.September, 14, 23, 0, 0, 0, time.UTC)
+	header := abci.Header{Time: time}
+	ctx := sdk.NewContext(ms, header, false, log.NewNopLogger())
+
+	return ctx, ms, am, k
+}
+
 func setupMultiStore() (sdk.MultiStore, *sdk.KVStoreKey, *sdk.KVStoreKey, *sdk.KVStoreKey) {
 	db := dbm.NewMemDB()
 	accKey := sdk.NewKVStoreKey("acc")
@@ -43,13 +86,4 @@ func setupMultiStore() (sdk.MultiStore, *sdk.KVStoreKey, *sdk.KVStoreKey, *sdk.K
 	ms.MountStoreWithDB(voteKey, sdk.StoreTypeIAVL, db)
 	ms.LoadLatestVersion()
 	return ms, accKey, storyKey, voteKey
-}
-
-func makeCodec() *amino.Codec {
-	cdc := amino.NewCodec()
-	cryptoAmino.RegisterAmino(cdc)
-	ts.RegisterAmino(cdc)
-	cdc.RegisterInterface((*auth.Account)(nil), nil)
-	cdc.RegisterConcrete(&auth.BaseAccount{}, "cosmos-sdk/BaseAccount", nil)
-	return cdc
 }
