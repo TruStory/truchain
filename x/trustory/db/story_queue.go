@@ -69,10 +69,7 @@ func (k TruKeeper) getActiveStoryQueue(ctx sdk.Context) (ts.ActiveStoryQueue, sd
 	}
 
 	storyQueue := &ts.ActiveStoryQueue{}
-	err := k.cdc.UnmarshalBinary(bsq, storyQueue)
-	if err != nil {
-		panic(err)
-	}
+	k.cdc.MustUnmarshalBinary(bsq, storyQueue)
 
 	return *storyQueue, nil
 }
@@ -80,9 +77,6 @@ func (k TruKeeper) getActiveStoryQueue(ctx sdk.Context) (ts.ActiveStoryQueue, sd
 // setActiveStoryQueue sets the ActiveStoryQueue to the context
 func (k TruKeeper) setActiveStoryQueue(ctx sdk.Context, storyQueue ts.ActiveStoryQueue) {
 	store := ctx.KVStore(k.storyKey)
-	bsq, err := k.cdc.MarshalBinary(storyQueue)
-	if err != nil {
-		panic(err)
-	}
+	bsq := k.cdc.MustMarshalBinary(storyQueue)
 	store.Set(keyActiveStoryQueue, bsq)
 }

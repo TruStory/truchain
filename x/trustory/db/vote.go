@@ -57,12 +57,9 @@ func (k TruKeeper) VoteStory(ctx sdk.Context, storyID int64, creator sdk.AccAddr
 	storyStore.Set(storyKey, newStory)
 
 	// add vote to vote list
-	votes, err := k.GetActiveVotes(ctx, story.ID)
-	if err != nil {
-		panic(err)
-	}
+	votes := k.GetActiveVotes(ctx, story.ID)
 	votes = append(votes, vote.ID)
-	err = k.SetActiveVotes(ctx, story.ID, votes)
+	k.SetActiveVotes(ctx, story.ID, votes)
 
 	return vote.ID, nil
 }
@@ -70,29 +67,25 @@ func (k TruKeeper) VoteStory(ctx sdk.Context, storyID int64, creator sdk.AccAddr
 // ============================================================================
 
 // GetActiveVotes gets all votes for the current round of a story
-func (k TruKeeper) GetActiveVotes(ctx sdk.Context, storyID int64) ([]int64, sdk.Error) {
+func (k TruKeeper) GetActiveVotes(ctx sdk.Context, storyID int64) []int64 {
 	store := ctx.KVStore(k.storyKey)
 	key := generateVoteListKey(storyID)
 	val := store.Get(key)
 	if val == nil {
-		return []int64{}, nil // FIXME: add error
+		return []int64{}
 	}
 	votes := &[]int64{}
-	err := k.cdc.UnmarshalBinary(val, votes)
-	if err != nil {
-		panic(err)
-	}
-	return *votes, nil
+	k.cdc.MustUnmarshalBinary(val, votes)
+
+	return *votes
 }
 
 // SetActiveVotes sets all votes for the current round of a story
-func (k TruKeeper) SetActiveVotes(ctx sdk.Context, storyID int64, votes []int64) sdk.Error {
+func (k TruKeeper) SetActiveVotes(ctx sdk.Context, storyID int64, votes []int64) {
 	store := ctx.KVStore(k.storyKey)
 	key := generateVoteListKey(storyID)
 	value := k.cdc.MustMarshalBinary(votes)
 	store.Set(key, value)
-
-	return nil
 }
 
 // ============================================================================
@@ -106,10 +99,8 @@ func (k TruKeeper) GetVote(ctx sdk.Context, voteID int64) (ts.Vote, sdk.Error) {
 		return ts.Vote{}, ts.ErrVoteNotFound(voteID)
 	}
 	vote := &ts.Vote{}
-	err := k.cdc.UnmarshalBinary(val, vote)
-	if err != nil {
-		panic(err)
-	}
+	k.cdc.MustUnmarshalBinary(val, vote)
+
 	return *vote, nil
 }
 
