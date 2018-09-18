@@ -21,9 +21,13 @@ func (k TruKeeper) VoteStory(ctx sdk.Context, storyID int64, creator sdk.AccAddr
 
 	// get existing story
 	story := &ts.Story{}
-	err := k.cdc.UnmarshalBinary(storyVal, story)
+	k.cdc.MustUnmarshalBinary(storyVal, story)
+
+	// temporarily moves funds from voter to an escrow account until
+	// the voting period is over and funds are distributed
+	_, err := k.ck.SendCoins(ctx, creator, story.Escrow, amount)
 	if err != nil {
-		panic(err)
+		return -1, err
 	}
 
 	// create new vote struct
@@ -40,20 +44,14 @@ func (k TruKeeper) VoteStory(ctx sdk.Context, storyID int64, creator sdk.AccAddr
 	// store vote in vote store
 	voteStore := ctx.KVStore(k.voteKey)
 	voteKey := generateKey(k.voteKey.String(), vote.ID)
-	voteVal, err := k.cdc.MarshalBinary(vote)
-	if err != nil {
-		panic(err)
-	}
+	voteVal := k.cdc.MustMarshalBinary(vote)
 	voteStore.Set(voteKey, voteVal)
 
 	// add vote id to story
 	story.VoteIDs = append(story.VoteIDs, vote.ID)
 
 	// create new story with vote
-	newStory, err := k.cdc.MarshalBinary(*story)
-	if err != nil {
-		panic(err)
-	}
+	newStory := k.cdc.MustMarshalBinary(*story)
 
 	// replace old story with new one in story store
 	storyStore.Set(storyKey, newStory)
@@ -114,6 +112,8 @@ func (k TruKeeper) GetVote(ctx sdk.Context, voteID int64) (ts.Vote, sdk.Error) {
 	}
 	return *vote, nil
 }
+
+// ============================================================================
 
 // generateVoteListKey creates a key for a vote list of form "stories|ID|votes"
 func generateVoteListKey(storyID int64) []byte {
