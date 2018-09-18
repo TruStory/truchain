@@ -7,23 +7,11 @@ import (
 	ts "github.com/TruStory/trucoin/x/trustory/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth"
-	"github.com/cosmos/cosmos-sdk/x/bank"
 	"github.com/stretchr/testify/assert"
-	abci "github.com/tendermint/tendermint/abci/types"
-	"github.com/tendermint/tendermint/libs/log"
 )
 
 func TestNotMeetVoteMinNewResponseEndBlock(t *testing.T) {
-	ms, accKey, storyKey, voteKey := setupMultiStore()
-	cdc := makeCodec()
-	am := auth.NewAccountMapper(cdc, accKey, auth.ProtoBaseAccount)
-	ck := bank.NewKeeper(am)
-	k := NewTruKeeper(storyKey, voteKey, ck, cdc)
-
-	// create fake context with fake block time in header
-	time := time.Date(2018, time.September, 14, 23, 0, 0, 0, time.UTC)
-	header := abci.Header{Time: time}
-	ctx := sdk.NewContext(ms, header, false, log.NewNopLogger())
+	ctx, ms, _, k := mockDB()
 
 	// create fake story with vote end after block time
 	_ = createFakeStory(ms, k)
@@ -39,11 +27,8 @@ func TestMeetVoteMinNewResponseEndBlock(t *testing.T) {
 	storyID := createFakeStoryWithEscrow(ctx, am, ms, k)
 
 	// fund voter account
-	_, _, addr := keyPubAddr()
-	baseAcct := auth.NewBaseAccountWithAddress(addr)
 	coins, _ := sdk.ParseCoins("5memecoin")
-	_ = baseAcct.SetCoins(coins)
-	am.SetAccount(ctx, &baseAcct)
+	addr := createFundedAccount(ctx, am, coins)
 
 	// fake 10 votes
 	for i := 0; i < 10; i++ {
@@ -53,6 +38,8 @@ func TestMeetVoteMinNewResponseEndBlock(t *testing.T) {
 	r := k.NewResponseEndBlock(ctx)
 	assert.NotNil(t, r)
 }
+
+// ============================================================================
 
 func createFakeStoryWithEscrow(ctx sdk.Context, am auth.AccountMapper, ms sdk.MultiStore, k TruKeeper) int64 {
 	body := "Body of story."
