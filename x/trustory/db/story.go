@@ -16,10 +16,8 @@ func (k TruKeeper) GetStory(ctx sdk.Context, storyID int64) (ts.Story, sdk.Error
 		return ts.Story{}, ts.ErrStoryNotFound(storyID)
 	}
 	story := &ts.Story{}
-	err := k.cdc.UnmarshalBinary(val, story)
-	if err != nil {
-		panic(err)
-	}
+	k.cdc.MustUnmarshalBinary(val, story)
+
 	return *story, nil
 }
 
@@ -49,18 +47,14 @@ func (k TruKeeper) AddStory(
 		VoteEnd:      voteEnd,
 	}
 
-	val, err := k.cdc.MarshalBinary(story)
-	if err != nil {
-		panic(err)
-	}
-
 	key := generateKey(k.storyKey.String(), story.ID)
+	val := k.cdc.MustMarshalBinary(story)
 	store.Set(key, val)
 
 	// add story to the active story queue (for in-progress stories)
-	err = k.ActiveStoryQueuePush(ctx, story.ID)
+	err := k.ActiveStoryQueuePush(ctx, story.ID)
 	if err != nil {
-		panic(err)
+		return -1, err
 	}
 
 	return story.ID, nil
@@ -90,13 +84,9 @@ func (k TruKeeper) UpdateStory(ctx sdk.Context, story ts.Story) sdk.Error {
 		story.VoteStart,
 		story.VoteEnd)
 
-	val, err := k.cdc.MarshalBinary(newStory)
-	if err != nil {
-		panic(err)
-	}
-
 	store := ctx.KVStore(k.storyKey)
 	key := generateKey(k.storyKey.String(), story.ID)
+	val := k.cdc.MustMarshalBinary(newStory)
 	store.Set(key, val)
 
 	return nil
