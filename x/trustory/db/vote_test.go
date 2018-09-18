@@ -11,11 +11,15 @@ import (
 
 func TestVoteStory(t *testing.T) {
 	ctx, ms, am, k := mockDB()
-	storyID := createFakeStory(ms, k)
+
+	// create and fund voter's account
 	denom := "memecoin"
 	amount := sdk.NewInt(5)
 	coins := sdk.Coins{sdk.NewCoin(denom, sdk.NewInt(5))}
 	creatorAddr := createFundedAccount(ctx, am, coins)
+
+	// fake params for voting on story
+	storyID := createFakeStory(ms, k)
 	vote := true
 
 	// test voting on a non-existant story

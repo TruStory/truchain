@@ -43,12 +43,7 @@ func checkStory(ctx sdk.Context, k TruKeeper) sdk.Error {
 		story.Round++
 
 		// check if we have enough votes to proceed
-		votes, err := k.GetActiveVotes(ctx, story.ID)
-
-		if err != nil {
-			// process next story
-			return checkStory(ctx, k)
-		}
+		votes := k.GetActiveVotes(ctx, story.ID)
 
 		// didn't achieve max number of votes
 		// mark story as unverifiable and return coins
@@ -86,6 +81,7 @@ func checkStory(ctx sdk.Context, k TruKeeper) sdk.Error {
 			}
 		}
 
+		// determine if we have a supermajority win
 		superMajority := 0.66 * maxNumVotes
 		if float64(len(yesVotes)) > superMajority || float64(len(noVotes)) > superMajority {
 			story.State = ts.Validated
@@ -96,12 +92,12 @@ func checkStory(ctx sdk.Context, k TruKeeper) sdk.Error {
 		// reward winning voters
 		if story.State == ts.Validated {
 			if len(yesVotes) > len(noVotes) {
-				err := rewardWinners(ctx, k, story.Escrow, story.Category, yesVotes, noVotes)
+				err := rewardWinners(ctx, k, story.Escrow, story.Category, yesVotes)
 				if err != nil {
 					return err
 				}
 			} else {
-				err := rewardWinners(ctx, k, story.Escrow, story.Category, noVotes, yesVotes)
+				err := rewardWinners(ctx, k, story.Escrow, story.Category, noVotes)
 				if err != nil {
 					return err
 				}
@@ -139,33 +135,27 @@ func returnCoins(ctx sdk.Context, k TruKeeper, escrow sdk.AccAddress, voteIDs []
 	return nil
 }
 
-// rewardWinners rewards winners of the voting process. It sends all coins from
-// the losing side to an escrow account. Then it calculates the winning amount
-// and distributes coins from the escrow account evenly to all the winners.
+// rewardWinners rewards winners of the voting process. It calculates the winning
+// amount and distributes coins from the escrow account evenly to all the winners.
 func rewardWinners(
 	ctx sdk.Context,
 	k TruKeeper,
 	escrowAddr sdk.AccAddress,
 	category ts.StoryCategory,
-	win []ts.Vote,
-	lose []ts.Vote) sdk.Error {
+	winners []ts.Vote) sdk.Error {
 
-	for _, vote := range lose {
-		_, err := k.ck.SendCoins(ctx, vote.Creator, escrowAddr, vote.Amount)
-		if err != nil {
-			return err
-		}
-	}
+	// retrieve coins from escrow account
+	// coin denom is category slug, i.e: "stablecoins"
+	denom := category.Slug()
+	escrowAmount := k.ck.GetCoins(ctx, escrowAddr).AmountOf(denom)
 
 	// calculate winning amount
-	numWinners := int64(len(win))
-	denom := category.Slug() // coin denom is category slug, i.e: "stablecoins"
-	escrowAmount := k.ck.GetCoins(ctx, escrowAddr).AmountOf(denom)
+	numWinners := int64(len(winners))
 	winnerAmount := escrowAmount.Div(sdk.NewInt(numWinners))
 	amt := sdk.NewCoin(denom, winnerAmount)
 
 	// reward winners
-	for _, vote := range win {
+	for _, vote := range winners {
 		_, err := k.ck.SendCoins(ctx, escrowAddr, vote.Creator, sdk.Coins{amt})
 		if err != nil {
 			return err

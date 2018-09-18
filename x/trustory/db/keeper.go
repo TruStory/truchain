@@ -44,10 +44,7 @@ func (k TruKeeper) newID(ctx sdk.Context, storeKey sdk.StoreKey) int64 {
 
 	// if we don't have an ID yet, set it to zero
 	if lastID == nil {
-		zero, err := k.cdc.MarshalBinary(int64(0))
-		if err != nil {
-			panic(err)
-		}
+		zero := k.cdc.MustMarshalBinary(int64(0))
 		store.Set(keyVal, zero)
 
 		return 0
@@ -55,17 +52,11 @@ func (k TruKeeper) newID(ctx sdk.Context, storeKey sdk.StoreKey) int64 {
 
 	// convert from binary to int64
 	ID := new(int64)
-	err := k.cdc.UnmarshalBinary(lastID, ID)
-	if err != nil {
-		panic(err)
-	}
+	k.cdc.MustUnmarshalBinary(lastID, ID)
 
 	// increment id by 1 and update value in blockchain
 	newID := *ID + 1
-	newIDVal, err := k.cdc.MarshalBinary(newID)
-	if err != nil {
-		panic(err)
-	}
+	newIDVal := k.cdc.MustMarshalBinary(newID)
 	store.Set(keyVal, newIDVal)
 
 	return newID
