@@ -150,12 +150,57 @@ type Story struct {
 	Escrow       sdk.AccAddress   `json:"escrow"`
 	Round        int64            `json:"round"`
 	State        StoryState       `json:"state"`
-	SubmitBlock  int64            `json:"submit_block"`
 	StoryType    StoryType        `json:"type"`
 	UpdatedBlock int64            `json:"updated_block"`
 	Users        []sdk.AccAddress `json:"users"`
+	VoteMaxNum   int64            `json:"vote_max_num"`
 	VoteStart    time.Time        `json:"vote_start"`
 	VoteEnd      time.Time        `json:"vote_end"`
+}
+
+// NewStory creates a new story
+func NewStory(
+	id int64,
+	bondIDs []int64,
+	commentIDs []int64,
+	evidenceIDs []int64,
+	thread []int64,
+	voteIDs []int64,
+	body string,
+	category StoryCategory,
+	createdBlock int64,
+	creator sdk.AccAddress,
+	escrow sdk.AccAddress,
+	round int64,
+	state StoryState,
+	storyType StoryType,
+	updatedBlock int64,
+	users []sdk.AccAddress,
+	voteMax int64,
+	voteStart time.Time,
+	voteEnd time.Time) Story {
+
+	return Story{
+		ID:           id,
+		BondIDs:      bondIDs,
+		CommentIDs:   commentIDs,
+		EvidenceIDs:  evidenceIDs,
+		Thread:       thread,
+		VoteIDs:      voteIDs,
+		Body:         body,
+		Category:     category,
+		CreatedBlock: createdBlock,
+		Creator:      creator,
+		Escrow:       escrow,
+		Round:        round,
+		State:        Created,
+		StoryType:    storyType,
+		UpdatedBlock: updatedBlock,
+		Users:        users,
+		VoteMaxNum:   voteMax,
+		VoteStart:    voteStart,
+		VoteEnd:      voteEnd,
+	}
 }
 
 // ============================================================================

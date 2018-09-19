@@ -40,6 +40,7 @@ func TestAddGetStory(t *testing.T) {
 		Escrow:       sdk.AccAddress([]byte{3, 4}),
 		State:        ts.Created,
 		StoryType:    ts.Default,
+		VoteMaxNum:   10,
 		VoteStart:    ti,
 		VoteEnd:      ti,
 	}
@@ -53,6 +54,6 @@ func TestAddGetStory(t *testing.T) {
 	escrow := sdk.AccAddress([]byte{4, 5})
 	storyType := ts.Default
 
-	storyID, _ = keeper.AddStory(ctx, body, category, creator, escrow, storyType, time.Now(), time.Now())
+	storyID, _ = keeper.AddStory(ctx, body, category, creator, escrow, storyType, 10, time.Now(), time.Now())
 	assert.Equal(t, int64(1), storyID, "Story ID did not increment properly")
 }
