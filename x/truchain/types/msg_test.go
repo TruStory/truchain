@@ -127,7 +127,7 @@ func TestInValidBodyAddCommentMsg(t *testing.T) {
 func TestValidSubmitEvidencetMsg(t *testing.T) {
 	validStoryID := int64(1)
 	validCreator := sdk.AccAddress([]byte{1, 2})
-	validURI := "http://www.trustory.io"
+	validURI := "http://www.truchain.io"
 	msg := NewSubmitEvidenceMsg(validStoryID, validCreator, validURI)
 	err := msg.ValidateBasic()
 
@@ -135,7 +135,7 @@ func TestValidSubmitEvidencetMsg(t *testing.T) {
 	assert.Equal(t, "SubmitEvidence", msg.Type())
 	assert.Equal(
 		t,
-		`{"creator":"cosmosaccaddr1qypq8zs0ka","story_id":1,"url":"http://www.trustory.io"}`,
+		`{"creator":"cosmosaccaddr1qypq8zs0ka","story_id":1,"url":"http://www.truchain.io"}`,
 		fmt.Sprintf("%s", msg.GetSignBytes()),
 	)
 	assert.Equal(t, []sdk.AccAddress{validCreator}, msg.GetSigners())
@@ -144,7 +144,7 @@ func TestValidSubmitEvidencetMsg(t *testing.T) {
 func TestInValidStoryIDSubmitEvidencetMsg(t *testing.T) {
 	invalidStoryID := int64(-1)
 	validCreator := sdk.AccAddress([]byte{1, 2})
-	validURI := "http://www.trustory.io"
+	validURI := "http://www.truchain.io"
 	msg := NewSubmitEvidenceMsg(invalidStoryID, validCreator, validURI)
 	err := msg.ValidateBasic()
 
@@ -154,7 +154,7 @@ func TestInValidStoryIDSubmitEvidencetMsg(t *testing.T) {
 func TestInValidCreatorSubmitEvidencetMsg(t *testing.T) {
 	validStoryID := int64(1)
 	invalidCreator := sdk.AccAddress([]byte{})
-	validURI := "http://www.trustory.io"
+	validURI := "http://www.truchain.io"
 	msg := NewSubmitEvidenceMsg(validStoryID, invalidCreator, validURI)
 	err := msg.ValidateBasic()
 

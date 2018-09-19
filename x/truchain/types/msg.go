@@ -270,11 +270,11 @@ func (msg VoteMsg) GetSigners() []sdk.AccAddress {
 
 // RegisterAmino registers messages into the codec
 func RegisterAmino(cdc *amino.Codec) {
-	cdc.RegisterConcrete(PlaceBondMsg{}, "trustory/PlaceBondMsg", nil)
-	cdc.RegisterConcrete(AddCommentMsg{}, "trustory/AddCommentMsg", nil)
-	cdc.RegisterConcrete(SubmitEvidenceMsg{}, "trustory/SubmitEvidenceMsg", nil)
-	cdc.RegisterConcrete(SubmitStoryMsg{}, "trustory/SubmitStoryMsg", nil)
-	cdc.RegisterConcrete(VoteMsg{}, "trustory/VoteMsg", nil)
+	cdc.RegisterConcrete(PlaceBondMsg{}, "truchain/PlaceBondMsg", nil)
+	cdc.RegisterConcrete(AddCommentMsg{}, "truchain/AddCommentMsg", nil)
+	cdc.RegisterConcrete(SubmitEvidenceMsg{}, "truchain/SubmitEvidenceMsg", nil)
+	cdc.RegisterConcrete(SubmitStoryMsg{}, "truchain/SubmitStoryMsg", nil)
+	cdc.RegisterConcrete(VoteMsg{}, "truchain/VoteMsg", nil)
 }
 
 // ============================================================================
