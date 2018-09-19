@@ -39,16 +39,15 @@ Project layout:
 ├── app
 │   ├── app.go
 │   └── app_test.go
-├── bin
-│   ├── trucli
-│   └── trucoind
 ├── cmd
 │   ├── trucli
 │   │   └── main.go
 │   └── trucoind
 │       └── main.go
+├── types
+│   └── account.go
 └── x
-    └── trustory
+    └── truchain
         ├── client
         │   ├── cli
         │   │   └── trustory.go
@@ -57,8 +56,14 @@ Project layout:
         ├── db
         │   ├── keeper.go
         │   ├── keeper_test.go
-        │   ├── queue.go
-        │   └── queue_test.go
+        │   ├── story.go
+        │   ├── story_queue.go
+        │   ├── story_queue_test.go
+        │   ├── story_test.go
+        │   ├── tick.go
+        │   ├── tick_test.go
+        │   ├── vote.go
+        │   └── vote_test.go
         ├── handler.go
         ├── handler_test.go
         └── types
@@ -68,7 +73,7 @@ Project layout:
             └── types.go
 ```
 
-It compiles into two binaries, `trucli` (lite client) and `trucoind` (dapp chain). The lite client is responsible for responding to API requests from clients wanting to access or modify data on the dapp chain. The dapp chain is responsible for responding to requests from the lite client, including querying and storing data.
+It compiles into two binaries, `trucli` (lite client) and `truchaind` (dapp chain). The lite client is responsible for responding to API requests from clients wanting to access or modify data on the dapp chain. The dapp chain is responsible for responding to requests from the lite client, including querying and storing data.
 
 ### Messages
 
