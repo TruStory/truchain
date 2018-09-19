@@ -3,9 +3,9 @@ package app
 import (
 	"encoding/json"
 
-	"github.com/TruStory/trucoin/types"
-	ts "github.com/TruStory/trucoin/x/trustory"
-	sdb "github.com/TruStory/trucoin/x/trustory/db"
+	"github.com/TruStory/truchain/types"
+	ts "github.com/TruStory/truchain/x/truchain"
+	sdb "github.com/TruStory/truchain/x/truchain/db"
 	bam "github.com/cosmos/cosmos-sdk/baseapp"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/wire"
@@ -20,14 +20,14 @@ import (
 )
 
 const (
-	appName = "TruStoryApp"
+	appName = "TruChain"
 )
 
-// TruStoryApp implements an extended ABCI application. It contains a BaseApp,
+// TruChain implements an extended ABCI application. It contains a BaseApp,
 // a codec for serialization, KVStore keys for multistore state management, and
 // various mappers and keepers to manage getting, setting, and serializing the
 // integral app types.
-type TruStoryApp struct {
+type TruChain struct {
 	*bam.BaseApp
 	cdc *wire.Codec
 
@@ -48,17 +48,17 @@ type TruStoryApp struct {
 	keeper sdb.TruKeeper
 }
 
-// NewTruStoryApp returns a reference to a new TruStoryApp. Internally,
+// NewTruChain returns a reference to a new TruChain. Internally,
 // a codec is created along with all the necessary keys.
 // In addition, all necessary mappers and keepers are created, routes
 // registered, and finally the stores being mounted along with any necessary
 // chain initialization.
-func NewTruStoryApp(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *TruStoryApp {
+func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *TruChain {
 	// create and register app-level codec for TXs and accounts
 	cdc := MakeCodec()
 
 	// create your application type
-	var app = &TruStoryApp{
+	var app = &TruChain{
 		cdc:        cdc,
 		BaseApp:    bam.NewBaseApp(appName, logger, db, auth.DefaultTxDecoder(cdc), options...),
 		keyMain:    sdk.NewKVStoreKey("main"),
@@ -112,7 +112,7 @@ func MakeCodec() *wire.Codec {
 
 	// register custom types
 	cdc.RegisterInterface((*auth.Account)(nil), nil)
-	cdc.RegisterConcrete(&types.AppAccount{}, "trucoin/Account", nil)
+	cdc.RegisterConcrete(&types.AppAccount{}, "truchain/Account", nil)
 
 	cdc.Seal()
 
@@ -121,13 +121,13 @@ func MakeCodec() *wire.Codec {
 
 // BeginBlocker reflects logic to run before any TXs application are processed
 // by the application.
-func (app *TruStoryApp) BeginBlocker(_ sdk.Context, _ abci.RequestBeginBlock) abci.ResponseBeginBlock {
+func (app *TruChain) BeginBlocker(_ sdk.Context, _ abci.RequestBeginBlock) abci.ResponseBeginBlock {
 	return abci.ResponseBeginBlock{}
 }
 
 // EndBlocker reflects logic to run after all TXs are processed by the
 // application.
-func (app *TruStoryApp) EndBlocker(ctx sdk.Context, _ abci.RequestEndBlock) abci.ResponseEndBlock {
+func (app *TruChain) EndBlocker(ctx sdk.Context, _ abci.RequestEndBlock) abci.ResponseEndBlock {
 	return app.keeper.NewResponseEndBlock(ctx)
 }
 
@@ -136,7 +136,7 @@ func (app *TruStoryApp) EndBlocker(ctx sdk.Context, _ abci.RequestEndBlock) abci
 // state provided by 'req' and attempt to deserialize said state. The state
 // should contain all the genesis accounts. These accounts will be added to the
 // application's account mapper.
-func (app *TruStoryApp) initChainer(ctx sdk.Context, req abci.RequestInitChain) abci.ResponseInitChain {
+func (app *TruChain) initChainer(ctx sdk.Context, req abci.RequestInitChain) abci.ResponseInitChain {
 	stateJSON := req.AppStateBytes
 
 	genesisState := new(types.GenesisState)
@@ -163,7 +163,7 @@ func (app *TruStoryApp) initChainer(ctx sdk.Context, req abci.RequestInitChain) 
 // ExportAppStateAndValidators implements custom application logic that exposes
 // various parts of the application's state and set of validators. An error is
 // returned if any step getting the state or set of validators fails.
-func (app *TruStoryApp) ExportAppStateAndValidators() (appState json.RawMessage, validators []tmtypes.GenesisValidator, err error) {
+func (app *TruChain) ExportAppStateAndValidators() (appState json.RawMessage, validators []tmtypes.GenesisValidator, err error) {
 	ctx := app.NewContext(true, abci.Header{})
 	accounts := []*types.GenesisAccount{}
 

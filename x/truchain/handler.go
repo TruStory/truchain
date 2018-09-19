@@ -1,12 +1,12 @@
-package trustory
+package truchain
 
 import (
 	"encoding/binary"
 	"reflect"
 	"time"
 
-	db "github.com/TruStory/trucoin/x/trustory/db"
-	ts "github.com/TruStory/trucoin/x/trustory/types"
+	db "github.com/TruStory/truchain/x/truchain/db"
+	ts "github.com/TruStory/truchain/x/truchain/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 

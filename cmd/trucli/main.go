@@ -3,8 +3,8 @@ package main
 import (
 	"os"
 
-	"github.com/TruStory/trucoin/app"
-	"github.com/TruStory/trucoin/types"
+	"github.com/TruStory/truchain/app"
+	"github.com/TruStory/truchain/types"
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/keys"
 	"github.com/cosmos/cosmos-sdk/client/rpc"
@@ -19,15 +19,15 @@ import (
 
 	// "github.com/tendermint/tendermint/libs/cli"
 
-	trustorycmd "github.com/TruStory/trucoin/x/trustory/client/cli"
-	trustoryrest "github.com/TruStory/trucoin/x/trustory/client/rest"
+	truchaincmd "github.com/TruStory/truchain/x/truchain/client/cli"
+	truchainrest "github.com/TruStory/truchain/x/truchain/client/rest"
 )
 
 // rootCmd is the entry point for this binary
 var (
 	rootCmd = &cobra.Command{
 		Use:   "trucli",
-		Short: "TruStoryApp light-client",
+		Short: "TruChain light-client",
 	}
 )
 
@@ -69,17 +69,17 @@ func main() {
 			stakecmd.GetCmdUnbond("stake", cdc),
 		)...)
 
-	// add trustory specific commands
+	// add truchain specific commands
 	rootCmd.AddCommand(
 		client.GetCommands(
-			trustorycmd.GetCmdQueryStories("stories", cdc),
+			truchaincmd.GetCmdQueryStories("stories", cdc),
 		)...)
 
 	// add proxy, version and key info
 	rootCmd.AddCommand(
 		client.LineBreak,
 		// lcd.ServeCommand(cdc),
-		trustoryrest.ServeCommand(cdc),
+		truchainrest.ServeCommand(cdc),
 		keys.Commands(),
 		client.LineBreak,
 		version.VersionCmd,

@@ -4,7 +4,7 @@ import (
 	"testing"
 	"time"
 
-	ts "github.com/TruStory/trucoin/x/trustory/types"
+	ts "github.com/TruStory/truchain/x/truchain/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/bank"
 
