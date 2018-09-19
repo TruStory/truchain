@@ -37,10 +37,11 @@ func handleSubmitStoryMsg(ctx sdk.Context, k db.TruKeeper, msg ts.SubmitStoryMsg
 	}
 
 	// calculate voting period
+	voteMaxNum := int64(10) // TODO: read this from genesis file (https://github.com/TruStory/truchain/issues/14)
 	voteStart := ctx.BlockHeader().Time
 	voteEnd := voteStart.Add(time.Hour * time.Duration(votingPeriod))
 
-	storyID, err := k.AddStory(ctx, msg.Body, msg.Category, msg.Creator, msg.Escrow, msg.StoryType, voteStart, voteEnd)
+	storyID, err := k.AddStory(ctx, msg.Body, msg.Category, msg.Creator, msg.Escrow, msg.StoryType, voteMaxNum, voteStart, voteEnd)
 	if err != nil {
 		panic(err)
 	}
