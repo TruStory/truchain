@@ -31,7 +31,7 @@ func createFakeStory(ms sdk.MultiStore, k TruKeeper) int64 {
 	storyType := ts.Default
 	t := time.Date(2018, time.September, 13, 23, 0, 0, 0, time.UTC)
 
-	storyID, _ := k.AddStory(ctx, body, category, creator, escrow, storyType, t, t)
+	storyID, _ := k.AddStory(ctx, body, category, creator, escrow, storyType, 10, t, t)
 	return storyID
 }
 

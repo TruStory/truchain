@@ -6,8 +6,6 @@ import (
 	abci "github.com/tendermint/tendermint/abci/types"
 )
 
-const maxNumVotes = 10
-
 // NewResponseEndBlock checks stories and generates a ResponseEndBlock.
 // It is called at the end of every block, and processes any timing-related
 // acitivities within the app -- currently handling the end of the voting
@@ -47,7 +45,7 @@ func checkStory(ctx sdk.Context, k TruKeeper) sdk.Error {
 
 		// didn't achieve max number of votes
 		// mark story as unverifiable and return coins
-		if len(votes) < maxNumVotes {
+		if len(votes) < int(story.VoteMaxNum) {
 			story.State = ts.Unverifiable
 			k.UpdateStory(ctx, story)
 
@@ -79,7 +77,7 @@ func checkStory(ctx sdk.Context, k TruKeeper) sdk.Error {
 		}
 
 		// determine if we have a supermajority win
-		superMajority := 0.66 * maxNumVotes
+		superMajority := 0.66 * float64(story.VoteMaxNum)
 		if float64(len(yesVotes)) > superMajority || float64(len(noVotes)) > superMajority {
 			story.State = ts.Validated
 		} else {

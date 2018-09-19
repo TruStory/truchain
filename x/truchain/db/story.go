@@ -29,6 +29,7 @@ func (k TruKeeper) AddStory(
 	creator sdk.AccAddress,
 	escrow sdk.AccAddress,
 	storyType ts.StoryType,
+	voteMaxNum int64,
 	voteStart time.Time,
 	voteEnd time.Time) (int64, sdk.Error) {
 
@@ -43,6 +44,7 @@ func (k TruKeeper) AddStory(
 		Escrow:       escrow,
 		State:        ts.Created,
 		StoryType:    storyType,
+		VoteMaxNum:   voteMaxNum,
 		VoteStart:    voteStart,
 		VoteEnd:      voteEnd,
 	}
@@ -62,27 +64,26 @@ func (k TruKeeper) AddStory(
 
 // UpdateStory updates an existing story in the store
 func (k TruKeeper) UpdateStory(ctx sdk.Context, story ts.Story) {
-	newStory := ts.Story{
-		ID:           story.ID,
-		BondIDs:      story.BondIDs,
-		CommentIDs:   story.CommentIDs,
-		EvidenceIDs:  story.EvidenceIDs,
-		Thread:       story.Thread,
-		VoteIDs:      story.VoteIDs,
-		Body:         story.Body,
-		Category:     story.Category,
-		CreatedBlock: story.CreatedBlock,
-		Creator:      story.Creator,
-		Escrow:       story.Escrow,
-		Round:        story.Round,
-		State:        story.State,
-		SubmitBlock:  story.SubmitBlock,
-		StoryType:    story.StoryType,
-		UpdatedBlock: ctx.BlockHeight(),
-		Users:        story.Users,
-		VoteStart:    story.VoteStart,
-		VoteEnd:      story.VoteEnd,
-	}
+	newStory := ts.NewStory(
+		story.ID,
+		story.BondIDs,
+		story.CommentIDs,
+		story.EvidenceIDs,
+		story.Thread,
+		story.VoteIDs,
+		story.Body,
+		story.Category,
+		story.CreatedBlock,
+		story.Creator,
+		story.Escrow,
+		story.Round,
+		story.State,
+		story.StoryType,
+		ctx.BlockHeight(),
+		story.Users,
+		story.VoteMaxNum,
+		story.VoteStart,
+		story.VoteEnd)
 
 	store := ctx.KVStore(k.storyKey)
 	key := generateKey(k.storyKey.String(), story.ID)
