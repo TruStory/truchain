@@ -4,7 +4,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/TruStory/trucoin/types"
+	"github.com/TruStory/truchain/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/wire"
 	"github.com/cosmos/cosmos-sdk/x/auth"
@@ -14,7 +14,7 @@ import (
 	"github.com/tendermint/tendermint/libs/log"
 )
 
-func setGenesis(baseApp *TruStoryApp, accounts ...*types.AppAccount) (types.GenesisState, error) {
+func setGenesis(baseApp *TruChain, accounts ...*types.AppAccount) (types.GenesisState, error) {
 	genAccts := make([]*types.GenesisAccount, len(accounts))
 	for i, appAct := range accounts {
 		genAccts[i] = types.NewGenesisAccount(appAct)
@@ -38,7 +38,7 @@ func setGenesis(baseApp *TruStoryApp, accounts ...*types.AppAccount) (types.Gene
 func TestGenesis(t *testing.T) {
 	logger := log.NewTMLogger(log.NewSyncWriter(os.Stdout)).With("module", "sdk/app")
 	db := dbm.NewMemDB()
-	baseApp := NewTruStoryApp(logger, db)
+	baseApp := NewTruChain(logger, db)
 	addr := sdk.AccAddress([]byte{2, 3})
 
 	// construct some test coins
@@ -61,7 +61,7 @@ func TestGenesis(t *testing.T) {
 	require.Equal(t, appAcct, res)
 
 	// reload app and ensure the account is still there
-	baseApp = NewTruStoryApp(logger, db)
+	baseApp = NewTruChain(logger, db)
 
 	stateBytes, err := wire.MarshalJSONIndent(baseApp.cdc, genState)
 	require.Nil(t, err)

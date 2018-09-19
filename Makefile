@@ -5,7 +5,7 @@ all: build test
 buidl: build
 
 build:
-	go build -o bin/trucli cmd/trucli/main.go && go build -o bin/trucoind cmd/trucoind/main.go
+	go build -o bin/trucli cmd/trucli/main.go && go build -o bin/truchaind cmd/truchaind/main.go
 
 test:
 	@go test $(PACKAGES)

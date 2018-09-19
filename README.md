@@ -19,14 +19,14 @@ BUIDL the binaries for the client apps:
 This creates:
 
 `bin/trucli`: TruStory command-line client and lite client
-`bin/trucoind`: TruStory server node
+`bin/truchaind`: TruStory server node
 
 #### Deployment
 
 `trucli`, the light client, will ideally run on it's own machine. It will handle all
-API requets, and communicate via RPC with `trucoind`.
+API requets, and communicate via RPC with `truchaind`.
 
-`trucoind`, will initially run as a single Cosmos node, but eventually as a zone of many nodes.
+`truchaind`, will initially run as a single Cosmos node, but eventually as a zone of many nodes.
 
 
 ### Architecture
