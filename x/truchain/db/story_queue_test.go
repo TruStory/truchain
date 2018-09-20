@@ -35,9 +35,7 @@ func TestActiveStoryQueue(t *testing.T) {
 	assert.NotNil(t, err)
 	assert.Equal(t, sdk.CodeType(712), err.Code(), err.Error())
 
-	err = k.ActiveStoryQueuePush(ctx, storyID)
-	assert.Nil(t, err)
-
+	k.ActiveStoryQueuePush(ctx, storyID)
 	story, _ := k.ActiveStoryQueueHead(ctx)
 	assert.NotNil(t, story)
 

@@ -12,10 +12,7 @@ var keyActiveStoryQueue = []byte("activeStoriesQueue")
 
 // ActiveStoryQueueHead returns the head of the FIFO queue
 func (k TruKeeper) ActiveStoryQueueHead(ctx sdk.Context) (ts.Story, sdk.Error) {
-	storyQueue, err := k.getActiveStoryQueue(ctx)
-	if err != nil {
-		return ts.Story{}, err
-	}
+	storyQueue := k.getActiveStoryQueue(ctx)
 	if storyQueue.IsEmpty() {
 		return ts.Story{}, ts.ErrActiveStoryQueueEmpty()
 	}
@@ -28,10 +25,7 @@ func (k TruKeeper) ActiveStoryQueueHead(ctx sdk.Context) (ts.Story, sdk.Error) {
 
 // ActiveStoryQueuePop pops the head from the story queue
 func (k TruKeeper) ActiveStoryQueuePop(ctx sdk.Context) (ts.Story, sdk.Error) {
-	storyQueue, err := k.getActiveStoryQueue(ctx)
-	if err != nil {
-		return ts.Story{}, err
-	}
+	storyQueue := k.getActiveStoryQueue(ctx)
 	if storyQueue.IsEmpty() {
 		return ts.Story{}, ts.ErrActiveStoryQueueEmpty()
 	}
@@ -41,37 +35,31 @@ func (k TruKeeper) ActiveStoryQueuePop(ctx sdk.Context) (ts.Story, sdk.Error) {
 	if err != nil {
 		return ts.Story{}, err
 	}
+
 	return story, nil
 }
 
 // ActiveStoryQueuePush pushes a story to the tail of the FIFO queue
-func (k TruKeeper) ActiveStoryQueuePush(ctx sdk.Context, storyID int64) sdk.Error {
-	storyQueue, err := k.getActiveStoryQueue(ctx)
-
-	// if queue is empty, create new one
-	if err == ts.ErrActiveStoryQueueNotFound() {
-		storyQueue = ts.ActiveStoryQueue{}
-	}
-
+func (k TruKeeper) ActiveStoryQueuePush(ctx sdk.Context, storyID int64) {
+	storyQueue := k.getActiveStoryQueue(ctx)
 	storyQueue = append(storyQueue, storyID)
 	k.setActiveStoryQueue(ctx, storyQueue)
-	return nil
 }
 
 // ============================================================================
 
 // getActiveStoryQueue gets the StoryQueue from the context
-func (k TruKeeper) getActiveStoryQueue(ctx sdk.Context) (ts.ActiveStoryQueue, sdk.Error) {
+func (k TruKeeper) getActiveStoryQueue(ctx sdk.Context) ts.ActiveStoryQueue {
 	store := ctx.KVStore(k.storyKey)
 	bsq := store.Get(keyActiveStoryQueue)
+	// if queue is empty, create new one
 	if bsq == nil {
-		return ts.ActiveStoryQueue{}, ts.ErrActiveStoryQueueNotFound()
+		return ts.ActiveStoryQueue{}
 	}
-
 	storyQueue := &ts.ActiveStoryQueue{}
 	k.cdc.MustUnmarshalBinary(bsq, storyQueue)
 
-	return *storyQueue, nil
+	return *storyQueue
 }
 
 // setActiveStoryQueue sets the ActiveStoryQueue to the context
