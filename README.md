@@ -21,13 +21,18 @@ This creates:
 `bin/trucli`: TruStory command-line client and lite client
 `bin/truchaind`: TruStory server node
 
-#### Deployment
-
 `trucli`, the light client, will ideally run on it's own machine. It will handle all
 API requets, and communicate via RPC with `truchaind`.
 
 `truchaind`, will initially run as a single Cosmos node, but eventually as a zone of many nodes.
 
+```
+// create genesis file
+truchaind init
+
+// start blockchain
+truchaind start
+```
 
 ### Architecture
 
