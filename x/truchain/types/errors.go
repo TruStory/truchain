@@ -86,11 +86,6 @@ func ErrVoteNotFound(voteID int64) sdk.Error {
 		strconv.Itoa(int(voteID))+" not found")
 }
 
-// ErrActiveStoryQueueNotFound throws an error when the searched ActiveStoryQueue is not found
-func ErrActiveStoryQueueNotFound() sdk.Error {
-	return newError(DefaultCodespace, CodeActiveStoryQueueNotFound, "Active story queue not found")
-}
-
 // ErrActiveStoryQueueEmpty throws an error when the searched ActiveStoryQueue is not found
 func ErrActiveStoryQueueEmpty() sdk.Error {
 	return newError(DefaultCodespace, CodeActiveStoryQueueEmpty, "Active story queue is empty")
