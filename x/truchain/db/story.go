@@ -63,7 +63,7 @@ func (k TruKeeper) AddStory(
 func (k TruKeeper) UpdateStory(ctx sdk.Context, story ts.Story) {
 	newStory := ts.NewStory(
 		story.ID,
-		story.BondIDs,
+		story.BackIDs,
 		story.CommentIDs,
 		story.EvidenceIDs,
 		story.Thread,

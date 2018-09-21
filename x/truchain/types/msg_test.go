@@ -16,14 +16,14 @@ func TestValidPlaceBondMsg(t *testing.T) {
 	validStake := sdk.Coin{Denom: "trusomecoin", Amount: sdk.NewInt(100)}
 	validCreator := sdk.AccAddress([]byte{1, 2})
 	validPeriod := time.Duration(3 * 24 * time.Hour)
-	msg := NewPlaceBondMsg(validStoryID, validStake, validCreator, validPeriod)
+	msg := NewBackStoryMsg(validStoryID, validStake, validCreator, validPeriod)
 	err := msg.ValidateBasic()
 
 	assert.Nil(t, err)
-	assert.Equal(t, "PlaceBond", msg.Type())
+	assert.Equal(t, "BackStory", msg.Type())
 	assert.Equal(
 		t,
-		`{"amount":{"amount":"100","denom":"trusomecoin"},"creator":"cosmosaccaddr1qypq8zs0ka","period":259200000000000,"story_id":1}`,
+		`{"amount":{"amount":"100","denom":"trusomecoin"},"creator":"cosmosaccaddr1qypq8zs0ka","duration":259200000000000,"story_id":1}`,
 		fmt.Sprintf("%s", msg.GetSignBytes()),
 	)
 	assert.Equal(t, []sdk.AccAddress{validCreator}, msg.GetSigners())
@@ -34,7 +34,7 @@ func TestInvalidStoryIdPlaceBondMsg(t *testing.T) {
 	validStake := sdk.Coin{Denom: "trusomecoin", Amount: sdk.NewInt(100)}
 	validCreator := sdk.AccAddress([]byte{1, 2})
 	validPeriod := time.Duration(3 * 24 * time.Hour)
-	msg := NewPlaceBondMsg(invalidStoryID, validStake, validCreator, validPeriod)
+	msg := NewBackStoryMsg(invalidStoryID, validStake, validCreator, validPeriod)
 	err := msg.ValidateBasic()
 
 	assert.Equal(t, sdk.CodeType(703), err.Code(), err.Error())
@@ -45,7 +45,7 @@ func TestInvalidAddressPlaceBondMsg(t *testing.T) {
 	validStake := sdk.Coin{Denom: "trusomecoin", Amount: sdk.NewInt(100)}
 	invalidCreator := sdk.AccAddress([]byte{})
 	validPeriod := time.Duration(3 * 24 * time.Hour)
-	msg := NewPlaceBondMsg(validStoryID, validStake, invalidCreator, validPeriod)
+	msg := NewBackStoryMsg(validStoryID, validStake, invalidCreator, validPeriod)
 	err := msg.ValidateBasic()
 
 	assert.Equal(t, sdk.CodeType(7), err.Code(), err.Error())
@@ -56,7 +56,7 @@ func TestInValidStakePlaceBondMsg(t *testing.T) {
 	invalidStake := sdk.Coin{Denom: "trusomecoin", Amount: sdk.NewInt(0)}
 	validCreator := sdk.AccAddress([]byte{1, 2})
 	validPeriod := time.Duration(3 * 24 * time.Hour)
-	msg := NewPlaceBondMsg(validStoryID, invalidStake, validCreator, validPeriod)
+	msg := NewBackStoryMsg(validStoryID, invalidStake, validCreator, validPeriod)
 	err := msg.ValidateBasic()
 
 	assert.Equal(t, sdk.CodeType(705), err.Code(), err.Error())
@@ -67,7 +67,7 @@ func TestInValidBondPeriodPlaceBondMsg(t *testing.T) {
 	validStake := sdk.Coin{Denom: "trusomecoin", Amount: sdk.NewInt(100)}
 	validCreator := sdk.AccAddress([]byte{1, 2})
 	invalidPeriod := time.Duration(0 * time.Hour)
-	msg := NewPlaceBondMsg(validStoryID, validStake, validCreator, invalidPeriod)
+	msg := NewBackStoryMsg(validStoryID, validStake, validCreator, invalidPeriod)
 	err := msg.ValidateBasic()
 
 	assert.Equal(t, sdk.CodeType(706), err.Code(), err.Error())

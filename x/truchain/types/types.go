@@ -137,14 +137,17 @@ func (i StoryType) String() string {
 
 // Back type
 type Back struct {
-	ID       int64
-	Coins    sdk.Coins
-	Duration time.Time
-	User     sdk.AccAddress
+	// ID is a unique key for each `Back` value in the KVStore
+	ID int64
 
-	// Blockstamps
-	CreatedBlock int64
-	UpdatedBlock int64
+	// Coins is the various coins being backed (TruStake and category)
+	Coins sdk.Coins
+
+	// Expires is the time a `Back` period is over
+	Expires time.Time
+
+	// User is the public key of the user backing the story
+	User sdk.AccAddress
 }
 
 // Story type

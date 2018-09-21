@@ -11,40 +11,40 @@ import (
 
 // ============================================================================
 
-// PlaceBondMsg defines a message to bond to a story
-type PlaceBondMsg struct {
-	StoryID int64          `json:"story_id"`
-	Amount  sdk.Coin       `json:"amount"`
-	Creator sdk.AccAddress `json:"creator"`
-	Period  time.Duration  `json:"period"`
+// BackStoryMsg defines a message to bond to a story
+type BackStoryMsg struct {
+	StoryID  int64          `json:"story_id"`
+	Amount   sdk.Coin       `json:"amount"`
+	Creator  sdk.AccAddress `json:"creator"`
+	Duration time.Duration  `json:"duration"`
 }
 
-// NewPlaceBondMsg creates a message to place a new bond
-func NewPlaceBondMsg(
+// NewBackStoryMsg creates a message to place a new bond
+func NewBackStoryMsg(
 	storyID int64,
 	amount sdk.Coin,
 	creator sdk.AccAddress,
-	period time.Duration) PlaceBondMsg {
-	return PlaceBondMsg{
-		StoryID: storyID,
-		Amount:  amount,
-		Creator: creator,
-		Period:  period,
+	duration time.Duration) BackStoryMsg {
+	return BackStoryMsg{
+		StoryID:  storyID,
+		Amount:   amount,
+		Creator:  creator,
+		Duration: duration,
 	}
 }
 
 // Type implements Msg
-func (msg PlaceBondMsg) Type() string {
-	return "PlaceBond"
+func (msg BackStoryMsg) Type() string {
+	return "BackStory"
 }
 
 // GetSignBytes implements Msg
-func (msg PlaceBondMsg) GetSignBytes() []byte {
+func (msg BackStoryMsg) GetSignBytes() []byte {
 	return getSignBytes(msg)
 }
 
 // ValidateBasic implements Msg
-func (msg PlaceBondMsg) ValidateBasic() sdk.Error {
+func (msg BackStoryMsg) ValidateBasic() sdk.Error {
 	if msg.StoryID <= 0 {
 		return ErrInvalidStoryID("StoryID cannot be negative")
 	}
@@ -54,14 +54,14 @@ func (msg PlaceBondMsg) ValidateBasic() sdk.Error {
 	if msg.Amount.IsZero() == true {
 		return ErrInvalidAmount("Invalid bond amount: " + msg.Amount.String())
 	}
-	if msg.Period == 0 {
-		return ErrInvalidBondPeriod("Invalid bond period: " + msg.Period.String())
+	if msg.Duration == 0 {
+		return ErrInvalidBondPeriod("Invalid bond period: " + msg.Duration.String())
 	}
 	return nil
 }
 
 // GetSigners implements Msg
-func (msg PlaceBondMsg) GetSigners() []sdk.AccAddress {
+func (msg BackStoryMsg) GetSigners() []sdk.AccAddress {
 	return getSigners(msg.Creator)
 }
 
@@ -270,7 +270,7 @@ func (msg VoteMsg) GetSigners() []sdk.AccAddress {
 
 // RegisterAmino registers messages into the codec
 func RegisterAmino(cdc *amino.Codec) {
-	cdc.RegisterConcrete(PlaceBondMsg{}, "truchain/PlaceBondMsg", nil)
+	cdc.RegisterConcrete(BackStoryMsg{}, "truchain/BackStoryMsg", nil)
 	cdc.RegisterConcrete(AddCommentMsg{}, "truchain/AddCommentMsg", nil)
 	cdc.RegisterConcrete(SubmitEvidenceMsg{}, "truchain/SubmitEvidenceMsg", nil)
 	cdc.RegisterConcrete(SubmitStoryMsg{}, "truchain/SubmitStoryMsg", nil)
