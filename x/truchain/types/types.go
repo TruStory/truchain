@@ -135,10 +135,22 @@ func (i StoryType) String() string {
 	return [...]string{"Default", "Identity", "Recovery"}[i]
 }
 
+// Back type
+type Back struct {
+	ID       int64
+	Coins    sdk.Coins
+	Duration time.Time
+	User     sdk.AccAddress
+
+	// Blockstamps
+	CreatedBlock int64
+	UpdatedBlock int64
+}
+
 // Story type
 type Story struct {
 	ID           int64            `json:"id"`
-	BondIDs      []int64          `json:"bond_i_ds,omitempty"`
+	BackIDs      []int64          `json:"back_ids,omitempty"`
 	CommentIDs   []int64          `json:"comment_i_ds,omitempty"`
 	EvidenceIDs  []int64          `json:"evidence_i_ds,omitempty"`
 	Thread       []int64          `json:"thread,omitempty"`
@@ -161,7 +173,7 @@ type Story struct {
 // NewStory creates a new story
 func NewStory(
 	id int64,
-	bondIDs []int64,
+	backIDs []int64,
 	commentIDs []int64,
 	evidenceIDs []int64,
 	thread []int64,
@@ -182,7 +194,7 @@ func NewStory(
 
 	return Story{
 		ID:           id,
-		BondIDs:      bondIDs,
+		BackIDs:      backIDs,
 		CommentIDs:   commentIDs,
 		EvidenceIDs:  evidenceIDs,
 		Thread:       thread,
