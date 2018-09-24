@@ -48,8 +48,8 @@ func (k TruKeeper) GetVote(ctx sdk.Context, voteID int64) (ts.Vote, sdk.Error) {
 	return *vote, nil
 }
 
-// AddVote adds a new vote to the vote store
-func (k TruKeeper) AddVote(
+// NewVote adds a new vote to the vote store
+func (k TruKeeper) NewVote(
 	ctx sdk.Context,
 	story ts.Story,
 	amount sdk.Coins,

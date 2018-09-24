@@ -41,7 +41,7 @@ func handleSubmitStoryMsg(ctx sdk.Context, k db.TruKeeper, msg ts.SubmitStoryMsg
 	voteStart := ctx.BlockHeader().Time
 	voteEnd := voteStart.Add(time.Hour * time.Duration(votingPeriod))
 
-	storyID, err := k.AddStory(ctx, msg.Body, msg.Category, msg.Creator, msg.Escrow, msg.StoryType, voteMaxNum, voteStart, voteEnd)
+	storyID, err := k.NewStory(ctx, msg.Body, msg.Category, msg.Creator, msg.Escrow, msg.StoryType, voteMaxNum, voteStart, voteEnd)
 	if err != nil {
 		panic(err)
 	}
