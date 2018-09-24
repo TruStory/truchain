@@ -55,6 +55,6 @@ func createFakeStoryWithEscrow(ctx sdk.Context, am auth.AccountMapper, ms sdk.Mu
 	storyType := ts.Default
 	t := time.Date(2018, time.September, 13, 23, 0, 0, 0, time.UTC)
 
-	storyID, _ := k.AddStory(ctx, body, category, creator, escrowAddr, storyType, 10, t, t)
+	storyID, _ := k.NewStory(ctx, body, category, creator, escrowAddr, storyType, 10, t, t)
 	return storyID
 }

@@ -10,22 +10,8 @@ import (
 // ============================================================================
 // Story operations
 
-// GetStory gets the story with the given id from the key-value store
-func (k TruKeeper) GetStory(ctx sdk.Context, storyID int64) (ts.Story, sdk.Error) {
-	store := ctx.KVStore(k.storyKey)
-	key := generateKey(k.storyKey.String(), storyID)
-	val := store.Get(key)
-	if val == nil {
-		return ts.Story{}, ts.ErrStoryNotFound(storyID)
-	}
-	story := &ts.Story{}
-	k.cdc.MustUnmarshalBinary(val, story)
-
-	return *story, nil
-}
-
-// AddStory adds a story to the key-value store
-func (k TruKeeper) AddStory(
+// NewStory adds a story to the key-value store
+func (k TruKeeper) NewStory(
 	ctx sdk.Context,
 	body string,
 	category ts.StoryCategory,
@@ -60,6 +46,20 @@ func (k TruKeeper) AddStory(
 	k.ActiveStoryQueuePush(ctx, story.ID)
 
 	return story.ID, nil
+}
+
+// GetStory gets the story with the given id from the key-value store
+func (k TruKeeper) GetStory(ctx sdk.Context, storyID int64) (ts.Story, sdk.Error) {
+	store := ctx.KVStore(k.storyKey)
+	key := generateKey(k.storyKey.String(), storyID)
+	val := store.Get(key)
+	if val == nil {
+		return ts.Story{}, ts.ErrStoryNotFound(storyID)
+	}
+	story := &ts.Story{}
+	k.cdc.MustUnmarshalBinary(val, story)
+
+	return *story, nil
 }
 
 // UpdateStory updates an existing story in the store
@@ -108,7 +108,7 @@ func (k TruKeeper) VoteStory(ctx sdk.Context, storyID int64, creator sdk.AccAddr
 		return -1, err
 	}
 
-	voteID, err := k.AddVote(ctx, story, amount, creator, choice)
+	voteID, err := k.NewVote(ctx, story, amount, creator, choice)
 
 	// add vote id to story
 	story.VoteIDs = append(story.VoteIDs, voteID)
