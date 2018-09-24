@@ -80,6 +80,16 @@ Project layout:
 
 It compiles into two binaries, `trucli` (lite client) and `truchaind` (dapp chain). The lite client is responsible for responding to API requests from clients wanting to access or modify data on the dapp chain. The dapp chain is responsible for responding to requests from the lite client, including querying and storing data.
 
+#### Key-Value Store
+
+Because the current Cosmos SDK data store is built on a key-value store, database
+operations are more explicit than a relational or even NoSQL database. Lists and
+queues must be made for data that needs to be retrieved.
+
+For example, the list of in-progress stories is stored as a queue with key `activeStoriesQueue`.
+
+Votes for a story are stored in the story store, with a key of the form `stories|ID|votes`.
+
 ### Messages
 
 These are the messages needed to modify state on the TruStory blockchain.
