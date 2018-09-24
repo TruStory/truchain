@@ -14,20 +14,22 @@ type TruKeeper struct {
 	ck bank.Keeper
 
 	// unexposed keys to access store from context
-	storyKey sdk.StoreKey
-	voteKey  sdk.StoreKey
+	storyKey   sdk.StoreKey
+	voteKey    sdk.StoreKey
+	backingKey sdk.StoreKey
 
 	// wire codec for binary encoding/decoding
 	cdc *amino.Codec
 }
 
 // NewTruKeeper creates a new keeper with write and read access
-func NewTruKeeper(storyKey sdk.StoreKey, voteKey sdk.StoreKey, ck bank.Keeper, cdc *amino.Codec) TruKeeper {
+func NewTruKeeper(storyKey sdk.StoreKey, voteKey sdk.StoreKey, backingKey sdk.StoreKey, ck bank.Keeper, cdc *amino.Codec) TruKeeper {
 	return TruKeeper{
-		ck:       ck,
-		storyKey: storyKey,
-		voteKey:  voteKey,
-		cdc:      cdc,
+		ck:         ck,
+		storyKey:   storyKey,
+		voteKey:    voteKey,
+		backingKey: backingKey,
+		cdc:        cdc,
 	}
 }
 

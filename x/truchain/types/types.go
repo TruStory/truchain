@@ -21,14 +21,27 @@ func (asq ActiveStoryQueue) IsEmpty() bool {
 
 // ============================================================================
 
-// Bond placed on a story
-type Bond struct {
-	ID           int64          `json:"id"`
-	StoryID      int64          `json:"story_id"`
-	Amount       sdk.Coin       `json:"amount"`
-	CreatedBlock int64          `json:"created_block"`
-	Creator      sdk.AccAddress `json:"creator"`
-	Period       time.Duration  `json:"period"`
+// Backing type
+type Backing struct {
+	ID      int64          `json:"id"`
+	Coins   sdk.Coins      `json:"coins"`
+	Expires time.Time      `json:"expires"`
+	User    sdk.AccAddress `json:"user"`
+}
+
+// NewBacking creates a new backing type
+func NewBacking(
+	id int64,
+	amount sdk.Coins,
+	expires time.Time,
+	creator sdk.AccAddress) Backing {
+
+	return Backing{
+		ID:      id,
+		Coins:   amount,
+		Expires: expires,
+		User:    creator,
+	}
 }
 
 // ============================================================================
@@ -133,21 +146,6 @@ func (i StoryType) IsValid() bool {
 
 func (i StoryType) String() string {
 	return [...]string{"Default", "Identity", "Recovery"}[i]
-}
-
-// Back type
-type Back struct {
-	// ID is a unique key for each `Back` value in the KVStore
-	ID int64
-
-	// Coins is the various coins being backed (TruStake and category)
-	Coins sdk.Coins
-
-	// Expires is the time a `Back` period is over
-	Expires time.Time
-
-	// User is the public key of the user backing the story
-	User sdk.AccAddress
 }
 
 // Story type

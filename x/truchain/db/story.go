@@ -96,6 +96,13 @@ func (k TruKeeper) UpdateStory(ctx sdk.Context, story ts.Story) {
 // ============================================================================
 // Actions that can be performed on a specific story
 
+// Backing
+
+// BackStory records a back to a story
+// func (k TruKeeper) BackStory(ctx sdk.Context, storyID int64, amount sdk.Coins, creator sdk.AccAddress, duration time.Duration) (int64, sdk.Error) {
+
+// }
+
 // Voting
 
 // VoteStory saves a vote to a story
