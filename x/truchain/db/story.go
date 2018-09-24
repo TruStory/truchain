@@ -1,6 +1,8 @@
 package db
 
 import (
+	"strconv"
+	"strings"
 	"time"
 
 	ts "github.com/TruStory/truchain/x/truchain/types"
@@ -92,7 +94,9 @@ func (k TruKeeper) UpdateStory(ctx sdk.Context, story ts.Story) {
 }
 
 // ============================================================================
-// Actions that can be performed on a story
+// Actions that can be performed on a specific story
+
+// Voting
 
 // VoteStory saves a vote to a story
 func (k TruKeeper) VoteStory(ctx sdk.Context, storyID int64, creator sdk.AccAddress, choice bool, amount sdk.Coins) (int64, sdk.Error) {
@@ -122,4 +126,33 @@ func (k TruKeeper) VoteStory(ctx sdk.Context, storyID int64, creator sdk.AccAddr
 	k.SetActiveVotes(ctx, story.ID, votes)
 
 	return voteID, nil
+}
+
+// GetActiveVotes gets all votes for the current round of a story
+func (k TruKeeper) GetActiveVotes(ctx sdk.Context, storyID int64) []int64 {
+	store := ctx.KVStore(k.storyKey)
+	key := generateVoteListKey(storyID)
+	val := store.Get(key)
+	if val == nil {
+		return []int64{}
+	}
+	votes := &[]int64{}
+	k.cdc.MustUnmarshalBinary(val, votes)
+
+	return *votes
+}
+
+// SetActiveVotes sets all votes for the current round of a story
+func (k TruKeeper) SetActiveVotes(ctx sdk.Context, storyID int64, votes []int64) {
+	store := ctx.KVStore(k.storyKey)
+	key := generateVoteListKey(storyID)
+	value := k.cdc.MustMarshalBinary(votes)
+	store.Set(key, value)
+}
+
+// ============================================================================
+
+// generateVoteListKey creates a key for a vote list of form "stories|ID|votes"
+func generateVoteListKey(storyID int64) []byte {
+	return []byte(strings.Join([]string{"stories", strconv.Itoa(int(storyID)), "votes"}, ""))
 }
