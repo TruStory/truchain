@@ -230,3 +230,24 @@ type Vote struct {
 	Round        int64          `json:"round"`
 	Vote         bool           `json:"vote"`
 }
+
+// NewVote creates a new Vote instance
+func NewVote(
+	id int64,
+	storyID int64,
+	amount sdk.Coins,
+	createdBlock int64,
+	creator sdk.AccAddress,
+	round int64,
+	vote bool) Vote {
+
+	return Vote{
+		ID:           id,
+		StoryID:      storyID,
+		Amount:       amount,
+		CreatedBlock: createdBlock,
+		Creator:      creator,
+		Round:        round,
+		Vote:         vote,
+	}
+}
