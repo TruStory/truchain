@@ -7,6 +7,9 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
+// ============================================================================
+// Story operations
+
 // GetStory gets the story with the given id from the key-value store
 func (k TruKeeper) GetStory(ctx sdk.Context, storyID int64) (ts.Story, sdk.Error) {
 	store := ctx.KVStore(k.storyKey)
@@ -86,4 +89,37 @@ func (k TruKeeper) UpdateStory(ctx sdk.Context, story ts.Story) {
 	key := generateKey(k.storyKey.String(), story.ID)
 	val := k.cdc.MustMarshalBinary(newStory)
 	store.Set(key, val)
+}
+
+// ============================================================================
+// Actions that can be performed on a story
+
+// VoteStory saves a vote to a story
+func (k TruKeeper) VoteStory(ctx sdk.Context, storyID int64, creator sdk.AccAddress, choice bool, amount sdk.Coins) (int64, sdk.Error) {
+	story, err := k.GetStory(ctx, storyID)
+	if err != nil {
+		return -1, err
+	}
+
+	// temporarily moves funds from voter to an escrow account until
+	// the voting period is over and funds are distributed
+	_, err = k.ck.SendCoins(ctx, creator, story.Escrow, amount)
+	if err != nil {
+		return -1, err
+	}
+
+	voteID, err := k.AddVote(ctx, story, amount, creator, choice)
+
+	// add vote id to story
+	story.VoteIDs = append(story.VoteIDs, voteID)
+
+	// replace old story with new one in story store
+	k.UpdateStory(ctx, story)
+
+	// add vote to vote list
+	votes := k.GetActiveVotes(ctx, story.ID)
+	votes = append(votes, voteID)
+	k.SetActiveVotes(ctx, story.ID, votes)
+
+	return voteID, nil
 }
