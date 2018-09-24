@@ -37,6 +37,7 @@ type TruChain struct {
 	keyIBC     *sdk.KVStoreKey
 	keyStory   *sdk.KVStoreKey
 	keyVote    *sdk.KVStoreKey
+	keyBacking *sdk.KVStoreKey
 
 	// manage getting and setting accounts
 	accountMapper       auth.AccountMapper
@@ -66,6 +67,7 @@ func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *T
 		keyIBC:     sdk.NewKVStoreKey("ibc"),
 		keyStory:   sdk.NewKVStoreKey("stories"),
 		keyVote:    sdk.NewKVStoreKey("votes"),
+		keyBacking: sdk.NewKVStoreKey("backings"),
 	}
 
 	// define and attach the mappers and keepers
@@ -76,13 +78,18 @@ func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *T
 	)
 	app.coinKeeper = bank.NewKeeper(app.accountMapper)
 	app.ibcMapper = ibc.NewMapper(app.cdc, app.keyIBC, app.RegisterCodespace(ibc.DefaultCodespace))
-	app.keeper = sdb.NewTruKeeper(app.keyStory, app.keyVote, app.coinKeeper, app.cdc)
+	app.keeper = sdb.NewTruKeeper(
+		app.keyStory,
+		app.keyVote,
+		app.keyBacking,
+		app.coinKeeper,
+		app.cdc)
 
 	// register message routes
 	app.Router().
 		AddRoute("bank", bank.NewHandler(app.coinKeeper)).
 		AddRoute("ibc", ibc.NewHandler(app.ibcMapper, app.coinKeeper)).
-		AddRoute("stories", ts.NewHandler(app.keeper))
+		AddRoute("app", ts.NewHandler(app.keeper))
 
 	// perform initialization logic
 	app.SetInitChainer(app.initChainer)

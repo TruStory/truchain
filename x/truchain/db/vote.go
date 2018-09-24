@@ -5,9 +5,6 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
-// ============================================================================
-// Vote operations
-
 // NewVote adds a new vote to the vote store
 func (k TruKeeper) NewVote(
 	ctx sdk.Context,

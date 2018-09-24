@@ -15,9 +15,9 @@ import (
 )
 
 func TestAddGetStory(t *testing.T) {
-	ms, _, storyKey, voteKey := setupMultiStore()
+	ms, _, storyKey, voteKey, backingKey := setupMultiStore()
 	cdc := makeCodec()
-	keeper := NewTruKeeper(storyKey, voteKey, bank.Keeper{}, cdc)
+	keeper := NewTruKeeper(storyKey, voteKey, backingKey, bank.Keeper{}, cdc)
 	ctx := sdk.NewContext(ms, abci.Header{}, false, log.NewNopLogger())
 	storyID := createFakeStory(ms, keeper)
 

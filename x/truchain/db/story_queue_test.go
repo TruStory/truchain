@@ -12,9 +12,9 @@ import (
 )
 
 func TestActiveStoryQueue(t *testing.T) {
-	ms, _, storyKey, voteKey := setupMultiStore()
+	ms, _, storyKey, voteKey, backingKey := setupMultiStore()
 	cdc := makeCodec()
-	k := NewTruKeeper(storyKey, voteKey, bank.Keeper{}, cdc)
+	k := NewTruKeeper(storyKey, voteKey, backingKey, bank.Keeper{}, cdc)
 	ctx := sdk.NewContext(ms, abci.Header{}, false, log.NewNopLogger())
 	storyID := createFakeStory(ms, k)
 
