@@ -10,7 +10,7 @@ import (
 // NewBacking adds a new vote to the vote store
 func (k TruKeeper) NewBacking(
 	ctx sdk.Context,
-	story ts.Story,
+	storyID int64,
 	amount sdk.Coins,
 	creator sdk.AccAddress,
 	duration time.Duration,
@@ -19,6 +19,7 @@ func (k TruKeeper) NewBacking(
 	// create new backing type
 	backing := ts.NewBacking(
 		k.newID(ctx, k.backingKey),
+		storyID,
 		amount,
 		time.Now().Add(duration),
 		creator)

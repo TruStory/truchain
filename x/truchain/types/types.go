@@ -24,6 +24,7 @@ func (asq ActiveStoryQueue) IsEmpty() bool {
 // Backing type
 type Backing struct {
 	ID      int64          `json:"id"`
+	StoryID int64          `json:"story_id"`
 	Coins   sdk.Coins      `json:"coins"`
 	Expires time.Time      `json:"expires"`
 	User    sdk.AccAddress `json:"user"`
@@ -32,12 +33,14 @@ type Backing struct {
 // NewBacking creates a new backing type
 func NewBacking(
 	id int64,
+	storyID int64,
 	amount sdk.Coins,
 	expires time.Time,
 	creator sdk.AccAddress) Backing {
 
 	return Backing{
 		ID:      id,
+		StoryID: storyID,
 		Coins:   amount,
 		Expires: expires,
 		User:    creator,
