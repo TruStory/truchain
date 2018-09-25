@@ -6,8 +6,8 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
-// resereTokenDenom is the denom for Trustory's native reserve token.
-const reserveTokenDenom = "trustake"
+// ReserveTokenDenom is the coin  denom for Trustory's native reserve token.
+const ReserveTokenDenom = "trustake"
 
 // maxBackingDuration is the max backing duration
 const maxBackingDuration time.Duration = 365 * 24 * time.Hour
@@ -60,7 +60,7 @@ func (msg BackStoryMsg) ValidateBasic() sdk.Error {
 	if msg.Amount.IsZero() == true {
 		return ErrInvalidAmount("Invalid backing amount: " + msg.Amount.String())
 	}
-	if msg.Amount.Denom != reserveTokenDenom {
+	if msg.Amount.Denom != ReserveTokenDenom {
 		return ErrInvalidBackingCoin("Invalid backing coin: " + msg.Amount.String())
 	}
 	if msg.Duration <= minBackingDuration || msg.Duration >= maxBackingDuration {

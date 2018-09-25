@@ -25,7 +25,7 @@ func (asq ActiveStoryQueue) IsEmpty() bool {
 type Backing struct {
 	ID      int64          `json:"id"`
 	StoryID int64          `json:"story_id"`
-	Coins   sdk.Coins      `json:"coins"`
+	Amount  sdk.Coin       `json:"amount"`
 	Expires time.Time      `json:"expires"`
 	User    sdk.AccAddress `json:"user"`
 }
@@ -34,14 +34,14 @@ type Backing struct {
 func NewBacking(
 	id int64,
 	storyID int64,
-	amount sdk.Coins,
+	amount sdk.Coin,
 	expires time.Time,
 	creator sdk.AccAddress) Backing {
 
 	return Backing{
 		ID:      id,
 		StoryID: storyID,
-		Coins:   amount,
+		Amount:  amount,
 		Expires: expires,
 		User:    creator,
 	}
@@ -91,6 +91,11 @@ func (i StoryCategory) IsValid() bool {
 		return true
 	}
 	return false
+}
+
+// CoinDenom is the coin denomination for the category (trubtc, trustablecoins, etc)
+func (i StoryCategory) CoinDenom() string {
+	return ReserveTokenDenom + i.Slug()
 }
 
 // Slug is the short name for a category

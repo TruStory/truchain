@@ -7,20 +7,35 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
+// denomPrefix is the prefix for category coins (i.e: trubtc, trustablecoins)
+const denomPrefix = "tru"
+
 // NewBacking adds a new vote to the vote store
 func (k TruKeeper) NewBacking(
 	ctx sdk.Context,
 	storyID int64,
-	amount sdk.Coins,
+	amount sdk.Coin,
 	creator sdk.AccAddress,
 	duration time.Duration,
 ) (int64, sdk.Error) {
+
+	// get story from story id
+	story, err := k.GetStory(ctx, storyID)
+	if err != nil {
+		return -1, err
+	}
+
+	// mint category coin from trustake
+	coins, err := mintCategoryCoins(k, ctx, story.Category, amount, duration, creator)
+	if err != nil {
+		return -1, err
+	}
 
 	// create new backing type
 	backing := ts.NewBacking(
 		k.newID(ctx, k.backingKey),
 		storyID,
-		amount,
+		coins,
 		time.Now().Add(duration),
 		creator)
 
@@ -35,49 +50,23 @@ func (k TruKeeper) NewBacking(
 	return backing.ID, nil
 }
 
-// GetVote gets a vote with the given id from the key-value store
-// func (k TruKeeper) GetVote(ctx sdk.Context, voteID int64) (ts.Vote, sdk.Error) {
-// 	store := ctx.KVStore(k.voteKey)
-// 	key := generateKey(k.voteKey.String(), voteID)
-// 	val := store.Get(key)
-// 	if val == nil {
-// 		return ts.Vote{}, ts.ErrVoteNotFound(voteID)
-// 	}
-// 	vote := &ts.Vote{}
-// 	k.cdc.MustUnmarshalBinary(val, vote)
+// mintCategoryCoin mints new category coins by burning trustake and using a formula
+// based on the amount of trustake and backing duration
+func mintCategoryCoins(
+	k TruKeeper,
+	ctx sdk.Context,
+	cat ts.StoryCategory,
+	amount sdk.Coin,
+	duration time.Duration,
+	addr sdk.AccAddress) (sdk.Coin, sdk.Error) {
 
-// 	return *vote, nil
-// }
+	// naive implementation: 1 trustake = 1 category coin
+	coin := sdk.NewCoin(cat.CoinDenom(), amount.Amount)
 
-// ============================================================================
+	// burn trustake
+	if _, _, err := k.ck.SubtractCoins(ctx, addr, sdk.Coins{amount}); err != nil {
+		return sdk.Coin{}, err
+	}
 
-// GetBackers gets all votes for the current round of a story
-// func (k TruKeeper) GetActiveVotes(ctx sdk.Context, storyID int64) []int64 {
-// 	store := ctx.KVStore(k.storyKey)
-// 	key := generateVoteListKey(storyID)
-// 	val := store.Get(key)
-// 	if val == nil {
-// 		return []int64{}
-// 	}
-// 	votes := &[]int64{}
-// 	k.cdc.MustUnmarshalBinary(val, votes)
-
-// 	return *votes
-// }
-
-// SetBackers sets all votes for the current round of a story
-// func (k TruKeeper) SetActiveVotes(ctx sdk.Context, storyID int64, votes []int64) {
-// 	store := ctx.KVStore(k.storyKey)
-// 	key := generateVoteListKey(storyID)
-// 	value := k.cdc.MustMarshalBinary(votes)
-// 	store.Set(key, value)
-// }
-
-// ============================================================================
-
-// ============================================================================
-
-// generateVoteListKey creates a key for a vote list of form "stories|ID|votes"
-// func generateVoteListKey(storyID int64) []byte {
-// 	return []byte(strings.Join([]string{"stories", strconv.Itoa(int(storyID)), "votes"}, ""))
-// }
+	return coin, nil
+}

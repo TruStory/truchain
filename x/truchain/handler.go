@@ -50,7 +50,7 @@ func handleBackStoryMsg(ctx sdk.Context, k db.TruKeeper, msg ts.BackStoryMsg) sd
 	backingID, err := k.NewBacking(
 		ctx,
 		msg.StoryID,
-		sdk.Coins{msg.Amount},
+		msg.Amount,
 		msg.Creator,
 		msg.Duration)
 	if err != nil {
