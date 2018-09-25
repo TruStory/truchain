@@ -15,13 +15,14 @@ const (
 	CodeInvalidStoryID           sdk.CodeType = 703
 	CodeStoryNotFound            sdk.CodeType = 704
 	CodeInvalidAmount            sdk.CodeType = 705
-	CodeInvalidBondPeriod        sdk.CodeType = 706
+	CodeInvalidBackingPeriod     sdk.CodeType = 706
 	CodeInvalidURL               sdk.CodeType = 707
 	CodeInvalidCategory          sdk.CodeType = 708
 	CodeInvalidStoryType         sdk.CodeType = 709
 	CodeVoteNotFoundType         sdk.CodeType = 710
 	CodeActiveStoryQueueNotFound sdk.CodeType = 711
 	CodeActiveStoryQueueEmpty    sdk.CodeType = 712
+	CodeInvalidBackingCoin       sdk.CodeType = 713
 )
 
 func codeToDefaultMsg(code sdk.CodeType) string {
@@ -64,9 +65,14 @@ func ErrInvalidAmount(msg string) sdk.Error {
 	return newError(DefaultCodespace, CodeInvalidAmount, msg)
 }
 
-// ErrInvalidBondPeriod throws an error when bond period is invalid
-func ErrInvalidBondPeriod(msg string) sdk.Error {
-	return newError(DefaultCodespace, CodeInvalidBondPeriod, msg)
+// ErrInvalidBackingPeriod throws an error when bond period is invalid
+func ErrInvalidBackingPeriod(msg string) sdk.Error {
+	return newError(DefaultCodespace, CodeInvalidBackingPeriod, msg)
+}
+
+// ErrInvalidBackingCoin throws an error when bond period is invalid
+func ErrInvalidBackingCoin(msg string) sdk.Error {
+	return newError(DefaultCodespace, CodeInvalidBackingCoin, msg)
 }
 
 // ErrInvalidURL throws an error when a URL in invalid

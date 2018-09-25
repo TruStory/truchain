@@ -6,6 +6,15 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
+// resereTokenDenom is the denom for Trustory's native reserve token.
+const reserveTokenDenom = "trustake"
+
+// maxBackingDuration is the max backing duration
+const maxBackingDuration time.Duration = 365 * 24 * time.Hour
+
+// minBackingDuration is the min backing duration
+const minBackingDuration time.Duration = 1 * 24 * time.Hour
+
 // BackStoryMsg defines a message to bond to a story.
 // It implements the Cosmos `Msg` interface which is required
 // for transactions on Cosmos blockchains.
@@ -49,10 +58,13 @@ func (msg BackStoryMsg) ValidateBasic() sdk.Error {
 		return sdk.ErrInvalidAddress("Invalid address: " + msg.Creator.String())
 	}
 	if msg.Amount.IsZero() == true {
-		return ErrInvalidAmount("Invalid bond amount: " + msg.Amount.String())
+		return ErrInvalidAmount("Invalid backing amount: " + msg.Amount.String())
 	}
-	if msg.Duration == 0 {
-		return ErrInvalidBondPeriod("Invalid bond period: " + msg.Duration.String())
+	if msg.Amount.Denom != reserveTokenDenom {
+		return ErrInvalidBackingCoin("Invalid backing coin: " + msg.Amount.String())
+	}
+	if msg.Duration <= minBackingDuration || msg.Duration >= maxBackingDuration {
+		return ErrInvalidBackingPeriod("Invalid backing duration: " + msg.Duration.String())
 	}
 	return nil
 }
