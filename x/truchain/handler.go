@@ -3,14 +3,11 @@ package truchain
 import (
 	"encoding/binary"
 	"reflect"
-	"time"
 
 	db "github.com/TruStory/truchain/x/truchain/db"
 	ts "github.com/TruStory/truchain/x/truchain/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
-
-const votingPeriod = 24 // hours
 
 // NewHandler creates a new handler for all TruStory messages
 func NewHandler(k db.TruKeeper) sdk.Handler {
@@ -36,12 +33,7 @@ func handleSubmitStoryMsg(ctx sdk.Context, k db.TruKeeper, msg ts.SubmitStoryMsg
 		return err.Result()
 	}
 
-	// calculate voting period
-	voteMaxNum := int64(10) // TODO: read this from genesis file (https://github.com/TruStory/truchain/issues/14)
-	voteStart := ctx.BlockHeader().Time
-	voteEnd := voteStart.Add(time.Hour * time.Duration(votingPeriod))
-
-	storyID, err := k.NewStory(ctx, msg.Body, msg.Category, msg.Creator, msg.Escrow, msg.StoryType, voteMaxNum, voteStart, voteEnd)
+	storyID, err := k.NewStory(ctx, msg.Body, msg.Category, msg.Creator, msg.Escrow, msg.StoryType)
 	if err != nil {
 		panic(err)
 	}

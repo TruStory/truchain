@@ -3,7 +3,6 @@ package db
 import (
 	"strconv"
 	"strings"
-	"time"
 
 	ts "github.com/TruStory/truchain/x/truchain/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -19,10 +18,7 @@ func (k TruKeeper) NewStory(
 	category ts.StoryCategory,
 	creator sdk.AccAddress,
 	escrow sdk.AccAddress,
-	storyType ts.StoryType,
-	voteMaxNum int64,
-	voteStart time.Time,
-	voteEnd time.Time) (int64, sdk.Error) {
+	storyType ts.StoryType) (int64, sdk.Error) {
 
 	store := ctx.KVStore(k.storyKey)
 
@@ -35,9 +31,6 @@ func (k TruKeeper) NewStory(
 		Escrow:       escrow,
 		State:        ts.Created,
 		StoryType:    storyType,
-		VoteMaxNum:   voteMaxNum,
-		VoteStart:    voteStart,
-		VoteEnd:      voteEnd,
 	}
 
 	key := generateKey(k.storyKey.String(), story.ID)
