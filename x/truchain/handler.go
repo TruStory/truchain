@@ -15,6 +15,8 @@ func NewHandler(k db.TruKeeper) sdk.Handler {
 		switch msg := msg.(type) {
 		case ts.SubmitStoryMsg:
 			return handleSubmitStoryMsg(ctx, k, msg)
+		case ts.BackStoryMsg:
+			return handleBackStoryMsg(ctx, k, msg)
 		case ts.VoteMsg:
 			return handleVoteMsg(ctx, k, msg)
 		default:
@@ -28,8 +30,7 @@ func NewHandler(k db.TruKeeper) sdk.Handler {
 
 // handleSubmitStoryMsg handles the logic of a SubmitStoryMsg
 func handleSubmitStoryMsg(ctx sdk.Context, k db.TruKeeper, msg ts.SubmitStoryMsg) sdk.Result {
-	err := msg.ValidateBasic()
-	if err != nil {
+	if err := msg.ValidateBasic(); err != nil {
 		return err.Result()
 	}
 
@@ -41,9 +42,26 @@ func handleSubmitStoryMsg(ctx sdk.Context, k db.TruKeeper, msg ts.SubmitStoryMsg
 	return sdk.Result{Data: i2b(storyID)}
 }
 
-func handleVoteMsg(ctx sdk.Context, k db.TruKeeper, msg ts.VoteMsg) sdk.Result {
-	err := msg.ValidateBasic()
+func handleBackStoryMsg(ctx sdk.Context, k db.TruKeeper, msg ts.BackStoryMsg) sdk.Result {
+	if err := msg.ValidateBasic(); err != nil {
+		return err.Result()
+	}
+
+	backingID, err := k.NewBacking(
+		ctx,
+		msg.StoryID,
+		sdk.Coins{msg.Amount},
+		msg.Creator,
+		msg.Duration)
 	if err != nil {
+		panic(err)
+	}
+
+	return sdk.Result{Data: i2b(backingID)}
+}
+
+func handleVoteMsg(ctx sdk.Context, k db.TruKeeper, msg ts.VoteMsg) sdk.Result {
+	if err := msg.ValidateBasic(); err != nil {
 		return err.Result()
 	}
 
