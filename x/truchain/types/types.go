@@ -95,7 +95,7 @@ func (i StoryCategory) IsValid() bool {
 
 // CoinDenom is the coin denomination for the category (trubtc, trustablecoins, etc)
 func (i StoryCategory) CoinDenom() string {
-	return ReserveTokenDenom + i.Slug()
+	return "tru" + i.Slug()
 }
 
 // Slug is the short name for a category

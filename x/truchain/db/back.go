@@ -7,9 +7,6 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
-// denomPrefix is the prefix for category coins (i.e: trubtc, trustablecoins)
-const denomPrefix = "tru"
-
 // NewBacking adds a new vote to the vote store
 func (k TruKeeper) NewBacking(
 	ctx sdk.Context,
