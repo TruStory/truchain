@@ -23,48 +23,58 @@ func (asq BackingQueue) IsEmpty() bool {
 
 // BackingParams holds data for backing interest calculations
 type BackingParams struct {
-	AmountWeight sdk.Rat
-	PeriodWeight sdk.Rat
-	MinPeriod    time.Duration
-	MaxPeriod    time.Duration
+	AmountWeight    sdk.Rat
+	PeriodWeight    sdk.Rat
+	MinPeriod       time.Duration
+	MaxPeriod       time.Duration
+	MinInterestRate sdk.Rat
+	MaxInterestRate sdk.Rat
 }
 
 // NewBackingParams creates a new BackingParams type
 func NewBackingParams() BackingParams {
 	return BackingParams{
-		AmountWeight: sdk.NewRat(1 / 3),
-		PeriodWeight: sdk.NewRat(2 / 3),
-		MinPeriod:    3 * 24 * time.Hour,      // 3 days
-		MaxPeriod:    3 * 30 * 24 * time.Hour, // 3 months
+		AmountWeight:    sdk.NewRat(1 / 3),
+		PeriodWeight:    sdk.NewRat(2 / 3),
+		MinPeriod:       3 * 24 * time.Hour,  // 3 days
+		MaxPeriod:       90 * 24 * time.Hour, // 90 days
+		MinInterestRate: sdk.ZeroRat(),       // 0%
+		MaxInterestRate: sdk.NewRat(10, 100), // 10%
 	}
 }
 
 // Backing type
 type Backing struct {
-	ID      int64          `json:"id"`
-	StoryID int64          `json:"story_id"`
-	Amount  sdk.Coin       `json:"amount"`
-	Expires time.Time      `json:"expires"`
-	Period  time.Duration  `json:"period"`
-	User    sdk.AccAddress `json:"user"`
+	ID        int64          `json:"id"`
+	StoryID   int64          `json:"story_id"`
+	Principal sdk.Coin       `json:"principal"`
+	Interest  sdk.Coin       `json:"interest"`
+	Expires   time.Time      `json:"expires"`
+	Params    BackingParams  `json:"params"`
+	Period    time.Duration  `json:"period"`
+	User      sdk.AccAddress `json:"user"`
 }
 
 // NewBacking creates a new backing type
 func NewBacking(
 	id int64,
 	storyID int64,
-	amount sdk.Coin,
+	principal sdk.Coin,
+	interest sdk.Coin,
 	expires time.Time,
+	params BackingParams,
 	period time.Duration,
 	creator sdk.AccAddress) Backing {
 
 	return Backing{
-		ID:      id,
-		StoryID: storyID,
-		Amount:  amount,
-		Expires: expires,
-		Period:  period,
-		User:    creator,
+		ID:        id,
+		StoryID:   storyID,
+		Principal: principal,
+		Interest:  interest,
+		Expires:   expires,
+		Params:    params,
+		Period:    period,
+		User:      creator,
 	}
 }
 
