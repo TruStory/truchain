@@ -22,22 +22,30 @@ func (k TruKeeper) NewBacking(
 		return -1, err
 	}
 
-	// TODO: implement conversion (https://github.com/TruStory/truchain/issues/21)
 	// naïve implementaion: 1 trustake = 1 category coin
+	// https://github.com/TruStory/truchain/issues/21
 	conversionRate := sdk.NewInt(int64(1))
 
-	// mint category coin from trustake
-	coins, err := convertCoins(k, ctx, story.Category, amount, duration, creator, conversionRate)
+	// mint category coin from trustake -- the principal, amount user gets back
+	principal, err := convertCoins(k, ctx, story.Category, amount, duration, creator, conversionRate)
 	if err != nil {
 		return -1, err
 	}
+
+	// load default backing parameters
+	params := ts.NewBackingParams()
+
+	// mint category coin from interest earned
+	interest := calculateInterest(story.Category, amount, duration, params)
 
 	// create new backing type
 	backing := ts.NewBacking(
 		k.newID(ctx, k.backingKey),
 		storyID,
-		coins,
+		principal,
+		interest,
 		time.Now().Add(duration),
+		params,
 		duration,
 		creator)
 
@@ -88,4 +96,32 @@ func convertCoins(
 	}
 
 	return coin, nil
+}
+
+// calculateInterest calcuates the interest for the backing
+func calculateInterest(
+	category ts.StoryCategory,
+	amount sdk.Coin,
+	period time.Duration,
+	params ts.BackingParams) sdk.Coin {
+
+	// TODO: keep track of total supply
+	// https://github.com/TruStory/truchain/issues/22
+	coinBalance := int64(100)
+
+	maxAmount := coinBalance
+	maxPeriod := int64(365 * 24 * time.Hour)
+	normalizedAmount := amount.Amount.Div(sdk.NewInt(maxAmount))
+	normalizedPeriod := sdk.NewInt(int64(period*time.Hour) / maxPeriod)
+	amountWeight := normalizedAmount.Mul(sdk.NewInt(int64(1 / 3)))
+	periodWeight := normalizedPeriod.Mul(sdk.NewInt(int64(2 / 3)))
+
+	maxInterestRate := int64(10)
+	minInterestRate := int64(0)
+
+	interestRateRange := sdk.NewInt(maxInterestRate - minInterestRate)
+	baseInterestRate := interestRateRange.Mul(amountWeight.Add(periodWeight))
+	interest := baseInterestRate.Add(sdk.NewInt(minInterestRate))
+
+	return sdk.NewCoin(category.CoinDenom(), interest)
 }
