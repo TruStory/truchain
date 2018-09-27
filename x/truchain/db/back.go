@@ -7,7 +7,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
-// NewBacking adds a new vote to the vote store
+// NewBacking adds a new backing to the backing store
 func (k TruKeeper) NewBacking(
 	ctx sdk.Context,
 	storyID int64,
@@ -22,8 +22,12 @@ func (k TruKeeper) NewBacking(
 		return -1, err
 	}
 
+	// TODO: implement conversion (https://github.com/TruStory/truchain/issues/21)
+	// naïve implementaion: 1 trustake = 1 category coin
+	conversionRate := sdk.NewInt(int64(1))
+
 	// mint category coin from trustake
-	coins, err := mintCategoryCoins(k, ctx, story.Category, amount, duration, creator)
+	coins, err := convertCoins(k, ctx, story.Category, amount, duration, creator, conversionRate)
 	if err != nil {
 		return -1, err
 	}
@@ -34,6 +38,7 @@ func (k TruKeeper) NewBacking(
 		storyID,
 		coins,
 		time.Now().Add(duration),
+		duration,
 		creator)
 
 	// get handle for backing store
@@ -64,18 +69,18 @@ func (k TruKeeper) GetBacking(ctx sdk.Context, id int64) (ts.Backing, sdk.Error)
 	return *backing, nil
 }
 
-// mintCategoryCoin mints new category coins by burning trustake and using a formula
-// based on the amount of trustake and backing duration
-func mintCategoryCoins(
+// convertCoins mints new category coins by burning trustake
+func convertCoins(
 	k TruKeeper,
 	ctx sdk.Context,
 	cat ts.StoryCategory,
 	amount sdk.Coin,
 	duration time.Duration,
-	addr sdk.AccAddress) (sdk.Coin, sdk.Error) {
+	addr sdk.AccAddress,
+	conversionRate sdk.Int) (sdk.Coin, sdk.Error) {
 
-	// naive implementation: 1 trustake = 1 category coin
-	coin := sdk.NewCoin(cat.CoinDenom(), amount.Amount)
+	// mint new category coins
+	coin := sdk.NewCoin(cat.CoinDenom(), amount.Amount.Mul(conversionRate))
 
 	// burn trustake
 	if _, _, err := k.ck.SubtractCoins(ctx, addr, sdk.Coins{amount}); err != nil {
