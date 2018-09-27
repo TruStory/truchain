@@ -39,8 +39,8 @@ func NewTruKeeper(storyKey sdk.StoreKey, voteKey sdk.StoreKey, backingKey sdk.St
 func (k TruKeeper) newID(ctx sdk.Context, storeKey sdk.StoreKey) int64 {
 	store := ctx.KVStore(storeKey)
 
-	// create key of form "keyName|TotalID", i.e: "stories|TotalID" or "votes|TotalID"
-	key := storeKey.Name() + "|TotalID"
+	// create key of form "keyName:lastIndex", i.e: "stories:lastIndex"
+	key := storeKey.Name() + ":lastIndex"
 	keyVal := []byte(key)
 	lastID := store.Get(keyVal)
 
