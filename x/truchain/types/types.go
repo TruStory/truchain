@@ -8,11 +8,11 @@ import (
 
 // ============================================================================
 
-// ActiveStoryQueue is a queue of in-progress stories -- `Created` and `Challenged`
-type ActiveStoryQueue []int64
+// BackingQueue is a list of all backings
+type BackingQueue []int64
 
 // IsEmpty checks if the queue is empty
-func (asq ActiveStoryQueue) IsEmpty() bool {
+func (asq BackingQueue) IsEmpty() bool {
 	if len(asq) == 0 {
 		return true
 	}
