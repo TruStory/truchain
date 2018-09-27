@@ -10,19 +10,19 @@ import (
 const (
 	DefaultCodespace sdk.CodespaceType = 7
 
-	CodeInvalidOption            sdk.CodeType = 701
-	CodeInvalidBody              sdk.CodeType = 702
-	CodeInvalidStoryID           sdk.CodeType = 703
-	CodeStoryNotFound            sdk.CodeType = 704
-	CodeInvalidAmount            sdk.CodeType = 705
-	CodeInvalidBackingPeriod     sdk.CodeType = 706
-	CodeInvalidURL               sdk.CodeType = 707
-	CodeInvalidCategory          sdk.CodeType = 708
-	CodeInvalidStoryType         sdk.CodeType = 709
-	CodeVoteNotFoundType         sdk.CodeType = 710
-	CodeActiveStoryQueueNotFound sdk.CodeType = 711
-	CodeActiveStoryQueueEmpty    sdk.CodeType = 712
-	CodeInvalidBackingCoin       sdk.CodeType = 713
+	CodeInvalidOption        sdk.CodeType = 701
+	CodeInvalidBody          sdk.CodeType = 702
+	CodeInvalidStoryID       sdk.CodeType = 703
+	CodeStoryNotFound        sdk.CodeType = 704
+	CodeInvalidAmount        sdk.CodeType = 705
+	CodeInvalidBackingPeriod sdk.CodeType = 706
+	CodeInvalidURL           sdk.CodeType = 707
+	CodeInvalidCategory      sdk.CodeType = 708
+	CodeInvalidStoryType     sdk.CodeType = 709
+	CodeVoteNotFoundType     sdk.CodeType = 710
+	CodeBackingQueueNotFound sdk.CodeType = 711
+	CodeBackingQueueEmpty    sdk.CodeType = 712
+	CodeInvalidBackingCoin   sdk.CodeType = 713
 )
 
 func codeToDefaultMsg(code sdk.CodeType) string {
@@ -92,9 +92,9 @@ func ErrVoteNotFound(voteID int64) sdk.Error {
 		strconv.Itoa(int(voteID))+" not found")
 }
 
-// ErrActiveStoryQueueEmpty throws an error when the searched ActiveStoryQueue is not found
-func ErrActiveStoryQueueEmpty() sdk.Error {
-	return newError(DefaultCodespace, CodeActiveStoryQueueEmpty, "Active story queue is empty")
+// ErrBackingQueueEmpty throws an error when the searched BackingQueue is not found
+func ErrBackingQueueEmpty() sdk.Error {
+	return newError(DefaultCodespace, CodeBackingQueueEmpty, "Active story queue is empty")
 }
 
 //----------------------------------------

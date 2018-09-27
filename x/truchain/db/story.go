@@ -37,9 +37,6 @@ func (k TruKeeper) NewStory(
 	val := k.cdc.MustMarshalBinary(story)
 	store.Set(key, val)
 
-	// add story to the active story queue (for in-progress stories)
-	k.ActiveStoryQueuePush(ctx, story.ID)
-
 	return story.ID, nil
 }
 

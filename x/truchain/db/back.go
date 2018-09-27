@@ -39,12 +39,29 @@ func (k TruKeeper) NewBacking(
 	// get handle for backing store
 	store := ctx.KVStore(k.backingKey)
 
-	// save it in the store
+	// save backing in the store
 	store.Set(
 		generateKey(k.backingKey.String(), backing.ID),
 		k.cdc.MustMarshalBinary(backing))
 
+	// add backing to the backing queue for processing
+	k.BackingQueuePush(ctx, backing.ID)
+
 	return backing.ID, nil
+}
+
+// GetBacking gets the backing at the current index from the KVStore
+func (k TruKeeper) GetBacking(ctx sdk.Context, id int64) (ts.Backing, sdk.Error) {
+	store := ctx.KVStore(k.backingKey)
+	key := generateKey(k.backingKey.String(), id)
+	val := store.Get(key)
+	if val == nil {
+		return ts.Backing{}, ts.ErrVoteNotFound(id)
+	}
+	backing := &ts.Backing{}
+	k.cdc.MustUnmarshalBinary(val, backing)
+
+	return *backing, nil
 }
 
 // mintCategoryCoin mints new category coins by burning trustake and using a formula
