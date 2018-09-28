@@ -1,6 +1,7 @@
 package db
 
 import (
+	"fmt"
 	"time"
 
 	ts "github.com/TruStory/truchain/x/truchain/types"
@@ -108,6 +109,8 @@ func calculateInterest(
 	// TODO: keep track of total supply
 	// https://github.com/TruStory/truchain/issues/22
 	coinBalance := int64(100)
+
+	fmt.Println("testing..")
 
 	maxAmount := coinBalance
 	maxPeriod := int64(365 * 24 * time.Hour)
