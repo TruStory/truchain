@@ -1,7 +1,6 @@
 package db
 
 import (
-	"fmt"
 	"time"
 
 	ts "github.com/TruStory/truchain/x/truchain/types"
@@ -108,23 +107,28 @@ func calculateInterest(
 
 	// TODO: keep track of total supply
 	// https://github.com/TruStory/truchain/issues/22
-	coinBalance := int64(100)
+	coinBalance := sdk.NewDec(100)
 
-	fmt.Println("testing..")
-
+	// inputs
 	maxAmount := coinBalance
-	maxPeriod := int64(365 * 24 * time.Hour)
-	normalizedAmount := amount.Amount.Div(sdk.NewInt(maxAmount))
-	normalizedPeriod := sdk.NewInt(int64(period*time.Hour) / maxPeriod)
-	amountWeight := normalizedAmount.Mul(sdk.NewInt(int64(1 / 3)))
-	periodWeight := normalizedPeriod.Mul(sdk.NewInt(int64(2 / 3)))
+	maxPeriod := 365 * 24 * time.Hour
+	amountWeight := params.AmountWeight
+	periodWeight := params.PeriodWeight
+	minInterestRate := params.MinInterestRate
+	maxInterestRate := params.MaxInterestRate
 
-	maxInterestRate := int64(10)
-	minInterestRate := int64(0)
+	// normalize amount and period to 0 - 1
+	normalizedAmount := sdk.NewDecFromInt(amount.Amount).Quo(maxAmount)
+	normalizedPeriod := sdk.NewDec(int64(period * time.Hour / maxPeriod))
 
-	interestRateRange := sdk.NewInt(maxInterestRate - minInterestRate)
-	baseInterestRate := interestRateRange.Mul(amountWeight.Add(periodWeight))
-	interest := baseInterestRate.Add(sdk.NewInt(minInterestRate))
+	// apply weights to normalized amount and period
+	weightedAmount := normalizedAmount.Mul(amountWeight)
+	weightedPeriod := normalizedPeriod.Mul(periodWeight)
 
-	return sdk.NewCoin(category.CoinDenom(), interest)
+	// calculate interest
+	interestRateRange := maxInterestRate.Sub(minInterestRate)
+	baseInterestRate := interestRateRange.Mul(weightedAmount.Add(weightedPeriod))
+	interest := baseInterestRate.Add(minInterestRate)
+
+	return sdk.NewCoin(category.CoinDenom(), interest.RoundInt())
 }
