@@ -63,7 +63,7 @@ func mockDB() (sdk.Context, sdk.MultiStore, auth.AccountMapper, TruKeeper) {
 	ms, accKey, storyKey, voteKey, backingKey := setupMultiStore()
 	cdc := makeCodec()
 	am := auth.NewAccountMapper(cdc, accKey, auth.ProtoBaseAccount)
-	ck := bank.NewKeeper(am)
+	ck := bank.NewBaseKeeper(am)
 	k := NewTruKeeper(storyKey, voteKey, backingKey, ck, cdc)
 
 	// create fake context with fake block time in header

@@ -76,7 +76,8 @@ func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *T
 		app.keyAccount,        // target store
 		auth.ProtoBaseAccount, // prototype
 	)
-	app.coinKeeper = bank.NewKeeper(app.accountMapper)
+	// app.coinKeeper = bank.NewKeeper(app.accountMapper)
+	app.coinKeeper = bank.NewBaseKeeper(app.accountMapper)
 	app.ibcMapper = ibc.NewMapper(app.cdc, app.keyIBC, app.RegisterCodespace(ibc.DefaultCodespace))
 	app.keeper = sdb.NewTruKeeper(
 		app.keyStory,
@@ -110,12 +111,12 @@ func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *T
 // MakeCodec creates a new codec codec and registers all the necessary types
 // with the codec.
 func MakeCodec() *codec.Codec {
-	cdc := codec.NewCodec()
+	cdc := codec.New()
 
 	codec.RegisterCrypto(cdc)
-	sdk.Registercodec(cdc)
-	bank.Registercodec(cdc)
-	ibc.Registercodec(cdc)
+	sdk.RegisterCodec(cdc)
+	bank.RegisterCodec(cdc)
+	ibc.RegisterCodec(cdc)
 
 	// register custom types
 	cdc.RegisterInterface((*auth.Account)(nil), nil)
