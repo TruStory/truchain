@@ -1,7 +1,7 @@
 package cli
 
 import (
-	"github.com/cosmos/cosmos-sdk/wire"
+	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/spf13/cobra"
 )
 
@@ -13,7 +13,7 @@ const (
 )
 
 // GetCmdQueryStories gets the command to get all stories
-func GetCmdQueryStories(storeName string, cdc *wire.Codec) *cobra.Command {
+func GetCmdQueryStories(storeName string, cdc *codec.Codec) *cobra.Command {
 	// cmd := &cobra.Command{
 	// 	Use:   "stories",
 	// 	Short: "Query all stories",
@@ -40,7 +40,7 @@ func GetCmdQueryStories(storeName string, cdc *wire.Codec) *cobra.Command {
 	// 			stories = append(stories, story)
 	// 		}
 
-	// 		output, err := wire.MarshalJSONIndent(cdc, stories)
+	// 		output, err := codec.MarshalJSONIndent(cdc, stories)
 	// 		if err != nil {
 	// 			// return err
 	// 		}

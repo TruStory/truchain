@@ -7,8 +7,8 @@ import (
 	ts "github.com/TruStory/truchain/x/truchain"
 	sdb "github.com/TruStory/truchain/x/truchain/db"
 	bam "github.com/cosmos/cosmos-sdk/baseapp"
+	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/cosmos/cosmos-sdk/wire"
 	"github.com/cosmos/cosmos-sdk/x/auth"
 	"github.com/cosmos/cosmos-sdk/x/bank"
 	"github.com/cosmos/cosmos-sdk/x/ibc"
@@ -29,7 +29,7 @@ const (
 // integral app types.
 type TruChain struct {
 	*bam.BaseApp
-	cdc *wire.Codec
+	cdc *codec.Codec
 
 	// keys to access the multistore
 	keyMain    *sdk.KVStoreKey
@@ -107,15 +107,15 @@ func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *T
 	return app
 }
 
-// MakeCodec creates a new wire codec and registers all the necessary types
+// MakeCodec creates a new codec codec and registers all the necessary types
 // with the codec.
-func MakeCodec() *wire.Codec {
-	cdc := wire.NewCodec()
+func MakeCodec() *codec.Codec {
+	cdc := codec.NewCodec()
 
-	wire.RegisterCrypto(cdc)
-	sdk.RegisterWire(cdc)
-	bank.RegisterWire(cdc)
-	ibc.RegisterWire(cdc)
+	codec.RegisterCrypto(cdc)
+	sdk.Registercodec(cdc)
+	bank.Registercodec(cdc)
+	ibc.Registercodec(cdc)
 
 	// register custom types
 	cdc.RegisterInterface((*auth.Account)(nil), nil)
@@ -187,7 +187,7 @@ func (app *TruChain) ExportAppStateAndValidators() (appState json.RawMessage, va
 	app.accountMapper.IterateAccounts(ctx, appendAccountsFn)
 
 	genState := types.GenesisState{Accounts: accounts}
-	appState, err = wire.MarshalJSONIndent(app.cdc, genState)
+	appState, err = codec.MarshalJSONIndent(app.cdc, genState)
 	if err != nil {
 		return nil, nil, err
 	}
