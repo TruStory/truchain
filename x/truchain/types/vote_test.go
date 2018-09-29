@@ -20,7 +20,7 @@ func TestValidVoteMsg(t *testing.T) {
 	assert.Equal(t, "Vote", msg.Type())
 	assert.Equal(
 		t,
-		`{"amount":{"amount":"100","denom":"trusomecoin"},"creator":"cosmosaccaddr1qypq8zs0ka","story_id":1,"vote":true}`,
+		`{"amount":{"amount":"100","denom":"trusomecoin"},"creator":"cosmos1qypq36vzru","story_id":1,"vote":true}`,
 		fmt.Sprintf("%s", msg.GetSignBytes()),
 	)
 	assert.Equal(t, []sdk.AccAddress{validCreator}, msg.GetSigners())

@@ -21,7 +21,7 @@ func TestValidBackMsg(t *testing.T) {
 	assert.Equal(t, "BackStory", msg.Type())
 	assert.Equal(
 		t,
-		`{"amount":{"amount":"100","denom":"trustake"},"creator":"cosmosaccaddr1qypq8zs0ka","duration":259200000000000,"story_id":1}`,
+		`{"amount":{"amount":"100","denom":"trustake"},"creator":"cosmos1qypq36vzru","duration":259200000000000,"story_id":1}`,
 		fmt.Sprintf("%s", msg.GetSignBytes()),
 	)
 	assert.Equal(t, []sdk.AccAddress{validCreator}, msg.GetSigners())
