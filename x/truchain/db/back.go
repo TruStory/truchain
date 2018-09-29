@@ -1,6 +1,7 @@
 package db
 
 import (
+	"fmt"
 	"time"
 
 	ts "github.com/TruStory/truchain/x/truchain/types"
@@ -69,6 +70,7 @@ func (k TruKeeper) GetBacking(ctx sdk.Context, id int64) (ts.Backing, sdk.Error)
 	key := generateKey(k.backingKey.String(), id)
 	val := store.Get(key)
 	if val == nil {
+		// TODO: change to backing error
 		return ts.Backing{}, ts.ErrVoteNotFound(id)
 	}
 	backing := &ts.Backing{}
@@ -88,6 +90,7 @@ func convertCoins(
 	conversionRate sdk.Int) (sdk.Coin, sdk.Error) {
 
 	// mint new category coins
+	// TODO: handle precision, write test
 	coin := sdk.NewCoin(cat.CoinDenom(), amount.Amount.Mul(conversionRate))
 
 	// burn trustake
@@ -111,14 +114,19 @@ func calculateInterest(
 
 	// inputs
 	maxAmount := totalSupply
-	maxPeriod := 365 * 24 * time.Hour
+	maxPeriod := params.MaxPeriod
 	amountWeight := params.AmountWeight
 	periodWeight := params.PeriodWeight
 	maxInterestRate := params.MaxInterestRate
 
+	// type cast values to unitless decimals for math operations
+	periodDec := sdk.NewDec(int64(period))
+	maxPeriodDec := sdk.NewDec(int64(maxPeriod))
+	amountDec := sdk.NewDecFromInt(amount.Amount)
+
 	// normalize amount and period to 0 - 1
-	normalizedAmount := sdk.NewDecFromInt(amount.Amount).Quo(maxAmount)
-	normalizedPeriod := sdk.NewDec(int64(period * time.Hour / maxPeriod))
+	normalizedAmount := amountDec.Quo(maxAmount)
+	normalizedPeriod := periodDec.Quo(maxPeriodDec)
 
 	// apply weights to normalized amount and period
 	weightedAmount := normalizedAmount.Mul(amountWeight)
@@ -127,5 +135,14 @@ func calculateInterest(
 	// calculate interest
 	interest := maxInterestRate.Mul(weightedAmount.Add(weightedPeriod))
 
-	return sdk.NewCoin(category.CoinDenom(), interest.RoundInt())
+	// debugging...
+	fmt.Println(normalizedAmount)
+	fmt.Println(normalizedPeriod)
+	fmt.Println(interest.String())
+	fmt.Println(sdk.NewCoin(category.CoinDenom(), interest.RoundInt()))
+
+	// output: coin with rounded interest
+	coin := sdk.NewCoin(category.CoinDenom(), interest.RoundInt())
+
+	return coin
 }

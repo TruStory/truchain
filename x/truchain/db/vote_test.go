@@ -38,7 +38,7 @@ func TestVoteStory(t *testing.T) {
 
 	// test getting vote and comparing fields
 	savedVote, err := k.GetVote(ctx, voteID)
-	assert.NotNil(t, err)
+	assert.Nil(t, err)
 	assert.Equal(t, savedVote.Vote, true, "Vote choice  does not match")
 	assert.Equal(t, savedVote.Amount.AmountOf(denom), amount, "Vote amount does not match")
 }
