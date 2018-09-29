@@ -23,9 +23,10 @@ func NewVoteMsg(storyID int64, creator sdk.AccAddress, amount sdk.Coin, vote boo
 }
 
 // Type implements Msg
-func (msg VoteMsg) Type() string {
-	return "Vote"
-}
+func (msg VoteMsg) Type() string { return "Vote" }
+
+// Name implements Msg
+func (msg VoteMsg) Name() string { return msg.Type() }
 
 // GetSignBytes implements Msg
 func (msg VoteMsg) GetSignBytes() []byte {

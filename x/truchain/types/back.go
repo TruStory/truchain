@@ -40,9 +40,10 @@ func NewBackStoryMsg(
 }
 
 // Type implements Msg
-func (msg BackStoryMsg) Type() string {
-	return "BackStory"
-}
+func (msg BackStoryMsg) Type() string { return "BackStory" }
+
+// Name implements Msg
+func (msg BackStoryMsg) Name() string { return msg.Type() }
 
 // GetSignBytes implements Msg
 func (msg BackStoryMsg) GetSignBytes() []byte {

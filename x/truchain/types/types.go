@@ -23,23 +23,23 @@ func (asq BackingQueue) IsEmpty() bool {
 
 // BackingParams holds data for backing interest calculations
 type BackingParams struct {
-	AmountWeight    sdk.Rat
-	PeriodWeight    sdk.Rat
+	AmountWeight    sdk.Dec
+	PeriodWeight    sdk.Dec
 	MinPeriod       time.Duration
 	MaxPeriod       time.Duration
-	MinInterestRate sdk.Rat
-	MaxInterestRate sdk.Rat
+	MinInterestRate sdk.Dec
+	MaxInterestRate sdk.Dec
 }
 
 // NewBackingParams creates a new BackingParams type
 func NewBackingParams() BackingParams {
 	return BackingParams{
-		AmountWeight:    sdk.NewRat(1 / 3),
-		PeriodWeight:    sdk.NewRat(2 / 3),
-		MinPeriod:       3 * 24 * time.Hour,  // 3 days
-		MaxPeriod:       90 * 24 * time.Hour, // 90 days
-		MinInterestRate: sdk.ZeroRat(),       // 0%
-		MaxInterestRate: sdk.NewRat(10, 100), // 10%
+		AmountWeight:    sdk.NewDecWithPrec(333, 3), // 33.3%
+		PeriodWeight:    sdk.NewDecWithPrec(667, 3), // 66.7%
+		MinPeriod:       3 * 24 * time.Hour,         // 3 days
+		MaxPeriod:       90 * 24 * time.Hour,        // 90 days
+		MinInterestRate: sdk.ZeroDec(),              // 0%
+		MaxInterestRate: sdk.NewDec(10),             // 10%
 	}
 }
 

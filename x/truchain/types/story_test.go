@@ -21,7 +21,7 @@ func TestValidSubmitStoryMsg(t *testing.T) {
 	assert.Equal(t, "SubmitStory", msg.Type())
 	assert.Equal(
 		t,
-		`{"body":"This is a valid story body @shanev amirite?","category":3,"creator":"cosmosaccaddr1qypq8zs0ka","escrow":"cosmosaccaddr1qvzqxum5ug","story_type":0}`,
+		`{"body":"This is a valid story body @shanev amirite?","category":3,"creator":"cosmos1qypq36vzru","escrow":"cosmos1qvzqsy8eff","story_type":0}`,
 		fmt.Sprintf("%s", msg.GetSignBytes()),
 	)
 	assert.Equal(t, []sdk.AccAddress{validCreator}, msg.GetSigners())

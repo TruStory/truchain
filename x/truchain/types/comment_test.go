@@ -19,7 +19,7 @@ func TestValidAddCommentMsg(t *testing.T) {
 	assert.Equal(t, "AddComment", msg.Type())
 	assert.Equal(
 		t,
-		`{"body":"This is a test comment on a story.","creator":"cosmosaccaddr1qypq8zs0ka","story_id":1}`,
+		`{"body":"This is a test comment on a story.","creator":"cosmos1qypq36vzru","story_id":1}`,
 		fmt.Sprintf("%s", msg.GetSignBytes()),
 	)
 	assert.Equal(t, []sdk.AccAddress{validCreator}, msg.GetSigners())

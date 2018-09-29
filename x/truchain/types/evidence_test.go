@@ -19,7 +19,7 @@ func TestValidSubmitEvidencetMsg(t *testing.T) {
 	assert.Equal(t, "SubmitEvidence", msg.Type())
 	assert.Equal(
 		t,
-		`{"creator":"cosmosaccaddr1qypq8zs0ka","story_id":1,"url":"http://www.truchain.io"}`,
+		`{"creator":"cosmos1qypq36vzru","story_id":1,"url":"http://www.truchain.io"}`,
 		fmt.Sprintf("%s", msg.GetSignBytes()),
 	)
 	assert.Equal(t, []sdk.AccAddress{validCreator}, msg.GetSigners())
