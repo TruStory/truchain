@@ -107,14 +107,13 @@ func calculateInterest(
 
 	// TODO: keep track of total supply
 	// https://github.com/TruStory/truchain/issues/22
-	coinBalance := sdk.NewDec(100)
+	totalSupply := sdk.NewDec(100)
 
 	// inputs
-	maxAmount := coinBalance
+	maxAmount := totalSupply
 	maxPeriod := 365 * 24 * time.Hour
 	amountWeight := params.AmountWeight
 	periodWeight := params.PeriodWeight
-	minInterestRate := params.MinInterestRate
 	maxInterestRate := params.MaxInterestRate
 
 	// normalize amount and period to 0 - 1
@@ -126,9 +125,7 @@ func calculateInterest(
 	weightedPeriod := normalizedPeriod.Mul(periodWeight)
 
 	// calculate interest
-	interestRateRange := maxInterestRate.Sub(minInterestRate)
-	baseInterestRate := interestRateRange.Mul(weightedAmount.Add(weightedPeriod))
-	interest := baseInterestRate.Add(minInterestRate)
+	interest := maxInterestRate.Mul(weightedAmount.Add(weightedPeriod))
 
 	return sdk.NewCoin(category.CoinDenom(), interest.RoundInt())
 }
