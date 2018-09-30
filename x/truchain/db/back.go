@@ -110,7 +110,10 @@ func calculateInterest(
 
 	// TODO: keep track of total supply
 	// https://github.com/TruStory/truchain/issues/22
-	totalSupply := sdk.NewDec(100)
+
+	// 1,000,000,000 nano = 10^9 = 1 trustake
+	// 1,000,000,000,000,000 nano = 10^15 / 10^9 = 10^6 = 1,000,000 trustake
+	totalSupply := sdk.NewDec(1000000000000000)
 
 	// inputs
 	maxAmount := totalSupply
@@ -133,11 +136,13 @@ func calculateInterest(
 	weightedPeriod := normalizedPeriod.Mul(periodWeight)
 
 	// calculate interest
-	interest := maxInterestRate.Mul(weightedAmount.Add(weightedPeriod))
+	interestRate := maxInterestRate.Mul(weightedAmount.Add(weightedPeriod))
+	// convert rate to a value
+	interest := amountDec.Mul(interestRate)
 
 	// debugging...
-	fmt.Println(normalizedAmount)
-	fmt.Println(normalizedPeriod)
+	fmt.Println(normalizedAmount.String())
+	fmt.Println(normalizedPeriod.String())
 	fmt.Println(interest.String())
 	fmt.Println(sdk.NewCoin(category.CoinDenom(), interest.RoundInt()))
 

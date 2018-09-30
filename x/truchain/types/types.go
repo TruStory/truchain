@@ -39,7 +39,7 @@ func NewBackingParams() BackingParams {
 		MinPeriod:       3 * 24 * time.Hour,         // 3 days
 		MaxPeriod:       90 * 24 * time.Hour,        // 90 days
 		MinInterestRate: sdk.ZeroDec(),              // 0%
-		MaxInterestRate: sdk.NewDec(10),             // 10%
+		MaxInterestRate: sdk.NewDecWithPrec(10, 2),  // 10%
 	}
 }
 
