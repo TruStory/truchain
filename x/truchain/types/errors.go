@@ -23,6 +23,7 @@ const (
 	CodeBackingQueueNotFound sdk.CodeType = 711
 	CodeBackingQueueEmpty    sdk.CodeType = 712
 	CodeInvalidBackingCoin   sdk.CodeType = 713
+	CodeBackingNotFound      sdk.CodeType = 714
 )
 
 func codeToDefaultMsg(code sdk.CodeType) string {
@@ -94,7 +95,13 @@ func ErrVoteNotFound(voteID int64) sdk.Error {
 
 // ErrBackingQueueEmpty throws an error when the searched BackingQueue is not found
 func ErrBackingQueueEmpty() sdk.Error {
-	return newError(DefaultCodespace, CodeBackingQueueEmpty, "Active story queue is empty")
+	return newError(DefaultCodespace, CodeBackingQueueEmpty, "Backing queue is empty")
+}
+
+// ErrBackingNotFound throws an error when the searched backing is not found
+func ErrBackingNotFound(id int64) sdk.Error {
+	return newError(DefaultCodespace, CodeBackingNotFound, "Backing with id "+
+		strconv.Itoa(int(id))+" not found")
 }
 
 //----------------------------------------

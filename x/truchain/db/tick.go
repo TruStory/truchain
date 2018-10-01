@@ -27,26 +27,29 @@ func processBacking(ctx sdk.Context, k TruKeeper) sdk.Error {
 	// check if the backing queue is empty
 	backing, err := k.BackingQueueHead(ctx)
 	if err != nil {
-		// done processing queue, return with no error
-		if err.Code() == ts.CodeBackingQueueEmpty {
+		if err.Code() == ts.ErrBackingQueueEmpty().Code() {
 			return nil
 		}
 		return err
 	}
 
-	// process next backing if this one hasn't expired
+	// check if backing has expired
 	if ctx.BlockHeader().Time.Before(backing.Expires) {
-		return processBacking(ctx, k)
+		// no more expired backings left in queue
+		// terminate recursion
+		return nil
 	}
 
 	// remove expired backing from the queue
-	k.BackingQueuePop(ctx)
+	if _, err = k.BackingQueuePop(ctx); err != nil {
+		return err
+	}
 
 	// distribute earnings to the backing creator
 	distributeEarnings(ctx, k, backing)
 
-	// done processing queue, return with no error
-	return nil
+	// process next in queue
+	return processBacking(ctx, k)
 }
 
 // distributeEarnings adds coins from the backing to the user.

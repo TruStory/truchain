@@ -9,12 +9,6 @@ import (
 // ReserveTokenDenom is the coin  denom for Trustory's native reserve token.
 const ReserveTokenDenom = "trustake"
 
-// maxBackingDuration is the max backing duration
-const maxBackingDuration time.Duration = 365 * 24 * time.Hour
-
-// minBackingDuration is the min backing duration
-const minBackingDuration time.Duration = 1 * 24 * time.Hour
-
 // BackStoryMsg defines a message to bond to a story.
 // It implements the Cosmos `Msg` interface which is required
 // for transactions on Cosmos blockchains.
@@ -52,6 +46,9 @@ func (msg BackStoryMsg) GetSignBytes() []byte {
 
 // ValidateBasic implements Msg
 func (msg BackStoryMsg) ValidateBasic() sdk.Error {
+
+	params := NewBackingParams()
+
 	if msg.StoryID <= 0 {
 		return ErrInvalidStoryID("StoryID cannot be negative")
 	}
@@ -61,10 +58,7 @@ func (msg BackStoryMsg) ValidateBasic() sdk.Error {
 	if msg.Amount.IsZero() == true {
 		return ErrInvalidAmount("Invalid backing amount: " + msg.Amount.String())
 	}
-	if msg.Amount.Denom != ReserveTokenDenom {
-		return ErrInvalidBackingCoin("Invalid backing coin: " + msg.Amount.String())
-	}
-	if msg.Duration <= minBackingDuration || msg.Duration >= maxBackingDuration {
+	if msg.Duration < params.MinPeriod || msg.Duration > params.MaxPeriod {
 		return ErrInvalidBackingPeriod("Invalid backing duration: " + msg.Duration.String())
 	}
 	return nil

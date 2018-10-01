@@ -17,8 +17,6 @@ func NewHandler(k db.TruKeeper) sdk.Handler {
 			return handleSubmitStoryMsg(ctx, k, msg)
 		case ts.BackStoryMsg:
 			return handleBackStoryMsg(ctx, k, msg)
-		case ts.VoteMsg:
-			return handleVoteMsg(ctx, k, msg)
 		default:
 			errMsg := "Unrecognized Msg type: " + reflect.TypeOf(msg).Name()
 			return sdk.ErrUnknownRequest(errMsg).Result()
@@ -36,7 +34,7 @@ func handleSubmitStoryMsg(ctx sdk.Context, k db.TruKeeper, msg ts.SubmitStoryMsg
 
 	storyID, err := k.NewStory(ctx, msg.Body, msg.Category, msg.Creator, msg.Escrow, msg.StoryType)
 	if err != nil {
-		panic(err)
+		return sdk.ErrInternal("Submit story error").Result()
 	}
 
 	return sdk.Result{Data: i2b(storyID)}
@@ -54,23 +52,10 @@ func handleBackStoryMsg(ctx sdk.Context, k db.TruKeeper, msg ts.BackStoryMsg) sd
 		msg.Creator,
 		msg.Duration)
 	if err != nil {
-		panic(err)
+		return sdk.ErrInternal("Backing error").Result()
 	}
 
 	return sdk.Result{Data: i2b(backingID)}
-}
-
-func handleVoteMsg(ctx sdk.Context, k db.TruKeeper, msg ts.VoteMsg) sdk.Result {
-	if err := msg.ValidateBasic(); err != nil {
-		return err.Result()
-	}
-
-	voteID, err := k.VoteStory(ctx, msg.StoryID, msg.Creator, msg.Vote, sdk.Coins{msg.Amount})
-	if err != nil {
-		panic(err)
-	}
-
-	return sdk.Result{Data: i2b(voteID)}
 }
 
 // i2b converts an int64 into a byte array

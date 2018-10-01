@@ -1,7 +1,6 @@
 package db
 
 import (
-	"fmt"
 	"time"
 
 	ts "github.com/TruStory/truchain/x/truchain/types"
@@ -17,18 +16,15 @@ func (k TruKeeper) NewBacking(
 	duration time.Duration,
 ) (int64, sdk.Error) {
 
-	// get story from story id
-	story, err := k.GetStory(ctx, storyID)
-	if err != nil {
-		return -1, err
+	// Check if user has enough cat coins or trustake to back
+	trustake := sdk.NewCoin(ts.ReserveTokenDenom, amount.Amount)
+	if !k.ck.HasCoins(ctx, creator, sdk.Coins{amount}) &&
+		!k.ck.HasCoins(ctx, creator, sdk.Coins{trustake}) {
+		return -1, sdk.ErrInsufficientFunds("Insufficient funds for backing.")
 	}
 
-	// naïve implementaion: 1 trustake = 1 category coin
-	// https://github.com/TruStory/truchain/issues/21
-	conversionRate := sdk.NewInt(int64(1))
-
-	// mint category coin from trustake -- the principal, amount user gets back
-	principal, err := convertCoins(k, ctx, story.Category, amount, duration, creator, conversionRate)
+	// get story from story id
+	story, err := k.GetStory(ctx, storyID)
 	if err != nil {
 		return -1, err
 	}
@@ -36,8 +32,14 @@ func (k TruKeeper) NewBacking(
 	// load default backing parameters
 	params := ts.NewBackingParams()
 
+	// set principal, converting from trustake if needed
+	principal, err := k.getPrincipal(ctx, story.Category, amount, creator)
+	if err != nil {
+		return -1, err
+	}
+
 	// mint category coin from interest earned
-	interest := calculateInterest(story.Category, amount, duration, params)
+	interest := getInterest(story.Category, amount, duration, params)
 
 	// create new backing type
 	backing := ts.NewBacking(
@@ -70,8 +72,7 @@ func (k TruKeeper) GetBacking(ctx sdk.Context, id int64) (ts.Backing, sdk.Error)
 	key := generateKey(k.backingKey.String(), id)
 	val := store.Get(key)
 	if val == nil {
-		// TODO: change to backing error
-		return ts.Backing{}, ts.ErrVoteNotFound(id)
+		return ts.Backing{}, ts.ErrBackingNotFound(id)
 	}
 	backing := &ts.Backing{}
 	k.cdc.MustUnmarshalBinary(val, backing)
@@ -79,30 +80,41 @@ func (k TruKeeper) GetBacking(ctx sdk.Context, id int64) (ts.Backing, sdk.Error)
 	return *backing, nil
 }
 
-// convertCoins mints new category coins by burning trustake
-func convertCoins(
-	k TruKeeper,
+// getPrincipal calculates the principal, the amount the user gets back
+// after the backing expires/matures. Returns a coin.
+func (k TruKeeper) getPrincipal(
 	ctx sdk.Context,
 	cat ts.StoryCategory,
 	amount sdk.Coin,
-	duration time.Duration,
-	addr sdk.AccAddress,
-	conversionRate sdk.Int) (sdk.Coin, sdk.Error) {
+	userAddr sdk.AccAddress) (sdk.Coin, sdk.Error) {
+
+	// check and return amount if user has enough category coins
+	if k.ck.HasCoins(ctx, userAddr, sdk.Coins{amount}) {
+		return amount, nil
+	}
+
+	// naïve implementaion: 1 trustake = 1 category coin
+	// https://github.com/TruStory/truchain/issues/21
+	conversionRate := sdk.NewDec(1)
 
 	// mint new category coins
-	// TODO: handle precision, write test
-	coin := sdk.NewCoin(cat.CoinDenom(), amount.Amount.Mul(conversionRate))
+	principal := sdk.NewCoin(
+		cat.CoinDenom(),
+		sdk.NewDecFromInt(amount.Amount).Mul(conversionRate).RoundInt())
 
-	// burn trustake
-	if _, _, err := k.ck.SubtractCoins(ctx, addr, sdk.Coins{amount}); err != nil {
+	// burn equivalent trustake
+	trustake := sdk.Coins{sdk.NewCoin(ts.ReserveTokenDenom, principal.Amount)}
+	if _, _, err := k.ck.SubtractCoins(ctx, userAddr, trustake); err != nil {
 		return sdk.Coin{}, err
 	}
 
-	return coin, nil
+	return principal, nil
 }
 
-// calculateInterest calcuates the interest for the backing
-func calculateInterest(
+// ============================================================================
+
+// getInterest calcuates the interest for the backing
+func getInterest(
 	category ts.StoryCategory,
 	amount sdk.Coin,
 	period time.Duration,
@@ -111,8 +123,8 @@ func calculateInterest(
 	// TODO: keep track of total supply
 	// https://github.com/TruStory/truchain/issues/22
 
-	// 1,000,000,000 nano = 10^9 = 1 trustake
-	// 1,000,000,000,000,000 nano = 10^15 / 10^9 = 10^6 = 1,000,000 trustake
+	// 1,000,000,000 preethi = 10^9 = 1 trustake
+	// 1,000,000,000,000,000 preethi = 10^15 / 10^9 = 10^6 = 1,000,000 trustake
 	totalSupply := sdk.NewDec(1000000000000000)
 
 	// inputs
@@ -140,13 +152,7 @@ func calculateInterest(
 	// convert rate to a value
 	interest := amountDec.Mul(interestRate)
 
-	// debugging...
-	fmt.Println(normalizedAmount.String())
-	fmt.Println(normalizedPeriod.String())
-	fmt.Println(interest.String())
-	fmt.Println(sdk.NewCoin(category.CoinDenom(), interest.RoundInt()))
-
-	// output: coin with rounded interest
+	// return coin with rounded interest
 	coin := sdk.NewCoin(category.CoinDenom(), interest.RoundInt())
 
 	return coin

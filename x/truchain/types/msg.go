@@ -13,7 +13,6 @@ func RegisterAmino(cdc *amino.Codec) {
 	cdc.RegisterConcrete(AddCommentMsg{}, "truchain/AddCommentMsg", nil)
 	cdc.RegisterConcrete(SubmitEvidenceMsg{}, "truchain/SubmitEvidenceMsg", nil)
 	cdc.RegisterConcrete(SubmitStoryMsg{}, "truchain/SubmitStoryMsg", nil)
-	cdc.RegisterConcrete(VoteMsg{}, "truchain/VoteMsg", nil)
 }
 
 // ============================================================================

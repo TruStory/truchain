@@ -36,7 +36,6 @@ type TruChain struct {
 	keyAccount *sdk.KVStoreKey
 	keyIBC     *sdk.KVStoreKey
 	keyStory   *sdk.KVStoreKey
-	keyVote    *sdk.KVStoreKey
 	keyBacking *sdk.KVStoreKey
 
 	// manage getting and setting accounts
@@ -66,7 +65,6 @@ func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *T
 		keyAccount: sdk.NewKVStoreKey("acc"),
 		keyIBC:     sdk.NewKVStoreKey("ibc"),
 		keyStory:   sdk.NewKVStoreKey("stories"),
-		keyVote:    sdk.NewKVStoreKey("votes"),
 		keyBacking: sdk.NewKVStoreKey("backings"),
 	}
 
@@ -81,7 +79,6 @@ func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *T
 	app.ibcMapper = ibc.NewMapper(app.cdc, app.keyIBC, app.RegisterCodespace(ibc.DefaultCodespace))
 	app.keeper = sdb.NewTruKeeper(
 		app.keyStory,
-		app.keyVote,
 		app.keyBacking,
 		app.coinKeeper,
 		app.cdc)
@@ -99,7 +96,7 @@ func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *T
 	app.SetAnteHandler(auth.NewAnteHandler(app.accountMapper, app.feeCollectionKeeper))
 
 	// mount the multistore and load the latest state
-	app.MountStoresIAVL(app.keyMain, app.keyAccount, app.keyIBC, app.keyStory)
+	app.MountStoresIAVL(app.keyMain, app.keyAccount, app.keyIBC, app.keyStory, app.keyBacking)
 	err := app.LoadLatestVersion(app.keyMain)
 	if err != nil {
 		cmn.Exit(err.Error())
