@@ -8,6 +8,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
+// unexported key for backing queue
 var keyBackingQueue = []byte("backings:queue")
 
 // BackingQueueHead returns the head of the FIFO queue
@@ -46,17 +47,20 @@ func (k TruKeeper) BackingQueuePush(ctx sdk.Context, id int64) {
 	k.setBackingQueue(ctx, q)
 }
 
+// BackQueueLen gets the length of the queue
+func (k TruKeeper) BackQueueLen(ctx sdk.Context) int {
+	return len(k.getBackingQueue(ctx))
+}
+
 // ============================================================================
 
 // getBackingQueue gets the StoryQueue from the context
 func (k TruKeeper) getBackingQueue(ctx sdk.Context) ts.BackingQueue {
 	store := ctx.KVStore(k.backingKey)
 	bq := store.Get(keyBackingQueue)
-	// if queue is empty, create new one
 	if bq == nil {
 		return ts.BackingQueue{}
 	}
-	// unmarshal bytes to array
 	q := &ts.BackingQueue{}
 	k.cdc.MustUnmarshalBinary(bq, q)
 
@@ -64,8 +68,8 @@ func (k TruKeeper) getBackingQueue(ctx sdk.Context) ts.BackingQueue {
 }
 
 // setBackingQueue sets the BackingQueue to the context
-func (k TruKeeper) setBackingQueue(ctx sdk.Context, storyQueue ts.BackingQueue) {
-	store := ctx.KVStore(k.storyKey)
-	bsq := k.cdc.MustMarshalBinary(storyQueue)
+func (k TruKeeper) setBackingQueue(ctx sdk.Context, q ts.BackingQueue) {
+	store := ctx.KVStore(k.backingKey)
+	bsq := k.cdc.MustMarshalBinary(q)
 	store.Set(keyBackingQueue, bsq)
 }

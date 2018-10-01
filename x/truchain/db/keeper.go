@@ -23,11 +23,10 @@ type TruKeeper struct {
 }
 
 // NewTruKeeper creates a new keeper with write and read access
-func NewTruKeeper(storyKey sdk.StoreKey, voteKey sdk.StoreKey, backingKey sdk.StoreKey, ck bank.Keeper, cdc *amino.Codec) TruKeeper {
+func NewTruKeeper(storyKey sdk.StoreKey, backingKey sdk.StoreKey, ck bank.Keeper, cdc *amino.Codec) TruKeeper {
 	return TruKeeper{
 		ck:         ck,
 		storyKey:   storyKey,
-		voteKey:    voteKey,
 		backingKey: backingKey,
 		cdc:        cdc,
 	}

@@ -60,31 +60,30 @@ func makeCodec() *amino.Codec {
 }
 
 func mockDB() (sdk.Context, sdk.MultiStore, auth.AccountMapper, TruKeeper) {
-	ms, accKey, storyKey, voteKey, backingKey := setupMultiStore()
+	ms, accKey, storyKey, backingKey := setupMultiStore()
 	cdc := makeCodec()
 	am := auth.NewAccountMapper(cdc, accKey, auth.ProtoBaseAccount)
 	ck := bank.NewBaseKeeper(am)
-	k := NewTruKeeper(storyKey, voteKey, backingKey, ck, cdc)
+	k := NewTruKeeper(storyKey, backingKey, ck, cdc)
 
 	// create fake context with fake block time in header
-	time := time.Date(2018, time.September, 14, 23, 0, 0, 0, time.UTC)
+	// time := time.Date(2018, time.September, 14, 23, 0, 0, 0, time.UTC)
+	time := time.Now().Add(5 * time.Hour)
 	header := abci.Header{Time: time}
 	ctx := sdk.NewContext(ms, header, false, log.NewNopLogger())
 
 	return ctx, ms, am, k
 }
 
-func setupMultiStore() (sdk.MultiStore, *sdk.KVStoreKey, *sdk.KVStoreKey, *sdk.KVStoreKey, *sdk.KVStoreKey) {
+func setupMultiStore() (sdk.MultiStore, *sdk.KVStoreKey, *sdk.KVStoreKey, *sdk.KVStoreKey) {
 	db := dbm.NewMemDB()
 	accKey := sdk.NewKVStoreKey("acc")
 	storyKey := sdk.NewKVStoreKey("stories")
-	voteKey := sdk.NewKVStoreKey("votes")
 	backingKey := sdk.NewKVStoreKey("backings")
 	ms := store.NewCommitMultiStore(db)
 	ms.MountStoreWithDB(accKey, sdk.StoreTypeIAVL, db)
 	ms.MountStoreWithDB(storyKey, sdk.StoreTypeIAVL, db)
-	ms.MountStoreWithDB(voteKey, sdk.StoreTypeIAVL, db)
 	ms.MountStoreWithDB(backingKey, sdk.StoreTypeIAVL, db)
 	ms.LoadLatestVersion()
-	return ms, accKey, storyKey, voteKey, backingKey
+	return ms, accKey, storyKey, backingKey
 }
