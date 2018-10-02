@@ -49,5 +49,5 @@ func TestAddGetStory(t *testing.T) {
 	storyType := ts.Default
 
 	storyID, _ = keeper.NewStory(ctx, body, category, creator, escrow, storyType)
-	assert.Equal(t, int64(1), storyID, "Story ID did not increment properly")
+	assert.Equal(t, int64(2), storyID, "Story ID did not increment properly")
 }

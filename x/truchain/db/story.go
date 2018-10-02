@@ -20,7 +20,7 @@ func (k TruKeeper) NewStory(
 	store := ctx.KVStore(k.storyKey)
 
 	story := ts.Story{
-		ID:           k.newID(ctx, k.storyKey),
+		ID:           k.id(ctx, k.storyKey),
 		Body:         body,
 		Category:     category,
 		CreatedBlock: ctx.BlockHeight(),
@@ -30,7 +30,7 @@ func (k TruKeeper) NewStory(
 		StoryType:    storyType,
 	}
 
-	key := generateKey(k.storyKey.String(), story.ID)
+	key := key(k.storyKey.String(), story.ID)
 	val := k.cdc.MustMarshalBinary(story)
 	store.Set(key, val)
 
@@ -40,7 +40,7 @@ func (k TruKeeper) NewStory(
 // GetStory gets the story with the given id from the key-value store
 func (k TruKeeper) GetStory(ctx sdk.Context, storyID int64) (ts.Story, sdk.Error) {
 	store := ctx.KVStore(k.storyKey)
-	key := generateKey(k.storyKey.String(), storyID)
+	key := key(k.storyKey.String(), storyID)
 	val := store.Get(key)
 	if val == nil {
 		return ts.Story{}, ts.ErrStoryNotFound(storyID)
@@ -75,7 +75,7 @@ func (k TruKeeper) UpdateStory(ctx sdk.Context, story ts.Story) {
 		story.VoteEnd)
 
 	store := ctx.KVStore(k.storyKey)
-	key := generateKey(k.storyKey.String(), story.ID)
+	key := key(k.storyKey.String(), story.ID)
 	val := k.cdc.MustMarshalBinary(newStory)
 	store.Set(key, val)
 }
