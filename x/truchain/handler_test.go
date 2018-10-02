@@ -1,58 +1,30 @@
 package truchain
 
 import (
+	"encoding/binary"
 	"testing"
 
+	ts "github.com/TruStory/truchain/x/truchain/types"
+	sdk "github.com/cosmos/cosmos-sdk/types"
+
 	"github.com/TruStory/truchain/x/truchain/db"
+	"github.com/stretchr/testify/assert"
 )
 
-// func TestCannotUnjailUnlessJailed(t *testing.T) {
-// 	// initial setup
-// 	ctx, ck, sk, _, keeper := createTestInput(t)
-// 	slh := NewHandler(keeper)
-// 	amtInt := int64(100)
-// 	addr, val, amt := addrs[0], pks[0], sdk.NewInt(amtInt)
-// 	msg := newTestMsgCreateValidator(addr, val, amt)
-// 	got := stake.NewHandler(sk)(ctx, msg)
-// 	require.True(t, got.IsOK())
-// 	stake.EndBlocker(ctx, sk)
-// 	require.Equal(t, ck.GetCoins(ctx, sdk.AccAddress(addr)), sdk.Coins{{sk.GetParams(ctx).BondDenom, initCoins.Sub(amt)}})
-// 	require.True(t, sdk.NewDecFromInt(amt).Equal(sk.Validator(ctx, addr).GetPower()))
-
-// 	// assert non-jailed validator can't be unjailed
-// 	got = slh(ctx, NewMsgUnjail(addr))
-// 	require.False(t, got.IsOK(), "allowed unjail of non-jailed validator")
-// 	require.Equal(t, sdk.ToABCICode(DefaultCodespace, CodeValidatorNotJailed), got.Code)
-// }
-
 func TestSubmitStoryMsg(t *testing.T) {
-	_, _, _, k := db.MockDB()
+	ctx, _, _, k := db.MockDB()
 
-	// h := NewHandler(k)
+	h := NewHandler(k)
+	assert.NotNil(t, h)
 
-	// body := "fake story"
-	// cat := ts.DEX
-	// creator := sdk.AccAddress([]byte{1, 2})
-	// storyType := ts.Default
-	// msg := ts.NewSubmitStoryMsg(body, cat, creator, storyType)
+	body := "fake story"
+	cat := ts.DEX
+	creator := sdk.AccAddress([]byte{1, 2})
+	storyType := ts.Default
+	msg := ts.NewSubmitStoryMsg(body, cat, creator, storyType)
+	assert.NotNil(t, msg)
 
-	// _, err := k.GetBacking(ctx, id)
-	// assert.NotNil(t, err)
-	// assert.Equal(t, ts.ErrBackingNotFound(id).Code(), err.Code(), "Should get error")
+	res := h(ctx, msg)
+	x, _ := binary.Varint(res.Data)
+	assert.Equal(t, int64(1), x, "incorrect result data")
 }
-
-// func MockDB() (sdk.Context, sdk.MultiStore, auth.AccountMapper, TruKeeper) {
-// 	ms, accKey, storyKey, backingKey := setupMultiStore()
-// 	cdc := makeCodec()
-// 	am := auth.NewAccountMapper(cdc, accKey, auth.ProtoBaseAccount)
-// 	ck := bank.NewBaseKeeper(am)
-// 	k := NewTruKeeper(storyKey, backingKey, ck, cdc)
-
-// 	// create fake context with fake block time in header
-// 	// time := time.Date(2018, time.September, 14, 23, 0, 0, 0, time.UTC)
-// 	time := time.Now().Add(5 * time.Hour)
-// 	header := abci.Header{Time: time}
-// 	ctx := sdk.NewContext(ms, header, false, log.NewNopLogger())
-
-// 	return ctx, ms, am, k
-// }
