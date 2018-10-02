@@ -10,21 +10,21 @@ import (
 )
 
 func TestNewResponseEndBlock(t *testing.T) {
-	ctx, _, _, k := mockDB()
+	ctx, _, _, k := MockDB()
 
 	res := k.NewResponseEndBlock(ctx)
 	assert.NotNil(t, res)
 }
 
 func Test_processEarnings_BackingQueueEmpty(t *testing.T) {
-	ctx, _, _, k := mockDB()
+	ctx, _, _, k := MockDB()
 
 	err := processBacking(ctx, k)
 	assert.Nil(t, err)
 }
 
 func Test_processEarnings_UnexpiredBackings(t *testing.T) {
-	ctx, ms, _, k := mockDB()
+	ctx, ms, _, k := MockDB()
 	storyID := createFakeStory(ms, k)
 	amount, _ := sdk.ParseCoin("5trudex")
 	creator := sdk.AccAddress([]byte{1, 2})
@@ -39,7 +39,7 @@ func Test_processEarnings_UnexpiredBackings(t *testing.T) {
 }
 
 func Test_processEarnings_ExpiredBackings(t *testing.T) {
-	ctx, ms, _, k := mockDB()
+	ctx, ms, _, k := MockDB()
 	storyID := createFakeStory(ms, k)
 	amount, _ := sdk.ParseCoin("5trudex")
 	creator := sdk.AccAddress([]byte{1, 2})
@@ -57,7 +57,7 @@ func Test_processEarnings_ExpiredBackings(t *testing.T) {
 }
 
 func Test_distributeEarnings(t *testing.T) {
-	ctx, _, _, k := mockDB()
+	ctx, _, _, k := MockDB()
 
 	principal, _ := sdk.ParseCoin("5trudex")
 	interest, _ := sdk.ParseCoin("2trudex")

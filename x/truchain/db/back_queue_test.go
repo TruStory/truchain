@@ -5,12 +5,11 @@ import (
 
 	ts "github.com/TruStory/truchain/x/truchain/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-
 	"github.com/stretchr/testify/assert"
 )
 
 func TestBackingQueue_ErrBackingQueueEmpty(t *testing.T) {
-	ctx, _, _, k := mockDB()
+	ctx, _, _, k := MockDB()
 
 	// test empty queue
 	_, err := k.BackingQueueHead(ctx)
@@ -28,7 +27,7 @@ func TestBackingQueue_ErrBackingQueueEmpty(t *testing.T) {
 }
 
 func TestBackingQueue(t *testing.T) {
-	ctx, ms, _, k := mockDB()
+	ctx, ms, _, k := MockDB()
 
 	// create fake backing
 	storyID := createFakeStory(ms, k)

@@ -11,7 +11,7 @@ import (
 )
 
 func TestGetBacking_ErrBackingNotFound(t *testing.T) {
-	ctx, _, _, k := mockDB()
+	ctx, _, _, k := MockDB()
 	id := int64(5)
 
 	_, err := k.GetBacking(ctx, id)
@@ -20,7 +20,7 @@ func TestGetBacking_ErrBackingNotFound(t *testing.T) {
 }
 
 func TestGetBacking(t *testing.T) {
-	ctx, ms, _, k := mockDB()
+	ctx, ms, _, k := MockDB()
 	storyID := createFakeStory(ms, k)
 	amount, _ := sdk.ParseCoin("5trudex")
 	creator := sdk.AccAddress([]byte{1, 2})
@@ -33,7 +33,7 @@ func TestGetBacking(t *testing.T) {
 }
 
 func TestNewBacking_ErrInsufficientFunds(t *testing.T) {
-	ctx, ms, _, k := mockDB()
+	ctx, ms, _, k := MockDB()
 	storyID := createFakeStory(ms, k)
 	amount, _ := sdk.ParseCoin("5trudex")
 	creator := sdk.AccAddress([]byte{1, 2})
@@ -45,7 +45,7 @@ func TestNewBacking_ErrInsufficientFunds(t *testing.T) {
 }
 
 func TestNewBacking(t *testing.T) {
-	ctx, ms, _, k := mockDB()
+	ctx, ms, _, k := MockDB()
 	storyID := createFakeStory(ms, k)
 	amount, _ := sdk.ParseCoin("5trudex")
 	creator := sdk.AccAddress([]byte{1, 2})
@@ -57,7 +57,7 @@ func TestNewBacking(t *testing.T) {
 }
 
 func Test_getPrincipal(t *testing.T) {
-	ctx, _, _, k := mockDB()
+	ctx, _, _, k := MockDB()
 	cat := ts.DEX
 	amount := sdk.NewCoin("trudex", sdk.NewInt(5))
 	userAddr := sdk.AccAddress([]byte{1, 2})
