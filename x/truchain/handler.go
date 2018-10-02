@@ -32,7 +32,7 @@ func handleSubmitStoryMsg(ctx sdk.Context, k db.TruKeeper, msg ts.SubmitStoryMsg
 		return err.Result()
 	}
 
-	storyID, err := k.NewStory(ctx, msg.Body, msg.Category, msg.Creator, msg.Escrow, msg.StoryType)
+	storyID, err := k.NewStory(ctx, msg.Body, msg.Category, msg.Creator, msg.StoryType)
 	if err != nil {
 		return sdk.ErrInternal("Submit story error").Result()
 	}

@@ -6,8 +6,8 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
-// ReserveTokenDenom is the coin  denom for Trustory's native reserve token.
-const ReserveTokenDenom = "trustake"
+// NativeTokenName is the coin  denom for Trustory's native reserve token.
+const NativeTokenName = "trustake"
 
 // BackStoryMsg defines a message to bond to a story.
 // It implements the Cosmos `Msg` interface which is required

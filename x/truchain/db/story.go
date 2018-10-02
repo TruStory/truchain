@@ -5,16 +5,12 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
-// ============================================================================
-// Story operations
-
 // NewStory adds a story to the key-value store
 func (k TruKeeper) NewStory(
 	ctx sdk.Context,
 	body string,
 	category ts.StoryCategory,
 	creator sdk.AccAddress,
-	escrow sdk.AccAddress,
 	storyType ts.StoryType) (int64, sdk.Error) {
 
 	store := ctx.KVStore(k.storyKey)
@@ -25,7 +21,6 @@ func (k TruKeeper) NewStory(
 		Category:     category,
 		CreatedBlock: ctx.BlockHeight(),
 		Creator:      creator,
-		Escrow:       escrow,
 		State:        ts.Created,
 		StoryType:    storyType,
 	}
@@ -59,20 +54,15 @@ func (k TruKeeper) UpdateStory(ctx sdk.Context, story ts.Story) {
 		story.CommentIDs,
 		story.EvidenceIDs,
 		story.Thread,
-		story.VoteIDs,
 		story.Body,
 		story.Category,
 		story.CreatedBlock,
 		story.Creator,
-		story.Escrow,
 		story.Round,
 		story.State,
 		story.StoryType,
 		ctx.BlockHeight(),
-		story.Users,
-		story.VoteMaxNum,
-		story.VoteStart,
-		story.VoteEnd)
+		story.Users)
 
 	store := ctx.KVStore(k.storyKey)
 	key := key(k.storyKey.String(), story.ID)

@@ -23,6 +23,15 @@ import (
 	"github.com/tendermint/tendermint/crypto/encoding/amino"
 )
 
+func Test_key(t *testing.T) {
+	bz1 := key("stories", int64(5))
+	bz2 := key("stories", int64(math.MaxInt64))
+
+	assert.Equal(t, "stories:5", string(bz1), "should generate valid key")
+	assert.Equal(t, "stories:9223372036854775807", string(bz2), "should generate valid key")
+}
+
+// ============================================================================
 // Helper functions used for keeper tests
 
 func createFakeStory(ms sdk.MultiStore, k TruKeeper) int64 {
@@ -30,10 +39,9 @@ func createFakeStory(ms sdk.MultiStore, k TruKeeper) int64 {
 	body := "Body of story."
 	category := ts.DEX
 	creator := sdk.AccAddress([]byte{1, 2})
-	escrow := sdk.AccAddress([]byte{3, 4})
 	storyType := ts.Default
 
-	storyID, _ := k.NewStory(ctx, body, category, creator, escrow, storyType)
+	storyID, _ := k.NewStory(ctx, body, category, creator, storyType)
 	return storyID
 }
 
@@ -89,12 +97,4 @@ func setupMultiStore() (sdk.MultiStore, *sdk.KVStoreKey, *sdk.KVStoreKey, *sdk.K
 	ms.MountStoreWithDB(backingKey, sdk.StoreTypeIAVL, db)
 	ms.LoadLatestVersion()
 	return ms, accKey, storyKey, backingKey
-}
-
-func Test_key(t *testing.T) {
-	bz1 := key("stories", int64(5))
-	bz2 := key("stories", int64(math.MaxInt64))
-
-	assert.Equal(t, "stories:5", string(bz1), "should generate valid key")
-	assert.Equal(t, "stories:9223372036854775807", string(bz2), "should generate valid key")
 }

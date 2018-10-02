@@ -17,16 +17,16 @@ func (k TruKeeper) NewBacking(
 ) (int64, sdk.Error) {
 
 	// Check if user has enough cat coins or trustake to back
-	trustake := sdk.NewCoin(ts.ReserveTokenDenom, amount.Amount)
+	trustake := sdk.NewCoin(ts.NativeTokenName, amount.Amount)
 	if !k.ck.HasCoins(ctx, creator, sdk.Coins{amount}) &&
 		!k.ck.HasCoins(ctx, creator, sdk.Coins{trustake}) {
-		return -1, sdk.ErrInsufficientFunds("Insufficient funds for backing.")
+		return 0, sdk.ErrInsufficientFunds("Insufficient funds for backing.")
 	}
 
 	// get story from story id
 	story, err := k.GetStory(ctx, storyID)
 	if err != nil {
-		return -1, err
+		return 0, err
 	}
 
 	// load default backing parameters
@@ -35,7 +35,7 @@ func (k TruKeeper) NewBacking(
 	// set principal, converting from trustake if needed
 	principal, err := k.getPrincipal(ctx, story.Category, amount, creator)
 	if err != nil {
-		return -1, err
+		return 0, err
 	}
 
 	// mint category coin from interest earned
@@ -103,7 +103,7 @@ func (k TruKeeper) getPrincipal(
 		sdk.NewDecFromInt(amount.Amount).Mul(conversionRate).RoundInt())
 
 	// burn equivalent trustake
-	trustake := sdk.Coins{sdk.NewCoin(ts.ReserveTokenDenom, principal.Amount)}
+	trustake := sdk.Coins{sdk.NewCoin(ts.NativeTokenName, principal.Amount)}
 	if _, _, err := k.ck.SubtractCoins(ctx, userAddr, trustake); err != nil {
 		return sdk.Coin{}, err
 	}

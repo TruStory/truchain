@@ -34,7 +34,6 @@ func TestAddGetStory(t *testing.T) {
 		Category:     ts.DEX,
 		CreatedBlock: int64(0),
 		Creator:      sdk.AccAddress([]byte{1, 2}),
-		Escrow:       sdk.AccAddress([]byte{3, 4}),
 		State:        ts.Created,
 		StoryType:    ts.Default,
 	}
@@ -45,9 +44,8 @@ func TestAddGetStory(t *testing.T) {
 	body := "Body of story 2."
 	category := ts.Bitcoin
 	creator := sdk.AccAddress([]byte{3, 4})
-	escrow := sdk.AccAddress([]byte{4, 5})
 	storyType := ts.Default
 
-	storyID, _ = keeper.NewStory(ctx, body, category, creator, escrow, storyType)
+	storyID, _ = keeper.NewStory(ctx, body, category, creator, storyType)
 	assert.Equal(t, int64(2), storyID, "Story ID did not increment properly")
 }
