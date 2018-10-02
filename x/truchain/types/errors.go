@@ -19,11 +19,10 @@ const (
 	CodeInvalidURL           sdk.CodeType = 707
 	CodeInvalidCategory      sdk.CodeType = 708
 	CodeInvalidStoryType     sdk.CodeType = 709
-	CodeVoteNotFoundType     sdk.CodeType = 710
-	CodeBackingQueueNotFound sdk.CodeType = 711
-	CodeBackingQueueEmpty    sdk.CodeType = 712
-	CodeInvalidBackingCoin   sdk.CodeType = 713
-	CodeBackingNotFound      sdk.CodeType = 714
+	CodeBackingQueueNotFound sdk.CodeType = 710
+	CodeBackingQueueEmpty    sdk.CodeType = 711
+	CodeInvalidBackingCoin   sdk.CodeType = 712
+	CodeBackingNotFound      sdk.CodeType = 713
 )
 
 func codeToDefaultMsg(code sdk.CodeType) string {
@@ -85,12 +84,6 @@ func ErrInvalidURL(msg string) sdk.Error {
 func ErrStoryNotFound(storyID int64) sdk.Error {
 	return newError(DefaultCodespace, CodeStoryNotFound, "Story with id "+
 		strconv.Itoa(int(storyID))+" not found")
-}
-
-// ErrVoteNotFound throws an error when a vote is not found
-func ErrVoteNotFound(voteID int64) sdk.Error {
-	return newError(DefaultCodespace, CodeVoteNotFoundType, "Vote with id "+
-		strconv.Itoa(int(voteID))+" not found")
 }
 
 // ErrBackingQueueEmpty throws an error when the searched BackingQueue is not found
