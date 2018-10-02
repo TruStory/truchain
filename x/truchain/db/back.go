@@ -43,7 +43,7 @@ func (k TruKeeper) NewBacking(
 
 	// create new backing type
 	backing := ts.NewBacking(
-		k.newID(ctx, k.backingKey),
+		k.id(ctx, k.backingKey),
 		storyID,
 		principal,
 		interest,
@@ -57,7 +57,7 @@ func (k TruKeeper) NewBacking(
 
 	// save backing in the store
 	store.Set(
-		generateKey(k.backingKey.String(), backing.ID),
+		key(k.backingKey.String(), backing.ID),
 		k.cdc.MustMarshalBinary(backing))
 
 	// add backing to the backing queue for processing
@@ -69,7 +69,7 @@ func (k TruKeeper) NewBacking(
 // GetBacking gets the backing at the current index from the KVStore
 func (k TruKeeper) GetBacking(ctx sdk.Context, id int64) (ts.Backing, sdk.Error) {
 	store := ctx.KVStore(k.backingKey)
-	key := generateKey(k.backingKey.String(), id)
+	key := key(k.backingKey.String(), id)
 	val := store.Get(key)
 	if val == nil {
 		return ts.Backing{}, ts.ErrBackingNotFound(id)

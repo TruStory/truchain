@@ -1,6 +1,8 @@
 package db
 
 import (
+	"math"
+	"testing"
 	"time"
 
 	ts "github.com/TruStory/truchain/x/truchain/types"
@@ -8,6 +10,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth"
 	"github.com/cosmos/cosmos-sdk/x/bank"
+	"github.com/stretchr/testify/assert"
 
 	amino "github.com/tendermint/go-amino"
 	abci "github.com/tendermint/tendermint/abci/types"
@@ -86,4 +89,12 @@ func setupMultiStore() (sdk.MultiStore, *sdk.KVStoreKey, *sdk.KVStoreKey, *sdk.K
 	ms.MountStoreWithDB(backingKey, sdk.StoreTypeIAVL, db)
 	ms.LoadLatestVersion()
 	return ms, accKey, storyKey, backingKey
+}
+
+func Test_key(t *testing.T) {
+	bz1 := key("stories", int64(5))
+	bz2 := key("stories", int64(math.MaxInt64))
+
+	assert.Equal(t, "stories:5", string(bz1), "should generate valid key")
+	assert.Equal(t, "stories:9223372036854775807", string(bz2), "should generate valid key")
 }

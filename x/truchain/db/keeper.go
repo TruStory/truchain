@@ -1,7 +1,7 @@
 package db
 
 import (
-	"encoding/binary"
+	"fmt"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/bank"
@@ -34,28 +34,28 @@ func NewTruKeeper(storyKey sdk.StoreKey, backingKey sdk.StoreKey, ck bank.Keeper
 
 // ============================================================================
 
-// newID creates a new id for a key by incrementing the last one by 1
-func (k TruKeeper) newID(ctx sdk.Context, storeKey sdk.StoreKey) int64 {
+// id creates a new id for a key by incrementing the last one by 1
+func (k TruKeeper) id(ctx sdk.Context, storeKey sdk.StoreKey) int64 {
 	store := ctx.KVStore(storeKey)
 
-	// create key of form "keyName:lastIndex", i.e: "stories:lastIndex"
-	key := storeKey.Name() + ":lastIndex"
+	// create key of form "keyName:len", i.e: "stories:len"
+	key := storeKey.Name() + ":len"
 	keyVal := []byte(key)
 	lastID := store.Get(keyVal)
 
-	// if we don't have an ID yet, set it to zero
+	// if we don't have an ID yet, set it to one
 	if lastID == nil {
-		zero := k.cdc.MustMarshalBinary(int64(0))
-		store.Set(keyVal, zero)
+		one := k.cdc.MustMarshalBinary(int64(1))
+		store.Set(keyVal, one)
 
-		return 0
+		return 1
 	}
 
 	// convert from binary to int64
 	ID := new(int64)
 	k.cdc.MustUnmarshalBinary(lastID, ID)
 
-	// increment id by 1 and update value in blockchain
+	// increment id by 1 and update value in the kvstore
 	newID := *ID + 1
 	newIDVal := k.cdc.MustMarshalBinary(newID)
 	store.Set(keyVal, newIDVal)
@@ -63,12 +63,7 @@ func (k TruKeeper) newID(ctx sdk.Context, storeKey sdk.StoreKey) int64 {
 	return newID
 }
 
-// generateKey creates a key of the form "keyName"|{id}
-func generateKey(keyName string, id int64) []byte {
-	var key []byte
-	idBytes := make([]byte, 8)
-	binary.LittleEndian.PutUint64(idBytes, uint64(id))
-	key = []byte(keyName)
-	key = append(key, idBytes...)
-	return key
+// key creates a key of the form keyName:id
+func key(keyName string, id int64) []byte {
+	return []byte(fmt.Sprintf("%s:%d", keyName, id))
 }

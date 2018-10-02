@@ -50,10 +50,10 @@ func TestBackingQueue(t *testing.T) {
 	assert.Equal(t, 2, len, "length of queue should be correct")
 
 	backing, _ := k.BackingQueuePop(ctx)
-	assert.Equal(t, backing.ID, int64(0), "backing id should match")
+	assert.Equal(t, backing.ID, int64(1), "backing id should match")
 
 	backing, _ = k.BackingQueuePop(ctx)
-	assert.Equal(t, backing.ID, int64(1), "backing id should match")
+	assert.Equal(t, backing.ID, int64(2), "backing id should match")
 
 	len = k.BackQueueLen(ctx)
 	assert.Equal(t, 0, len, "length of queue should be correct")
