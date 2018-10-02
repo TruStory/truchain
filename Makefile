@@ -1,6 +1,7 @@
 PACKAGES=$(shell go list ./...)
 
-all: build test
+benchmark:
+	@go test -bench=. $(PACKAGES)
 
 buidl: build
 
@@ -10,7 +11,9 @@ build:
 test:
 	@go test $(PACKAGES)
 
-benchmark:
-	@go test -bench=. $(PACKAGES)
+update_vendor_deps:
+	@echo "--> Running dep ensure"
+	@rm -rf .vendor-new
+	@dep ensure -v
 
-.PHONY: all build test benchmark
+.PHONY: build test benchmark

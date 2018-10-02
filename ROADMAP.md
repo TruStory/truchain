@@ -4,17 +4,15 @@
 
 ### MVP (10-30-2018)
 
-Time to devcon: ~6 weeks
+Time to devcon: ~4 weeks
 
-#### Voting on a story (in-progress)
+#### Backing a story
 
-- [x] handle end of voting period logic
-- [x] reward winning users
-- [ ] tests
-- [ ] fix Cosmos lite client bug preventing custom endpoints
+- [x] refactor `Bond` to `Back`
+- [x] end blocker logic to handle end of backing period
 - [ ] lite client endpoints
 
-time: 1 week
+time: 2 weeks
 
 #### Accounts / Users / Wallets
 
@@ -31,13 +29,4 @@ time: 2 weeks
 - [ ] end blocker logic to handle end of challenge period
 - [ ] lite client endpoints
 
-time: 1 week
-
-#### Backing a story
-
-- [ ] refactor `Bond` to `Back`
-- [ ] end blocker logic to handle end of backing period
-- [ ] lite client endpoints
-
 time: 2 weeks
-
