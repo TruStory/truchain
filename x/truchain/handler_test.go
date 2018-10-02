@@ -1,15 +1,10 @@
 package truchain
 
-// import (
-// 	"testing"
-// 	"time"
+import (
+	"testing"
 
-// 	ts "github.com/TruStory/truchain/x/truchain/types"
-// 	sdk "github.com/cosmos/cosmos-sdk/types"
-// 	"github.com/cosmos/cosmos-sdk/x/auth"
-// 	"github.com/cosmos/cosmos-sdk/x/bank"
-// 	"github.com/go-kit/kit/log"
-// )
+	"github.com/TruStory/truchain/x/truchain/db"
+)
 
 // func TestCannotUnjailUnlessJailed(t *testing.T) {
 // 	// initial setup
@@ -30,23 +25,23 @@ package truchain
 // 	require.Equal(t, sdk.ToABCICode(DefaultCodespace, CodeValidatorNotJailed), got.Code)
 // }
 
-// func TestSubmitStoryMsg(t *testing.T) {
-// 	ctx, _, _, k := mockDB()
+func TestSubmitStoryMsg(t *testing.T) {
+	_, _, _, k := db.MockDB()
 
-// 	h := NewHandler(k)
+	// h := NewHandler(k)
 
-// 	body := "fake story"
-// 	cat := ts.DEX
-// 	creator := sdk.AccAddress([]byte{1, 2})
-// 	storyType := ts.Default
-// 	msg := ts.NewSubmitStoryMsg(body, cat, creator, storyType)
+	// body := "fake story"
+	// cat := ts.DEX
+	// creator := sdk.AccAddress([]byte{1, 2})
+	// storyType := ts.Default
+	// msg := ts.NewSubmitStoryMsg(body, cat, creator, storyType)
 
-// 	// _, err := k.GetBacking(ctx, id)
-// 	// assert.NotNil(t, err)
-// 	// assert.Equal(t, ts.ErrBackingNotFound(id).Code(), err.Code(), "Should get error")
-// }
+	// _, err := k.GetBacking(ctx, id)
+	// assert.NotNil(t, err)
+	// assert.Equal(t, ts.ErrBackingNotFound(id).Code(), err.Code(), "Should get error")
+}
 
-// func mockDB() (sdk.Context, sdk.MultiStore, auth.AccountMapper, TruKeeper) {
+// func MockDB() (sdk.Context, sdk.MultiStore, auth.AccountMapper, TruKeeper) {
 // 	ms, accKey, storyKey, backingKey := setupMultiStore()
 // 	cdc := makeCodec()
 // 	am := auth.NewAccountMapper(cdc, accKey, auth.ProtoBaseAccount)
