@@ -31,7 +31,7 @@ type BackingParams struct {
 	MaxInterestRate sdk.Dec
 }
 
-// NewBackingParams creates a new BackingParams type
+// NewBackingParams creates a new BackingParams type with defaults
 func NewBackingParams() BackingParams {
 	return BackingParams{
 		AmountWeight:    sdk.NewDecWithPrec(333, 3), // 33.3%

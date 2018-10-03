@@ -6,9 +6,8 @@ import (
 	abci "github.com/tendermint/tendermint/abci/types"
 )
 
-// NewResponseEndBlock checks stories and generates a ResponseEndBlock.
-// It is called at the end of every block, and processes any timing-related
-// acitivities within the app.
+// NewResponseEndBlock is called at the end of every block, processes timing
+// related events, and returns a ResponseEndBlock.
 func (k TruKeeper) NewResponseEndBlock(ctx sdk.Context) abci.ResponseEndBlock {
 	err := processBacking(ctx, k)
 	if err != nil {

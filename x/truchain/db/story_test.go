@@ -18,7 +18,7 @@ func TestAddGetStory(t *testing.T) {
 	cdc := makeCodec()
 	keeper := NewTruKeeper(storyKey, backingKey, bank.BaseKeeper{}, cdc)
 	ctx := sdk.NewContext(ms, abci.Header{}, false, log.NewNopLogger())
-	storyID := createFakeStory(ms, keeper)
+	storyID := CreateFakeStory(ms, keeper)
 
 	// test getting a non-existant story
 	_, err := keeper.GetStory(ctx, int64(5))
