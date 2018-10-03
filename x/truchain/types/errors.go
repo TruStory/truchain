@@ -65,12 +65,12 @@ func ErrInvalidAmount(msg string) sdk.Error {
 	return newError(DefaultCodespace, CodeInvalidAmount, msg)
 }
 
-// ErrInvalidBackingPeriod throws an error when bond period is invalid
+// ErrInvalidBackingPeriod throws an error when backing period is invalid
 func ErrInvalidBackingPeriod(msg string) sdk.Error {
 	return newError(DefaultCodespace, CodeInvalidBackingPeriod, msg)
 }
 
-// ErrInvalidBackingCoin throws an error when bond period is invalid
+// ErrInvalidBackingCoin throws an error when backing period is invalid
 func ErrInvalidBackingCoin(msg string) sdk.Error {
 	return newError(DefaultCodespace, CodeInvalidBackingCoin, msg)
 }
