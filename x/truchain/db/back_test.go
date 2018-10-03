@@ -21,7 +21,7 @@ func TestGetBacking_ErrBackingNotFound(t *testing.T) {
 
 func TestGetBacking(t *testing.T) {
 	ctx, ms, _, k := MockDB()
-	storyID := createFakeStory(ms, k)
+	storyID := CreateFakeStory(ms, k)
 	amount, _ := sdk.ParseCoin("5trudex")
 	creator := sdk.AccAddress([]byte{1, 2})
 	duration := ts.NewBackingParams().MinPeriod
@@ -34,7 +34,7 @@ func TestGetBacking(t *testing.T) {
 
 func TestNewBacking_ErrInsufficientFunds(t *testing.T) {
 	ctx, ms, _, k := MockDB()
-	storyID := createFakeStory(ms, k)
+	storyID := CreateFakeStory(ms, k)
 	amount, _ := sdk.ParseCoin("5trudex")
 	creator := sdk.AccAddress([]byte{1, 2})
 	duration := ts.NewBackingParams().MinPeriod
@@ -46,7 +46,7 @@ func TestNewBacking_ErrInsufficientFunds(t *testing.T) {
 
 func TestNewBacking(t *testing.T) {
 	ctx, ms, _, k := MockDB()
-	storyID := createFakeStory(ms, k)
+	storyID := CreateFakeStory(ms, k)
 	amount, _ := sdk.ParseCoin("5trudex")
 	creator := sdk.AccAddress([]byte{1, 2})
 	duration := ts.NewBackingParams().MinPeriod

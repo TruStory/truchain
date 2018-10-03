@@ -9,9 +9,8 @@ import (
 // NativeTokenName is the coin  denom for Trustory's native reserve token.
 const NativeTokenName = "trustake"
 
-// BackStoryMsg defines a message to bond to a story.
-// It implements the Cosmos `Msg` interface which is required
-// for transactions on Cosmos blockchains.
+// BackStoryMsg defines a message to back a story. It implements the
+// `Msg` interface which is required for transactions on Cosmos blockchains.
 type BackStoryMsg struct {
 	StoryID  int64          `json:"story_id"`
 	Amount   sdk.Coin       `json:"amount"`
@@ -19,7 +18,7 @@ type BackStoryMsg struct {
 	Duration time.Duration  `json:"duration"`
 }
 
-// NewBackStoryMsg creates a message to place a new bond
+// NewBackStoryMsg creates a message to back a story
 func NewBackStoryMsg(
 	storyID int64,
 	amount sdk.Coin,

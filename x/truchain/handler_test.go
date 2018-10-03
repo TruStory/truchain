@@ -90,3 +90,16 @@ func TestBackStoryMsg(t *testing.T) {
 	x, _ := binary.Varint(res.Data)
 	assert.Equal(t, int64(1), x, "incorrect result story id")
 }
+
+func TestByzantineMsg(t *testing.T) {
+	ctx, _, _, k := db.MockDB()
+
+	h := NewHandler(k)
+	assert.NotNil(t, h)
+
+	fakeMsg := ts.NewAddCommentMsg(int64(5), "test", sdk.AccAddress([]byte{1, 2}))
+
+	res := h(ctx, fakeMsg)
+	hasUnrecognizedMessage := strings.Contains(res.Log, "65542")
+	assert.True(t, hasUnrecognizedMessage, "should return err code")
+}

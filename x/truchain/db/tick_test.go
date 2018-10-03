@@ -25,7 +25,7 @@ func Test_processEarnings_BackingQueueEmpty(t *testing.T) {
 
 func Test_processEarnings_UnexpiredBackings(t *testing.T) {
 	ctx, ms, _, k := MockDB()
-	storyID := createFakeStory(ms, k)
+	storyID := CreateFakeStory(ms, k)
 	amount, _ := sdk.ParseCoin("5trudex")
 	creator := sdk.AccAddress([]byte{1, 2})
 	duration := 99 * time.Hour
@@ -40,7 +40,7 @@ func Test_processEarnings_UnexpiredBackings(t *testing.T) {
 
 func Test_processEarnings_ExpiredBackings(t *testing.T) {
 	ctx, ms, _, k := MockDB()
-	storyID := createFakeStory(ms, k)
+	storyID := CreateFakeStory(ms, k)
 	amount, _ := sdk.ParseCoin("5trudex")
 	creator := sdk.AccAddress([]byte{1, 2})
 	duration := 4 * time.Hour

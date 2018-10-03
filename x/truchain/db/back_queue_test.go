@@ -30,7 +30,7 @@ func TestBackingQueue(t *testing.T) {
 	ctx, ms, _, k := MockDB()
 
 	// create fake backing
-	storyID := createFakeStory(ms, k)
+	storyID := CreateFakeStory(ms, k)
 	amount, _ := sdk.ParseCoin("5trudex")
 	creator := sdk.AccAddress([]byte{1, 2})
 	duration := ts.NewBackingParams().MinPeriod
