@@ -52,7 +52,7 @@ func handleBackStoryMsg(ctx sdk.Context, k db.TruKeeper, msg ts.BackStoryMsg) sd
 		msg.Creator,
 		msg.Duration)
 	if err != nil {
-		return sdk.ErrInternal("Backing error").Result()
+		return err.Result()
 	}
 
 	return sdk.Result{Data: i2b(backingID)}

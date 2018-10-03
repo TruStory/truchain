@@ -28,8 +28,6 @@ func MockDB() (sdk.Context, sdk.MultiStore, auth.AccountMapper, TruKeeper) {
 	ck := bank.NewBaseKeeper(am)
 	k := NewTruKeeper(storyKey, backingKey, ck, cdc)
 
-	// create fake context with fake block time in header
-	// time := time.Date(2018, time.September, 14, 23, 0, 0, 0, time.UTC)
 	time := time.Now().Add(5 * time.Hour)
 	header := abci.Header{Time: time}
 	ctx := sdk.NewContext(ms, header, false, log.NewNopLogger())
@@ -37,7 +35,18 @@ func MockDB() (sdk.Context, sdk.MultiStore, auth.AccountMapper, TruKeeper) {
 	return ctx, ms, am, k
 }
 
-func createFakeStory(ms sdk.MultiStore, k TruKeeper) int64 {
+// CreateFakeFundedAccount creates a fake funded account for testing
+func CreateFakeFundedAccount(ctx sdk.Context, am auth.AccountMapper, coins sdk.Coins) sdk.AccAddress {
+	_, _, addr := keyPubAddr()
+	baseAcct := auth.NewBaseAccountWithAddress(addr)
+	_ = baseAcct.SetCoins(coins)
+	am.SetAccount(ctx, &baseAcct)
+
+	return addr
+}
+
+// CreateFakeStory creates a fake story for testing
+func CreateFakeStory(ms sdk.MultiStore, k TruKeeper) int64 {
 	ctx := sdk.NewContext(ms, abci.Header{}, false, log.NewNopLogger())
 	body := "Body of story."
 	category := ts.DEX
@@ -46,15 +55,6 @@ func createFakeStory(ms sdk.MultiStore, k TruKeeper) int64 {
 
 	storyID, _ := k.NewStory(ctx, body, category, creator, storyType)
 	return storyID
-}
-
-func createFundedAccount(ctx sdk.Context, am auth.AccountMapper, coins sdk.Coins) sdk.AccAddress {
-	_, _, addr := keyPubAddr()
-	baseAcct := auth.NewBaseAccountWithAddress(addr)
-	_ = baseAcct.SetCoins(coins)
-	am.SetAccount(ctx, &baseAcct)
-
-	return addr
 }
 
 func keyPubAddr() (crypto.PrivKey, crypto.PubKey, sdk.AccAddress) {
