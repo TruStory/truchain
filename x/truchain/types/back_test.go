@@ -60,7 +60,7 @@ func TestInValidStakeBackMsg(t *testing.T) {
 	assert.Equal(t, sdk.CodeType(705), err.Code(), err.Error())
 }
 
-func TestInValidBondPeriodBackMsg(t *testing.T) {
+func TestInValidBackingPeriodBackMsg(t *testing.T) {
 	validStoryID := int64(1)
 	validStake := sdk.Coin{Denom: "trustake", Amount: sdk.NewInt(100)}
 	validCreator := sdk.AccAddress([]byte{1, 2})
@@ -71,7 +71,7 @@ func TestInValidBondPeriodBackMsg(t *testing.T) {
 	assert.Equal(t, sdk.CodeType(706), err.Code(), err.Error())
 }
 
-func TestInValidBondPeriod2BackMsg(t *testing.T) {
+func TestInValidBackingPeriod2BackMsg(t *testing.T) {
 	validStoryID := int64(1)
 	validStake := sdk.Coin{Denom: "trustake", Amount: sdk.NewInt(100)}
 	validCreator := sdk.AccAddress([]byte{1, 2})
