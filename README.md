@@ -1,4 +1,4 @@
-# TruStory Sidechain
+# TruChain
 
 ### Running
 
@@ -86,29 +86,40 @@ Project layout:
 
 It compiles into two binaries, `trucli` (lite client) and `truchaind` (dapp chain). The lite client is responsible for responding to API requests from clients wanting to access or modify data on the dapp chain. The dapp chain is responsible for responding to requests from the lite client, including querying and storing data.
 
-#### Key-Value Store
+#### Key-Value Stores
 
-Because the current Cosmos SDK data store is built on a key-value store, database
-operations are more explicit than a relational or even NoSQL database. Lists and
-queues must be made for data that needs to be retrieved.
+Because the current Cosmos SDK data store is built on key-value storage, database operations are more explicit than a relational or even NoSQL database. Lists and queues must be made for data that needs to be retrieved.
 
-For example, the list of unexpired story backings is stored as a queue with key `backings:queue` in the `backings` key-value store.
+`TruKeeper` handles all reads and writes from key-value storage. It contains a separate store for each data type:
+
+Stories key-value store:
+
+* stories:1 -> `Story`
+* stories:2 -> `Story`
+* stories:len -> 2
+
+Backings key-value store:
+
+* backings:1 -> `Backing`
+* backings:2 -> `Backing`
+* backings:3 -> `Backing`
+* backings:len -> 3
+* backings:queue -> [1, 2, 3]
+
+All data in stores are binary encoded using [Amino](https://github.com/tendermint/go-amino) for efficient storage in a Merkle tree. `TruKeeper` handles marshalling and umarshalling data between its binary encoding and Go data type.
 
 ### Messages
 
-These are the messages needed to modify state on the TruStory blockchain.
+These are the messages needed to modify state on TruChain.
 
 - `BackStoryMsg`: to back a story
 - `AddCommentMsg`: to add a comment to a story
 - `SubmitEvidenceMsg`: to submit evidence for a story
 - `SubmitStoryMsg`: to submit a story
 
-Each of these messages mutates state in a key-value store (`KVStore`) on each node. The  `KVStore` itself is broken into multiple keyspaces, one for each type. The values in `KVStore` are binary encoded using [Amino](https://github.com/tendermint/go-amino), a library based on [Protocol Buffers](https://developers.google.com/protocol-buffers/). These values are Go types that can be serialized and deserialized.
+Each message is routed to a handler which performs operations on the key-value stores.
 
-### Types
+### Data Types
 
 Currently the supported types are: `Back`, `Evidence`, `Comment`, and `Story`. Using Amino/protobufs allows types to be forwards and backwards compatible, allowing multiple versions of them to co-exist.
 
-### Keepers
-
-Keepers are wrappers around `KVStore` that handle reading and writing. They do the main heavy lifting of the app.
