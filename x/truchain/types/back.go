@@ -33,10 +33,10 @@ func NewBackStoryMsg(
 }
 
 // Type implements Msg
-func (msg BackStoryMsg) Type() string { return "BackStory" }
+func (msg BackStoryMsg) Type() string { return MsgType }
 
 // Name implements Msg
-func (msg BackStoryMsg) Name() string { return msg.Type() }
+func (msg BackStoryMsg) Name() string { return "back_story" }
 
 // GetSignBytes implements Msg
 func (msg BackStoryMsg) GetSignBytes() []byte {

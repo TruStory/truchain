@@ -21,10 +21,10 @@ func NewAddCommentMsg(storyID int64, body string, creator sdk.AccAddress) AddCom
 }
 
 // Type implements Msg
-func (msg AddCommentMsg) Type() string { return "AddComment" }
+func (msg AddCommentMsg) Type() string { return MsgType }
 
 // Name implements Msg
-func (msg AddCommentMsg) Name() string { return msg.Type() }
+func (msg AddCommentMsg) Name() string { return "add_comment" }
 
 // GetSignBytes implements Msg
 func (msg AddCommentMsg) GetSignBytes() []byte {

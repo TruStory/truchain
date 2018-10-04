@@ -87,7 +87,7 @@ func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *T
 	app.Router().
 		AddRoute("bank", bank.NewHandler(app.coinKeeper)).
 		AddRoute("ibc", ibc.NewHandler(app.ibcMapper, app.coinKeeper)).
-		AddRoute("app", ts.NewHandler(app.keeper))
+		AddRoute("truchain", ts.NewHandler(app.keeper))
 
 	// perform initialization logic
 	app.SetInitChainer(app.initChainer)
