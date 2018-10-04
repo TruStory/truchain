@@ -1,12 +1,12 @@
-// Implements a queue on top of the Cosmos key-value store.
-// Useful for managing lists of data, like stories in-progress.
-
 package db
 
 import (
 	ts "github.com/TruStory/truchain/x/truchain/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
+
+// Implements a queue on top of the key-value store. It keeps a list of ids
+// for unexpired backings which are checked for maturity on each block tick.
 
 // unexported key for backing queue
 var keyBackingQueue = []byte("backings:queue")
