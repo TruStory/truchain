@@ -17,9 +17,6 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/tendermint/tmlibs/cli"
 
-	// "github.com/tendermint/tendermint/libs/cli"
-
-	truchaincmd "github.com/TruStory/truchain/x/truchain/client/cli"
 	truchainrest "github.com/TruStory/truchain/x/truchain/client/rest"
 )
 
@@ -67,12 +64,6 @@ func main() {
 			stakecmd.GetCmdEditValidator(cdc),
 			stakecmd.GetCmdDelegate(cdc),
 			stakecmd.GetCmdUnbond("stake", cdc),
-		)...)
-
-	// add truchain specific commands
-	rootCmd.AddCommand(
-		client.GetCommands(
-			truchaincmd.GetCmdQueryStories("stories", cdc),
 		)...)
 
 	// add proxy, version and key info
