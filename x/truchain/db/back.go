@@ -52,13 +52,8 @@ func (k TruKeeper) NewBacking(
 		duration,
 		creator)
 
-	// get handle for backing store
-	store := ctx.KVStore(k.backingKey)
-
-	// save backing in the store
-	store.Set(
-		key(k.backingKey.String(), backing.ID),
-		k.cdc.MustMarshalBinary(backing))
+	// store backing
+	k.setBacking(ctx, backing)
 
 	// add backing to the backing queue for processing
 	k.BackingQueuePush(ctx, backing.ID)
@@ -79,6 +74,8 @@ func (k TruKeeper) GetBacking(ctx sdk.Context, id int64) (ts.Backing, sdk.Error)
 
 	return *backing, nil
 }
+
+// ============================================================================
 
 // getPrincipal calculates the principal, the amount the user gets back
 // after the backing expires/matures. Returns a coin.
@@ -110,8 +107,6 @@ func (k TruKeeper) getPrincipal(
 
 	return principal, nil
 }
-
-// ============================================================================
 
 // getInterest calcuates the interest for the backing
 func getInterest(
@@ -156,4 +151,12 @@ func getInterest(
 	coin := sdk.NewCoin(category.CoinDenom(), interest.RoundInt())
 
 	return coin
+}
+
+// setBacking stores a `Backing` type in the KVStore
+func (k TruKeeper) setBacking(ctx sdk.Context, backing ts.Backing) {
+	store := ctx.KVStore(k.backingKey)
+	store.Set(
+		key(k.backingKey.String(), backing.ID),
+		k.cdc.MustMarshalBinary(backing))
 }

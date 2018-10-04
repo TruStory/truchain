@@ -13,8 +13,6 @@ func (k TruKeeper) NewStory(
 	creator sdk.AccAddress,
 	storyType ts.StoryType) (int64, sdk.Error) {
 
-	store := ctx.KVStore(k.storyKey)
-
 	story := ts.Story{
 		ID:           k.id(ctx, k.storyKey),
 		Body:         body,
@@ -25,9 +23,7 @@ func (k TruKeeper) NewStory(
 		StoryType:    storyType,
 	}
 
-	key := key(k.storyKey.String(), story.ID)
-	val := k.cdc.MustMarshalBinary(story)
-	store.Set(key, val)
+	k.setStory(ctx, story)
 
 	return story.ID, nil
 }
@@ -64,8 +60,15 @@ func (k TruKeeper) UpdateStory(ctx sdk.Context, story ts.Story) {
 		ctx.BlockHeight(),
 		story.Users)
 
+	k.setStory(ctx, newStory)
+}
+
+// ============================================================================
+
+// setStory saves a `Story` type to the KVStore
+func (k TruKeeper) setStory(ctx sdk.Context, story ts.Story) {
 	store := ctx.KVStore(k.storyKey)
-	key := key(k.storyKey.String(), story.ID)
-	val := k.cdc.MustMarshalBinary(newStory)
-	store.Set(key, val)
+	store.Set(
+		key(k.storyKey.String(), story.ID),
+		k.cdc.MustMarshalBinary(story))
 }
