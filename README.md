@@ -20,7 +20,7 @@ This creates:
 `bin/truchaind`: TruStory server node
 
 `trucli`, the light client, will ideally run on it's own machine. It will handle all
-API requets, and communicate via RPC with `truchaind`.
+API requests, and communicate via RPC with `truchaind`.
 
 `truchaind`, will initially run as a single Cosmos node, but eventually as a zone of many nodes.
 
@@ -84,7 +84,7 @@ Project layout:
             └── types.go
 ```
 
-It compiles into two binaries, `trucli` (lite client) and `truchaind` (dapp chain). The lite client is responsible for responding to API requests from clients wanting to access or modify data on the dapp chain. The dapp chain is responsible for responding to requests from the lite client, including querying and storing data.
+It compiles into two binaries, `trucli` (lite client) and `truchaind` (dapp chain). The lite client is responsible for responding to API requests from clients wanting to access or modify data on the dapp chain. The dapp chain is responsible for responding to requests from the lite client, such as querying and storing data.
 
 #### Key-Value Stores
 
