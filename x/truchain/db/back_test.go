@@ -56,7 +56,7 @@ func TestNewBacking(t *testing.T) {
 	assert.NotNil(t, backingID)
 }
 
-func Test_getPrincipal(t *testing.T) {
+func Test_getPrincipal_InCategoryCoins(t *testing.T) {
 	ctx, _, _, k := MockDB()
 	cat := ts.DEX
 	amount := sdk.NewCoin("trudex", sdk.NewInt(5))
@@ -69,6 +69,22 @@ func Test_getPrincipal(t *testing.T) {
 	coin, err := k.getPrincipal(ctx, cat, amount, userAddr)
 	assert.Nil(t, err)
 	assert.Equal(t, amount, coin, "Incorrect principal calculation")
+	assert.Equal(t, "trudex", amount.Denom, "Incorrect principal coin")
+}
+
+func Test_getPrincipal_InTrustake(t *testing.T) {
+	ctx, _, _, k := MockDB()
+	cat := ts.DEX
+	userAddr := sdk.AccAddress([]byte{1, 2})
+
+	// give fake user some fake coins
+	amount, _ := sdk.ParseCoin("5trustake")
+	k.ck.AddCoins(ctx, userAddr, sdk.Coins{amount})
+
+	coin, err := k.getPrincipal(ctx, cat, amount, userAddr)
+	assert.Nil(t, err)
+	assert.Equal(t, amount, coin, "Incorrect principal calculation")
+	assert.Equal(t, "trustake", amount.Denom, "Incorrect principal coin")
 }
 
 func Test_getInterest_MidAmountMidPeriod(t *testing.T) {
