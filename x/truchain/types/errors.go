@@ -10,7 +10,6 @@ import (
 const (
 	DefaultCodespace sdk.CodespaceType = 7
 
-	CodeInvalidOption        sdk.CodeType = 701
 	CodeInvalidBody          sdk.CodeType = 702
 	CodeInvalidStoryID       sdk.CodeType = 703
 	CodeStoryNotFound        sdk.CodeType = 704
@@ -34,11 +33,6 @@ func codeToDefaultMsg(code sdk.CodeType) string {
 
 //----------------------------------------
 // Error constructors
-
-// ErrInvalidOption throws an error on invalid option
-func ErrInvalidOption(msg string) sdk.Error {
-	return newError(DefaultCodespace, CodeInvalidOption, msg)
-}
 
 // ErrInvalidBody throws an error on invalid title
 func ErrInvalidBody(msg string) sdk.Error {
