@@ -104,7 +104,7 @@ Backings key-value store:
 * backings:2 -> `Backing`
 * backings:3 -> `Backing`
 * backings:len -> 3
-* backings:queue -> [1, 2, 3]
+* backings:queue:unexpired -> [1, 2, 3]
 
 All data in stores are binary encoded using [Amino](https://github.com/tendermint/go-amino) for efficient storage in a Merkle tree. `TruKeeper` handles marshalling and umarshalling data between its binary encoding and Go data type.
 
