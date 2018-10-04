@@ -16,7 +16,8 @@ func TestValidAddCommentMsg(t *testing.T) {
 	err := msg.ValidateBasic()
 
 	assert.Nil(t, err)
-	assert.Equal(t, "AddComment", msg.Type())
+	assert.Equal(t, "truchain", msg.Type())
+	assert.Equal(t, "add_comment", msg.Name())
 	assert.Equal(
 		t,
 		`{"body":"This is a test comment on a story.","creator":"cosmos1qypq36vzru","story_id":1}`,

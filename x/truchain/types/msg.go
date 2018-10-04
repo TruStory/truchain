@@ -7,6 +7,9 @@ import (
 	amino "github.com/tendermint/go-amino"
 )
 
+// MsgType is the name used to identify transaction types
+const MsgType = "truchain"
+
 // RegisterAmino registers messages into the codec
 func RegisterAmino(cdc *amino.Codec) {
 	cdc.RegisterConcrete(BackStoryMsg{}, "truchain/BackStoryMsg", nil)

@@ -17,7 +17,8 @@ func TestValidSubmitStoryMsg(t *testing.T) {
 	err := msg.ValidateBasic()
 
 	assert.Nil(t, err)
-	assert.Equal(t, "SubmitStory", msg.Type())
+	assert.Equal(t, "truchain", msg.Type())
+	assert.Equal(t, "submit_story", msg.Name())
 	assert.Equal(
 		t,
 		`{"body":"This is a valid story body @shanev amirite?","category":3,"creator":"cosmos1qypq36vzru","story_type":0}`,

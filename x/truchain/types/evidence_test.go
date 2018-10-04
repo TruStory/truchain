@@ -16,7 +16,8 @@ func TestValidSubmitEvidencetMsg(t *testing.T) {
 	err := msg.ValidateBasic()
 
 	assert.Nil(t, err)
-	assert.Equal(t, "SubmitEvidence", msg.Type())
+	assert.Equal(t, "truchain", msg.Type())
+	assert.Equal(t, "submit_evidence", msg.Name())
 	assert.Equal(
 		t,
 		`{"creator":"cosmos1qypq36vzru","story_id":1,"url":"http://www.truchain.io"}`,

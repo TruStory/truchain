@@ -23,10 +23,10 @@ func NewSubmitEvidenceMsg(storyID int64, creator sdk.AccAddress, uri string) Sub
 }
 
 // Type implements Msg
-func (msg SubmitEvidenceMsg) Type() string { return "SubmitEvidence" }
+func (msg SubmitEvidenceMsg) Type() string { return MsgType }
 
 // Name implements Msg
-func (msg SubmitEvidenceMsg) Name() string { return msg.Type() }
+func (msg SubmitEvidenceMsg) Name() string { return "submit_evidence" }
 
 // GetSignBytes implements Msg
 func (msg SubmitEvidenceMsg) GetSignBytes() []byte {

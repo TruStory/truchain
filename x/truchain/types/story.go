@@ -23,10 +23,10 @@ func NewSubmitStoryMsg(body string, category StoryCategory, creator sdk.AccAddre
 }
 
 // Type implements Msg
-func (msg SubmitStoryMsg) Type() string { return "SubmitStory" }
+func (msg SubmitStoryMsg) Type() string { return MsgType }
 
 // Name implements Msg
-func (msg SubmitStoryMsg) Name() string { return msg.Type() }
+func (msg SubmitStoryMsg) Name() string { return "submit_story" }
 
 // GetSignBytes implements Msg
 func (msg SubmitStoryMsg) GetSignBytes() []byte {
