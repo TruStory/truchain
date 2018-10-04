@@ -9,7 +9,7 @@ import (
 // for unexpired backings which are checked for maturity on each block tick.
 
 // unexported key for backing queue
-var keyBackingQueue = []byte("backings:queue")
+var keyBackingQueue = []byte("backings:queue:unexpired")
 
 // BackingQueueHead returns the head of the FIFO queue
 func (k TruKeeper) BackingQueueHead(ctx sdk.Context) (ts.Backing, sdk.Error) {
