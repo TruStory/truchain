@@ -4,25 +4,24 @@ import (
 	"os"
 	"testing"
 
-	"github.com/TruStory/trucoin/types"
+	"github.com/TruStory/truchain/types"
+	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/cosmos/cosmos-sdk/wire"
 	"github.com/cosmos/cosmos-sdk/x/auth"
 	"github.com/stretchr/testify/require"
 	abci "github.com/tendermint/tendermint/abci/types"
-	"github.com/tendermint/tendermint/crypto"
 	dbm "github.com/tendermint/tendermint/libs/db"
 	"github.com/tendermint/tendermint/libs/log"
 )
 
-func setGenesis(baseApp *TruStoryApp, accounts ...*types.AppAccount) (types.GenesisState, error) {
+func setGenesis(baseApp *TruChain, accounts ...*types.AppAccount) (types.GenesisState, error) {
 	genAccts := make([]*types.GenesisAccount, len(accounts))
 	for i, appAct := range accounts {
 		genAccts[i] = types.NewGenesisAccount(appAct)
 	}
 
 	genesisState := types.GenesisState{Accounts: genAccts}
-	stateBytes, err := wire.MarshalJSONIndent(baseApp.cdc, genesisState)
+	stateBytes, err := codec.MarshalJSONIndent(baseApp.cdc, genesisState)
 	if err != nil {
 		return types.GenesisState{}, err
 	}
@@ -39,11 +38,8 @@ func setGenesis(baseApp *TruStoryApp, accounts ...*types.AppAccount) (types.Gene
 func TestGenesis(t *testing.T) {
 	logger := log.NewTMLogger(log.NewSyncWriter(os.Stdout)).With("module", "sdk/app")
 	db := dbm.NewMemDB()
-	baseApp := NewTruStoryApp(logger, db)
-
-	// construct a pubkey and an address for the test account
-	pubkey := crypto.GenPrivKeyEd25519().PubKey()
-	addr := sdk.AccAddress(pubkey.Address())
+	baseApp := NewTruChain(logger, db)
+	addr := sdk.AccAddress([]byte{2, 3})
 
 	// construct some test coins
 	coins, err := sdk.ParseCoins("77trustake,99bitcoincred")
@@ -65,9 +61,9 @@ func TestGenesis(t *testing.T) {
 	require.Equal(t, appAcct, res)
 
 	// reload app and ensure the account is still there
-	baseApp = NewTruStoryApp(logger, db)
+	baseApp = NewTruChain(logger, db)
 
-	stateBytes, err := wire.MarshalJSONIndent(baseApp.cdc, genState)
+	stateBytes, err := codec.MarshalJSONIndent(baseApp.cdc, genState)
 	require.Nil(t, err)
 
 	// initialize the chain with the expected genesis state

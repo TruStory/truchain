@@ -6,8 +6,8 @@ import (
 	"net/http"
 
 	"github.com/cosmos/cosmos-sdk/client/context"
+	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/cosmos/cosmos-sdk/crypto/keys"
-	"github.com/cosmos/cosmos-sdk/wire"
 	"github.com/gorilla/mux"
 	"github.com/spf13/cobra"
 
@@ -17,19 +17,19 @@ import (
 // ServeCommand will generate a long-running rest server
 // (aka Light Client Daemon) that exposes functionality similar
 // to the cli, but over rest
-func ServeCommand(cdc *wire.Codec) *cobra.Command {
+func ServeCommand(cdc *codec.Codec) *cobra.Command {
 	return lcd.ServeCommand(cdc)
 }
 
 // RegisterRoutes - Central function to define routes that get registered by the main application
-func RegisterRoutes(ctx context.CoreContext, r *mux.Router, cdc *wire.Codec, kb keys.Keybase) {
+func RegisterRoutes(ctx context.CLIContext, r *mux.Router, cdc *codec.Codec, kb keys.Keybase) {
 	// GET /stories
 	r.HandleFunc("/stories",
 		GetStoriesHandlerFn(cdc, kb, ctx)).Methods("GET")
 }
 
 // GetStoriesHandlerFn - http request handler to get stories
-func GetStoriesHandlerFn(cdc *wire.Codec, kb keys.Keybase, ctx context.CoreContext) http.HandlerFunc {
+func GetStoriesHandlerFn(cdc *codec.Codec, kb keys.Keybase, ctx context.CLIContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		// body, err := ioutil.ReadAll(r.Body)
 		_, err := ioutil.ReadAll(r.Body)

@@ -1,23 +1,19 @@
-PACKAGES=$(shell go list ./... | grep -v '/vendor/')
-
-all: get_tools get_vendor_deps build test
-
-get_tools:
-	go get github.com/golang/dep/cmd/dep
-
-buidl: build
-
-build:
-	go build -o bin/trucli cmd/trucli/main.go && go build -o bin/trucoind cmd/trucoind/main.go
-
-get_vendor_deps:
-	@rm -rf vendor/
-	@dep ensure
-
-test:
-	@go test $(PACKAGES)
+PACKAGES=$(shell go list ./...)
 
 benchmark:
 	@go test -bench=. $(PACKAGES)
 
-.PHONY: all build test benchmark
+buidl: build
+
+build:
+	go build -o bin/trucli cmd/trucli/main.go && go build -o bin/truchaind cmd/truchaind/main.go
+
+test:
+	@go test $(PACKAGES)
+
+update_vendor_deps:
+	@echo "--> Running dep ensure"
+	@rm -rf .vendor-new
+	@dep ensure -v
+
+.PHONY: build test benchmark

@@ -2,9 +2,10 @@ package main
 
 import (
 	"encoding/json"
+	"io"
 	"os"
 
-	"github.com/TruStory/trucoin/app"
+	"github.com/TruStory/truchain/app"
 	"github.com/cosmos/cosmos-sdk/server"
 	"github.com/spf13/cobra"
 	abci "github.com/tendermint/tendermint/abci/types"
@@ -19,17 +20,17 @@ func main() {
 	ctx := server.NewDefaultContext()
 
 	rootCmd := &cobra.Command{
-		Use:               "trucoind",
-		Short:             "TruStoryApp Daemon (server)",
+		Use:               "truchaind",
+		Short:             "TruChain Daemon (server)",
 		PersistentPreRunE: server.PersistentPreRunEFn(ctx),
 	}
 
 	server.AddCommands(ctx, cdc, rootCmd, server.DefaultAppInit,
-		server.ConstructAppCreator(newApp, "trucoin"),
-		server.ConstructAppExporter(exportAppStateAndTMValidators, "trucoin"))
+		server.ConstructAppCreator(newApp, "truchain"),
+		server.ConstructAppExporter(exportAppStateAndTMValidators, "truchain"))
 
 	// prepare and add flags
-	rootDir := os.ExpandEnv("$HOME/.trucoind")
+	rootDir := os.ExpandEnv("$HOME/.truchaind")
 	executor := cli.PrepareBaseCmd(rootCmd, "BC", rootDir)
 
 	err := executor.Execute()
@@ -39,11 +40,11 @@ func main() {
 	}
 }
 
-func newApp(logger log.Logger, db dbm.DB) abci.Application {
-	return app.NewTruStoryApp(logger, db)
+func newApp(logger log.Logger, db dbm.DB, _ io.Writer) abci.Application {
+	return app.NewTruChain(logger, db)
 }
 
-func exportAppStateAndTMValidators(logger log.Logger, db dbm.DB) (json.RawMessage, []tmtypes.GenesisValidator, error) {
-	bapp := app.NewTruStoryApp(logger, db)
+func exportAppStateAndTMValidators(logger log.Logger, db dbm.DB, _ io.Writer) (json.RawMessage, []tmtypes.GenesisValidator, error) {
+	bapp := app.NewTruChain(logger, db)
 	return bapp.ExportAppStateAndValidators()
 }

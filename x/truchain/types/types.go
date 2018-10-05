@@ -8,31 +8,73 @@ import (
 
 // ============================================================================
 
-// Bond placed on a story
-type Bond struct {
-	ID           int64          `json:"id"`
-	StoryID      int64          `json:"story_id"`
-	Amount       sdk.Coin       `json:"amount"`
-	CreatedBlock int64          `json:"created_block"`
-	Creator      sdk.AccAddress `json:"creator"`
-	Period       time.Duration  `json:"period"`
+// BackingQueue is a list of all backings
+type BackingQueue []int64
+
+// IsEmpty checks if the queue is empty
+func (asq BackingQueue) IsEmpty() bool {
+	if len(asq) == 0 {
+		return true
+	}
+	return false
 }
 
-// NewBond creates a new bond
-func NewBond(
+// ============================================================================
+
+// BackingParams holds data for backing interest calculations
+type BackingParams struct {
+	AmountWeight    sdk.Dec
+	PeriodWeight    sdk.Dec
+	MinPeriod       time.Duration
+	MaxPeriod       time.Duration
+	MinInterestRate sdk.Dec
+	MaxInterestRate sdk.Dec
+}
+
+// NewBackingParams creates a new BackingParams type with defaults
+func NewBackingParams() BackingParams {
+	return BackingParams{
+		AmountWeight:    sdk.NewDecWithPrec(333, 3), // 33.3%
+		PeriodWeight:    sdk.NewDecWithPrec(667, 3), // 66.7%
+		MinPeriod:       3 * 24 * time.Hour,         // 3 days
+		MaxPeriod:       90 * 24 * time.Hour,        // 90 days
+		MinInterestRate: sdk.ZeroDec(),              // 0%
+		MaxInterestRate: sdk.NewDecWithPrec(10, 2),  // 10%
+	}
+}
+
+// Backing type
+type Backing struct {
+	ID        int64          `json:"id"`
+	StoryID   int64          `json:"story_id"`
+	Principal sdk.Coin       `json:"principal"`
+	Interest  sdk.Coin       `json:"interest"`
+	Expires   time.Time      `json:"expires"`
+	Params    BackingParams  `json:"params"`
+	Period    time.Duration  `json:"period"`
+	User      sdk.AccAddress `json:"user"`
+}
+
+// NewBacking creates a new backing type
+func NewBacking(
 	id int64,
 	storyID int64,
-	amount sdk.Coin,
-	createdBlock int64,
-	creator sdk.AccAddress,
-	period time.Duration) Bond {
-	return Bond{
-		ID:           id,
-		StoryID:      storyID,
-		Amount:       amount,
-		CreatedBlock: createdBlock,
-		Creator:      creator,
-		Period:       period,
+	principal sdk.Coin,
+	interest sdk.Coin,
+	expires time.Time,
+	params BackingParams,
+	period time.Duration,
+	creator sdk.AccAddress) Backing {
+
+	return Backing{
+		ID:        id,
+		StoryID:   storyID,
+		Principal: principal,
+		Interest:  interest,
+		Expires:   expires,
+		Params:    params,
+		Period:    period,
+		User:      creator,
 	}
 }
 
@@ -40,40 +82,22 @@ func NewBond(
 
 // Comment for a story
 type Comment struct {
-	ID      int64          `json:"id"`
-	StoryID int64          `json:"story_id"`
-	Body    string         `json:"body"`
-	Creator sdk.AccAddress `json:"creator"`
-}
-
-// NewComment creates a new comment for a given story
-func NewComment(id int64, storyID int64, body string, creator sdk.AccAddress) Comment {
-	return Comment{
-		ID:      id,
-		StoryID: storyID,
-		Body:    body,
-		Creator: creator,
-	}
+	ID           int64          `json:"id"`
+	StoryID      int64          `json:"story_id"`
+	Body         string         `json:"body"`
+	CreatedBlock int64          `json:"created_block"`
+	Creator      sdk.AccAddress `json:"creator"`
 }
 
 // ============================================================================
 
 // Evidence for a story
 type Evidence struct {
-	ID      int64          `json:"id"`
-	StoryID int64          `json:"story_id"`
-	Creator sdk.AccAddress `json:"creator"`
-	URI     string         `json:"uri"`
-}
-
-// NewEvidence creates new evidence for a story
-func NewEvidence(id int64, storyID int64, creator sdk.AccAddress, uri string) Evidence {
-	return Evidence{
-		ID:      id,
-		StoryID: storyID,
-		Creator: creator,
-		URI:     uri,
-	}
+	ID           int64          `json:"id"`
+	StoryID      int64          `json:"story_id"`
+	CreatedBlock int64          `json:"created_block"`
+	Creator      sdk.AccAddress `json:"creator"`
+	URI          string         `json:"uri"`
 }
 
 // ============================================================================
@@ -98,6 +122,11 @@ func (i StoryCategory) IsValid() bool {
 		return true
 	}
 	return false
+}
+
+// CoinDenom is the coin denomination for the category (trubtc, trustablecoins, etc)
+func (i StoryCategory) CoinDenom() string {
+	return "tru" + i.Slug()
 }
 
 // Slug is the short name for a category
@@ -161,19 +190,16 @@ func (i StoryType) String() string {
 // Story type
 type Story struct {
 	ID           int64            `json:"id"`
-	BondIDs      []int64          `json:"bond_i_ds,omitempty"`
+	BackIDs      []int64          `json:"back_ids,omitempty"`
 	CommentIDs   []int64          `json:"comment_i_ds,omitempty"`
 	EvidenceIDs  []int64          `json:"evidence_i_ds,omitempty"`
 	Thread       []int64          `json:"thread,omitempty"`
-	VoteIDs      []int64          `json:"vote_i_ds"`
 	Body         string           `json:"body"`
 	Category     StoryCategory    `json:"category"`
 	CreatedBlock int64            `json:"created_block"`
 	Creator      sdk.AccAddress   `json:"creator"`
-	Expiration   time.Time        `json:"expiration,omitempty"`
 	Round        int64            `json:"round"`
 	State        StoryState       `json:"state"`
-	SubmitBlock  int64            `json:"submit_block"`
 	StoryType    StoryType        `json:"type"`
 	UpdatedBlock int64            `json:"updated_block"`
 	Users        []sdk.AccAddress `json:"users"`
@@ -182,85 +208,34 @@ type Story struct {
 // NewStory creates a new story
 func NewStory(
 	id int64,
-	bondIDs []int64,
+	backIDs []int64,
 	commentIDs []int64,
 	evidenceIDs []int64,
 	thread []int64,
-	voteIDs []int64,
 	body string,
 	category StoryCategory,
 	createdBlock int64,
 	creator sdk.AccAddress,
-	expiration time.Time,
 	round int64,
 	state StoryState,
-	submitBlock int64,
 	storyType StoryType,
 	updatedBlock int64,
 	users []sdk.AccAddress) Story {
+
 	return Story{
 		ID:           id,
-		BondIDs:      bondIDs,
+		BackIDs:      backIDs,
 		CommentIDs:   commentIDs,
 		EvidenceIDs:  evidenceIDs,
 		Thread:       thread,
-		VoteIDs:      voteIDs,
 		Body:         body,
 		Category:     category,
 		CreatedBlock: createdBlock,
 		Creator:      creator,
-		Expiration:   expiration,
 		Round:        round,
 		State:        Created,
-		SubmitBlock:  submitBlock,
 		StoryType:    storyType,
 		UpdatedBlock: updatedBlock,
 		Users:        users,
 	}
-}
-
-// ============================================================================
-
-// Vote for a story
-type Vote struct {
-	ID           int64          `json:"id"`
-	StoryID      int64          `json:"story_id"`
-	CreatedBlock int64          `json:"created_block"`
-	Creator      sdk.AccAddress `json:"creator"`
-	Round        int64          `json:"round"`
-	Stake        sdk.Coin       `json:"stake"`
-	Vote         bool           `json:"vote"`
-}
-
-// NewVote creates a new vote for a story
-func NewVote(
-	id int64,
-	storyID int64,
-	createdBlock int64,
-	creator sdk.AccAddress,
-	round int64,
-	stake sdk.Coin,
-	vote bool) Vote {
-	return Vote{
-		ID:           id,
-		StoryID:      storyID,
-		CreatedBlock: createdBlock,
-		Creator:      creator,
-		Round:        round,
-		Stake:        stake,
-		Vote:         vote,
-	}
-}
-
-// ============================================================================
-
-// ActiveStoryQueue is a queue of in-progress stories -- `Created` and `Challenged`
-type ActiveStoryQueue []int64
-
-// IsEmpty checks if the queue is empty
-func (asq ActiveStoryQueue) IsEmpty() bool {
-	if len(asq) == 0 {
-		return true
-	}
-	return false
 }

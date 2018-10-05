@@ -10,18 +10,18 @@ import (
 const (
 	DefaultCodespace sdk.CodespaceType = 7
 
-	CodeInvalidOption            sdk.CodeType = 701
-	CodeInvalidBody              sdk.CodeType = 702
-	CodeInvalidStoryID           sdk.CodeType = 703
-	CodeStoryNotFound            sdk.CodeType = 704
-	CodeInvalidAmount            sdk.CodeType = 705
-	CodeInvalidBondPeriod        sdk.CodeType = 706
-	CodeInvalidURL               sdk.CodeType = 707
-	CodeInvalidCategory          sdk.CodeType = 708
-	CodeInvalidStoryType         sdk.CodeType = 709
-	CodeVoteNotFoundType         sdk.CodeType = 710
-	CodeActiveStoryQueueNotFound sdk.CodeType = 711
-	CodeActiveStoryQueueEmpty    sdk.CodeType = 712
+	CodeInvalidBody          sdk.CodeType = 702
+	CodeInvalidStoryID       sdk.CodeType = 703
+	CodeStoryNotFound        sdk.CodeType = 704
+	CodeInvalidAmount        sdk.CodeType = 705
+	CodeInvalidBackingPeriod sdk.CodeType = 706
+	CodeInvalidURL           sdk.CodeType = 707
+	CodeInvalidCategory      sdk.CodeType = 708
+	CodeInvalidStoryType     sdk.CodeType = 709
+	CodeBackingQueueNotFound sdk.CodeType = 710
+	CodeBackingQueueEmpty    sdk.CodeType = 711
+	CodeInvalidBackingCoin   sdk.CodeType = 712
+	CodeBackingNotFound      sdk.CodeType = 713
 )
 
 func codeToDefaultMsg(code sdk.CodeType) string {
@@ -33,11 +33,6 @@ func codeToDefaultMsg(code sdk.CodeType) string {
 
 //----------------------------------------
 // Error constructors
-
-// ErrInvalidOption throws an error on invalid option
-func ErrInvalidOption(msg string) sdk.Error {
-	return newError(DefaultCodespace, CodeInvalidOption, msg)
-}
 
 // ErrInvalidBody throws an error on invalid title
 func ErrInvalidBody(msg string) sdk.Error {
@@ -64,9 +59,14 @@ func ErrInvalidAmount(msg string) sdk.Error {
 	return newError(DefaultCodespace, CodeInvalidAmount, msg)
 }
 
-// ErrInvalidBondPeriod throws an error when bond period is invalid
-func ErrInvalidBondPeriod(msg string) sdk.Error {
-	return newError(DefaultCodespace, CodeInvalidBondPeriod, msg)
+// ErrInvalidBackingPeriod throws an error when backing period is invalid
+func ErrInvalidBackingPeriod(msg string) sdk.Error {
+	return newError(DefaultCodespace, CodeInvalidBackingPeriod, msg)
+}
+
+// ErrInvalidBackingCoin throws an error when backing period is invalid
+func ErrInvalidBackingCoin() sdk.Error {
+	return newError(DefaultCodespace, CodeInvalidBackingCoin, "Invalid backing coin")
 }
 
 // ErrInvalidURL throws an error when a URL in invalid
@@ -80,20 +80,15 @@ func ErrStoryNotFound(storyID int64) sdk.Error {
 		strconv.Itoa(int(storyID))+" not found")
 }
 
-// ErrVoteNotFound throws an error when a vote is not found
-func ErrVoteNotFound(voteID int64) sdk.Error {
-	return newError(DefaultCodespace, CodeVoteNotFoundType, "Vote with id "+
-		strconv.Itoa(int(voteID))+" not found")
+// ErrBackingQueueEmpty throws an error when the searched BackingQueue is not found
+func ErrBackingQueueEmpty() sdk.Error {
+	return newError(DefaultCodespace, CodeBackingQueueEmpty, "Backing queue is empty")
 }
 
-// ErrActiveStoryQueueNotFound throws an error when the searched ActiveStoryQueue is not found
-func ErrActiveStoryQueueNotFound() sdk.Error {
-	return newError(DefaultCodespace, CodeActiveStoryQueueNotFound, "Active story queue not found")
-}
-
-// ErrActiveStoryQueueEmpty throws an error when the searched ActiveStoryQueue is not found
-func ErrActiveStoryQueueEmpty() sdk.Error {
-	return newError(DefaultCodespace, CodeActiveStoryQueueEmpty, "Active story queue is empty")
+// ErrBackingNotFound throws an error when the searched backing is not found
+func ErrBackingNotFound(id int64) sdk.Error {
+	return newError(DefaultCodespace, CodeBackingNotFound, "Backing with id "+
+		strconv.Itoa(int(id))+" not found")
 }
 
 //----------------------------------------
