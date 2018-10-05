@@ -8,7 +8,6 @@ import (
 
 	ts "github.com/TruStory/truchain/x/truchain/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/davecgh/go-spew/spew"
 
 	"github.com/TruStory/truchain/x/truchain/db"
 	"github.com/stretchr/testify/assert"
@@ -78,15 +77,13 @@ func TestBackStoryMsg(t *testing.T) {
 	assert.NotNil(t, h)
 
 	storyID := db.CreateFakeStory(ms, k)
-	amount, _ := sdk.ParseCoin("5trushane")
+	amount, _ := sdk.ParseCoin("5trudex")
 	creator := db.CreateFakeFundedAccount(ctx, am, sdk.Coins{amount})
 	duration := 99 * time.Hour
 	msg := ts.NewBackStoryMsg(storyID, amount, creator, duration)
 	assert.NotNil(t, msg)
 
 	res := h(ctx, msg)
-	spew.Dump(res)
-
 	x, _ := binary.Varint(res.Data)
 	assert.Equal(t, int64(1), x, "incorrect result story id")
 }

@@ -62,9 +62,8 @@ func Test_getPrincipal_InCategoryCoins(t *testing.T) {
 	amount := sdk.NewCoin("trudex", sdk.NewInt(5))
 	userAddr := sdk.AccAddress([]byte{1, 2})
 
-	// give fake user some fake coins
-	fakeCoin, _ := sdk.ParseCoin("5trustake")
-	k.ck.AddCoins(ctx, userAddr, sdk.Coins{fakeCoin})
+	// give fake user some fake category coins
+	k.ck.AddCoins(ctx, userAddr, sdk.Coins{amount})
 
 	coin, err := k.getPrincipal(ctx, cat, amount, userAddr)
 	assert.Nil(t, err)
@@ -77,14 +76,30 @@ func Test_getPrincipal_InTrustake(t *testing.T) {
 	cat := ts.DEX
 	userAddr := sdk.AccAddress([]byte{1, 2})
 
-	// give fake user some fake coins
+	// give fake user some fake trustake
 	amount, _ := sdk.ParseCoin("5trustake")
 	k.ck.AddCoins(ctx, userAddr, sdk.Coins{amount})
 
+	// back with trustake, get principal in cat coins
 	coin, err := k.getPrincipal(ctx, cat, amount, userAddr)
 	assert.Nil(t, err)
-	assert.Equal(t, amount, coin, "Incorrect principal calculation")
-	assert.Equal(t, "trustake", amount.Denom, "Incorrect principal coin")
+	assert.Equal(t, amount.Amount, coin.Amount, "Incorrect principal calculation")
+	assert.Equal(t, "trudex", coin.Denom, "Incorrect principal coin")
+}
+
+func Test_getPrincipal_ErrInvalidCoin(t *testing.T) {
+	ctx, _, _, k := MockDB()
+	cat := ts.DEX
+	amount := sdk.NewCoin("trubtc", sdk.NewInt(5))
+	userAddr := sdk.AccAddress([]byte{1, 2})
+
+	// give fake user some fake coins
+	fakeCoin, _ := sdk.ParseCoin("5trustake")
+	k.ck.AddCoins(ctx, userAddr, sdk.Coins{fakeCoin})
+
+	_, err := k.getPrincipal(ctx, cat, amount, userAddr)
+	assert.NotNil(t, err)
+	assert.Equal(t, ts.ErrInvalidBackingCoin().Code(), err.Code(), "invalid error")
 }
 
 func Test_getInterest_MidAmountMidPeriod(t *testing.T) {

@@ -65,8 +65,8 @@ func ErrInvalidBackingPeriod(msg string) sdk.Error {
 }
 
 // ErrInvalidBackingCoin throws an error when backing period is invalid
-func ErrInvalidBackingCoin(msg string) sdk.Error {
-	return newError(DefaultCodespace, CodeInvalidBackingCoin, msg)
+func ErrInvalidBackingCoin() sdk.Error {
+	return newError(DefaultCodespace, CodeInvalidBackingCoin, "Invalid backing coin")
 }
 
 // ErrInvalidURL throws an error when a URL in invalid

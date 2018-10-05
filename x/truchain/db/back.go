@@ -1,6 +1,7 @@
 package db
 
 import (
+	"fmt"
 	"time"
 
 	ts "github.com/TruStory/truchain/x/truchain/types"
@@ -85,13 +86,24 @@ func (k TruKeeper) getPrincipal(
 	amount sdk.Coin,
 	userAddr sdk.AccAddress) (sdk.Coin, sdk.Error) {
 
-	// check and return amount if user has enough category coins
-	if k.ck.HasCoins(ctx, userAddr, sdk.Coins{amount}) {
-		return amount, nil
+	fmt.Println(amount)
+
+	// check which type of coin user wants to back in
+	switch amount.Denom {
+	case cat.CoinDenom():
+		// check and return amount if user has enough category coins
+		if k.ck.HasCoins(ctx, userAddr, sdk.Coins{amount}) {
+			return amount, nil
+		}
+	case ts.NativeTokenName:
+		// mint category coins from trustake
+		return mintFromNativeToken(ctx, k, cat, amount, userAddr)
+	default:
+		return sdk.Coin{}, ts.ErrInvalidBackingCoin()
+
 	}
 
-	// user doesn't have enough category coins, convert from trustake
-	return mintFromNativeToken(ctx, k, cat, amount, userAddr)
+	return sdk.Coin{}, nil
 }
 
 // setBacking stores a `Backing` type in the KVStore
