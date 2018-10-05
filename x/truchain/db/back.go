@@ -1,7 +1,6 @@
 package db
 
 import (
-	"fmt"
 	"time"
 
 	ts "github.com/TruStory/truchain/x/truchain/types"
@@ -85,8 +84,6 @@ func (k TruKeeper) getPrincipal(
 	cat ts.StoryCategory,
 	amount sdk.Coin,
 	userAddr sdk.AccAddress) (sdk.Coin, sdk.Error) {
-
-	fmt.Println(amount)
 
 	// check which type of coin user wants to back in
 	switch amount.Denom {
