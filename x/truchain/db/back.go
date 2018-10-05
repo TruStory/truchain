@@ -90,6 +90,28 @@ func (k TruKeeper) getPrincipal(
 		return amount, nil
 	}
 
+	// user doesn't have enough category coins, convert from trustake
+	return mintFromNativeToken(ctx, k, cat, amount, userAddr)
+}
+
+// setBacking stores a `Backing` type in the KVStore
+func (k TruKeeper) setBacking(ctx sdk.Context, backing ts.Backing) {
+	store := ctx.KVStore(k.backingKey)
+	store.Set(
+		key(k.backingKey.String(), backing.ID),
+		k.cdc.MustMarshalBinary(backing))
+}
+
+// ============================================================================
+
+// mintFromNativeToken creates category coins by burning trustake
+func mintFromNativeToken(
+	ctx sdk.Context,
+	k TruKeeper,
+	cat ts.StoryCategory,
+	amount sdk.Coin,
+	userAddr sdk.AccAddress) (sdk.Coin, sdk.Error) {
+
 	// naïve implementaion: 1 trustake = 1 category coin
 	// https://github.com/TruStory/truchain/issues/21
 	conversionRate := sdk.NewDec(1)
@@ -151,12 +173,4 @@ func getInterest(
 	coin := sdk.NewCoin(category.CoinDenom(), interest.RoundInt())
 
 	return coin
-}
-
-// setBacking stores a `Backing` type in the KVStore
-func (k TruKeeper) setBacking(ctx sdk.Context, backing ts.Backing) {
-	store := ctx.KVStore(k.backingKey)
-	store.Set(
-		key(k.backingKey.String(), backing.ID),
-		k.cdc.MustMarshalBinary(backing))
 }
