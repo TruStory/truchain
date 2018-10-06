@@ -44,8 +44,8 @@ type TruChain struct {
 	coinKeeper          bank.Keeper
 	ibcMapper           ibc.Mapper
 
-	// access story and vote database
-	keeper sdb.TruKeeper
+	// access truchain database
+	keeper sdb.WriteKeeper
 }
 
 // NewTruChain returns a reference to a new TruChain. Internally,
