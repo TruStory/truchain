@@ -2,11 +2,51 @@ package db
 
 import (
 	"fmt"
+	"time"
 
+	ts "github.com/TruStory/truchain/x/truchain/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/bank"
 	amino "github.com/tendermint/go-amino"
+	abci "github.com/tendermint/tendermint/abci/types"
 )
+
+// ReadKeeper defines a module interface that facilitates read only access
+// to truchain data
+type ReadKeeper interface {
+	BackingQueueHead(ctx sdk.Context) (ts.Backing, sdk.Error)
+	BackQueueLen(ctx sdk.Context) int
+	GetBacking(ctx sdk.Context, id int64) (ts.Backing, sdk.Error)
+	GetStory(ctx sdk.Context, storyID int64) (ts.Story, sdk.Error)
+}
+
+// WriteKeeper defines a module interface that facilities write only access
+// to truchain data
+type WriteKeeper interface {
+	BackingQueuePop(ctx sdk.Context) (ts.Backing, sdk.Error)
+	BackingQueuePush(ctx sdk.Context, id int64)
+	NewBacking(
+		ctx sdk.Context,
+		storyID int64,
+		amount sdk.Coin,
+		creator sdk.AccAddress,
+		duration time.Duration,
+	) (int64, sdk.Error)
+	NewResponseEndBlock(ctx sdk.Context) abci.ResponseEndBlock
+	NewStory(
+		ctx sdk.Context,
+		body string,
+		category ts.StoryCategory,
+		creator sdk.AccAddress,
+		storyType ts.StoryType) (int64, sdk.Error)
+}
+
+// Keeper defines a module interface that facilities read/write access
+// to truchain data
+type Keeper interface {
+	ReadKeeper
+	WriteKeeper
+}
 
 // TruKeeper data type storing keys to the key-value store
 type TruKeeper struct {

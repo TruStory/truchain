@@ -10,7 +10,7 @@ import (
 )
 
 // NewHandler creates a new handler for all TruStory messages
-func NewHandler(k db.TruKeeper) sdk.Handler {
+func NewHandler(k db.WriteKeeper) sdk.Handler {
 	return func(ctx sdk.Context, msg sdk.Msg) sdk.Result {
 		switch msg := msg.(type) {
 		case ts.SubmitStoryMsg:
@@ -27,7 +27,7 @@ func NewHandler(k db.TruKeeper) sdk.Handler {
 // ============================================================================
 
 // handleSubmitStoryMsg handles the logic of a SubmitStoryMsg
-func handleSubmitStoryMsg(ctx sdk.Context, k db.TruKeeper, msg ts.SubmitStoryMsg) sdk.Result {
+func handleSubmitStoryMsg(ctx sdk.Context, k db.WriteKeeper, msg ts.SubmitStoryMsg) sdk.Result {
 	if err := msg.ValidateBasic(); err != nil {
 		return err.Result()
 	}
@@ -40,7 +40,7 @@ func handleSubmitStoryMsg(ctx sdk.Context, k db.TruKeeper, msg ts.SubmitStoryMsg
 	return sdk.Result{Data: i2b(storyID)}
 }
 
-func handleBackStoryMsg(ctx sdk.Context, k db.TruKeeper, msg ts.BackStoryMsg) sdk.Result {
+func handleBackStoryMsg(ctx sdk.Context, k db.WriteKeeper, msg ts.BackStoryMsg) sdk.Result {
 	if err := msg.ValidateBasic(); err != nil {
 		return err.Result()
 	}
