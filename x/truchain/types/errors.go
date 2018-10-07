@@ -22,6 +22,7 @@ const (
 	CodeBackingQueueEmpty    sdk.CodeType = 711
 	CodeInvalidBackingCoin   sdk.CodeType = 712
 	CodeBackingNotFound      sdk.CodeType = 713
+	CodeCategoryNotFound     sdk.CodeType = 714
 )
 
 func codeToDefaultMsg(code sdk.CodeType) string {
@@ -88,6 +89,12 @@ func ErrBackingQueueEmpty() sdk.Error {
 // ErrBackingNotFound throws an error when the searched backing is not found
 func ErrBackingNotFound(id int64) sdk.Error {
 	return newError(DefaultCodespace, CodeBackingNotFound, "Backing with id "+
+		strconv.Itoa(int(id))+" not found")
+}
+
+// ErrCategoryNotFound throws an error when the searched category is not found
+func ErrCategoryNotFound(id int64) sdk.Error {
+	return newError(DefaultCodespace, CodeCategoryNotFound, "Category with id "+
 		strconv.Itoa(int(id))+" not found")
 }
 

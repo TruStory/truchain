@@ -6,19 +6,19 @@ import (
 
 // SubmitStoryMsg defines a message to submit a story
 type SubmitStoryMsg struct {
-	Body      string         `json:"body"`
-	Category  StoryCategory  `json:"category"`
-	Creator   sdk.AccAddress `json:"creator"`
-	StoryType StoryType      `json:"story_type"`
+	Body       string         `json:"body"`
+	CategoryID int64          `json:"category_id"`
+	Creator    sdk.AccAddress `json:"creator"`
+	StoryType  StoryType      `json:"story_type"`
 }
 
 // NewSubmitStoryMsg creates a new message to submit a story
-func NewSubmitStoryMsg(body string, category StoryCategory, creator sdk.AccAddress, storyType StoryType) SubmitStoryMsg {
+func NewSubmitStoryMsg(body string, categoryID int64, creator sdk.AccAddress, storyType StoryType) SubmitStoryMsg {
 	return SubmitStoryMsg{
-		Body:      body,
-		Category:  category,
-		Creator:   creator,
-		StoryType: storyType,
+		Body:       body,
+		CategoryID: categoryID,
+		Creator:    creator,
+		StoryType:  storyType,
 	}
 }
 
@@ -38,8 +38,8 @@ func (msg SubmitStoryMsg) ValidateBasic() sdk.Error {
 	if len(msg.Body) == 0 {
 		return ErrInvalidBody("Invalid body: " + msg.Body)
 	}
-	if msg.Category.IsValid() == false {
-		return ErrInvalidCategory("Invalid category: " + msg.Category.String())
+	if msg.CategoryID == 0 {
+		return ErrInvalidCategory("Invalid category")
 	}
 	if len(msg.Creator) == 0 {
 		return sdk.ErrInvalidAddress("Invalid address: " + msg.Creator.String())

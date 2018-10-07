@@ -23,8 +23,14 @@ func (k TruKeeper) NewBacking(
 		return 0, sdk.ErrInsufficientFunds("Insufficient funds for backing.")
 	}
 
-	// get story from story id
+	// get story value from story id
 	story, err := k.GetStory(ctx, storyID)
+	if err != nil {
+		return 0, err
+	}
+
+	// get category value from category id
+	cat, err := k.GetCategory(ctx, story.CategoryID)
 	if err != nil {
 		return 0, err
 	}
@@ -33,13 +39,13 @@ func (k TruKeeper) NewBacking(
 	params := ts.NewBackingParams()
 
 	// set principal, converting from trustake if needed
-	principal, err := k.getPrincipal(ctx, story.Category, amount, creator)
+	principal, err := k.getPrincipal(ctx, cat, amount, creator)
 	if err != nil {
 		return 0, err
 	}
 
 	// mint category coin from interest earned
-	interest := getInterest(story.Category, amount, duration, params)
+	interest := getInterest(cat, amount, duration, params)
 
 	// create new backing type
 	backing := ts.NewBacking(
@@ -81,13 +87,13 @@ func (k TruKeeper) GetBacking(ctx sdk.Context, id int64) (ts.Backing, sdk.Error)
 // after the backing expires/matures. Returns a coin.
 func (k TruKeeper) getPrincipal(
 	ctx sdk.Context,
-	cat ts.StoryCategory,
+	cat ts.Category,
 	amount sdk.Coin,
 	userAddr sdk.AccAddress) (sdk.Coin, sdk.Error) {
 
 	// check which type of coin user wants to back in
 	switch amount.Denom {
-	case cat.CoinDenom():
+	case cat.CoinName():
 		// check and return amount if user has enough category coins
 		if k.ck.HasCoins(ctx, userAddr, sdk.Coins{amount}) {
 			return amount, nil
@@ -117,7 +123,7 @@ func (k TruKeeper) setBacking(ctx sdk.Context, backing ts.Backing) {
 func mintFromNativeToken(
 	ctx sdk.Context,
 	k TruKeeper,
-	cat ts.StoryCategory,
+	cat ts.Category,
 	amount sdk.Coin,
 	userAddr sdk.AccAddress) (sdk.Coin, sdk.Error) {
 
@@ -127,7 +133,7 @@ func mintFromNativeToken(
 
 	// mint new category coins
 	principal := sdk.NewCoin(
-		cat.CoinDenom(),
+		cat.CoinName(),
 		sdk.NewDecFromInt(amount.Amount).Mul(conversionRate).RoundInt())
 
 	// burn equivalent trustake
@@ -141,7 +147,7 @@ func mintFromNativeToken(
 
 // getInterest calcuates the interest for the backing
 func getInterest(
-	category ts.StoryCategory,
+	category ts.Category,
 	amount sdk.Coin,
 	period time.Duration,
 	params ts.BackingParams) sdk.Coin {
@@ -179,7 +185,7 @@ func getInterest(
 	interest := amountDec.Mul(interestRate)
 
 	// return coin with rounded interest
-	coin := sdk.NewCoin(category.CoinDenom(), interest.RoundInt())
+	coin := sdk.NewCoin(category.CoinName(), interest.RoundInt())
 
 	return coin
 }

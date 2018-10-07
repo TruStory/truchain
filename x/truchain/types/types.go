@@ -80,6 +80,31 @@ func NewBacking(
 
 // ============================================================================
 
+// Category is a type that defines the category for a story
+type Category struct {
+	ID          int64  `json:"id"`
+	Name        string `json:"name"`
+	Slug        string `json:"slug"`
+	Description string `json:"description,omitempty"`
+}
+
+// CoinName returns the name of the coin, alias for slug
+func (c Category) CoinName() string {
+	return c.Slug
+}
+
+// NewCategory creates a new story category type
+func NewCategory(id int64, name string, slug string, description string) Category {
+	return Category{
+		ID:          id,
+		Name:        name,
+		Slug:        slug,
+		Description: description,
+	}
+}
+
+// ============================================================================
+
 // Comment for a story
 type Comment struct {
 	ID           int64          `json:"id"`
@@ -101,42 +126,6 @@ type Evidence struct {
 }
 
 // ============================================================================
-
-// StoryCategory is a type that defines a story category
-type StoryCategory int
-
-// List of accepted categories
-const (
-	Unknown StoryCategory = iota
-	Bitcoin
-	Consensus
-	DEX
-	Ethereum
-	StableCoins
-)
-
-// IsValid returns true if the value is listed in the enum defintion, false otherwise.
-func (i StoryCategory) IsValid() bool {
-	switch i {
-	case Unknown, Bitcoin, Consensus, DEX, Ethereum, StableCoins:
-		return true
-	}
-	return false
-}
-
-// CoinDenom is the coin denomination for the category (trubtc, trustablecoins, etc)
-func (i StoryCategory) CoinDenom() string {
-	return "tru" + i.Slug()
-}
-
-// Slug is the short name for a category
-func (i StoryCategory) Slug() string {
-	return [...]string{"unknown", "btc", "consensus", "dex", "eth", "stablecoins"}[i]
-}
-
-func (i StoryCategory) String() string {
-	return [...]string{"Unknown", "Bitcoin", "Consensus", "Decentralized Exchanges", "Ethereum", "Stable Coins"}[i]
-}
 
 // StoryState is a type that defines a story state
 type StoryState int
@@ -195,7 +184,7 @@ type Story struct {
 	EvidenceIDs  []int64          `json:"evidence_i_ds,omitempty"`
 	Thread       []int64          `json:"thread,omitempty"`
 	Body         string           `json:"body"`
-	Category     StoryCategory    `json:"category"`
+	CategoryID   int64            `json:"category_id"`
 	CreatedBlock int64            `json:"created_block"`
 	Creator      sdk.AccAddress   `json:"creator"`
 	Round        int64            `json:"round"`
@@ -213,7 +202,7 @@ func NewStory(
 	evidenceIDs []int64,
 	thread []int64,
 	body string,
-	category StoryCategory,
+	categoryID int64,
 	createdBlock int64,
 	creator sdk.AccAddress,
 	round int64,
@@ -229,7 +218,7 @@ func NewStory(
 		EvidenceIDs:  evidenceIDs,
 		Thread:       thread,
 		Body:         body,
-		Category:     category,
+		CategoryID:   categoryID,
 		CreatedBlock: createdBlock,
 		Creator:      creator,
 		Round:        round,
