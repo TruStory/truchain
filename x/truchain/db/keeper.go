@@ -17,6 +17,7 @@ type ReadKeeper interface {
 	BackingQueueHead(ctx sdk.Context) (ts.Backing, sdk.Error)
 	BackQueueLen(ctx sdk.Context) int
 	GetBacking(ctx sdk.Context, id int64) (ts.Backing, sdk.Error)
+	GetCategory(ctx sdk.Context, id int64) (ts.Category, sdk.Error)
 	GetStory(ctx sdk.Context, storyID int64) (ts.Story, sdk.Error)
 }
 
@@ -25,20 +26,10 @@ type ReadKeeper interface {
 type WriteKeeper interface {
 	BackingQueuePop(ctx sdk.Context) (ts.Backing, sdk.Error)
 	BackingQueuePush(ctx sdk.Context, id int64)
-	NewBacking(
-		ctx sdk.Context,
-		storyID int64,
-		amount sdk.Coin,
-		creator sdk.AccAddress,
-		duration time.Duration,
-	) (int64, sdk.Error)
+	NewBacking(ctx sdk.Context, storyID int64, amount sdk.Coin, creator sdk.AccAddress, duration time.Duration) (int64, sdk.Error)
+	NewCategory(ctx sdk.Context, name string, slug string, description string) (int64, sdk.Error)
 	NewResponseEndBlock(ctx sdk.Context) abci.ResponseEndBlock
-	NewStory(
-		ctx sdk.Context,
-		body string,
-		category ts.StoryCategory,
-		creator sdk.AccAddress,
-		storyType ts.StoryType) (int64, sdk.Error)
+	NewStory(ctx sdk.Context, body string, categoryID int64, creator sdk.AccAddress, storyType ts.StoryType) (int64, sdk.Error)
 }
 
 // Keeper defines a module interface that facilities read/write access
@@ -54,21 +45,22 @@ type TruKeeper struct {
 	ck bank.Keeper
 
 	// unexposed keys to access store from context
-	storyKey   sdk.StoreKey
-	voteKey    sdk.StoreKey
-	backingKey sdk.StoreKey
+	storyKey    sdk.StoreKey
+	categoryKey sdk.StoreKey
+	backingKey  sdk.StoreKey
 
 	// wire codec for binary encoding/decoding
 	cdc *amino.Codec
 }
 
 // NewTruKeeper creates a new keeper with write and read access
-func NewTruKeeper(storyKey sdk.StoreKey, backingKey sdk.StoreKey, ck bank.Keeper, cdc *amino.Codec) TruKeeper {
+func NewTruKeeper(storyKey sdk.StoreKey, categoryKey sdk.StoreKey, backingKey sdk.StoreKey, ck bank.Keeper, cdc *amino.Codec) TruKeeper {
 	return TruKeeper{
-		ck:         ck,
-		storyKey:   storyKey,
-		backingKey: backingKey,
-		cdc:        cdc,
+		ck:          ck,
+		storyKey:    storyKey,
+		categoryKey: categoryKey,
+		backingKey:  backingKey,
+		cdc:         cdc,
 	}
 }
 

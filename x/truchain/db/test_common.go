@@ -22,11 +22,11 @@ import (
 
 // MockDB returns a mock DB to test the app
 func MockDB() (sdk.Context, sdk.MultiStore, auth.AccountMapper, TruKeeper) {
-	ms, accKey, storyKey, backingKey := setupMultiStore()
+	ms, accKey, storyKey, catKey, backingKey := setupMultiStore()
 	cdc := makeCodec()
 	am := auth.NewAccountMapper(cdc, accKey, auth.ProtoBaseAccount)
 	ck := bank.NewBaseKeeper(am)
-	k := NewTruKeeper(storyKey, backingKey, ck, cdc)
+	k := NewTruKeeper(storyKey, catKey, backingKey, ck, cdc)
 
 	time := time.Now().Add(5 * time.Hour)
 	header := abci.Header{Time: time}
@@ -49,12 +49,18 @@ func CreateFakeFundedAccount(ctx sdk.Context, am auth.AccountMapper, coins sdk.C
 func CreateFakeStory(ms sdk.MultiStore, k TruKeeper) int64 {
 	ctx := sdk.NewContext(ms, abci.Header{}, false, log.NewNopLogger())
 	body := "Body of story."
-	category := ts.DEX
+	cat := fakeCategory(ctx, k)
 	creator := sdk.AccAddress([]byte{1, 2})
 	storyType := ts.Default
 
-	storyID, _ := k.NewStory(ctx, body, category, creator, storyType)
+	storyID, _ := k.NewStory(ctx, body, cat.ID, creator, storyType)
 	return storyID
+}
+
+func fakeCategory(ctx sdk.Context, k Keeper) ts.Category {
+	id, _ := k.NewCategory(ctx, "decentralized exchanges", "trudex", "category for experts in decentralized exchanges")
+	cat, _ := k.GetCategory(ctx, id)
+	return cat
 }
 
 func keyPubAddr() (crypto.PrivKey, crypto.PubKey, sdk.AccAddress) {
@@ -73,15 +79,17 @@ func makeCodec() *amino.Codec {
 	return cdc
 }
 
-func setupMultiStore() (sdk.MultiStore, *sdk.KVStoreKey, *sdk.KVStoreKey, *sdk.KVStoreKey) {
+func setupMultiStore() (sdk.MultiStore, *sdk.KVStoreKey, *sdk.KVStoreKey, *sdk.KVStoreKey, *sdk.KVStoreKey) {
 	db := dbm.NewMemDB()
 	accKey := sdk.NewKVStoreKey("acc")
 	storyKey := sdk.NewKVStoreKey("stories")
+	categoryKey := sdk.NewKVStoreKey("categories")
 	backingKey := sdk.NewKVStoreKey("backings")
 	ms := store.NewCommitMultiStore(db)
 	ms.MountStoreWithDB(accKey, sdk.StoreTypeIAVL, db)
 	ms.MountStoreWithDB(storyKey, sdk.StoreTypeIAVL, db)
+	ms.MountStoreWithDB(categoryKey, sdk.StoreTypeIAVL, db)
 	ms.MountStoreWithDB(backingKey, sdk.StoreTypeIAVL, db)
 	ms.LoadLatestVersion()
-	return ms, accKey, storyKey, backingKey
+	return ms, accKey, storyKey, categoryKey, backingKey
 }

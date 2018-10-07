@@ -20,7 +20,7 @@ func TestSubmitStoryMsg(t *testing.T) {
 	assert.NotNil(t, h)
 
 	body := "fake story"
-	cat := ts.DEX
+	cat := int64(1)
 	creator := sdk.AccAddress([]byte{1, 2})
 	storyType := ts.Default
 	msg := ts.NewSubmitStoryMsg(body, cat, creator, storyType)
@@ -85,7 +85,7 @@ func TestBackStoryMsg(t *testing.T) {
 
 	res := h(ctx, msg)
 	x, _ := binary.Varint(res.Data)
-	assert.Equal(t, int64(1), x, "incorrect result story id")
+	assert.Equal(t, int64(1), x, "incorrect result backing id")
 }
 
 func TestByzantineMsg(t *testing.T) {
