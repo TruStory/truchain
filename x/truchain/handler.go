@@ -15,6 +15,8 @@ func NewHandler(k db.WriteKeeper) sdk.Handler {
 		switch msg := msg.(type) {
 		case ts.SubmitStoryMsg:
 			return handleSubmitStoryMsg(ctx, k, msg)
+		case ts.CreateCategoryMsg:
+			return handleCreateCategoryMsg(ctx, k, msg)
 		case ts.BackStoryMsg:
 			return handleBackStoryMsg(ctx, k, msg)
 		default:
@@ -26,7 +28,6 @@ func NewHandler(k db.WriteKeeper) sdk.Handler {
 
 // ============================================================================
 
-// handleSubmitStoryMsg handles the logic of a SubmitStoryMsg
 func handleSubmitStoryMsg(ctx sdk.Context, k db.WriteKeeper, msg ts.SubmitStoryMsg) sdk.Result {
 	if err := msg.ValidateBasic(); err != nil {
 		return err.Result()
@@ -38,6 +39,19 @@ func handleSubmitStoryMsg(ctx sdk.Context, k db.WriteKeeper, msg ts.SubmitStoryM
 	}
 
 	return sdk.Result{Data: i2b(storyID)}
+}
+
+func handleCreateCategoryMsg(ctx sdk.Context, k db.WriteKeeper, msg ts.CreateCategoryMsg) sdk.Result {
+	if err := msg.ValidateBasic(); err != nil {
+		return err.Result()
+	}
+
+	id, err := k.NewCategory(ctx, msg.Title, msg.Slug, msg.Description)
+	if err != nil {
+		return err.Result()
+	}
+
+	return sdk.Result{Data: i2b(id)}
 }
 
 func handleBackStoryMsg(ctx sdk.Context, k db.WriteKeeper, msg ts.BackStoryMsg) sdk.Result {
