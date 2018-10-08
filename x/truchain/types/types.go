@@ -84,7 +84,7 @@ func NewBacking(
 type Category struct {
 	ID          int64          `json:"id"`
 	Creator     sdk.AccAddress `json:"creator"`
-	Name        string         `json:"name"`
+	Title       string         `json:"title"`
 	Slug        string         `json:"slug"`
 	Description string         `json:"description,omitempty"`
 }
@@ -95,10 +95,10 @@ func (c Category) CoinName() string {
 }
 
 // NewCategory creates a new story category type
-func NewCategory(id int64, name string, slug string, description string) Category {
+func NewCategory(id int64, title string, slug string, description string) Category {
 	return Category{
 		ID:          id,
-		Name:        name,
+		Title:       title,
 		Slug:        slug,
 		Description: description,
 	}
