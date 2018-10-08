@@ -49,7 +49,7 @@ func CreateFakeFundedAccount(ctx sdk.Context, am auth.AccountMapper, coins sdk.C
 func CreateFakeStory(ms sdk.MultiStore, k TruKeeper) int64 {
 	ctx := sdk.NewContext(ms, abci.Header{}, false, log.NewNopLogger())
 	body := "Body of story."
-	cat := fakeCategory(ctx, k)
+	cat := CreateFakeCategory(ctx, k)
 	creator := sdk.AccAddress([]byte{1, 2})
 	storyType := ts.Default
 
@@ -57,7 +57,8 @@ func CreateFakeStory(ms sdk.MultiStore, k TruKeeper) int64 {
 	return storyID
 }
 
-func fakeCategory(ctx sdk.Context, k Keeper) ts.Category {
+// CreateFakeCategory creates a fake dex category
+func CreateFakeCategory(ctx sdk.Context, k TruKeeper) ts.Category {
 	id, _ := k.NewCategory(ctx, "decentralized exchanges", "trudex", "category for experts in decentralized exchanges")
 	cat, _ := k.GetCategory(ctx, id)
 	return cat

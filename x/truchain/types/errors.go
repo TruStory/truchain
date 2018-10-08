@@ -1,6 +1,7 @@
 package types
 
 import (
+	"fmt"
 	"strconv"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -42,8 +43,11 @@ func ErrInvalidBody(msg string) sdk.Error {
 }
 
 // ErrInvalidCategory throws an error when the category is invalid
-func ErrInvalidCategory(msg string) sdk.Error {
-	return newError(DefaultCodespace, CodeInvalidCategory, msg)
+func ErrInvalidCategory(id int64) sdk.Error {
+	return newError(
+		DefaultCodespace,
+		CodeInvalidCategory,
+		"Invalid category id "+fmt.Sprintf("%d", id))
 }
 
 // ErrInvalidStoryID throws an error on invalid storyID
