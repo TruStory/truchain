@@ -13,6 +13,11 @@ func (k TruKeeper) NewStory(
 	creator sdk.AccAddress,
 	storyType ts.StoryType) (int64, sdk.Error) {
 
+	_, err := k.GetCategory(ctx, categoryID)
+	if err != nil {
+		return 0, ts.ErrInvalidCategory(categoryID)
+	}
+
 	story := ts.Story{
 		ID:           k.id(ctx, k.storyKey),
 		Body:         body,

@@ -39,7 +39,7 @@ func (msg SubmitStoryMsg) ValidateBasic() sdk.Error {
 		return ErrInvalidBody("Invalid body: " + msg.Body)
 	}
 	if msg.CategoryID == 0 {
-		return ErrInvalidCategory("Invalid category")
+		return ErrInvalidCategory(msg.CategoryID)
 	}
 	if len(msg.Creator) == 0 {
 		return sdk.ErrInvalidAddress("Invalid address: " + msg.Creator.String())

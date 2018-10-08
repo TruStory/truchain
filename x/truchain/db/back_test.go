@@ -58,7 +58,7 @@ func TestNewBacking(t *testing.T) {
 
 func Test_getPrincipal_InCategoryCoins(t *testing.T) {
 	ctx, _, _, k := MockDB()
-	cat := fakeCategory(ctx, k)
+	cat := CreateFakeCategory(ctx, k)
 	amount := sdk.NewCoin("trudex", sdk.NewInt(5))
 	userAddr := sdk.AccAddress([]byte{1, 2})
 
@@ -73,7 +73,7 @@ func Test_getPrincipal_InCategoryCoins(t *testing.T) {
 
 func Test_getPrincipal_InTrustake(t *testing.T) {
 	ctx, _, _, k := MockDB()
-	cat := fakeCategory(ctx, k)
+	cat := CreateFakeCategory(ctx, k)
 	userAddr := sdk.AccAddress([]byte{1, 2})
 
 	// give fake user some fake trustake
@@ -89,7 +89,7 @@ func Test_getPrincipal_InTrustake(t *testing.T) {
 
 func Test_getPrincipal_ErrInvalidCoin(t *testing.T) {
 	ctx, _, _, k := MockDB()
-	cat := fakeCategory(ctx, k)
+	cat := CreateFakeCategory(ctx, k)
 	amount := sdk.NewCoin("trubtc", sdk.NewInt(5))
 	userAddr := sdk.AccAddress([]byte{1, 2})
 
@@ -104,7 +104,7 @@ func Test_getPrincipal_ErrInvalidCoin(t *testing.T) {
 
 func Test_getInterest_MidAmountMidPeriod(t *testing.T) {
 	ctx, _, _, k := MockDB()
-	cat := fakeCategory(ctx, k)
+	cat := CreateFakeCategory(ctx, k)
 	// 500,000,000,000,000 nano / 10^9 = 500,000 trudex
 	amount := sdk.NewCoin("trudex", sdk.NewInt(500000000000000))
 	period := 45 * 24 * time.Hour
@@ -116,7 +116,7 @@ func Test_getInterest_MidAmountMidPeriod(t *testing.T) {
 
 func Test_getInterest_MaxAmountMinPeriod(t *testing.T) {
 	ctx, _, _, k := MockDB()
-	cat := fakeCategory(ctx, k)
+	cat := CreateFakeCategory(ctx, k)
 	amount := sdk.NewCoin("trudex", sdk.NewInt(1000000000000000))
 	period := 3 * 24 * time.Hour
 	params := ts.NewBackingParams()
@@ -127,7 +127,7 @@ func Test_getInterest_MaxAmountMinPeriod(t *testing.T) {
 
 func Test_getInterest_MinAmountMaxPeriod(t *testing.T) {
 	ctx, _, _, k := MockDB()
-	cat := fakeCategory(ctx, k)
+	cat := CreateFakeCategory(ctx, k)
 	amount := sdk.NewCoin("trudex", sdk.NewInt(0))
 	period := 90 * 24 * time.Hour
 	params := ts.NewBackingParams()
@@ -138,7 +138,7 @@ func Test_getInterest_MinAmountMaxPeriod(t *testing.T) {
 
 func Test_getInterest_MaxAmountMaxPeriod(t *testing.T) {
 	ctx, _, _, k := MockDB()
-	cat := fakeCategory(ctx, k)
+	cat := CreateFakeCategory(ctx, k)
 	amount := sdk.NewCoin("trudex", sdk.NewInt(1000000000000000))
 	period := 90 * 24 * time.Hour
 	params := ts.NewBackingParams()
@@ -150,7 +150,7 @@ func Test_getInterest_MaxAmountMaxPeriod(t *testing.T) {
 
 func Test_getInterest_MinAmountMinPeriod(t *testing.T) {
 	ctx, _, _, k := MockDB()
-	cat := fakeCategory(ctx, k)
+	cat := CreateFakeCategory(ctx, k)
 	amount := sdk.NewCoin("trudex", sdk.NewInt(0))
 	period := 3 * 24 * time.Hour
 	params := ts.NewBackingParams()
