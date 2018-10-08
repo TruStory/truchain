@@ -1,6 +1,7 @@
-package types
+package category
 
 import (
+	t "github.com/TruStory/truchain/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
@@ -28,14 +29,14 @@ func NewCreateCategoryMsg(
 }
 
 // Type implements Msg
-func (msg CreateCategoryMsg) Type() string { return MsgType }
+func (msg CreateCategoryMsg) Type() string { return t.GetType(msg) }
 
 // Name implements Msg
-func (msg CreateCategoryMsg) Name() string { return "new_category" }
+func (msg CreateCategoryMsg) Name() string { return t.GetName(msg) }
 
 // GetSignBytes implements Msg
 func (msg CreateCategoryMsg) GetSignBytes() []byte {
-	return getSignBytes(msg)
+	return t.MustGetSignBytes(msg)
 }
 
 // ValidateBasic implements Msg
@@ -43,25 +44,20 @@ func (msg CreateCategoryMsg) ValidateBasic() sdk.Error {
 	if len(msg.Creator) == 0 {
 		return sdk.ErrInvalidAddress("Invalid address: " + msg.Creator.String())
 	}
-
-	params := NewCategoryParams()
-
+	params := NewParams()
 	if len(msg.Title) < params.MinTitleLen || len(msg.Title) > params.MaxTitleLen {
 		return ErrInvalidCategoryMsg("Invalid title: " + msg.Title)
 	}
-
 	if len(msg.Slug) < params.MinSlugLen || len(msg.Slug) > params.MaxSlugLen {
 		return ErrInvalidCategoryMsg("Invalid slug: " + msg.Slug)
 	}
-
 	if len(msg.Description) > params.MaxDescLen {
 		return ErrInvalidCategoryMsg("Invalid description: " + msg.Description)
 	}
-
 	return nil
 }
 
-// GetSigners implements Msg
+// GetSigners implements Msg. Returns the creator as the signer.
 func (msg CreateCategoryMsg) GetSigners() []sdk.AccAddress {
-	return getSigners(msg.Creator)
+	return t.GetSigners(msg.Creator)
 }

@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 
 	"github.com/TruStory/truchain/types"
-	ts "github.com/TruStory/truchain/x/truchain"
-	sdb "github.com/TruStory/truchain/x/truchain/db"
+	c "github.com/TruStory/truchain/x/category"
+	s "github.com/TruStory/truchain/x/story"
 	bam "github.com/cosmos/cosmos-sdk/baseapp"
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -29,7 +29,7 @@ const (
 // integral app types.
 type TruChain struct {
 	*bam.BaseApp
-	cdc *codec.Codec
+	codec *codec.Codec
 
 	// keys to access the multistore
 	keyMain     *sdk.KVStoreKey
@@ -46,7 +46,8 @@ type TruChain struct {
 	ibcMapper           ibc.Mapper
 
 	// access truchain database
-	keeper sdb.WriteKeeper
+	storyKeeper    s.ReadWriteKeeper
+	categoryKeeper c.ReadWriteKeeper
 }
 
 // NewTruChain returns a reference to a new TruChain. Internally,
@@ -56,12 +57,12 @@ type TruChain struct {
 // chain initialization.
 func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *TruChain {
 	// create and register app-level codec for TXs and accounts
-	cdc := MakeCodec()
+	codec := MakeCodec()
 
 	// create your application type
 	var app = &TruChain{
-		cdc:         cdc,
-		BaseApp:     bam.NewBaseApp(appName, logger, db, auth.DefaultTxDecoder(cdc), options...),
+		codec:       codec,
+		BaseApp:     bam.NewBaseApp(appName, logger, db, auth.DefaultTxDecoder(codec), options...),
 		keyMain:     sdk.NewKVStoreKey("main"),
 		keyAccount:  sdk.NewKVStoreKey("acc"),
 		keyIBC:      sdk.NewKVStoreKey("ibc"),
@@ -72,25 +73,22 @@ func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *T
 
 	// define and attach the mappers and keepers
 	app.accountMapper = auth.NewAccountMapper(
-		cdc,
+		codec,
 		app.keyAccount,        // target store
 		auth.ProtoBaseAccount, // prototype
 	)
-	// app.coinKeeper = bank.NewKeeper(app.accountMapper)
 	app.coinKeeper = bank.NewBaseKeeper(app.accountMapper)
-	app.ibcMapper = ibc.NewMapper(app.cdc, app.keyIBC, app.RegisterCodespace(ibc.DefaultCodespace))
-	app.keeper = sdb.NewTruKeeper(
-		app.keyStory,
-		app.keyCategory,
-		app.keyBacking,
-		app.coinKeeper,
-		app.cdc)
+	app.ibcMapper = ibc.NewMapper(app.codec, app.keyIBC, app.RegisterCodespace(ibc.DefaultCodespace))
+
+	app.categoryKeeper = c.NewKeeper(app.keyCategory, app.keyStory, codec)
+	app.storyKeeper = s.NewKeeper(app.keyStory, app.categoryKeeper, app.coinKeeper, app.codec)
 
 	// register message routes
 	app.Router().
 		AddRoute("bank", bank.NewHandler(app.coinKeeper)).
 		AddRoute("ibc", ibc.NewHandler(app.ibcMapper, app.coinKeeper)).
-		AddRoute("truchain", ts.NewHandler(app.keeper))
+		// AddRoute("story", s.NewHandler(app.storyKeeper)).
+		AddRoute("category", c.NewHandler(app.categoryKeeper))
 
 	// perform initialization logic
 	app.SetInitChainer(app.initChainer)
@@ -136,7 +134,8 @@ func (app *TruChain) BeginBlocker(_ sdk.Context, _ abci.RequestBeginBlock) abci.
 // EndBlocker reflects logic to run after all TXs are processed by the
 // application.
 func (app *TruChain) EndBlocker(ctx sdk.Context, _ abci.RequestEndBlock) abci.ResponseEndBlock {
-	return app.keeper.NewResponseEndBlock(ctx)
+	// return app.keeper.NewResponseEndBlock(ctx)
+	return abci.ResponseEndBlock{}
 }
 
 // initChainer implements the custom application logic that the BaseApp will
@@ -148,7 +147,7 @@ func (app *TruChain) initChainer(ctx sdk.Context, req abci.RequestInitChain) abc
 	stateJSON := req.AppStateBytes
 
 	genesisState := new(types.GenesisState)
-	err := app.cdc.UnmarshalJSON(stateJSON, genesisState)
+	err := app.codec.UnmarshalJSON(stateJSON, genesisState)
 	if err != nil {
 		// TODO: https://github.com/cosmos/cosmos-sdk/issues/468
 		panic(err)
@@ -188,7 +187,7 @@ func (app *TruChain) ExportAppStateAndValidators() (appState json.RawMessage, va
 	app.accountMapper.IterateAccounts(ctx, appendAccountsFn)
 
 	genState := types.GenesisState{Accounts: accounts}
-	appState, err = codec.MarshalJSONIndent(app.cdc, genState)
+	appState, err = codec.MarshalJSONIndent(app.codec, genState)
 	if err != nil {
 		return nil, nil, err
 	}
