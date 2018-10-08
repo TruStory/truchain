@@ -23,6 +23,7 @@ const (
 	CodeInvalidBackingCoin   sdk.CodeType = 712
 	CodeBackingNotFound      sdk.CodeType = 713
 	CodeCategoryNotFound     sdk.CodeType = 714
+	CodeInvalidCategoryMsg   sdk.CodeType = 715
 )
 
 func codeToDefaultMsg(code sdk.CodeType) string {
@@ -96,6 +97,11 @@ func ErrBackingNotFound(id int64) sdk.Error {
 func ErrCategoryNotFound(id int64) sdk.Error {
 	return newError(DefaultCodespace, CodeCategoryNotFound, "Category with id "+
 		strconv.Itoa(int(id))+" not found")
+}
+
+// ErrInvalidCategoryMsg throws an error when a category msg is invalid
+func ErrInvalidCategoryMsg(msg string) sdk.Error {
+	return newError(DefaultCodespace, CodeInvalidCategoryMsg, msg)
 }
 
 //----------------------------------------

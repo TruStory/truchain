@@ -82,10 +82,11 @@ func NewBacking(
 
 // Category is a type that defines the category for a story
 type Category struct {
-	ID          int64  `json:"id"`
-	Name        string `json:"name"`
-	Slug        string `json:"slug"`
-	Description string `json:"description,omitempty"`
+	ID          int64          `json:"id"`
+	Creator     sdk.AccAddress `json:"creator"`
+	Name        string         `json:"name"`
+	Slug        string         `json:"slug"`
+	Description string         `json:"description,omitempty"`
 }
 
 // CoinName returns the name of the coin, alias for slug
@@ -100,6 +101,26 @@ func NewCategory(id int64, name string, slug string, description string) Categor
 		Name:        name,
 		Slug:        slug,
 		Description: description,
+	}
+}
+
+// CategoryParams holds data for category parameters
+type CategoryParams struct {
+	MinTitleLen int
+	MaxTitleLen int
+	MinSlugLen  int
+	MaxSlugLen  int
+	MaxDescLen  int
+}
+
+// NewCategoryParams creates a new CategoryParams type with defaults
+func NewCategoryParams() CategoryParams {
+	return CategoryParams{
+		MinTitleLen: 5,
+		MaxTitleLen: 25,
+		MinSlugLen:  3,
+		MaxSlugLen:  15,
+		MaxDescLen:  140,
 	}
 }
 

@@ -34,6 +34,27 @@ func TestSubmitStoryMsg(t *testing.T) {
 	assert.Equal(t, int64(2), x1, "incorrect result data")
 }
 
+func TestCreateCategoryMsg(t *testing.T) {
+	ctx, _, _, k := db.MockDB()
+	h := NewHandler(k)
+	assert.NotNil(t, h)
+
+	title := "Flying cars"
+	creator := sdk.AccAddress([]byte{1, 2})
+	slug := "flying-cars"
+	desc := ""
+
+	msg := ts.NewCreateCategoryMsg(title, creator, slug, desc)
+	assert.NotNil(t, msg)
+
+	res := h(ctx, msg)
+	res1 := h(ctx, msg)
+	x, _ := binary.Varint(res.Data)
+	x1, _ := binary.Varint(res1.Data)
+	assert.Equal(t, int64(1), x, "incorrect result data")
+	assert.Equal(t, int64(2), x1, "incorrect result data")
+}
+
 func TestBackStoryMsg_FailBasicValidation(t *testing.T) {
 	ctx, _, _, k := db.MockDB()
 
