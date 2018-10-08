@@ -1,4 +1,4 @@
-package types
+package category
 
 import (
 	"testing"
@@ -16,6 +16,8 @@ func TestCreateCategoryMsg(t *testing.T) {
 	msg := NewCreateCategoryMsg(validTitle, validCreator, validSlug, validDescription)
 	err := msg.ValidateBasic()
 	assert.Nil(t, err)
+	assert.Equal(t, "category", msg.Type(), "should get type")
+	assert.Equal(t, "create_category", msg.Name(), "should get name")
 }
 
 func TestCreateCategoryMsg_Invalid(t *testing.T) {
