@@ -8,13 +8,13 @@ import (
 // NewCategory adds a story to the key-value store
 func (k TruKeeper) NewCategory(
 	ctx sdk.Context,
-	name string,
+	title string,
 	slug string,
 	description string) (int64, sdk.Error) {
 
 	cat := ts.NewCategory(
 		k.id(ctx, k.categoryKey),
-		name,
+		title,
 		slug,
 		description)
 
