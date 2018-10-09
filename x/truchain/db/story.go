@@ -9,14 +9,19 @@ import (
 func (k TruKeeper) NewStory(
 	ctx sdk.Context,
 	body string,
-	category ts.StoryCategory,
+	categoryID int64,
 	creator sdk.AccAddress,
 	storyType ts.StoryType) (int64, sdk.Error) {
+
+	_, err := k.GetCategory(ctx, categoryID)
+	if err != nil {
+		return 0, ts.ErrInvalidCategory(categoryID)
+	}
 
 	story := ts.Story{
 		ID:           k.id(ctx, k.storyKey),
 		Body:         body,
-		Category:     category,
+		CategoryID:   categoryID,
 		CreatedBlock: ctx.BlockHeight(),
 		Creator:      creator,
 		State:        ts.Created,
@@ -51,7 +56,7 @@ func (k TruKeeper) UpdateStory(ctx sdk.Context, story ts.Story) {
 		story.EvidenceIDs,
 		story.Thread,
 		story.Body,
-		story.Category,
+		story.CategoryID,
 		story.CreatedBlock,
 		story.Creator,
 		story.Round,

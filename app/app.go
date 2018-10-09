@@ -32,11 +32,12 @@ type TruChain struct {
 	cdc *codec.Codec
 
 	// keys to access the multistore
-	keyMain    *sdk.KVStoreKey
-	keyAccount *sdk.KVStoreKey
-	keyIBC     *sdk.KVStoreKey
-	keyStory   *sdk.KVStoreKey
-	keyBacking *sdk.KVStoreKey
+	keyMain     *sdk.KVStoreKey
+	keyAccount  *sdk.KVStoreKey
+	keyIBC      *sdk.KVStoreKey
+	keyStory    *sdk.KVStoreKey
+	keyCategory *sdk.KVStoreKey
+	keyBacking  *sdk.KVStoreKey
 
 	// manage getting and setting accounts
 	accountMapper       auth.AccountMapper
@@ -59,13 +60,14 @@ func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *T
 
 	// create your application type
 	var app = &TruChain{
-		cdc:        cdc,
-		BaseApp:    bam.NewBaseApp(appName, logger, db, auth.DefaultTxDecoder(cdc), options...),
-		keyMain:    sdk.NewKVStoreKey("main"),
-		keyAccount: sdk.NewKVStoreKey("acc"),
-		keyIBC:     sdk.NewKVStoreKey("ibc"),
-		keyStory:   sdk.NewKVStoreKey("stories"),
-		keyBacking: sdk.NewKVStoreKey("backings"),
+		cdc:         cdc,
+		BaseApp:     bam.NewBaseApp(appName, logger, db, auth.DefaultTxDecoder(cdc), options...),
+		keyMain:     sdk.NewKVStoreKey("main"),
+		keyAccount:  sdk.NewKVStoreKey("acc"),
+		keyIBC:      sdk.NewKVStoreKey("ibc"),
+		keyStory:    sdk.NewKVStoreKey("stories"),
+		keyCategory: sdk.NewKVStoreKey("categories"),
+		keyBacking:  sdk.NewKVStoreKey("backings"),
 	}
 
 	// define and attach the mappers and keepers
@@ -79,6 +81,7 @@ func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *T
 	app.ibcMapper = ibc.NewMapper(app.cdc, app.keyIBC, app.RegisterCodespace(ibc.DefaultCodespace))
 	app.keeper = sdb.NewTruKeeper(
 		app.keyStory,
+		app.keyCategory,
 		app.keyBacking,
 		app.coinKeeper,
 		app.cdc)

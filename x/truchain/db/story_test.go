@@ -14,9 +14,9 @@ import (
 )
 
 func TestAddGetStory(t *testing.T) {
-	ms, _, storyKey, backingKey := setupMultiStore()
+	ms, _, storyKey, catKey, backingKey := setupMultiStore()
 	cdc := makeCodec()
-	keeper := NewTruKeeper(storyKey, backingKey, bank.BaseKeeper{}, cdc)
+	keeper := NewTruKeeper(storyKey, catKey, backingKey, bank.BaseKeeper{}, cdc)
 	ctx := sdk.NewContext(ms, abci.Header{}, false, log.NewNopLogger())
 	storyID := CreateFakeStory(ms, keeper)
 
@@ -31,7 +31,7 @@ func TestAddGetStory(t *testing.T) {
 	story := ts.Story{
 		ID:           storyID,
 		Body:         "Body of story.",
-		Category:     ts.DEX,
+		CategoryID:   int64(1),
 		CreatedBlock: int64(0),
 		Creator:      sdk.AccAddress([]byte{1, 2}),
 		State:        ts.Created,
@@ -42,10 +42,10 @@ func TestAddGetStory(t *testing.T) {
 
 	// test incrementing id by adding another story
 	body := "Body of story 2."
-	category := ts.Bitcoin
+	// category := fakeCategory(ctx, k)
 	creator := sdk.AccAddress([]byte{3, 4})
 	storyType := ts.Default
 
-	storyID, _ = keeper.NewStory(ctx, body, category, creator, storyType)
+	storyID, _ = keeper.NewStory(ctx, body, int64(1), creator, storyType)
 	assert.Equal(t, int64(2), storyID, "Story ID did not increment properly")
 }

@@ -19,11 +19,52 @@ func TestSubmitStoryMsg(t *testing.T) {
 	h := NewHandler(k)
 	assert.NotNil(t, h)
 
+	cat := db.CreateFakeCategory(ctx, k)
+
 	body := "fake story"
-	cat := ts.DEX
 	creator := sdk.AccAddress([]byte{1, 2})
 	storyType := ts.Default
-	msg := ts.NewSubmitStoryMsg(body, cat, creator, storyType)
+	msg := ts.NewSubmitStoryMsg(body, cat.ID, creator, storyType)
+	assert.NotNil(t, msg)
+
+	res := h(ctx, msg)
+	res1 := h(ctx, msg)
+	x, _ := binary.Varint(res.Data)
+	x1, _ := binary.Varint(res1.Data)
+	assert.Equal(t, int64(1), x, "incorrect result data")
+	assert.Equal(t, int64(2), x1, "incorrect result data")
+}
+
+func TestSubmitStoryMsg_ErrInvalidCategory(t *testing.T) {
+	ctx, _, _, k := db.MockDB()
+
+	h := NewHandler(k)
+	assert.NotNil(t, h)
+
+	catID := int64(5)
+
+	body := "fake story"
+	creator := sdk.AccAddress([]byte{1, 2})
+	storyType := ts.Default
+	msg := ts.NewSubmitStoryMsg(body, catID, creator, storyType)
+	assert.NotNil(t, msg)
+
+	res := h(ctx, msg)
+	hasInvalidCategory := strings.Contains(res.Log, "708")
+	assert.True(t, hasInvalidCategory, "should return err code")
+}
+
+func TestCreateCategoryMsg(t *testing.T) {
+	ctx, _, _, k := db.MockDB()
+	h := NewHandler(k)
+	assert.NotNil(t, h)
+
+	title := "Flying cars"
+	creator := sdk.AccAddress([]byte{1, 2})
+	slug := "flying-cars"
+	desc := ""
+
+	msg := ts.NewCreateCategoryMsg(title, creator, slug, desc)
 	assert.NotNil(t, msg)
 
 	res := h(ctx, msg)
@@ -85,7 +126,7 @@ func TestBackStoryMsg(t *testing.T) {
 
 	res := h(ctx, msg)
 	x, _ := binary.Varint(res.Data)
-	assert.Equal(t, int64(1), x, "incorrect result story id")
+	assert.Equal(t, int64(1), x, "incorrect result backing id")
 }
 
 func TestByzantineMsg(t *testing.T) {

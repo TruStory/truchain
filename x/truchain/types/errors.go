@@ -1,6 +1,7 @@
 package types
 
 import (
+	"fmt"
 	"strconv"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -22,6 +23,8 @@ const (
 	CodeBackingQueueEmpty    sdk.CodeType = 711
 	CodeInvalidBackingCoin   sdk.CodeType = 712
 	CodeBackingNotFound      sdk.CodeType = 713
+	CodeCategoryNotFound     sdk.CodeType = 714
+	CodeInvalidCategoryMsg   sdk.CodeType = 715
 )
 
 func codeToDefaultMsg(code sdk.CodeType) string {
@@ -40,8 +43,11 @@ func ErrInvalidBody(msg string) sdk.Error {
 }
 
 // ErrInvalidCategory throws an error when the category is invalid
-func ErrInvalidCategory(msg string) sdk.Error {
-	return newError(DefaultCodespace, CodeInvalidCategory, msg)
+func ErrInvalidCategory(id int64) sdk.Error {
+	return newError(
+		DefaultCodespace,
+		CodeInvalidCategory,
+		"Invalid category id "+fmt.Sprintf("%d", id))
 }
 
 // ErrInvalidStoryID throws an error on invalid storyID
@@ -89,6 +95,17 @@ func ErrBackingQueueEmpty() sdk.Error {
 func ErrBackingNotFound(id int64) sdk.Error {
 	return newError(DefaultCodespace, CodeBackingNotFound, "Backing with id "+
 		strconv.Itoa(int(id))+" not found")
+}
+
+// ErrCategoryNotFound throws an error when the searched category is not found
+func ErrCategoryNotFound(id int64) sdk.Error {
+	return newError(DefaultCodespace, CodeCategoryNotFound, "Category with id "+
+		strconv.Itoa(int(id))+" not found")
+}
+
+// ErrInvalidCategoryMsg throws an error when a category msg is invalid
+func ErrInvalidCategoryMsg(msg string) sdk.Error {
+	return newError(DefaultCodespace, CodeInvalidCategoryMsg, msg)
 }
 
 //----------------------------------------
