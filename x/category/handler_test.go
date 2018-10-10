@@ -10,8 +10,8 @@ import (
 )
 
 func TestHandleCreateCategoryMsg(t *testing.T) {
-	ctx, k := mockDB()
-	h := NewHandler(k)
+	ctx, ck := mockDB()
+	h := NewHandler(ck)
 	assert.NotNil(t, h)
 
 	title := "Flying cars"
@@ -31,12 +31,10 @@ func TestHandleCreateCategoryMsg(t *testing.T) {
 }
 
 func TestByzantineMsg(t *testing.T) {
-	ctx, k := mockDB()
+	ctx, ck := mockDB()
 
-	h := NewHandler(k)
+	h := NewHandler(ck)
 	assert.NotNil(t, h)
-
-	// fakeMsg := NewAddCommentMsg(int64(5), "test", sdk.AccAddress([]byte{1, 2}))
 
 	res := h(ctx, nil)
 	hasUnrecognizedMessage := strings.Contains(res.Log, "65542")

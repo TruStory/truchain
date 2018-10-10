@@ -1,0 +1,38 @@
+package backing
+
+import (
+	t "github.com/TruStory/truchain/types"
+	sdk "github.com/cosmos/cosmos-sdk/types"
+)
+
+// NewHandler creates a new handler for all TruStory messages
+func NewHandler(k WriteKeeper) sdk.Handler {
+	return func(ctx sdk.Context, msg sdk.Msg) sdk.Result {
+		switch msg := msg.(type) {
+		case BackStoryMsg:
+			return handleBackStoryMsg(ctx, k, msg)
+		default:
+			return t.ErrMsgHandler(msg)
+		}
+	}
+}
+
+// ============================================================================
+
+func handleBackStoryMsg(ctx sdk.Context, k WriteKeeper, msg BackStoryMsg) sdk.Result {
+	if err := msg.ValidateBasic(); err != nil {
+		return err.Result()
+	}
+
+	id, err := k.NewBacking(
+		ctx,
+		msg.StoryID,
+		msg.Amount,
+		msg.Creator,
+		msg.Duration)
+	if err != nil {
+		return err.Result()
+	}
+
+	return t.Result(id)
+}

@@ -7,7 +7,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
-// Utilities for all truchain modules
+// Utilities for all module handlers
 
 // ErrMsgHandler returns an unknown Msg request error result
 func ErrMsgHandler(msg sdk.Msg) sdk.Result {
