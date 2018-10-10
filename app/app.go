@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 
 	"github.com/TruStory/truchain/types"
+	b "github.com/TruStory/truchain/x/backing"
 	c "github.com/TruStory/truchain/x/category"
 	s "github.com/TruStory/truchain/x/story"
 	bam "github.com/cosmos/cosmos-sdk/baseapp"
@@ -48,6 +49,7 @@ type TruChain struct {
 	// access truchain database
 	storyKeeper    s.ReadWriteKeeper
 	categoryKeeper c.ReadWriteKeeper
+	backingKeeper  b.ReadWriteKeeper
 }
 
 // NewTruChain returns a reference to a new TruChain. Internally,
@@ -80,15 +82,18 @@ func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *T
 	app.coinKeeper = bank.NewBaseKeeper(app.accountMapper)
 	app.ibcMapper = ibc.NewMapper(app.codec, app.keyIBC, app.RegisterCodespace(ibc.DefaultCodespace))
 
+	// wire up trustory keepers
 	app.categoryKeeper = c.NewKeeper(app.keyCategory, app.keyStory, codec)
 	app.storyKeeper = s.NewKeeper(app.keyStory, app.categoryKeeper, app.coinKeeper, app.codec)
+	app.backingKeeper = b.NewKeeper(app.keyBacking, app.storyKeeper, app.coinKeeper, app.categoryKeeper, codec)
 
 	// register message routes
 	app.Router().
 		AddRoute("bank", bank.NewHandler(app.coinKeeper)).
 		AddRoute("ibc", ibc.NewHandler(app.ibcMapper, app.coinKeeper)).
-		// AddRoute("story", s.NewHandler(app.storyKeeper)).
-		AddRoute("category", c.NewHandler(app.categoryKeeper))
+		AddRoute("story", s.NewHandler(app.storyKeeper)).
+		AddRoute("category", c.NewHandler(app.categoryKeeper)).
+		AddRoute("backing", b.NewHandler(app.backingKeeper))
 
 	// perform initialization logic
 	app.SetInitChainer(app.initChainer)
@@ -134,8 +139,7 @@ func (app *TruChain) BeginBlocker(_ sdk.Context, _ abci.RequestBeginBlock) abci.
 // EndBlocker reflects logic to run after all TXs are processed by the
 // application.
 func (app *TruChain) EndBlocker(ctx sdk.Context, _ abci.RequestEndBlock) abci.ResponseEndBlock {
-	// return app.keeper.NewResponseEndBlock(ctx)
-	return abci.ResponseEndBlock{}
+	return app.backingKeeper.NewResponseEndBlock(ctx)
 }
 
 // initChainer implements the custom application logic that the BaseApp will

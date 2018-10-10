@@ -1,4 +1,4 @@
-package category
+package backing
 
 import (
 	amino "github.com/tendermint/go-amino"
@@ -6,5 +6,5 @@ import (
 
 // RegisterAmino registers messages into the codec
 func RegisterAmino(c *amino.Codec) {
-	c.RegisterConcrete(CreateCategoryMsg{}, "category/CreateCategoryMsg", nil)
+	c.RegisterConcrete(BackStoryMsg{}, "backing/BackStoryMsg", nil)
 }

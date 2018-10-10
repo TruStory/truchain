@@ -90,7 +90,7 @@ It compiles into two binaries, `trucli` (lite client) and `truchaind` (dapp chai
 
 Because the current Cosmos SDK data store is built on key-value storage, database operations are more explicit than a relational or even NoSQL database. Lists and queues must be made for data that needs to be retrieved.
 
-`TruKeeper` handles all reads and writes from key-value storage. It contains a separate store for each data type:
+`Keeper` handles all reads and writes from key-value storage. It contains a separate store for each data type:
 
 Stories key-value store:
 
@@ -106,7 +106,7 @@ Backings key-value store:
 * backings:len -> 3
 * backings:queue:unexpired -> [1, 2, 3]
 
-All data in stores are binary encoded using [Amino](https://github.com/tendermint/go-amino) for efficient storage in a Merkle tree. `TruKeeper` handles marshalling and umarshalling data between its binary encoding and Go data type.
+All data in stores are binary encoded using [Amino](https://github.com/tendermint/go-amino) for efficient storage in a Merkle tree. `Keeper` handles marshalling and umarshalling data between its binary encoding and Go data type.
 
 ### Messages
 
