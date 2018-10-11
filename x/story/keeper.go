@@ -4,7 +4,6 @@ import (
 	app "github.com/TruStory/truchain/types"
 	"github.com/TruStory/truchain/x/category"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/cosmos/cosmos-sdk/x/bank"
 	amino "github.com/tendermint/go-amino"
 )
 
@@ -30,26 +29,17 @@ type ReadWriteKeeper interface {
 
 // Keeper data type storing keys to the key-value store
 type Keeper struct {
-	// base keeper
-	baseKeeper app.Keeper
-
-	// read-only access to category DB
+	baseKeeper     app.Keeper
 	categoryKeeper category.ReadKeeper
-
-	// key to access coin store
-	bankKeeper bank.Keeper
-
-	// unexposed keys to access store from context
-	storyKey sdk.StoreKey
+	storyKey       sdk.StoreKey
 }
 
 // NewKeeper creates a new keeper with write and read access
-func NewKeeper(storyKey sdk.StoreKey, ck category.ReadKeeper, bk bank.Keeper, codec *amino.Codec) Keeper {
+func NewKeeper(storyKey sdk.StoreKey, ck category.ReadKeeper, codec *amino.Codec) Keeper {
 	return Keeper{
 		baseKeeper:     app.NewKeeper(codec),
 		storyKey:       storyKey,
 		categoryKeeper: ck,
-		bankKeeper:     bk,
 	}
 }
 

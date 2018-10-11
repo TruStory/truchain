@@ -84,7 +84,7 @@ func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *T
 
 	// wire up trustory keepers
 	app.categoryKeeper = c.NewKeeper(app.keyCategory, app.keyStory, codec)
-	app.storyKeeper = s.NewKeeper(app.keyStory, app.categoryKeeper, app.coinKeeper, app.codec)
+	app.storyKeeper = s.NewKeeper(app.keyStory, app.categoryKeeper, app.codec)
 	app.backingKeeper = b.NewKeeper(app.keyBacking, app.storyKeeper, app.coinKeeper, app.categoryKeeper, codec)
 
 	// register message routes
