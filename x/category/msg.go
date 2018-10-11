@@ -1,7 +1,7 @@
 package category
 
 import (
-	t "github.com/TruStory/truchain/types"
+	app "github.com/TruStory/truchain/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
@@ -29,14 +29,14 @@ func NewCreateCategoryMsg(
 }
 
 // Type implements Msg
-func (msg CreateCategoryMsg) Type() string { return t.GetType(msg) }
+func (msg CreateCategoryMsg) Type() string { return app.GetType(msg) }
 
 // Name implements Msg
-func (msg CreateCategoryMsg) Name() string { return t.GetName(msg) }
+func (msg CreateCategoryMsg) Name() string { return app.GetName(msg) }
 
 // GetSignBytes implements Msg
 func (msg CreateCategoryMsg) GetSignBytes() []byte {
-	return t.MustGetSignBytes(msg)
+	return app.MustGetSignBytes(msg)
 }
 
 // ValidateBasic implements Msg
@@ -59,5 +59,5 @@ func (msg CreateCategoryMsg) ValidateBasic() sdk.Error {
 
 // GetSigners implements Msg. Returns the creator as the signer.
 func (msg CreateCategoryMsg) GetSigners() []sdk.AccAddress {
-	return t.GetSigners(msg.Creator)
+	return app.GetSigners(msg.Creator)
 }
