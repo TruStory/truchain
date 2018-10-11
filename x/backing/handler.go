@@ -1,7 +1,7 @@
 package backing
 
 import (
-	t "github.com/TruStory/truchain/types"
+	app "github.com/TruStory/truchain/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
@@ -12,7 +12,7 @@ func NewHandler(k WriteKeeper) sdk.Handler {
 		case BackStoryMsg:
 			return handleBackStoryMsg(ctx, k, msg)
 		default:
-			return t.ErrMsgHandler(msg)
+			return app.ErrMsgHandler(msg)
 		}
 	}
 }
@@ -34,5 +34,5 @@ func handleBackStoryMsg(ctx sdk.Context, k WriteKeeper, msg BackStoryMsg) sdk.Re
 		return err.Result()
 	}
 
-	return t.Result(id)
+	return app.Result(id)
 }

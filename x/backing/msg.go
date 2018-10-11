@@ -3,8 +3,8 @@ package backing
 import (
 	"time"
 
-	t "github.com/TruStory/truchain/types"
-	s "github.com/TruStory/truchain/x/story"
+	app "github.com/TruStory/truchain/types"
+	"github.com/TruStory/truchain/x/story"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
@@ -35,14 +35,14 @@ func NewBackStoryMsg(
 }
 
 // Type implements Msg
-func (msg BackStoryMsg) Type() string { return t.GetType(msg) }
+func (msg BackStoryMsg) Type() string { return app.GetType(msg) }
 
 // Name implements Msg
-func (msg BackStoryMsg) Name() string { return t.GetName(msg) }
+func (msg BackStoryMsg) Name() string { return app.GetName(msg) }
 
 // GetSignBytes implements Msg
 func (msg BackStoryMsg) GetSignBytes() []byte {
-	return t.MustGetSignBytes(msg)
+	return app.MustGetSignBytes(msg)
 }
 
 // ValidateBasic implements Msg
@@ -51,7 +51,7 @@ func (msg BackStoryMsg) ValidateBasic() sdk.Error {
 	params := NewParams()
 
 	if msg.StoryID <= 0 {
-		return s.ErrInvalidStoryID(msg.StoryID)
+		return story.ErrInvalidStoryID(msg.StoryID)
 	}
 	if len(msg.Creator) == 0 {
 		return sdk.ErrInvalidAddress("Invalid address: " + msg.Creator.String())
@@ -67,5 +67,5 @@ func (msg BackStoryMsg) ValidateBasic() sdk.Error {
 
 // GetSigners implements Msg
 func (msg BackStoryMsg) GetSigners() []sdk.AccAddress {
-	return t.GetSigners(msg.Creator)
+	return app.GetSigners(msg.Creator)
 }
