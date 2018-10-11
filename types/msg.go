@@ -18,7 +18,7 @@ func GetType(msg sdk.Msg) string {
 	return path.Base(pkgPath)
 }
 
-// GetName returns the name of the `Msg` in camel case
+// GetName returns the name of the `Msg` in snake_case
 func GetName(msg sdk.Msg) string {
 	name := reflect.TypeOf(msg).Name()
 	prefix := strings.Split(toSnakeCase(name), "_")
