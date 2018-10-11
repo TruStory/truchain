@@ -16,7 +16,6 @@ import (
 	stakecmd "github.com/cosmos/cosmos-sdk/x/stake/client/cli"
 	"github.com/spf13/cobra"
 	"github.com/tendermint/tmlibs/cli"
-	// truchainrest "github.com/TruStory/truchain/x/truchain/client/rest"
 )
 
 // rootCmd is the entry point for this binary
@@ -68,8 +67,6 @@ func main() {
 	// add proxy, version and key info
 	rootCmd.AddCommand(
 		client.LineBreak,
-		// lcd.ServeCommand(cdc),
-		// truchainrest.ServeCommand(cdc),
 		keys.Commands(),
 		client.LineBreak,
 		version.VersionCmd,
