@@ -1,7 +1,7 @@
 package story
 
 import (
-	t "github.com/TruStory/truchain/types"
+	app "github.com/TruStory/truchain/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
@@ -12,7 +12,7 @@ func NewHandler(k WriteKeeper) sdk.Handler {
 		case SubmitStoryMsg:
 			return handleSubmitStoryMsg(ctx, k, msg)
 		default:
-			return t.ErrMsgHandler(msg)
+			return app.ErrMsgHandler(msg)
 		}
 	}
 }
@@ -29,5 +29,5 @@ func handleSubmitStoryMsg(ctx sdk.Context, k WriteKeeper, msg SubmitStoryMsg) sd
 		return err.Result()
 	}
 
-	return t.Result(id)
+	return app.Result(id)
 }
