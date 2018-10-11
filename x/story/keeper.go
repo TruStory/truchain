@@ -1,6 +1,8 @@
 package story
 
 import (
+	"fmt"
+
 	app "github.com/TruStory/truchain/types"
 	"github.com/TruStory/truchain/x/category"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -11,6 +13,7 @@ import (
 // to truchain data
 type ReadKeeper interface {
 	GetStory(ctx sdk.Context, storyID int64) (Story, sdk.Error)
+	GetStoriesWithCategory(ctx sdk.Context, catID int64) (stories []Story, err sdk.Error)
 }
 
 // WriteKeeper defines a module interface that facilities write only access
@@ -69,6 +72,7 @@ func (k Keeper) NewStory(
 	}
 
 	k.setStory(ctx, story)
+	k.addStoryToCategory(ctx, story)
 
 	return story.ID, nil
 }
@@ -83,6 +87,33 @@ func (k Keeper) GetStory(ctx sdk.Context, storyID int64) (story Story, err sdk.E
 	}
 	k.baseKeeper.Codec.MustUnmarshalBinary(val, &story)
 
+	return
+}
+
+// GetStoriesWithCategory gets the stories for a given category id
+func (k Keeper) GetStoriesWithCategory(ctx sdk.Context, catID int64) (stories []Story, err sdk.Error) {
+
+	// get bytes stored at "categories:id:[catID]:stories"
+	store := ctx.KVStore(k.catKey)
+	bz := store.Get(getCategoryStoriesKey(k, catID))
+	if bz == nil {
+		return stories, ErrStoriesWithCategoryNotFound(catID)
+	}
+
+	// deserialize bytes to story ids
+	storyIDs := []int64{}
+	k.tk.Codec.MustUnmarshalBinary(bz, &storyIDs)
+
+	// extract each story and add to a list
+	for _, id := range storyIDs {
+		story, err := k.GetStory(ctx, id)
+		if err != nil {
+			return stories, ErrStoryNotFound(id)
+		}
+		stories = append(stories, story)
+	}
+
+	// return list of stories
 	return
 }
 
@@ -116,7 +147,31 @@ func (k Keeper) setStory(ctx sdk.Context, story Story) {
 		k.baseKeeper.Codec.MustMarshalBinary(story))
 }
 
-// getStoryIDKey returns byte array for "stories:id:[ID]"
+// addStoryToCategory adds a story id to key "categories:id:[ID]"
+func (k Keeper) addStoryToCategory(ctx sdk.Context, story Story) {
+	store := ctx.KVStore(k.catKey)
+	key := getCategoryStoriesKey(k, story.CategoryID)
+	bz := store.Get(key)
+	if bz == nil {
+		bz = k.tk.Codec.MustMarshalBinary([]int64{})
+		store.Set(key, bz)
+	}
+
+	// get list of story ids from category store
+	storyIDs := []int64{}
+	k.tk.Codec.MustUnmarshalBinary(bz, &storyIDs)
+
+	storyIDs = append(storyIDs, story.ID)
+	store.Set(key, k.tk.Codec.MustMarshalBinary(storyIDs))
+}
+
+// getStoryIDKey returns byte array for "stories:id:[ID]")
 func getStoryIDKey(k Keeper, id int64) []byte {
 	return app.GetIDKey(k.storyKey, id)
+}
+
+// getCategoryStoriesKey returns "categories:id:[`catID`]:stories"
+func getCategoryStoriesKey(k Keeper, catID int64) []byte {
+	return []byte(fmt.Sprintf("%s:id:%d:%s", k.catKey.Name(), catID, k.storyKey.Name()))
+
 }

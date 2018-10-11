@@ -40,3 +40,16 @@ func TestAddGetStory(t *testing.T) {
 	storyID, _ = sk.NewStory(ctx, body, int64(1), creator, kind)
 	assert.Equal(t, int64(2), storyID, "Story ID did not increment properly")
 }
+
+func TestGetStoriesWithCategory(t *testing.T) {
+	ctx, sk, ck := mockDB()
+
+	numStories := 100
+
+	for i := 0; i < numStories; i++ {
+		createFakeStory(ctx, sk, ck)
+	}
+
+	stories, _ := sk.GetStoriesWithCategory(ctx, 1)
+	assert.Equal(t, numStories, len(stories))
+}
