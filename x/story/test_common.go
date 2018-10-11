@@ -4,8 +4,6 @@ import (
 	c "github.com/TruStory/truchain/x/category"
 	"github.com/cosmos/cosmos-sdk/store"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/cosmos/cosmos-sdk/x/auth"
-	"github.com/cosmos/cosmos-sdk/x/bank"
 	amino "github.com/tendermint/go-amino"
 	abci "github.com/tendermint/tendermint/abci/types"
 	"github.com/tendermint/tendermint/crypto/encoding/amino"
@@ -16,12 +14,10 @@ import (
 func mockDB() (sdk.Context, Keeper, c.Keeper) {
 	db := dbm.NewMemDB()
 
-	accKey := sdk.NewKVStoreKey("acc")
 	storyKey := sdk.NewKVStoreKey("stories")
 	catKey := sdk.NewKVStoreKey("categories")
 
 	ms := store.NewCommitMultiStore(db)
-	ms.MountStoreWithDB(accKey, sdk.StoreTypeIAVL, db)
 	ms.MountStoreWithDB(storyKey, sdk.StoreTypeIAVL, db)
 	ms.MountStoreWithDB(catKey, sdk.StoreTypeIAVL, db)
 	ms.LoadLatestVersion()
@@ -33,9 +29,7 @@ func mockDB() (sdk.Context, Keeper, c.Keeper) {
 	RegisterAmino(codec)
 
 	ck := c.NewKeeper(catKey, storyKey, codec)
-	am := auth.NewAccountMapper(codec, accKey, auth.ProtoBaseAccount)
-	bk := bank.NewBaseKeeper(am)
-	sk := NewKeeper(storyKey, ck, bk, codec)
+	sk := NewKeeper(storyKey, ck, codec)
 
 	return ctx, sk, ck
 }
