@@ -1,7 +1,7 @@
 package category
 
 import (
-	t "github.com/TruStory/truchain/types"
+	app "github.com/TruStory/truchain/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	amino "github.com/tendermint/go-amino"
 )
@@ -27,17 +27,17 @@ type ReadWriteKeeper interface {
 
 // Keeper data type storing keys to the key-value store
 type Keeper struct {
-	tk       t.Keeper
-	catKey   sdk.StoreKey
-	storyKey sdk.StoreKey
+	baseKeeper app.Keeper
+	catKey     sdk.StoreKey
+	storyKey   sdk.StoreKey
 }
 
 // NewKeeper creates a new keeper with write and read access
 func NewKeeper(catKey sdk.StoreKey, storyKey sdk.StoreKey, codec *amino.Codec) Keeper {
 	return Keeper{
-		tk:       t.NewKeeper(codec),
-		catKey:   catKey,
-		storyKey: storyKey,
+		baseKeeper: app.NewKeeper(codec),
+		catKey:     catKey,
+		storyKey:   storyKey,
 	}
 }
 
@@ -49,7 +49,7 @@ func (k Keeper) NewCategory(
 	description string) (int64, sdk.Error) {
 
 	cat := NewCategory(
-		k.tk.GetNextID(ctx, k.catKey),
+		k.baseKeeper.GetNextID(ctx, k.catKey),
 		title,
 		slug,
 		description)
@@ -66,7 +66,7 @@ func (k Keeper) GetCategory(ctx sdk.Context, id int64) (cat Category, err sdk.Er
 	if val == nil {
 		return cat, ErrCategoryNotFound(id)
 	}
-	k.tk.Codec.MustUnmarshalBinary(val, &cat)
+	k.baseKeeper.Codec.MustUnmarshalBinary(val, &cat)
 
 	return
 }
@@ -78,10 +78,10 @@ func (k Keeper) setCategory(ctx sdk.Context, cat Category) {
 	store := ctx.KVStore(k.catKey)
 	store.Set(
 		getCategoryIDKey(k, cat.ID),
-		k.tk.Codec.MustMarshalBinary(cat))
+		k.baseKeeper.Codec.MustMarshalBinary(cat))
 }
 
 // getCategoryIDKey returns byte array for "categories:id:[ID]"
 func getCategoryIDKey(k Keeper, id int64) []byte {
-	return t.GetIDKey(k.catKey, id)
+	return app.GetIDKey(k.catKey, id)
 }
