@@ -4,9 +4,9 @@ import (
 	"encoding/json"
 
 	"github.com/TruStory/truchain/types"
-	b "github.com/TruStory/truchain/x/backing"
-	c "github.com/TruStory/truchain/x/category"
-	s "github.com/TruStory/truchain/x/story"
+	"github.com/TruStory/truchain/x/backing"
+	"github.com/TruStory/truchain/x/category"
+	"github.com/TruStory/truchain/x/story"
 	bam "github.com/cosmos/cosmos-sdk/baseapp"
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -47,9 +47,9 @@ type TruChain struct {
 	ibcMapper           ibc.Mapper
 
 	// access truchain database
-	storyKeeper    s.ReadWriteKeeper
-	categoryKeeper c.ReadWriteKeeper
-	backingKeeper  b.ReadWriteKeeper
+	storyKeeper    story.ReadWriteKeeper
+	categoryKeeper category.ReadWriteKeeper
+	backingKeeper  backing.ReadWriteKeeper
 }
 
 // NewTruChain returns a reference to a new TruChain. Internally,
@@ -83,17 +83,17 @@ func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *T
 	app.ibcMapper = ibc.NewMapper(app.codec, app.keyIBC, app.RegisterCodespace(ibc.DefaultCodespace))
 
 	// wire up trustory keepers
-	app.categoryKeeper = c.NewKeeper(app.keyCategory, app.keyStory, codec)
-	app.storyKeeper = s.NewKeeper(app.keyStory, app.categoryKeeper, app.codec)
-	app.backingKeeper = b.NewKeeper(app.keyBacking, app.storyKeeper, app.coinKeeper, app.categoryKeeper, codec)
+	app.categoryKeeper = category.NewKeeper(app.keyCategory, app.keyStory, codec)
+	app.storyKeeper = story.NewKeeper(app.keyStory, app.categoryKeeper, app.codec)
+	app.backingKeeper = backing.NewKeeper(app.keyBacking, app.storyKeeper, app.coinKeeper, app.categoryKeeper, codec)
 
 	// register message routes
 	app.Router().
 		AddRoute("bank", bank.NewHandler(app.coinKeeper)).
 		AddRoute("ibc", ibc.NewHandler(app.ibcMapper, app.coinKeeper)).
-		AddRoute("story", s.NewHandler(app.storyKeeper)).
-		AddRoute("category", c.NewHandler(app.categoryKeeper)).
-		AddRoute("backing", b.NewHandler(app.backingKeeper))
+		AddRoute("story", story.NewHandler(app.storyKeeper)).
+		AddRoute("category", category.NewHandler(app.categoryKeeper)).
+		AddRoute("backing", backing.NewHandler(app.backingKeeper))
 
 	// perform initialization logic
 	app.SetInitChainer(app.initChainer)
