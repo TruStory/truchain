@@ -18,6 +18,7 @@ type ReadKeeper interface {
 // to truchain data
 type WriteKeeper interface {
 	NewStory(ctx sdk.Context, body string, categoryID int64, creator sdk.AccAddress, kind Kind) (int64, sdk.Error)
+	UpdateStory(ctx sdk.Context, story Story)
 }
 
 // ReadWriteKeeper defines a module interface that facilities read/write access
