@@ -3,9 +3,9 @@ package story
 import (
 	"net/url"
 
-	c "github.com/TruStory/truchain/x/category"
+	"github.com/TruStory/truchain/x/category"
 
-	t "github.com/TruStory/truchain/types"
+	app "github.com/TruStory/truchain/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
@@ -28,15 +28,15 @@ func NewSubmitStoryMsg(body string, categoryID int64, creator sdk.AccAddress, ki
 }
 
 // Type implements Msg
-func (msg SubmitStoryMsg) Type() string { return t.GetType(msg) }
+func (msg SubmitStoryMsg) Type() string { return app.GetType(msg) }
 
 // Name implements Msg
-func (msg SubmitStoryMsg) Name() string { return t.GetName(msg) }
+func (msg SubmitStoryMsg) Name() string { return app.GetName(msg) }
 
 // GetSignBytes implements Msg. Story creator should sign this message.
 // Serializes Msg into JSON bytes for transport.
 func (msg SubmitStoryMsg) GetSignBytes() []byte {
-	return t.MustGetSignBytes(msg)
+	return app.MustGetSignBytes(msg)
 }
 
 // ValidateBasic implements Msg
@@ -45,7 +45,7 @@ func (msg SubmitStoryMsg) ValidateBasic() sdk.Error {
 		return ErrInvalidStoryBody(msg.Body)
 	}
 	if msg.CategoryID == 0 {
-		return c.ErrInvalidCategory(msg.CategoryID)
+		return category.ErrInvalidCategory(msg.CategoryID)
 	}
 	if len(msg.Creator) == 0 {
 		return sdk.ErrInvalidAddress("Invalid address: " + msg.Creator.String())
@@ -58,7 +58,7 @@ func (msg SubmitStoryMsg) ValidateBasic() sdk.Error {
 
 // GetSigners implements Msg. Story creator is the only signer of this message.
 func (msg SubmitStoryMsg) GetSigners() []sdk.AccAddress {
-	return t.GetSigners(msg.Creator)
+	return app.GetSigners(msg.Creator)
 }
 
 // ============================================================================
@@ -80,14 +80,14 @@ func NewSubmitEvidenceMsg(storyID int64, creator sdk.AccAddress, uri string) Sub
 }
 
 // Type implements Msg
-func (msg SubmitEvidenceMsg) Type() string { return t.GetType(msg) }
+func (msg SubmitEvidenceMsg) Type() string { return app.GetType(msg) }
 
 // Name implements Msg
-func (msg SubmitEvidenceMsg) Name() string { return t.GetName(msg) }
+func (msg SubmitEvidenceMsg) Name() string { return app.GetName(msg) }
 
 // GetSignBytes implements Msg
 func (msg SubmitEvidenceMsg) GetSignBytes() []byte {
-	return t.MustGetSignBytes(msg)
+	return app.MustGetSignBytes(msg)
 }
 
 // ValidateBasic implements Msg
@@ -107,5 +107,5 @@ func (msg SubmitEvidenceMsg) ValidateBasic() sdk.Error {
 
 // GetSigners implements Msg
 func (msg SubmitEvidenceMsg) GetSigners() []sdk.AccAddress {
-	return t.GetSigners(msg.Creator)
+	return app.GetSigners(msg.Creator)
 }

@@ -1,8 +1,8 @@
 package story
 
 import (
-	t "github.com/TruStory/truchain/types"
-	c "github.com/TruStory/truchain/x/category"
+	app "github.com/TruStory/truchain/types"
+	"github.com/TruStory/truchain/x/category"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/bank"
 	amino "github.com/tendermint/go-amino"
@@ -31,25 +31,25 @@ type ReadWriteKeeper interface {
 // Keeper data type storing keys to the key-value store
 type Keeper struct {
 	// base keeper
-	tk t.Keeper
+	baseKeeper app.Keeper
 
 	// read-only access to category DB
-	ck c.ReadKeeper
+	categoryKeeper category.ReadKeeper
 
 	// key to access coin store
-	bk bank.Keeper
+	bankKeeper bank.Keeper
 
 	// unexposed keys to access store from context
 	storyKey sdk.StoreKey
 }
 
 // NewKeeper creates a new keeper with write and read access
-func NewKeeper(storyKey sdk.StoreKey, ck c.ReadKeeper, bk bank.Keeper, codec *amino.Codec) Keeper {
+func NewKeeper(storyKey sdk.StoreKey, ck category.ReadKeeper, bk bank.Keeper, codec *amino.Codec) Keeper {
 	return Keeper{
-		tk:       t.NewKeeper(codec),
-		storyKey: storyKey,
-		ck:       ck,
-		bk:       bk,
+		baseKeeper:     app.NewKeeper(codec),
+		storyKey:       storyKey,
+		categoryKeeper: ck,
+		bankKeeper:     bk,
 	}
 }
 
@@ -63,13 +63,13 @@ func (k Keeper) NewStory(
 	creator sdk.AccAddress,
 	kind Kind) (int64, sdk.Error) {
 
-	_, err := k.ck.GetCategory(ctx, categoryID)
+	_, err := k.categoryKeeper.GetCategory(ctx, categoryID)
 	if err != nil {
-		return 0, c.ErrInvalidCategory(categoryID)
+		return 0, category.ErrInvalidCategory(categoryID)
 	}
 
 	story := Story{
-		ID:           k.tk.GetNextID(ctx, k.storyKey),
+		ID:           k.baseKeeper.GetNextID(ctx, k.storyKey),
 		Body:         body,
 		CategoryID:   categoryID,
 		CreatedBlock: ctx.BlockHeight(),
@@ -91,7 +91,7 @@ func (k Keeper) GetStory(ctx sdk.Context, storyID int64) (story Story, err sdk.E
 	if val == nil {
 		return story, ErrStoryNotFound(storyID)
 	}
-	k.tk.Codec.MustUnmarshalBinary(val, &story)
+	k.baseKeeper.Codec.MustUnmarshalBinary(val, &story)
 
 	return
 }
@@ -123,10 +123,10 @@ func (k Keeper) setStory(ctx sdk.Context, story Story) {
 	store := ctx.KVStore(k.storyKey)
 	store.Set(
 		getStoryIDKey(k, story.ID),
-		k.tk.Codec.MustMarshalBinary(story))
+		k.baseKeeper.Codec.MustMarshalBinary(story))
 }
 
 // getStoryIDKey returns byte array for "stories:id:[ID]"
 func getStoryIDKey(k Keeper, id int64) []byte {
-	return t.GetIDKey(k.storyKey, id)
+	return app.GetIDKey(k.storyKey, id)
 }
