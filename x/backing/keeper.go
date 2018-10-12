@@ -69,7 +69,7 @@ func NewKeeper(
 
 // GetCodec returns the base keeper's underlying codec
 func (k Keeper) GetCodec() *amino.Codec {
-	return k.baseKeeper.Codec
+	return k.baseKeeper.GetCodec()
 }
 
 // NewBacking adds a new backing to the backing store

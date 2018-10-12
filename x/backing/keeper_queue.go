@@ -57,7 +57,7 @@ func (k Keeper) getQueue(ctx sdk.Context) (q Queue) {
 	if bq == nil {
 		return
 	}
-	k.baseKeeper.Codec.MustUnmarshalBinary(bq, &q)
+	k.GetCodec().MustUnmarshalBinary(bq, &q)
 
 	return
 }
@@ -65,6 +65,6 @@ func (k Keeper) getQueue(ctx sdk.Context) (q Queue) {
 // setQueue sets the Queue to the context
 func (k Keeper) setQueue(ctx sdk.Context, q Queue) {
 	store := ctx.KVStore(k.backingKey)
-	bsq := k.baseKeeper.Codec.MustMarshalBinary(q)
+	bsq := k.GetCodec().MustMarshalBinary(q)
 	store.Set(keyQueue, bsq)
 }
