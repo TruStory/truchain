@@ -9,6 +9,12 @@ import (
 
 // Utilities for all module keepers
 
+// ReadKeeper defines a module interface that facilitates read only access
+// to truchain data. Modules keepers should implement this base interface.
+type ReadKeeper interface {
+	GetCodec() *amino.Codec
+}
+
 // Keeper data type with a default codec
 type Keeper struct {
 	Codec *amino.Codec

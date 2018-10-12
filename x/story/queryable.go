@@ -13,7 +13,7 @@ const (
 	QueryCategoryStories = "category/stories"
 )
 
-// QueryCategoryStoriesParams are params for query '/truchain/stories'
+// QueryCategoryStoriesParams are params for query 'category/stories'
 type QueryCategoryStoriesParams struct {
 	CategoryID int64
 }
