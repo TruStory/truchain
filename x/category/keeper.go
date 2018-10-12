@@ -9,6 +9,8 @@ import (
 // ReadKeeper defines a module interface that facilitates read only access
 // to truchain data
 type ReadKeeper interface {
+	app.ReadKeeper
+
 	GetCategory(ctx sdk.Context, id int64) (Category, sdk.Error)
 }
 
@@ -66,9 +68,14 @@ func (k Keeper) GetCategory(ctx sdk.Context, id int64) (cat Category, err sdk.Er
 	if val == nil {
 		return cat, ErrCategoryNotFound(id)
 	}
-	k.baseKeeper.Codec.MustUnmarshalBinary(val, &cat)
+	k.GetCodec().MustUnmarshalBinary(val, &cat)
 
 	return
+}
+
+// GetCodec returns the base keeper's underlying codec
+func (k Keeper) GetCodec() *amino.Codec {
+	return k.baseKeeper.Codec
 }
 
 // ============================================================================
@@ -78,7 +85,7 @@ func (k Keeper) setCategory(ctx sdk.Context, cat Category) {
 	store := ctx.KVStore(k.catKey)
 	store.Set(
 		getCategoryIDKey(k, cat.ID),
-		k.baseKeeper.Codec.MustMarshalBinary(cat))
+		k.GetCodec().MustMarshalBinary(cat))
 }
 
 // getCategoryIDKey returns byte array for "categories:id:[ID]"

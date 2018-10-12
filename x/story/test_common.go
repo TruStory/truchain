@@ -29,7 +29,7 @@ func mockDB() (sdk.Context, Keeper, c.Keeper) {
 	RegisterAmino(codec)
 
 	ck := c.NewKeeper(catKey, storyKey, codec)
-	sk := NewKeeper(storyKey, ck, codec)
+	sk := NewKeeper(storyKey, catKey, ck, codec)
 
 	return ctx, sk, ck
 }
@@ -46,6 +46,10 @@ func createFakeStory(ctx sdk.Context, sk Keeper, ck c.ReadWriteKeeper) int64 {
 }
 
 func createFakeCategory(ctx sdk.Context, ck c.ReadWriteKeeper) c.Category {
+	existing, err := ck.GetCategory(ctx, 1)
+	if err == nil {
+		return existing
+	}
 	id, _ := ck.NewCategory(ctx, "decentralized exchanges", "trudex", "category for experts in decentralized exchanges")
 	cat, _ := ck.GetCategory(ctx, id)
 	return cat

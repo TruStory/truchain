@@ -47,9 +47,10 @@ type TruChain struct {
 	ibcMapper           ibc.Mapper
 
 	// access truchain database
-	storyKeeper    story.ReadWriteKeeper
-	categoryKeeper category.ReadWriteKeeper
-	backingKeeper  backing.ReadWriteKeeper
+	readStoryKeeper story.ReadKeeper
+	storyKeeper     story.ReadWriteKeeper
+	categoryKeeper  category.ReadWriteKeeper
+	backingKeeper   backing.ReadWriteKeeper
 }
 
 // NewTruChain returns a reference to a new TruChain. Internally,
@@ -84,16 +85,21 @@ func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *T
 
 	// wire up trustory keepers
 	app.categoryKeeper = category.NewKeeper(app.keyCategory, app.keyStory, codec)
-	app.storyKeeper = story.NewKeeper(app.keyStory, app.categoryKeeper, app.codec)
+	app.readStoryKeeper = story.NewKeeper(app.keyStory, app.keyCategory, app.categoryKeeper, app.codec)
+	app.storyKeeper = story.NewKeeper(app.keyStory, app.keyCategory, app.categoryKeeper, app.codec)
 	app.backingKeeper = backing.NewKeeper(app.keyBacking, app.storyKeeper, app.coinKeeper, app.categoryKeeper, codec)
 
-	// register message routes
+	// register message routes for modifying state
 	app.Router().
 		AddRoute("bank", bank.NewHandler(app.coinKeeper)).
 		AddRoute("ibc", ibc.NewHandler(app.ibcMapper, app.coinKeeper)).
 		AddRoute("story", story.NewHandler(app.storyKeeper)).
 		AddRoute("category", category.NewHandler(app.categoryKeeper)).
 		AddRoute("backing", backing.NewHandler(app.backingKeeper))
+
+	// register query routes for reading state
+	app.QueryRouter().
+		AddRoute("story", story.NewQuerier(app.readStoryKeeper))
 
 	// perform initialization logic
 	app.SetInitChainer(app.initChainer)
