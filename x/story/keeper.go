@@ -174,7 +174,7 @@ func (k Keeper) addStoryToCategory(ctx sdk.Context, story Story) {
 	store.Set(key, k.GetCodec().MustMarshalBinary(storyIDs))
 }
 
-// getStoryIDKey returns byte array for "stories:id:[ID]")
+// getStoryIDKey returns byte array for "stories:id:[ID]"
 func getStoryIDKey(k Keeper, id int64) []byte {
 	return app.GetIDKey(k.storyKey, id)
 }
