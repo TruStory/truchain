@@ -1,11 +1,33 @@
 package challenge
 
+import (
+	"testing"
+
+	"github.com/stretchr/testify/assert"
+)
+
 // import (
 // 	"testing"
 
 // 	sdk "github.com/cosmos/cosmos-sdk/types"
 // 	"github.com/stretchr/testify/assert"
 // )
+
+func TestMarshaling(t *testing.T) {
+	ctx, k := mockDB()
+
+	challenge := Challenge{
+		ID:      k.GetNextID(ctx, k.challengeKey),
+		StoryID: int64(5),
+	}
+
+	bz := k.marshal(challenge)
+	assert.NotNil(t, bz)
+
+	value := k.unmarshal(bz)
+	assert.IsType(t, Challenge{}, value, "should be right type")
+	assert.Equal(t, challenge.StoryID, value.StoryID, "should be equal")
+}
 
 // func TestAddGetStory(t *testing.T) {
 // 	ctx, sk, ck := mockDB()

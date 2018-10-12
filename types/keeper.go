@@ -51,11 +51,6 @@ func (k Keeper) GetNextID(ctx sdk.Context, storeKey sdk.StoreKey) (id int64) {
 	return nextID
 }
 
-// Marshal marshals a data type into a byte array using the codec
-func (k Keeper) Marshal(value interface{}) []byte {
-	return k.codec.MustMarshalBinary(value)
-}
-
 // GetIDKey returns a store key of form name:id:[ID]
 func GetIDKey(storeKey sdk.StoreKey, id int64) []byte {
 	return []byte(fmt.Sprintf("%s:id:%d", storeKey.Name(), id))
