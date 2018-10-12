@@ -19,7 +19,7 @@ type QueryCategoryStoriesParams struct {
 }
 
 // NewQuerier returns a function that handles queries on the KVStore
-func NewQuerier(k Keeper) sdk.Querier {
+func NewQuerier(k ReadKeeper) sdk.Querier {
 	return func(ctx sdk.Context, path []string, req abci.RequestQuery) (res []byte, err sdk.Error) {
 		switch path[0] {
 		case QueryCategoryStories:
@@ -35,27 +35,27 @@ func NewQuerier(k Keeper) sdk.Querier {
 func queryStoriesWithCategory(
 	ctx sdk.Context,
 	req abci.RequestQuery,
-	k Keeper) ([]byte, sdk.Error) {
+	k ReadKeeper) (res []byte, sdkErr sdk.Error) {
 
 	// deserialize query params
 	var params QueryCategoryStoriesParams
-	err := k.tk.Codec.UnmarshalJSON(req.Data, &params)
+	err := k.GetCodec().UnmarshalJSON(req.Data, &params)
 	if err != nil {
-		return []byte{},
+		return res,
 			sdk.ErrUnknownRequest(fmt.Sprintf("Incorrectly formatted request data - %s", err.Error()))
 	}
 
 	// fetch stories
 	stories, sdkErr := k.GetStoriesWithCategory(ctx, params.CategoryID)
 	if sdkErr != nil {
-		return []byte{}, sdkErr
+		return res, sdkErr
 	}
 
 	// serialize into pretty JSON bytes
-	bz, err := codec.MarshalJSONIndent(k.tk.Codec, stories)
+	res, err = codec.MarshalJSONIndent(k.GetCodec(), stories)
 	if err != nil {
 		panic("Could not marshal result to JSON")
 	}
 
-	return bz, nil
+	return
 }
