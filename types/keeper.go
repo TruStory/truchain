@@ -25,6 +25,11 @@ func NewKeeper(codec *amino.Codec) Keeper {
 	return Keeper{codec: codec}
 }
 
+// GetCodec returns the base keeper's underlying codec
+func (k Keeper) GetCodec() *amino.Codec {
+	return k.codec
+}
+
 // GetNextID increments and returns the next available id by 1
 func (k Keeper) GetNextID(ctx sdk.Context, storeKey sdk.StoreKey) (id int64) {
 	store := ctx.KVStore(storeKey)
@@ -32,15 +37,15 @@ func (k Keeper) GetNextID(ctx sdk.Context, storeKey sdk.StoreKey) (id int64) {
 
 	bz := store.Get(lenKey)
 	if bz == nil {
-		one := k.codec.MustMarshalBinary(int64(1))
+		one := k.GetCodec().MustMarshalBinary(int64(1))
 		store.Set(lenKey, one)
 
 		return 1
 	}
 
-	k.codec.MustUnmarshalBinary(bz, &id)
+	k.GetCodec().MustUnmarshalBinary(bz, &id)
 	nextID := id + 1
-	bz = k.codec.MustMarshalBinary(nextID)
+	bz = k.GetCodec().MustMarshalBinary(nextID)
 	store.Set(lenKey, bz)
 
 	return nextID

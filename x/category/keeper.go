@@ -75,7 +75,7 @@ func (k Keeper) GetCategory(ctx sdk.Context, id int64) (cat Category, err sdk.Er
 
 // GetCodec returns the base keeper's underlying codec
 func (k Keeper) GetCodec() *amino.Codec {
-	return k.baseKeeper.Codec
+	return k.baseKeeper.GetCodec()
 }
 
 // ============================================================================

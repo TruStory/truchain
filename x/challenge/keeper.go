@@ -39,10 +39,10 @@ func NewKeeper(challengeKey sdk.StoreKey, sk story.ReadWriteKeeper, codec *amino
 
 // // ============================================================================
 
-// // GetCodec returns the base keeper's underlying codec
-// func (k Keeper) GetCodec() *amino.Codec {
-// 	return k.baseKeeper.Codec
-// }
+// GetCodec returns the base keeper's underlying codec
+func (k Keeper) GetCodec() *amino.Codec {
+	return k.baseKeeper.GetCodec()
+}
 
 // // NewStory adds a story to the key-value store
 // func (k Keeper) NewStory(

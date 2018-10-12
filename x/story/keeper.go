@@ -54,7 +54,7 @@ func NewKeeper(storyKey sdk.StoreKey, catKey sdk.StoreKey, ck category.ReadKeepe
 
 // GetCodec returns the base keeper's underlying codec
 func (k Keeper) GetCodec() *amino.Codec {
-	return k.baseKeeper.Codec
+	return k.baseKeeper.GetCodec()
 }
 
 // NewStory adds a story to the key-value store
