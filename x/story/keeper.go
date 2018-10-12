@@ -12,6 +12,7 @@ import (
 // ReadKeeper defines a module interface that facilitates read only access
 // to truchain data
 type ReadKeeper interface {
+	GetCodec() *amino.Codec
 	GetStory(ctx sdk.Context, storyID int64) (Story, sdk.Error)
 	GetStoriesWithCategory(ctx sdk.Context, catID int64) (stories []Story, err sdk.Error)
 }
@@ -35,18 +36,25 @@ type Keeper struct {
 	baseKeeper     app.Keeper
 	categoryKeeper category.ReadKeeper
 	storyKey       sdk.StoreKey
+	catKey         sdk.StoreKey
 }
 
 // NewKeeper creates a new keeper with write and read access
-func NewKeeper(storyKey sdk.StoreKey, ck category.ReadKeeper, codec *amino.Codec) Keeper {
+func NewKeeper(storyKey sdk.StoreKey, catKey sdk.StoreKey, ck category.ReadKeeper, codec *amino.Codec) Keeper {
 	return Keeper{
 		baseKeeper:     app.NewKeeper(codec),
 		storyKey:       storyKey,
+		catKey:         catKey,
 		categoryKeeper: ck,
 	}
 }
 
 // ============================================================================
+
+// GetCodec returns the base keeper's underlying codec
+func (k Keeper) GetCodec() *amino.Codec {
+	return k.baseKeeper.Codec
+}
 
 // NewStory adds a story to the key-value store
 func (k Keeper) NewStory(
@@ -85,7 +93,7 @@ func (k Keeper) GetStory(ctx sdk.Context, storyID int64) (story Story, err sdk.E
 	if val == nil {
 		return story, ErrStoryNotFound(storyID)
 	}
-	k.baseKeeper.Codec.MustUnmarshalBinary(val, &story)
+	k.GetCodec().MustUnmarshalBinary(val, &story)
 
 	return
 }
@@ -102,7 +110,7 @@ func (k Keeper) GetStoriesWithCategory(ctx sdk.Context, catID int64) (stories []
 
 	// deserialize bytes to story ids
 	storyIDs := []int64{}
-	k.tk.Codec.MustUnmarshalBinary(bz, &storyIDs)
+	k.GetCodec().MustUnmarshalBinary(bz, &storyIDs)
 
 	// extract each story and add to a list
 	for _, id := range storyIDs {
@@ -144,7 +152,7 @@ func (k Keeper) setStory(ctx sdk.Context, story Story) {
 	store := ctx.KVStore(k.storyKey)
 	store.Set(
 		getStoryIDKey(k, story.ID),
-		k.baseKeeper.Codec.MustMarshalBinary(story))
+		k.GetCodec().MustMarshalBinary(story))
 }
 
 // addStoryToCategory adds a story id to key "categories:id:[ID]"
@@ -153,16 +161,16 @@ func (k Keeper) addStoryToCategory(ctx sdk.Context, story Story) {
 	key := getCategoryStoriesKey(k, story.CategoryID)
 	bz := store.Get(key)
 	if bz == nil {
-		bz = k.tk.Codec.MustMarshalBinary([]int64{})
+		bz = k.GetCodec().MustMarshalBinary([]int64{})
 		store.Set(key, bz)
 	}
 
 	// get list of story ids from category store
 	storyIDs := []int64{}
-	k.tk.Codec.MustUnmarshalBinary(bz, &storyIDs)
+	k.GetCodec().MustUnmarshalBinary(bz, &storyIDs)
 
 	storyIDs = append(storyIDs, story.ID)
-	store.Set(key, k.tk.Codec.MustMarshalBinary(storyIDs))
+	store.Set(key, k.GetCodec().MustMarshalBinary(storyIDs))
 }
 
 // getStoryIDKey returns byte array for "stories:id:[ID]")
