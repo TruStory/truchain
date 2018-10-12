@@ -12,7 +12,8 @@ import (
 // ReadKeeper defines a module interface that facilitates read only access
 // to truchain data
 type ReadKeeper interface {
-	GetCodec() *amino.Codec
+	app.ReadKeeper
+
 	GetStory(ctx sdk.Context, storyID int64) (Story, sdk.Error)
 	GetStoriesWithCategory(ctx sdk.Context, catID int64) (stories []Story, err sdk.Error)
 }

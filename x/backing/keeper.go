@@ -15,6 +15,8 @@ import (
 // ReadKeeper defines a module interface that facilitates read only access
 // to truchain data
 type ReadKeeper interface {
+	app.ReadKeeper
+
 	GetBacking(ctx sdk.Context, id int64) (backing Backing, err sdk.Error)
 }
 
@@ -64,6 +66,11 @@ func NewKeeper(
 }
 
 // ============================================================================
+
+// GetCodec returns the base keeper's underlying codec
+func (k Keeper) GetCodec() *amino.Codec {
+	return k.baseKeeper.Codec
+}
 
 // NewBacking adds a new backing to the backing store
 func (k Keeper) NewBacking(
@@ -133,7 +140,7 @@ func (k Keeper) GetBacking(ctx sdk.Context, id int64) (backing Backing, err sdk.
 	if val == nil {
 		return backing, ErrNotFound(id)
 	}
-	k.baseKeeper.Codec.MustUnmarshalBinary(val, &backing)
+	k.GetCodec().MustUnmarshalBinary(val, &backing)
 
 	return
 }
@@ -171,7 +178,7 @@ func (k Keeper) setBacking(ctx sdk.Context, backing Backing) {
 	store := ctx.KVStore(k.backingKey)
 	store.Set(
 		getBackingIDKey(k, backing.ID),
-		k.baseKeeper.Codec.MustMarshalBinary(backing))
+		k.GetCodec().MustMarshalBinary(backing))
 }
 
 // ============================================================================
