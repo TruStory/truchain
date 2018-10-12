@@ -111,3 +111,14 @@ func NewStory(
 		Users:        users,
 	}
 }
+
+// List defines a list of story IDs
+type List []int64
+
+// IsEmpty checks if the story list is empty
+func (sl List) IsEmpty() bool {
+	if len(sl) == 0 {
+		return true
+	}
+	return false
+}

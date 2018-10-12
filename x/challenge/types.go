@@ -39,14 +39,3 @@ func NewChallenge(
 		CreatedTime:  time.Now(),
 	}
 }
-
-// StoryList defines a list of challenged story IDs
-type StoryList []int64
-
-// IsEmpty checks if the story list is empty
-func (sl StoryList) IsEmpty() bool {
-	if len(sl) == 0 {
-		return true
-	}
-	return false
-}

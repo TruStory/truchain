@@ -6,6 +6,7 @@ import (
 	"github.com/TruStory/truchain/types"
 	"github.com/TruStory/truchain/x/backing"
 	"github.com/TruStory/truchain/x/category"
+	"github.com/TruStory/truchain/x/challenge"
 	"github.com/TruStory/truchain/x/story"
 	bam "github.com/cosmos/cosmos-sdk/baseapp"
 	"github.com/cosmos/cosmos-sdk/codec"
@@ -33,12 +34,13 @@ type TruChain struct {
 	codec *codec.Codec
 
 	// keys to access the multistore
-	keyMain     *sdk.KVStoreKey
-	keyAccount  *sdk.KVStoreKey
-	keyIBC      *sdk.KVStoreKey
-	keyStory    *sdk.KVStoreKey
-	keyCategory *sdk.KVStoreKey
-	keyBacking  *sdk.KVStoreKey
+	keyMain      *sdk.KVStoreKey
+	keyAccount   *sdk.KVStoreKey
+	keyIBC       *sdk.KVStoreKey
+	keyStory     *sdk.KVStoreKey
+	keyCategory  *sdk.KVStoreKey
+	keyBacking   *sdk.KVStoreKey
+	keyChallenge *sdk.KVStoreKey
 
 	// manage getting and setting accounts
 	accountMapper       auth.AccountMapper
@@ -51,6 +53,7 @@ type TruChain struct {
 	storyKeeper     story.ReadWriteKeeper
 	categoryKeeper  category.ReadWriteKeeper
 	backingKeeper   backing.ReadWriteKeeper
+	challengeKeeper challenge.ReadWriteKeeper
 }
 
 // NewTruChain returns a reference to a new TruChain. Internally,
@@ -64,14 +67,15 @@ func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *T
 
 	// create your application type
 	var app = &TruChain{
-		codec:       codec,
-		BaseApp:     bam.NewBaseApp(appName, logger, db, auth.DefaultTxDecoder(codec), options...),
-		keyMain:     sdk.NewKVStoreKey("main"),
-		keyAccount:  sdk.NewKVStoreKey("acc"),
-		keyIBC:      sdk.NewKVStoreKey("ibc"),
-		keyStory:    sdk.NewKVStoreKey("stories"),
-		keyCategory: sdk.NewKVStoreKey("categories"),
-		keyBacking:  sdk.NewKVStoreKey("backings"),
+		codec:        codec,
+		BaseApp:      bam.NewBaseApp(appName, logger, db, auth.DefaultTxDecoder(codec), options...),
+		keyMain:      sdk.NewKVStoreKey("main"),
+		keyAccount:   sdk.NewKVStoreKey("acc"),
+		keyIBC:       sdk.NewKVStoreKey("ibc"),
+		keyStory:     sdk.NewKVStoreKey("stories"),
+		keyCategory:  sdk.NewKVStoreKey("categories"),
+		keyBacking:   sdk.NewKVStoreKey("backings"),
+		keyChallenge: sdk.NewKVStoreKey("challenges"),
 	}
 
 	// define and attach the mappers and keepers
@@ -83,11 +87,26 @@ func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *T
 	app.coinKeeper = bank.NewBaseKeeper(app.accountMapper)
 	app.ibcMapper = ibc.NewMapper(app.codec, app.keyIBC, app.RegisterCodespace(ibc.DefaultCodespace))
 
-	// wire up trustory keepers
+	// wire up keepers
 	app.categoryKeeper = category.NewKeeper(app.keyCategory, app.keyStory, codec)
-	app.readStoryKeeper = story.NewKeeper(app.keyStory, app.keyCategory, app.categoryKeeper, app.codec)
-	app.storyKeeper = story.NewKeeper(app.keyStory, app.keyCategory, app.categoryKeeper, app.codec)
-	app.backingKeeper = backing.NewKeeper(app.keyBacking, app.storyKeeper, app.coinKeeper, app.categoryKeeper, codec)
+	app.readStoryKeeper = story.NewKeeper(
+		app.keyStory,
+		app.keyCategory,
+		app.keyChallenge,
+		app.categoryKeeper,
+		app.codec)
+	app.storyKeeper = story.NewKeeper(
+		app.keyStory,
+		app.keyCategory,
+		app.keyChallenge,
+		app.categoryKeeper,
+		app.codec)
+	app.backingKeeper = backing.NewKeeper(
+		app.keyBacking,
+		app.storyKeeper,
+		app.coinKeeper,
+		app.categoryKeeper,
+		codec)
 
 	// register message routes for modifying state
 	app.Router().

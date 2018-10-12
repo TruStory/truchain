@@ -23,6 +23,7 @@ type ReadKeeper interface {
 type WriteKeeper interface {
 	NewStory(ctx sdk.Context, body string, categoryID int64, creator sdk.AccAddress, kind Kind) (int64, sdk.Error)
 	UpdateStory(ctx sdk.Context, story Story)
+	Challenge(ctx sdk.Context, story Story)
 }
 
 // ReadWriteKeeper defines a module interface that facilities read/write access
@@ -38,14 +39,21 @@ type Keeper struct {
 	categoryKeeper category.ReadKeeper
 	storyKey       sdk.StoreKey
 	catKey         sdk.StoreKey
+	challengeKey   sdk.StoreKey
 }
 
 // NewKeeper creates a new keeper with write and read access
-func NewKeeper(storyKey sdk.StoreKey, catKey sdk.StoreKey, ck category.ReadKeeper, codec *amino.Codec) Keeper {
+func NewKeeper(
+	storyKey sdk.StoreKey,
+	catKey sdk.StoreKey,
+	challengeKey sdk.StoreKey,
+	ck category.ReadKeeper,
+	codec *amino.Codec) Keeper {
 	return Keeper{
 		baseKeeper:     app.NewKeeper(codec),
 		storyKey:       storyKey,
 		catKey:         catKey,
+		challengeKey:   challengeKey,
 		categoryKeeper: ck,
 	}
 }
@@ -81,7 +89,7 @@ func (k Keeper) NewStory(
 	}
 
 	k.setStory(ctx, story)
-	k.addStoryToCategory(ctx, story)
+	k.appendCategoryStoriesList(ctx, story)
 
 	return story.ID, nil
 }
@@ -146,6 +154,11 @@ func (k Keeper) UpdateStory(ctx sdk.Context, story Story) {
 	k.setStory(ctx, newStory)
 }
 
+// Challenge records challenging a story
+func (k Keeper) Challenge(ctx sdk.Context, story Story) {
+	k.appendChallengedCategoryStoriesList(ctx, story)
+}
+
 // ============================================================================
 
 // setStory saves a `Story` type to the KVStore
@@ -156,22 +169,31 @@ func (k Keeper) setStory(ctx sdk.Context, story Story) {
 		k.GetCodec().MustMarshalBinary(story))
 }
 
-// addStoryToCategory adds a story id to key "categories:id:[ID]"
-func (k Keeper) addStoryToCategory(ctx sdk.Context, story Story) {
+// adds a story id to key "categories:id:[ID]"
+func (k Keeper) appendCategoryStoriesList(ctx sdk.Context, story Story) {
+	k.appendList(ctx, getCategoryStoriesKey(k, story.CategoryID), story.ID)
+}
+
+// adds a story id to key "challenges:categories:id:[ID]"
+func (k Keeper) appendChallengedCategoryStoriesList(ctx sdk.Context, story Story) {
+	k.appendList(ctx, getChallengedStoriesKey(k, story.CategoryID), story.ID)
+}
+
+// appendList adds a story id to a list of story ids in category store
+func (k Keeper) appendList(ctx sdk.Context, key []byte, storyID int64) {
+	// get list of story ids from category store for a given key
 	store := ctx.KVStore(k.catKey)
-	key := getCategoryStoriesKey(k, story.CategoryID)
 	bz := store.Get(key)
+	var storyList List
 	if bz == nil {
-		bz = k.GetCodec().MustMarshalBinary([]int64{})
+		bz = k.GetCodec().MustMarshalBinary(storyList)
 		store.Set(key, bz)
 	}
+	k.GetCodec().MustUnmarshalBinary(bz, &storyList)
 
-	// get list of story ids from category store
-	storyIDs := []int64{}
-	k.GetCodec().MustUnmarshalBinary(bz, &storyIDs)
-
-	storyIDs = append(storyIDs, story.ID)
-	store.Set(key, k.GetCodec().MustMarshalBinary(storyIDs))
+	// add the new story id and marshal it back to the store
+	storyList = append(storyList, storyID)
+	store.Set(key, k.GetCodec().MustMarshalBinary(storyList))
 }
 
 // getStoryIDKey returns byte array for "stories:id:[ID]"
@@ -182,5 +204,15 @@ func getStoryIDKey(k Keeper, id int64) []byte {
 // getCategoryStoriesKey returns "categories:id:[`catID`]:stories"
 func getCategoryStoriesKey(k Keeper, catID int64) []byte {
 	return []byte(fmt.Sprintf("%s:id:%d:%s", k.catKey.Name(), catID, k.storyKey.Name()))
+}
 
+// getChallengedStoriesKey returns "challenges:categories:id:[`catID`]:stories"
+func getChallengedStoriesKey(k Keeper, catID int64) []byte {
+	return []byte(
+		fmt.Sprintf(
+			"%s:%s:id:%d:%s",
+			k.challengeKey.Name(),
+			k.catKey.Name(),
+			catID,
+			k.storyKey.Name()))
 }
