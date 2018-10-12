@@ -21,7 +21,7 @@ func setGenesis(baseApp *TruChain, accounts ...*types.AppAccount) (types.Genesis
 	}
 
 	genesisState := types.GenesisState{Accounts: genAccts}
-	stateBytes, err := codec.MarshalJSONIndent(baseApp.cdc, genesisState)
+	stateBytes, err := codec.MarshalJSONIndent(baseApp.codec, genesisState)
 	if err != nil {
 		return types.GenesisState{}, err
 	}
@@ -63,7 +63,7 @@ func TestGenesis(t *testing.T) {
 	// reload app and ensure the account is still there
 	baseApp = NewTruChain(logger, db)
 
-	stateBytes, err := codec.MarshalJSONIndent(baseApp.cdc, genState)
+	stateBytes, err := codec.MarshalJSONIndent(baseApp.codec, genState)
 	require.Nil(t, err)
 
 	// initialize the chain with the expected genesis state

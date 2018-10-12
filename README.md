@@ -42,55 +42,70 @@ Project layout:
 ├── app
 │   ├── app.go
 │   └── app_test.go
+├── bin
+│   ├── truchaind
+│   └── trucli
 ├── cmd
-│   ├── trucli
+│   ├── truchaind
 │   │   └── main.go
-│   └── trucoind
+│   └── trucli
 │       └── main.go
 ├── types
-│   └── account.go
+│   ├── account.go
+│   ├── handler.go
+│   ├── keeper.go
+│   └── msg.go
+├── vendor
+| ...
 └── x
-    └── truchain
-        ├── client
-        │   ├── cli
-        │   │   └── trustory.go
-        │   └── rest
-        │       └── trustory.go
-        ├── db
-        │   ├── back.go
-        │   ├── back_queue.go
-        │   ├── back_queue_test.go
-        │   ├── back_test.go
-        │   ├── keeper.go
-        │   ├── keeper_test.go
-        │   ├── story.go
-        │   ├── story_test.go
-        │   ├── test_common.go
-        │   ├── tick.go
-        │   └── tick_test.go
+    ├── backing
+    │   ├── codec.go
+    │   ├── errors.go
+    │   ├── handler.go
+    │   ├── handler_test.go
+    │   ├── keeper.go
+    │   ├── keeper_queue.go
+    │   ├── keeper_queue_test.go
+    │   ├── keeper_test.go
+    │   ├── msg.go
+    │   ├── msg_test.go
+    │   ├── test_common.go
+    │   ├── tick.go
+    │   ├── tick_test.go
+    │   └── types.go
+    ├── category
+    │   ├── codec.go
+    │   ├── errors.go
+    │   ├── handler.go
+    │   ├── handler_test.go
+    │   ├── keeper.go
+    │   ├── keeper_test.go
+    │   ├── msg.go
+    │   ├── msg_test.go
+    │   ├── test_common.go
+    │   └── types.go
+    └── story
+        ├── codec.go
+        ├── errors.go
         ├── handler.go
         ├── handler_test.go
-        └── types
-            ├── back.go
-            ├── back_test.go
-            ├── comment.go
-            ├── comment_test.go
-            ├── errors.go
-            ├── evidence.go
-            ├── evidence_test.go
-            ├── msg.go
-            ├── story.go
-            ├── story_test.go
-            └── types.go
+        ├── keeper.go
+        ├── keeper_test.go
+        ├── msg.go
+        ├── msg_test.go
+        ├── test_common.go
+        └── types.go
 ```
 
 It compiles into two binaries, `trucli` (lite client) and `truchaind` (dapp chain). The lite client is responsible for responding to API requests from clients wanting to access or modify data on the dapp chain. The dapp chain is responsible for responding to requests from the lite client, such as querying and storing data.
+
+Each main feature of TruChain is implemented as a separate module that lives under `x/`. Each module has it's own types for data storage, "keepers" for reading and writing this data, `Msg` types that communicate with the blockchain, and handlers that route messages.
 
 #### Key-Value Stores
 
 Because the current Cosmos SDK data store is built on key-value storage, database operations are more explicit than a relational or even NoSQL database. Lists and queues must be made for data that needs to be retrieved.
 
-`TruKeeper` handles all reads and writes from key-value storage. It contains a separate store for each data type:
+Keepers handle all reads and writes from key-value storage. There's a separate keeper for each data type:
 
 Stories key-value store:
 
@@ -106,14 +121,16 @@ Backings key-value store:
 * backings:len -> 3
 * backings:queue:unexpired -> [1, 2, 3]
 
-All data in stores are binary encoded using [Amino](https://github.com/tendermint/go-amino) for efficient storage in a Merkle tree. `TruKeeper` handles marshalling and umarshalling data between its binary encoding and Go data type.
+Each module provides a `ReadKeeper`, `WriteKeeper`, and `ReadWriteKeeper`. Other modules should get passed the appropriate keeper for it's needs. For example, if a module doesn't need to create categories, but only read them, it should get passed a category `ReadKeeper`.
+
+All data in stores are binary encoded using [Amino](https://github.com/tendermint/go-amino) for efficient storage in a Merkle tree. Keepers handle marshalling and umarshalling data between its binary encoding and Go data type.
 
 ### Messages
 
 These are the messages needed to modify state on TruChain.
 
+- `CreateCategoryMsg` creates a category for a story
 - `BackStoryMsg`: to back a story
-- `AddCommentMsg`: to add a comment to a story
 - `SubmitEvidenceMsg`: to submit evidence for a story
 - `SubmitStoryMsg`: to submit a story
 
@@ -121,5 +138,5 @@ Each message is routed to a handler which performs operations on the key-value s
 
 ### Data Types
 
-Currently the supported types are: `Back`, `Evidence`, `Comment`, and `Story`. Using Amino/protobufs allows types to be forwards and backwards compatible, allowing multiple versions of them to co-exist.
+Currently the supported types are: `Back`, `Evidence`, `Category`, and `Story`. Using Amino/protobufs allows types to be forwards and backwards compatible, allowing multiple versions of them to co-exist.
 
