@@ -17,12 +17,12 @@ type ReadKeeper interface {
 
 // Keeper data type with a default codec
 type Keeper struct {
-	Codec *amino.Codec
+	codec *amino.Codec
 }
 
 // NewKeeper creates a new parent keeper for module keepers to embed
 func NewKeeper(codec *amino.Codec) Keeper {
-	return Keeper{Codec: codec}
+	return Keeper{codec: codec}
 }
 
 // GetNextID increments and returns the next available id by 1
@@ -32,18 +32,23 @@ func (k Keeper) GetNextID(ctx sdk.Context, storeKey sdk.StoreKey) (id int64) {
 
 	bz := store.Get(lenKey)
 	if bz == nil {
-		one := k.Codec.MustMarshalBinary(int64(1))
+		one := k.codec.MustMarshalBinary(int64(1))
 		store.Set(lenKey, one)
 
 		return 1
 	}
 
-	k.Codec.MustUnmarshalBinary(bz, &id)
+	k.codec.MustUnmarshalBinary(bz, &id)
 	nextID := id + 1
-	bz = k.Codec.MustMarshalBinary(nextID)
+	bz = k.codec.MustMarshalBinary(nextID)
 	store.Set(lenKey, bz)
 
 	return nextID
+}
+
+// Marshal marshals a data type into a byte array using the codec
+func (k Keeper) Marshal(value interface{}) []byte {
+	return k.codec.MustMarshalBinary(value)
 }
 
 // GetIDKey returns a store key of form name:id:[ID]
