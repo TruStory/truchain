@@ -35,7 +35,8 @@ type ReadWriteKeeper interface {
 
 // Keeper data type storing keys to the key-value store
 type Keeper struct {
-	baseKeeper     app.Keeper
+	app.Keeper
+
 	categoryKeeper category.ReadKeeper
 	storyKey       sdk.StoreKey
 	catKey         sdk.StoreKey
@@ -49,21 +50,10 @@ func NewKeeper(
 	challengeKey sdk.StoreKey,
 	ck category.ReadKeeper,
 	codec *amino.Codec) Keeper {
-	return Keeper{
-		baseKeeper:     app.NewKeeper(codec),
-		storyKey:       storyKey,
-		catKey:         catKey,
-		challengeKey:   challengeKey,
-		categoryKeeper: ck,
-	}
+	return Keeper{app.NewKeeper(codec), ck, storyKey, catKey, challengeKey}
 }
 
 // ============================================================================
-
-// GetCodec returns the base keeper's underlying codec
-func (k Keeper) GetCodec() *amino.Codec {
-	return k.baseKeeper.GetCodec()
-}
 
 // NewStory adds a story to the key-value store
 func (k Keeper) NewStory(
@@ -79,7 +69,7 @@ func (k Keeper) NewStory(
 	}
 
 	story := Story{
-		ID:           k.baseKeeper.GetNextID(ctx, k.storyKey),
+		ID:           k.GetNextID(ctx, k.storyKey),
 		Body:         body,
 		CategoryID:   categoryID,
 		CreatedBlock: ctx.BlockHeight(),
@@ -109,7 +99,6 @@ func (k Keeper) GetStory(ctx sdk.Context, storyID int64) (story Story, err sdk.E
 
 // GetStoriesWithCategory gets the stories for a given category id
 func (k Keeper) GetStoriesWithCategory(ctx sdk.Context, catID int64) (stories []Story, err sdk.Error) {
-
 	// get bytes stored at "categories:id:[catID]:stories"
 	store := ctx.KVStore(k.catKey)
 	bz := store.Get(getCategoryStoriesKey(k, catID))
@@ -118,7 +107,7 @@ func (k Keeper) GetStoriesWithCategory(ctx sdk.Context, catID int64) (stories []
 	}
 
 	// deserialize bytes to story ids
-	storyIDs := []int64{}
+	var storyIDs List
 	k.GetCodec().MustUnmarshalBinary(bz, &storyIDs)
 
 	// extract each story and add to a list
@@ -169,12 +158,12 @@ func (k Keeper) setStory(ctx sdk.Context, story Story) {
 		k.GetCodec().MustMarshalBinary(story))
 }
 
-// adds a story id to key "categories:id:[ID]"
+// adds a story id to key "categories:id:[ID]:stories"
 func (k Keeper) appendCategoryStoriesList(ctx sdk.Context, story Story) {
 	k.appendList(ctx, getCategoryStoriesKey(k, story.CategoryID), story.ID)
 }
 
-// adds a story id to key "challenges:categories:id:[ID]"
+// adds a story id to key "challenges:categories:id:[ID]:stories"
 func (k Keeper) appendChallengedCategoryStoriesList(ctx sdk.Context, story Story) {
 	k.appendList(ctx, getChallengedStoriesKey(k, story.CategoryID), story.ID)
 }

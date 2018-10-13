@@ -42,8 +42,9 @@ type ReadWriteKeeper interface {
 
 // Keeper data type storing keys to the key-value store
 type Keeper struct {
+	app.Keeper
+
 	backingKey     sdk.StoreKey          // key to backing store
-	baseKeeper     app.Keeper            // base keeper
 	storyKeeper    story.ReadWriteKeeper // read-write access to story store
 	bankKeeper     bank.Keeper           // read-write access coin store
 	categoryKeeper cat.ReadKeeper        // read access to category store
@@ -56,21 +57,10 @@ func NewKeeper(
 	bk bank.Keeper,
 	ck cat.ReadKeeper,
 	codec *amino.Codec) Keeper {
-	return Keeper{
-		backingKey:     backingKey,
-		baseKeeper:     app.NewKeeper(codec),
-		storyKeeper:    sk,
-		bankKeeper:     bk,
-		categoryKeeper: ck,
-	}
+	return Keeper{app.NewKeeper(codec), backingKey, sk, bk, ck}
 }
 
 // ============================================================================
-
-// GetCodec returns the base keeper's underlying codec
-func (k Keeper) GetCodec() *amino.Codec {
-	return k.baseKeeper.GetCodec()
-}
 
 // NewBacking adds a new backing to the backing store
 func (k Keeper) NewBacking(
@@ -79,7 +69,7 @@ func (k Keeper) NewBacking(
 	amount sdk.Coin,
 	creator sdk.AccAddress,
 	duration time.Duration,
-) (int64, sdk.Error) {
+) (id int64, err sdk.Error) {
 
 	// Check if user has enough cat coins or trustake to back
 	trustake := sdk.NewCoin(NativeTokenName, amount.Amount)
@@ -91,13 +81,13 @@ func (k Keeper) NewBacking(
 	// get story value from story id
 	story, err := k.storyKeeper.GetStory(ctx, storyID)
 	if err != nil {
-		return 0, err
+		return
 	}
 
 	// get category value from category id
 	cat, err := k.categoryKeeper.GetCategory(ctx, story.CategoryID)
 	if err != nil {
-		return 0, err
+		return
 	}
 
 	// load default backing parameters
@@ -106,7 +96,7 @@ func (k Keeper) NewBacking(
 	// set principal, converting from trustake if needed
 	principal, err := k.getPrincipal(ctx, cat, amount, creator)
 	if err != nil {
-		return 0, err
+		return
 	}
 
 	// mint category coin from interest earned
@@ -114,7 +104,7 @@ func (k Keeper) NewBacking(
 
 	// create new backing type
 	backing := NewBacking(
-		k.baseKeeper.GetNextID(ctx, k.backingKey),
+		k.GetNextID(ctx, k.backingKey),
 		storyID,
 		principal,
 		interest,
@@ -202,8 +192,9 @@ func mintFromNativeToken(
 
 	// burn equivalent trustake
 	trustake := sdk.Coins{sdk.NewCoin(NativeTokenName, principal.Amount)}
-	if _, _, err := k.bankKeeper.SubtractCoins(ctx, userAddr, trustake); err != nil {
-		return principal, err
+	_, _, err = k.bankKeeper.SubtractCoins(ctx, userAddr, trustake)
+	if err != nil {
+		return
 	}
 
 	return
