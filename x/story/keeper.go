@@ -14,8 +14,14 @@ import (
 type ReadKeeper interface {
 	app.ReadKeeper
 
-	GetStory(ctx sdk.Context, storyID int64) (Story, sdk.Error)
+	GetChallengedStoriesWithCategory(
+		ctx sdk.Context,
+		catID int64) (stories []Story, err sdk.Error)
+	GetFeedWithCategory(
+		ctx sdk.Context,
+		catID int64) (stories []Story, err sdk.Error)
 	GetStoriesWithCategory(ctx sdk.Context, catID int64) (stories []Story, err sdk.Error)
+	GetStory(ctx sdk.Context, storyID int64) (Story, sdk.Error)
 }
 
 // WriteKeeper defines a module interface that facilities write only access
@@ -98,7 +104,10 @@ func (k Keeper) GetStory(ctx sdk.Context, storyID int64) (story Story, err sdk.E
 }
 
 // GetStoriesWithCategory gets the stories for a given category id
-func (k Keeper) GetStoriesWithCategory(ctx sdk.Context, catID int64) (stories []Story, err sdk.Error) {
+func (k Keeper) GetStoriesWithCategory(
+	ctx sdk.Context,
+	catID int64) (stories []Story, err sdk.Error) {
+
 	// get bytes stored at "categories:id:[catID]:stories"
 	store := ctx.KVStore(k.catKey)
 	bz := store.Get(getCategoryStoriesKey(k, catID))
@@ -106,21 +115,72 @@ func (k Keeper) GetStoriesWithCategory(ctx sdk.Context, catID int64) (stories []
 		return stories, ErrStoriesWithCategoryNotFound(catID)
 	}
 
-	// deserialize bytes to story ids
-	var storyIDs List
-	k.GetCodec().MustUnmarshalBinary(bz, &storyIDs)
+	// return list of stories
+	return getStories(ctx, k, bz)
+}
 
-	// extract each story and add to a list
-	for _, id := range storyIDs {
-		story, err := k.GetStory(ctx, id)
-		if err != nil {
-			return stories, ErrStoryNotFound(id)
-		}
-		stories = append(stories, story)
+// GetChallengedStoriesWithCategory gets all challenged stories for a category
+func (k Keeper) GetChallengedStoriesWithCategory(
+	ctx sdk.Context,
+	catID int64) (stories []Story, err sdk.Error) {
+
+	// get bytes stored at "challenges:categories:id:[catID]:stories"
+	store := ctx.KVStore(k.challengeKey)
+	bz := store.Get(getChallengedStoriesKey(k, catID))
+	if bz == nil {
+		// TODO: ErrChallengedStoriesWithCategoryNotFound
+		return stories, ErrStoriesWithCategoryNotFound(catID)
 	}
 
 	// return list of stories
-	return
+	return getStories(ctx, k, bz)
+}
+
+// GetFeedWithCategory gets stories ordered by challenged stories first
+func (k Keeper) GetFeedWithCategory(
+	ctx sdk.Context,
+	catID int64) (stories []Story, err sdk.Error) {
+
+	// get stores
+	categoryStore := ctx.KVStore(k.catKey)
+	challengeStore := ctx.KVStore(k.challengeKey)
+
+	// get bytes stored at "categories:id:[catID]:stories"
+	bz := categoryStore.Get(getCategoryStoriesKey(k, catID))
+	if bz == nil {
+		return stories, ErrStoriesWithCategoryNotFound(catID)
+	}
+
+	// unmarshal bytes to story ids
+	var all List
+	k.GetCodec().MustUnmarshalBinary(bz, &all)
+
+	// get bytes stored at "challenges:categories:id:[catID]:stories"
+	bz = challengeStore.Get(getChallengedStoriesKey(k, catID))
+	if bz == nil {
+		// TODO: ErrChallengedStoriesWithCategoryNotFound
+		return stories, ErrStoriesWithCategoryNotFound(catID)
+	}
+
+	// unmarshal challenged story id list
+	var challenged List
+	k.GetCodec().MustUnmarshalBinary(bz, &challenged)
+
+	// make a list of all unchallenged story ids
+	var unchallenged []int64
+	for _, sid := range all {
+		for _, cid := range challenged {
+			if sid == cid {
+				break
+			}
+		}
+		unchallenged = append(unchallenged, sid)
+	}
+
+	// concat challeneged with unchallenged stories
+	feed := append(challenged, unchallenged...)
+
+	return getStoriesFromIDList(ctx, k, feed)
 }
 
 // UpdateStory updates an existing story in the store
@@ -145,6 +205,10 @@ func (k Keeper) UpdateStory(ctx sdk.Context, story Story) {
 
 // Challenge records challenging a story
 func (k Keeper) Challenge(ctx sdk.Context, story Story) {
+	// update story state
+	story.State = Challenged
+	k.UpdateStory(ctx, story)
+	// add story to challenged list
 	k.appendChallengedCategoryStoriesList(ctx, story)
 }
 
@@ -204,4 +268,28 @@ func getChallengedStoriesKey(k Keeper, catID int64) []byte {
 			k.catKey.Name(),
 			catID,
 			k.storyKey.Name()))
+}
+
+func getStories(ctx sdk.Context, k Keeper, bz []byte) (stories []Story, err sdk.Error) {
+	// deserialize bytes to story ids
+	var storyIDs List
+	k.GetCodec().MustUnmarshalBinary(bz, &storyIDs)
+
+	// return list of stories
+	return getStoriesFromIDList(ctx, k, storyIDs)
+}
+
+// extract each story and add to a list
+func getStoriesFromIDList(ctx sdk.Context, k Keeper, storyIDs List) (stories []Story, err sdk.Error) {
+	// extract each story and add to a list
+	for _, id := range storyIDs {
+		story, err := k.GetStory(ctx, id)
+		if err != nil {
+			return stories, ErrStoryNotFound(id)
+		}
+		stories = append(stories, story)
+	}
+
+	// return list of stories
+	return
 }

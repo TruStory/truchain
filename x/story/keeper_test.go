@@ -53,3 +53,32 @@ func TestGetStoriesWithCategory(t *testing.T) {
 	stories, _ := sk.GetStoriesWithCategory(ctx, 1)
 	assert.Equal(t, numStories, len(stories))
 }
+
+// all = [1,2,3,4,5]
+// challenged = [2,4]
+
+// id = 1
+// cid = 2
+// unchallenged = [1]
+
+// id = 2
+// cid = 2
+// break
+
+// id = 3
+// cid = 2
+// cid = 4
+// unchallenged = [1,3]
+
+// id = 4
+// cid = 2
+// cid = 4
+// break
+
+// id = 5
+// cid = 2
+// cid = 4
+// unchallenged = [1,3,5]
+
+// unchallenged = [1,3,5]
+// feed = [2,4,1,3,5]
