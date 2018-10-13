@@ -29,18 +29,15 @@ type ReadWriteKeeper interface {
 
 // Keeper data type storing keys to the key-value store
 type Keeper struct {
-	baseKeeper app.Keeper
-	catKey     sdk.StoreKey
-	storyKey   sdk.StoreKey
+	app.Keeper
+
+	catKey   sdk.StoreKey
+	storyKey sdk.StoreKey
 }
 
 // NewKeeper creates a new keeper with write and read access
 func NewKeeper(catKey sdk.StoreKey, storyKey sdk.StoreKey, codec *amino.Codec) Keeper {
-	return Keeper{
-		baseKeeper: app.NewKeeper(codec),
-		catKey:     catKey,
-		storyKey:   storyKey,
-	}
+	return Keeper{app.NewKeeper(codec), catKey, storyKey}
 }
 
 // NewCategory adds a story to the key-value store
@@ -51,7 +48,7 @@ func (k Keeper) NewCategory(
 	description string) (int64, sdk.Error) {
 
 	cat := NewCategory(
-		k.baseKeeper.GetNextID(ctx, k.catKey),
+		k.GetNextID(ctx, k.catKey),
 		title,
 		slug,
 		description)
@@ -71,11 +68,6 @@ func (k Keeper) GetCategory(ctx sdk.Context, id int64) (cat Category, err sdk.Er
 	k.GetCodec().MustUnmarshalBinary(val, &cat)
 
 	return
-}
-
-// GetCodec returns the base keeper's underlying codec
-func (k Keeper) GetCodec() *amino.Codec {
-	return k.baseKeeper.GetCodec()
 }
 
 // ============================================================================
