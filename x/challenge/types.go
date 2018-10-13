@@ -8,14 +8,14 @@ import (
 
 // Challenge defines a challenge on a story
 type Challenge struct {
-	ID           int64
-	StoryID      int64
-	Amount       sdk.Coin
-	Arugment     string
-	Creator      sdk.AccAddress
-	Evidence     string // TODO: in here or story?
-	CreatedBlock int64
-	CreatedTime  time.Time
+	ID           int64          `json:"id"`
+	StoryID      int64          `json:"story_id"`
+	Amount       sdk.Coin       `json:"amount"`
+	Arugment     string         `json:"arugment,omitempty"`
+	Creator      sdk.AccAddress `json:"creator"`
+	Evidence     string         `json:"evidence,omitempty"`
+	CreatedBlock int64          `json:"created_block"`
+	CreatedTime  time.Time      `json:"created_time"`
 }
 
 // NewChallenge creates a new `Challenge` type with defaults
