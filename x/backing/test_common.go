@@ -48,7 +48,7 @@ func mockDB() (
 	codec.RegisterInterface((*auth.Account)(nil), nil)
 	codec.RegisterConcrete(&auth.BaseAccount{}, "auth/Account", nil)
 
-	ck := c.NewKeeper(catKey, storyKey, codec)
+	ck := c.NewKeeper(catKey, codec)
 	am := auth.NewAccountMapper(codec, accKey, auth.ProtoBaseAccount)
 	bankKeeper := bank.NewBaseKeeper(am)
 	sk := s.NewKeeper(storyKey, catKey, challengeKey, ck, codec)

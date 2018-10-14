@@ -1,23 +1,19 @@
 package challenge
 
 import (
+	"fmt"
+	"net/url"
 	"testing"
 
+	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/stretchr/testify/assert"
 )
 
-// import (
-// 	"testing"
-
-// 	sdk "github.com/cosmos/cosmos-sdk/types"
-// 	"github.com/stretchr/testify/assert"
-// )
-
 func TestMarshaling(t *testing.T) {
-	ctx, k := mockDB()
+	ctx, k, _, _ := mockDB()
 
 	challenge := Challenge{
-		ID:      k.GetNextID(ctx, k.challengeKey),
+		ID:      k.GetNextID(ctx, k.storeKey),
 		StoryID: int64(5),
 	}
 
@@ -29,49 +25,37 @@ func TestMarshaling(t *testing.T) {
 	assert.Equal(t, challenge.StoryID, value.StoryID, "should be equal")
 }
 
-// func TestAddGetStory(t *testing.T) {
-// 	ctx, sk, ck := mockDB()
+func TestValidKeys(t *testing.T) {
+	_, k, _, _ := mockDB()
 
-// 	// test getting a non-existant story
-// 	_, err := sk.GetStory(ctx, int64(5))
-// 	assert.NotNil(t, err)
+	key := getChallengeIDKey(k, 5)
+	assert.Equal(t, "challenges:id:5", fmt.Sprintf("%s", key), "should be equal")
+}
 
-// 	storyID := createFakeStory(ctx, sk, ck)
+func TestSetChallenge(t *testing.T) {
+	ctx, k, _, _ := mockDB()
 
-// 	// test getting an existing story
-// 	savedStory, err := sk.GetStory(ctx, storyID)
-// 	assert.Nil(t, err)
+	challenge := Challenge{ID: int64(5)}
+	k.setChallenge(ctx, challenge)
 
-// 	story := Story{
-// 		ID:           storyID,
-// 		Body:         "Body of story.",
-// 		CategoryID:   int64(1),
-// 		CreatedBlock: int64(0),
-// 		Creator:      sdk.AccAddress([]byte{1, 2}),
-// 		State:        Created,
-// 		Kind:         Default,
-// 	}
+	savedChallenge, err := k.GetChallenge(ctx, int64(5))
+	assert.Nil(t, err)
+	assert.Equal(t, challenge.ID, savedChallenge.ID, "should be equal")
+}
 
-// 	assert.Equal(t, story, savedStory, "Story received from store does not match expected value")
+func TestNewGetChallenge(t *testing.T) {
+	ctx, k, sk, ck := mockDB()
 
-// 	// test incrementing id by adding another story
-// 	body := "Body of story 2."
-// 	creator := sdk.AccAddress([]byte{3, 4})
-// 	kind := Default
+	storyID := createFakeStory(ctx, sk, ck)
+	amount := sdk.NewCoin("testcoin", sdk.NewInt(5))
+	argument := "test argument"
+	creator := sdk.AccAddress([]byte{1, 2})
+	cnn, _ := url.Parse("http://www.cnn.com")
+	evidence := []url.URL{*cnn}
 
-// 	storyID, _ = sk.NewStory(ctx, body, int64(1), creator, kind)
-// 	assert.Equal(t, int64(2), storyID, "Story ID did not increment properly")
-// }
+	id, err := k.NewChallenge(ctx, storyID, amount, argument, creator, evidence)
+	assert.Nil(t, err)
 
-// func TestGetStoriesWithCategory(t *testing.T) {
-// 	ctx, sk, ck := mockDB()
-
-// 	numStories := 100
-
-// 	for i := 0; i < numStories; i++ {
-// 		createFakeStory(ctx, sk, ck)
-// 	}
-
-// 	stories, _ := sk.GetStoriesWithCategory(ctx, 1)
-// 	assert.Equal(t, numStories, len(stories))
-// }
+	challenge, _ := k.GetChallenge(ctx, id)
+	assert.Equal(t, argument, challenge.Arugment, "should match")
+}

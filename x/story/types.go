@@ -14,11 +14,11 @@ type Evidence struct {
 // ============================================================================
 
 // State is a type that defines a story state
-type State int
+type State int8
 
 // List of acceptable story states
 const (
-	Created State = iota
+	Created = State(iota)
 	Validated
 	Rejected
 	Unverifiable
@@ -105,7 +105,7 @@ func NewStory(
 		CreatedBlock: createdBlock,
 		Creator:      creator,
 		Round:        round,
-		State:        Created,
+		State:        state,
 		Kind:         kind,
 		UpdatedBlock: updatedBlock,
 		Users:        users,

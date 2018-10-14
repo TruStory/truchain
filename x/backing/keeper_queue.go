@@ -1,14 +1,13 @@
 package backing
 
 import (
+	"fmt"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
 // Implements a queue on top of the key-value store. It keeps a list of ids
 // for unexpired backings which are checked for maturity on each block tick.
-
-// unexported key for backing queue
-var keyQueue = []byte("backings:queue:unexpired")
 
 // QueueHead returns the head of the FIFO queue
 func (k Keeper) QueueHead(ctx sdk.Context) (backing Backing, err sdk.Error) {
@@ -52,8 +51,8 @@ func (k Keeper) QueueLen(ctx sdk.Context) int {
 
 // geQueue gets the queue from the context
 func (k Keeper) getQueue(ctx sdk.Context) (q Queue) {
-	store := ctx.KVStore(k.backingKey)
-	bq := store.Get(keyQueue)
+	store := ctx.KVStore(k.storeKey)
+	bq := store.Get(getQueueKey(k))
 	if bq == nil {
 		return
 	}
@@ -64,7 +63,12 @@ func (k Keeper) getQueue(ctx sdk.Context) (q Queue) {
 
 // setQueue sets the Queue to the context
 func (k Keeper) setQueue(ctx sdk.Context, q Queue) {
-	store := ctx.KVStore(k.backingKey)
+	store := ctx.KVStore(k.storeKey)
 	bsq := k.GetCodec().MustMarshalBinary(q)
-	store.Set(keyQueue, bsq)
+	store.Set(getQueueKey(k), bsq)
+}
+
+// getQueueKey returns "backings:unexpired:queue"
+func getQueueKey(k Keeper) []byte {
+	return []byte(fmt.Sprintf("%s:%s:%s", k.storeKey.Name(), "unexpired", "queue"))
 }

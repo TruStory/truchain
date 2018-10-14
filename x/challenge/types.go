@@ -34,6 +34,7 @@ func NewChallenge(
 		ID:           id,
 		StoryID:      storyID,
 		Amount:       amount,
+		Arugment:     argument,
 		Creator:      creator,
 		Evidence:     evidence,
 		CreatedBlock: createdBlock,
