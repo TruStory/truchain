@@ -1,6 +1,8 @@
 package challenge
 
 import (
+	"net/url"
+
 	app "github.com/TruStory/truchain/types"
 	"github.com/TruStory/truchain/x/story"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -14,7 +16,13 @@ type ReadKeeper interface {
 
 // WriteKeeper defines a module interface that facilities write only access to truchain data
 type WriteKeeper interface {
-	NewChallenge(ctx sdk.Context, storyID int64, amount sdk.Coin, argument string) (int64, sdk.Error)
+	NewChallenge(
+		ctx sdk.Context,
+		storyID int64,
+		amount sdk.Coin,
+		argument string,
+		creator sdk.AccAddress,
+		evidence []url.URL) (int64, sdk.Error)
 }
 
 // ReadWriteKeeper defines a module interface that facilities read/write access to truchain data
@@ -43,7 +51,9 @@ func (k Keeper) NewChallenge(
 	ctx sdk.Context,
 	storyID int64,
 	amount sdk.Coin,
-	argument string) (int64, sdk.Error) {
+	argument string,
+	creator sdk.AccAddress,
+	evidence []url.URL) (int64, sdk.Error) {
 
 	// make sure we have the story being challenged
 	story, err := k.storyKeeper.GetStory(ctx, storyID)
@@ -56,8 +66,8 @@ func (k Keeper) NewChallenge(
 		storyID,
 		amount,
 		argument,
-		sdk.AccAddress([]byte{1, 2}),
-		"evidence",
+		creator,
+		[]url.URL{},
 		ctx.BlockHeight(),
 		ctx.BlockHeader().Time)
 
@@ -76,7 +86,7 @@ func (k Keeper) GetChallenge(ctx sdk.Context, challengeID int64) (challenge Chal
 	key := getChallengeIDKey(k, challengeID)
 	bz := store.Get(key)
 	if bz == nil {
-		return challenge, sdk.ErrInternal("fix me: challenge not found")
+		return challenge, ErrNotFound(challengeID)
 	}
 	challenge = k.unmarshal(bz)
 

@@ -27,9 +27,9 @@ type ReadKeeper interface {
 // WriteKeeper defines a module interface that facilities write only access
 // to truchain data
 type WriteKeeper interface {
+	Challenge(ctx sdk.Context, story Story)
 	NewStory(ctx sdk.Context, body string, categoryID int64, creator sdk.AccAddress, kind Kind) (int64, sdk.Error)
 	UpdateStory(ctx sdk.Context, story Story)
-	Challenge(ctx sdk.Context, story Story)
 }
 
 // ReadWriteKeeper defines a module interface that facilities read/write access
@@ -128,7 +128,6 @@ func (k Keeper) GetChallengedStoriesWithCategory(
 	store := ctx.KVStore(k.challengeKey)
 	bz := store.Get(getChallengedStoriesKey(k, catID))
 	if bz == nil {
-		// TODO: ErrChallengedStoriesWithCategoryNotFound
 		return stories, ErrStoriesWithCategoryNotFound(catID)
 	}
 
@@ -151,23 +150,24 @@ func (k Keeper) GetFeedWithCategory(
 		return stories, ErrStoriesWithCategoryNotFound(catID)
 	}
 
+	var (
+		all          List
+		challenged   List
+		unchallenged List
+	)
+
 	// unmarshal bytes to story ids
-	var all List
 	k.GetCodec().MustUnmarshalBinary(bz, &all)
 
 	// get bytes stored at "challenges:categories:id:[catID]:stories"
 	bz = challengeStore.Get(getChallengedStoriesKey(k, catID))
 	if bz == nil {
-		// TODO: ErrChallengedStoriesWithCategoryNotFound
 		return stories, ErrStoriesWithCategoryNotFound(catID)
 	}
-
 	// unmarshal challenged story id list
-	var challenged List
 	k.GetCodec().MustUnmarshalBinary(bz, &challenged)
 
 	// make a list of all unchallenged story ids
-	var unchallenged []int64
 	for _, sid := range all {
 		for _, cid := range challenged {
 			if sid == cid {
