@@ -6,6 +6,7 @@ import (
 	app "github.com/TruStory/truchain/types"
 	"github.com/TruStory/truchain/x/story"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/davecgh/go-spew/spew"
 	amino "github.com/tendermint/go-amino"
 )
 
@@ -35,13 +36,13 @@ type ReadWriteKeeper interface {
 type Keeper struct {
 	app.Keeper
 
-	challengeKey sdk.StoreKey
-	storyKeeper  story.ReadWriteKeeper
+	storeKey    sdk.StoreKey
+	storyKeeper story.ReadWriteKeeper
 }
 
 // NewKeeper creates a new keeper with write and read access
-func NewKeeper(challengeKey sdk.StoreKey, sk story.ReadWriteKeeper, codec *amino.Codec) Keeper {
-	return Keeper{app.NewKeeper(codec), challengeKey, sk}
+func NewKeeper(storeKey sdk.StoreKey, sk story.ReadWriteKeeper, codec *amino.Codec) Keeper {
+	return Keeper{app.NewKeeper(codec), storeKey, sk}
 }
 
 // // ============================================================================
@@ -53,16 +54,16 @@ func (k Keeper) NewChallenge(
 	amount sdk.Coin,
 	argument string,
 	creator sdk.AccAddress,
-	evidence []url.URL) (int64, sdk.Error) {
+	evidence []url.URL) (id int64, err sdk.Error) {
 
 	// make sure we have the story being challenged
-	story, err := k.storyKeeper.GetStory(ctx, storyID)
+	_, err = k.storyKeeper.GetStory(ctx, storyID)
 	if err != nil {
-		return 0, err
+		return
 	}
 
 	challenge := NewChallenge(
-		k.GetNextID(ctx, k.challengeKey),
+		k.GetNextID(ctx, k.storeKey),
 		storyID,
 		amount,
 		argument,
@@ -74,15 +75,19 @@ func (k Keeper) NewChallenge(
 	// persist challenge value
 	k.setChallenge(ctx, challenge)
 
+	savedChallenge, err := k.GetChallenge(ctx, challenge.ID)
+	spew.Dump(savedChallenge)
+	spew.Dump(err)
+
 	// add story id to challenged stories list
-	k.storyKeeper.Challenge(ctx, story)
+	k.storyKeeper.Challenge(ctx, storyID)
 
 	return challenge.ID, nil
 }
 
 // GetChallenge the challenge for the given id
 func (k Keeper) GetChallenge(ctx sdk.Context, challengeID int64) (challenge Challenge, err sdk.Error) {
-	store := ctx.KVStore(k.challengeKey)
+	store := ctx.KVStore(k.storeKey)
 	key := getChallengeIDKey(k, challengeID)
 	bz := store.Get(key)
 	if bz == nil {
@@ -109,7 +114,7 @@ func (k Keeper) unmarshal(bz []byte) (value Challenge) {
 
 // saves the `Challenge` in the KVStore
 func (k Keeper) setChallenge(ctx sdk.Context, challenge Challenge) {
-	store := ctx.KVStore(k.challengeKey)
+	store := ctx.KVStore(k.storeKey)
 	store.Set(getChallengeIDKey(k, challenge.ID), k.marshal(challenge))
 }
 
@@ -117,5 +122,5 @@ func (k Keeper) setChallenge(ctx sdk.Context, challenge Challenge) {
 
 // returns a key of the form "challenges:id:[ID]"
 func getChallengeIDKey(k Keeper, id int64) []byte {
-	return app.GetIDKey(k.challengeKey, id)
+	return app.GetIDKey(k.storeKey, id)
 }

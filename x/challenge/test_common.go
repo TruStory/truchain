@@ -12,7 +12,7 @@ import (
 	"github.com/tendermint/tendermint/libs/log"
 )
 
-func mockDB() (sdk.Context, Keeper) {
+func mockDB() (sdk.Context, Keeper, s.Keeper, c.Keeper) {
 	db := dbm.NewMemDB()
 
 	storyKey := sdk.NewKVStoreKey("stories")
@@ -29,33 +29,33 @@ func mockDB() (sdk.Context, Keeper) {
 
 	codec := amino.NewCodec()
 	cryptoAmino.RegisterAmino(codec)
-	// RegisterAmino(codec)
+	RegisterAmino(codec)
 
-	ck := c.NewKeeper(catKey, storyKey, codec)
+	ck := c.NewKeeper(catKey, codec)
 	sk := s.NewKeeper(storyKey, catKey, challengeKey, ck, codec)
 
 	k := NewKeeper(challengeKey, sk, codec)
 
-	return ctx, k
+	return ctx, k, sk, ck
 }
 
-// func createFakeStory(ctx sdk.Context, sk Keeper, ck c.ReadWriteKeeper) int64 {
-// 	body := "Body of story."
-// 	cat := createFakeCategory(ctx, ck)
-// 	creator := sdk.AccAddress([]byte{1, 2})
-// 	storyType := Default
+func createFakeStory(ctx sdk.Context, sk s.Keeper, ck c.ReadWriteKeeper) int64 {
+	body := "Body of story."
+	cat := createFakeCategory(ctx, ck)
+	creator := sdk.AccAddress([]byte{1, 2})
+	storyType := s.Default
 
-// 	storyID, _ := sk.NewStory(ctx, body, cat.ID, creator, storyType)
+	storyID, _ := sk.NewStory(ctx, body, cat.ID, creator, storyType)
 
-// 	return storyID
-// }
+	return storyID
+}
 
-// func createFakeCategory(ctx sdk.Context, ck c.ReadWriteKeeper) c.Category {
-// 	existing, err := ck.GetCategory(ctx, 1)
-// 	if err == nil {
-// 		return existing
-// 	}
-// 	id, _ := ck.NewCategory(ctx, "decentralized exchanges", "trudex", "category for experts in decentralized exchanges")
-// 	cat, _ := ck.GetCategory(ctx, id)
-// 	return cat
-// }
+func createFakeCategory(ctx sdk.Context, ck c.ReadWriteKeeper) c.Category {
+	existing, err := ck.GetCategory(ctx, 1)
+	if err == nil {
+		return existing
+	}
+	id, _ := ck.NewCategory(ctx, "decentralized exchanges", "trudex", "category for experts in decentralized exchanges")
+	cat, _ := ck.GetCategory(ctx, id)
+	return cat
+}

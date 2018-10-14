@@ -6,6 +6,7 @@ import (
 	app "github.com/TruStory/truchain/types"
 	"github.com/TruStory/truchain/x/category"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/davecgh/go-spew/spew"
 	amino "github.com/tendermint/go-amino"
 )
 
@@ -27,7 +28,7 @@ type ReadKeeper interface {
 // WriteKeeper defines a module interface that facilities write only access
 // to truchain data
 type WriteKeeper interface {
-	Challenge(ctx sdk.Context, story Story)
+	Challenge(ctx sdk.Context, storyID int64) sdk.Error
 	NewStory(ctx sdk.Context, body string, categoryID int64, creator sdk.AccAddress, kind Kind) (int64, sdk.Error)
 	UpdateStory(ctx sdk.Context, story Story)
 }
@@ -43,23 +44,40 @@ type ReadWriteKeeper interface {
 type Keeper struct {
 	app.Keeper
 
+	storeKey       sdk.StoreKey
 	categoryKeeper category.ReadKeeper
-	storyKey       sdk.StoreKey
 	catKey         sdk.StoreKey
 	challengeKey   sdk.StoreKey
 }
 
 // NewKeeper creates a new keeper with write and read access
 func NewKeeper(
-	storyKey sdk.StoreKey,
+	storeKey sdk.StoreKey,
 	catKey sdk.StoreKey,
 	challengeKey sdk.StoreKey,
 	ck category.ReadKeeper,
 	codec *amino.Codec) Keeper {
-	return Keeper{app.NewKeeper(codec), ck, storyKey, catKey, challengeKey}
+	return Keeper{app.NewKeeper(codec), storeKey, ck, catKey, challengeKey}
 }
 
 // ============================================================================
+
+// Challenge records challenging a story
+func (k Keeper) Challenge(ctx sdk.Context, storyID int64) sdk.Error {
+	// get story
+	story, err := k.GetStory(ctx, storyID)
+	if err != nil {
+		return err
+	}
+	// update story state
+	story.State = Challenged
+	k.UpdateStory(ctx, story)
+
+	// add story to challenged list
+	k.appendChallengedCategoryStoriesList(ctx, story)
+
+	return nil
+}
 
 // NewStory adds a story to the key-value store
 func (k Keeper) NewStory(
@@ -75,7 +93,7 @@ func (k Keeper) NewStory(
 	}
 
 	story := Story{
-		ID:           k.GetNextID(ctx, k.storyKey),
+		ID:           k.GetNextID(ctx, k.storeKey),
 		Body:         body,
 		CategoryID:   categoryID,
 		CreatedBlock: ctx.BlockHeight(),
@@ -92,7 +110,7 @@ func (k Keeper) NewStory(
 
 // GetStory gets the story with the given id from the key-value store
 func (k Keeper) GetStory(ctx sdk.Context, storyID int64) (story Story, err sdk.Error) {
-	store := ctx.KVStore(k.storyKey)
+	store := ctx.KVStore(k.storeKey)
 	key := getStoryIDKey(k, storyID)
 	val := store.Get(key)
 	if val == nil {
@@ -109,7 +127,7 @@ func (k Keeper) GetStoriesWithCategory(
 	catID int64) (stories []Story, err sdk.Error) {
 
 	// get bytes stored at "categories:id:[catID]:stories"
-	store := ctx.KVStore(k.catKey)
+	store := ctx.KVStore(k.storeKey)
 	bz := store.Get(getCategoryStoriesKey(k, catID))
 	if bz == nil {
 		return stories, ErrStoriesWithCategoryNotFound(catID)
@@ -125,11 +143,13 @@ func (k Keeper) GetChallengedStoriesWithCategory(
 	catID int64) (stories []Story, err sdk.Error) {
 
 	// get bytes stored at "challenges:categories:id:[catID]:stories"
-	store := ctx.KVStore(k.challengeKey)
+	store := ctx.KVStore(k.storeKey)
 	bz := store.Get(getChallengedStoriesKey(k, catID))
 	if bz == nil {
 		return stories, ErrStoriesWithCategoryNotFound(catID)
 	}
+
+	spew.Dump(bz)
 
 	// return list of stories
 	return getStories(ctx, k, bz)
@@ -141,8 +161,8 @@ func (k Keeper) GetFeedWithCategory(
 	catID int64) (stories []Story, err sdk.Error) {
 
 	// get stores
-	categoryStore := ctx.KVStore(k.catKey)
-	challengeStore := ctx.KVStore(k.challengeKey)
+	categoryStore := ctx.KVStore(k.storeKey)
+	challengeStore := ctx.KVStore(k.storeKey)
 
 	// get bytes stored at "categories:id:[catID]:stories"
 	bz := categoryStore.Get(getCategoryStoriesKey(k, catID))
@@ -169,12 +189,16 @@ func (k Keeper) GetFeedWithCategory(
 
 	// make a list of all unchallenged story ids
 	for _, sid := range all {
+		isMatch := false
 		for _, cid := range challenged {
-			if sid == cid {
+			isMatch = sid == cid
+			if isMatch {
 				break
 			}
 		}
-		unchallenged = append(unchallenged, sid)
+		if !isMatch {
+			unchallenged = append(unchallenged, sid)
+		}
 	}
 
 	// concat challeneged with unchallenged stories
@@ -203,20 +227,11 @@ func (k Keeper) UpdateStory(ctx sdk.Context, story Story) {
 	k.setStory(ctx, newStory)
 }
 
-// Challenge records challenging a story
-func (k Keeper) Challenge(ctx sdk.Context, story Story) {
-	// update story state
-	story.State = Challenged
-	k.UpdateStory(ctx, story)
-	// add story to challenged list
-	k.appendChallengedCategoryStoriesList(ctx, story)
-}
-
 // ============================================================================
 
 // setStory saves a `Story` type to the KVStore
 func (k Keeper) setStory(ctx sdk.Context, story Story) {
-	store := ctx.KVStore(k.storyKey)
+	store := ctx.KVStore(k.storeKey)
 	store.Set(
 		getStoryIDKey(k, story.ID),
 		k.GetCodec().MustMarshalBinary(story))
@@ -232,10 +247,10 @@ func (k Keeper) appendChallengedCategoryStoriesList(ctx sdk.Context, story Story
 	k.appendList(ctx, getChallengedStoriesKey(k, story.CategoryID), story.ID)
 }
 
-// appendList adds a story id to a list of story ids in category store
+// appendList adds a story id to a list of story id
 func (k Keeper) appendList(ctx sdk.Context, key []byte, storyID int64) {
 	// get list of story ids from category store for a given key
-	store := ctx.KVStore(k.catKey)
+	store := ctx.KVStore(k.storeKey)
 	bz := store.Get(key)
 	var storyList List
 	if bz == nil {
@@ -251,12 +266,12 @@ func (k Keeper) appendList(ctx sdk.Context, key []byte, storyID int64) {
 
 // getStoryIDKey returns byte array for "stories:id:[ID]"
 func getStoryIDKey(k Keeper, id int64) []byte {
-	return app.GetIDKey(k.storyKey, id)
+	return app.GetIDKey(k.storeKey, id)
 }
 
 // getCategoryStoriesKey returns "categories:id:[`catID`]:stories"
 func getCategoryStoriesKey(k Keeper, catID int64) []byte {
-	return []byte(fmt.Sprintf("%s:id:%d:%s", k.catKey.Name(), catID, k.storyKey.Name()))
+	return []byte(fmt.Sprintf("%s:id:%d:%s", k.catKey.Name(), catID, k.storeKey.Name()))
 }
 
 // getChallengedStoriesKey returns "challenges:categories:id:[`catID`]:stories"
@@ -267,7 +282,7 @@ func getChallengedStoriesKey(k Keeper, catID int64) []byte {
 			k.challengeKey.Name(),
 			k.catKey.Name(),
 			catID,
-			k.storyKey.Name()))
+			k.storeKey.Name()))
 }
 
 func getStories(ctx sdk.Context, k Keeper, bz []byte) (stories []Story, err sdk.Error) {

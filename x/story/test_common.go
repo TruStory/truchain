@@ -30,7 +30,7 @@ func mockDB() (sdk.Context, Keeper, c.Keeper) {
 	cryptoAmino.RegisterAmino(codec)
 	RegisterAmino(codec)
 
-	ck := c.NewKeeper(catKey, storyKey, codec)
+	ck := c.NewKeeper(catKey, codec)
 	sk := NewKeeper(storyKey, catKey, challengeKey, ck, codec)
 
 	return ctx, sk, ck

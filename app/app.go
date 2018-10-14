@@ -88,7 +88,7 @@ func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *T
 	app.ibcMapper = ibc.NewMapper(app.codec, app.keyIBC, app.RegisterCodespace(ibc.DefaultCodespace))
 
 	// wire up keepers
-	app.categoryKeeper = category.NewKeeper(app.keyCategory, app.keyStory, codec)
+	app.categoryKeeper = category.NewKeeper(app.keyCategory, codec)
 	app.readStoryKeeper = story.NewKeeper(
 		app.keyStory,
 		app.keyCategory,
