@@ -1,5 +1,22 @@
 # TruChain
 
+### Installation
+
+1. Install `go` by following the [official docs](https://golang.org/doc/install). Remember to set your `$GOPATH`, `$GOBIN`, and `$PATH` environment variables.
+
+
+2. Now let's install truchain.
+
+``` bash
+mkdir -p $GOPATH/src/github.com/trustory`
+
+cd $GOPATH/src/github.com/trustory`
+
+git clone https://github.com/TruStory/truchain.git`
+
+cd truchain && git checkout master`
+```
+
 ### Running
 
 1. Install dependencies
@@ -17,6 +34,7 @@ This should install all dependencies in `/vendor`.
 This creates:
 
 `bin/trucli`: TruStory command-line client and lite client
+
 `bin/truchaind`: TruStory server node
 
 `trucli`, the light client, will ideally run on it's own machine. It will handle all
@@ -26,11 +44,11 @@ API requests, and communicate via RPC with `truchaind`.
 
 3. Create genesis file (one-time only)
 
-`./truchaind init`
+`bin/truchaind init`
 
 4. Start blockchain
 
-`./truchaind start`
+`bin/truchaind start`
 
 ### Architecture
 
