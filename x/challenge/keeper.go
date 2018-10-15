@@ -3,10 +3,11 @@ package challenge
 import (
 	"net/url"
 
+	"github.com/cosmos/cosmos-sdk/x/bank"
+
 	app "github.com/TruStory/truchain/types"
 	"github.com/TruStory/truchain/x/story"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/davecgh/go-spew/spew"
 	amino "github.com/tendermint/go-amino"
 )
 
@@ -23,7 +24,8 @@ type WriteKeeper interface {
 		amount sdk.Coin,
 		argument string,
 		creator sdk.AccAddress,
-		evidence []url.URL) (int64, sdk.Error)
+		evidence []url.URL,
+		reason Reason) (int64, sdk.Error)
 }
 
 // ReadWriteKeeper defines a module interface that facilities read/write access to truchain data
@@ -36,13 +38,13 @@ type ReadWriteKeeper interface {
 type Keeper struct {
 	app.Keeper
 
-	storeKey    sdk.StoreKey
 	storyKeeper story.ReadWriteKeeper
+	bankKeeper  bank.Keeper
 }
 
 // NewKeeper creates a new keeper with write and read access
-func NewKeeper(storeKey sdk.StoreKey, sk story.ReadWriteKeeper, codec *amino.Codec) Keeper {
-	return Keeper{app.NewKeeper(codec), storeKey, sk}
+func NewKeeper(storeKey sdk.StoreKey, sk story.ReadWriteKeeper, bankKeeper bank.Keeper, codec *amino.Codec) Keeper {
+	return Keeper{app.NewKeeper(codec, storeKey), sk, bankKeeper}
 }
 
 // // ============================================================================
@@ -54,42 +56,89 @@ func (k Keeper) NewChallenge(
 	amount sdk.Coin,
 	argument string,
 	creator sdk.AccAddress,
-	evidence []url.URL) (id int64, err sdk.Error) {
+	evidence []url.URL,
+	reason Reason) (id int64, err sdk.Error) {
 
 	// make sure we have the story being challenged
-	_, err = k.storyKeeper.GetStory(ctx, storyID)
+	story, err := k.storyKeeper.GetStory(ctx, storyID)
 	if err != nil {
 		return
 	}
 
-	challenge := NewChallenge(
-		k.GetNextID(ctx, k.storeKey),
-		storyID,
-		amount,
-		argument,
-		creator,
-		[]url.URL{},
-		ctx.BlockHeight(),
-		ctx.BlockHeader().Time)
+	// get category coin name
+	coinName, err := k.storyKeeper.GetCoinName(ctx, storyID)
+	if err != nil {
+		return
+	}
 
-	// persist challenge value
+	// load default challenge parameters
+	params := NewParams()
+	minStake := sdk.NewCoin(coinName, params.MinChallengeStake)
+
+	// check if user has the stake they are claiming
+	if !k.bankKeeper.HasCoins(ctx, creator, sdk.Coins{minStake}) {
+		return 0, sdk.ErrInsufficientFunds("Insufficient funds for challenging story.")
+	}
+
+	// check if challenge amount meets minimum stake
+	if amount.IsLT(minStake) {
+		return 0, sdk.ErrInsufficientFunds("Does not meet minimum stake amount.")
+	}
+
+	// check if story already has a challenge
+	var challenge Challenge
+	if story.ChallengeID > 0 {
+		challenge, err = k.GetChallenge(ctx, story.ChallengeID)
+		if err != nil {
+			return 0, err
+		}
+		// add user to challenge
+		challenge.Challengers = append(challenge.Challengers, creator)
+		// add amount to challenge pool
+		challenge.Pool.Plus(amount)
+		// if threshold is reached, start challenge
+		if challenge.Pool.Amount.GT(challenge.ThresholdAmount) {
+			k.storyKeeper.StartChallenge(ctx, storyID)
+		}
+
+		// update block time for good record keeping
+		challenge.UpdatedBlock = ctx.BlockHeight()
+		challenge.UpdatedTime = ctx.BlockHeader().Time
+	} else {
+		// create new challenge type
+		challenge = NewChallenge(
+			k.GetNextID(ctx),
+			storyID,
+			amount,
+			argument,
+			[]sdk.AccAddress{creator},
+			creator,
+			evidence,
+			amount,
+			reason,
+			getThresholdAmount(story),
+			ctx.BlockHeight(),
+			ctx.BlockHeader().Time)
+
+		story.ChallengeID = challenge.ID
+		k.storyKeeper.UpdateStory(ctx, story)
+	}
+	// persist new or updated challenge value
 	k.setChallenge(ctx, challenge)
 
-	savedChallenge, err := k.GetChallenge(ctx, challenge.ID)
-	spew.Dump(savedChallenge)
-	spew.Dump(err)
-
-	// add story id to challenged stories list
-	k.storyKeeper.Challenge(ctx, storyID)
+	// deduct challenge amount from  user
+	_, _, err = k.bankKeeper.SubtractCoins(ctx, creator, sdk.Coins{amount})
+	if err != nil {
+		return
+	}
 
 	return challenge.ID, nil
 }
 
 // GetChallenge the challenge for the given id
 func (k Keeper) GetChallenge(ctx sdk.Context, challengeID int64) (challenge Challenge, err sdk.Error) {
-	store := ctx.KVStore(k.storeKey)
-	key := getChallengeIDKey(k, challengeID)
-	bz := store.Get(key)
+	store := k.GetStore(ctx)
+	bz := store.Get(k.GetIDKey(challengeID))
 	if bz == nil {
 		return challenge, ErrNotFound(challengeID)
 	}
@@ -114,13 +163,13 @@ func (k Keeper) unmarshal(bz []byte) (value Challenge) {
 
 // saves the `Challenge` in the KVStore
 func (k Keeper) setChallenge(ctx sdk.Context, challenge Challenge) {
-	store := ctx.KVStore(k.storeKey)
-	store.Set(getChallengeIDKey(k, challenge.ID), k.marshal(challenge))
+	store := k.GetStore(ctx)
+	store.Set(k.GetIDKey(challenge.ID), k.marshal(challenge))
 }
 
 // ============================================================================
 
-// returns a key of the form "challenges:id:[ID]"
-func getChallengeIDKey(k Keeper, id int64) []byte {
-	return app.GetIDKey(k.storeKey, id)
+// TODO:
+func getThresholdAmount(s story.Story) sdk.Int {
+	return sdk.NewInt(10)
 }

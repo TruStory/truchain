@@ -49,7 +49,6 @@ type TruChain struct {
 	ibcMapper           ibc.Mapper
 
 	// access truchain database
-	readStoryKeeper story.ReadKeeper
 	storyKeeper     story.ReadWriteKeeper
 	categoryKeeper  category.ReadWriteKeeper
 	backingKeeper   backing.ReadWriteKeeper
@@ -89,12 +88,6 @@ func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *T
 
 	// wire up keepers
 	app.categoryKeeper = category.NewKeeper(app.keyCategory, codec)
-	app.readStoryKeeper = story.NewKeeper(
-		app.keyStory,
-		app.keyCategory,
-		app.keyChallenge,
-		app.categoryKeeper,
-		app.codec)
 	app.storyKeeper = story.NewKeeper(
 		app.keyStory,
 		app.keyCategory,
@@ -118,7 +111,7 @@ func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *T
 
 	// register query routes for reading state
 	app.QueryRouter().
-		AddRoute("story", story.NewQuerier(app.readStoryKeeper))
+		AddRoute("story", story.NewQuerier(app.storyKeeper))
 
 	// perform initialization logic
 	app.SetInitChainer(app.initChainer)

@@ -18,6 +18,7 @@ type ReadKeeper interface {
 	GetChallengedStoriesWithCategory(
 		ctx sdk.Context,
 		catID int64) (stories []Story, err sdk.Error)
+	GetCoinName(ctx sdk.Context, id int64) (name string, err sdk.Error)
 	GetFeedWithCategory(
 		ctx sdk.Context,
 		catID int64) (stories []Story, err sdk.Error)
@@ -28,8 +29,8 @@ type ReadKeeper interface {
 // WriteKeeper defines a module interface that facilities write only access
 // to truchain data
 type WriteKeeper interface {
-	Challenge(ctx sdk.Context, storyID int64) sdk.Error
 	NewStory(ctx sdk.Context, body string, categoryID int64, creator sdk.AccAddress, kind Kind) (int64, sdk.Error)
+	StartChallenge(ctx sdk.Context, storyID int64) sdk.Error
 	UpdateStory(ctx sdk.Context, story Story)
 }
 
@@ -44,7 +45,6 @@ type ReadWriteKeeper interface {
 type Keeper struct {
 	app.Keeper
 
-	storeKey       sdk.StoreKey
 	categoryKeeper category.ReadKeeper
 	catKey         sdk.StoreKey
 	challengeKey   sdk.StoreKey
@@ -57,13 +57,15 @@ func NewKeeper(
 	challengeKey sdk.StoreKey,
 	ck category.ReadKeeper,
 	codec *amino.Codec) Keeper {
-	return Keeper{app.NewKeeper(codec), storeKey, ck, catKey, challengeKey}
+	return Keeper{app.NewKeeper(codec, storeKey), ck, catKey, challengeKey}
 }
 
 // ============================================================================
 
-// Challenge records challenging a story
-func (k Keeper) Challenge(ctx sdk.Context, storyID int64) sdk.Error {
+// TODO: run this from end blocker
+
+// StartChallenge records challenging a story
+func (k Keeper) StartChallenge(ctx sdk.Context, storyID int64) sdk.Error {
 	// get story
 	story, err := k.GetStory(ctx, storyID)
 	if err != nil {
@@ -93,7 +95,7 @@ func (k Keeper) NewStory(
 	}
 
 	story := Story{
-		ID:           k.GetNextID(ctx, k.storeKey),
+		ID:           k.GetNextID(ctx),
 		Body:         body,
 		CategoryID:   categoryID,
 		CreatedBlock: ctx.BlockHeight(),
@@ -108,11 +110,24 @@ func (k Keeper) NewStory(
 	return story.ID, nil
 }
 
+// GetCoinName returns the name of the category coin for the story
+func (k Keeper) GetCoinName(ctx sdk.Context, id int64) (name string, err sdk.Error) {
+	story, err := k.GetStory(ctx, id)
+	if err != nil {
+		return
+	}
+	cat, err := k.categoryKeeper.GetCategory(ctx, story.CategoryID)
+	if err != nil {
+		return
+	}
+
+	return cat.CoinName(), nil
+}
+
 // GetStory gets the story with the given id from the key-value store
 func (k Keeper) GetStory(ctx sdk.Context, storyID int64) (story Story, err sdk.Error) {
-	store := ctx.KVStore(k.storeKey)
-	key := getStoryIDKey(k, storyID)
-	val := store.Get(key)
+	store := k.GetStore(ctx)
+	val := store.Get(k.GetIDKey(storyID))
 	if val == nil {
 		return story, ErrStoryNotFound(storyID)
 	}
@@ -127,7 +142,7 @@ func (k Keeper) GetStoriesWithCategory(
 	catID int64) (stories []Story, err sdk.Error) {
 
 	// get bytes stored at "categories:id:[catID]:stories"
-	store := ctx.KVStore(k.storeKey)
+	store := k.GetStore(ctx)
 	bz := store.Get(getCategoryStoriesKey(k, catID))
 	if bz == nil {
 		return stories, ErrStoriesWithCategoryNotFound(catID)
@@ -143,7 +158,7 @@ func (k Keeper) GetChallengedStoriesWithCategory(
 	catID int64) (stories []Story, err sdk.Error) {
 
 	// get bytes stored at "challenges:categories:id:[catID]:stories"
-	store := ctx.KVStore(k.storeKey)
+	store := k.GetStore(ctx)
 	bz := store.Get(getChallengedStoriesKey(k, catID))
 	if bz == nil {
 		return stories, ErrStoriesWithCategoryNotFound(catID)
@@ -160,12 +175,11 @@ func (k Keeper) GetFeedWithCategory(
 	ctx sdk.Context,
 	catID int64) (stories []Story, err sdk.Error) {
 
-	// get stores
-	categoryStore := ctx.KVStore(k.storeKey)
-	challengeStore := ctx.KVStore(k.storeKey)
+	// get story store
+	store := k.GetStore(ctx)
 
 	// get bytes stored at "categories:id:[catID]:stories"
-	bz := categoryStore.Get(getCategoryStoriesKey(k, catID))
+	bz := store.Get(getCategoryStoriesKey(k, catID))
 	if bz == nil {
 		return stories, ErrStoriesWithCategoryNotFound(catID)
 	}
@@ -180,7 +194,7 @@ func (k Keeper) GetFeedWithCategory(
 	k.GetCodec().MustUnmarshalBinary(bz, &all)
 
 	// get bytes stored at "challenges:categories:id:[catID]:stories"
-	bz = challengeStore.Get(getChallengedStoriesKey(k, catID))
+	bz = store.Get(getChallengedStoriesKey(k, catID))
 	if bz == nil {
 		return stories, ErrStoriesWithCategoryNotFound(catID)
 	}
@@ -216,6 +230,7 @@ func (k Keeper) UpdateStory(ctx sdk.Context, story Story) {
 		story.Thread,
 		story.Body,
 		story.CategoryID,
+		story.ChallengeID,
 		story.CreatedBlock,
 		story.Creator,
 		story.Round,
@@ -231,9 +246,9 @@ func (k Keeper) UpdateStory(ctx sdk.Context, story Story) {
 
 // setStory saves a `Story` type to the KVStore
 func (k Keeper) setStory(ctx sdk.Context, story Story) {
-	store := ctx.KVStore(k.storeKey)
+	store := k.GetStore(ctx)
 	store.Set(
-		getStoryIDKey(k, story.ID),
+		k.GetIDKey(story.ID),
 		k.GetCodec().MustMarshalBinary(story))
 }
 
@@ -250,7 +265,7 @@ func (k Keeper) appendChallengedCategoryStoriesList(ctx sdk.Context, story Story
 // appendList adds a story id to a list of story id
 func (k Keeper) appendList(ctx sdk.Context, key []byte, storyID int64) {
 	// get list of story ids from category store for a given key
-	store := ctx.KVStore(k.storeKey)
+	store := k.GetStore(ctx)
 	bz := store.Get(key)
 	var storyList List
 	if bz == nil {
@@ -264,14 +279,13 @@ func (k Keeper) appendList(ctx sdk.Context, key []byte, storyID int64) {
 	store.Set(key, k.GetCodec().MustMarshalBinary(storyList))
 }
 
-// getStoryIDKey returns byte array for "stories:id:[ID]"
-func getStoryIDKey(k Keeper, id int64) []byte {
-	return app.GetIDKey(k.storeKey, id)
-}
-
 // getCategoryStoriesKey returns "categories:id:[`catID`]:stories"
 func getCategoryStoriesKey(k Keeper, catID int64) []byte {
-	return []byte(fmt.Sprintf("%s:id:%d:%s", k.catKey.Name(), catID, k.storeKey.Name()))
+	return []byte(fmt.Sprintf(
+		"%s:id:%d:%s",
+		k.catKey.Name(),
+		catID,
+		k.GetStoreKey().Name()))
 }
 
 // getChallengedStoriesKey returns "challenges:categories:id:[`catID`]:stories"
@@ -282,7 +296,7 @@ func getChallengedStoriesKey(k Keeper, catID int64) []byte {
 			k.challengeKey.Name(),
 			k.catKey.Name(),
 			catID,
-			k.storeKey.Name()))
+			k.GetStoreKey().Name()))
 }
 
 func getStories(ctx sdk.Context, k Keeper, bz []byte) (stories []Story, err sdk.Error) {

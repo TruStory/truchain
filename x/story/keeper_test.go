@@ -60,7 +60,7 @@ func TestChallenge(t *testing.T) {
 	story, _ := sk.GetStory(ctx, storyID)
 	assert.Equal(t, Created, story.State, "state should match")
 
-	sk.Challenge(ctx, storyID)
+	sk.StartChallenge(ctx, storyID)
 	story, _ = sk.GetStory(ctx, storyID)
 	spew.Dump(story)
 	assert.Equal(t, Challenged, story.State, "state should match")
@@ -103,8 +103,8 @@ func TestGetChallengedStoriesWithCategory(t *testing.T) {
 		createFakeStory(ctx, sk, ck)
 	}
 
-	sk.Challenge(ctx, 2)
-	sk.Challenge(ctx, 3)
+	sk.StartChallenge(ctx, 2)
+	sk.StartChallenge(ctx, 3)
 
 	stories, _ := sk.GetChallengedStoriesWithCategory(ctx, 1)
 	assert.Equal(t, 2, len(stories))
@@ -118,8 +118,8 @@ func TestFeedWithCategory(t *testing.T) {
 		createFakeStory(ctx, sk, ck)
 	}
 
-	sk.Challenge(ctx, 2)
-	sk.Challenge(ctx, 4)
+	sk.StartChallenge(ctx, 2)
+	sk.StartChallenge(ctx, 4)
 
 	stories, _ := sk.GetFeedWithCategory(ctx, 1)
 

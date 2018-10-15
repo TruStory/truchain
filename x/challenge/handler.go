@@ -24,7 +24,14 @@ func handleStartChallengeMsg(ctx sdk.Context, k WriteKeeper, msg StartChallengeM
 		return err.Result()
 	}
 
-	id, err := k.NewChallenge(ctx, msg.StoryID, msg.Amount, msg.Argument, msg.Creator, msg.Evidence)
+	id, err := k.NewChallenge(
+		ctx,
+		msg.StoryID,
+		msg.Amount,
+		msg.Argument,
+		msg.Creator,
+		msg.Evidence,
+		msg.Reason)
 	if err != nil {
 		return err.Result()
 	}

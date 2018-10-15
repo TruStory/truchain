@@ -30,13 +30,11 @@ type ReadWriteKeeper interface {
 // Keeper data type storing keys to the key-value store
 type Keeper struct {
 	app.Keeper
-
-	storeKey sdk.StoreKey
 }
 
 // NewKeeper creates a new keeper with write and read access
 func NewKeeper(storeKey sdk.StoreKey, codec *amino.Codec) Keeper {
-	return Keeper{app.NewKeeper(codec), storeKey}
+	return Keeper{app.NewKeeper(codec, storeKey)}
 }
 
 // NewCategory adds a story to the key-value store
@@ -47,7 +45,7 @@ func (k Keeper) NewCategory(
 	description string) (int64, sdk.Error) {
 
 	cat := NewCategory(
-		k.GetNextID(ctx, k.storeKey),
+		k.GetNextID(ctx),
 		title,
 		slug,
 		description)
@@ -59,8 +57,8 @@ func (k Keeper) NewCategory(
 
 // GetCategory gets the category with the given id from the key-value store
 func (k Keeper) GetCategory(ctx sdk.Context, id int64) (cat Category, err sdk.Error) {
-	store := ctx.KVStore(k.storeKey)
-	val := store.Get(getCategoryIDKey(k, id))
+	store := k.GetStore(ctx)
+	val := store.Get(k.GetIDKey(id))
 	if val == nil {
 		return cat, ErrCategoryNotFound(id)
 	}
@@ -73,13 +71,8 @@ func (k Keeper) GetCategory(ctx sdk.Context, id int64) (cat Category, err sdk.Er
 
 // setCategory saves a `Category` type to the KVStore
 func (k Keeper) setCategory(ctx sdk.Context, cat Category) {
-	store := ctx.KVStore(k.storeKey)
+	store := k.GetStore(ctx)
 	store.Set(
-		getCategoryIDKey(k, cat.ID),
+		k.GetIDKey(cat.ID),
 		k.GetCodec().MustMarshalBinary(cat))
-}
-
-// getCategoryIDKey returns byte array for "categories:id:[ID]"
-func getCategoryIDKey(k Keeper, id int64) []byte {
-	return app.GetIDKey(k.storeKey, id)
 }

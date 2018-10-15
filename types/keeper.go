@@ -13,16 +13,27 @@ import (
 // to truchain data. Modules keepers should implement this base interface.
 type ReadKeeper interface {
 	GetCodec() *amino.Codec
+	GetStoreKey() sdk.StoreKey
+}
+
+type WriteKeeper interface {
+	GetStore(ctx sdk.Context) sdk.KVStore
+}
+
+type ReadWriteKeeper interface {
+	ReadKeeper
+	WriteKeeper
 }
 
 // Keeper data type with a default codec
 type Keeper struct {
-	codec *amino.Codec
+	codec    *amino.Codec
+	storeKey sdk.StoreKey
 }
 
 // NewKeeper creates a new parent keeper for module keepers to embed
-func NewKeeper(codec *amino.Codec) Keeper {
-	return Keeper{codec: codec}
+func NewKeeper(codec *amino.Codec, storeKey sdk.StoreKey) Keeper {
+	return Keeper{codec, storeKey}
 }
 
 // GetCodec returns the base keeper's underlying codec
@@ -30,10 +41,18 @@ func (k Keeper) GetCodec() *amino.Codec {
 	return k.codec
 }
 
+func (k Keeper) GetStoreKey() sdk.StoreKey {
+	return k.storeKey
+}
+
+func (k Keeper) GetStore(ctx sdk.Context) sdk.KVStore {
+	return ctx.KVStore(k.GetStoreKey())
+}
+
 // GetNextID increments and returns the next available id by 1
-func (k Keeper) GetNextID(ctx sdk.Context, storeKey sdk.StoreKey) (id int64) {
-	store := ctx.KVStore(storeKey)
-	lenKey := []byte(storeKey.Name() + ":len")
+func (k Keeper) GetNextID(ctx sdk.Context) (id int64) {
+	store := k.GetStore(ctx)
+	lenKey := []byte(k.storeKey.Name() + ":len")
 
 	bz := store.Get(lenKey)
 	if bz == nil {
@@ -51,7 +70,6 @@ func (k Keeper) GetNextID(ctx sdk.Context, storeKey sdk.StoreKey) (id int64) {
 	return nextID
 }
 
-// GetIDKey returns a store key of form name:id:[ID]
-func GetIDKey(storeKey sdk.StoreKey, id int64) []byte {
-	return []byte(fmt.Sprintf("%s:id:%d", storeKey.Name(), id))
+func (k Keeper) GetIDKey(id int64) []byte {
+	return []byte(fmt.Sprintf("%s:id:%d", k.GetStoreKey().Name(), id))
 }

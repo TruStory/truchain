@@ -9,15 +9,16 @@ import (
 )
 
 func TestValidStartChallengeMsg(t *testing.T) {
-	ctx, _, sk, ck := mockDB()
+	ctx, _, sk, ck, _ := mockDB()
 	validStoryID := createFakeStory(ctx, sk, ck)
 	validAmount := sdk.NewCoin("testcoin", sdk.NewInt(5))
 	validArugment := "I am against this story because, you know, just cuz."
 	validCreator := sdk.AccAddress([]byte{1, 2})
 	cnn, _ := url.Parse("http://www.cnn.com")
 	validEvidence := []url.URL{*cnn}
+	validReason := False
 
-	msg := NewStartChallengeMsg(validStoryID, validAmount, validArugment, validCreator, validEvidence)
+	msg := NewStartChallengeMsg(validStoryID, validAmount, validArugment, validCreator, validEvidence, validReason)
 	err := msg.ValidateBasic()
 	assert.Nil(t, err)
 
@@ -27,15 +28,16 @@ func TestValidStartChallengeMsg(t *testing.T) {
 }
 
 func TestInValidStartChallengeMsg(t *testing.T) {
-	ctx, _, sk, ck := mockDB()
+	ctx, _, sk, ck, _ := mockDB()
 	validStoryID := createFakeStory(ctx, sk, ck)
 	validAmount := sdk.NewCoin("testcoin", sdk.NewInt(5))
 	validArugment := "I am against this story because, you know, just cuz."
 	validCreator := sdk.AccAddress([]byte{1, 2})
 	cnn, _ := url.Parse("http://www.cnn.com")
 	validEvidence := []url.URL{*cnn, *cnn, *cnn, *cnn, *cnn, *cnn, *cnn, *cnn, *cnn, *cnn, *cnn}
+	validReason := False
 
-	msg := NewStartChallengeMsg(validStoryID, validAmount, validArugment, validCreator, validEvidence)
+	msg := NewStartChallengeMsg(validStoryID, validAmount, validArugment, validCreator, validEvidence, validReason)
 	err := msg.ValidateBasic()
 	assert.NotNil(t, err)
 	assert.Equal(t, ErrInvalidMsg(msg.Evidence).Code(), err.Code(), "wrong error code")
