@@ -1,5 +1,12 @@
 PACKAGES=$(shell go list ./...)
 
+MODULES = backing category challenge story
+
+define \n
+
+
+endef
+
 benchmark:
 	@go test -bench=. $(PACKAGES)
 
@@ -10,6 +17,8 @@ build:
 
 check:
 	gometalinter ./...
+
+dep_graph: ; $(foreach dir, $(MODULES), godepgraph -s -novendor github.com/TruStory/truchain/x/$(dir) | dot -Tpng -o x/$(dir)/dep.png${\n})
 
 install_tools_macos:
 	brew install dep && brew upgrade dep
@@ -26,4 +35,4 @@ update_deps:
 	@rm -rf .vendor-new
 	@dep ensure -v
 
-.PHONY: benchmark buidl build test test_cover test_lint update_deps
+.PHONY: benchmark buidl build check dep_graph test test_cover update_deps
