@@ -44,7 +44,6 @@ type ReadWriteKeeper interface {
 type Keeper struct {
 	app.Keeper
 
-	storeKey       sdk.StoreKey          // key to backing store
 	storyKeeper    story.ReadWriteKeeper // read-write access to story store
 	bankKeeper     bank.Keeper           // read-write access coin store
 	categoryKeeper cat.ReadKeeper        // read access to category store
@@ -57,7 +56,7 @@ func NewKeeper(
 	bk bank.Keeper,
 	ck cat.ReadKeeper,
 	codec *amino.Codec) Keeper {
-	return Keeper{app.NewKeeper(codec), storeKey, sk, bk, ck}
+	return Keeper{app.NewKeeper(codec, storeKey), sk, bk, ck}
 }
 
 // ============================================================================
@@ -104,7 +103,7 @@ func (k Keeper) NewBacking(
 
 	// create new backing type
 	backing := NewBacking(
-		k.GetNextID(ctx, k.storeKey),
+		k.GetNextID(ctx),
 		storyID,
 		principal,
 		interest,
@@ -124,8 +123,8 @@ func (k Keeper) NewBacking(
 
 // GetBacking gets the backing at the current index from the KVStore
 func (k Keeper) GetBacking(ctx sdk.Context, id int64) (backing Backing, err sdk.Error) {
-	store := ctx.KVStore(k.storeKey)
-	key := getBackingIDKey(k, id)
+	store := k.GetStore(ctx)
+	key := k.GetIDKey(id)
 	val := store.Get(key)
 	if val == nil {
 		return backing, ErrNotFound(id)
@@ -165,9 +164,9 @@ func (k Keeper) getPrincipal(
 
 // setBacking stores a `Backing` type in the KVStore
 func (k Keeper) setBacking(ctx sdk.Context, backing Backing) {
-	store := ctx.KVStore(k.storeKey)
+	store := k.GetStore(ctx)
 	store.Set(
-		getBackingIDKey(k, backing.ID),
+		k.GetIDKey(backing.ID),
 		k.GetCodec().MustMarshalBinary(backing))
 }
 
@@ -246,6 +245,6 @@ func getInterest(
 }
 
 // getBackingIDKey returns byte array for "backings:id:[ID]"
-func getBackingIDKey(k Keeper, id int64) []byte {
-	return app.GetIDKey(k.storeKey, id)
-}
+// func getBackingIDKey(k Keeper, id int64) []byte {
+// 	return app.GetIDKey(k.GetStoreKey(), id)
+// }

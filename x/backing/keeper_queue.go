@@ -51,7 +51,7 @@ func (k Keeper) QueueLen(ctx sdk.Context) int {
 
 // geQueue gets the queue from the context
 func (k Keeper) getQueue(ctx sdk.Context) (q Queue) {
-	store := ctx.KVStore(k.storeKey)
+	store := k.GetStore(ctx)
 	bq := store.Get(getQueueKey(k))
 	if bq == nil {
 		return
@@ -63,12 +63,16 @@ func (k Keeper) getQueue(ctx sdk.Context) (q Queue) {
 
 // setQueue sets the Queue to the context
 func (k Keeper) setQueue(ctx sdk.Context, q Queue) {
-	store := ctx.KVStore(k.storeKey)
+	store := k.GetStore(ctx)
 	bsq := k.GetCodec().MustMarshalBinary(q)
 	store.Set(getQueueKey(k), bsq)
 }
 
 // getQueueKey returns "backings:unexpired:queue"
 func getQueueKey(k Keeper) []byte {
-	return []byte(fmt.Sprintf("%s:%s:%s", k.storeKey.Name(), "unexpired", "queue"))
+	return []byte(fmt.Sprintf(
+		"%s:%s:%s",
+		k.GetStoreKey().Name(),
+		"unexpired",
+		"queue"))
 }

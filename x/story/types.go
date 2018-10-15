@@ -70,6 +70,7 @@ type Story struct {
 	Thread       []int64          `json:"thread,omitempty"`
 	Body         string           `json:"body"`
 	CategoryID   int64            `json:"category_id"`
+	ChallengeID  int64            `json:"challenge_id"`
 	CreatedBlock int64            `json:"created_block"`
 	Creator      sdk.AccAddress   `json:"creator"`
 	Round        int64            `json:"round"`
@@ -87,6 +88,7 @@ func NewStory(
 	thread []int64,
 	body string,
 	categoryID int64,
+	challengeID int64,
 	createdBlock int64,
 	creator sdk.AccAddress,
 	round int64,
@@ -102,6 +104,7 @@ func NewStory(
 		Thread:       thread,
 		Body:         body,
 		CategoryID:   categoryID,
+		ChallengeID:  challengeID,
 		CreatedBlock: createdBlock,
 		Creator:      creator,
 		Round:        round,
