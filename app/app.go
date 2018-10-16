@@ -2,21 +2,23 @@ package app
 
 import (
 	"encoding/json"
-
+	"github.com/cosmos/cosmos-sdk/codec"
+	"github.com/cosmos/cosmos-sdk/x/auth"
+	"github.com/cosmos/cosmos-sdk/x/bank"
+	"github.com/cosmos/cosmos-sdk/x/ibc"
+	"github.com/tendermint/tendermint/libs/log"
 	"github.com/TruStory/truchain/types"
 	"github.com/TruStory/truchain/x/backing"
 	"github.com/TruStory/truchain/x/category"
 	"github.com/TruStory/truchain/x/story"
-	bam "github.com/cosmos/cosmos-sdk/baseapp"
-	"github.com/cosmos/cosmos-sdk/codec"
-	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/cosmos/cosmos-sdk/x/auth"
-	"github.com/cosmos/cosmos-sdk/x/bank"
-	"github.com/cosmos/cosmos-sdk/x/ibc"
+	"github.com/TruStory/truchain/x/truapi"
+	"github.com/TruStory/truchain/x/registration"
+	
 	abci "github.com/tendermint/tendermint/abci/types"
+	bam "github.com/cosmos/cosmos-sdk/baseapp"
 	cmn "github.com/tendermint/tendermint/libs/common"
 	dbm "github.com/tendermint/tendermint/libs/db"
-	"github.com/tendermint/tendermint/libs/log"
+	sdk "github.com/cosmos/cosmos-sdk/types"
 	tmtypes "github.com/tendermint/tendermint/types"
 )
 
@@ -35,6 +37,7 @@ type TruChain struct {
 	// keys to access the multistore
 	keyMain     *sdk.KVStoreKey
 	keyAccount  *sdk.KVStoreKey
+	keyFee      *sdk.KVStoreKey
 	keyIBC      *sdk.KVStoreKey
 	keyStory    *sdk.KVStoreKey
 	keyCategory *sdk.KVStoreKey
@@ -64,14 +67,15 @@ func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *T
 
 	// create your application type
 	var app = &TruChain{
-		codec:       codec,
-		BaseApp:     bam.NewBaseApp(appName, logger, db, auth.DefaultTxDecoder(codec), options...),
-		keyMain:     sdk.NewKVStoreKey("main"),
-		keyAccount:  sdk.NewKVStoreKey("acc"),
-		keyIBC:      sdk.NewKVStoreKey("ibc"),
-		keyStory:    sdk.NewKVStoreKey("stories"),
-		keyCategory: sdk.NewKVStoreKey("categories"),
-		keyBacking:  sdk.NewKVStoreKey("backings"),
+		codec:        codec,
+		BaseApp:      bam.NewBaseApp(appName, logger, db, auth.DefaultTxDecoder(codec), options...),
+		keyMain:      sdk.NewKVStoreKey("main"),
+		keyAccount:   sdk.NewKVStoreKey("acc"),
+		keyIBC:       sdk.NewKVStoreKey("ibc"),
+		keyFee:       sdk.NewKVStoreKey("collectedFees"),
+		keyStory:     sdk.NewKVStoreKey("stories"),
+		keyCategory:  sdk.NewKVStoreKey("categories"),
+		keyBacking:   sdk.NewKVStoreKey("backings"),
 	}
 
 	// define and attach the mappers and keepers
@@ -82,6 +86,7 @@ func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *T
 	)
 	app.coinKeeper = bank.NewBaseKeeper(app.accountMapper)
 	app.ibcMapper = ibc.NewMapper(app.codec, app.keyIBC, app.RegisterCodespace(ibc.DefaultCodespace))
+	app.feeCollectionKeeper = auth.NewFeeCollectionKeeper(app.codec, app.keyFee)
 
 	// wire up trustory keepers
 	app.categoryKeeper = category.NewKeeper(app.keyCategory, app.keyStory, codec)
@@ -108,7 +113,7 @@ func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *T
 	app.SetAnteHandler(auth.NewAnteHandler(app.accountMapper, app.feeCollectionKeeper))
 
 	// mount the multistore and load the latest state
-	app.MountStoresIAVL(app.keyMain, app.keyAccount, app.keyIBC, app.keyStory, app.keyBacking)
+	app.MountStoresIAVL(app.keyMain, app.keyAccount, app.keyIBC, app.keyStory, app.keyBacking, app.keyFee, app.keyCategory)
 	err := app.LoadLatestVersion(app.keyMain)
 	if err != nil {
 		cmn.Exit(err.Error())
@@ -127,9 +132,15 @@ func MakeCodec() *codec.Codec {
 	bank.RegisterCodec(cdc)
 	ibc.RegisterCodec(cdc)
 
-	// register custom types
+	// register msg types
+	story.RegisterAmino(cdc)
+	backing.RegisterAmino(cdc)
+	category.RegisterAmino(cdc)
+	
+	// register other custom types
 	cdc.RegisterInterface((*auth.Account)(nil), nil)
 	cdc.RegisterConcrete(&types.AppAccount{}, "truchain/Account", nil)
+	cdc.RegisterConcrete(&auth.StdTx{}, "cosmos-sdk/StdTx", nil)
 
 	cdc.Seal()
 

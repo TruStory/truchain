@@ -4,6 +4,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth"
+	"github.com/tendermint/tendermint/crypto"
 )
 
 var _ auth.Account = (*AppAccount)(nil)
@@ -21,6 +22,43 @@ type AppAccount struct {
 // nolint
 func (acc AppAccount) GetName() string      { return acc.Name }
 func (acc *AppAccount) SetName(name string) { acc.Name = name }
+
+func (acc AppAccount) GetAccountNumber() int64 {
+	return acc.AccountNumber
+}
+
+func (acc AppAccount) GetCoins() sdk.Coins {
+	return acc.Coins
+}
+
+func (acc AppAccount) GetSequence() int64 {
+	return acc.Sequence
+}
+
+func (acc AppAccount) SetAccountNumber(accNumber int64) error {
+	acc.BaseAccount.SetAccountNumber(accNumber)
+	return nil
+}
+
+func (acc AppAccount) SetAddress(address sdk.AccAddress) error {
+	acc.BaseAccount.SetAddress(address)
+	return nil
+}
+
+func (acc AppAccount) SetSequence(seq int64) error {
+	acc.BaseAccount.SetSequence(seq)
+	return nil
+}
+
+func (acc AppAccount) SetCoins(coins sdk.Coins) error {
+	acc.BaseAccount.SetCoins(coins)
+	return nil
+}
+
+func (acc AppAccount) SetPubKey(pubkey crypto.PubKey) error {
+	acc.PubKey = pubkey
+	return nil
+}
 
 // NewAppAccount returns a reference to a new AppAccount given a name and an
 // auth.BaseAccount.
