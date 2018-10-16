@@ -59,6 +59,12 @@ type TruChain struct {
 	storyKeeper     story.ReadWriteKeeper
 	categoryKeeper  category.ReadWriteKeeper
 	backingKeeper   backing.ReadWriteKeeper
+
+	// state to run api
+	blockCtx *sdk.Context
+	blockHeader abci.Header
+	api *truapi.TruApi
+	apiStarted bool
 	registrarKey secp256k1.PrivKeySecp256k1
 }
 
@@ -82,6 +88,10 @@ func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *T
 		keyStory:     sdk.NewKVStoreKey("stories"),
 		keyCategory:  sdk.NewKVStoreKey("categories"),
 		keyBacking:   sdk.NewKVStoreKey("backings"),
+		api:          nil,
+		apiStarted:   false,
+		blockCtx:     nil,
+		blockHeader:  abci.Header{},
 		registrarKey: loadRegistrarKey(),
 	}
 
@@ -127,6 +137,9 @@ func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *T
 		cmn.Exit(err.Error())
 	}
 
+	// build HTTP api
+	app.api = app.makeApi()
+
 	return app
 }
 
@@ -158,7 +171,15 @@ func MakeCodec() *codec.Codec {
 
 // BeginBlocker reflects logic to run before any TXs application are processed
 // by the application.
-func (app *TruChain) BeginBlocker(_ sdk.Context, _ abci.RequestBeginBlock) abci.ResponseBeginBlock {
+func (app *TruChain) BeginBlocker(ctx sdk.Context, req abci.RequestBeginBlock) abci.ResponseBeginBlock {
+	app.blockCtx = &ctx
+	app.blockHeader = req.Header
+
+	if !(app.apiStarted) {
+		go app.startApi()
+		app.apiStarted = true
+	}
+
 	return abci.ResponseBeginBlock{}
 }
 
