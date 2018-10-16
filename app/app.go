@@ -19,12 +19,17 @@ import (
 	cmn "github.com/tendermint/tendermint/libs/common"
 	dbm "github.com/tendermint/tendermint/libs/db"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	secp256k1 "github.com/tendermint/tendermint/crypto/secp256k1"
 	tmtypes "github.com/tendermint/tendermint/types"
 )
 
 const (
 	appName = "TruChain"
+	registrarAccAddress = "truchainaccregistrar"
 )
+
+var initialCoins = sdk.Coins{sdk.Coin{Amount: sdk.NewInt(123456), Denom: "trusteak"}}
+var registrationFee = auth.StdFee{Amount: sdk.Coins{sdk.Coin{Amount: sdk.NewInt(1), Denom: "trustake"}}, Gas: 10000}
 
 // TruChain implements an extended ABCI application. It contains a BaseApp,
 // a codec for serialization, KVStore keys for multistore state management, and
@@ -54,6 +59,7 @@ type TruChain struct {
 	storyKeeper     story.ReadWriteKeeper
 	categoryKeeper  category.ReadWriteKeeper
 	backingKeeper   backing.ReadWriteKeeper
+	registrarKey secp256k1.PrivKeySecp256k1
 }
 
 // NewTruChain returns a reference to a new TruChain. Internally,
@@ -76,6 +82,7 @@ func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *T
 		keyStory:     sdk.NewKVStoreKey("stories"),
 		keyCategory:  sdk.NewKVStoreKey("categories"),
 		keyBacking:   sdk.NewKVStoreKey("backings"),
+		registrarKey: loadRegistrarKey(),
 	}
 
 	// define and attach the mappers and keepers
@@ -174,7 +181,7 @@ func (app *TruChain) initChainer(ctx sdk.Context, req abci.RequestInitChain) abc
 		panic(err)
 	}
 
-	for _, gacc := range genesisState.Accounts {
+	for i, gacc := range genesisState.Accounts {
 		acc, err := gacc.ToAppAccount()
 		if err != nil {
 			// TODO: https://github.com/cosmos/cosmos-sdk/issues/468
@@ -182,6 +189,11 @@ func (app *TruChain) initChainer(ctx sdk.Context, req abci.RequestInitChain) abc
 		}
 
 		acc.AccountNumber = app.accountMapper.GetNextAccountNumber(ctx)
+
+		if i == 1 { // TODO: more robust way of identifying registrar account
+			acc.BaseAccount.SetPubKey(app.registrarKey.PubKey())
+		}
+
 		app.accountMapper.SetAccount(ctx, acc)
 	}
 
@@ -214,4 +226,28 @@ func (app *TruChain) ExportAppStateAndValidators() (appState json.RawMessage, va
 	}
 
 	return appState, validators, err
+}
+
+func loadRegistrarKey() secp256k1.PrivKeySecp256k1 {
+  fileBytes, err := ioutil.ReadFile("registrar.key")
+  
+  if err != nil {
+    panic(err)
+  }
+
+  keyBytes, err := hex.DecodeString(string(fileBytes))
+
+  if err != nil {
+    panic(err)
+  }
+
+  if len(keyBytes) != 32 {
+    panic("Invalid registrar key: " + string(fileBytes))
+  }
+
+  key := secp256k1.PrivKeySecp256k1{}
+
+  copy(key[:], keyBytes)
+
+  return key
 }
