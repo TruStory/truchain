@@ -31,8 +31,11 @@ const (
 	registrarAccAddress = "truchainaccregistrar"
 )
 
-var initialCoins = sdk.Coins{sdk.Coin{Amount: sdk.NewInt(123456), Denom: "trusteak"}}
-var registrationFee = auth.StdFee{Amount: sdk.Coins{sdk.Coin{Amount: sdk.NewInt(1), Denom: "trustake"}}, Gas: 10000}
+var initialCoins = sdk.Coins{sdk.Coin{Amount: sdk.NewInt(123456), Denom: "trusteak"}} // TODO: Update with actual user initial coins [notduncansmith]
+var registrationFee = auth.StdFee{
+	Amount: sdk.Coins{sdk.Coin{Amount: sdk.NewInt(1), Denom: "trustake"}}, 
+	Gas: 10000 // TODO: Use more accurate gas estimate [notduncansmith]
+}
 
 // TruChain implements an extended ABCI application. It contains a BaseApp,
 // a codec for serialization, KVStore keys for multistore state management, and
@@ -216,7 +219,7 @@ func (app *TruChain) initChainer(ctx sdk.Context, req abci.RequestInitChain) abc
 
 		acc.AccountNumber = app.accountMapper.GetNextAccountNumber(ctx)
 
-		if i == 1 { // TODO: more robust way of identifying registrar account
+		if i == 1 { // TODO: more robust way of identifying registrar account [notduncansmith]
 			acc.BaseAccount.SetPubKey(app.registrarKey.PubKey())
 		}
 

@@ -38,14 +38,7 @@ func (app *TruChain) startApi() {
 
   app.api.RegisterRoutes()
   app.api.RegisterResolvers()
-  apierr := app.api.ListenAndServe("0.0.0.0:8080")
-
-  if apierr != nil {
-    log.Println("Failed to start http")
-    log.Fatal(apierr)
-  } else {
-    log.Println("Woo listening on 8080!!!!")
-  }
+  log.Fatal(app.api.ListenAndServe("0.0.0.0:8080")) // TODO: Make port configurable [notduncansmith]
 }
 
 // Implements chttp.App
