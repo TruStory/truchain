@@ -107,7 +107,8 @@ func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *T
 		AddRoute("ibc", ibc.NewHandler(app.ibcMapper, app.coinKeeper)).
 		AddRoute("story", story.NewHandler(app.storyKeeper)).
 		AddRoute("category", category.NewHandler(app.categoryKeeper)).
-		AddRoute("backing", backing.NewHandler(app.backingKeeper))
+		AddRoute("backing", backing.NewHandler(app.backingKeeper)).
+		AddRoute("registration", registration.NewHandler(app.accountMapper))
 
 	// register query routes for reading state
 	app.QueryRouter().
@@ -143,6 +144,7 @@ func MakeCodec() *codec.Codec {
 	story.RegisterAmino(cdc)
 	backing.RegisterAmino(cdc)
 	category.RegisterAmino(cdc)
+	registration.RegisterAmino(cdc)
 	
 	// register other custom types
 	cdc.RegisterInterface((*auth.Account)(nil), nil)
