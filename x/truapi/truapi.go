@@ -27,5 +27,6 @@ func (ta *TruApi) RegisterRoutes() {
 }
 
 func (ta *TruApi) RegisterResolvers() {
+  ta.GraphQLClient.RegisterQueryResolver("story", ta.storyResolver)
   ta.GraphQLClient.BuildSchema()
 }
