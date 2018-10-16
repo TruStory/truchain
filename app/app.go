@@ -1,11 +1,15 @@
 package app
 
 import (
+	"encoding/hex"
 	"encoding/json"
+  "io/ioutil"
+  
 	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/cosmos/cosmos-sdk/x/auth"
 	"github.com/cosmos/cosmos-sdk/x/bank"
 	"github.com/cosmos/cosmos-sdk/x/ibc"
+	"github.com/tendermint/tendermint/crypto/secp256k1"
 	"github.com/tendermint/tendermint/libs/log"
 	"github.com/TruStory/truchain/types"
 	"github.com/TruStory/truchain/x/backing"
@@ -19,7 +23,6 @@ import (
 	cmn "github.com/tendermint/tendermint/libs/common"
 	dbm "github.com/tendermint/tendermint/libs/db"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	secp256k1 "github.com/tendermint/tendermint/crypto/secp256k1"
 	tmtypes "github.com/tendermint/tendermint/types"
 )
 

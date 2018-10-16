@@ -2,10 +2,8 @@ package app
 
 import (
   "context"
-  "encoding/hex"
   "encoding/json"
   "fmt"
-  "io/ioutil"
   "log"
   "math/rand"
   "net/http"
@@ -19,7 +17,6 @@ import (
 
   "github.com/cosmos/cosmos-sdk/x/auth"
   "github.com/oklog/ulid"
-  "github.com/tendermint/tendermint/crypto/secp256k1"
   "github.com/TruStory/truchain/x/chttp"
   "github.com/TruStory/truchain/x/registration"
   "github.com/TruStory/truchain/x/truapi"
