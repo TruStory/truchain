@@ -1,0 +1,81 @@
+version: 2
+
+defaults: &defaults
+  docker:
+    - image: circleci/golang:1.11.1
+  working_directory: /go/src/github.com/TruStory/truchain
+  environment:
+    GOBIN: /tmp/workspace/bin
+
+jobs:
+
+  setup_dependencies:
+    <<: *defaults
+    steps:
+      - run: mkdir -p /tmp/workspace/bin
+      - run: mkdir -p /tmp/workspace/profiles
+      - checkout
+      - restore_cache:
+          keys:
+            - v1-pkg-cache
+      - run:
+          name: dependencies
+          command: |
+            export PATH="$GOBIN:$PATH"
+            make update_deps
+      - persist_to_workspace:
+          root: /tmp/workspace
+          paths:
+            - bin
+            - profiles
+
+  check:
+    <<: *defaults
+    parallelism: 1
+    steps:
+      - attach_workspace:
+          at: /tmp/workspace
+      - checkout
+      - run:
+          name: dependencies
+          command: |
+            export PATH="$GOBIN:$PATH"
+            make update_deps
+      - run:
+          name: Get metalinter
+          command: |
+            export PATH="$GOBIN:$PATH"
+            go get github.com/alecthomas/gometalinter
+            gometalinter --install --update
+      - run:
+          name: Lint source
+          command: |
+            export PATH="$GOBIN:$PATH"
+            make check
+
+  test_unit:
+    <<: *defaults
+    parallelism: 4
+    steps:
+      - attach_workspace:
+          at: /tmp/workspace
+      - checkout
+      - run:
+          name: dependencies
+          command: |
+            export PATH="$GOBIN:$PATH"
+            make update_deps
+      - run:
+          name: Run unit tests
+          command: |
+            export PATH="$GOBIN:$PATH"
+            make test
+
+workflows:
+  version: 2
+  test-suite:
+    jobs:
+      - setup_dependencies
+      - check:
+          requires:
+            - setup_dependencies
