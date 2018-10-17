@@ -19,7 +19,7 @@ type QueryCategoryStoriesParams struct {
 }
 
 type QueryStoriesByIdParams struct {
-  ID int64 `json:"id"`
+	ID int64 `json:"id"`
 }
 
 // NewQuerier returns a function that handles queries on the KVStore

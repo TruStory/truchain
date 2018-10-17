@@ -3,38 +3,37 @@ package app
 import (
 	"encoding/hex"
 	"encoding/json"
-  "io/ioutil"
-  
-	"github.com/cosmos/cosmos-sdk/codec"
-	"github.com/cosmos/cosmos-sdk/x/auth"
-	"github.com/cosmos/cosmos-sdk/x/bank"
-	"github.com/cosmos/cosmos-sdk/x/ibc"
-	"github.com/tendermint/tendermint/crypto/secp256k1"
-	"github.com/tendermint/tendermint/libs/log"
+	"io/ioutil"
+
 	"github.com/TruStory/truchain/types"
 	"github.com/TruStory/truchain/x/backing"
 	"github.com/TruStory/truchain/x/category"
+	"github.com/TruStory/truchain/x/registration"
 	"github.com/TruStory/truchain/x/story"
 	"github.com/TruStory/truchain/x/truapi"
-	"github.com/TruStory/truchain/x/registration"
-	
-	abci "github.com/tendermint/tendermint/abci/types"
 	bam "github.com/cosmos/cosmos-sdk/baseapp"
+	"github.com/cosmos/cosmos-sdk/codec"
+	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/cosmos/cosmos-sdk/x/auth"
+	"github.com/cosmos/cosmos-sdk/x/bank"
+	"github.com/cosmos/cosmos-sdk/x/ibc"
+	abci "github.com/tendermint/tendermint/abci/types"
+	"github.com/tendermint/tendermint/crypto/secp256k1"
 	cmn "github.com/tendermint/tendermint/libs/common"
 	dbm "github.com/tendermint/tendermint/libs/db"
-	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/tendermint/tendermint/libs/log"
 	tmtypes "github.com/tendermint/tendermint/types"
 )
 
 const (
-	appName = "TruChain"
+	appName             = "TruChain"
 	registrarAccAddress = "truchainaccregistrar"
 )
 
 var initialCoins = sdk.Coins{sdk.Coin{Amount: sdk.NewInt(123456), Denom: "trusteak"}} // TODO: Update with actual user initial coins [notduncansmith]
 var registrationFee = auth.StdFee{
-	Amount: sdk.Coins{sdk.Coin{Amount: sdk.NewInt(1), Denom: "trustake"}}, 
-	Gas: 10000, // TODO: Use more accurate gas estimate [notduncansmith]
+	Amount: sdk.Coins{sdk.Coin{Amount: sdk.NewInt(1), Denom: "trustake"}},
+	Gas:    10000, // TODO: Use more accurate gas estimate [notduncansmith]
 }
 
 // TruChain implements an extended ABCI application. It contains a BaseApp,
@@ -67,10 +66,10 @@ type TruChain struct {
 	backingKeeper   backing.ReadWriteKeeper
 
 	// state to run api
-	blockCtx *sdk.Context
-	blockHeader abci.Header
-	api *truapi.TruApi
-	apiStarted bool
+	blockCtx     *sdk.Context
+	blockHeader  abci.Header
+	api          *truapi.TruApi
+	apiStarted   bool
 	registrarKey secp256k1.PrivKeySecp256k1
 }
 
@@ -164,7 +163,7 @@ func MakeCodec() *codec.Codec {
 	backing.RegisterAmino(cdc)
 	category.RegisterAmino(cdc)
 	registration.RegisterAmino(cdc)
-	
+
 	// register other custom types
 	cdc.RegisterInterface((*auth.Account)(nil), nil)
 	cdc.RegisterConcrete(&types.AppAccount{}, "truchain/Account", nil)
@@ -258,25 +257,25 @@ func (app *TruChain) ExportAppStateAndValidators() (appState json.RawMessage, va
 }
 
 func loadRegistrarKey() secp256k1.PrivKeySecp256k1 {
-  fileBytes, err := ioutil.ReadFile("registrar.key")
-  
-  if err != nil {
-    panic(err)
-  }
+	fileBytes, err := ioutil.ReadFile("registrar.key")
 
-  keyBytes, err := hex.DecodeString(string(fileBytes))
+	if err != nil {
+		panic(err)
+	}
 
-  if err != nil {
-    panic(err)
-  }
+	keyBytes, err := hex.DecodeString(string(fileBytes))
 
-  if len(keyBytes) != 32 {
-    panic("Invalid registrar key: " + string(fileBytes))
-  }
+	if err != nil {
+		panic(err)
+	}
 
-  key := secp256k1.PrivKeySecp256k1{}
+	if len(keyBytes) != 32 {
+		panic("Invalid registrar key: " + string(fileBytes))
+	}
 
-  copy(key[:], keyBytes)
+	key := secp256k1.PrivKeySecp256k1{}
 
-  return key
+	copy(key[:], keyBytes)
+
+	return key
 }
