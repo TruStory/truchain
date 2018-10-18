@@ -46,7 +46,7 @@ func (ta *TruApi) HandleRegistration(r *http.Request) chttp.Response {
 		Address:       addr.String(),
 		AccountNumber: num,
 		Sequence:      0,
-		Coins:         *coins,
+		Coins:         coins,
 	})
 
 	return chttp.SimpleResponse(200, responseBytes)

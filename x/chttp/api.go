@@ -14,7 +14,7 @@ import (
 type MsgTypes map[string]interface{} // Map of Msg type names to empty instances
 
 type App interface {
-	RegisterKey(tcmn.HexBytes, string) (*sdk.AccAddress, int64, *sdk.Coins, error)
+	RegisterKey(tcmn.HexBytes, string) (sdk.AccAddress, int64, sdk.Coins, error)
 	RunQuery(string, interface{}) abci.ResponseQuery
 	DeliverPresigned(auth.StdTx) (*trpctypes.ResultBroadcastTxCommit, error)
 }

@@ -42,21 +42,27 @@ func (app *TruChain) startApi() {
 }
 
 // Implements chttp.App
-func (app *TruChain) RegisterKey(k tcmn.HexBytes, algo string) (*sdk.AccAddress, int64, *sdk.Coins, error) {
+func (app *TruChain) RegisterKey(k tcmn.HexBytes, algo string) (sdk.AccAddress, int64, sdk.Coins, error) {
 	addr := getUlid()
-	tx := app.signedRegistrationTx(addr, k, algo)
+	tx, err := app.signedRegistrationTx(addr, k, algo)
+
+	if err != nil {
+		fmt.Println("TX Parse error: ", err, tx)
+		return sdk.AccAddress{}, 0, sdk.Coins{}, err
+	}
+
 	res, err := app.DeliverPresigned(tx)
 
 	if err != nil {
 		fmt.Println("TX Broadcast error: ", err, res)
-		return nil, 0, nil, err
+		return sdk.AccAddress{}, 0, sdk.Coins{}, err
 	}
 
 	stored := app.accountMapper.GetAccount(*(app.blockCtx), sdk.AccAddress(addr))
 	accaddr := sdk.AccAddress(addr)
 	coins := stored.GetCoins()
 
-	return &accaddr, stored.GetAccountNumber(), &coins, nil
+	return accaddr, stored.GetAccountNumber(), coins, nil
 }
 
 // Implements chttp.App
@@ -76,7 +82,7 @@ func (app *TruChain) RunQuery(path string, params interface{}) abci.ResponseQuer
 	return app.Query(abci.RequestQuery{Data: bz, Path: "/custom/" + path})
 }
 
-func (app *TruChain) signedRegistrationTx(addr []byte, k tcmn.HexBytes, algo string) auth.StdTx {
+func (app *TruChain) signedRegistrationTx(addr []byte, k tcmn.HexBytes, algo string) (auth.StdTx, error) {
 	msg := registration.RegisterKeyMsg{Address: addr, PubKey: k, PubKeyAlgo: algo, Coins: initialCoins}
 	chainId := app.blockHeader.ChainID
 	registrarAcc := app.accountMapper.GetAccount(*(app.blockCtx), []byte(types.RegistrarAccAddress))
@@ -89,7 +95,7 @@ func (app *TruChain) signedRegistrationTx(addr []byte, k tcmn.HexBytes, algo str
 	sigBytes, err := app.registrarKey.Sign(bytesToSign)
 
 	if err != nil {
-		panic(err)
+		return auth.StdTx{}, err
 	}
 
 	// Construct and submit signed tx
@@ -105,7 +111,7 @@ func (app *TruChain) signedRegistrationTx(addr []byte, k tcmn.HexBytes, algo str
 		Memo: registrationMemo,
 	}
 
-	return tx
+	return tx, nil
 }
 
 func getUlid() []byte {

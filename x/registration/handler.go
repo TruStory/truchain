@@ -30,7 +30,7 @@ func handleRegisterKeyMsg(ctx sdk.Context, am auth.AccountMapper, msg RegisterKe
 		return sdk.Result{Code: 1, Data: []byte("Registration Error: parsing public key: " + err.Error())}
 	}
 
-	err = bacc.SetPubKey(*key)
+	err = bacc.SetPubKey(key)
 
 	if err != nil {
 		return sdk.Result{Code: 1, Data: []byte("Registration Error: setting public key: " + err.Error())}
