@@ -44,7 +44,16 @@ API requests, and communicate via RPC with `truchaind`.
 
 3. Create genesis file (one-time only)
 
-`bin/truchaind init`
+    a. `bin/truchaind init`
+
+    b. Edit `~/.truchaind/config/genesis.json` and add the following account to the `"accounts"` array:
+
+    ```json
+    {
+      "address": "cosmos1w3e82cmgv95kuctrvdex2emfwd68yctjpzp3mr",
+      "coins": [{"denom": "trustake", "amount": "123456"}]
+    }
+    ```
 
 4. Start blockchain
 
