@@ -28,21 +28,28 @@ func (i Reason) IsValid() bool {
 	return false
 }
 
+// ChallengerInfo defines a challenger
+type ChallengerInfo struct {
+	User   sdk.AccAddress `json:"user"`
+	Amount sdk.Coin       `json:"amount"`
+}
+
 // Challenge defines a challenge on a story
 type Challenge struct {
-	ID              int64            `json:"id"`
-	StoryID         int64            `json:"story_id"`
-	Arugment        string           `json:"arugment"`
-	Challengers     []sdk.AccAddress `json:"challengers"`
-	Creator         sdk.AccAddress   `json:"creator"`
-	Evidence        []url.URL        `json:"evidence,omitempty"`
-	Pool            sdk.Coin         `json:"pool"`
-	Reason          Reason           `json:"reason"`
-	ThresholdAmount sdk.Int          `json:"threshold_amount"`
-	CreatedBlock    int64            `json:"created_block"`
-	CreatedTime     time.Time        `json:"created_time"`
-	UpdatedBlock    int64            `json:"updated_block"`
-	UpdatedTime     time.Time        `json:"updated_time"`
+	ID              int64          `json:"id"`
+	StoryID         int64          `json:"story_id"`
+	Arugment        string         `json:"arugment"`
+	Creator         sdk.AccAddress `json:"creator"`
+	Evidence        []url.URL      `json:"evidence,omitempty"`
+	ExpiresTime     time.Time      `json:"expires_time,omitempty"`
+	Pool            sdk.Coin       `json:"pool"`
+	Reason          Reason         `json:"reason"`
+	Started         bool           `json:"started"`
+	ThresholdAmount sdk.Int        `json:"threshold_amount"`
+	CreatedBlock    int64          `json:"created_block"`
+	CreatedTime     time.Time      `json:"created_time"`
+	UpdatedBlock    int64          `json:"updated_block"`
+	UpdatedTime     time.Time      `json:"updated_time"`
 }
 
 // NewChallenge creates a new `Challenge` type with defaults
@@ -51,11 +58,11 @@ func NewChallenge(
 	storyID int64,
 	amount sdk.Coin,
 	argument string,
-	challengers []sdk.AccAddress,
 	creator sdk.AccAddress,
 	evidence []url.URL,
-	pool sdk.Coin,
+	expiresTime time.Time,
 	reason Reason,
+	started bool,
 	thresholdAmount sdk.Int,
 	createdBlock int64,
 	createdTime time.Time) Challenge {
@@ -64,11 +71,12 @@ func NewChallenge(
 		ID:              id,
 		StoryID:         storyID,
 		Arugment:        argument,
-		Challengers:     challengers,
 		Creator:         creator,
 		Evidence:        evidence,
-		Pool:            pool,
+		ExpiresTime:     expiresTime,
+		Pool:            amount,
 		Reason:          reason,
+		Started:         started,
 		ThresholdAmount: thresholdAmount,
 		CreatedBlock:    createdBlock,
 		CreatedTime:     time.Now(),
