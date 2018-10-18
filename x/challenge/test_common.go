@@ -1,6 +1,8 @@
 package challenge
 
 import (
+	"time"
+
 	c "github.com/TruStory/truchain/x/category"
 	s "github.com/TruStory/truchain/x/story"
 	"github.com/cosmos/cosmos-sdk/store"
@@ -29,7 +31,8 @@ func mockDB() (sdk.Context, Keeper, s.Keeper, c.Keeper, bank.Keeper) {
 	ms.MountStoreWithDB(challengeKey, sdk.StoreTypeIAVL, db)
 	ms.LoadLatestVersion()
 
-	ctx := sdk.NewContext(ms, abci.Header{}, false, log.NewNopLogger())
+	header := abci.Header{Time: time.Now().Add(50 * 24 * time.Hour)}
+	ctx := sdk.NewContext(ms, header, false, log.NewNopLogger())
 
 	codec := amino.NewCodec()
 	cryptoAmino.RegisterAmino(codec)

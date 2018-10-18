@@ -17,10 +17,11 @@ func TestMarshaling(t *testing.T) {
 		StoryID: int64(5),
 	}
 
-	bz := k.marshal(challenge)
+	bz := k.GetCodec().MustMarshalBinary(challenge)
 	assert.NotNil(t, bz)
 
-	value := k.unmarshal(bz)
+	var value Challenge
+	k.GetCodec().MustUnmarshalBinary(bz, &value)
 	assert.IsType(t, Challenge{}, value, "should be right type")
 	assert.Equal(t, challenge.StoryID, value.StoryID, "should be equal")
 }
@@ -36,9 +37,9 @@ func TestSetChallenge(t *testing.T) {
 	ctx, k, _, _, _ := mockDB()
 
 	challenge := Challenge{ID: int64(5)}
-	k.setChallenge(ctx, challenge)
+	k.set(ctx, challenge)
 
-	savedChallenge, err := k.GetChallenge(ctx, int64(5))
+	savedChallenge, err := k.Get(ctx, int64(5))
 	assert.Nil(t, err)
 	assert.Equal(t, challenge.ID, savedChallenge.ID, "should be equal")
 }
@@ -60,13 +61,13 @@ func TestNewGetChallenge(t *testing.T) {
 	id, err := k.NewChallenge(ctx, storyID, amount, argument, creator, evidence, reason)
 	assert.Nil(t, err)
 
-	challenge, err := k.GetChallenge(ctx, id)
+	challenge, err := k.Get(ctx, id)
 	assert.Nil(t, err)
 
 	assert.Equal(t, argument, challenge.Arugment, "should match")
 }
 
-func TestNewChallenge_Existing(t *testing.T) {
+func TestNewChallenge_Duplicate(t *testing.T) {
 	ctx, k, sk, ck, bankKeeper := mockDB()
 
 	storyID := createFakeStory(ctx, sk, ck)
@@ -82,14 +83,44 @@ func TestNewChallenge_Existing(t *testing.T) {
 
 	challengeAmount, _ := sdk.ParseCoin("10trudex")
 
-	id, err := k.NewChallenge(ctx, storyID, challengeAmount, argument, creator, evidence, reason)
+	_, err := k.NewChallenge(ctx, storyID, challengeAmount, argument, creator, evidence, reason)
 	assert.Nil(t, err)
 
-	id, err = k.NewChallenge(ctx, storyID, challengeAmount, argument, creator, evidence, reason)
+	_, err = k.NewChallenge(ctx, storyID, challengeAmount, argument, creator, evidence, reason)
+	assert.NotNil(t, err)
+	assert.Equal(t, ErrDuplicate(5).Code(), err.Code())
+}
+
+func TestNewChallenge_MultipleChallengers(t *testing.T) {
+	ctx, k, sk, ck, bankKeeper := mockDB()
+
+	storyID := createFakeStory(ctx, sk, ck)
+	amount := sdk.NewCoin("trudex", sdk.NewInt(50))
+	argument := "test argument is long enough"
+	creator1 := sdk.AccAddress([]byte{1, 2})
+	creator2 := sdk.AccAddress([]byte{3, 4})
+	cnn, _ := url.Parse("http://www.cnn.com")
+	evidence := []url.URL{*cnn}
+	reason := False
+
+	// give user some funds
+	bankKeeper.AddCoins(ctx, creator1, sdk.Coins{amount})
+	bankKeeper.AddCoins(ctx, creator2, sdk.Coins{amount})
+
+	challengeAmount, _ := sdk.ParseCoin("10trudex")
+
+	id, err := k.NewChallenge(ctx, storyID, challengeAmount, argument, creator1, evidence, reason)
 	assert.Nil(t, err)
 
-	challenge, _ := k.GetChallenge(ctx, id)
-	assert.Equal(t, argument, challenge.Arugment, "should match")
+	challenge, _ := k.Get(ctx, id)
+
+	_, err = k.Update(ctx, challenge, creator2, amount)
+	assert.Nil(t, err)
+	assert.False(t, bankKeeper.HasCoins(ctx, creator2, sdk.Coins{amount}))
+
+	challenge, _ = k.Get(ctx, id)
+	assert.True(t, challenge.Pool.IsEqual(challengeAmount.Plus(amount)))
+	assert.True(t, challenge.Started)
 }
 
 func TestNewChallenge_ErrIncorrectCategoryCoin(t *testing.T) {
