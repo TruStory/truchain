@@ -14,9 +14,9 @@ import (
 )
 
 type PresignedRequest struct {
-	MsgTypes   []string      `json:"msgTypes"`
+	MsgTypes   []string      `json:"msg_types"`
 	Tx         tcmn.HexBytes `json:"tx"`
-	PubKeyAlgo string        `json:"pubkeyAlgo"`
+	PubKeyAlgo string        `json:"pubkey_algo"`
 	PubKey     tcmn.HexBytes `json:"pubkey"`
 	Signature  tcmn.HexBytes `json:"signature"`
 }

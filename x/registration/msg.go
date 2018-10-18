@@ -9,7 +9,7 @@ import (
 type RegisterKeyMsg struct {
 	Address    sdk.AccAddress `json:"address"`
 	PubKey     tcmn.HexBytes  `json:"pubkey"`
-	PubKeyAlgo string         `json:"pubkeyAlgo"`
+	PubKeyAlgo string         `json:"pubkey_algo"`
 	Coins      sdk.Coins      `json:"coins"`
 }
 
