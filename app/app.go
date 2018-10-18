@@ -26,8 +26,7 @@ import (
 )
 
 const (
-	appName             = "TruChain"
-	registrarAccAddress = "truchainaccregistrar"
+	appName = "TruChain"
 )
 
 var initialCoins = sdk.Coins{sdk.Coin{Amount: sdk.NewInt(123456), Denom: "trusteak"}} // TODO: Update with actual user initial coins [notduncansmith]
@@ -123,7 +122,8 @@ func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *T
 		AddRoute("story", story.NewHandler(app.storyKeeper)).
 		AddRoute("category", category.NewHandler(app.categoryKeeper)).
 		AddRoute("backing", backing.NewHandler(app.backingKeeper)).
-		AddRoute("registration", registration.NewHandler(app.accountMapper))
+		AddRoute(registration.RegisterKeyMsg{}.Type(),
+			registration.NewHandler(app.accountMapper))
 
 	// register query routes for reading state
 	app.QueryRouter().

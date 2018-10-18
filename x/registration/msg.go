@@ -14,10 +14,10 @@ type RegisterKeyMsg struct {
 }
 
 // Type implements Msg
-func (msg RegisterKeyMsg) Type() string { return "registration" }
+func (msg RegisterKeyMsg) Type() string { return app.GetType(msg) }
 
 // Name implements Msg
-func (msg RegisterKeyMsg) Name() string { return "RegisterKeyMsg" }
+func (msg RegisterKeyMsg) Name() string { return app.GetName(msg) }
 
 // GetSignBytes implements Msg
 func (msg RegisterKeyMsg) GetSignBytes() []byte {
@@ -32,5 +32,5 @@ func (msg RegisterKeyMsg) ValidateBasic() sdk.Error {
 
 // GetSigners implements Msg
 func (msg RegisterKeyMsg) GetSigners() []sdk.AccAddress {
-	return []sdk.AccAddress{sdk.AccAddress([]byte("truchainaccregistrar"))}
+	return []sdk.AccAddress{sdk.AccAddress([]byte(app.RegistrarAccAddress))}
 }

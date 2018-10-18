@@ -9,6 +9,8 @@ import (
 
 var _ auth.Account = (*AppAccount)(nil)
 
+const RegistrarAccAddress = "truchainaccregistrar"
+
 // AppAccount is a custom extension for this application. It is an example of
 // extending auth.BaseAccount with custom fields. It is compatible with the
 // stock auth.AccountStore, since auth.AccountStore uses the flexible go-amino

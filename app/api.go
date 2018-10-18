@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/TruStory/truchain/types"
 	"github.com/TruStory/truchain/x/chttp"
 	"github.com/TruStory/truchain/x/registration"
 	"github.com/TruStory/truchain/x/truapi"
@@ -78,7 +79,7 @@ func (app *TruChain) RunQuery(path string, params interface{}) abci.ResponseQuer
 func (app *TruChain) signedRegistrationTx(addr []byte, k tcmn.HexBytes, algo string) auth.StdTx {
 	msg := registration.RegisterKeyMsg{Address: addr, PubKey: k, PubKeyAlgo: algo, Coins: initialCoins}
 	chainId := app.blockHeader.ChainID
-	registrarAcc := app.accountMapper.GetAccount(*(app.blockCtx), []byte(registrarAccAddress))
+	registrarAcc := app.accountMapper.GetAccount(*(app.blockCtx), []byte(types.RegistrarAccAddress))
 	registrarNum := registrarAcc.GetAccountNumber()
 	registrarSequence := registrarAcc.GetSequence()
 	registrationMemo := "reg"
