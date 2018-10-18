@@ -66,7 +66,12 @@ func (app *TruChain) DeliverPresigned(tx auth.StdTx) (*trpctypes.ResultBroadcast
 
 // Implements chttp.App
 func (app *TruChain) RunQuery(path string, params interface{}) abci.ResponseQuery {
-	bz, _ := json.Marshal(params)
+	bz, err := json.Marshal(params)
+
+	if err != nil {
+		return abci.ResponseQuery{Log: err.Error()}
+	}
+
 	return app.Query(abci.RequestQuery{Data: bz, Path: "/custom/" + path})
 }
 

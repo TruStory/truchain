@@ -32,7 +32,12 @@ func SimpleResponse(status int, data json.RawMessage) Response {
 }
 
 func SimpleDataResponse(status int, data map[string]interface{}) Response {
-	bz, _ := json.Marshal(data)
+	bz, err := json.Marshal(data)
+
+	if err != nil {
+		panic(err)
+	}
+
 	return NewResponse(status, bz, nil)
 }
 
