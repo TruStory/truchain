@@ -31,7 +31,7 @@ const (
 
 var initialCoins = sdk.Coins{sdk.Coin{Amount: sdk.NewInt(123456), Denom: "trusteak"}} // TODO: Update with actual user initial coins [notduncansmith]
 var registrationFee = auth.StdFee{
-	Amount: sdk.Coins{sdk.Coin{Amount: sdk.NewInt(1), Denom: "trustake"}},
+	Amount: sdk.Coins{sdk.Coin{Amount: sdk.NewInt(1), Denom: "trusteak"}},
 	Gas:    10000, // TODO: Use more accurate gas estimate [notduncansmith]
 }
 
