@@ -55,7 +55,17 @@ API requests, and communicate via RPC with `truchaind`.
     }
     ```
 
-4. Start blockchain
+4. Create registrar key
+
+Create a file in the root of this project named `registrar.key` containing the upper-case-hex encoding of a secp256k1 private key. Example:
+
+```
+6D5A20923CB334E4950C32C344842FE0DCBAC559FB04AE97D64B49ACC81BC1FB
+```
+
+This is the private key to the account added in step 3b.
+
+5. Start blockchain
 
 `bin/truchaind start`
 
