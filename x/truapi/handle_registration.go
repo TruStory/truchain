@@ -11,7 +11,7 @@ import (
 )
 
 type RegistrationRequest struct {
-	PubKeyAlgo string        `json:"pubkeyAlgo"`
+	PubKeyAlgo string        `json:"pubkey_algo"`
 	PubKey     tcmn.HexBytes `json:"pubkey"`
 }
 
@@ -49,5 +49,5 @@ func (ta *TruApi) HandleRegistration(r *http.Request) chttp.Response {
 		Coins:         coins,
 	})
 
-	return chttp.SimpleResponse(200, responseBytes)
+	return chttp.SimpleResponse(201, responseBytes)
 }
