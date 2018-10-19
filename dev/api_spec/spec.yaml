@@ -1,0 +1,26 @@
+meta:
+  name: TruChain API
+configuration:
+  scheme: http
+  host: localhost
+  port: 8080
+  base_path: /
+specs:
+  - name: Register key
+    request: 
+      path: /register
+      method: post
+      headers:
+        - name: content-type
+          value: application/json
+      payload:
+        body:
+          type: json
+          content:
+            pubkey: 02f2c73a5446bd30f7681064334be4b9a318d6870ffac756c34805f75c02fc9049
+            pubkey_algo: secp256k1
+    response:
+      status_code: 201
+      json_data:
+        - path: $.data.coins.0.denom
+          value: trusteak
