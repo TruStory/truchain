@@ -22,13 +22,13 @@ type ReadKeeper interface {
 
 // WriteKeeper defines a module interface that facilities write only access to truchain data
 type WriteKeeper interface {
-	NewChallenge(
+	Create(
 		ctx sdk.Context, storyID int64, amount sdk.Coin,
 		argument string, creator sdk.AccAddress, evidence []url.URL,
 		reason Reason) (int64, sdk.Error)
 
 	Update(
-		ctx sdk.Context, challenge Challenge, creator sdk.AccAddress,
+		ctx sdk.Context, challengeID int64, creator sdk.AccAddress,
 		amount sdk.Coin) (id int64, err sdk.Error)
 }
 
@@ -53,14 +53,10 @@ func NewKeeper(storeKey sdk.StoreKey, sk story.ReadWriteKeeper, bankKeeper bank.
 
 // ============================================================================
 
-// NewChallenge adds a new challenge on a story in the KVStore
-func (k Keeper) NewChallenge(
-	ctx sdk.Context,
-	storyID int64,
-	amount sdk.Coin,
-	argument string,
-	creator sdk.AccAddress,
-	evidence []url.URL,
+// Create adds a new challenge on a story in the KVStore
+func (k Keeper) Create(
+	ctx sdk.Context, storyID int64, amount sdk.Coin,
+	argument string, creator sdk.AccAddress, evidence []url.URL,
 	reason Reason) (int64, sdk.Error) {
 
 	// get the story being challenged
@@ -116,7 +112,14 @@ func (k Keeper) Get(ctx sdk.Context, challengeID int64) (challenge Challenge, er
 }
 
 // Update mutates an existing challenge, adding a new challenger and updating the pool
-func (k Keeper) Update(ctx sdk.Context, challenge Challenge, creator sdk.AccAddress, amount sdk.Coin) (id int64, err sdk.Error) {
+func (k Keeper) Update(
+	ctx sdk.Context, challengeID int64, creator sdk.AccAddress,
+	amount sdk.Coin) (id int64, err sdk.Error) {
+	challenge, err := k.Get(ctx, challengeID)
+	if err != nil {
+		return 0, err
+	}
+
 	// validate challenge before updating it
 	if err = validate(ctx, k, challenge.StoryID, creator, amount); err != nil {
 		return 0, err
@@ -183,7 +186,9 @@ func (k Keeper) getChallengerPrefix(id int64) []byte {
 // ============================================================================
 
 // addChallenger adds a challenger to the challenge and saves to the store
-func addChallenger(ctx sdk.Context, k Keeper, challenge *Challenge, challenger sdk.AccAddress, amount sdk.Coin) sdk.Error {
+func addChallenger(
+	ctx sdk.Context, k Keeper, challenge *Challenge,
+	challenger sdk.AccAddress, amount sdk.Coin) sdk.Error {
 	// if threshold is reached, start challenge
 	if challenge.Pool.Amount.GT(challenge.ThresholdAmount) {
 		k.storyKeeper.StartChallenge(ctx, challenge.StoryID)
@@ -217,7 +222,9 @@ func thresholdAmount(s story.Story) sdk.Int {
 }
 
 // validate a new challenge operation before creating one
-func validate(ctx sdk.Context, k Keeper, storyID int64, creator sdk.AccAddress, amount sdk.Coin) (err sdk.Error) {
+func validate(
+	ctx sdk.Context, k Keeper, storyID int64,
+	creator sdk.AccAddress, amount sdk.Coin) (err sdk.Error) {
 	// get category coin name
 	coinName, err := k.storyKeeper.GetCoinName(ctx, storyID)
 	if err != nil {

@@ -78,3 +78,55 @@ func (msg StartChallengeMsg) ValidateBasic() sdk.Error {
 func (msg StartChallengeMsg) GetSigners() []sdk.AccAddress {
 	return app.GetSigners(msg.Creator)
 }
+
+// ============================================================================
+
+// UpdateChallengeMsg defines a message to challenge a story
+type UpdateChallengeMsg struct {
+	ChallengeID int64          `json:"challenge_id"`
+	Amount      sdk.Coin       `json:"amount"`
+	Creator     sdk.AccAddress `json:"creator"`
+}
+
+// NewUpdateChallengeMsg creates a message to challenge a story
+func NewUpdateChallengeMsg(
+	challengeID int64,
+	amount sdk.Coin,
+	creator sdk.AccAddress) UpdateChallengeMsg {
+	return UpdateChallengeMsg{
+		ChallengeID: challengeID,
+		Amount:      amount,
+		Creator:     creator,
+	}
+}
+
+// Type implements Msg
+func (msg UpdateChallengeMsg) Type() string { return app.GetType(msg) }
+
+// Name implements Msg
+func (msg UpdateChallengeMsg) Name() string { return app.GetName(msg) }
+
+// GetSignBytes implements Msg. Story creator should sign this message.
+// Serializes Msg into JSON bytes for transport.
+func (msg UpdateChallengeMsg) GetSignBytes() []byte {
+	return app.MustGetSignBytes(msg)
+}
+
+// ValidateBasic implements Msg
+func (msg UpdateChallengeMsg) ValidateBasic() sdk.Error {
+	if msg.ChallengeID == 0 {
+		return story.ErrInvalidStoryID(msg.ChallengeID)
+	}
+	if msg.Amount.IsZero() == true {
+		return sdk.ErrInsufficientFunds("Invalid challenge amount" + msg.Amount.String())
+	}
+	if len(msg.Creator) == 0 {
+		return sdk.ErrInvalidAddress("Invalid address: " + msg.Creator.String())
+	}
+	return nil
+}
+
+// GetSigners implements Msg. Story creator is the only signer of this message.
+func (msg UpdateChallengeMsg) GetSigners() []sdk.AccAddress {
+	return app.GetSigners(msg.Creator)
+}
