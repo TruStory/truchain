@@ -58,7 +58,7 @@ func TestNewGetChallenge(t *testing.T) {
 	// give user some funds
 	bankKeeper.AddCoins(ctx, creator, sdk.Coins{amount})
 
-	id, err := k.NewChallenge(ctx, storyID, amount, argument, creator, evidence, reason)
+	id, err := k.Create(ctx, storyID, amount, argument, creator, evidence, reason)
 	assert.Nil(t, err)
 
 	challenge, err := k.Get(ctx, id)
@@ -83,10 +83,10 @@ func TestNewChallenge_Duplicate(t *testing.T) {
 
 	challengeAmount, _ := sdk.ParseCoin("10trudex")
 
-	_, err := k.NewChallenge(ctx, storyID, challengeAmount, argument, creator, evidence, reason)
+	_, err := k.Create(ctx, storyID, challengeAmount, argument, creator, evidence, reason)
 	assert.Nil(t, err)
 
-	_, err = k.NewChallenge(ctx, storyID, challengeAmount, argument, creator, evidence, reason)
+	_, err = k.Create(ctx, storyID, challengeAmount, argument, creator, evidence, reason)
 	assert.NotNil(t, err)
 	assert.Equal(t, ErrDuplicate(5).Code(), err.Code())
 }
@@ -109,12 +109,12 @@ func TestNewChallenge_MultipleChallengers(t *testing.T) {
 
 	challengeAmount, _ := sdk.ParseCoin("10trudex")
 
-	id, err := k.NewChallenge(ctx, storyID, challengeAmount, argument, creator1, evidence, reason)
+	id, err := k.Create(ctx, storyID, challengeAmount, argument, creator1, evidence, reason)
 	assert.Nil(t, err)
 
 	challenge, _ := k.Get(ctx, id)
 
-	_, err = k.Update(ctx, challenge, creator2, amount)
+	_, err = k.Update(ctx, challenge.ID, creator2, amount)
 	assert.Nil(t, err)
 	assert.False(t, bankKeeper.HasCoins(ctx, creator2, sdk.Coins{amount}))
 
@@ -137,6 +137,6 @@ func TestNewChallenge_ErrIncorrectCategoryCoin(t *testing.T) {
 	// give user some funds
 	bankKeeper.AddCoins(ctx, creator, sdk.Coins{amount})
 
-	_, err := k.NewChallenge(ctx, storyID, amount, argument, creator, evidence, reason)
+	_, err := k.Create(ctx, storyID, amount, argument, creator, evidence, reason)
 	assert.NotNil(t, err)
 }
