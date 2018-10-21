@@ -2,18 +2,16 @@ package backing
 
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	abci "github.com/tendermint/tendermint/abci/types"
 )
 
-// NewResponseEndBlock is called at the end of every block, processes timing
-// related events, and returns a ResponseEndBlock.
-func (k Keeper) NewResponseEndBlock(ctx sdk.Context) abci.ResponseEndBlock {
+// NewResponseEndBlock is called at the end of every block tick
+func (k Keeper) NewResponseEndBlock(ctx sdk.Context) sdk.Tags {
 	err := processBacking(ctx, k)
 	if err != nil {
 		panic(err)
 	}
 
-	return abci.ResponseEndBlock{}
+	return sdk.NewTags()
 }
 
 // ============================================================================

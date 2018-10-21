@@ -9,7 +9,6 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/bank"
 	amino "github.com/tendermint/go-amino"
-	abci "github.com/tendermint/tendermint/abci/types"
 )
 
 // ReadKeeper defines a module interface that facilitates read only access
@@ -30,7 +29,8 @@ type WriteKeeper interface {
 		creator sdk.AccAddress,
 		duration time.Duration,
 	) (int64, sdk.Error)
-	NewResponseEndBlock(ctx sdk.Context) abci.ResponseEndBlock
+
+	NewResponseEndBlock(ctx sdk.Context) sdk.Tags
 }
 
 // ReadWriteKeeper defines a module interface that facilities read/write access
