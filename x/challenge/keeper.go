@@ -30,6 +30,8 @@ type WriteKeeper interface {
 	Update(
 		ctx sdk.Context, challengeID int64, creator sdk.AccAddress,
 		amount sdk.Coin) (id int64, err sdk.Error)
+
+	NewResponseEndBlock(ctx sdk.Context) sdk.Tags
 }
 
 // ReadWriteKeeper defines a module interface that facilities read/write access to truchain data

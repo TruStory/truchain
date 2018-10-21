@@ -12,8 +12,8 @@ import (
 func TestNewResponseEndBlock(t *testing.T) {
 	ctx, k, _, _, _ := mockDB()
 
-	res := k.NewResponseEndBlock(ctx)
-	assert.NotNil(t, res)
+	tags := k.NewResponseEndBlock(ctx)
+	assert.Nil(t, tags)
 }
 
 func Test_checkExpiredChallenges(t *testing.T) {

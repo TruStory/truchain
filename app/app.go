@@ -157,7 +157,14 @@ func (app *TruChain) BeginBlocker(_ sdk.Context, _ abci.RequestBeginBlock) abci.
 // EndBlocker reflects logic to run after all TXs are processed by the
 // application.
 func (app *TruChain) EndBlocker(ctx sdk.Context, _ abci.RequestEndBlock) abci.ResponseEndBlock {
-	return app.backingKeeper.NewResponseEndBlock(ctx)
+	tags := sdk.EmptyTags()
+
+	backingEndBlockTags := app.backingKeeper.NewResponseEndBlock(ctx)
+	challengeEndBlockTags := app.challengeKeeper.NewResponseEndBlock(ctx)
+
+	tags.AppendTags(sdk.NewTags(backingEndBlockTags, challengeEndBlockTags))
+
+	return abci.ResponseEndBlock{Tags: tags.ToKVPairs()}
 }
 
 // initChainer implements the custom application logic that the BaseApp will

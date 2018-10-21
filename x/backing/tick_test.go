@@ -11,8 +11,8 @@ import (
 func TestNewResponseEndBlock(t *testing.T) {
 	ctx, bk, _, _, _, _ := mockDB()
 
-	res := bk.NewResponseEndBlock(ctx)
-	assert.NotNil(t, res)
+	tags := bk.NewResponseEndBlock(ctx)
+	assert.Nil(t, tags)
 }
 
 func Test_processEarnings_QueueEmpty(t *testing.T) {
