@@ -243,8 +243,3 @@ func getInterest(
 
 	return coin
 }
-
-// getBackingIDKey returns byte array for "backings:id:[ID]"
-// func getBackingIDKey(k Keeper, id int64) []byte {
-// 	return app.GetIDKey(k.GetStoreKey(), id)
-// }

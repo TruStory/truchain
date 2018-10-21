@@ -7,7 +7,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
-// Story errors reserve 1000 ~ 1099.
+// Challenge errors reserve 1000 ~ 1099.
 const (
 	DefaultCodespace sdk.CodespaceType = 10
 
