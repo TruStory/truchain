@@ -7,4 +7,5 @@ import (
 // RegisterAmino registers messages into the codec
 func RegisterAmino(c *amino.Codec) {
 	c.RegisterConcrete(StartChallengeMsg{}, "challenge/StartChallengeMsg", nil)
+	c.RegisterConcrete(UpdateChallengeMsg{}, "challenge/UpdateChallengeMsg", nil)
 }
