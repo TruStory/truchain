@@ -38,7 +38,7 @@ type ChallengerInfo struct {
 type Challenge struct {
 	ID              int64          `json:"id"`
 	StoryID         int64          `json:"story_id"`
-	Arugment        string         `json:"arugment"`
+	Argument        string         `json:"argument"`
 	Creator         sdk.AccAddress `json:"creator"`
 	Evidence        []url.URL      `json:"evidence,omitempty"`
 	ExpiresTime     time.Time      `json:"expires_time,omitempty"`
@@ -70,7 +70,7 @@ func NewChallenge(
 	return Challenge{
 		ID:              id,
 		StoryID:         storyID,
-		Arugment:        argument,
+		Argument:        argument,
 		Creator:         creator,
 		Evidence:        evidence,
 		ExpiresTime:     expiresTime,
