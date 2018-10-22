@@ -79,3 +79,6 @@ workflows:
       - check:
           requires:
             - setup_dependencies
+      - test_unit:
+          requires:
+            - setup_dependencies
