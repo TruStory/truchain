@@ -21,7 +21,7 @@
 
 [[constraint]]
   name = "github.com/cosmos/cosmos-sdk"
-  branch = "develop"
+  revision = "ce23ad41ce7bc53494c80a2d73fdc1c9e39f7ec7"
 
 [[override]]
   name = "github.com/tendermint/iavl"
