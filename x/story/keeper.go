@@ -215,7 +215,7 @@ func (k Keeper) GetFeedWithCategory(
 		}
 	}
 
-	// concat challeneged with unchallenged stories
+	// concat challenged with unchallenged stories
 	feed := append(challenged, unchallenged...)
 
 	return getStoriesFromIDList(ctx, k, feed)

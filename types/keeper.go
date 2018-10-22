@@ -16,10 +16,12 @@ type ReadKeeper interface {
 	GetStoreKey() sdk.StoreKey
 }
 
+// WriteKeeper defines an interface for write access to the KVStore
 type WriteKeeper interface {
 	GetStore(ctx sdk.Context) sdk.KVStore
 }
 
+// ReadWriteKeeper defines an interface for read-write access to the KVStore
 type ReadWriteKeeper interface {
 	ReadKeeper
 	WriteKeeper
@@ -41,10 +43,12 @@ func (k Keeper) GetCodec() *amino.Codec {
 	return k.codec
 }
 
+// GetStoreKey returns the default store key for the keeper
 func (k Keeper) GetStoreKey() sdk.StoreKey {
 	return k.storeKey
 }
 
+// GetStore returns the default KVStore for the keeper
 func (k Keeper) GetStore(ctx sdk.Context) sdk.KVStore {
 	return ctx.KVStore(k.GetStoreKey())
 }
@@ -70,6 +74,7 @@ func (k Keeper) GetNextID(ctx sdk.Context) (id int64) {
 	return nextID
 }
 
+// GetIDKey returns the key for a given index
 func (k Keeper) GetIDKey(id int64) []byte {
 	return []byte(fmt.Sprintf("%s:id:%d", k.GetStoreKey().Name(), id))
 }
