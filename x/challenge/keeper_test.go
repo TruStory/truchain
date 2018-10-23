@@ -86,7 +86,7 @@ func TestNewChallenge_Duplicate(t *testing.T) {
 
 	_, err = k.Create(ctx, storyID, challengeAmount, argument, creator, evidence)
 	assert.NotNil(t, err)
-	assert.Equal(t, ErrDuplicate(5).Code(), err.Code())
+	assert.Equal(t, ErrStoryAlreadyChallenged(5).Code(), err.Code())
 }
 
 func TestNewChallenge_MultipleChallengers(t *testing.T) {
