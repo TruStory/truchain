@@ -72,12 +72,16 @@ func (k Keeper) Create(
 
 	// check if story already has a challenge
 	if story.ChallengeID > 0 {
-		return 0, ErrStoryAlreadyChallenged(story.ID)
+		return 0, ErrStoryAlreadyChallenged(storyID)
 	}
+
+	// create an initial empty challenge pool
+	coinName, err := k.storyKeeper.GetCoinName(ctx, storyID)
+	emptyPool := sdk.NewCoin(coinName, sdk.NewInt(0))
 
 	// create new challenge type
 	challenge := NewChallenge(
-		k.GetNextID(ctx), storyID, amount,
+		k.GetNextID(ctx), storyID, emptyPool,
 		argument, creator, evidence,
 		ctx.BlockHeader().Time.Add(NewParams().Expires),
 		false, thresholdAmount(story), ctx.BlockHeight(),
@@ -91,6 +95,7 @@ func (k Keeper) Create(
 	q := queue.NewQueue(k.GetCodec(), k.GetStore(ctx))
 	q.Push(challenge.ID)
 
+	// add creator of challenge as challenger
 	addChallenger(ctx, k, &challenge, creator, amount)
 
 	// set challenge in KVStore
@@ -137,9 +142,7 @@ func (k Keeper) Update(
 		return 0, ErrDuplicateChallenger(challenge.ID, creator)
 	}
 
-	// add amount to challenge pool
-	challenge.Pool = challenge.Pool.Plus(amount)
-
+	// add user to challenger list
 	addChallenger(ctx, k, &challenge, creator, amount)
 
 	// update existing challenge in KVStore
@@ -185,15 +188,10 @@ func (k Keeper) getChallengerPrefix(id int64) []byte {
 
 // ============================================================================
 
-// addChallenger adds a challenger to the challenge and saves to the store
+// addChallenger adds a challenger to the challenge
 func addChallenger(
 	ctx sdk.Context, k Keeper, challenge *Challenge,
 	challenger sdk.AccAddress, amount sdk.Coin) sdk.Error {
-	// if threshold is reached, start challenge and allow voting to begin
-	if challenge.Pool.Amount.GT(challenge.ThresholdAmount) {
-		k.storyKeeper.StartChallenge(ctx, challenge.StoryID)
-		challenge.Started = true
-	}
 
 	// update block time for good record keeping
 	challenge.UpdatedBlock = ctx.BlockHeight()
@@ -211,6 +209,15 @@ func addChallenger(
 	_, _, err := k.bankKeeper.SubtractCoins(ctx, challenger, sdk.Coins{amount})
 	if err != nil {
 		return err
+	}
+
+	// add amount to challenge pool
+	challenge.Pool = challenge.Pool.Plus(amount)
+
+	// if threshold is reached, start challenge and allow voting to begin
+	if challenge.Pool.Amount.GT(challenge.ThresholdAmount) {
+		k.storyKeeper.StartChallenge(ctx, challenge.StoryID)
+		challenge.Started = true
 	}
 
 	return nil
