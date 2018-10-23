@@ -49,6 +49,14 @@ func checkExpiredChallenges(ctx sdk.Context, k Keeper, q store.Queue) sdk.Error 
 			return err
 		}
 		k.delete(ctx, challengeID)
+
+		// remove challenge association from story
+		story, err := k.storyKeeper.GetStory(ctx, challenge.StoryID)
+		if err != nil {
+			return err
+		}
+		story.ChallengeID = 0
+		k.storyKeeper.UpdateStory(ctx, story)
 	}
 
 	return checkExpiredChallenges(ctx, k, q)
