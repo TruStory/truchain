@@ -16,9 +16,8 @@ func TestValidStartChallengeMsg(t *testing.T) {
 	validCreator := sdk.AccAddress([]byte{1, 2})
 	cnn, _ := url.Parse("http://www.cnn.com")
 	validEvidence := []url.URL{*cnn}
-	validReason := False
 
-	msg := NewStartChallengeMsg(validStoryID, validAmount, validArugment, validCreator, validEvidence, validReason)
+	msg := NewStartChallengeMsg(validStoryID, validAmount, validArugment, validCreator, validEvidence)
 	err := msg.ValidateBasic()
 	assert.Nil(t, err)
 
@@ -35,9 +34,8 @@ func TestInValidStartChallengeMsg(t *testing.T) {
 	validCreator := sdk.AccAddress([]byte{1, 2})
 	cnn, _ := url.Parse("http://www.cnn.com")
 	validEvidence := []url.URL{*cnn, *cnn, *cnn, *cnn, *cnn, *cnn, *cnn, *cnn, *cnn, *cnn, *cnn}
-	validReason := False
 
-	msg := NewStartChallengeMsg(validStoryID, validAmount, validArugment, validCreator, validEvidence, validReason)
+	msg := NewStartChallengeMsg(validStoryID, validAmount, validArugment, validCreator, validEvidence)
 	err := msg.ValidateBasic()
 	assert.NotNil(t, err)
 	assert.Equal(t, ErrInvalidMsg(msg.Evidence).Code(), err.Code(), "wrong error code")
@@ -51,9 +49,8 @@ func TestValidUpdateChallengeMsg(t *testing.T) {
 	validCreator := sdk.AccAddress([]byte{1, 2})
 	cnn, _ := url.Parse("http://www.cnn.com")
 	validEvidence := []url.URL{*cnn}
-	validReason := False
 
-	msg := NewStartChallengeMsg(validStoryID, validAmount, validArugment, validCreator, validEvidence, validReason)
+	msg := NewStartChallengeMsg(validStoryID, validAmount, validArugment, validCreator, validEvidence)
 	err := msg.ValidateBasic()
 	assert.Nil(t, err)
 

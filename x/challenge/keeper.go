@@ -24,8 +24,7 @@ type ReadKeeper interface {
 type WriteKeeper interface {
 	Create(
 		ctx sdk.Context, storyID int64, amount sdk.Coin,
-		argument string, creator sdk.AccAddress, evidence []url.URL,
-		reason Reason) (int64, sdk.Error)
+		argument string, creator sdk.AccAddress, evidence []url.URL) (int64, sdk.Error)
 
 	Update(
 		ctx sdk.Context, challengeID int64, creator sdk.AccAddress,
@@ -58,8 +57,7 @@ func NewKeeper(storeKey sdk.StoreKey, sk story.ReadWriteKeeper, bankKeeper bank.
 // Create adds a new challenge on a story in the KVStore
 func (k Keeper) Create(
 	ctx sdk.Context, storyID int64, amount sdk.Coin,
-	argument string, creator sdk.AccAddress, evidence []url.URL,
-	reason Reason) (int64, sdk.Error) {
+	argument string, creator sdk.AccAddress, evidence []url.URL) (int64, sdk.Error) {
 
 	// get the story being challenged
 	story, err := k.storyKeeper.GetStory(ctx, storyID)
@@ -81,7 +79,7 @@ func (k Keeper) Create(
 	challenge := NewChallenge(
 		k.GetNextID(ctx), storyID, amount,
 		argument, creator, evidence,
-		ctx.BlockHeader().Time.Add(NewParams().Expires), reason,
+		ctx.BlockHeader().Time.Add(NewParams().Expires),
 		false, thresholdAmount(story), ctx.BlockHeight(),
 		ctx.BlockHeader().Time)
 

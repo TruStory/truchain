@@ -7,27 +7,6 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
-// Reason is a type that defines a reason for a challenge
-type Reason int8
-
-// List of acceptable challenge reasons
-const (
-	False = Reason(iota)
-	NotEasilyFalsifiable
-	Spam
-	TooObvious
-	TooSubjective
-)
-
-// IsValid return true if a reason is valid
-func (i Reason) IsValid() bool {
-	switch i {
-	case False, NotEasilyFalsifiable, Spam, TooObvious, TooSubjective:
-		return true
-	}
-	return false
-}
-
 // ChallengerInfo defines a challenger
 type ChallengerInfo struct {
 	User   sdk.AccAddress `json:"user"`
@@ -43,7 +22,6 @@ type Challenge struct {
 	Evidence        []url.URL      `json:"evidence,omitempty"`
 	ExpiresTime     time.Time      `json:"expires_time,omitempty"`
 	Pool            sdk.Coin       `json:"pool"`
-	Reason          Reason         `json:"reason"`
 	Started         bool           `json:"started"`
 	ThresholdAmount sdk.Int        `json:"threshold_amount"`
 	CreatedBlock    int64          `json:"created_block"`
@@ -61,7 +39,6 @@ func NewChallenge(
 	creator sdk.AccAddress,
 	evidence []url.URL,
 	expiresTime time.Time,
-	reason Reason,
 	started bool,
 	thresholdAmount sdk.Int,
 	createdBlock int64,
@@ -75,7 +52,6 @@ func NewChallenge(
 		Evidence:        evidence,
 		ExpiresTime:     expiresTime,
 		Pool:            amount,
-		Reason:          reason,
 		Started:         started,
 		ThresholdAmount: thresholdAmount,
 		CreatedBlock:    createdBlock,

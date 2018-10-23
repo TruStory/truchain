@@ -22,12 +22,11 @@ func TestStartChallengeMsg(t *testing.T) {
 	creator := sdk.AccAddress([]byte{1, 2})
 	cnn, _ := url.Parse("http://www.cnn.com")
 	evidence := []url.URL{*cnn}
-	reason := False
 
 	// give user some funds
 	bankKeeper.AddCoins(ctx, creator, sdk.Coins{amount})
 
-	msg := NewStartChallengeMsg(storyID, amount, argument, creator, evidence, reason)
+	msg := NewStartChallengeMsg(storyID, amount, argument, creator, evidence)
 	assert.NotNil(t, msg)
 
 	res := h(ctx, msg)
@@ -48,9 +47,8 @@ func TestStartChallengeMsg_ErrInsufficientFunds(t *testing.T) {
 	creator := sdk.AccAddress([]byte{1, 2})
 	cnn, _ := url.Parse("http://www.cnn.com")
 	evidence := []url.URL{*cnn}
-	reason := False
 
-	msg := NewStartChallengeMsg(storyID, amount, argument, creator, evidence, reason)
+	msg := NewStartChallengeMsg(storyID, amount, argument, creator, evidence)
 	assert.NotNil(t, msg)
 
 	res := h(ctx, msg)
@@ -70,12 +68,11 @@ func TestStartChallengeMsg_ErrInsufficientChallengeAmount(t *testing.T) {
 	creator := sdk.AccAddress([]byte{1, 2})
 	cnn, _ := url.Parse("http://www.cnn.com")
 	evidence := []url.URL{*cnn}
-	reason := False
 
 	// give user some funds
 	bankKeeper.AddCoins(ctx, creator, sdk.Coins{amount})
 
-	msg := NewStartChallengeMsg(storyID, amount, argument, creator, evidence, reason)
+	msg := NewStartChallengeMsg(storyID, amount, argument, creator, evidence)
 	assert.NotNil(t, msg)
 
 	res := h(ctx, msg)
@@ -96,13 +93,12 @@ func TestUpdateChallengeMsg(t *testing.T) {
 	creator2 := sdk.AccAddress([]byte{2, 3})
 	cnn, _ := url.Parse("http://www.cnn.com")
 	evidence := []url.URL{*cnn}
-	reason := False
 
 	// give users some funds
 	bankKeeper.AddCoins(ctx, creator, sdk.Coins{amount})
 	bankKeeper.AddCoins(ctx, creator2, sdk.Coins{amount})
 
-	msg := NewStartChallengeMsg(storyID, amount, argument, creator, evidence, reason)
+	msg := NewStartChallengeMsg(storyID, amount, argument, creator, evidence)
 	assert.NotNil(t, msg)
 
 	res := h(ctx, msg)

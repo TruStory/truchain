@@ -16,7 +16,6 @@ type StartChallengeMsg struct {
 	Argument string         `json:"argument,omitempty"`
 	Creator  sdk.AccAddress `json:"creator"`
 	Evidence []url.URL      `json:"evidence,omitempty"`
-	Reason   Reason         `json:"reason"`
 }
 
 // NewStartChallengeMsg creates a message to challenge a story
@@ -25,15 +24,13 @@ func NewStartChallengeMsg(
 	amount sdk.Coin,
 	argument string,
 	creator sdk.AccAddress,
-	evidence []url.URL,
-	reason Reason) StartChallengeMsg {
+	evidence []url.URL) StartChallengeMsg {
 	return StartChallengeMsg{
 		StoryID:  storyID,
 		Amount:   amount,
 		Argument: argument,
 		Creator:  creator,
 		Evidence: evidence,
-		Reason:   reason,
 	}
 }
 
@@ -67,9 +64,6 @@ func (msg StartChallengeMsg) ValidateBasic() sdk.Error {
 	}
 	if len := len(msg.Evidence); len < params.MinEvidenceCount || len > params.MaxEvidenceCount {
 		return ErrInvalidMsg(msg.Evidence)
-	}
-	if !msg.Reason.IsValid() {
-		return ErrInvalidMsg(msg.Reason)
 	}
 	return nil
 }

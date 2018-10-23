@@ -25,12 +25,11 @@ func Test_checkExpiredChallenges(t *testing.T) {
 	creator := sdk.AccAddress([]byte{1, 2})
 	cnn, _ := url.Parse("http://www.cnn.com")
 	evidence := []url.URL{*cnn}
-	reason := False
 
 	// give user some funds
 	bankKeeper.AddCoins(ctx, creator, sdk.Coins{amount})
 
-	_, err := k.Create(ctx, storyID, amount, argument, creator, evidence, reason)
+	_, err := k.Create(ctx, storyID, amount, argument, creator, evidence)
 	assert.Nil(t, err)
 
 	q := store.NewQueue(k.GetCodec(), k.GetStore(ctx))
@@ -47,12 +46,11 @@ func Test_returnFunds(t *testing.T) {
 	creator := sdk.AccAddress([]byte{1, 2})
 	cnn, _ := url.Parse("http://www.cnn.com")
 	evidence := []url.URL{*cnn}
-	reason := False
 
 	// give user some funds
 	bankKeeper.AddCoins(ctx, creator, sdk.Coins{amount})
 
-	id, err := k.Create(ctx, storyID, amount, argument, creator, evidence, reason)
+	id, err := k.Create(ctx, storyID, amount, argument, creator, evidence)
 	assert.Nil(t, err)
 
 	challenge, _ := k.Get(ctx, id)
