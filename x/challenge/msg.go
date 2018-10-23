@@ -118,7 +118,7 @@ func (msg UpdateChallengeMsg) ValidateBasic() sdk.Error {
 		return story.ErrInvalidStoryID(msg.ChallengeID)
 	}
 	if msg.Amount.IsZero() == true {
-		return sdk.ErrInsufficientFunds("Invalid challenge amount" + msg.Amount.String())
+		return sdk.ErrInvalidCoins("Invalid challenge amount" + msg.Amount.String())
 	}
 	if len(msg.Creator) == 0 {
 		return sdk.ErrInvalidAddress("Invalid address: " + msg.Creator.String())

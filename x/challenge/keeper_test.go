@@ -64,7 +64,7 @@ func TestNewGetChallenge(t *testing.T) {
 	challenge, err := k.Get(ctx, id)
 	assert.Nil(t, err)
 
-	assert.Equal(t, argument, challenge.Arugment, "should match")
+	assert.Equal(t, argument, challenge.Argument, "should match")
 }
 
 func TestNewChallenge_Duplicate(t *testing.T) {

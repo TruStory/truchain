@@ -6,7 +6,6 @@ import (
 	app "github.com/TruStory/truchain/types"
 	"github.com/TruStory/truchain/x/category"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/davecgh/go-spew/spew"
 	amino "github.com/tendermint/go-amino"
 )
 
@@ -164,8 +163,6 @@ func (k Keeper) GetChallengedStoriesWithCategory(
 		return stories, ErrStoriesWithCategoryNotFound(catID)
 	}
 
-	spew.Dump(bz)
-
 	// return list of stories
 	return getStories(ctx, k, bz)
 }
@@ -215,7 +212,7 @@ func (k Keeper) GetFeedWithCategory(
 		}
 	}
 
-	// concat challenged with unchallenged stories
+	// concat challenged story ids with unchallenged story ids
 	feed := append(challenged, unchallenged...)
 
 	return getStoriesFromIDList(ctx, k, feed)
