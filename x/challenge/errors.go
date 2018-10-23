@@ -35,11 +35,11 @@ func ErrInvalidMsg(value interface{}) sdk.Error {
 }
 
 // ErrDuplicate creates an error when more than one challenge is attempted on a story
-func ErrDuplicate(id int64) sdk.Error {
+func ErrDuplicate(storyID int64) sdk.Error {
 	return sdk.NewError(
 		DefaultCodespace,
 		CodeDuplicate,
-		"Challenge with id "+fmt.Sprintf("%d", id)+" has already been challenged")
+		"Story with id "+fmt.Sprintf("%d", storyID)+" has already been challenged")
 }
 
 // ErrNotFoundChallenger creates an error for not finding a challenger

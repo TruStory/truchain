@@ -73,8 +73,8 @@ func (k Keeper) Create(
 	}
 
 	// check if story already has a challenge
-	if id := story.ChallengeID; id > 0 {
-		return 0, ErrDuplicate(id)
+	if story.ChallengeID > 0 {
+		return 0, ErrDuplicate(story.ID)
 	}
 
 	// create new challenge type
@@ -191,7 +191,7 @@ func (k Keeper) getChallengerPrefix(id int64) []byte {
 func addChallenger(
 	ctx sdk.Context, k Keeper, challenge *Challenge,
 	challenger sdk.AccAddress, amount sdk.Coin) sdk.Error {
-	// if threshold is reached, start challenge
+	// if threshold is reached, start challenge and allow voting to begin
 	if challenge.Pool.Amount.GT(challenge.ThresholdAmount) {
 		k.storyKeeper.StartChallenge(ctx, challenge.StoryID)
 		challenge.Started = true
