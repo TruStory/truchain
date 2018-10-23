@@ -34,8 +34,8 @@ func ErrInvalidMsg(value interface{}) sdk.Error {
 		"Invalid message field: "+fmt.Sprintf("%s", reflect.TypeOf(value).String()))
 }
 
-// ErrDuplicate creates an error when more than one challenge is attempted on a story
-func ErrDuplicate(storyID int64) sdk.Error {
+// ErrStoryAlreadyChallenged creates an error when more than one challenge is attempted on a story
+func ErrStoryAlreadyChallenged(storyID int64) sdk.Error {
 	return sdk.NewError(
 		DefaultCodespace,
 		CodeDuplicate,

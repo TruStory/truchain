@@ -72,7 +72,7 @@ func (k Keeper) Create(
 
 	// check if story already has a challenge
 	if story.ChallengeID > 0 {
-		return 0, ErrDuplicate(story.ID)
+		return 0, ErrStoryAlreadyChallenged(story.ID)
 	}
 
 	// create new challenge type
