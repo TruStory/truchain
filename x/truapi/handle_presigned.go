@@ -9,7 +9,8 @@ import (
 	"github.com/TruStory/truchain/x/chttp"
 )
 
-func (ta *TruApi) HandlePresigned(r *http.Request) chttp.Response {
+// HandlePresigned dispatches a `chttp.PresignedRequest` to a Cosmos app
+func (ta *TruAPI) HandlePresigned(r *http.Request) chttp.Response {
 	txr := new(chttp.PresignedRequest)
 	jsonBytes, err := ioutil.ReadAll(r.Body)
 
@@ -30,7 +31,7 @@ func (ta *TruApi) HandlePresigned(r *http.Request) chttp.Response {
 		return chttp.SimpleErrorResponse(400, err)
 	}
 
-	res, err := (*(ta.App)).DeliverPresigned(tx)
+	res, err := ta.DeliverPresigned(tx)
 
 	if err != nil {
 		return chttp.SimpleErrorResponse(400, err)

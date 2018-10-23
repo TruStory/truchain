@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 )
 
+// Response describes the information that should be available in the HTTP response body to any API request
 type Response interface {
 	HTTPCode() int
 	Data() []byte
@@ -11,12 +12,14 @@ type Response interface {
 	Marshal() ([]byte, error)
 }
 
-type JsonResponse struct {
+// JSONResponse is an implementation of Response which encodes the required data as JSON
+type JSONResponse struct {
 	status int
 	Body   *json.RawMessage `json:"data"`
 	Err    string           `json:"error"`
 }
 
+// NewResponse returns a JSONResponse with the given status/data/err
 func NewResponse(status int, data json.RawMessage, err error) Response {
 	errs := ""
 
@@ -24,13 +27,15 @@ func NewResponse(status int, data json.RawMessage, err error) Response {
 		errs = err.Error()
 	}
 
-	return Response(JsonResponse{status: status, Body: &data, Err: errs})
+	return Response(JSONResponse{status: status, Body: &data, Err: errs})
 }
 
+// SimpleResponse is a helper to return a response with the given status and data (err is nil)
 func SimpleResponse(status int, data json.RawMessage) Response {
 	return NewResponse(status, data, nil)
 }
 
+// SimpleDataResponse is a helper to return a response whose data is an object
 func SimpleDataResponse(status int, data map[string]interface{}) Response {
 	bz, err := json.Marshal(data)
 
@@ -41,11 +46,13 @@ func SimpleDataResponse(status int, data map[string]interface{}) Response {
 	return NewResponse(status, bz, nil)
 }
 
+// SimpleErrorResponse is a helper to return a response with an error (data is nil)
 func SimpleErrorResponse(status int, err error) Response {
 	return NewResponse(status, []byte("{}"), err)
 }
 
-func (r JsonResponse) HTTPCode() int {
+// HTTPCode implements Response.HTTPCode
+func (r JSONResponse) HTTPCode() int {
 	if r.status != 0 {
 		return r.status
 	}
@@ -57,14 +64,17 @@ func (r JsonResponse) HTTPCode() int {
 	return 200
 }
 
-func (r JsonResponse) Data() []byte {
+// Data implements Response.Data
+func (r JSONResponse) Data() []byte {
 	return *r.Body
 }
 
-func (r JsonResponse) Error() string {
+// Error implements Response.Error
+func (r JSONResponse) Error() string {
 	return r.Err
 }
 
-func (r JsonResponse) Marshal() ([]byte, error) {
+// Marshal implements Response.Marshal
+func (r JSONResponse) Marshal() ([]byte, error) {
 	return json.Marshal(r)
 }

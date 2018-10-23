@@ -8,7 +8,7 @@ import (
 	"github.com/TruStory/truchain/x/story"
 )
 
-func (ta *TruApi) storyResolver(_ context.Context, q story.QueryStoriesByIdParams) []story.Story {
+func (ta *TruAPI) storyResolver(_ context.Context, q story.QueryStoriesByIdParams) []story.Story {
 	res := ta.RunQuery("story", q)
 
 	if res.Code != 0 {

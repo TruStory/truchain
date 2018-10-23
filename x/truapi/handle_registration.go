@@ -10,11 +10,13 @@ import (
 	tcmn "github.com/tendermint/tendermint/libs/common"
 )
 
+// RegistrationRequest is a JSON request body representing a key that a user wishes to register
 type RegistrationRequest struct {
 	PubKeyAlgo string        `json:"pubkey_algo"`
 	PubKey     tcmn.HexBytes `json:"pubkey"`
 }
 
+// RegistrationResponse is a JSON response body representing the result of registering a key
 type RegistrationResponse struct {
 	Address       string    `json:"address"`
 	AccountNumber int64     `json:"account_number"`
@@ -22,7 +24,8 @@ type RegistrationResponse struct {
 	Coins         sdk.Coins `json:"coins"`
 }
 
-func (ta *TruApi) HandleRegistration(r *http.Request) chttp.Response {
+// HandleRegistration takes a `RegistrationRequest` and returns a `RegistrationResponse`
+func (ta *TruAPI) HandleRegistration(r *http.Request) chttp.Response {
 	rr := new(RegistrationRequest)
 	reqBytes, err := ioutil.ReadAll(r.Body)
 

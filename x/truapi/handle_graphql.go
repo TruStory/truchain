@@ -9,7 +9,7 @@ import (
 	"github.com/TruStory/truchain/x/graphql"
 )
 
-func (ta *TruApi) HandleGraphQL(r *http.Request) chttp.Response {
+func (ta *TruAPI) HandleGraphQL(r *http.Request) chttp.Response {
 	gr := new(graphql.Request)
 	jsonBytes, err := ioutil.ReadAll(r.Body)
 

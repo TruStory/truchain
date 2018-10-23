@@ -25,16 +25,6 @@ import (
 	tmtypes "github.com/tendermint/tendermint/types"
 )
 
-const (
-	appName = "TruChain"
-)
-
-var initialCoins = sdk.Coins{sdk.Coin{Amount: sdk.NewInt(123456), Denom: "trusteak"}} // TODO: Update with actual user initial coins [notduncansmith]
-var registrationFee = auth.StdFee{
-	Amount: sdk.Coins{sdk.Coin{Amount: sdk.NewInt(1), Denom: "trusteak"}},
-	Gas:    10000, // TODO: Use more accurate gas estimate [notduncansmith]
-}
-
 // TruChain implements an extended ABCI application. It contains a BaseApp,
 // a codec for serialization, KVStore keys for multistore state management, and
 // various mappers and keepers to manage getting, setting, and serializing the
@@ -67,7 +57,7 @@ type TruChain struct {
 	// state to run api
 	blockCtx     *sdk.Context
 	blockHeader  abci.Header
-	api          *truapi.TruApi
+	api          *truapi.TruAPI
 	apiStarted   bool
 	registrarKey secp256k1.PrivKeySecp256k1
 }
@@ -84,7 +74,7 @@ func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *T
 	// create your application type
 	var app = &TruChain{
 		codec:        codec,
-		BaseApp:      bam.NewBaseApp(appName, logger, db, auth.DefaultTxDecoder(codec), options...),
+		BaseApp:      bam.NewBaseApp(AppName, logger, db, auth.DefaultTxDecoder(codec), options...),
 		keyMain:      sdk.NewKVStoreKey("main"),
 		keyAccount:   sdk.NewKVStoreKey("acc"),
 		keyIBC:       sdk.NewKVStoreKey("ibc"),
@@ -143,7 +133,7 @@ func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *T
 	}
 
 	// build HTTP api
-	app.api = app.makeApi()
+	app.api = app.makeAPI()
 
 	return app
 }
@@ -181,7 +171,7 @@ func (app *TruChain) BeginBlocker(ctx sdk.Context, req abci.RequestBeginBlock) a
 	app.blockHeader = req.Header
 
 	if !(app.apiStarted) {
-		go app.startApi()
+		go app.startAPI()
 		app.apiStarted = true
 	}
 

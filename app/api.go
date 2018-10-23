@@ -22,28 +22,36 @@ import (
 	trpctypes "github.com/tendermint/tendermint/rpc/core/types"
 )
 
-func (app *TruChain) makeApi() *truapi.TruApi {
+const KeepersContextKey = "keepers"
+const StoryKeeperKey = "storyKeeper"
+
+func (app *TruChain) makeAPI() *truapi.TruAPI {
 	aa := chttp.App(app)
-	return truapi.NewTruApi(&aa)
+	return truapi.NewTruAPI(&aa)
 }
 
-func (app *TruChain) startApi() {
+func (app *TruChain) startAPI() {
 	app.api.Use(func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			next.ServeHTTP(w, r.WithContext(context.WithValue(r.Context(), "keepers", map[string]interface{}{
-				"storyKeeper": app.storyKeeper,
-			})))
+			keepers := map[string]interface{}{
+				StoryKeeperKey: app.storyKeeper,
+			}
+
+			ctxWithKeepers := context.WithValue(r.Context(), KeepersContextKey, keepers)
+
+			next.ServeHTTP(w, r.WithContext(ctxWithKeepers))
 		})
 	})
 
 	app.api.RegisterRoutes()
 	app.api.RegisterResolvers()
-	log.Fatal(app.api.ListenAndServe("0.0.0.0:8080")) // TODO: Make port configurable [notduncansmith]
+	log.Fatal(app.api.ListenAndServe(Hostname + ":" + Portname))
 }
 
 // Implements chttp.App
+// RegisterKey generates a new address/account for a public key
 func (app *TruChain) RegisterKey(k tcmn.HexBytes, algo string) (sdk.AccAddress, int64, sdk.Coins, error) {
-	addr := getUlid()
+	addr := GenerateAddress()
 	tx, err := app.signedRegistrationTx(addr, k, algo)
 
 	if err != nil {
@@ -66,12 +74,14 @@ func (app *TruChain) RegisterKey(k tcmn.HexBytes, algo string) (sdk.AccAddress, 
 }
 
 // Implements chttp.App
+// DeliverPresigned broadcasts a transaction to the network and returns the result.
 func (app *TruChain) DeliverPresigned(tx auth.StdTx) (*trpctypes.ResultBroadcastTxCommit, error) {
 	bz := app.codec.MustMarshalBinary(tx)
 	return trpc.BroadcastTxCommit(bz)
 }
 
 // Implements chttp.App
+// RunQuery takes a querier path string and parameters map, and returns the results of the query.
 func (app *TruChain) RunQuery(path string, params interface{}) abci.ResponseQuery {
 	bz, err := json.Marshal(params)
 
@@ -80,6 +90,16 @@ func (app *TruChain) RunQuery(path string, params interface{}) abci.ResponseQuer
 	}
 
 	return app.Query(abci.RequestQuery{Data: bz, Path: "/custom/" + path})
+}
+
+// GenerateAddress returns the first 20 characters of a ULID generated with github.com/oklog/ulid
+func GenerateAddress() []byte {
+	t := time.Now()
+	entropy := ulid.Monotonic(rand.New(rand.NewSource(t.UnixNano())), 0)
+	ulidaddr := ulid.MustNew(ulid.Timestamp(t), entropy)
+	addr := []byte(ulidaddr.String())[:20]
+
+	return addr
 }
 
 func (app *TruChain) signedRegistrationTx(addr []byte, k tcmn.HexBytes, algo string) (auth.StdTx, error) {
@@ -112,13 +132,4 @@ func (app *TruChain) signedRegistrationTx(addr []byte, k tcmn.HexBytes, algo str
 	}
 
 	return tx, nil
-}
-
-func getUlid() []byte {
-	t := time.Now()
-	entropy := ulid.Monotonic(rand.New(rand.NewSource(t.UnixNano())), 0)
-	ulidaddr := ulid.MustNew(ulid.Timestamp(t), entropy)
-	addr := []byte(ulidaddr.String())[:20]
-
-	return addr
 }

@@ -11,37 +11,50 @@ import (
 	trpctypes "github.com/tendermint/tendermint/rpc/core/types"
 )
 
-type MsgTypes map[string]interface{} // Map of Msg type names to empty instances
+// MsgTypes is a map of `Msg` type names to empty instances
+type MsgTypes map[string]interface{}
 
+// App is implemented by a Cosmos app to provide chain functionality to the API
 type App interface {
 	RegisterKey(tcmn.HexBytes, string) (sdk.AccAddress, int64, sdk.Coins, error)
 	RunQuery(string, interface{}) abci.ResponseQuery
 	DeliverPresigned(auth.StdTx) (*trpctypes.ResultBroadcastTxCommit, error)
 }
 
-type Api struct {
+// API presents the functionality of a Cosmos app over HTTP
+type API struct {
 	App       *App
 	Supported MsgTypes
 	router    *mux.Router
 }
 
-func NewApi(app *App, supported MsgTypes) *Api {
-	a := Api{App: app, Supported: supported, router: mux.NewRouter()}
+// NewAPI creates an `API` struct from an `App` and a `MsgTypes` schema
+func NewAPI(app *App, supported MsgTypes) *API {
+	a := API{App: app, Supported: supported, router: mux.NewRouter()}
 	return &a
 }
 
-func (a *Api) HandleFunc(path string, h Handler) {
+// HandleFunc registers a `chttp.Handler` on the API router
+func (a *API) HandleFunc(path string, h Handler) {
 	a.router.HandleFunc(path, h.HandlerFunc())
 }
 
-func (a *Api) Use(mw func(http.Handler) http.Handler) {
+// Use registers a middleware on the API router
+func (a *API) Use(mw func(http.Handler) http.Handler) {
 	a.router.Use(mw)
 }
 
-func (a *Api) ListenAndServe(addr string) error {
+// ListenAndServe serves HTTP using the API router
+func (a *API) ListenAndServe(addr string) error {
 	return http.ListenAndServe(addr, a.router)
 }
 
-func (a *Api) RunQuery(path string, params interface{}) abci.ResponseQuery {
+// RunQuery dispatches a query (path + params) to the Cosmos app
+func (a *API) RunQuery(path string, params interface{}) abci.ResponseQuery {
 	return (*(a.App)).RunQuery(path, params)
+}
+
+// DeliverPresigned dispatches a pre-signed query to the Cosmos app
+func (a *API) DeliverPresigned(tx auth.StdTx) (*trpctypes.ResultBroadcastTxCommit, error) {
+	return (*(a.App)).DeliverPresigned(tx)
 }

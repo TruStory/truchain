@@ -13,15 +13,13 @@ import (
 	"github.com/samsarahq/thunder/reactive"
 )
 
+// Request represents the JSON body of a GraphQL query request
 type Request struct {
-	Query     string                 `json:"query"`    // The GraphQL query string
-	Variables map[string]interface{} `json:"variables` // Variable values for the query
+	Query     string                 `json:"query"`     // The GraphQL query string
+	Variables map[string]interface{} `json:"variables"` // Variable values for the query
 }
 
-type Response struct {
-	Data interface{} `json:"data"`
-}
-
+// Client holds a GraphQL schema / execution context
 type Client struct {
 	pendingSchema *builder.Schema
 	queries       *builder.Object
@@ -29,12 +27,14 @@ type Client struct {
 	Built         bool
 }
 
-func NewGraphqlClient() *Client {
+// NewGraphQLClient returns a GraphQL client with an empty, unbuilt schema
+func NewGraphQLClient() *Client {
 	schema := builder.NewSchema()
 	client := Client{pendingSchema: schema, queries: schema.Query(), Schema: nil, Built: false}
 	return &client
 }
 
+// Query runs the GraphQL query in a given `Request` and returns a `chttp.Response` containing a `Response` object
 func (c *Client) Query(withCtx context.Context, r Request) chttp.Response {
 	if !c.Built {
 		c.BuildSchema()
@@ -49,10 +49,12 @@ func (c *Client) Query(withCtx context.Context, r Request) chttp.Response {
 	return c.runQuery(withCtx, query)
 }
 
+// RegisterQueryResolver adds a top-level resolver to find the first batch of entities in a GraphQL query
 func (c *Client) RegisterQueryResolver(name string, fn interface{}) {
 	c.queries.FieldFunc(name, fn)
 }
 
+// RegisterObjectResolver adds a set of field resolvers for objects of the given type that are returned by top-level resolvers
 func (c *Client) RegisterObjectResolver(name string, objPrototype interface{}, fields map[string]interface{}) {
 	obj := c.pendingSchema.Object(name, objPrototype)
 
@@ -61,6 +63,7 @@ func (c *Client) RegisterObjectResolver(name string, objPrototype interface{}, f
 	}
 }
 
+// BuildSchema builds the GraphQL schema from the given resolvers and
 func (c *Client) BuildSchema() {
 	builtSchema := c.pendingSchema.MustBuild()
 	introspection.AddIntrospectionToSchema(builtSchema)
@@ -68,9 +71,9 @@ func (c *Client) BuildSchema() {
 	c.Built = true
 }
 
-func (c *Client) runQuery(withCtx context.Context, query *thunder.Query) chttp.JsonResponse {
+func (c *Client) runQuery(withCtx context.Context, query *thunder.Query) chttp.JSONResponse {
 	var wg sync.WaitGroup
-	var response chttp.JsonResponse
+	var response chttp.JSONResponse
 	e := thunder.Executor{}
 
 	wg.Add(1)
@@ -80,18 +83,18 @@ func (c *Client) runQuery(withCtx context.Context, query *thunder.Query) chttp.J
 		data, err := e.Execute(batch.WithBatching(ctx), c.Schema.Query, nil, query)
 
 		if err != nil {
-			response = chttp.SimpleErrorResponse(400, err).(chttp.JsonResponse)
+			response = chttp.SimpleErrorResponse(400, err).(chttp.JSONResponse)
 			return nil, err
 		}
 
 		resBytes, err := json.Marshal(data)
 
 		if err != nil {
-			response = chttp.SimpleErrorResponse(500, err).(chttp.JsonResponse)
+			response = chttp.SimpleErrorResponse(500, err).(chttp.JSONResponse)
 			return nil, err
 		}
 
-		response = chttp.SimpleResponse(200, resBytes).(chttp.JsonResponse)
+		response = chttp.SimpleResponse(200, resBytes).(chttp.JSONResponse)
 
 		return data, nil
 	}, thunder.DefaultMinRerunInterval)

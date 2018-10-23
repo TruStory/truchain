@@ -5,28 +5,32 @@ import (
 	"github.com/TruStory/truchain/x/graphql"
 )
 
-type TruApi struct {
+// TruAPI implements an HTTP server for TruStory functionality using `chttp.API`
+type TruAPI struct {
 	*chttp.Api
 	GraphQLClient *graphql.Client
 }
 
-func NewTruApi(aa *chttp.App) *TruApi {
-	ta := TruApi{
+// NewTruAPI returns a `TruAPI` instance populated with the existing app and a new GraphQL client
+func NewTruAPI(aa *chttp.App) *TruAPI {
+	ta := TruAPI{
 		Api:           chttp.NewApi(aa, supported),
-		GraphQLClient: graphql.NewGraphqlClient(),
+		GraphQLClient: graphql.NewGraphQLClient(),
 	}
 
 	return &ta
 }
 
-func (ta *TruApi) RegisterRoutes() {
-	ta.Use(chttp.ContentJSONMiddleware)
+// RegisterRoutes applies the TruStory API routes to the `chttp.API` router
+func (ta *TruAPI) RegisterRoutes() {
+	ta.Use(chttp.JSONResponseMiddleware)
 	ta.HandleFunc("/graphql", ta.HandleGraphQL)
 	ta.HandleFunc("/presigned", ta.HandlePresigned)
 	ta.HandleFunc("/register", ta.HandleRegistration)
 }
 
-func (ta *TruApi) RegisterResolvers() {
+// RegisterResolvers builds the app's GraphQL schema from resolvers (declared in `resolver.go`)
+func (ta *TruAPI) RegisterResolvers() {
 	ta.GraphQLClient.RegisterQueryResolver("story", ta.storyResolver)
 	ta.GraphQLClient.BuildSchema()
 }

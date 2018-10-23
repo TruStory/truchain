@@ -22,41 +22,51 @@ type AppAccount struct {
 }
 
 // nolint
-func (acc AppAccount) GetName() string      { return acc.Name }
+func (acc AppAccount) GetName() string { return acc.Name }
+
+// nolint
 func (acc *AppAccount) SetName(name string) { acc.Name = name }
 
+// nolint
 func (acc AppAccount) GetAccountNumber() int64 {
 	return acc.AccountNumber
 }
 
+// nolint
 func (acc AppAccount) GetCoins() sdk.Coins {
 	return acc.Coins
 }
 
+// nolint
 func (acc AppAccount) GetSequence() int64 {
 	return acc.Sequence
 }
 
+// nolint
 func (acc AppAccount) SetAccountNumber(accNumber int64) error {
 	acc.BaseAccount.SetAccountNumber(accNumber)
 	return nil
 }
 
+// nolint
 func (acc AppAccount) SetAddress(address sdk.AccAddress) error {
 	acc.BaseAccount.SetAddress(address)
 	return nil
 }
 
+// nolint
 func (acc AppAccount) SetSequence(seq int64) error {
 	acc.BaseAccount.SetSequence(seq)
 	return nil
 }
 
+// nolint
 func (acc AppAccount) SetCoins(coins sdk.Coins) error {
 	acc.BaseAccount.SetCoins(coins)
 	return nil
 }
 
+// nolint
 func (acc AppAccount) SetPubKey(pubkey crypto.PubKey) error {
 	acc.PubKey = pubkey
 	return nil

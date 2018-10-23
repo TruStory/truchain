@@ -14,6 +14,7 @@ import (
 	tcmn "github.com/tendermint/tendermint/libs/common"
 )
 
+// PresignedRequest represents a JSON request body from a user wishing to broadcast a transaction that they've signed locally
 type PresignedRequest struct {
 	MsgTypes   []string      `json:"msg_types"`
 	Tx         tcmn.HexBytes `json:"tx"`
@@ -22,7 +23,8 @@ type PresignedRequest struct {
 	Signature  tcmn.HexBytes `json:"signature"`
 }
 
-func (a *Api) NewPresignedStdTx(r PresignedRequest) (auth.StdTx, error) {
+// NewPresignedStdTx parses a `PresignedRequest` into an `auth.StdTx`
+func (a *API) NewPresignedStdTx(r PresignedRequest) (auth.StdTx, error) {
 	msgs, fee, signatures, doc, err := a.stdTxFragments(r)
 
 	if err != nil {
@@ -34,7 +36,7 @@ func (a *Api) NewPresignedStdTx(r PresignedRequest) (auth.StdTx, error) {
 	return tx, nil
 }
 
-func (a *Api) stdTxFragments(r PresignedRequest) ([]sdk.Msg, auth.StdFee, []auth.StdSignature, auth.StdSignDoc, error) {
+func (a *API) stdTxFragments(r PresignedRequest) ([]sdk.Msg, auth.StdFee, []auth.StdSignature, auth.StdSignDoc, error) {
 	doc, err := a.stdSignDoc(r.Tx.Bytes())
 
 	if err != nil {
@@ -66,7 +68,7 @@ func (a *Api) stdTxFragments(r PresignedRequest) ([]sdk.Msg, auth.StdFee, []auth
 	return msgs, fee, signatures, doc, nil
 }
 
-func (a *Api) stdSignDoc(bs []byte) (auth.StdSignDoc, error) {
+func (a *API) stdSignDoc(bs []byte) (auth.StdSignDoc, error) {
 	doc := new(auth.StdSignDoc)
 	err := json.Unmarshal(bs, &doc)
 
@@ -77,7 +79,7 @@ func (a *Api) stdSignDoc(bs []byte) (auth.StdSignDoc, error) {
 	return *doc, nil
 }
 
-func (a *Api) stdMsgs(msgTypes []string, msgBodies []json.RawMessage) ([]sdk.Msg, error) {
+func (a *API) stdMsgs(msgTypes []string, msgBodies []json.RawMessage) ([]sdk.Msg, error) {
 	msgs := []sdk.Msg{}
 	finalTypeIndex := len(msgTypes) - 1
 
@@ -106,7 +108,7 @@ func (a *Api) stdMsgs(msgTypes []string, msgBodies []json.RawMessage) ([]sdk.Msg
 	return msgs, nil
 }
 
-func (a *Api) stdMsg(name string, raw json.RawMessage) (sdk.Msg, error) {
+func (a *API) stdMsg(name string, raw json.RawMessage) (sdk.Msg, error) {
 	t := reflect.TypeOf(a.Supported[name])
 
 	if t == nil {
@@ -130,7 +132,7 @@ func (a *Api) stdMsg(name string, raw json.RawMessage) (sdk.Msg, error) {
 	return msg, nil
 }
 
-func (a *Api) stdFee(fragment json.RawMessage) (auth.StdFee, error) {
+func (a *API) stdFee(fragment json.RawMessage) (auth.StdFee, error) {
 	fee := new(auth.StdFee)
 	fmt.Println(string(fragment))
 	err := json.Unmarshal(fragment, fee)
@@ -143,7 +145,7 @@ func (a *Api) stdFee(fragment json.RawMessage) (auth.StdFee, error) {
 	return *fee, nil
 }
 
-func (a *Api) stdSignatures(r PresignedRequest, d auth.StdSignDoc) ([]auth.StdSignature, error) {
+func (a *API) stdSignatures(r PresignedRequest, d auth.StdSignDoc) ([]auth.StdSignature, error) {
 	key, err := StdKey(r.PubKeyAlgo, r.PubKey)
 
 	if err != nil {
@@ -162,16 +164,17 @@ func (a *Api) stdSignatures(r PresignedRequest, d auth.StdSignDoc) ([]auth.StdSi
 	return sigs, nil
 }
 
-func (a *Api) supportedMsgTypeNames() []string {
+func (a *API) supportedMsgTypeNames() []string {
 	types := []string{}
 
-	for k, _ := range a.Supported {
-		types = append(types, string(k))
+	for k := range a.Supported {
+		types = append(types, k)
 	}
 
 	return types
 }
 
+// StdKey returns an instance of `crypto.PubKey` using the given algorithm
 func StdKey(algo string, bytes []byte) (crypto.PubKey, error) {
 	switch algo {
 	case "ed25519":
