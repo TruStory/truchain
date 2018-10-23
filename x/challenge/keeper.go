@@ -236,7 +236,7 @@ func validate(
 	minStake := sdk.NewCoin(coinName, params.MinChallengeStake)
 
 	// check if user has the stake they are claiming
-	if !k.bankKeeper.HasCoins(ctx, creator, sdk.Coins{minStake}) {
+	if !k.bankKeeper.HasCoins(ctx, creator, sdk.Coins{amount}) {
 		return sdk.ErrInsufficientFunds("Insufficient funds for challenging story.")
 	}
 
