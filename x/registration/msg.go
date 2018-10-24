@@ -6,6 +6,7 @@ import (
 	tcmn "github.com/tendermint/tendermint/libs/common"
 )
 
+// RegisterKeyMsg describes a public key that should be registered with some initial coins
 type RegisterKeyMsg struct {
 	Address    sdk.AccAddress `json:"address"`
 	PubKey     tcmn.HexBytes  `json:"pubkey"`

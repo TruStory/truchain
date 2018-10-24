@@ -22,8 +22,10 @@ import (
 	trpctypes "github.com/tendermint/tendermint/rpc/core/types"
 )
 
-const KeepersContextKey = "keepers"
-const StoryKeeperKey = "storyKeeper"
+type truChainContextKey string
+
+const keepersContextKey truChainContextKey = "keepers"
+const storyKeeperKey = "storyKeeper"
 
 func (app *TruChain) makeAPI() *truapi.TruAPI {
 	aa := chttp.App(app)
@@ -34,10 +36,10 @@ func (app *TruChain) startAPI() {
 	app.api.Use(func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			keepers := map[string]interface{}{
-				StoryKeeperKey: app.storyKeeper,
+				storyKeeperKey: app.storyKeeper,
 			}
 
-			ctxWithKeepers := context.WithValue(r.Context(), KeepersContextKey, keepers)
+			ctxWithKeepers := context.WithValue(r.Context(), keepersContextKey, keepers)
 
 			next.ServeHTTP(w, r.WithContext(ctxWithKeepers))
 		})
@@ -48,8 +50,8 @@ func (app *TruChain) startAPI() {
 	log.Fatal(app.api.ListenAndServe(Hostname + ":" + Portname))
 }
 
-// Implements chttp.App
 // RegisterKey generates a new address/account for a public key
+// Implements chttp.App
 func (app *TruChain) RegisterKey(k tcmn.HexBytes, algo string) (sdk.AccAddress, int64, sdk.Coins, error) {
 	addr := GenerateAddress()
 	tx, err := app.signedRegistrationTx(addr, k, algo)
@@ -73,15 +75,15 @@ func (app *TruChain) RegisterKey(k tcmn.HexBytes, algo string) (sdk.AccAddress, 
 	return accaddr, stored.GetAccountNumber(), coins, nil
 }
 
-// Implements chttp.App
 // DeliverPresigned broadcasts a transaction to the network and returns the result.
+// Implements chttp.App
 func (app *TruChain) DeliverPresigned(tx auth.StdTx) (*trpctypes.ResultBroadcastTxCommit, error) {
 	bz := app.codec.MustMarshalBinary(tx)
 	return trpc.BroadcastTxCommit(bz)
 }
 
-// Implements chttp.App
 // RunQuery takes a querier path string and parameters map, and returns the results of the query.
+// Implements chttp.App
 func (app *TruChain) RunQuery(path string, params interface{}) abci.ResponseQuery {
 	bz, err := json.Marshal(params)
 
@@ -104,14 +106,14 @@ func GenerateAddress() []byte {
 
 func (app *TruChain) signedRegistrationTx(addr []byte, k tcmn.HexBytes, algo string) (auth.StdTx, error) {
 	msg := registration.RegisterKeyMsg{Address: addr, PubKey: k, PubKeyAlgo: algo, Coins: initialCoins}
-	chainId := app.blockHeader.ChainID
+	chainID := app.blockHeader.ChainID
 	registrarAcc := app.accountMapper.GetAccount(*(app.blockCtx), []byte(types.RegistrarAccAddress))
 	registrarNum := registrarAcc.GetAccountNumber()
 	registrarSequence := registrarAcc.GetSequence()
 	registrationMemo := "reg"
 
 	// Sign tx as registrar
-	bytesToSign := auth.StdSignBytes(chainId, registrarNum, registrarSequence, registrationFee, []sdk.Msg{msg}, registrationMemo)
+	bytesToSign := auth.StdSignBytes(chainID, registrarNum, registrarSequence, registrationFee, []sdk.Msg{msg}, registrationMemo)
 	sigBytes, err := app.registrarKey.Sign(bytesToSign)
 
 	if err != nil {

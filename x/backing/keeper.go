@@ -191,7 +191,7 @@ func mintFromNativeToken(
 	amount sdk.Coin,
 	userAddr sdk.AccAddress) (principal sdk.Coin, err sdk.Error) {
 
-	// naïve implementaion: 1 trustake = 1 category coin
+	// naïve implementation: 1 trustake = 1 category coin
 	// https://github.com/TruStory/truchain/issues/21
 	conversionRate := sdk.NewDec(1)
 

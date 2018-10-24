@@ -26,7 +26,7 @@ const (
 	Revoked
 )
 
-// IsValid returns true if the value is listed in the enum defintion, false otherwise.
+// IsValid returns true if the value is listed in the enum definition, false otherwise.
 func (i State) IsValid() bool {
 	switch i {
 	case Created, Validated, Rejected, Unverifiable, Challenged, Revoked:

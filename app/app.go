@@ -117,7 +117,7 @@ func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *T
 
 	// register query routes for reading state
 	app.QueryRouter().
-		AddRoute("story", story.NewQuerier(app.readStoryKeeper))
+		AddRoute(story.QueryPath, story.NewQuerier(app.readStoryKeeper))
 
 	// perform initialization logic
 	app.SetInitChainer(app.initChainer)

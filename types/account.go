@@ -9,6 +9,7 @@ import (
 
 var _ auth.Account = (*AppAccount)(nil)
 
+// RegistrarAccAddress is the UTF8-encoded address of the account which is responsible for registering other accounts
 const RegistrarAccAddress = "truchainaccregistrar"
 
 // AppAccount is a custom extension for this application. It is an example of

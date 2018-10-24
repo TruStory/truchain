@@ -9,6 +9,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/auth"
 )
 
+// NewHandler returns a handler for messages of type RegisterKeyMsg
 func NewHandler(am auth.AccountMapper) sdk.Handler {
 	return func(ctx sdk.Context, msg sdk.Msg) sdk.Result {
 		switch msg := msg.(type) {
@@ -44,7 +45,7 @@ func handleRegisterKeyMsg(ctx sdk.Context, am auth.AccountMapper, msg RegisterKe
 
 	acc := app.NewAppAccount(string(msg.Address), bacc)
 
-	am.SetAccount(ctx, *acc)
+	am.SetAccount(ctx, auth.Account(*acc))
 
 	bz, _ := json.Marshal(*acc)
 

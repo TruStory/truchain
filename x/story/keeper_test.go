@@ -10,7 +10,7 @@ import (
 func TestAddGetStory(t *testing.T) {
 	ctx, sk, ck := mockDB()
 
-	// test getting a non-existant story
+	// test getting a non-existent story
 	_, err := sk.GetStory(ctx, int64(5))
 	assert.NotNil(t, err)
 
