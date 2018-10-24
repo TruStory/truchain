@@ -23,12 +23,12 @@ type ReadKeeper interface {
 // WriteKeeper defines a module interface that facilities write only access to truchain data
 type WriteKeeper interface {
 	Create(
-		ctx sdk.Context, storyID int64, amount sdk.Coin,
-		argument string, creator sdk.AccAddress, evidence []url.URL) (int64, sdk.Error)
+		ctx sdk.Context, storyID int64, amount sdk.Coin, argument string,
+		creator sdk.AccAddress, evidence []url.URL) (int64, sdk.Error)
 
 	Update(
-		ctx sdk.Context, challengeID int64, creator sdk.AccAddress,
-		amount sdk.Coin) (id int64, err sdk.Error)
+		ctx sdk.Context, challengeID int64, amount sdk.Coin, argument string,
+		creator sdk.AccAddress, evidence []url.URL) (int64, sdk.Error)
 
 	NewResponseEndBlock(ctx sdk.Context) sdk.Tags
 }
@@ -48,7 +48,10 @@ type Keeper struct {
 }
 
 // NewKeeper creates a new keeper with write and read access
-func NewKeeper(storeKey sdk.StoreKey, sk story.ReadWriteKeeper, bankKeeper bank.Keeper, codec *amino.Codec) Keeper {
+func NewKeeper(
+	storeKey sdk.StoreKey, sk story.ReadWriteKeeper, bankKeeper bank.Keeper,
+	codec *amino.Codec) Keeper {
+
 	return Keeper{app.NewKeeper(codec, storeKey), sk, bankKeeper}
 }
 
@@ -56,8 +59,8 @@ func NewKeeper(storeKey sdk.StoreKey, sk story.ReadWriteKeeper, bankKeeper bank.
 
 // Create adds a new challenge on a story in the KVStore
 func (k Keeper) Create(
-	ctx sdk.Context, storyID int64, amount sdk.Coin,
-	argument string, creator sdk.AccAddress, evidence []url.URL) (int64, sdk.Error) {
+	ctx sdk.Context, storyID int64, amount sdk.Coin, argument string,
+	creator sdk.AccAddress, evidence []url.URL) (int64, sdk.Error) {
 
 	// get the story being challenged
 	story, err := k.storyKeeper.GetStory(ctx, storyID)
@@ -65,8 +68,8 @@ func (k Keeper) Create(
 		return 0, err
 	}
 
-	// check conditions to create a challenge first
-	if err = validate(ctx, k, storyID, creator, amount); err != nil {
+	// validate challenger stake before creating challenge
+	if err = validateStake(ctx, k, storyID, creator, amount); err != nil {
 		return 0, err
 	}
 
@@ -77,13 +80,15 @@ func (k Keeper) Create(
 
 	// create an initial empty challenge pool
 	coinName, err := k.storyKeeper.GetCoinName(ctx, storyID)
-	emptyPool := sdk.NewCoin(coinName, sdk.NewInt(0))
+	if err != nil {
+		return 0, err
+	}
+	emptyPool := sdk.NewCoin(coinName, sdk.ZeroInt())
 
 	// create new challenge type
 	challenge := NewChallenge(
 		k.GetNextID(ctx), storyID, emptyPool,
-		argument, creator, evidence,
-		ctx.BlockHeader().Time.Add(NewParams().Expires),
+		creator, ctx.BlockHeader().Time.Add(NewParams().Expires),
 		false, thresholdAmount(story), ctx.BlockHeight(),
 		ctx.BlockHeader().Time)
 
@@ -96,7 +101,7 @@ func (k Keeper) Create(
 	q.Push(challenge.ID)
 
 	// add creator of challenge as challenger
-	addChallenger(ctx, k, &challenge, creator, amount)
+	addChallenger(ctx, k, &challenge, amount, argument, creator, evidence)
 
 	// set challenge in KVStore
 	k.set(ctx, challenge)
@@ -118,21 +123,22 @@ func (k Keeper) Get(ctx sdk.Context, challengeID int64) (challenge Challenge, er
 
 // Update mutates an existing challenge, adding a new challenger and updating the pool
 func (k Keeper) Update(
-	ctx sdk.Context, challengeID int64, creator sdk.AccAddress,
-	amount sdk.Coin) (id int64, err sdk.Error) {
+	ctx sdk.Context, challengeID int64, amount sdk.Coin, argument string,
+	creator sdk.AccAddress, evidence []url.URL) (int64, sdk.Error) {
+
 	challenge, err := k.Get(ctx, challengeID)
 	if err != nil {
 		return 0, err
 	}
 
-	// validate challenge before updating it
-	if err = validate(ctx, k, challenge.StoryID, creator, amount); err != nil {
+	// validate challenger stake before adding
+	if err = validateStake(ctx, k, challenge.StoryID, creator, amount); err != nil {
 		return 0, err
 	}
 
 	challenge, err = k.Get(ctx, challenge.ID)
 	if err != nil {
-		return
+		return 0, err
 	}
 
 	// check if user has already challenged
@@ -142,8 +148,8 @@ func (k Keeper) Update(
 		return 0, ErrDuplicateChallenger(challenge.ID, creator)
 	}
 
-	// add user to challenger list
-	addChallenger(ctx, k, &challenge, creator, amount)
+	// add creator of challenge as challenger
+	addChallenger(ctx, k, &challenge, amount, argument, creator, evidence)
 
 	// update existing challenge in KVStore
 	k.set(ctx, challenge)
@@ -190,23 +196,25 @@ func (k Keeper) getChallengerPrefix(id int64) []byte {
 
 // addChallenger adds a challenger to the challenge
 func addChallenger(
-	ctx sdk.Context, k Keeper, challenge *Challenge,
-	challenger sdk.AccAddress, amount sdk.Coin) sdk.Error {
+	ctx sdk.Context, k Keeper, challenge *Challenge, amount sdk.Coin,
+	argument string, creator sdk.AccAddress, evidence []url.URL) sdk.Error {
 
 	// update block time for good record keeping
 	challenge.UpdatedBlock = ctx.BlockHeight()
 	challenge.UpdatedTime = ctx.BlockHeader().Time
 
-	// add user to challenger store
-	var challengerInfo ChallengerInfo
-	challengerInfo.Amount = amount
-	challengerInfo.User = challenger
+	// create new challenger
+	challenger := NewChallenger(
+		amount, argument, creator, evidence,
+		ctx.BlockHeight(), ctx.BlockHeader().Time)
+
+	// persist challenger
 	k.GetStore(ctx).Set(
-		k.getChallengerIDKey(challenge.ID, challenger),
-		k.GetCodec().MustMarshalBinary(challengerInfo))
+		k.getChallengerIDKey(challenge.ID, creator),
+		k.GetCodec().MustMarshalBinary(challenger))
 
 	// deduct challenge amount from user
-	_, _, err := k.bankKeeper.SubtractCoins(ctx, challenger, sdk.Coins{amount})
+	_, _, err := k.bankKeeper.SubtractCoins(ctx, creator, sdk.Coins{amount})
 	if err != nil {
 		return err
 	}
@@ -228,26 +236,24 @@ func thresholdAmount(s story.Story) sdk.Int {
 	return sdk.NewInt(10)
 }
 
-// validate a new challenge operation before creating one
-func validate(
+// validate if a challenger has the right staking amount
+func validateStake(
 	ctx sdk.Context, k Keeper, storyID int64,
 	creator sdk.AccAddress, amount sdk.Coin) (err sdk.Error) {
+
 	// get category coin name
 	coinName, err := k.storyKeeper.GetCoinName(ctx, storyID)
 	if err != nil {
 		return
 	}
 
-	// load default challenge parameters
-	params := NewParams()
-	minStake := sdk.NewCoin(coinName, params.MinChallengeStake)
-
 	// check if user has the stake they are claiming
 	if !k.bankKeeper.HasCoins(ctx, creator, sdk.Coins{amount}) {
 		return sdk.ErrInsufficientFunds("Insufficient funds for challenging story.")
 	}
 
-	// check if challenge amount meets minimum stake
+	// check if challenge amount is greater than minimum stake
+	minStake := sdk.NewCoin(coinName, NewParams().MinChallengeStake)
 	if amount.IsLT(minStake) {
 		return sdk.ErrInsufficientFunds("Does not meet minimum stake amount.")
 	}

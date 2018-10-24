@@ -73,7 +73,7 @@ func returnFunds(ctx sdk.Context, k Keeper, challenge Challenge) sdk.Error {
 	iter := sdk.KVStorePrefixIterator(store, prefix)
 	defer iter.Close()
 	for ; iter.Valid(); iter.Next() {
-		var challenger ChallengerInfo
+		var challenger Challenger
 		bz := iter.Value()
 		if bz == nil {
 			return ErrNotFoundChallenger(challenge.ID)
@@ -83,7 +83,7 @@ func returnFunds(ctx sdk.Context, k Keeper, challenge Challenge) sdk.Error {
 		// return funds
 		_, _, err := k.bankKeeper.AddCoins(
 			ctx,
-			challenger.User,
+			challenger.Creator,
 			sdk.Coins{challenger.Amount})
 		if err != nil {
 			return err

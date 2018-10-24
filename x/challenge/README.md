@@ -12,7 +12,7 @@
     *  keyspace
         * `"challenges:id:5"` -> `Challenge`
             * main type storage
-        * `"challenges:id:5:userAddr:0xdeadbeef"` -> `ChallengerInfo`
+        * `"challenges:id:5:userAddr:0xdead"` -> `Challenger`
             * list of challengers for each challenge
         * `"0x00"` -> `uint64`
             * unexpired challenge queue length

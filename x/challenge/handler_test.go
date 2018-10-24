@@ -30,7 +30,7 @@ func TestStartChallengeMsg(t *testing.T) {
 	assert.NotNil(t, msg)
 
 	res := h(ctx, msg)
-	// spew.Dump(res)
+	spew.Dump(res)
 	x, _ := binary.Varint(res.Data)
 	assert.Equal(t, int64(1), x, "incorrect result data")
 }
@@ -103,10 +103,9 @@ func TestUpdateChallengeMsg(t *testing.T) {
 
 	res := h(ctx, msg)
 
-	updateMsg := NewUpdateChallengeMsg(1, amount, creator2)
+	updateMsg := NewJoinChallengeMsg(1, amount, creator2)
 
 	res = h(ctx, updateMsg)
-	spew.Dump(res)
 	x, _ := binary.Varint(res.Data)
 	assert.Equal(t, int64(1), x, "incorrect result data")
 }

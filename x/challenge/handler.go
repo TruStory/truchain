@@ -11,8 +11,8 @@ func NewHandler(k WriteKeeper) sdk.Handler {
 		switch msg := msg.(type) {
 		case StartChallengeMsg:
 			return handleStartChallengeMsg(ctx, k, msg)
-		case UpdateChallengeMsg:
-			return handleUpdateChallengeMsg(ctx, k, msg)
+		case JoinChallengeMsg:
+			return handleJoinChallengeMsg(ctx, k, msg)
 		default:
 			return app.ErrMsgHandler(msg)
 		}
@@ -37,13 +37,15 @@ func handleStartChallengeMsg(ctx sdk.Context, k WriteKeeper, msg StartChallengeM
 	return app.Result(id)
 }
 
-// handleUpdateChallengeMsg handles a message to add a new challenger
-func handleUpdateChallengeMsg(ctx sdk.Context, k WriteKeeper, msg UpdateChallengeMsg) sdk.Result {
+// handleJoinChallengeMsg handles a message to add a new challenger
+func handleJoinChallengeMsg(ctx sdk.Context, k WriteKeeper, msg JoinChallengeMsg) sdk.Result {
 	if err := msg.ValidateBasic(); err != nil {
 		return err.Result()
 	}
 
-	id, err := k.Update(ctx, msg.ChallengeID, msg.Creator, msg.Amount)
+	id, err := k.Update(
+		ctx, msg.ChallengeID, msg.Amount,
+		msg.Argument, msg.Creator, msg.Evidence)
 	if err != nil {
 		return err.Result()
 	}
