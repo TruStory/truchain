@@ -75,19 +75,21 @@ func (msg StartChallengeMsg) GetSigners() []sdk.AccAddress {
 
 // ============================================================================
 
-// UpdateChallengeMsg defines a message to challenge a story
-type UpdateChallengeMsg struct {
+// JoinChallengeMsg defines a message to join a challenge on a story
+type JoinChallengeMsg struct {
 	ChallengeID int64          `json:"challenge_id"`
 	Amount      sdk.Coin       `json:"amount"`
+	Argument    string         `json:"argument,omitempty"`
 	Creator     sdk.AccAddress `json:"creator"`
+	Evidence    []url.URL      `json:"evidence,omitempty"`
 }
 
-// NewUpdateChallengeMsg creates a message to challenge a story
-func NewUpdateChallengeMsg(
+// NewJoinChallengeMsg creates a message to challenge a story
+func NewJoinChallengeMsg(
 	challengeID int64,
 	amount sdk.Coin,
-	creator sdk.AccAddress) UpdateChallengeMsg {
-	return UpdateChallengeMsg{
+	creator sdk.AccAddress) JoinChallengeMsg {
+	return JoinChallengeMsg{
 		ChallengeID: challengeID,
 		Amount:      amount,
 		Creator:     creator,
@@ -95,19 +97,19 @@ func NewUpdateChallengeMsg(
 }
 
 // Type implements Msg
-func (msg UpdateChallengeMsg) Type() string { return app.GetType(msg) }
+func (msg JoinChallengeMsg) Type() string { return app.GetType(msg) }
 
 // Name implements Msg
-func (msg UpdateChallengeMsg) Name() string { return app.GetName(msg) }
+func (msg JoinChallengeMsg) Name() string { return app.GetName(msg) }
 
 // GetSignBytes implements Msg. Story creator should sign this message.
 // Serializes Msg into JSON bytes for transport.
-func (msg UpdateChallengeMsg) GetSignBytes() []byte {
+func (msg JoinChallengeMsg) GetSignBytes() []byte {
 	return app.MustGetSignBytes(msg)
 }
 
 // ValidateBasic implements Msg
-func (msg UpdateChallengeMsg) ValidateBasic() sdk.Error {
+func (msg JoinChallengeMsg) ValidateBasic() sdk.Error {
 	if msg.ChallengeID == 0 {
 		return story.ErrInvalidStoryID(msg.ChallengeID)
 	}
@@ -121,6 +123,6 @@ func (msg UpdateChallengeMsg) ValidateBasic() sdk.Error {
 }
 
 // GetSigners implements Msg. Story creator is the only signer of this message.
-func (msg UpdateChallengeMsg) GetSigners() []sdk.AccAddress {
+func (msg JoinChallengeMsg) GetSigners() []sdk.AccAddress {
 	return app.GetSigners(msg.Creator)
 }

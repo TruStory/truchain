@@ -5,7 +5,6 @@ import (
 	"testing"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/davecgh/go-spew/spew"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -62,7 +61,6 @@ func TestChallenge(t *testing.T) {
 
 	sk.StartChallenge(ctx, storyID)
 	story, _ = sk.GetStory(ctx, storyID)
-	spew.Dump(story)
 	assert.Equal(t, Challenged, story.State, "state should match")
 }
 

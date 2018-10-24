@@ -7,19 +7,37 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
-// ChallengerInfo defines a challenger
-type ChallengerInfo struct {
-	User   sdk.AccAddress `json:"user"`
-	Amount sdk.Coin       `json:"amount"`
+// Challenger defines a user's challenge on a story
+type Challenger struct {
+	Amount       sdk.Coin       `json:"amount"`
+	Argument     string         `json:"argument"`
+	Creator      sdk.AccAddress `json:"creator"`
+	Evidence     []url.URL      `json:"evidence,omitempty"`
+	CreatedBlock int64          `json:"created_block"`
+	CreatedTime  time.Time      `json:"created_time"`
+}
+
+// NewChallenger creates a new `Challenger` type
+func NewChallenger(
+	amount sdk.Coin,
+	argument string,
+	creator sdk.AccAddress,
+	evidence []url.URL,
+	createdBlock int64,
+	createdTime time.Time) Challenger {
+
+	return Challenger{
+		Amount: amount, Argument: argument,
+		Creator: creator, Evidence: evidence,
+		CreatedBlock: createdBlock, CreatedTime: createdTime,
+	}
 }
 
 // Challenge defines a challenge on a story
 type Challenge struct {
 	ID              int64          `json:"id"`
 	StoryID         int64          `json:"story_id"`
-	Argument        string         `json:"argument"`
 	Creator         sdk.AccAddress `json:"creator"`
-	Evidence        []url.URL      `json:"evidence,omitempty"`
 	ExpiresTime     time.Time      `json:"expires_time,omitempty"`
 	Pool            sdk.Coin       `json:"pool"`
 	Started         bool           `json:"started"`
@@ -35,9 +53,7 @@ func NewChallenge(
 	id int64,
 	storyID int64,
 	amount sdk.Coin,
-	argument string,
 	creator sdk.AccAddress,
-	evidence []url.URL,
 	expiresTime time.Time,
 	started bool,
 	thresholdAmount sdk.Int,
@@ -47,9 +63,7 @@ func NewChallenge(
 	return Challenge{
 		ID:              id,
 		StoryID:         storyID,
-		Argument:        argument,
 		Creator:         creator,
-		Evidence:        evidence,
 		ExpiresTime:     expiresTime,
 		Pool:            amount,
 		Started:         started,

@@ -41,7 +41,7 @@ func TestInValidStartChallengeMsg(t *testing.T) {
 	assert.Equal(t, ErrInvalidMsg(msg.Evidence).Code(), err.Code(), "wrong error code")
 }
 
-func TestValidUpdateChallengeMsg(t *testing.T) {
+func TestValidJoinChallengeMsg(t *testing.T) {
 	ctx, _, sk, ck, _ := mockDB()
 	validStoryID := createFakeStory(ctx, sk, ck)
 	validAmount := sdk.NewCoin("testcoin", sdk.NewInt(5))
@@ -54,7 +54,7 @@ func TestValidUpdateChallengeMsg(t *testing.T) {
 	err := msg.ValidateBasic()
 	assert.Nil(t, err)
 
-	updateMsg := NewUpdateChallengeMsg(1, validAmount, validCreator)
+	updateMsg := NewJoinChallengeMsg(1, validAmount, validCreator)
 	err = updateMsg.ValidateBasic()
 	assert.Nil(t, err)
 }
