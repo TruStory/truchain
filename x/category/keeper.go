@@ -17,7 +17,7 @@ type ReadKeeper interface {
 // WriteKeeper defines a module interface that facilities write only access
 // to truchain data
 type WriteKeeper interface {
-	NewCategory(ctx sdk.Context, name string, slug string, description string) (int64, sdk.Error)
+	NewCategory(ctx sdk.Context, title string, creator sdk.AccAddress, slug string, description string) (int64, sdk.Error)
 }
 
 // ReadWriteKeeper defines a module interface that facilities read/write access
@@ -41,14 +41,17 @@ func NewKeeper(storeKey sdk.StoreKey, codec *amino.Codec) Keeper {
 func (k Keeper) NewCategory(
 	ctx sdk.Context,
 	title string,
+	creator sdk.AccAddress,
 	slug string,
 	description string) (int64, sdk.Error) {
 
-	cat := NewCategory(
+	cat := Category{
 		k.GetNextID(ctx),
+		creator,
 		title,
 		slug,
-		description)
+		description,
+	}
 
 	k.setCategory(ctx, cat)
 

@@ -102,7 +102,7 @@ func (k Keeper) NewBacking(
 	interest := getInterest(cat, amount, duration, params)
 
 	// create new backing type
-	backing := NewBacking(
+	backing := Backing{
 		k.GetNextID(ctx),
 		storyID,
 		principal,
@@ -110,7 +110,8 @@ func (k Keeper) NewBacking(
 		time.Now().Add(duration),
 		params,
 		duration,
-		creator)
+		creator,
+	}
 
 	// store backing
 	k.setBacking(ctx, backing)

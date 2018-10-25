@@ -16,16 +16,6 @@ func (c Category) CoinName() string {
 	return c.Slug
 }
 
-// NewCategory creates a new story category type
-func NewCategory(id int64, name string, slug string, description string) Category {
-	return Category{
-		ID:          id,
-		Name:        name,
-		Slug:        slug,
-		Description: description,
-	}
-}
-
 // Params holds data for category parameters
 type Params struct {
 	MinTitleLen int

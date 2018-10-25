@@ -80,41 +80,6 @@ type Story struct {
 	Users        []sdk.AccAddress `json:"users"`
 }
 
-// NewStory creates a new story
-func NewStory(
-	id int64,
-	backIDs []int64,
-	evidenceIDs []int64,
-	thread []int64,
-	body string,
-	categoryID int64,
-	challengeID int64,
-	createdBlock int64,
-	creator sdk.AccAddress,
-	round int64,
-	state State,
-	kind Kind,
-	updatedBlock int64,
-	users []sdk.AccAddress) Story {
-
-	return Story{
-		ID:           id,
-		BackIDs:      backIDs,
-		EvidenceIDs:  evidenceIDs,
-		Thread:       thread,
-		Body:         body,
-		CategoryID:   categoryID,
-		ChallengeID:  challengeID,
-		CreatedBlock: createdBlock,
-		Creator:      creator,
-		Round:        round,
-		State:        state,
-		Kind:         kind,
-		UpdatedBlock: updatedBlock,
-		Users:        users,
-	}
-}
-
 // List defines a list of story IDs
 type List []int64
 

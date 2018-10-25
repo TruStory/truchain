@@ -86,11 +86,19 @@ func (k Keeper) Create(
 	emptyPool := sdk.NewCoin(coinName, sdk.ZeroInt())
 
 	// create new challenge type
-	challenge := NewChallenge(
-		k.GetNextID(ctx), storyID, emptyPool,
-		creator, ctx.BlockHeader().Time.Add(NewParams().Expires),
-		false, thresholdAmount(story), ctx.BlockHeight(),
-		ctx.BlockHeader().Time)
+	challenge := Challenge{
+		k.GetNextID(ctx),
+		storyID,
+		creator,
+		ctx.BlockHeader().Time.Add(NewParams().Expires),
+		emptyPool,
+		false,
+		thresholdAmount(story),
+		ctx.BlockHeight(),
+		ctx.BlockHeader().Time,
+		ctx.BlockHeight(),
+		ctx.BlockHeader().Time,
+	}
 
 	story.ChallengeID = challenge.ID
 	k.storyKeeper.UpdateStory(ctx, story)
@@ -204,9 +212,14 @@ func addChallenger(
 	challenge.UpdatedTime = ctx.BlockHeader().Time
 
 	// create new challenger
-	challenger := NewChallenger(
-		amount, argument, creator, evidence,
-		ctx.BlockHeight(), ctx.BlockHeader().Time)
+	challenger := Challenger{
+		amount,
+		argument,
+		creator,
+		evidence,
+		ctx.BlockHeight(),
+		ctx.BlockHeader().Time,
+	}
 
 	// persist challenger
 	k.GetStore(ctx).Set(
