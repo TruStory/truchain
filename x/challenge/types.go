@@ -44,8 +44,8 @@ type Params struct {
 	Threshold         int64         // amount at which game begins
 }
 
-// NewParams creates a new Params type with defaults
-func NewParams() Params {
+// DefaultParams creates a new Params type with defaults
+func DefaultParams() Params {
 	return Params{
 		MinArgumentLength: 10,
 		MaxArgumentLength: 340,

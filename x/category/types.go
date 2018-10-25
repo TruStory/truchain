@@ -25,8 +25,8 @@ type Params struct {
 	MaxDescLen  int
 }
 
-// NewParams creates a new CategoryParams type with defaults
-func NewParams() Params {
+// DefaultParams creates a new CategoryParams type with defaults
+func DefaultParams() Params {
 	return Params{
 		MinTitleLen: 5,
 		MaxTitleLen: 25,

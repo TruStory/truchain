@@ -32,7 +32,7 @@ func TestQueue(t *testing.T) {
 	storyID := createFakeStory(ctx, sk, ck)
 	amount, _ := sdk.ParseCoin("5trudex")
 	creator := sdk.AccAddress([]byte{1, 2})
-	duration := NewParams().MinPeriod
+	duration := DefaultParams().MinPeriod
 	bankKeeper.AddCoins(ctx, creator, sdk.Coins{amount})
 
 	// create backings

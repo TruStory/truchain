@@ -90,7 +90,7 @@ func (k Keeper) Create(
 		k.GetNextID(ctx),
 		storyID,
 		creator,
-		ctx.BlockHeader().Time.Add(NewParams().Expires),
+		ctx.BlockHeader().Time.Add(DefaultParams().Expires),
 		emptyPool,
 		false,
 		thresholdAmount(story),
@@ -266,7 +266,7 @@ func validateStake(
 	}
 
 	// check if challenge amount is greater than minimum stake
-	minStake := sdk.NewCoin(coinName, NewParams().MinChallengeStake)
+	minStake := sdk.NewCoin(coinName, DefaultParams().MinChallengeStake)
 	if amount.IsLT(minStake) {
 		return sdk.ErrInsufficientFunds("Does not meet minimum stake amount.")
 	}

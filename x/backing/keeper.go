@@ -90,7 +90,7 @@ func (k Keeper) NewBacking(
 	}
 
 	// load default backing parameters
-	params := NewParams()
+	params := DefaultParams()
 
 	// set principal, converting from trustake if needed
 	principal, err := k.getPrincipal(ctx, cat, amount, creator)
