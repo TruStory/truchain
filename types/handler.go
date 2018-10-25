@@ -19,7 +19,7 @@ func ErrMsgHandler(msg sdk.Msg) sdk.Result {
 
 }
 
-// Result returns a succesful handler result with id of the type
+// Result returns a successful handler result with id of the type
 // encoded as binary data
 func Result(id int64) sdk.Result {
 	return sdk.Result{Data: i2b(id)}

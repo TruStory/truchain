@@ -14,11 +14,11 @@ type Evidence struct {
 // ============================================================================
 
 // State is a type that defines a story state
-type State int
+type State int8
 
 // List of acceptable story states
 const (
-	Created State = iota
+	Created = State(iota)
 	Validated
 	Rejected
 	Unverifiable
@@ -26,7 +26,7 @@ const (
 	Revoked
 )
 
-// IsValid returns true if the value is listed in the enum defintion, false otherwise.
+// IsValid returns true if the value is listed in the enum definition, false otherwise.
 func (i State) IsValid() bool {
 	switch i {
 	case Created, Validated, Rejected, Unverifiable, Challenged, Revoked:
@@ -70,6 +70,7 @@ type Story struct {
 	Thread       []int64          `json:"thread,omitempty"`
 	Body         string           `json:"body"`
 	CategoryID   int64            `json:"category_id"`
+	ChallengeID  int64            `json:"challenge_id"`
 	CreatedBlock int64            `json:"created_block"`
 	Creator      sdk.AccAddress   `json:"creator"`
 	Round        int64            `json:"round"`
@@ -87,6 +88,7 @@ func NewStory(
 	thread []int64,
 	body string,
 	categoryID int64,
+	challengeID int64,
 	createdBlock int64,
 	creator sdk.AccAddress,
 	round int64,
@@ -102,12 +104,24 @@ func NewStory(
 		Thread:       thread,
 		Body:         body,
 		CategoryID:   categoryID,
+		ChallengeID:  challengeID,
 		CreatedBlock: createdBlock,
 		Creator:      creator,
 		Round:        round,
-		State:        Created,
+		State:        state,
 		Kind:         kind,
 		UpdatedBlock: updatedBlock,
 		Users:        users,
 	}
+}
+
+// List defines a list of story IDs
+type List []int64
+
+// IsEmpty checks if the story list is empty
+func (sl List) IsEmpty() bool {
+	if len(sl) == 0 {
+		return true
+	}
+	return false
 }

@@ -25,9 +25,14 @@ func main() {
 		PersistentPreRunE: server.PersistentPreRunEFn(ctx),
 	}
 
-	server.AddCommands(ctx, cdc, rootCmd, server.DefaultAppInit,
-		server.ConstructAppCreator(newApp, "truchain"),
-		server.ConstructAppExporter(exportAppStateAndTMValidators, "truchain"))
+	appInit := server.DefaultAppInit
+	server.AddCommands(
+		ctx,
+		cdc,
+		rootCmd,
+		appInit,
+		newApp,
+		exportAppStateAndTMValidators)
 
 	// prepare and add flags
 	rootDir := os.ExpandEnv("$HOME/.truchaind")

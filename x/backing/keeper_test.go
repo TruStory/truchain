@@ -12,8 +12,8 @@ import (
 func Test_key(t *testing.T) {
 	_, bk, _, _, _, _ := mockDB()
 
-	bz1 := getBackingIDKey(bk, int64(5))
-	bz2 := getBackingIDKey(bk, int64(math.MaxInt64))
+	bz1 := bk.GetIDKey(5)
+	bz2 := bk.GetIDKey(math.MaxInt64)
 
 	assert.Equal(t, "backings:id:5", string(bz1), "should generate valid key")
 	assert.Equal(t, "backings:id:9223372036854775807", string(bz2), "should generate valid key")

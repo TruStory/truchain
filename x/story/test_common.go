@@ -16,10 +16,12 @@ func mockDB() (sdk.Context, Keeper, c.Keeper) {
 
 	storyKey := sdk.NewKVStoreKey("stories")
 	catKey := sdk.NewKVStoreKey("categories")
+	challengeKey := sdk.NewKVStoreKey("challenges")
 
 	ms := store.NewCommitMultiStore(db)
 	ms.MountStoreWithDB(storyKey, sdk.StoreTypeIAVL, db)
 	ms.MountStoreWithDB(catKey, sdk.StoreTypeIAVL, db)
+	ms.MountStoreWithDB(challengeKey, sdk.StoreTypeIAVL, db)
 	ms.LoadLatestVersion()
 
 	ctx := sdk.NewContext(ms, abci.Header{}, false, log.NewNopLogger())
@@ -28,8 +30,8 @@ func mockDB() (sdk.Context, Keeper, c.Keeper) {
 	cryptoAmino.RegisterAmino(codec)
 	RegisterAmino(codec)
 
-	ck := c.NewKeeper(catKey, storyKey, codec)
-	sk := NewKeeper(storyKey, catKey, ck, codec)
+	ck := c.NewKeeper(catKey, codec)
+	sk := NewKeeper(storyKey, catKey, challengeKey, ck, codec)
 
 	return ctx, sk, ck
 }
