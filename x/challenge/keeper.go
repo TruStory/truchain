@@ -148,7 +148,7 @@ func (k Keeper) Update(
 		return 0, ErrDuplicateChallenger(challenge.ID, creator)
 	}
 
-	// add creator of challenge as challenger
+	// add this challenger to the challenger list
 	addChallenger(ctx, k, &challenge, amount, argument, creator, evidence)
 
 	// update existing challenge in KVStore

@@ -50,6 +50,9 @@ func checkExpiredChallenges(ctx sdk.Context, k Keeper, q store.Queue) sdk.Error 
 		}
 		k.delete(ctx, challengeID)
 
+		// TODO [Shane]: also delete challengers here
+		// see https://github.com/TruStory/truchain/issues/54
+
 		// remove challenge association from story
 		story, err := k.storyKeeper.GetStory(ctx, challenge.StoryID)
 		if err != nil {
