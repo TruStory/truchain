@@ -89,17 +89,13 @@ func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *T
 	// wire up keepers
 	app.categoryKeeper = category.NewKeeper(app.keyCategory, codec)
 	app.storyKeeper = story.NewKeeper(
-		app.keyStory,
-		app.keyCategory,
-		app.keyChallenge,
-		app.categoryKeeper,
-		app.codec)
+		app.keyStory, app.keyCategory, app.keyChallenge,
+		app.categoryKeeper, app.codec)
 	app.backingKeeper = backing.NewKeeper(
-		app.keyBacking,
-		app.storyKeeper,
-		app.coinKeeper,
-		app.categoryKeeper,
-		codec)
+		app.keyBacking, app.storyKeeper, app.coinKeeper,
+		app.categoryKeeper, codec)
+	app.challengeKeeper = challenge.NewKeeper(
+		app.keyChallenge, app.storyKeeper, app.coinKeeper, codec)
 
 	// register message routes for modifying state
 	app.Router().
@@ -107,7 +103,8 @@ func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *T
 		AddRoute("ibc", ibc.NewHandler(app.ibcMapper, app.coinKeeper)).
 		AddRoute("story", story.NewHandler(app.storyKeeper)).
 		AddRoute("category", category.NewHandler(app.categoryKeeper)).
-		AddRoute("backing", backing.NewHandler(app.backingKeeper))
+		AddRoute("backing", backing.NewHandler(app.backingKeeper)).
+		AddRoute("challenge", challenge.NewHandler(app.challengeKeeper))
 
 	// register query routes for reading state
 	app.QueryRouter().
@@ -142,6 +139,12 @@ func MakeCodec() *codec.Codec {
 	// register custom types
 	cdc.RegisterInterface((*auth.Account)(nil), nil)
 	cdc.RegisterConcrete(&types.AppAccount{}, "truchain/Account", nil)
+
+	// register modules
+	backing.RegisterAmino(cdc)
+	category.RegisterAmino(cdc)
+	challenge.RegisterAmino(cdc)
+	story.RegisterAmino(cdc)
 
 	cdc.Seal()
 
