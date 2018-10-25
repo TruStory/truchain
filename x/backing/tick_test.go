@@ -61,11 +61,11 @@ func Test_distributeEarnings(t *testing.T) {
 	principal, _ := sdk.ParseCoin("5trudex")
 	interest, _ := sdk.ParseCoin("2trudex")
 	expires := time.Now().Add(24 * time.Hour)
-	params := NewParams()
+	params := DefaultParams()
 	duration := 24 * time.Hour
 	creator := sdk.AccAddress([]byte{1, 2})
 
-	backing := NewBacking(
+	backing := Backing{
 		int64(1),
 		int64(5),
 		principal,
@@ -73,7 +73,8 @@ func Test_distributeEarnings(t *testing.T) {
 		expires,
 		params,
 		duration,
-		creator)
+		creator,
+	}
 
 	err := distributeEarnings(ctx, bk, backing)
 	assert.Nil(t, err)

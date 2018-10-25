@@ -17,22 +17,6 @@ type Challenger struct {
 	CreatedTime  time.Time      `json:"created_time"`
 }
 
-// NewChallenger creates a new `Challenger` type
-func NewChallenger(
-	amount sdk.Coin,
-	argument string,
-	creator sdk.AccAddress,
-	evidence []url.URL,
-	createdBlock int64,
-	createdTime time.Time) Challenger {
-
-	return Challenger{
-		Amount: amount, Argument: argument,
-		Creator: creator, Evidence: evidence,
-		CreatedBlock: createdBlock, CreatedTime: createdTime,
-	}
-}
-
 // Challenge defines a challenge on a story
 type Challenge struct {
 	ID              int64          `json:"id"`
@@ -48,31 +32,6 @@ type Challenge struct {
 	UpdatedTime     time.Time      `json:"updated_time"`
 }
 
-// NewChallenge creates a new `Challenge` type with defaults
-func NewChallenge(
-	id int64,
-	storyID int64,
-	amount sdk.Coin,
-	creator sdk.AccAddress,
-	expiresTime time.Time,
-	started bool,
-	thresholdAmount sdk.Int,
-	createdBlock int64,
-	createdTime time.Time) Challenge {
-
-	return Challenge{
-		ID:              id,
-		StoryID:         storyID,
-		Creator:         creator,
-		ExpiresTime:     expiresTime,
-		Pool:            amount,
-		Started:         started,
-		ThresholdAmount: thresholdAmount,
-		CreatedBlock:    createdBlock,
-		CreatedTime:     time.Now(),
-	}
-}
-
 // Params holds default parameters for a challenge
 type Params struct {
 	MinArgumentLength int           // min number of chars for argument
@@ -85,8 +44,8 @@ type Params struct {
 	Threshold         int64         // amount at which game begins
 }
 
-// NewParams creates a new Params type with defaults
-func NewParams() Params {
+// DefaultParams creates a new Params type with defaults
+func DefaultParams() Params {
 	return Params{
 		MinArgumentLength: 10,
 		MaxArgumentLength: 340,

@@ -90,7 +90,7 @@ func (k Keeper) NewBacking(
 	}
 
 	// load default backing parameters
-	params := NewParams()
+	params := DefaultParams()
 
 	// set principal, converting from trustake if needed
 	principal, err := k.getPrincipal(ctx, cat, amount, creator)
@@ -102,7 +102,7 @@ func (k Keeper) NewBacking(
 	interest := getInterest(cat, amount, duration, params)
 
 	// create new backing type
-	backing := NewBacking(
+	backing := Backing{
 		k.GetNextID(ctx),
 		storyID,
 		principal,
@@ -110,7 +110,8 @@ func (k Keeper) NewBacking(
 		time.Now().Add(duration),
 		params,
 		duration,
-		creator)
+		creator,
+	}
 
 	// store backing
 	k.setBacking(ctx, backing)
