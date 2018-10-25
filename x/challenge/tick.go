@@ -44,11 +44,12 @@ func checkExpiredChallenges(ctx sdk.Context, k Keeper, q store.Queue) sdk.Error 
 
 	// return funds and delete challenge if it hasn't started
 	if !challenge.Started {
-		err = returnFunds(ctx, k, challenge)
-		if err != nil {
+		if err = returnFunds(ctx, k, challenge); err != nil {
 			return err
 		}
-		k.delete(ctx, challengeID)
+		if err = k.delete(ctx, challengeID); err != nil {
+			return err
+		}
 
 		// TODO [Shane]: also delete challengers here
 		// see https://github.com/TruStory/truchain/issues/54

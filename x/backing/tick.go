@@ -42,7 +42,9 @@ func processBacking(ctx sdk.Context, k Keeper) sdk.Error {
 	}
 
 	// distribute earnings to the backing creator
-	distributeEarnings(ctx, k, backing)
+	if err = distributeEarnings(ctx, k, backing); err != nil {
+		return err
+	}
 
 	// process next in queue
 	return processBacking(ctx, k)
