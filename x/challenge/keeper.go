@@ -109,7 +109,10 @@ func (k Keeper) Create(
 	q.Push(challenge.ID)
 
 	// add creator of challenge as challenger
-	addChallenger(ctx, k, &challenge, amount, argument, creator, evidence)
+	err = addChallenger(ctx, k, &challenge, amount, argument, creator, evidence)
+	if err != nil {
+		return 0, err
+	}
 
 	// set challenge in KVStore
 	k.set(ctx, challenge)
@@ -157,7 +160,10 @@ func (k Keeper) Update(
 	}
 
 	// add this challenger to the challenger list
-	addChallenger(ctx, k, &challenge, amount, argument, creator, evidence)
+	err = addChallenger(ctx, k, &challenge, amount, argument, creator, evidence)
+	if err != nil {
+		return 0, err
+	}
 
 	// update existing challenge in KVStore
 	k.set(ctx, challenge)
@@ -237,7 +243,10 @@ func addChallenger(
 
 	// if threshold is reached, start challenge and allow voting to begin
 	if challenge.Pool.Amount.GT(challenge.ThresholdAmount) {
-		k.storyKeeper.StartChallenge(ctx, challenge.StoryID)
+		err = k.storyKeeper.StartChallenge(ctx, challenge.StoryID)
+		if err != nil {
+			return err
+		}
 		challenge.Started = true
 	}
 
