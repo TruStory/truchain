@@ -54,26 +54,3 @@ type Backing struct {
 	Period    time.Duration  `json:"period"`
 	User      sdk.AccAddress `json:"user"`
 }
-
-// NewBacking creates a new backing type
-func NewBacking(
-	id int64,
-	storyID int64,
-	principal sdk.Coin,
-	interest sdk.Coin,
-	expires time.Time,
-	params Params,
-	period time.Duration,
-	creator sdk.AccAddress) Backing {
-
-	return Backing{
-		ID:        id,
-		StoryID:   storyID,
-		Principal: principal,
-		Interest:  interest,
-		Expires:   expires,
-		Params:    params,
-		Period:    period,
-		User:      creator,
-	}
-}

@@ -94,13 +94,20 @@ func (k Keeper) NewStory(
 	}
 
 	story := Story{
-		ID:           k.GetNextID(ctx),
-		Body:         body,
-		CategoryID:   categoryID,
-		CreatedBlock: ctx.BlockHeight(),
-		Creator:      creator,
-		State:        Created,
-		Kind:         kind,
+		k.GetNextID(ctx),
+		nil,
+		nil,
+		nil,
+		body,
+		categoryID,
+		0,
+		ctx.BlockHeight(),
+		creator,
+		0,
+		Created,
+		kind,
+		ctx.BlockHeight(),
+		nil,
 	}
 
 	k.setStory(ctx, story)
@@ -220,7 +227,7 @@ func (k Keeper) GetFeedWithCategory(
 
 // UpdateStory updates an existing story in the store
 func (k Keeper) UpdateStory(ctx sdk.Context, story Story) {
-	newStory := NewStory(
+	newStory := Story{
 		story.ID,
 		story.BackIDs,
 		story.EvidenceIDs,
@@ -234,7 +241,8 @@ func (k Keeper) UpdateStory(ctx sdk.Context, story Story) {
 		story.State,
 		story.Kind,
 		ctx.BlockHeight(),
-		story.Users)
+		story.Users,
+	}
 
 	k.setStory(ctx, newStory)
 }
