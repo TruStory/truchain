@@ -13,7 +13,7 @@ func TestNewResponseEndBlock(t *testing.T) {
 	ctx, k, _, _, _ := mockDB()
 
 	tags := k.NewResponseEndBlock(ctx)
-	assert.Nil(t, tags)
+	assert.Equal(t, sdk.Tags{}, tags)
 }
 
 func Test_checkExpiredChallenges(t *testing.T) {
