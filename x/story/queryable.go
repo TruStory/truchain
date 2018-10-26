@@ -10,19 +10,14 @@ import (
 
 // query endpoints supported by the truchain Querier
 const (
-	QueryPath            = "stories"
-	QueryCategoryStories = "category"
-	QueryStoriesByID     = "id"
+	QueryStoriesByCategory           = "category/:id/stories"
+	QueryChallengedStoriesByCategory = "category/:id/challenged_stories"
+	QueryStoryFeedByCategory         = "category/:id/story_feed"
 )
 
 // QueryCategoryStoriesParams are params for stories by category queries
 type QueryCategoryStoriesParams struct {
 	CategoryID int64
-}
-
-// QueryStoriesByIDParams are params for query 'story/'
-type QueryStoriesByIDParams struct {
-	ID int64 `json:"id"`
 }
 
 // NewQuerier returns a function that handles queries on the KVStore
@@ -31,8 +26,6 @@ func NewQuerier(k ReadKeeper) sdk.Querier {
 		switch path[0] {
 		case QueryStoriesByCategory:
 			return queryStoriesWithCategory(ctx, req, k)
-		case QueryStoriesByID:
-			return queryStoriesByID(ctx, req, k)
 		case QueryChallengedStoriesByCategory:
 			return queryChallengedStoriesWithCategory(ctx, req, k)
 		case QueryStoryFeedByCategory:
@@ -126,33 +119,5 @@ func marshalStories(k ReadKeeper, stories []Story) (res []byte, sdkErr sdk.Error
 	if err != nil {
 		panic("Could not marshal result to JSON")
 	}
-	return
-}
-
-func queryStoriesByID(
-	ctx sdk.Context,
-	req abci.RequestQuery,
-	k ReadKeeper) (res []byte, sdkErr sdk.Error) {
-
-	// deserialize query params
-	var params QueryStoriesByIDParams
-	err := k.GetCodec().UnmarshalJSON(req.Data, &params)
-	if err != nil {
-		return res,
-			sdk.ErrUnknownRequest(fmt.Sprintf("Incorrectly formatted request data - %s", err.Error()))
-	}
-
-	// fetch stories
-	stories, sdkErr := k.GetStory(ctx, params.ID)
-	if sdkErr != nil {
-		return res, sdkErr
-	}
-
-	// serialize into pretty JSON bytes
-	res, err = codec.MarshalJSONIndent(k.GetCodec(), stories)
-	if err != nil {
-		panic("Could not marshal result to JSON")
-	}
-
 	return
 }
