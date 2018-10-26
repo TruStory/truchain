@@ -31,8 +31,8 @@ type Params struct {
 	MaxInterestRate sdk.Dec
 }
 
-// NewParams creates a new BackingParams type with defaults
-func NewParams() Params {
+// DefaultParams creates a new BackingParams type with defaults
+func DefaultParams() Params {
 	return Params{
 		AmountWeight:    sdk.NewDecWithPrec(333, 3), // 33.3%
 		PeriodWeight:    sdk.NewDecWithPrec(667, 3), // 66.7%
@@ -53,27 +53,4 @@ type Backing struct {
 	Params    Params         `json:"params"`
 	Period    time.Duration  `json:"period"`
 	User      sdk.AccAddress `json:"user"`
-}
-
-// NewBacking creates a new backing type
-func NewBacking(
-	id int64,
-	storyID int64,
-	principal sdk.Coin,
-	interest sdk.Coin,
-	expires time.Time,
-	params Params,
-	period time.Duration,
-	creator sdk.AccAddress) Backing {
-
-	return Backing{
-		ID:        id,
-		StoryID:   storyID,
-		Principal: principal,
-		Interest:  interest,
-		Expires:   expires,
-		Params:    params,
-		Period:    period,
-		User:      creator,
-	}
 }

@@ -95,7 +95,7 @@ Project layout:
 ├── vendor
 | ...
 └── x
-    ├── backing
+    ├── [MODULE]
     │   ├── codec.go
     │   ├── errors.go
     │   ├── handler.go
@@ -110,70 +110,24 @@ Project layout:
     │   ├── tick.go
     │   ├── tick_test.go
     │   └── types.go
-    ├── category
-    │   ├── codec.go
-    │   ├── errors.go
-    │   ├── handler.go
-    │   ├── handler_test.go
-    │   ├── keeper.go
-    │   ├── keeper_test.go
-    │   ├── msg.go
-    │   ├── msg_test.go
-    │   ├── test_common.go
-    │   └── types.go
-    └── story
-        ├── codec.go
-        ├── errors.go
-        ├── handler.go
-        ├── handler_test.go
-        ├── keeper.go
-        ├── keeper_test.go
-        ├── msg.go
-        ├── msg_test.go
-        ├── test_common.go
-        └── types.go
 ```
 
 It compiles into two binaries, `trucli` (lite client) and `truchaind` (dapp chain). The lite client is responsible for responding to API requests from clients wanting to access or modify data on the dapp chain. The dapp chain is responsible for responding to requests from the lite client, such as querying and storing data.
 
 Each main feature of TruChain is implemented as a separate module that lives under `x/`. Each module has it's own types for data storage, "keepers" for reading and writing this data, `Msg` types that communicate with the blockchain, and handlers that route messages.
 
+Each module has it's own [README](x/README.md).
+
 #### Key-Value Stores
 
 Because the current Cosmos SDK data store is built on key-value storage, database operations are more explicit than a relational or even NoSQL database. Lists and queues must be made for data that needs to be retrieved.
 
-Keepers handle all reads and writes from key-value storage. There's a separate keeper for each data type:
-
-Stories key-value store:
-
-* stories:1 -> `Story`
-* stories:2 -> `Story`
-* stories:len -> 2
-
-Backings key-value store:
-
-* backings:1 -> `Backing`
-* backings:2 -> `Backing`
-* backings:3 -> `Backing`
-* backings:len -> 3
-* backings:queue:unexpired -> [1, 2, 3]
+Keepers handle all reads and writes from key-value storage. There's a separate keeper for each module.
 
 Each module provides a `ReadKeeper`, `WriteKeeper`, and `ReadWriteKeeper`. Other modules should get passed the appropriate keeper for it's needs. For example, if a module doesn't need to create categories, but only read them, it should get passed a category `ReadKeeper`.
 
 All data in stores are binary encoded using [Amino](https://github.com/tendermint/go-amino) for efficient storage in a Merkle tree. Keepers handle marshalling and umarshalling data between its binary encoding and Go data type.
 
-### Messages
+### Testing
 
-These are the messages needed to modify state on TruChain.
-
-- `CreateCategoryMsg` creates a category for a story
-- `BackStoryMsg`: to back a story
-- `SubmitEvidenceMsg`: to submit evidence for a story
-- `SubmitStoryMsg`: to submit a story
-
-Each message is routed to a handler which performs operations on the key-value stores.
-
-### Data Types
-
-Currently the supported types are: `Back`, `Evidence`, `Category`, and `Story`. Using Amino/protobufs allows types to be forwards and backwards compatible, allowing multiple versions of them to co-exist.
-
+`make test`

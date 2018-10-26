@@ -8,7 +8,8 @@ import (
 	"github.com/TruStory/truchain/types"
 	"github.com/TruStory/truchain/x/backing"
 	"github.com/TruStory/truchain/x/category"
-	"github.com/TruStory/truchain/x/registration"
+	"github.com/TruStory/truchain/x/challenge"
+  "github.com/TruStory/truchain/x/registration"
 	"github.com/TruStory/truchain/x/story"
 	"github.com/TruStory/truchain/x/truapi"
 	bam "github.com/cosmos/cosmos-sdk/baseapp"
@@ -34,13 +35,15 @@ type TruChain struct {
 	codec *codec.Codec
 
 	// keys to access the multistore
-	keyMain     *sdk.KVStoreKey
-	keyAccount  *sdk.KVStoreKey
-	keyFee      *sdk.KVStoreKey
-	keyIBC      *sdk.KVStoreKey
-	keyStory    *sdk.KVStoreKey
-	keyCategory *sdk.KVStoreKey
-	keyBacking  *sdk.KVStoreKey
+  
+	keyMain      *sdk.KVStoreKey
+	keyAccount   *sdk.KVStoreKey
+	keyIBC       *sdk.KVStoreKey
+	keyStory     *sdk.KVStoreKey
+	keyCategory  *sdk.KVStoreKey
+	keyBacking   *sdk.KVStoreKey
+	keyChallenge *sdk.KVStoreKey
+  keyFee      *sdk.KVStoreKey
 
 	// manage getting and setting accounts
 	accountMapper       auth.AccountMapper
@@ -49,7 +52,6 @@ type TruChain struct {
 	ibcMapper           ibc.Mapper
 
 	// access truchain database
-	readStoryKeeper story.ReadKeeper
 	storyKeeper     story.ReadWriteKeeper
 	categoryKeeper  category.ReadWriteKeeper
 	backingKeeper   backing.ReadWriteKeeper
@@ -60,6 +62,7 @@ type TruChain struct {
 	api          *truapi.TruAPI
 	apiStarted   bool
 	registrarKey secp256k1.PrivKeySecp256k1
+	challengeKeeper challenge.ReadWriteKeeper
 }
 
 // NewTruChain returns a reference to a new TruChain. Internally,
@@ -82,6 +85,7 @@ func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *T
 		keyStory:     sdk.NewKVStoreKey("stories"),
 		keyCategory:  sdk.NewKVStoreKey("categories"),
 		keyBacking:   sdk.NewKVStoreKey("backings"),
+    keyChallenge: sdk.NewKVStoreKey("challenges"),
 		api:          nil,
 		apiStarted:   false,
 		blockCtx:     nil,
@@ -99,11 +103,16 @@ func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *T
 	app.ibcMapper = ibc.NewMapper(app.codec, app.keyIBC, app.RegisterCodespace(ibc.DefaultCodespace))
 	app.feeCollectionKeeper = auth.NewFeeCollectionKeeper(app.codec, app.keyFee)
 
-	// wire up trustory keepers
-	app.categoryKeeper = category.NewKeeper(app.keyCategory, app.keyStory, codec)
-	app.readStoryKeeper = story.NewKeeper(app.keyStory, app.keyCategory, app.categoryKeeper, app.codec)
-	app.storyKeeper = story.NewKeeper(app.keyStory, app.keyCategory, app.categoryKeeper, app.codec)
-	app.backingKeeper = backing.NewKeeper(app.keyBacking, app.storyKeeper, app.coinKeeper, app.categoryKeeper, codec)
+	// wire up keepers
+	app.categoryKeeper = category.NewKeeper(app.keyCategory, codec)
+	app.storyKeeper = story.NewKeeper(
+		app.keyStory, app.keyCategory, app.keyChallenge,
+		app.categoryKeeper, app.codec)
+	app.backingKeeper = backing.NewKeeper(
+		app.keyBacking, app.storyKeeper, app.coinKeeper,
+		app.categoryKeeper, codec)
+	app.challengeKeeper = challenge.NewKeeper(
+		app.keyChallenge, app.storyKeeper, app.coinKeeper, codec)
 
 	// register message routes for modifying state
 	app.Router().
@@ -113,7 +122,8 @@ func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *T
 		AddRoute("category", category.NewHandler(app.categoryKeeper)).
 		AddRoute("backing", backing.NewHandler(app.backingKeeper)).
 		AddRoute(registration.RegisterKeyMsg{}.Type(),
-			registration.NewHandler(app.accountMapper))
+			registration.NewHandler(app.accountMapper)).
+    AddRoute("challenge", challenge.NewHandler(app.challengeKeeper))
 
 	// register query routes for reading state
 	app.QueryRouter().
@@ -159,6 +169,12 @@ func MakeCodec() *codec.Codec {
 	cdc.RegisterConcrete(&types.AppAccount{}, "truchain/Account", nil)
 	cdc.RegisterConcrete(&auth.StdTx{}, "cosmos-sdk/StdTx", nil)
 
+	// register modules
+	backing.RegisterAmino(cdc)
+	category.RegisterAmino(cdc)
+	challenge.RegisterAmino(cdc)
+	story.RegisterAmino(cdc)
+
 	cdc.Seal()
 
 	return cdc
@@ -181,7 +197,14 @@ func (app *TruChain) BeginBlocker(ctx sdk.Context, req abci.RequestBeginBlock) a
 // EndBlocker reflects logic to run after all TXs are processed by the
 // application.
 func (app *TruChain) EndBlocker(ctx sdk.Context, _ abci.RequestEndBlock) abci.ResponseEndBlock {
-	return app.backingKeeper.NewResponseEndBlock(ctx)
+	tags := sdk.EmptyTags()
+
+	backingEndBlockTags := app.backingKeeper.NewResponseEndBlock(ctx)
+	challengeEndBlockTags := app.challengeKeeper.NewResponseEndBlock(ctx)
+
+	tags.AppendTags(sdk.NewTags(backingEndBlockTags, challengeEndBlockTags))
+
+	return abci.ResponseEndBlock{Tags: tags.ToKVPairs()}
 }
 
 // initChainer implements the custom application logic that the BaseApp will

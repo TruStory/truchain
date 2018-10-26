@@ -11,8 +11,8 @@ import (
 func TestNewResponseEndBlock(t *testing.T) {
 	ctx, bk, _, _, _, _ := mockDB()
 
-	res := bk.NewResponseEndBlock(ctx)
-	assert.NotNil(t, res)
+	tags := bk.NewResponseEndBlock(ctx)
+	assert.Nil(t, tags)
 }
 
 func Test_processEarnings_QueueEmpty(t *testing.T) {
@@ -61,11 +61,11 @@ func Test_distributeEarnings(t *testing.T) {
 	principal, _ := sdk.ParseCoin("5trudex")
 	interest, _ := sdk.ParseCoin("2trudex")
 	expires := time.Now().Add(24 * time.Hour)
-	params := NewParams()
+	params := DefaultParams()
 	duration := 24 * time.Hour
 	creator := sdk.AccAddress([]byte{1, 2})
 
-	backing := NewBacking(
+	backing := Backing{
 		int64(1),
 		int64(5),
 		principal,
@@ -73,7 +73,8 @@ func Test_distributeEarnings(t *testing.T) {
 		expires,
 		params,
 		duration,
-		creator)
+		creator,
+	}
 
 	err := distributeEarnings(ctx, bk, backing)
 	assert.Nil(t, err)

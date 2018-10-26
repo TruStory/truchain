@@ -12,8 +12,8 @@ import (
 func Test_key(t *testing.T) {
 	_, bk, _, _, _, _ := mockDB()
 
-	bz1 := getBackingIDKey(bk, int64(5))
-	bz2 := getBackingIDKey(bk, int64(math.MaxInt64))
+	bz1 := bk.GetIDKey(5)
+	bz2 := bk.GetIDKey(math.MaxInt64)
 
 	assert.Equal(t, "backings:id:5", string(bz1), "should generate valid key")
 	assert.Equal(t, "backings:id:9223372036854775807", string(bz2), "should generate valid key")
@@ -33,7 +33,7 @@ func TestGetBacking(t *testing.T) {
 	storyID := createFakeStory(ctx, sk, ck)
 	amount, _ := sdk.ParseCoin("5trudex")
 	creator := sdk.AccAddress([]byte{1, 2})
-	duration := NewParams().MinPeriod
+	duration := DefaultParams().MinPeriod
 	bankKeeper.AddCoins(ctx, creator, sdk.Coins{amount})
 	backingID, _ := bk.NewBacking(ctx, storyID, amount, creator, duration)
 
@@ -46,7 +46,7 @@ func TestNewBacking_ErrInsufficientFunds(t *testing.T) {
 	storyID := createFakeStory(ctx, sk, ck)
 	amount, _ := sdk.ParseCoin("5trudex")
 	creator := sdk.AccAddress([]byte{1, 2})
-	duration := NewParams().MinPeriod
+	duration := DefaultParams().MinPeriod
 
 	_, err := bk.NewBacking(ctx, storyID, amount, creator, duration)
 	assert.NotNil(t, err)
@@ -58,7 +58,7 @@ func TestNewBacking(t *testing.T) {
 	storyID := createFakeStory(ctx, sk, ck)
 	amount, _ := sdk.ParseCoin("5trudex")
 	creator := sdk.AccAddress([]byte{1, 2})
-	duration := NewParams().MinPeriod
+	duration := DefaultParams().MinPeriod
 	bankKeeper.AddCoins(ctx, creator, sdk.Coins{amount})
 
 	backingID, _ := bk.NewBacking(ctx, storyID, amount, creator, duration)
@@ -117,7 +117,7 @@ func Test_getInterest_MidAmountMidPeriod(t *testing.T) {
 	// 500,000,000,000,000 nano / 10^9 = 500,000 trudex
 	amount := sdk.NewCoin("trudex", sdk.NewInt(500000000000000))
 	period := 45 * 24 * time.Hour
-	params := NewParams()
+	params := DefaultParams()
 
 	interest := getInterest(cat, amount, period, params)
 	assert.Equal(t, interest.Amount, sdk.NewInt(25000000000000), "Interest is wrong")
@@ -128,7 +128,7 @@ func Test_getInterest_MaxAmountMinPeriod(t *testing.T) {
 	cat := createFakeCategory(ctx, ck)
 	amount := sdk.NewCoin("trudex", sdk.NewInt(1000000000000000))
 	period := 3 * 24 * time.Hour
-	params := NewParams()
+	params := DefaultParams()
 
 	interest := getInterest(cat, amount, period, params)
 	assert.Equal(t, interest.Amount, sdk.NewInt(35523333300000), "Interest is wrong")
@@ -139,7 +139,7 @@ func Test_getInterest_MinAmountMaxPeriod(t *testing.T) {
 	cat := createFakeCategory(ctx, ck)
 	amount := sdk.NewCoin("trudex", sdk.NewInt(0))
 	period := 90 * 24 * time.Hour
-	params := NewParams()
+	params := DefaultParams()
 
 	interest := getInterest(cat, amount, period, params)
 	assert.Equal(t, interest.Amount, sdk.NewInt(0), "Interest is wrong")
@@ -150,7 +150,7 @@ func Test_getInterest_MaxAmountMaxPeriod(t *testing.T) {
 	cat := createFakeCategory(ctx, ck)
 	amount := sdk.NewCoin("trudex", sdk.NewInt(1000000000000000))
 	period := 90 * 24 * time.Hour
-	params := NewParams()
+	params := DefaultParams()
 	expected := sdk.NewDecFromInt(amount.Amount).Mul(params.MaxInterestRate)
 
 	interest := getInterest(cat, amount, period, params)
@@ -162,7 +162,7 @@ func Test_getInterest_MinAmountMinPeriod(t *testing.T) {
 	cat := createFakeCategory(ctx, ck)
 	amount := sdk.NewCoin("trudex", sdk.NewInt(0))
 	period := 3 * 24 * time.Hour
-	params := NewParams()
+	params := DefaultParams()
 
 	interest := getInterest(cat, amount, period, params)
 	assert.Equal(t, interest.String(), "0trudex", "Interest is wrong")

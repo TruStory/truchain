@@ -15,7 +15,7 @@ const (
 	QueryStoriesByID     = "id"
 )
 
-// QueryCategoryStoriesParams are params for query 'category/stories'
+// QueryCategoryStoriesParams are params for stories by category queries
 type QueryCategoryStoriesParams struct {
 	CategoryID int64
 }
@@ -29,10 +29,14 @@ type QueryStoriesByIDParams struct {
 func NewQuerier(k ReadKeeper) sdk.Querier {
 	return func(ctx sdk.Context, path []string, req abci.RequestQuery) (res []byte, err sdk.Error) {
 		switch path[0] {
-		case QueryCategoryStories:
+		case QueryStoriesByCategory:
 			return queryStoriesWithCategory(ctx, req, k)
 		case QueryStoriesByID:
 			return queryStoriesByID(ctx, req, k)
+		case QueryChallengedStoriesByCategory:
+			return queryChallengedStoriesWithCategory(ctx, req, k)
+		case QueryStoryFeedByCategory:
+			return queryStoryFeed(ctx, req, k)
 		default:
 			return nil, sdk.ErrUnknownRequest("Unknown truchain query endpoint")
 		}
@@ -44,28 +48,84 @@ func NewQuerier(k ReadKeeper) sdk.Querier {
 func queryStoriesWithCategory(
 	ctx sdk.Context,
 	req abci.RequestQuery,
-	k ReadKeeper) (res []byte, sdkErr sdk.Error) {
+	k ReadKeeper) (res []byte, err sdk.Error) {
 
-	// deserialize query params
-	var params QueryCategoryStoriesParams
-	err := k.GetCodec().UnmarshalJSON(req.Data, &params)
+	// get query params
+	params, err := unmarshalQueryParams(k, req)
 	if err != nil {
-		return res,
-			sdk.ErrUnknownRequest(fmt.Sprintf("Incorrectly formatted request data - %s", err.Error()))
+		return
 	}
 
 	// fetch stories
-	stories, sdkErr := k.GetStoriesWithCategory(ctx, params.CategoryID)
-	if sdkErr != nil {
-		return res, sdkErr
+	stories, err := k.GetStoriesWithCategory(ctx, params.CategoryID)
+	if err != nil {
+		return
 	}
 
-	// serialize into pretty JSON bytes
-	res, err = codec.MarshalJSONIndent(k.GetCodec(), stories)
+	// return stories JSON bytes
+	return marshalStories(k, stories)
+}
+
+func queryChallengedStoriesWithCategory(
+	ctx sdk.Context,
+	req abci.RequestQuery,
+	k ReadKeeper) (res []byte, err sdk.Error) {
+
+	// get query params
+	params, err := unmarshalQueryParams(k, req)
+	if err != nil {
+		return
+	}
+
+	// fetch challenged stories for category
+	stories, err := k.GetChallengedStoriesWithCategory(ctx, params.CategoryID)
+	if err != nil {
+		return
+	}
+
+	// return stories JSON bytes
+	return marshalStories(k, stories)
+}
+
+func queryStoryFeed(
+	ctx sdk.Context,
+	req abci.RequestQuery,
+	k ReadKeeper) (res []byte, err sdk.Error) {
+
+	// get query params
+	params, err := unmarshalQueryParams(k, req)
+	if err != nil {
+		return
+	}
+
+	// fetch stories
+	stories, err := k.GetFeedWithCategory(ctx, params.CategoryID)
+	if err != nil {
+		return
+	}
+
+	// return stories JSON bytes
+	return marshalStories(k, stories)
+}
+
+// unmarshal query params into struct
+func unmarshalQueryParams(
+	k ReadKeeper,
+	req abci.RequestQuery) (params QueryCategoryStoriesParams, sdkErr sdk.Error) {
+	err := k.GetCodec().UnmarshalJSON(req.Data, &params)
+	if err != nil {
+		return params,
+			sdk.ErrUnknownRequest(fmt.Sprintf("Incorrectly formatted request data - %s", err.Error()))
+	}
+	return
+}
+
+// marshal stories into pretty JSON bytes
+func marshalStories(k ReadKeeper, stories []Story) (res []byte, sdkErr sdk.Error) {
+	res, err := codec.MarshalJSONIndent(k.GetCodec(), stories)
 	if err != nil {
 		panic("Could not marshal result to JSON")
 	}
-
 	return
 }
 

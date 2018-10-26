@@ -14,11 +14,11 @@ type Evidence struct {
 // ============================================================================
 
 // State is a type that defines a story state
-type State int
+type State int8
 
 // List of acceptable story states
 const (
-	Created State = iota
+	Created = State(iota)
 	Validated
 	Rejected
 	Unverifiable
@@ -70,6 +70,7 @@ type Story struct {
 	Thread       []int64          `json:"thread,omitempty"`
 	Body         string           `json:"body"`
 	CategoryID   int64            `json:"category_id"`
+	ChallengeID  int64            `json:"challenge_id"`
 	CreatedBlock int64            `json:"created_block"`
 	Creator      sdk.AccAddress   `json:"creator"`
 	Round        int64            `json:"round"`
@@ -79,35 +80,13 @@ type Story struct {
 	Users        []sdk.AccAddress `json:"users"`
 }
 
-// NewStory creates a new story
-func NewStory(
-	id int64,
-	backIDs []int64,
-	evidenceIDs []int64,
-	thread []int64,
-	body string,
-	categoryID int64,
-	createdBlock int64,
-	creator sdk.AccAddress,
-	round int64,
-	state State,
-	kind Kind,
-	updatedBlock int64,
-	users []sdk.AccAddress) Story {
+// List defines a list of story IDs
+type List []int64
 
-	return Story{
-		ID:           id,
-		BackIDs:      backIDs,
-		EvidenceIDs:  evidenceIDs,
-		Thread:       thread,
-		Body:         body,
-		CategoryID:   categoryID,
-		CreatedBlock: createdBlock,
-		Creator:      creator,
-		Round:        round,
-		State:        Created,
-		Kind:         kind,
-		UpdatedBlock: updatedBlock,
-		Users:        users,
+// IsEmpty checks if the story list is empty
+func (sl List) IsEmpty() bool {
+	if len(sl) == 0 {
+		return true
 	}
+	return false
 }

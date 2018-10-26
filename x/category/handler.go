@@ -24,7 +24,7 @@ func handleCreateCategoryMsg(ctx sdk.Context, k WriteKeeper, msg CreateCategoryM
 		return err.Result()
 	}
 
-	id, err := k.NewCategory(ctx, msg.Title, msg.Slug, msg.Description)
+	id, err := k.NewCategory(ctx, msg.Title, msg.Creator, msg.Slug, msg.Description)
 	if err != nil {
 		return err.Result()
 	}
