@@ -7,13 +7,10 @@ import (
 
 // NewResponseEndBlock is called at the end of every block tick
 func (k Keeper) NewResponseEndBlock(ctx sdk.Context) sdk.Tags {
-	unexpiredChallengeQueue := store.NewQueue(k.GetCodec(), k.GetStore(ctx))
-	err := checkExpiredChallenges(ctx, k, unexpiredChallengeQueue)
-	if err != nil {
-		panic(err)
-	}
+	// TODO [Shane] add back expired challenges checker
+	// https://github.com/TruStory/truchain/issues/44
 
-	return sdk.NewTags()
+	return sdk.EmptyTags()
 }
 
 // ============================================================================
