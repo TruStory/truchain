@@ -2,9 +2,9 @@
     "Linters": {
         "vet": "go tool vet -composites=false :PATH:LINE:MESSAGE"
    },
-    "Enable": ["golint", "vet", "ineffassign", "misspell"],
+    "Enable": ["errcheck", "golint", "ineffassign", "misspell", "unconvert", "vet"],
     "Deadline": "500s",
     "Vendor": true,
     "Cyclo": 11,
-    "Exclude": ["/usr/lib/go/src/", "vendor/*", "../../../../pkg/mod"]
+    "Exclude": ["/usr/lib/go/src/", "test_common.go", "vendor/*"]
 }

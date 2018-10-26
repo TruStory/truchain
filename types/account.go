@@ -4,13 +4,9 @@ import (
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth"
-	"github.com/tendermint/tendermint/crypto"
 )
 
 var _ auth.Account = (*AppAccount)(nil)
-
-// RegistrarAccAddress is the UTF8-encoded address of the account which is responsible for registering other accounts
-const RegistrarAccAddress = "truchainaccregistrar"
 
 // AppAccount is a custom extension for this application. It is an example of
 // extending auth.BaseAccount with custom fields. It is compatible with the
@@ -23,55 +19,8 @@ type AppAccount struct {
 }
 
 // nolint
-func (acc AppAccount) GetName() string { return acc.Name }
-
-// nolint
+func (acc AppAccount) GetName() string      { return acc.Name }
 func (acc *AppAccount) SetName(name string) { acc.Name = name }
-
-// nolint
-func (acc AppAccount) GetAccountNumber() int64 {
-	return acc.AccountNumber
-}
-
-// nolint
-func (acc AppAccount) GetCoins() sdk.Coins {
-	return acc.Coins
-}
-
-// nolint
-func (acc AppAccount) GetSequence() int64 {
-	return acc.Sequence
-}
-
-// nolint
-func (acc AppAccount) SetAccountNumber(accNumber int64) error {
-	acc.BaseAccount.SetAccountNumber(accNumber)
-	return nil
-}
-
-// nolint
-func (acc AppAccount) SetAddress(address sdk.AccAddress) error {
-	acc.BaseAccount.SetAddress(address)
-	return nil
-}
-
-// nolint
-func (acc AppAccount) SetSequence(seq int64) error {
-	acc.BaseAccount.SetSequence(seq)
-	return nil
-}
-
-// nolint
-func (acc AppAccount) SetCoins(coins sdk.Coins) error {
-	acc.BaseAccount.SetCoins(coins)
-	return nil
-}
-
-// nolint
-func (acc AppAccount) SetPubKey(pubkey crypto.PubKey) error {
-	acc.PubKey = pubkey
-	return nil
-}
 
 // NewAppAccount returns a reference to a new AppAccount given a name and an
 // auth.BaseAccount.

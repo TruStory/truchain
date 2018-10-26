@@ -3,8 +3,9 @@ package story
 import (
 	"net/url"
 
-	app "github.com/TruStory/truchain/types"
 	"github.com/TruStory/truchain/x/category"
+
+	app "github.com/TruStory/truchain/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
