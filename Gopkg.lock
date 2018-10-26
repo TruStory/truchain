@@ -49,7 +49,7 @@
   revision = "d4cc87b860166d00d6b5b9e0d3b3d71d6088d4d4"
 
 [[projects]]
-  digest = "1:4fb5db4b7b0af5b5103d1d0ead9b47320b52577b8b7c81c33bc206aaa26036f2"
+  digest = "1:f0ddc9c448ceca19e7afc8da3825caacc6689db8421818ace709316b6ae91877"
   name = "github.com/cosmos/cosmos-sdk"
   packages = [
     "baseapp",
@@ -59,6 +59,7 @@
     "client/rpc",
     "client/tx",
     "client/utils",
+    "cmd/gaia/init",
     "codec",
     "crypto",
     "crypto/keys",
@@ -705,6 +706,7 @@
     "github.com/cosmos/cosmos-sdk/client/keys",
     "github.com/cosmos/cosmos-sdk/client/rpc",
     "github.com/cosmos/cosmos-sdk/client/tx",
+    "github.com/cosmos/cosmos-sdk/cmd/gaia/init",
     "github.com/cosmos/cosmos-sdk/codec",
     "github.com/cosmos/cosmos-sdk/server",
     "github.com/cosmos/cosmos-sdk/store",

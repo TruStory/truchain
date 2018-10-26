@@ -5,7 +5,10 @@ import (
 	"io"
 	"os"
 
+	gaiaInit "github.com/cosmos/cosmos-sdk/cmd/gaia/init"
+
 	"github.com/TruStory/truchain/app"
+
 	"github.com/cosmos/cosmos-sdk/server"
 	"github.com/spf13/cobra"
 	abci "github.com/tendermint/tendermint/abci/types"
@@ -26,6 +29,9 @@ func main() {
 	}
 
 	appInit := server.DefaultAppInit
+	rootCmd.AddCommand(gaiaInit.InitCmd(ctx, cdc, appInit))
+	rootCmd.AddCommand(gaiaInit.TestnetFilesCmd(ctx, cdc, appInit))
+
 	server.AddCommands(
 		ctx,
 		cdc,
