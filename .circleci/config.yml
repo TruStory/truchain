@@ -55,7 +55,7 @@ jobs:
 
   test_unit:
     <<: *defaults
-    parallelism: 4
+    parallelism: 2
     steps:
       - attach_workspace:
           at: /tmp/workspace
