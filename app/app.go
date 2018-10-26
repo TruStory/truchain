@@ -1,13 +1,17 @@
 package app
 
 import (
+	"encoding/hex"
 	"encoding/json"
+	"io/ioutil"
 
 	"github.com/TruStory/truchain/types"
 	"github.com/TruStory/truchain/x/backing"
 	"github.com/TruStory/truchain/x/category"
 	"github.com/TruStory/truchain/x/challenge"
+  "github.com/TruStory/truchain/x/registration"
 	"github.com/TruStory/truchain/x/story"
+	"github.com/TruStory/truchain/x/truapi"
 	bam "github.com/cosmos/cosmos-sdk/baseapp"
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -15,14 +19,11 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/bank"
 	"github.com/cosmos/cosmos-sdk/x/ibc"
 	abci "github.com/tendermint/tendermint/abci/types"
+	"github.com/tendermint/tendermint/crypto/secp256k1"
 	cmn "github.com/tendermint/tendermint/libs/common"
 	dbm "github.com/tendermint/tendermint/libs/db"
 	"github.com/tendermint/tendermint/libs/log"
 	tmtypes "github.com/tendermint/tendermint/types"
-)
-
-const (
-	appName = "TruChain"
 )
 
 // TruChain implements an extended ABCI application. It contains a BaseApp,
@@ -34,6 +35,7 @@ type TruChain struct {
 	codec *codec.Codec
 
 	// keys to access the multistore
+  
 	keyMain      *sdk.KVStoreKey
 	keyAccount   *sdk.KVStoreKey
 	keyIBC       *sdk.KVStoreKey
@@ -41,6 +43,7 @@ type TruChain struct {
 	keyCategory  *sdk.KVStoreKey
 	keyBacking   *sdk.KVStoreKey
 	keyChallenge *sdk.KVStoreKey
+  keyFee      *sdk.KVStoreKey
 
 	// manage getting and setting accounts
 	accountMapper       auth.AccountMapper
@@ -52,6 +55,13 @@ type TruChain struct {
 	storyKeeper     story.ReadWriteKeeper
 	categoryKeeper  category.ReadWriteKeeper
 	backingKeeper   backing.ReadWriteKeeper
+
+	// state to run api
+	blockCtx     *sdk.Context
+	blockHeader  abci.Header
+	api          *truapi.TruAPI
+	apiStarted   bool
+	registrarKey secp256k1.PrivKeySecp256k1
 	challengeKeeper challenge.ReadWriteKeeper
 }
 
@@ -67,14 +77,20 @@ func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *T
 	// create your application type
 	var app = &TruChain{
 		codec:        codec,
-		BaseApp:      bam.NewBaseApp(appName, logger, db, auth.DefaultTxDecoder(codec), options...),
+		BaseApp:      bam.NewBaseApp(AppName, logger, db, auth.DefaultTxDecoder(codec), options...),
 		keyMain:      sdk.NewKVStoreKey("main"),
 		keyAccount:   sdk.NewKVStoreKey("acc"),
 		keyIBC:       sdk.NewKVStoreKey("ibc"),
+		keyFee:       sdk.NewKVStoreKey("collectedFees"),
 		keyStory:     sdk.NewKVStoreKey("stories"),
 		keyCategory:  sdk.NewKVStoreKey("categories"),
 		keyBacking:   sdk.NewKVStoreKey("backings"),
-		keyChallenge: sdk.NewKVStoreKey("challenges"),
+    keyChallenge: sdk.NewKVStoreKey("challenges"),
+		api:          nil,
+		apiStarted:   false,
+		blockCtx:     nil,
+		blockHeader:  abci.Header{},
+		registrarKey: loadRegistrarKey(),
 	}
 
 	// define and attach the mappers and keepers
@@ -85,6 +101,7 @@ func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *T
 	)
 	app.coinKeeper = bank.NewBaseKeeper(app.accountMapper)
 	app.ibcMapper = ibc.NewMapper(app.codec, app.keyIBC, app.RegisterCodespace(ibc.DefaultCodespace))
+	app.feeCollectionKeeper = auth.NewFeeCollectionKeeper(app.codec, app.keyFee)
 
 	// wire up keepers
 	app.categoryKeeper = category.NewKeeper(app.keyCategory, codec)
@@ -104,11 +121,13 @@ func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *T
 		AddRoute("story", story.NewHandler(app.storyKeeper)).
 		AddRoute("category", category.NewHandler(app.categoryKeeper)).
 		AddRoute("backing", backing.NewHandler(app.backingKeeper)).
-		AddRoute("challenge", challenge.NewHandler(app.challengeKeeper))
+		AddRoute(registration.RegisterKeyMsg{}.Type(),
+			registration.NewHandler(app.accountMapper)).
+    AddRoute("challenge", challenge.NewHandler(app.challengeKeeper))
 
 	// register query routes for reading state
 	app.QueryRouter().
-		AddRoute("story", story.NewQuerier(app.storyKeeper))
+		AddRoute(story.QueryPath, story.NewQuerier(app.readStoryKeeper))
 
 	// perform initialization logic
 	app.SetInitChainer(app.initChainer)
@@ -117,11 +136,14 @@ func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *T
 	app.SetAnteHandler(auth.NewAnteHandler(app.accountMapper, app.feeCollectionKeeper))
 
 	// mount the multistore and load the latest state
-	app.MountStoresIAVL(app.keyMain, app.keyAccount, app.keyIBC, app.keyStory, app.keyBacking)
+	app.MountStoresIAVL(app.keyMain, app.keyAccount, app.keyIBC, app.keyStory, app.keyBacking, app.keyFee, app.keyCategory)
 	err := app.LoadLatestVersion(app.keyMain)
 	if err != nil {
 		cmn.Exit(err.Error())
 	}
+
+	// build HTTP api
+	app.api = app.makeAPI()
 
 	return app
 }
@@ -136,9 +158,16 @@ func MakeCodec() *codec.Codec {
 	bank.RegisterCodec(cdc)
 	ibc.RegisterCodec(cdc)
 
-	// register custom types
+	// register msg types
+	story.RegisterAmino(cdc)
+	backing.RegisterAmino(cdc)
+	category.RegisterAmino(cdc)
+	registration.RegisterAmino(cdc)
+
+	// register other custom types
 	cdc.RegisterInterface((*auth.Account)(nil), nil)
 	cdc.RegisterConcrete(&types.AppAccount{}, "truchain/Account", nil)
+	cdc.RegisterConcrete(&auth.StdTx{}, "cosmos-sdk/StdTx", nil)
 
 	// register modules
 	backing.RegisterAmino(cdc)
@@ -153,7 +182,15 @@ func MakeCodec() *codec.Codec {
 
 // BeginBlocker reflects logic to run before any TXs application are processed
 // by the application.
-func (app *TruChain) BeginBlocker(_ sdk.Context, _ abci.RequestBeginBlock) abci.ResponseBeginBlock {
+func (app *TruChain) BeginBlocker(ctx sdk.Context, req abci.RequestBeginBlock) abci.ResponseBeginBlock {
+	app.blockCtx = &ctx
+	app.blockHeader = req.Header
+
+	if !(app.apiStarted) {
+		go app.startAPI()
+		app.apiStarted = true
+	}
+
 	return abci.ResponseBeginBlock{}
 }
 
@@ -185,7 +222,7 @@ func (app *TruChain) initChainer(ctx sdk.Context, req abci.RequestInitChain) abc
 		panic(err)
 	}
 
-	for _, gacc := range genesisState.Accounts {
+	for i, gacc := range genesisState.Accounts {
 		acc, err := gacc.ToAppAccount()
 		if err != nil {
 			// TODO: https://github.com/cosmos/cosmos-sdk/issues/468
@@ -193,6 +230,11 @@ func (app *TruChain) initChainer(ctx sdk.Context, req abci.RequestInitChain) abc
 		}
 
 		acc.AccountNumber = app.accountMapper.GetNextAccountNumber(ctx)
+
+		if i == 1 { // TODO: more robust way of identifying registrar account [notduncansmith]
+			acc.BaseAccount.SetPubKey(app.registrarKey.PubKey())
+		}
+
 		app.accountMapper.SetAccount(ctx, acc)
 	}
 
@@ -225,4 +267,28 @@ func (app *TruChain) ExportAppStateAndValidators() (appState json.RawMessage, va
 	}
 
 	return appState, validators, err
+}
+
+func loadRegistrarKey() secp256k1.PrivKeySecp256k1 {
+	fileBytes, err := ioutil.ReadFile("registrar.key")
+
+	if err != nil {
+		panic(err)
+	}
+
+	keyBytes, err := hex.DecodeString(string(fileBytes))
+
+	if err != nil {
+		panic(err)
+	}
+
+	if len(keyBytes) != 32 {
+		panic("Invalid registrar key: " + string(fileBytes))
+	}
+
+	key := secp256k1.PrivKeySecp256k1{}
+
+	copy(key[:], keyBytes)
+
+	return key
 }
