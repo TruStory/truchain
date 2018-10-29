@@ -117,7 +117,9 @@ func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *T
 	app.SetAnteHandler(auth.NewAnteHandler(app.accountMapper, app.feeCollectionKeeper))
 
 	// mount the multistore and load the latest state
-	app.MountStoresIAVL(app.keyMain, app.keyAccount, app.keyIBC, app.keyStory, app.keyBacking)
+	app.MountStoresIAVL(
+		app.keyMain, app.keyAccount, app.keyIBC,
+		app.keyBacking, app.keyCategory, app.keyChallenge, app.keyStory)
 	err := app.LoadLatestVersion(app.keyMain)
 	if err != nil {
 		cmn.Exit(err.Error())
