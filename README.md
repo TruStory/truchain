@@ -21,15 +21,13 @@ cd truchain && git checkout master`
 
 1. Install dependencies
 
-`make update_vendor_deps`
-
-This should install all dependencies in `/vendor`.
+`make update_deps`
 
 2. Buidl the binaries for the client apps:
 
 `make buidl`
 
-(NOTE: `make build` also works)
+NOTE: On macOS Mojave, you might have to run `export CGO_ENABLED=1; export CC=gcc`.
 
 This creates:
 
@@ -49,6 +47,7 @@ API requests, and communicate via RPC with `truchaind`.
 4. Start blockchain
 
 `bin/truchaind start`
+```
 
 ### Architecture
 
