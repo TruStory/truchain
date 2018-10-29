@@ -6,7 +6,7 @@ import sdk "github.com/cosmos/cosmos-sdk/types"
 type Category struct {
 	ID          int64          `json:"id"`
 	Creator     sdk.AccAddress `json:"creator"`
-	Name        string         `json:"name"`
+	Title       string         `json:"name"`
 	Slug        string         `json:"slug"`
 	Description string         `json:"description,omitempty"`
 }

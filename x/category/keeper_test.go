@@ -39,8 +39,8 @@ func TestInitCategories(t *testing.T) {
 	assert.Nil(t, err)
 
 	cat, _ := k.GetCategory(ctx, 1)
-	assert.Equal(t, "Bitcoin", cat.Name)
+	assert.Equal(t, "Bitcoin", cat.Title)
 
 	cat, _ = k.GetCategory(ctx, 2)
-	assert.Equal(t, "Shitcoins", cat.Name)
+	assert.Equal(t, "Shitcoins", cat.Title)
 }
