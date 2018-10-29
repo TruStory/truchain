@@ -17,6 +17,9 @@ type ReadKeeper interface {
 // WriteKeeper defines a module interface that facilities write only access
 // to truchain data
 type WriteKeeper interface {
+	InitCategories(
+		ctx sdk.Context, creator sdk.AccAddress, categories map[string]string) (err sdk.Error)
+
 	NewCategory(ctx sdk.Context, title string, creator sdk.AccAddress, slug string, description string) (int64, sdk.Error)
 }
 
@@ -35,6 +38,20 @@ type Keeper struct {
 // NewKeeper creates a new keeper with write and read access
 func NewKeeper(storeKey sdk.StoreKey, codec *amino.Codec) Keeper {
 	return Keeper{app.NewKeeper(codec, storeKey)}
+}
+
+// InitCategories creates the initial set of categories
+func (k Keeper) InitCategories(
+	ctx sdk.Context, creator sdk.AccAddress, categories map[string]string) (err sdk.Error) {
+
+	for slug, title := range categories {
+		_, err = k.NewCategory(ctx, title, creator, slug, "")
+		if err != nil {
+			return err
+		}
+	}
+
+	return
 }
 
 // NewCategory adds a story to the key-value store

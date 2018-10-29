@@ -53,6 +53,9 @@ type TruChain struct {
 	categoryKeeper  category.ReadWriteKeeper
 	backingKeeper   backing.ReadWriteKeeper
 	challengeKeeper challenge.ReadWriteKeeper
+
+	// list of initial categories
+	categories map[string]string
 }
 
 // NewTruChain returns a reference to a new TruChain. Internally,
@@ -64,8 +67,20 @@ func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *T
 	// create and register app-level codec for TXs and accounts
 	codec := MakeCodec()
 
+	// map of initial categories (slug -> title)
+	categories := map[string]string{
+		"btc":        "Bitcoin",
+		"conensus":   "Consensus",
+		"eth":        "Ethereum",
+		"founder":    "Founders",
+		"ico":        "ICOs",
+		"regulation": "Regulation",
+		"shitcoin":   "Shitcoins",
+	}
+
 	// create your application type
 	var app = &TruChain{
+		categories:   categories,
 		codec:        codec,
 		BaseApp:      bam.NewBaseApp(appName, logger, db, auth.DefaultTxDecoder(codec), options...),
 		keyMain:      sdk.NewKVStoreKey("main"),
@@ -117,7 +132,9 @@ func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *T
 	app.SetAnteHandler(auth.NewAnteHandler(app.accountMapper, app.feeCollectionKeeper))
 
 	// mount the multistore and load the latest state
-	app.MountStoresIAVL(app.keyMain, app.keyAccount, app.keyIBC, app.keyStory, app.keyBacking)
+	app.MountStoresIAVL(
+		app.keyMain, app.keyAccount, app.keyIBC,
+		app.keyBacking, app.keyCategory, app.keyChallenge, app.keyStory)
 	err := app.LoadLatestVersion(app.keyMain)
 	if err != nil {
 		cmn.Exit(err.Error())
@@ -190,6 +207,15 @@ func (app *TruChain) initChainer(ctx sdk.Context, req abci.RequestInitChain) abc
 
 		acc.AccountNumber = app.accountMapper.GetNextAccountNumber(ctx)
 		app.accountMapper.SetAccount(ctx, acc)
+	}
+
+	// get genesis account address
+	genesisAddr := genesisState.Accounts[0].Address
+
+	// persist initial categories on chain
+	err = app.categoryKeeper.InitCategories(ctx, genesisAddr, app.categories)
+	if err != nil {
+		panic(err)
 	}
 
 	return abci.ResponseInitChain{}
