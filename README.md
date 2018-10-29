@@ -47,7 +47,6 @@ API requests, and communicate via RPC with `truchaind`.
 4. Start blockchain
 
 `bin/truchaind start`
-```
 
 ### Architecture
 
