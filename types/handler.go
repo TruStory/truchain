@@ -15,8 +15,8 @@ func ErrMsgHandler(msg sdk.Msg) sdk.Result {
 		errMsg := "Unrecognized Msg type: " + mType.Name()
 		return sdk.ErrUnknownRequest(errMsg).Result()
 	}
-	return sdk.ErrUnknownRequest("Unrecognized Msg").Result()
 
+	return sdk.ErrUnknownRequest("Unrecognized Msg").Result()
 }
 
 // Result returns a successful handler result with id of the type
