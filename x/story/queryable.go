@@ -14,8 +14,8 @@ const (
 	QueryStoriesByCategory           = "category/:id/stories"
 	QueryChallengedStoriesByCategory = "category/:id/challenged_stories"
 	QueryStoryFeedByCategory         = "category/:id/story_feed"
-	QueryPath            = "stories"
-	QueryCategoryStories = "category"
+	QueryPath                        = "stories"
+	QueryCategoryStories             = "category"
 )
 
 // QueryCategoryStoriesParams are params for stories by category queries

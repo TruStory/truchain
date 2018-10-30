@@ -1,7 +1,9 @@
 package app
 
 import (
+	"encoding/hex"
 	"encoding/json"
+	"io/ioutil"
 
 	params "github.com/TruStory/truchain/parameters"
 	"github.com/TruStory/truchain/types"
@@ -10,6 +12,7 @@ import (
 	"github.com/TruStory/truchain/x/challenge"
 	"github.com/TruStory/truchain/x/registration"
 	"github.com/TruStory/truchain/x/story"
+	"github.com/TruStory/truchain/x/truapi"
 	bam "github.com/cosmos/cosmos-sdk/baseapp"
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -56,6 +59,12 @@ type TruChain struct {
 
 	// list of initial categories
 	categories map[string]string
+
+	// state to run api
+	blockCtx     *sdk.Context
+	blockHeader  abci.Header
+	api          *truapi.TruAPI
+	apiStarted   bool
 	registrarKey secp256k1.PrivKeySecp256k1
 }
 
@@ -92,6 +101,10 @@ func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *T
 		keyBacking:   sdk.NewKVStoreKey("backings"),
 		keyChallenge: sdk.NewKVStoreKey("challenges"),
 		keyFee:       sdk.NewKVStoreKey("collectedFees"),
+		api:          nil,
+		apiStarted:   false,
+		blockCtx:     nil,
+		blockHeader:  abci.Header{},
 		registrarKey: loadRegistrarKey(),
 	}
 
@@ -146,6 +159,9 @@ func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *T
 		cmn.Exit(err.Error())
 	}
 
+	// build HTTP api
+	app.api = app.makeAPI()
+
 	return app
 }
 
@@ -160,6 +176,9 @@ func MakeCodec() *codec.Codec {
 	ibc.RegisterCodec(cdc)
 
 	// register msg types
+	story.RegisterAmino(cdc)
+	backing.RegisterAmino(cdc)
+	category.RegisterAmino(cdc)
 	registration.RegisterAmino(cdc)
 
 	// register other custom types
@@ -180,7 +199,15 @@ func MakeCodec() *codec.Codec {
 
 // BeginBlocker reflects logic to run before any TXs application are processed
 // by the application.
-func (app *TruChain) BeginBlocker(_ sdk.Context, _ abci.RequestBeginBlock) abci.ResponseBeginBlock {
+func (app *TruChain) BeginBlocker(ctx sdk.Context, req abci.RequestBeginBlock) abci.ResponseBeginBlock {
+	app.blockCtx = &ctx
+	app.blockHeader = req.Header
+
+	if !(app.apiStarted) {
+		go app.startAPI()
+		app.apiStarted = true
+	}
+
 	return abci.ResponseBeginBlock{}
 }
 
@@ -219,4 +246,28 @@ func (app *TruChain) ExportAppStateAndValidators() (appState json.RawMessage, va
 	}
 
 	return appState, validators, err
+}
+
+func loadRegistrarKey() secp256k1.PrivKeySecp256k1 {
+	fileBytes, err := ioutil.ReadFile("registrar.key")
+
+	if err != nil {
+		panic(err)
+	}
+
+	keyBytes, err := hex.DecodeString(string(fileBytes))
+
+	if err != nil {
+		panic(err)
+	}
+
+	if len(keyBytes) != 32 {
+		panic("Invalid registrar key: " + string(fileBytes))
+	}
+
+	key := secp256k1.PrivKeySecp256k1{}
+
+	copy(key[:], keyBytes)
+
+	return key
 }
