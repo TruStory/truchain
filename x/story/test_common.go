@@ -36,7 +36,7 @@ func mockDB() (sdk.Context, Keeper, c.Keeper) {
 	return ctx, sk, ck
 }
 
-func createFakeStory(ctx sdk.Context, sk Keeper, ck c.ReadWriteKeeper) int64 {
+func createFakeStory(ctx sdk.Context, sk Keeper, ck c.WriteKeeper) int64 {
 	body := "Body of story."
 	cat := createFakeCategory(ctx, ck)
 	creator := sdk.AccAddress([]byte{1, 2})
@@ -47,7 +47,7 @@ func createFakeStory(ctx sdk.Context, sk Keeper, ck c.ReadWriteKeeper) int64 {
 	return storyID
 }
 
-func createFakeCategory(ctx sdk.Context, ck c.ReadWriteKeeper) c.Category {
+func createFakeCategory(ctx sdk.Context, ck c.WriteKeeper) c.Category {
 	existing, err := ck.GetCategory(ctx, 1)
 	if err == nil {
 		return existing

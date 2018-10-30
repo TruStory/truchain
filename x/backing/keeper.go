@@ -13,7 +13,6 @@ import (
 )
 
 // ReadKeeper defines a module interface that facilitates read only access
-// to truchain data
 type ReadKeeper interface {
 	app.ReadKeeper
 
@@ -21,8 +20,9 @@ type ReadKeeper interface {
 }
 
 // WriteKeeper defines a module interface that facilities write only access
-// to truchain data
 type WriteKeeper interface {
+	ReadKeeper
+
 	NewBacking(
 		ctx sdk.Context,
 		storyID int64,
@@ -34,26 +34,19 @@ type WriteKeeper interface {
 	NewResponseEndBlock(ctx sdk.Context) sdk.Tags
 }
 
-// ReadWriteKeeper defines a module interface that facilities read/write access
-// to truchain data
-type ReadWriteKeeper interface {
-	ReadKeeper
-	WriteKeeper
-}
-
 // Keeper data type storing keys to the key-value store
 type Keeper struct {
 	app.Keeper
 
-	storyKeeper    story.ReadWriteKeeper // read-write access to story store
-	bankKeeper     bank.Keeper           // read-write access coin store
-	categoryKeeper cat.ReadKeeper        // read access to category store
+	storyKeeper    story.WriteKeeper // read-write access to story store
+	bankKeeper     bank.Keeper       // read-write access coin store
+	categoryKeeper cat.ReadKeeper    // read access to category store
 }
 
 // NewKeeper creates a new keeper with write and read access
 func NewKeeper(
 	storeKey sdk.StoreKey,
-	sk story.ReadWriteKeeper,
+	sk story.WriteKeeper,
 	bk bank.Keeper,
 	ck cat.ReadKeeper,
 	codec *amino.Codec) Keeper {

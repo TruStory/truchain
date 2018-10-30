@@ -52,10 +52,10 @@ type TruChain struct {
 	ibcMapper           ibc.Mapper
 
 	// access truchain database
-	storyKeeper     story.ReadWriteKeeper
-	categoryKeeper  category.ReadWriteKeeper
-	backingKeeper   backing.ReadWriteKeeper
-	challengeKeeper challenge.ReadWriteKeeper
+	storyKeeper     story.WriteKeeper
+	categoryKeeper  category.WriteKeeper
+	backingKeeper   backing.WriteKeeper
+	challengeKeeper challenge.WriteKeeper
 
 	// list of initial categories
 	categories map[string]string
