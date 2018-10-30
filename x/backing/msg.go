@@ -14,7 +14,7 @@ type BackStoryMsg struct {
 	StoryID  int64          `json:"story_id"`
 	Amount   sdk.Coin       `json:"amount"`
 	Creator  sdk.AccAddress `json:"creator"`
-	Duration time.Duration  `json:"duration"`
+	Duration int64          `json:"duration"`
 }
 
 // NewBackStoryMsg creates a message to back a story
@@ -27,7 +27,7 @@ func NewBackStoryMsg(
 		StoryID:  storyID,
 		Amount:   amount,
 		Creator:  creator,
-		Duration: duration,
+		Duration: int64(duration),
 	}
 }
 
@@ -40,6 +40,10 @@ func (msg BackStoryMsg) Name() string { return app.GetName(msg) }
 // GetSignBytes implements Msg
 func (msg BackStoryMsg) GetSignBytes() []byte {
 	return app.MustGetSignBytes(msg)
+}
+
+func (msg BackStoryMsg) GetDuration() time.Duration {
+	return time.Duration(time.Duration(msg.Duration) * time.Second)
 }
 
 // ValidateBasic implements Msg
@@ -56,9 +60,13 @@ func (msg BackStoryMsg) ValidateBasic() sdk.Error {
 	if msg.Amount.IsZero() == true {
 		return sdk.ErrInsufficientFunds("Invalid backing amount" + msg.Amount.String())
 	}
-	if msg.Duration < params.MinPeriod || msg.Duration > params.MaxPeriod {
-		return ErrInvalidPeriod(msg.Duration)
+
+	duration := time.Duration(time.Duration(msg.Duration) * time.Second)
+
+	if duration < params.MinPeriod || duration > params.MaxPeriod {
+		return ErrInvalidPeriod(duration)
 	}
+
 	return nil
 }
 
