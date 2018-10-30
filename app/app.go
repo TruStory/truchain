@@ -38,6 +38,7 @@ type TruChain struct {
 	keyCategory  *sdk.KVStoreKey
 	keyBacking   *sdk.KVStoreKey
 	keyChallenge *sdk.KVStoreKey
+	keyFee       *sdk.KVStoreKey
 
 	// manage getting and setting accounts
 	accountMapper       auth.AccountMapper
@@ -87,6 +88,7 @@ func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *T
 		keyCategory:  sdk.NewKVStoreKey("categories"),
 		keyBacking:   sdk.NewKVStoreKey("backings"),
 		keyChallenge: sdk.NewKVStoreKey("challenges"),
+		keyFee:       sdk.NewKVStoreKey("collectedFees"),
 	}
 
 	// define and attach the mappers and keepers
@@ -97,6 +99,7 @@ func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *T
 	)
 	app.coinKeeper = bank.NewBaseKeeper(app.accountMapper)
 	app.ibcMapper = ibc.NewMapper(app.codec, app.keyIBC, app.RegisterCodespace(ibc.DefaultCodespace))
+	app.feeCollectionKeeper = auth.NewFeeCollectionKeeper(app.codec, app.keyFee)
 
 	// wire up keepers
 	app.categoryKeeper = category.NewKeeper(app.keyCategory, codec)
@@ -129,10 +132,10 @@ func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *T
 	app.SetAnteHandler(auth.NewAnteHandler(app.accountMapper, app.feeCollectionKeeper))
 
 	// mount the multistore and load the latest state
-	app.MountStoresIAVL(
-		app.keyMain, app.keyAccount, app.keyIBC,
-		app.keyBacking, app.keyCategory, app.keyChallenge, app.keyStory)
+	app.MountStoresIAVL(app.keyMain, app.keyAccount, app.keyIBC, app.keyStory, app.keyBacking, app.keyFee, app.keyCategory, app.keyChallenge)
+
 	err := app.LoadLatestVersion(app.keyMain)
+
 	if err != nil {
 		cmn.Exit(err.Error())
 	}
