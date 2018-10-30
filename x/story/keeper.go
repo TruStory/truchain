@@ -25,19 +25,13 @@ type ReadKeeper interface {
 	GetStory(ctx sdk.Context, storyID int64) (Story, sdk.Error)
 }
 
-// WriteKeeper defines a module interface that facilities write only access
-// to truchain data
+// WriteKeeper defines a module interface that facilities read/write access
 type WriteKeeper interface {
+	ReadKeeper
+
 	NewStory(ctx sdk.Context, body string, categoryID int64, creator sdk.AccAddress, kind Kind) (int64, sdk.Error)
 	StartChallenge(ctx sdk.Context, storyID int64) sdk.Error
 	UpdateStory(ctx sdk.Context, story Story)
-}
-
-// ReadWriteKeeper defines a module interface that facilities read/write access
-// to truchain data
-type ReadWriteKeeper interface {
-	ReadKeeper
-	WriteKeeper
 }
 
 // Keeper data type storing keys to the key-value store

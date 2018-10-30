@@ -16,17 +16,6 @@ type ReadKeeper interface {
 	GetStoreKey() sdk.StoreKey
 }
 
-// WriteKeeper defines an interface for write access to the KVStore
-type WriteKeeper interface {
-	GetStore(ctx sdk.Context) sdk.KVStore
-}
-
-// ReadWriteKeeper defines an interface for read-write access to the KVStore
-type ReadWriteKeeper interface {
-	ReadKeeper
-	WriteKeeper
-}
-
 // Keeper data type with a default codec
 type Keeper struct {
 	codec    *amino.Codec
