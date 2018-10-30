@@ -22,6 +22,8 @@ type ReadKeeper interface {
 
 // WriteKeeper defines a module interface that facilities write only access to truchain data
 type WriteKeeper interface {
+	ReadKeeper
+
 	Create(
 		ctx sdk.Context, storyID int64, amount sdk.Coin, argument string,
 		creator sdk.AccAddress, evidence []url.URL) (int64, sdk.Error)
@@ -33,23 +35,17 @@ type WriteKeeper interface {
 	NewResponseEndBlock(ctx sdk.Context) sdk.Tags
 }
 
-// ReadWriteKeeper defines a module interface that facilities read/write access to truchain data
-type ReadWriteKeeper interface {
-	ReadKeeper
-	WriteKeeper
-}
-
 // Keeper data type storing keys to the key-value store
 type Keeper struct {
 	app.Keeper
 
-	storyKeeper story.ReadWriteKeeper
+	storyKeeper story.WriteKeeper
 	bankKeeper  bank.Keeper
 }
 
 // NewKeeper creates a new keeper with write and read access
 func NewKeeper(
-	storeKey sdk.StoreKey, sk story.ReadWriteKeeper, bankKeeper bank.Keeper,
+	storeKey sdk.StoreKey, sk story.WriteKeeper, bankKeeper bank.Keeper,
 	codec *amino.Codec) Keeper {
 
 	return Keeper{app.NewKeeper(codec, storeKey), sk, bankKeeper}

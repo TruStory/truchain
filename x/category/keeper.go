@@ -7,7 +7,6 @@ import (
 )
 
 // ReadKeeper defines a module interface that facilitates read only access
-// to truchain data
 type ReadKeeper interface {
 	app.ReadKeeper
 
@@ -15,19 +14,13 @@ type ReadKeeper interface {
 }
 
 // WriteKeeper defines a module interface that facilities write only access
-// to truchain data
 type WriteKeeper interface {
+	ReadKeeper
+
 	InitCategories(
 		ctx sdk.Context, creator sdk.AccAddress, categories map[string]string) (err sdk.Error)
 
 	NewCategory(ctx sdk.Context, title string, creator sdk.AccAddress, slug string, description string) (int64, sdk.Error)
-}
-
-// ReadWriteKeeper defines a module interface that facilities read/write access
-// to truchain data
-type ReadWriteKeeper interface {
-	ReadKeeper
-	WriteKeeper
 }
 
 // Keeper data type storing keys to the key-value store
