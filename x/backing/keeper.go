@@ -3,6 +3,7 @@ package backing
 import (
 	"time"
 
+	params "github.com/TruStory/truchain/parameters"
 	app "github.com/TruStory/truchain/types"
 	cat "github.com/TruStory/truchain/x/category"
 	"github.com/TruStory/truchain/x/story"
@@ -71,7 +72,7 @@ func (k Keeper) NewBacking(
 ) (id int64, err sdk.Error) {
 
 	// Check if user has enough cat coins or trustake to back
-	trustake := sdk.NewCoin(NativeTokenName, amount.Amount)
+	trustake := sdk.NewCoin(params.StakeDenom, amount.Amount)
 	if !k.bankKeeper.HasCoins(ctx, creator, sdk.Coins{amount}) &&
 		!k.bankKeeper.HasCoins(ctx, creator, sdk.Coins{trustake}) {
 		return 0, sdk.ErrInsufficientFunds("Insufficient funds for backing.")
@@ -152,7 +153,7 @@ func (k Keeper) getPrincipal(
 		if k.bankKeeper.HasCoins(ctx, userAddr, sdk.Coins{amount}) {
 			return amount, nil
 		}
-	case NativeTokenName:
+	case params.StakeDenom:
 		// mint category coins from trustake
 		return mintFromNativeToken(ctx, k, cat, amount, userAddr)
 	default:
@@ -191,7 +192,7 @@ func mintFromNativeToken(
 		sdk.NewDecFromInt(amount.Amount).Mul(conversionRate).RoundInt())
 
 	// burn equivalent trustake
-	trustake := sdk.Coins{sdk.NewCoin(NativeTokenName, principal.Amount)}
+	trustake := sdk.Coins{sdk.NewCoin(params.StakeDenom, principal.Amount)}
 	_, _, err = k.bankKeeper.SubtractCoins(ctx, userAddr, trustake)
 	if err != nil {
 		return
