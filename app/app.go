@@ -8,6 +8,7 @@ import (
 	"github.com/TruStory/truchain/x/backing"
 	"github.com/TruStory/truchain/x/category"
 	"github.com/TruStory/truchain/x/challenge"
+	"github.com/TruStory/truchain/x/registration"
 	"github.com/TruStory/truchain/x/story"
 	bam "github.com/cosmos/cosmos-sdk/baseapp"
 	"github.com/cosmos/cosmos-sdk/codec"
@@ -16,6 +17,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/bank"
 	"github.com/cosmos/cosmos-sdk/x/ibc"
 	abci "github.com/tendermint/tendermint/abci/types"
+	"github.com/tendermint/tendermint/crypto/secp256k1"
 	cmn "github.com/tendermint/tendermint/libs/common"
 	dbm "github.com/tendermint/tendermint/libs/db"
 	"github.com/tendermint/tendermint/libs/log"
@@ -54,6 +56,7 @@ type TruChain struct {
 
 	// list of initial categories
 	categories map[string]string
+	registrarKey secp256k1.PrivKeySecp256k1
 }
 
 // NewTruChain returns a reference to a new TruChain. Internally,
@@ -89,6 +92,7 @@ func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *T
 		keyBacking:   sdk.NewKVStoreKey("backings"),
 		keyChallenge: sdk.NewKVStoreKey("challenges"),
 		keyFee:       sdk.NewKVStoreKey("collectedFees"),
+		registrarKey: loadRegistrarKey(),
 	}
 
 	// define and attach the mappers and keepers
@@ -119,7 +123,9 @@ func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *T
 		AddRoute("story", story.NewHandler(app.storyKeeper)).
 		AddRoute("category", category.NewHandler(app.categoryKeeper)).
 		AddRoute("backing", backing.NewHandler(app.backingKeeper)).
-		AddRoute("challenge", challenge.NewHandler(app.challengeKeeper))
+		AddRoute("challenge", challenge.NewHandler(app.challengeKeeper)).
+		AddRoute(registration.RegisterKeyMsg{}.Type(),
+			registration.NewHandler(app.accountMapper))
 
 	// register query routes for reading state
 	app.QueryRouter().
@@ -153,9 +159,13 @@ func MakeCodec() *codec.Codec {
 	bank.RegisterCodec(cdc)
 	ibc.RegisterCodec(cdc)
 
-	// register custom types
+	// register msg types
+	registration.RegisterAmino(cdc)
+
+	// register other custom types
 	cdc.RegisterInterface((*auth.Account)(nil), nil)
 	cdc.RegisterConcrete(&types.AppAccount{}, "truchain/Account", nil)
+	cdc.RegisterConcrete(&auth.StdTx{}, "cosmos-sdk/StdTx", nil)
 
 	// register modules
 	backing.RegisterAmino(cdc)
@@ -181,44 +191,6 @@ func (app *TruChain) EndBlocker(ctx sdk.Context, _ abci.RequestEndBlock) abci.Re
 	app.challengeKeeper.NewResponseEndBlock(ctx)
 
 	return abci.ResponseEndBlock{}
-}
-
-// initChainer implements the custom application logic that the BaseApp will
-// invoke upon initialization. In this case, it will take the application's
-// state provided by 'req' and attempt to deserialize said state. The state
-// should contain all the genesis accounts. These accounts will be added to the
-// application's account mapper.
-func (app *TruChain) initChainer(ctx sdk.Context, req abci.RequestInitChain) abci.ResponseInitChain {
-	stateJSON := req.AppStateBytes
-
-	genesisState := new(types.GenesisState)
-	err := app.codec.UnmarshalJSON(stateJSON, genesisState)
-	if err != nil {
-		// TODO: https://github.com/cosmos/cosmos-sdk/issues/468
-		panic(err)
-	}
-
-	for _, gacc := range genesisState.Accounts {
-		acc, err := gacc.ToAppAccount()
-		if err != nil {
-			// TODO: https://github.com/cosmos/cosmos-sdk/issues/468
-			panic(err)
-		}
-
-		acc.AccountNumber = app.accountMapper.GetNextAccountNumber(ctx)
-		app.accountMapper.SetAccount(ctx, acc)
-	}
-
-	// get genesis account address
-	genesisAddr := genesisState.Accounts[0].Address
-
-	// persist initial categories on chain
-	err = app.categoryKeeper.InitCategories(ctx, genesisAddr, app.categories)
-	if err != nil {
-		panic(err)
-	}
-
-	return abci.ResponseInitChain{}
 }
 
 // ExportAppStateAndValidators implements custom application logic that exposes

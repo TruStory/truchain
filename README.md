@@ -42,9 +42,28 @@ API requests, and communicate via RPC with `truchaind`.
 
 3. Create genesis file (one-time only)
 
-`bin/truchaind init`
+    a. `bin/truchaind init`
 
-4. Start blockchain
+    b. Edit `~/.truchaind/config/genesis.json` and add the following account to the `"accounts"` array:
+
+    ```json
+    {
+      "address": "cosmos1w3e82cmgv95kuctrvdex2emfwd68yctjpzp3mr",
+      "coins": [{"denom": "trustake", "amount": "123456"}]
+    }
+    ```
+
+4. Create registrar key
+
+Create a file in the root of this project named `registrar.key` containing the upper-case-hex encoding of a secp256k1 private key. Example:
+
+```
+6D5A20923CB334E4950C32C344842FE0DCBAC559FB04AE97D64B49ACC81BC1FB
+```
+
+This is the private key to the account added in step 3b.
+
+5. Start blockchain
 
 `bin/truchaind start`
 
