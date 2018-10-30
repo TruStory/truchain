@@ -3,6 +3,17 @@ bin/*
 
 # Testing
 mytestnet/*
+report.html
+.pid
 
 # Dependencies
 vendor/*
+node_modules/
+
+# Misc.
+.DS_Store
+registrar.key
+
+# These stay ignored until we switch to modules
+go.mod
+go.sum
