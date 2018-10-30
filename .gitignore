@@ -5,6 +5,7 @@ bin/*
 mytestnet/*
 report.html
 .pid
+write-file-atomic-*
 
 # Dependencies
 vendor/*
