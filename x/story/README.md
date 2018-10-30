@@ -10,13 +10,15 @@
 ### Stores
 * "stories"
     * keys
-        * `"stories:id:5"` -> `Story`
-        * `"categories:id:[5]:stories:list"` -> `[1,2,3]`
-        * `"categories:id:[5]:stories:challenged:list"` -> `[1,2,3]`
+        * `"stories:id:[StoryID]"` -> `Story`
 
 * "storiesByCategory"
     * keys
-        * `"categories:id:[ID]:stories:id:[ID]"` -> `[StoryID]`
+        * `"categories:id:[CategoryID]:stories:id:[StoryID]"` -> `[StoryID]`
+
+* "challengedStoriesByCategory"
+    * keys
+        * `"categories:id:[CategoryID]:stories:id:[StoryID]"` -> `[StoryID]`
 
 ## Notes
 

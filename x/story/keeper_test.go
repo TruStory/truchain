@@ -1,22 +1,21 @@
 package story
 
 import (
-	"fmt"
 	"testing"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/stretchr/testify/assert"
 )
 
-func TestValidKeys(t *testing.T) {
-	ctx, sk, ck := mockDB()
+// func TestValidKeys(t *testing.T) {
+// 	ctx, sk, ck := mockDB()
 
-	storyID := createFakeStory(ctx, sk, ck)
-	story, _ := sk.GetStory(ctx, storyID)
+// 	storyID := createFakeStory(ctx, sk, ck)
+// 	story, _ := sk.GetStory(ctx, storyID)
 
-	key := getChallengedStoriesKey(sk, story.CategoryID)
-	assert.Equal(t, "challenges:categories:id:1:stories", fmt.Sprintf("%s", key), "should be equal")
-}
+// 	key := getChallengedStoriesKey(sk, story.CategoryID)
+// 	assert.Equal(t, "challenges:categories:id:1:stories", fmt.Sprintf("%s", key), "should be equal")
+// }
 
 func TestAddGetStory(t *testing.T) {
 	ctx, sk, ck := mockDB()
