@@ -3,6 +3,7 @@ package graphql
 import (
 	"context"
 	"encoding/json"
+	"strings"
 	"sync"
 
 	"github.com/TruStory/truchain/x/chttp"
@@ -87,12 +88,14 @@ func (c *Client) runQuery(withCtx context.Context, query *thunder.Query) chttp.J
 			return nil, err
 		}
 
-		resBytes, err := json.Marshal(data)
+		rawResBytes, err := json.Marshal(data)
 
 		if err != nil {
 			response = chttp.SimpleErrorResponse(500, err).(chttp.JSONResponse)
 			return nil, err
 		}
+
+		resBytes := []byte(strings.Replace(string(rawResBytes), "iD", "id", -1))
 
 		response = chttp.SimpleResponse(200, resBytes).(chttp.JSONResponse)
 
