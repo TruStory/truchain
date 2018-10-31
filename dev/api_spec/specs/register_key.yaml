@@ -17,8 +17,8 @@ specs:
         body:
           type: json
           content:
-            pubkey: 030C9FA7F14CA38DF65A31DA31819E1BD3311643F02C7A09AD35EAD20690EEDAE7
-            pubkey_algo: "*secp256k1"
+            pubkey: 02BACF1C2CB1CB200EAB66DEF9241F27FE308B9DB04D518EFB7AA4A9DFF14EBD84
+            pubkey_algo: '*secp256k1'
     response:
       status_code: 201
       json_data:
@@ -33,4 +33,4 @@ specs:
         - path: $.data.coins.0.denom
           value: trusteak
         - path: $.data.coins.0.amount
-          value: "123456"
+          value: '123456'

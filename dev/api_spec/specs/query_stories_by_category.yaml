@@ -5,19 +5,8 @@ configuration:
   host: localhost
   port: 1337
   base_path: /
-spec_dependencies:
-  - ./specs/register_key.yaml
-  - ./specs/submit_story.yaml
 specs:
-    - name: Query stories by categoryID
-      before_test:
-        run_type: inline
-        inline:
-          function: !js/asyncFunction >
-            async function() {
-              await this.runSpec('Register key');
-              await this.runSpec('Submit story');
-            }
+    - name: Query stories by category
       request:
         path: /graphql
         method: post
@@ -28,9 +17,13 @@ specs:
           body:
             type: json
             content:
-              query: "query { stories(categoryID: $categoryID) { body } }"
+              query: 'query {
+                stories(categoryID: $categoryID) {
+                  body
+                }
+              }'
               variables:
-                categoryID: "1"
+                categoryID: '1'
       response:
         status_code: 200
         json_data:
