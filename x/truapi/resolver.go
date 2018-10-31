@@ -2,10 +2,10 @@ package truapi
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 
 	"github.com/TruStory/truchain/x/story"
+	"github.com/tendermint/go-amino"
 )
 
 func (ta *TruAPI) storyResolver(_ context.Context, q story.QueryCategoryStoriesParams) []story.Story {
@@ -17,7 +17,7 @@ func (ta *TruAPI) storyResolver(_ context.Context, q story.QueryCategoryStoriesP
 	}
 
 	s := new([]story.Story)
-	err := json.Unmarshal(res.Value, s)
+	err := amino.UnmarshalJSON(res.Value, s)
 
 	if err != nil {
 		panic(err)
