@@ -142,7 +142,7 @@ func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *T
 
 	// register query routes for reading state
 	app.QueryRouter().
-		AddRoute(story.QueryPath, story.NewQuerier(app.readStoryKeeper))
+		AddRoute(story.QueryPath, story.NewQuerier(app.storyKeeper))
 
 	// perform initialization logic
 	app.SetInitChainer(app.initChainer)
@@ -179,18 +179,13 @@ func MakeCodec() *codec.Codec {
 	story.RegisterAmino(cdc)
 	backing.RegisterAmino(cdc)
 	category.RegisterAmino(cdc)
+	challenge.RegisterAmino(cdc)
 	registration.RegisterAmino(cdc)
 
-	// register other custom types
+	// register other types
 	cdc.RegisterInterface((*auth.Account)(nil), nil)
 	cdc.RegisterConcrete(&types.AppAccount{}, "truchain/Account", nil)
 	cdc.RegisterConcrete(&auth.StdTx{}, "cosmos-sdk/StdTx", nil)
-
-	// register modules
-	backing.RegisterAmino(cdc)
-	category.RegisterAmino(cdc)
-	challenge.RegisterAmino(cdc)
-	story.RegisterAmino(cdc)
 
 	cdc.Seal()
 
