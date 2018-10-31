@@ -5,7 +5,7 @@
 cat .pid
 sleep 5
 
-./node_modules/.bin/just-api --reporter html --reporter-options logRequests specs/api.yaml
+cat ./spec_order | xargs ./node_modules/.bin/just-api --reporter html --reporter-options logRequests
 
 kill -9 $(cat .pid)
 
