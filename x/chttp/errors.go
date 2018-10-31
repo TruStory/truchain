@@ -13,8 +13,8 @@ func signBytesMismatchError(received tcmn.HexBytes, canonical tcmn.HexBytes) err
 	return fmt.Errorf(s, received.String(), canonical.String(), cs)
 }
 
-func expectedMoreMessagesError(receivedCount int, providedTypes []string) error {
-	s := "Tx Error: Only got first %i messages in expected sequence %v"
+func expectedMessagesError(receivedCount int, providedTypes []string) error {
+	s := "Tx Error: Got %i messages in expected sequence %v"
 	return fmt.Errorf(s, receivedCount, providedTypes)
 }
 
