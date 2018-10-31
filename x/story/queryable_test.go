@@ -12,7 +12,7 @@ func TestQueryStories_ErrNotFound(t *testing.T) {
 	ctx, k, _ := mockDB()
 
 	queryParams := QueryCategoryStoriesParams{
-		CategoryID: 1,
+		CategoryID: "1",
 	}
 
 	cdc := codec.New()
@@ -36,7 +36,7 @@ func TestQueryStoriesWithCategory(t *testing.T) {
 	createFakeStory(ctx, sk, ck)
 
 	queryParams := QueryCategoryStoriesParams{
-		CategoryID: 1,
+		CategoryID: "1",
 	}
 
 	cdc := codec.New()
@@ -60,7 +60,7 @@ func TestQueryChallengedStoriesWithCategory(t *testing.T) {
 	sk.StartChallenge(ctx, storyID)
 
 	queryParams := QueryCategoryStoriesParams{
-		CategoryID: 1,
+		CategoryID: "1",
 	}
 
 	cdc := codec.New()
@@ -84,7 +84,7 @@ func TestQueryStoryFeed(t *testing.T) {
 	sk.StartChallenge(ctx, storyID)
 
 	queryParams := QueryCategoryStoriesParams{
-		CategoryID: 1,
+		CategoryID: "1",
 	}
 
 	cdc := codec.New()
