@@ -2,11 +2,12 @@ package challenge
 
 import (
 	"encoding/binary"
+	"encoding/json"
 	"net/url"
 	"testing"
 
+	"github.com/TruStory/truchain/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/davecgh/go-spew/spew"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -30,9 +31,10 @@ func TestStartChallengeMsg(t *testing.T) {
 	assert.NotNil(t, msg)
 
 	res := h(ctx, msg)
-	spew.Dump(res)
-	x, _ := binary.Varint(res.Data)
-	assert.Equal(t, int64(1), x, "incorrect result data")
+	idres := new(types.IDResult)
+	_ = json.Unmarshal(res.Data, &idres)
+
+	assert.Equal(t, int64(1), idres.ID, "incorrect result data")
 }
 
 func TestStartChallengeMsg_ErrInsufficientFunds(t *testing.T) {
@@ -106,6 +108,8 @@ func TestUpdateChallengeMsg(t *testing.T) {
 	updateMsg := NewJoinChallengeMsg(1, amount, creator2)
 
 	res = h(ctx, updateMsg)
-	x, _ := binary.Varint(res.Data)
-	assert.Equal(t, int64(1), x, "incorrect result data")
+	idres := new(types.IDResult)
+	_ = json.Unmarshal(res.Data, &idres)
+
+	assert.Equal(t, int64(1), idres.ID, "incorrect result data")
 }

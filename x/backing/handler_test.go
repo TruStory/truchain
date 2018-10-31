@@ -1,11 +1,12 @@
 package backing
 
 import (
-	"encoding/binary"
+	"encoding/json"
 	"strings"
 	"testing"
 	"time"
 
+	"github.com/TruStory/truchain/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/stretchr/testify/assert"
 )
@@ -60,6 +61,8 @@ func TestBackStoryMsg(t *testing.T) {
 	assert.NotNil(t, msg)
 
 	res := h(ctx, msg)
-	x, _ := binary.Varint(res.Data)
-	assert.Equal(t, int64(1), x, "incorrect result backing id")
+	idres := new(types.IDResult)
+	_ = json.Unmarshal(res.Data, &idres)
+
+	assert.Equal(t, int64(1), idres.ID, "incorrect result backing id")
 }

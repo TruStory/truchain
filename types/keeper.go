@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/tendermint/go-amino"
+	amino "github.com/tendermint/go-amino"
 )
 
 // Utilities for all module keepers

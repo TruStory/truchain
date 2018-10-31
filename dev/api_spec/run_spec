@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+
+../../bin/truchaind --home ../empty_truchain unsafe-reset-all
+../../bin/truchaind --home ../empty_truchain start & echo $! > .pid
+cat .pid
+sleep 5
+
+cat ./spec_order | xargs ./node_modules/.bin/just-api --reporter html --reporter-options logRequests
+
+kill -9 $(cat .pid)
+
+../../bin/truchaind --home ../empty_truchain unsafe-reset-all

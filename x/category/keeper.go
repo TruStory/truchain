@@ -63,11 +63,11 @@ func (k Keeper) NewCategory(
 	description string) (int64, sdk.Error) {
 
 	cat := Category{
-		k.GetNextID(ctx),
-		creator,
-		title,
-		slug,
-		description,
+		ID:          k.GetNextID(ctx),
+		Creator:     creator,
+		Title:       title,
+		Slug:        slug,
+		Description: description,
 	}
 
 	k.setCategory(ctx, cat)

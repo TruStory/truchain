@@ -1,0 +1,31 @@
+meta:
+  name: TruChain API
+configuration:
+  scheme: http
+  host: localhost
+  port: 1337
+  base_path: /
+specs:
+    - name: Query stories by category
+      request:
+        path: /graphql
+        method: post
+        headers:
+          - name: content-type
+            value: application/json
+        payload:
+          body:
+            type: json
+            content:
+              query: 'query {
+                stories(categoryID: $categoryID) {
+                  body
+                }
+              }'
+              variables:
+                categoryID: '1'
+      response:
+        status_code: 200
+        json_data:
+          - path: $.data.stories.0.body
+            value: A new story!
