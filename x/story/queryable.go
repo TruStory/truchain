@@ -11,11 +11,10 @@ import (
 
 // query endpoints supported by the truchain Querier
 const (
-	QueryStoriesByCategory           = "category/:id/stories"
-	QueryChallengedStoriesByCategory = "category/:id/challenged_stories"
-	QueryStoryFeedByCategory         = "category/:id/story_feed"
 	QueryPath                        = "stories"
-	QueryCategoryStories             = "category"
+	QueryStoriesByCategory           = "category"
+	QueryChallengedStoriesByCategory = "category-challenged"
+	QueryStoryFeedByCategory         = "category-feed"
 )
 
 // QueryCategoryStoriesParams are params for stories by category queries
