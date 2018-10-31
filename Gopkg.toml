@@ -35,6 +35,14 @@
   name = "github.com/tendermint/go-amino"
   version = "=v0.12.0"
 
+[[constraint]]
+  name = "github.com/samsarahq/thunder"
+  version = "=v0.4.0"
+
+[[constraint]]
+  name = "github.com/oklog/ulid"
+  version = "=v1.3.1"
+
 [prune]
   go-tests = true
   unused-packages = true

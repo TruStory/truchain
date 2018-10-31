@@ -2,6 +2,7 @@ package story
 
 import (
 	"fmt"
+	"strconv"
 
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -10,14 +11,15 @@ import (
 
 // query endpoints supported by the truchain Querier
 const (
-	QueryStoriesByCategory           = "category/:id/stories"
-	QueryChallengedStoriesByCategory = "category/:id/challenged_stories"
-	QueryStoryFeedByCategory         = "category/:id/story_feed"
+	QueryPath                        = "stories"
+	QueryStoriesByCategory           = "category"
+	QueryChallengedStoriesByCategory = "category-challenged"
+	QueryStoryFeedByCategory         = "category-feed"
 )
 
 // QueryCategoryStoriesParams are params for stories by category queries
 type QueryCategoryStoriesParams struct {
-	CategoryID int64
+	CategoryID string
 }
 
 // NewQuerier returns a function that handles queries on the KVStore
@@ -49,10 +51,17 @@ func queryStoriesWithCategory(
 		return
 	}
 
+	cid, parseErr := strconv.ParseInt(params.CategoryID, 10, 64)
+
+	if parseErr != nil {
+		return res,
+			sdk.ErrUnknownRequest(fmt.Sprintf("Incorrectly formatted request data - %s", err.Error()))
+	}
+
 	// fetch stories
-	stories, err := k.GetStoriesWithCategory(ctx, params.CategoryID)
-	if err != nil {
-		return
+	stories, sdkErr := k.GetStoriesWithCategory(ctx, cid)
+	if sdkErr != nil {
+		return res, sdkErr
 	}
 
 	// return stories JSON bytes
@@ -70,8 +79,15 @@ func queryChallengedStoriesWithCategory(
 		return
 	}
 
+	cid, parseErr := strconv.ParseInt(params.CategoryID, 10, 64)
+
+	if parseErr != nil {
+		return res,
+			sdk.ErrUnknownRequest(fmt.Sprintf("Incorrectly formatted request data - %s", err.Error()))
+	}
+
 	// fetch challenged stories for category
-	stories, err := k.GetChallengedStoriesWithCategory(ctx, params.CategoryID)
+	stories, err := k.GetChallengedStoriesWithCategory(ctx, cid)
 	if err != nil {
 		return
 	}
@@ -91,8 +107,15 @@ func queryStoryFeed(
 		return
 	}
 
+	cid, parseErr := strconv.ParseInt(params.CategoryID, 10, 64)
+
+	if parseErr != nil {
+		return res,
+			sdk.ErrUnknownRequest(fmt.Sprintf("Incorrectly formatted request data - %s", err.Error()))
+	}
+
 	// fetch stories
-	stories, err := k.GetFeedWithCategory(ctx, params.CategoryID)
+	stories, err := k.GetFeedWithCategory(ctx, cid)
 	if err != nil {
 		return
 	}

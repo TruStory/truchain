@@ -5,9 +5,15 @@ import (
 	"testing"
 	"time"
 
+	params "github.com/TruStory/truchain/parameters"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/stretchr/testify/assert"
 )
+
+var fiver sdk.Coin = sdk.Coin{
+	Amount: sdk.NewInt(5),
+	Denom:  params.StakeDenom,
+}
 
 func Test_key(t *testing.T) {
 	_, bk, _, _, _, _ := mockDB()
@@ -86,13 +92,12 @@ func Test_getPrincipal_InTrustake(t *testing.T) {
 	userAddr := sdk.AccAddress([]byte{1, 2})
 
 	// give fake user some fake trustake
-	amount, _ := sdk.ParseCoin("5trustake")
-	bankKeeper.AddCoins(ctx, userAddr, sdk.Coins{amount})
+	bankKeeper.AddCoins(ctx, userAddr, sdk.Coins{fiver})
 
 	// back with trustake, get principal in cat coins
-	coin, err := bk.getPrincipal(ctx, cat, amount, userAddr)
+	coin, err := bk.getPrincipal(ctx, cat, fiver, userAddr)
 	assert.Nil(t, err)
-	assert.Equal(t, amount.Amount, coin.Amount, "Incorrect principal calculation")
+	assert.Equal(t, fiver.Amount, coin.Amount, "Incorrect principal calculation")
 	assert.Equal(t, "trudex", coin.Denom, "Incorrect principal coin")
 }
 
@@ -103,8 +108,7 @@ func Test_getPrincipal_ErrInvalidCoin(t *testing.T) {
 	userAddr := sdk.AccAddress([]byte{1, 2})
 
 	// give fake user some fake coins
-	fakeCoin, _ := sdk.ParseCoin("5trustake")
-	bankKeeper.AddCoins(ctx, userAddr, sdk.Coins{fakeCoin})
+	bankKeeper.AddCoins(ctx, userAddr, sdk.Coins{fiver})
 
 	_, err := bk.getPrincipal(ctx, cat, amount, userAddr)
 	assert.NotNil(t, err)
