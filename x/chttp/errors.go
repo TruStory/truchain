@@ -1,17 +1,8 @@
 package chttp
 
 import (
-	"encoding/hex"
 	"fmt"
-
-	tcmn "github.com/tendermint/tendermint/libs/common"
 )
-
-func signBytesMismatchError(received tcmn.HexBytes, canonical tcmn.HexBytes) error {
-	s := "Tx Error: Bytes signed were \"%s\" but canonical tx encoding would be \"%s\" (utf8: \"%s\")"
-	cs, _ := hex.DecodeString(canonical.String())
-	return fmt.Errorf(s, received.String(), canonical.String(), cs)
-}
 
 func expectedMessagesError(receivedCount int, providedTypes []string) error {
 	s := "Tx Error: Got %i messages in expected sequence %v"
