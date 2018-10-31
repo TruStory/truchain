@@ -1,10 +1,11 @@
 package story
 
 import (
-	"encoding/binary"
+	"encoding/json"
 	"strings"
 	"testing"
 
+	"github.com/TruStory/truchain/types"
 	c "github.com/TruStory/truchain/x/category"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/stretchr/testify/assert"
@@ -26,10 +27,13 @@ func TestSubmitStoryMsg(t *testing.T) {
 
 	res := h(ctx, msg)
 	res1 := h(ctx, msg)
-	x, _ := binary.Varint(res.Data)
-	x1, _ := binary.Varint(res1.Data)
-	assert.Equal(t, int64(1), x, "incorrect result data")
-	assert.Equal(t, int64(2), x1, "incorrect result data")
+	idres := new(types.IDResult)
+	idres1 := new(types.IDResult)
+	_ = json.Unmarshal(res.Data, &idres)
+	_ = json.Unmarshal(res1.Data, &idres1)
+
+	assert.Equal(t, int64(1), idres.ID, "incorrect result data")
+	assert.Equal(t, int64(2), idres1.ID, "incorrect result data")
 }
 
 func TestSubmitStoryMsg_ErrInvalidCategory(t *testing.T) {
