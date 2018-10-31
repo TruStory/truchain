@@ -43,7 +43,7 @@ func (c *Client) Query(withCtx context.Context, r Request) chttp.Response {
 	query, err := c.prepareQuery(r.Query, r.Variables)
 
 	if err != nil {
-		return chttp.SimpleErrorResponse(401, err)
+		return chttp.SimpleErrorResponse(400, err)
 	}
 
 	return c.runQuery(withCtx, query)
