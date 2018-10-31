@@ -12,8 +12,23 @@ benchmark:
 
 buidl: build
 
-build:
-	go build -o bin/trucli cmd/trucli/main.go && go build -o bin/truchaind cmd/truchaind/main.go
+build: build_cli build_daemon
+
+br: build_daemon run_daemon
+
+bwr: wipe_chain br
+
+build_cli:
+	go build -o bin/trucli cmd/trucli/main.go
+
+build_daemon:
+	go build -o bin/truchaind cmd/truchaind/main.go
+
+run_daemon:
+	bin/truchaind start
+
+wipe_chain:
+	bin/truchaind unsafe-reset-all
 
 check:
 	gometalinter ./...
