@@ -81,21 +81,13 @@ func (a *API) stdSignDoc(bs []byte) (auth.StdSignDoc, error) {
 
 func (a *API) stdMsgs(msgTypes []string, msgBodies []json.RawMessage) ([]sdk.Msg, error) {
 	msgs := []sdk.Msg{}
-	finalTypeIndex := len(msgTypes) - 1
 
-	if len(msgTypes) > len(msgBodies) {
-		return msgs, expectedMoreMessagesError(len(msgBodies), msgTypes)
+	if len(msgTypes) != len(msgBodies) {
+		return msgs, expectedMessagesError(len(msgBodies), msgTypes)
 	}
 
 	for i, body := range msgBodies {
-		var typeName string
-
-		if i > finalTypeIndex {
-			typeName = msgTypes[finalTypeIndex]
-		} else {
-			typeName = msgTypes[i]
-		}
-
+		typeName := msgTypes[i]
 		msg, err := a.stdMsg(typeName, body)
 
 		if err != nil {
