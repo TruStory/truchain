@@ -31,7 +31,10 @@ func (app *TruChain) initChainer(ctx sdk.Context, req abci.RequestInitChain) abc
 		acc.AccountNumber = app.accountMapper.GetNextAccountNumber(ctx)
 
 		if i == 1 { // TODO: more robust way of identifying registrar account [notduncansmith]
-			acc.BaseAccount.SetPubKey(app.registrarKey.PubKey())
+			err := acc.BaseAccount.SetPubKey(app.registrarKey.PubKey())
+			if err != nil {
+				panic(err)
+			}
 		}
 
 		app.accountMapper.SetAccount(ctx, acc)
@@ -42,6 +45,10 @@ func (app *TruChain) initChainer(ctx sdk.Context, req abci.RequestInitChain) abc
 
 	// persist initial categories on chain
 	err = app.categoryKeeper.InitCategories(ctx, genesisAddr, app.categories)
+
+	if err != nil {
+		panic(err)
+	}
 
 	return abci.ResponseInitChain{}
 }
