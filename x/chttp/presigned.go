@@ -172,14 +172,11 @@ func StdKey(algo string, bytes []byte) (crypto.PubKey, error) {
 	case "ed25519":
 		ek := ed.PubKeyEd25519{}
 		copy(ek[:], bytes)
-		key := crypto.PubKey(ek)
-		return key, nil
+		return ek, nil
 	case "secp256k1":
 		sk := secp.PubKeySecp256k1{}
 		copy(sk[:], bytes)
-		key := crypto.PubKey(sk)
-		fmt.Println("Got key from bytes", algo, bytes, sk)
-		return key, nil
+		return sk, nil
 	default:
 		return secp.PubKeySecp256k1{}, unsupportedAlgoError(algo, []string{"ed25519", "secp256k1"})
 	}
