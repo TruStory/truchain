@@ -29,7 +29,7 @@ func handleBackStoryMsg(ctx sdk.Context, k WriteKeeper, msg BackStoryMsg) sdk.Re
 		msg.StoryID,
 		msg.Amount,
 		msg.Creator,
-		msg.GetDuration())
+		msg.Duration)
 	if err != nil {
 		return err.Result()
 	}
