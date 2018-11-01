@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"io/ioutil"
 
+	params "github.com/TruStory/truchain/parameters"
 	"github.com/TruStory/truchain/types"
 	"github.com/TruStory/truchain/x/backing"
 	"github.com/TruStory/truchain/x/category"
@@ -93,7 +94,7 @@ func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *T
 	var app = &TruChain{
 		categories:                     categories,
 		codec:                          codec,
-		BaseApp:                        bam.NewBaseApp(appName, logger, db, auth.DefaultTxDecoder(codec), options...),
+		BaseApp:                        bam.NewBaseApp(params.AppName, logger, db, auth.DefaultTxDecoder(codec), options...),
 		keyMain:                        sdk.NewKVStoreKey("main"),
 		keyAccount:                     sdk.NewKVStoreKey("acc"),
 		keyIBC:                         sdk.NewKVStoreKey("ibc"),
