@@ -290,12 +290,8 @@ func (k Keeper) storyIDsWithCategory(
 	iter := sdk.KVStorePrefixIterator(store, prefix)
 	defer iter.Close()
 	for ; iter.Valid(); iter.Next() {
-		bz := iter.Value()
-		if bz == nil {
-			return storyIDs, ErrStoriesWithCategoryNotFound(catID)
-		}
 		var storyID int64
-		k.GetCodec().MustUnmarshalBinary(bz, &storyID)
+		k.GetCodec().MustUnmarshalBinary(iter.Value(), &storyID)
 		storyIDs = append(storyIDs, storyID)
 	}
 
