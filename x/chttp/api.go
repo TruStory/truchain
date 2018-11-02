@@ -46,7 +46,7 @@ func (a *API) Use(mw func(http.Handler) http.Handler) {
 
 // ListenAndServe serves HTTP using the API router
 func (a *API) ListenAndServe(addr string) error {
-	go http.ListenAndServe("0.0.0.0:3030", nil)
+	go func() { _ = http.ListenAndServe("localhost:3030", nil) }()
 	return http.ListenAndServe(addr, a.router)
 }
 
