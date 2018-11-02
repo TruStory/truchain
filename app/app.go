@@ -144,6 +144,9 @@ func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *T
 	app.QueryRouter().
 		AddRoute(story.QueryPath, story.NewQuerier(app.storyKeeper))
 
+	app.QueryRouter().
+		AddRoute(category.QueryPath, category.NewQuerier(app.categoryKeeper))
+
 	// perform initialization logic
 	app.SetInitChainer(app.initChainer)
 	app.SetBeginBlocker(app.BeginBlocker)
