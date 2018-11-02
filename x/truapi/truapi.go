@@ -40,5 +40,11 @@ func (ta *TruAPI) RegisterRoutes() {
 // RegisterResolvers builds the app's GraphQL schema from resolvers (declared in `resolver.go`)
 func (ta *TruAPI) RegisterResolvers() {
 	ta.GraphQLClient.RegisterQueryResolver("stories", ta.storyResolver)
+	ta.GraphQLClient.RegisterObjectResolver("Story", story.Story{}, map[string]interface{}{
+		"id": func(_ context.Context, q story.Story) int64 {
+			return q.ID
+		},
+		"category": ta.storyCategoryResolver,
+	})
 	ta.GraphQLClient.BuildSchema()
 }
