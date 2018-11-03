@@ -4,17 +4,17 @@ import (
 	"net/url"
 	"time"
 
+	app "github.com/TruStory/truchain/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
 // Challenger defines a user's challenge on a story
 type Challenger struct {
-	Amount       sdk.Coin       `json:"amount"`
-	Argument     string         `json:"argument"`
-	Creator      sdk.AccAddress `json:"creator"`
-	Evidence     []url.URL      `json:"evidence,omitempty"`
-	CreatedBlock int64          `json:"created_block"`
-	CreatedTime  time.Time      `json:"created_time"`
+	Amount    sdk.Coin       `json:"amount"`
+	Argument  string         `json:"argument"`
+	Creator   sdk.AccAddress `json:"creator"`
+	Evidence  []url.URL      `json:"evidence,omitempty"`
+	Timestamp app.Timestamp  `json:"timestamp"`
 }
 
 // Challenge defines a challenge on a story
@@ -26,10 +26,7 @@ type Challenge struct {
 	Pool            sdk.Coin       `json:"pool"`
 	Started         bool           `json:"started"`
 	ThresholdAmount sdk.Int        `json:"threshold_amount"`
-	CreatedBlock    int64          `json:"created_block"`
-	CreatedTime     time.Time      `json:"created_time"`
-	UpdatedBlock    int64          `json:"updated_block"`
-	UpdatedTime     time.Time      `json:"updated_time"`
+	Timestamp       app.Timestamp  `json:"timestamp"`
 }
 
 // Params holds default parameters for a challenge

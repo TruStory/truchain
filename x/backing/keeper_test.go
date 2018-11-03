@@ -10,7 +10,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-var fiver sdk.Coin = sdk.Coin{
+var fiver = sdk.Coin{
 	Amount: sdk.NewInt(5),
 	Denom:  params.StakeDenom,
 }

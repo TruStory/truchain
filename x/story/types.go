@@ -1,14 +1,17 @@
 package story
 
-import sdk "github.com/cosmos/cosmos-sdk/types"
+import (
+	app "github.com/TruStory/truchain/types"
+	sdk "github.com/cosmos/cosmos-sdk/types"
+)
 
 // Evidence for a story
 type Evidence struct {
-	ID           int64          `json:"id"`
-	StoryID      int64          `json:"story_id"`
-	CreatedBlock int64          `json:"created_block"`
-	Creator      sdk.AccAddress `json:"creator"`
-	URI          string         `json:"uri"`
+	ID        int64          `json:"id"`
+	StoryID   int64          `json:"story_id"`
+	Creator   sdk.AccAddress `json:"creator"`
+	URI       string         `json:"uri"`
+	Timestamp app.Timestamp  `json:"timestamp"`
 }
 
 // ============================================================================
@@ -64,18 +67,17 @@ func (i Kind) String() string {
 
 // Story type
 type Story struct {
-	ID           int64            `json:"id"`
-	BackIDs      []int64          `json:"back_ids,omitempty"`
-	EvidenceIDs  []int64          `json:"evidence_i_ds,omitempty"`
-	Thread       []int64          `json:"thread,omitempty"`
-	Body         string           `json:"body"`
-	CategoryID   int64            `json:"category_id"`
-	ChallengeID  int64            `json:"challenge_id"`
-	CreatedBlock int64            `json:"created_block"`
-	Creator      sdk.AccAddress   `json:"creator"`
-	Round        int64            `json:"round"`
-	State        State            `json:"state"`
-	Kind         Kind             `json:"kind"`
-	UpdatedBlock int64            `json:"updated_block"`
-	Users        []sdk.AccAddress `json:"users"`
+	ID          int64            `json:"id"`
+	BackIDs     []int64          `json:"back_ids,omitempty"`
+	EvidenceIDs []int64          `json:"evidence_i_ds,omitempty"`
+	Thread      []int64          `json:"thread,omitempty"`
+	Body        string           `json:"body"`
+	CategoryID  int64            `json:"category_id"`
+	ChallengeID int64            `json:"challenge_id"`
+	Creator     sdk.AccAddress   `json:"creator"`
+	Round       int64            `json:"round"`
+	State       State            `json:"state"`
+	Kind        Kind             `json:"kind"`
+	Users       []sdk.AccAddress `json:"users"`
+	Timestamp   app.Timestamp    `json:"timestamp"`
 }

@@ -21,13 +21,12 @@ func TestAddGetStory(t *testing.T) {
 	assert.Nil(t, err)
 
 	story := Story{
-		ID:           storyID,
-		Body:         "Body of story.",
-		CategoryID:   int64(1),
-		CreatedBlock: int64(0),
-		Creator:      sdk.AccAddress([]byte{1, 2}),
-		State:        Created,
-		Kind:         Default,
+		ID:         storyID,
+		Body:       "Body of story.",
+		CategoryID: int64(1),
+		Creator:    sdk.AccAddress([]byte{1, 2}),
+		State:      Created,
+		Kind:       Default,
 	}
 
 	assert.Equal(t, story, savedStory, "Story received from store does not match expected value")

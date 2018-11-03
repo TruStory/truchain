@@ -105,6 +105,7 @@ func (k Keeper) NewBacking(
 		params,
 		duration,
 		creator,
+		app.NewTimestamp(ctx.BlockHeader()),
 	}
 
 	// store backing

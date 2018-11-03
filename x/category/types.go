@@ -1,6 +1,9 @@
 package category
 
-import sdk "github.com/cosmos/cosmos-sdk/types"
+import (
+	app "github.com/TruStory/truchain/types"
+	sdk "github.com/cosmos/cosmos-sdk/types"
+)
 
 // Category is a type that defines the category for a story
 type Category struct {
@@ -9,6 +12,7 @@ type Category struct {
 	Title       string         `json:"name"`
 	Slug        string         `json:"slug"`
 	Description string         `json:"description,omitempty"`
+	Timestamp   app.Timestamp  `json:"timestamp"`
 }
 
 // CoinName returns the name of the coin, alias for slug
