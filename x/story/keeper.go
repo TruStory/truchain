@@ -18,10 +18,10 @@ type ReadKeeper interface {
 		ctx sdk.Context,
 		catID int64) (stories []Story, err sdk.Error)
 	GetCoinName(ctx sdk.Context, id int64) (name string, err sdk.Error)
-	GetFeedWithCategory(
+	GetFeedByCategory(
 		ctx sdk.Context,
 		catID int64) (stories []Story, err sdk.Error)
-	GetStoriesWithCategory(ctx sdk.Context, catID int64) (stories []Story, err sdk.Error)
+	GetStoriesByCategory(ctx sdk.Context, catID int64) (stories []Story, err sdk.Error)
 	GetStory(ctx sdk.Context, storyID int64) (Story, sdk.Error)
 }
 
@@ -139,12 +139,12 @@ func (k Keeper) GetStory(ctx sdk.Context, storyID int64) (story Story, err sdk.E
 	return
 }
 
-// GetStoriesWithCategory gets the stories for a given category id
-func (k Keeper) GetStoriesWithCategory(
+// GetStoriesByCategory gets the stories for a given category id
+func (k Keeper) GetStoriesByCategory(
 	ctx sdk.Context,
 	catID int64) (stories []Story, err sdk.Error) {
 
-	return k.storiesWithCategory(ctx, k.storiesByCategoryKey, catID)
+	return k.storiesByCategory(ctx, k.storiesByCategoryKey, catID)
 }
 
 // GetChallengedStoriesWithCategory gets all challenged stories for a category
@@ -152,11 +152,11 @@ func (k Keeper) GetChallengedStoriesWithCategory(
 	ctx sdk.Context,
 	catID int64) (stories []Story, err sdk.Error) {
 
-	return k.storiesWithCategory(ctx, k.challengedStoriesByCategoryKey, catID)
+	return k.storiesByCategory(ctx, k.challengedStoriesByCategoryKey, catID)
 }
 
-// GetFeedWithCategory gets stories ordered by challenged stories first
-func (k Keeper) GetFeedWithCategory(
+// GetFeedByCategory gets stories ordered by challenged stories first
+func (k Keeper) GetFeedByCategory(
 	ctx sdk.Context,
 	catID int64) (stories []Story, err sdk.Error) {
 
@@ -190,7 +190,7 @@ func (k Keeper) GetFeedWithCategory(
 	// concat challenged story ids with unchallenged story ids
 	feedIDs := append(challengedStoryIDs, unchallengedStoryIDs...)
 
-	return k.stories(ctx, feedIDs)
+	return k.storiesByID(ctx, feedIDs)
 }
 
 // UpdateStory updates an existing story in the store
@@ -243,7 +243,7 @@ func (k Keeper) setStory(ctx sdk.Context, story Story) {
 		k.GetCodec().MustMarshalBinary(story))
 }
 
-func (k Keeper) storiesWithCategory(
+func (k Keeper) storiesByCategory(
 	ctx sdk.Context,
 	storeKey sdk.StoreKey,
 	catID int64) (stories []Story, err sdk.Error) {
@@ -257,10 +257,10 @@ func (k Keeper) storiesWithCategory(
 		return stories, ErrStoriesWithCategoryNotFound(catID)
 	}
 
-	return k.stories(ctx, storyIDs)
+	return k.storiesByID(ctx, storyIDs)
 }
 
-func (k Keeper) stories(ctx sdk.Context, storyIDs []int64) (stories []Story, err sdk.Error) {
+func (k Keeper) storiesByID(ctx sdk.Context, storyIDs []int64) (stories []Story, err sdk.Error) {
 	for _, storyID := range storyIDs {
 		story, err := k.GetStory(ctx, storyID)
 		if err != nil {
