@@ -1,6 +1,8 @@
 package story
 
 import (
+	"time"
+
 	c "github.com/TruStory/truchain/x/category"
 	"github.com/cosmos/cosmos-sdk/store"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -38,6 +40,9 @@ func mockDB() (sdk.Context, Keeper, c.Keeper) {
 
 func createFakeStory(ctx sdk.Context, sk Keeper, ck c.WriteKeeper) int64 {
 	body := "Body of story."
+
+	ctx = ctx.WithBlockHeader(abci.Header{Time: time.Now().UTC()})
+
 	cat := createFakeCategory(ctx, ck)
 	creator := sdk.AccAddress([]byte{1, 2})
 	storyType := Default

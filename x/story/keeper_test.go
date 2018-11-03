@@ -29,7 +29,7 @@ func TestAddGetStory(t *testing.T) {
 		Kind:       Default,
 	}
 
-	assert.Equal(t, story, savedStory, "Story received from store does not match expected value")
+	assert.Equal(t, story.ID, savedStory.ID, "Story received from store does not match expected value")
 
 	// test incrementing id by adding another story
 	body := "Body of story 2."
