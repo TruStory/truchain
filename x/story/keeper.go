@@ -89,13 +89,12 @@ func (k Keeper) NewStory(
 		body,
 		categoryID,
 		0,
-		ctx.BlockHeight(),
 		creator,
 		0,
 		Created,
 		kind,
-		ctx.BlockHeight(),
 		nil,
+		app.NewTimestamp(ctx.BlockHeader()),
 	}
 
 	k.setStory(ctx, story)
@@ -199,13 +198,12 @@ func (k Keeper) UpdateStory(ctx sdk.Context, story Story) {
 		story.Body,
 		story.CategoryID,
 		story.ChallengeID,
-		story.CreatedBlock,
 		story.Creator,
 		story.Round,
 		story.State,
 		story.Kind,
-		ctx.BlockHeight(),
 		story.Users,
+		story.Timestamp.Update(ctx.BlockHeader()),
 	}
 
 	k.setStory(ctx, newStory)

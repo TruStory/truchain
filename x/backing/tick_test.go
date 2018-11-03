@@ -4,6 +4,7 @@ import (
 	"testing"
 	"time"
 
+	app "github.com/TruStory/truchain/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/stretchr/testify/assert"
 )
@@ -74,6 +75,7 @@ func Test_distributeEarnings(t *testing.T) {
 		params,
 		duration,
 		creator,
+		app.NewTimestamp(ctx.BlockHeader()),
 	}
 
 	err := distributeEarnings(ctx, bk, backing)
