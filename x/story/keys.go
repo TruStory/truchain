@@ -1,51 +1,33 @@
 package story
 
-import "fmt"
+import (
+	"fmt"
 
-// create subspace prefix "categories:id:[CategoryID]:stories:challenged:id:[StoryID]"
-func challengedStoriesByCategoryKey(
-	k Keeper, catID int64, storyID int64) []byte {
+	app "github.com/TruStory/truchain/types"
+	sdk "github.com/cosmos/cosmos-sdk/types"
+)
 
-	key := fmt.Sprintf(
-		"%s:id:%d:%s:challenged:id:%d",
-		k.categoryKeeper.GetStoreKey().Name(),
-		catID,
-		k.GetStoreKey().Name(),
-		storyID)
+// create subspace prefix "categories:id:[int64]:stories:time:[time.Time]"
+func storyIDsByCategoryKey(
+	k Keeper, catID int64, storyTimestamp app.Timestamp, challenged bool) []byte {
 
-	return []byte(key)
+	return append(
+		storyIDsByCategorySubspaceKey(k, catID, challenged),
+		sdk.FormatTimeBytes(storyTimestamp.CreatedTime)...)
 }
 
-// create subspace prefix "categories:id:[CategoryID]:stories:id:[StoryID]"
-func storiesByCategoryKey(k Keeper, catID int64, storyID int64) []byte {
+// create subspace prefix "categories:id:[int64]:stories:time:"
+func storyIDsByCategorySubspaceKey(k Keeper, catID int64, challenged bool) []byte {
+	format := "%s:id:%d:%s:time:"
+	if challenged {
+		format = "%s:id:%d:%s:challenged:time:"
+	}
+
 	key := fmt.Sprintf(
-		"%s:id:%d:%s:id:%d",
-		k.categoryKeeper.GetStoreKey().Name(),
-		catID,
-		k.GetStoreKey().Name(),
-		storyID)
-
-	return []byte(key)
-}
-
-// create subspace prefix "categories:id:[CategoryID]:stories:challenged:id:"
-func challengedStoryIDsByCategorySubspaceKey(k Keeper, catID int64) []byte {
-	prefix := fmt.Sprintf(
-		"%s:id:%d:%s:challenged:id:",
+		format,
 		k.categoryKeeper.GetStoreKey().Name(),
 		catID,
 		k.GetStoreKey().Name())
 
-	return []byte(prefix)
-}
-
-// create subspace prefix "categories:id:[CategoryID]:stories:id:"
-func storyIDsByCategorySubspaceKey(k Keeper, catID int64) []byte {
-	prefix := fmt.Sprintf(
-		"%s:id:%d:%s:id:",
-		k.categoryKeeper.GetStoreKey().Name(),
-		catID,
-		k.GetStoreKey().Name())
-
-	return []byte(prefix)
+	return []byte(key)
 }

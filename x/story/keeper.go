@@ -27,7 +27,8 @@ type ReadKeeper interface {
 type WriteKeeper interface {
 	ReadKeeper
 
-	NewStory(ctx sdk.Context, body string, categoryID int64, creator sdk.AccAddress, kind Kind) (int64, sdk.Error)
+	NewStory(
+		ctx sdk.Context, body string, categoryID int64, creator sdk.AccAddress, kind Kind) (int64, sdk.Error)
 	StartChallenge(ctx sdk.Context, storyID int64) sdk.Error
 	UpdateStory(ctx sdk.Context, story Story)
 }
@@ -63,7 +64,7 @@ func (k Keeper) StartChallenge(ctx sdk.Context, storyID int64) sdk.Error {
 
 	// add story to challenged list
 	k.appendStoriesList(
-		ctx, challengedStoriesByCategoryKey(k, story.CategoryID, story.ID), story)
+		ctx, storyIDsByCategoryKey(k, story.CategoryID, story.Timestamp, true), story)
 
 	return nil
 }
@@ -99,7 +100,7 @@ func (k Keeper) NewStory(
 
 	k.setStory(ctx, story)
 	k.appendStoriesList(
-		ctx, storiesByCategoryKey(k, categoryID, story.ID), story)
+		ctx, storyIDsByCategoryKey(k, categoryID, story.Timestamp, false), story)
 
 	return story.ID, nil
 }
@@ -137,7 +138,7 @@ func (k Keeper) GetStoriesByCategory(
 	ctx sdk.Context, catID int64) (stories []Story, err sdk.Error) {
 
 	return k.storiesByCategory(
-		ctx, storyIDsByCategorySubspaceKey(k, catID), catID)
+		ctx, storyIDsByCategorySubspaceKey(k, catID, false), catID)
 }
 
 // GetChallengedStoriesWithCategory gets all challenged stories for a category
@@ -145,7 +146,7 @@ func (k Keeper) GetChallengedStoriesWithCategory(
 	ctx sdk.Context, catID int64) (stories []Story, err sdk.Error) {
 
 	return k.storiesByCategory(
-		ctx, challengedStoryIDsByCategorySubspaceKey(k, catID), catID)
+		ctx, storyIDsByCategorySubspaceKey(k, catID, true), catID)
 }
 
 // GetFeedByCategory gets stories ordered by challenged stories first
@@ -155,14 +156,14 @@ func (k Keeper) GetFeedByCategory(
 
 	// get all story ids by category
 	storyIDs, err := k.storyIDsByCategory(
-		ctx, storyIDsByCategorySubspaceKey(k, catID), catID)
+		ctx, storyIDsByCategorySubspaceKey(k, catID, false), catID)
 	if err != nil {
 		return
 	}
 
 	// get all challenged story ids by category
 	challengedStoryIDs, err := k.storyIDsByCategory(
-		ctx, challengedStoryIDsByCategorySubspaceKey(k, catID), catID)
+		ctx, storyIDsByCategorySubspaceKey(k, catID, true), catID)
 	if err != nil {
 		return
 	}
