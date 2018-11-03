@@ -27,9 +27,9 @@ func NewQuerier(k ReadKeeper) sdk.Querier {
 	return func(ctx sdk.Context, path []string, req abci.RequestQuery) (res []byte, err sdk.Error) {
 		switch path[0] {
 		case QueryStoriesByCategory:
-			return queryStoriesWithCategory(ctx, req, k)
+			return queryStoriesByCategory(ctx, req, k)
 		case QueryChallengedStoriesByCategory:
-			return queryChallengedStoriesWithCategory(ctx, req, k)
+			return queryChallengedStoriesByCategory(ctx, req, k)
 		case QueryStoryFeedByCategory:
 			return queryStoryFeed(ctx, req, k)
 		default:
@@ -40,7 +40,7 @@ func NewQuerier(k ReadKeeper) sdk.Querier {
 
 // ============================================================================
 
-func queryStoriesWithCategory(
+func queryStoriesByCategory(
 	ctx sdk.Context,
 	req abci.RequestQuery,
 	k ReadKeeper) (res []byte, err sdk.Error) {
@@ -59,7 +59,7 @@ func queryStoriesWithCategory(
 	}
 
 	// fetch stories
-	stories, sdkErr := k.GetStoriesWithCategory(ctx, cid)
+	stories, sdkErr := k.GetStoriesByCategory(ctx, cid)
 	if sdkErr != nil {
 		return res, sdkErr
 	}
@@ -68,7 +68,7 @@ func queryStoriesWithCategory(
 	return marshalStories(k, stories)
 }
 
-func queryChallengedStoriesWithCategory(
+func queryChallengedStoriesByCategory(
 	ctx sdk.Context,
 	req abci.RequestQuery,
 	k ReadKeeper) (res []byte, err sdk.Error) {
@@ -115,7 +115,7 @@ func queryStoryFeed(
 	}
 
 	// fetch stories
-	stories, err := k.GetFeedWithCategory(ctx, cid)
+	stories, err := k.GetFeedByCategory(ctx, cid)
 	if err != nil {
 		return
 	}

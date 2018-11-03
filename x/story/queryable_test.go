@@ -25,7 +25,7 @@ func TestQueryStories_ErrNotFound(t *testing.T) {
 		Data: bz,
 	}
 
-	_, err := queryStoriesWithCategory(ctx, query, k)
+	_, err := queryStoriesByCategory(ctx, query, k)
 	require.NotNil(t, err)
 	require.Equal(t, ErrStoriesWithCategoryNotFound(1).Code(), err.Code(), "should get error")
 }
@@ -49,7 +49,7 @@ func TestQueryStoriesWithCategory(t *testing.T) {
 		Data: bz,
 	}
 
-	_, err := queryStoriesWithCategory(ctx, query, sk)
+	_, err := queryStoriesByCategory(ctx, query, sk)
 	require.Nil(t, err)
 }
 
@@ -73,7 +73,7 @@ func TestQueryChallengedStoriesWithCategory(t *testing.T) {
 		Data: bz,
 	}
 
-	_, err := queryChallengedStoriesWithCategory(ctx, query, sk)
+	_, err := queryChallengedStoriesByCategory(ctx, query, sk)
 	require.Nil(t, err)
 }
 

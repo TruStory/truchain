@@ -81,7 +81,7 @@ func TestGetStoriesWithCategory(t *testing.T) {
 		createFakeStory(ctx, sk, ck)
 	}
 
-	stories, _ := sk.GetStoriesWithCategory(ctx, 1)
+	stories, _ := sk.GetStoriesByCategory(ctx, 1)
 	assert.Equal(t, numStories, len(stories))
 }
 
@@ -111,7 +111,7 @@ func TestFeedWithCategory(t *testing.T) {
 	sk.StartChallenge(ctx, 2)
 	sk.StartChallenge(ctx, 4)
 
-	stories, _ := sk.GetFeedWithCategory(ctx, 1)
+	stories, _ := sk.GetFeedByCategory(ctx, 1)
 
 	assert.Equal(t, 5, len(stories))
 	assert.Equal(t, Challenged, stories[0].State)
