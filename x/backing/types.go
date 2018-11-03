@@ -3,6 +3,7 @@ package backing
 import (
 	"time"
 
+	app "github.com/TruStory/truchain/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
@@ -53,4 +54,5 @@ type Backing struct {
 	Params    Params         `json:"params"`
 	Period    time.Duration  `json:"period"`
 	User      sdk.AccAddress `json:"user"`
+	Timestamp app.Timestamp  `json:"timestamp"`
 }

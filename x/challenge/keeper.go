@@ -90,10 +90,7 @@ func (k Keeper) Create(
 		emptyPool,
 		false,
 		thresholdAmount(story),
-		ctx.BlockHeight(),
-		ctx.BlockHeader().Time,
-		ctx.BlockHeight(),
-		ctx.BlockHeader().Time,
+		app.NewTimestamp(ctx.BlockHeader()),
 	}
 
 	story.ChallengeID = challenge.ID
@@ -209,18 +206,13 @@ func addChallenger(
 	ctx sdk.Context, k Keeper, challenge *Challenge, amount sdk.Coin,
 	argument string, creator sdk.AccAddress, evidence []url.URL) sdk.Error {
 
-	// update block time for good record keeping
-	challenge.UpdatedBlock = ctx.BlockHeight()
-	challenge.UpdatedTime = ctx.BlockHeader().Time
-
 	// create new challenger
 	challenger := Challenger{
 		amount,
 		argument,
 		creator,
 		evidence,
-		ctx.BlockHeight(),
-		ctx.BlockHeader().Time,
+		app.NewTimestamp(ctx.BlockHeader()),
 	}
 
 	// persist challenger
