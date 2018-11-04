@@ -11,15 +11,7 @@
 * "stories"
     * keys
         * `"stories:id:[StoryID]"` -> `Story`
-
-* "storiesByCategory"
-    * keys
         * `"categories:id:[CategoryID]:stories:id:[StoryID]"` -> `[StoryID]`
-
-* "challengedStoriesByCategory"
-    * keys
-        * `"categories:id:[CategoryID]:stories:id:[StoryID]"` -> `[StoryID]`
+        * `"categories:id:[CategoryID]:stories:challenged:id:[StoryID]"` -> `[StoryID]`
 
 ## Notes
-
-
