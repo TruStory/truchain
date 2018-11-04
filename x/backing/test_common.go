@@ -51,7 +51,7 @@ func mockDB() (
 	ck := c.NewKeeper(catKey, codec)
 	am := auth.NewAccountMapper(codec, accKey, auth.ProtoBaseAccount)
 	bankKeeper := bank.NewBaseKeeper(am)
-	sk := s.NewKeeper(storyKey, catKey, challengeKey, ck, codec)
+	sk := s.NewKeeper(storyKey, ck, codec)
 	bk := NewKeeper(backingKey, sk, bankKeeper, ck, codec)
 
 	return ctx, bk, sk, ck, bankKeeper, am

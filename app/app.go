@@ -36,16 +36,14 @@ type TruChain struct {
 	codec *codec.Codec
 
 	// keys to access the multistore
-	keyMain                        *sdk.KVStoreKey
-	keyAccount                     *sdk.KVStoreKey
-	keyIBC                         *sdk.KVStoreKey
-	keyStory                       *sdk.KVStoreKey
-	keyStoriesByCategory           *sdk.KVStoreKey
-	keyChallengedStoriesByCategory *sdk.KVStoreKey
-	keyCategory                    *sdk.KVStoreKey
-	keyBacking                     *sdk.KVStoreKey
-	keyChallenge                   *sdk.KVStoreKey
-	keyFee                         *sdk.KVStoreKey
+	keyMain      *sdk.KVStoreKey
+	keyAccount   *sdk.KVStoreKey
+	keyIBC       *sdk.KVStoreKey
+	keyStory     *sdk.KVStoreKey
+	keyCategory  *sdk.KVStoreKey
+	keyBacking   *sdk.KVStoreKey
+	keyChallenge *sdk.KVStoreKey
+	keyFee       *sdk.KVStoreKey
 
 	// manage getting and setting accounts
 	accountMapper       auth.AccountMapper
@@ -92,24 +90,22 @@ func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *T
 
 	// create your application type
 	var app = &TruChain{
-		categories:                     categories,
-		codec:                          codec,
-		BaseApp:                        bam.NewBaseApp(params.AppName, logger, db, auth.DefaultTxDecoder(codec), options...),
-		keyMain:                        sdk.NewKVStoreKey("main"),
-		keyAccount:                     sdk.NewKVStoreKey("acc"),
-		keyIBC:                         sdk.NewKVStoreKey("ibc"),
-		keyStory:                       sdk.NewKVStoreKey("stories"),
-		keyStoriesByCategory:           sdk.NewKVStoreKey("storiesByCategory"),
-		keyChallengedStoriesByCategory: sdk.NewKVStoreKey("challengedStoriesByCategory"),
-		keyCategory:                    sdk.NewKVStoreKey("categories"),
-		keyBacking:                     sdk.NewKVStoreKey("backings"),
-		keyChallenge:                   sdk.NewKVStoreKey("challenges"),
-		keyFee:                         sdk.NewKVStoreKey("collectedFees"),
-		api:                            nil,
-		apiStarted:                     false,
-		blockCtx:                       nil,
-		blockHeader:                    abci.Header{},
-		registrarKey:                   loadRegistrarKey(),
+		categories:   categories,
+		codec:        codec,
+		BaseApp:      bam.NewBaseApp(params.AppName, logger, db, auth.DefaultTxDecoder(codec), options...),
+		keyMain:      sdk.NewKVStoreKey("main"),
+		keyAccount:   sdk.NewKVStoreKey("acc"),
+		keyIBC:       sdk.NewKVStoreKey("ibc"),
+		keyStory:     sdk.NewKVStoreKey("stories"),
+		keyCategory:  sdk.NewKVStoreKey("categories"),
+		keyBacking:   sdk.NewKVStoreKey("backings"),
+		keyChallenge: sdk.NewKVStoreKey("challenges"),
+		keyFee:       sdk.NewKVStoreKey("collectedFees"),
+		api:          nil,
+		apiStarted:   false,
+		blockCtx:     nil,
+		blockHeader:  abci.Header{},
+		registrarKey: loadRegistrarKey(),
 	}
 
 	// define and attach the mappers and keepers
@@ -125,8 +121,7 @@ func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *T
 	// wire up keepers
 	app.categoryKeeper = category.NewKeeper(app.keyCategory, codec)
 	app.storyKeeper = story.NewKeeper(
-		app.keyStory, app.keyStoriesByCategory, app.keyChallengedStoriesByCategory,
-		app.categoryKeeper, app.codec)
+		app.keyStory, app.categoryKeeper, app.codec)
 	app.backingKeeper = backing.NewKeeper(
 		app.keyBacking, app.storyKeeper, app.coinKeeper,
 		app.categoryKeeper, codec)
@@ -157,8 +152,7 @@ func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *T
 	// mount the multistore and load the latest state
 	app.MountStoresIAVL(
 		app.keyMain, app.keyAccount, app.keyIBC, app.keyFee,
-		app.keyBacking, app.keyCategory, app.keyChallenge, app.keyStory,
-		app.keyStoriesByCategory, app.keyChallengedStoriesByCategory)
+		app.keyBacking, app.keyCategory, app.keyChallenge, app.keyStory)
 	err := app.LoadLatestVersion(app.keyMain)
 
 	if err != nil {
