@@ -46,8 +46,8 @@ func (app *TruChain) startAPI() {
 		})
 	})
 
-	app.api.RegisterRoutes()
 	app.api.RegisterResolvers()
+	app.api.RegisterRoutes()
 	log.Fatal(app.api.ListenAndServe(params.Hostname + ":" + params.Portname))
 }
 

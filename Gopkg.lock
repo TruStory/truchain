@@ -387,6 +387,14 @@
   revision = "185b4288413d2a0dd0806f78c90dde719829e5ae"
 
 [[projects]]
+  digest = "1:ea0700160aca4ef099f4e06686a665a87691f4248dddd40796925eda2e46bd64"
+  name = "github.com/rakyll/statik"
+  packages = ["fs"]
+  pruneopts = "UT"
+  revision = "1355192d24db2566a83c3914e187e2a7e7679832"
+  version = "v0.1.5"
+
+[[projects]]
   digest = "1:c4556a44e350b50a490544d9b06e9fba9c286c21d6c0e47f54f3a9214597298c"
   name = "github.com/rcrowley/go-metrics"
   packages = ["."]
@@ -394,13 +402,15 @@
   revision = "e2704e165165ec55d062f5919b4b29494e9fa790"
 
 [[projects]]
-  digest = "1:c7fd35ab0fb23ad0fb999ae43ace47b1b76518513a7b6ae87a6b26547913bf5e"
+  digest = "1:b579c92271e8cbaf43662ea9b19b036e283565b345d94f10a9f683b8b31abc0f"
   name = "github.com/samsarahq/thunder"
   packages = [
     "batch",
     "concurrencylimiter",
     "diff",
     "graphql",
+    "graphql/graphiql",
+    "graphql/graphiql/statik",
     "graphql/introspection",
     "graphql/schemabuilder",
     "internal",
@@ -760,11 +770,11 @@
     "github.com/cosmos/cosmos-sdk/x/ibc",
     "github.com/cosmos/cosmos-sdk/x/ibc/client/cli",
     "github.com/cosmos/cosmos-sdk/x/stake/client/cli",
-    "github.com/davecgh/go-spew/spew",
     "github.com/gorilla/mux",
     "github.com/oklog/ulid",
     "github.com/samsarahq/thunder/batch",
     "github.com/samsarahq/thunder/graphql",
+    "github.com/samsarahq/thunder/graphql/graphiql",
     "github.com/samsarahq/thunder/graphql/introspection",
     "github.com/samsarahq/thunder/graphql/schemabuilder",
     "github.com/samsarahq/thunder/reactive",

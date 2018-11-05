@@ -29,3 +29,13 @@ func mockDB() (sdk.Context, Keeper) {
 
 	return ctx, ck
 }
+
+func createFakeCategory(ctx sdk.Context, ck ReadWriteKeeper) Category {
+	existing, err := ck.GetCategory(ctx, 1)
+	if err == nil {
+		return existing
+	}
+	id, _ := ck.NewCategory(ctx, "decentralized exchanges", sdk.AccAddress([]byte{1, 2}), "trudex", "category for experts in decentralized exchanges")
+	cat, _ := ck.GetCategory(ctx, id)
+	return cat
+}

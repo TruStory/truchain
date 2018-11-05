@@ -20,6 +20,9 @@ specs:
               query: 'query {
                 stories(categoryID: $categoryID) {
                   body
+                  category {
+                    creator
+                  }
                 }
               }'
               variables:
@@ -29,3 +32,5 @@ specs:
         json_data:
           - path: $.data.stories.0.body
             value: A new story!
+          - path: $.data.stories.0.category.creator
+            value: [34,59,176,185,162,112,137,118,206,181,122,51,95,205,2,193,216,202,251,100]
