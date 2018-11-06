@@ -49,7 +49,7 @@
   revision = "d4cc87b860166d00d6b5b9e0d3b3d71d6088d4d4"
 
 [[projects]]
-  digest = "1:f0ddc9c448ceca19e7afc8da3825caacc6689db8421818ace709316b6ae91877"
+  digest = "1:85316c3ce341cab548a775ec38084fc6617837273a73ee379586d59a832eacba"
   name = "github.com/cosmos/cosmos-sdk"
   packages = [
     "baseapp",
@@ -59,11 +59,13 @@
     "client/rpc",
     "client/tx",
     "client/utils",
+    "cmd/gaia/app",
     "cmd/gaia/init",
     "codec",
     "crypto",
     "crypto/keys",
     "crypto/keys/hd",
+    "crypto/keys/keyerror",
     "crypto/keys/mintkey",
     "server",
     "server/config",
@@ -76,10 +78,19 @@
     "x/bank",
     "x/bank/client",
     "x/bank/client/cli",
+    "x/distribution",
+    "x/distribution/keeper",
+    "x/distribution/tags",
+    "x/distribution/types",
+    "x/gov",
+    "x/gov/tags",
     "x/ibc",
     "x/ibc/client/cli",
+    "x/mint",
+    "x/mock",
     "x/params",
     "x/params/subspace",
+    "x/slashing",
     "x/stake",
     "x/stake/client/cli",
     "x/stake/keeper",
@@ -88,7 +99,8 @@
     "x/stake/types",
   ]
   pruneopts = "UT"
-  revision = "ce23ad41ce7bc53494c80a2d73fdc1c9e39f7ec7"
+  revision = "7c5c14f289bef310bdfac2331d30ab0310c56597"
+  version = "v0.25.0"
 
 [[projects]]
   digest = "1:e8a3550c8786316675ff54ad6f09d265d129c9d986919af7f541afba50d87ce2"
@@ -539,7 +551,7 @@
   version = "v0.11.0"
 
 [[projects]]
-  digest = "1:a69eebd15b05045ffdb10a984e001fadc5666f74383de3d2a9ee5862ee99cfdc"
+  digest = "1:f9c7a1f3ee087476f4883c33cc7c1bdbe56b9670b2fb27855ea2f386393272f5"
   name = "github.com/tendermint/tendermint"
   packages = [
     "abci/client",
@@ -605,8 +617,8 @@
     "version",
   ]
   pruneopts = "UT"
-  revision = "0c9c3292c918617624f6f3fbcd95eceade18bcd5"
-  version = "v0.25.0"
+  revision = "90eda9bfb6e6daeed1c8015df41cb36772d91778"
+  version = "v0.25.1-rc0"
 
 [[projects]]
   digest = "1:bf6d9a827ea3cad964c2f863302e4f6823170d0b5ed16f72cf1184a7c615067e"
