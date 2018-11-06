@@ -21,7 +21,7 @@
 
 [[constraint]]
   name = "github.com/cosmos/cosmos-sdk"
-  revision = "ce23ad41ce7bc53494c80a2d73fdc1c9e39f7ec7"
+  version = "=v0.25.0"
 
 [[override]]
   name = "github.com/tendermint/iavl"
@@ -29,7 +29,7 @@
 
 [[override]]
   name = "github.com/tendermint/tendermint"
-  version = "=0.25.0"
+  version = "=0.25.1-rc0"
 
 [[override]]
   name = "github.com/tendermint/go-amino"
@@ -42,6 +42,13 @@
 [[constraint]]
   name = "github.com/oklog/ulid"
   version = "=v1.3.1"
+
+## deps without releases:
+
+[[override]]
+  name = "golang.org/x/crypto"
+  source = "https://github.com/tendermint/crypto"
+  revision = "3764759f34a542a3aef74d6b02e35be7ab893bba"
 
 [prune]
   go-tests = true
