@@ -61,6 +61,7 @@ func (k Keeper) NewCategory(
 		title,
 		slug,
 		description,
+		app.NewTimestamp(ctx.BlockHeader()),
 	}
 
 	k.setCategory(ctx, cat)

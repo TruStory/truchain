@@ -30,7 +30,7 @@ func mockDB() (sdk.Context, Keeper) {
 	return ctx, ck
 }
 
-func createFakeCategory(ctx sdk.Context, ck ReadWriteKeeper) Category {
+func createFakeCategory(ctx sdk.Context, ck WriteKeeper) Category {
 	existing, err := ck.GetCategory(ctx, 1)
 	if err == nil {
 		return existing
