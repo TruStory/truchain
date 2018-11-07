@@ -77,7 +77,7 @@ func (app *TruChain) RegisterKey(k tcmn.HexBytes, algo string) (sdk.AccAddress, 
 		return sdk.AccAddress{}, 0, sdk.Coins{}, err
 	}
 
-	stored := app.accountMapper.GetAccount(*(app.blockCtx), sdk.AccAddress(addr))
+	stored := app.accountKeeper.GetAccount(*(app.blockCtx), sdk.AccAddress(addr))
 	accaddr := sdk.AccAddress(addr)
 	coins := stored.GetCoins()
 
@@ -116,7 +116,7 @@ func GenerateAddress() []byte {
 func (app *TruChain) signedRegistrationTx(addr []byte, k tcmn.HexBytes, algo string) (auth.StdTx, error) {
 	msg := registration.RegisterKeyMsg{Address: addr, PubKey: k, PubKeyAlgo: algo, Coins: params.InitialCoins}
 	chainID := app.blockHeader.ChainID
-	registrarAcc := app.accountMapper.GetAccount(*(app.blockCtx), []byte(types.RegistrarAccAddress))
+	registrarAcc := app.accountKeeper.GetAccount(*(app.blockCtx), []byte(types.RegistrarAccAddress))
 	registrarNum := registrarAcc.GetAccountNumber()
 	registrarSequence := registrarAcc.GetSequence()
 	registrationMemo := "reg"

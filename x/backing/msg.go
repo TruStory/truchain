@@ -34,8 +34,8 @@ func NewBackStoryMsg(
 // Type implements Msg
 func (msg BackStoryMsg) Type() string { return app.GetType(msg) }
 
-// Name implements Msg
-func (msg BackStoryMsg) Name() string { return app.GetName(msg) }
+// Route implements Msg
+func (msg BackStoryMsg) Route() string { return app.GetName(msg) }
 
 // GetSignBytes implements Msg
 func (msg BackStoryMsg) GetSignBytes() []byte {

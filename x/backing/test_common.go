@@ -22,7 +22,7 @@ func mockDB() (
 	s.Keeper,
 	c.Keeper,
 	bank.Keeper,
-	auth.AccountMapper) {
+	auth.AccountKeeper) {
 
 	db := dbm.NewMemDB()
 
@@ -49,7 +49,7 @@ func mockDB() (
 	codec.RegisterConcrete(&auth.BaseAccount{}, "auth/Account", nil)
 
 	ck := c.NewKeeper(catKey, codec)
-	am := auth.NewAccountMapper(codec, accKey, auth.ProtoBaseAccount)
+	am := auth.NewAccountKeeper(codec, accKey, auth.ProtoBaseAccount)
 	bankKeeper := bank.NewBaseKeeper(am)
 	sk := s.NewKeeper(storyKey, ck, codec)
 	bk := NewKeeper(backingKey, sk, bankKeeper, ck, codec)
@@ -74,7 +74,7 @@ func createFakeCategory(ctx sdk.Context, ck c.WriteKeeper) c.Category {
 	return cat
 }
 
-func createFakeFundedAccount(ctx sdk.Context, am auth.AccountMapper, coins sdk.Coins) sdk.AccAddress {
+func createFakeFundedAccount(ctx sdk.Context, am auth.AccountKeeper, coins sdk.Coins) sdk.AccAddress {
 	_, _, addr := keyPubAddr()
 	baseAcct := auth.NewBaseAccountWithAddress(addr)
 	_ = baseAcct.SetCoins(coins)

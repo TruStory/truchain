@@ -10,11 +10,11 @@ import (
 )
 
 // NewHandler returns a handler for messages of type RegisterKeyMsg
-func NewHandler(am auth.AccountMapper) sdk.Handler {
+func NewHandler(ak auth.AccountKeeper) sdk.Handler {
 	return func(ctx sdk.Context, msg sdk.Msg) sdk.Result {
 		switch msg := msg.(type) {
 		case RegisterKeyMsg:
-			return handleRegisterKeyMsg(ctx, am, msg)
+			return handleRegisterKeyMsg(ctx, ak, msg)
 		default:
 			return app.ErrMsgHandler(msg)
 		}
@@ -23,7 +23,7 @@ func NewHandler(am auth.AccountMapper) sdk.Handler {
 
 // ============================================================================
 
-func handleRegisterKeyMsg(ctx sdk.Context, am auth.AccountMapper, msg RegisterKeyMsg) sdk.Result {
+func handleRegisterKeyMsg(ctx sdk.Context, ak auth.AccountKeeper, msg RegisterKeyMsg) sdk.Result {
 	bacc := auth.NewBaseAccountWithAddress(msg.Address)
 	key, err := chttp.StdKey(msg.PubKeyAlgo, msg.PubKey.Bytes())
 
@@ -45,7 +45,7 @@ func handleRegisterKeyMsg(ctx sdk.Context, am auth.AccountMapper, msg RegisterKe
 
 	acc := app.NewAppAccount(string(msg.Address), bacc)
 
-	am.SetAccount(ctx, auth.Account(*acc))
+	ak.SetAccount(ctx, auth.Account(*acc))
 
 	bz, _ := json.Marshal(*acc)
 
