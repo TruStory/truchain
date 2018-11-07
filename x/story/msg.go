@@ -26,11 +26,11 @@ func NewSubmitStoryMsg(body string, categoryID int64, creator sdk.AccAddress, ki
 	}
 }
 
-// Type implements Msg
-func (msg SubmitStoryMsg) Type() string { return app.GetType(msg) }
+// Route implements Msg
+func (msg SubmitStoryMsg) Route() string { return app.GetType(msg) }
 
-// Name implements Msg
-func (msg SubmitStoryMsg) Name() string { return app.GetName(msg) }
+// Type implements Msg
+func (msg SubmitStoryMsg) Type() string { return app.GetName(msg) }
 
 // GetSignBytes implements Msg. Story creator should sign this message.
 // Serializes Msg into JSON bytes for transport.
@@ -78,11 +78,11 @@ func NewSubmitEvidenceMsg(storyID int64, creator sdk.AccAddress, uri string) Sub
 	}
 }
 
+// Route implements Msg
+func (msg SubmitEvidenceMsg) Route() string { return app.GetName(msg) }
+
 // Type implements Msg
 func (msg SubmitEvidenceMsg) Type() string { return app.GetType(msg) }
-
-// Name implements Msg
-func (msg SubmitEvidenceMsg) Name() string { return app.GetName(msg) }
 
 // GetSignBytes implements Msg
 func (msg SubmitEvidenceMsg) GetSignBytes() []byte {

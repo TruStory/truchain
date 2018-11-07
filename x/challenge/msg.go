@@ -37,8 +37,8 @@ func NewStartChallengeMsg(
 // Type implements Msg
 func (msg StartChallengeMsg) Type() string { return app.GetType(msg) }
 
-// Name implements Msg
-func (msg StartChallengeMsg) Name() string { return app.GetName(msg) }
+// Route implements Msg
+func (msg StartChallengeMsg) Route() string { return app.GetName(msg) }
 
 // GetSignBytes implements Msg. Story creator should sign this message.
 // Serializes Msg into JSON bytes for transport.
@@ -99,8 +99,8 @@ func NewJoinChallengeMsg(
 // Type implements Msg
 func (msg JoinChallengeMsg) Type() string { return app.GetType(msg) }
 
-// Name implements Msg
-func (msg JoinChallengeMsg) Name() string { return app.GetName(msg) }
+// Route implements Msg
+func (msg JoinChallengeMsg) Route() string { return app.GetName(msg) }
 
 // GetSignBytes implements Msg. Story creator should sign this message.
 // Serializes Msg into JSON bytes for transport.

@@ -19,7 +19,7 @@ func TestValidBackMsg(t *testing.T) {
 
 	assert.Nil(t, err)
 	assert.Equal(t, "backing", msg.Type())
-	assert.Equal(t, "back_story", msg.Name())
+	assert.Equal(t, "back_story", msg.Route())
 	assert.Equal(
 		t,
 		`{"amount":{"amount":"100","denom":"trustake"},"creator":"cosmos1qypq36vzru","duration":259200000000000,"story_id":1}`,

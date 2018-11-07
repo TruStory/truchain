@@ -17,8 +17,8 @@ func TestValidSubmitStoryMsg(t *testing.T) {
 	err := msg.ValidateBasic()
 
 	assert.Nil(t, err)
-	assert.Equal(t, "story", msg.Type())
-	assert.Equal(t, "submit_story", msg.Name())
+	assert.Equal(t, "story", msg.Route())
+	assert.Equal(t, "submit_story", msg.Type())
 	assert.Equal(
 		t,
 		`{"body":"This is a valid story body @shanev amirite?","category_id":1,"creator":"cosmos1qypq36vzru","kind":0}`,
@@ -60,7 +60,7 @@ func TestValidSubmitEvidencetMsg(t *testing.T) {
 
 	assert.Nil(t, err)
 	assert.Equal(t, "story", msg.Type())
-	assert.Equal(t, "submit_evidence", msg.Name())
+	assert.Equal(t, "submit_evidence", msg.Route())
 	assert.Equal(
 		t,
 		`{"creator":"cosmos1qypq36vzru","story_id":1,"url":"http://www.truchain.io"}`,
