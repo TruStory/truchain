@@ -46,7 +46,7 @@ type TruChain struct {
 	keyFee       *sdk.KVStoreKey
 
 	// manage getting and setting accounts
-	accountMapper       auth.AccountMapper
+	accountKeeper       auth.AccountKeeper
 	feeCollectionKeeper auth.FeeCollectionKeeper
 	coinKeeper          bank.Keeper
 	ibcMapper           ibc.Mapper
@@ -109,12 +109,12 @@ func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *T
 	}
 
 	// define and attach the mappers and keepers
-	app.accountMapper = auth.NewAccountMapper(
+	app.accountKeeper = auth.NewAccountKeeper(
 		codec,
 		app.keyAccount,        // target store
 		auth.ProtoBaseAccount, // prototype
 	)
-	app.coinKeeper = bank.NewBaseKeeper(app.accountMapper)
+	app.coinKeeper = bank.NewBaseKeeper(app.accountKeeper)
 	app.ibcMapper = ibc.NewMapper(app.codec, app.keyIBC, app.RegisterCodespace(ibc.DefaultCodespace))
 	app.feeCollectionKeeper = auth.NewFeeCollectionKeeper(app.codec, app.keyFee)
 
@@ -137,7 +137,7 @@ func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *T
 		AddRoute("backing", backing.NewHandler(app.backingKeeper)).
 		AddRoute("challenge", challenge.NewHandler(app.challengeKeeper)).
 		AddRoute(registration.RegisterKeyMsg{}.Type(),
-			registration.NewHandler(app.accountMapper))
+			registration.NewHandler(app.accountKeeper))
 
 	// register query routes for reading state
 	app.QueryRouter().
@@ -150,7 +150,7 @@ func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *T
 	app.SetInitChainer(app.initChainer)
 	app.SetBeginBlocker(app.BeginBlocker)
 	app.SetEndBlocker(app.EndBlocker)
-	app.SetAnteHandler(auth.NewAnteHandler(app.accountMapper, app.feeCollectionKeeper))
+	app.SetAnteHandler(auth.NewAnteHandler(app.accountKeeper, app.feeCollectionKeeper))
 
 	// mount the multistore and load the latest state
 	app.MountStoresIAVL(
@@ -235,7 +235,7 @@ func (app *TruChain) ExportAppStateAndValidators() (appState json.RawMessage, va
 		return false
 	}
 
-	app.accountMapper.IterateAccounts(ctx, appendAccountsFn)
+	app.accountKeeper.IterateAccounts(ctx, appendAccountsFn)
 
 	genState := types.GenesisState{Accounts: accounts}
 	appState, err = codec.MarshalJSONIndent(app.codec, genState)

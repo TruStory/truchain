@@ -28,11 +28,11 @@ func NewCreateCategoryMsg(
 	}
 }
 
+// Route implements Msg
+func (msg CreateCategoryMsg) Route() string { return app.GetName(msg) }
+
 // Type implements Msg
 func (msg CreateCategoryMsg) Type() string { return app.GetType(msg) }
-
-// Name implements Msg
-func (msg CreateCategoryMsg) Name() string { return app.GetName(msg) }
 
 // GetSignBytes implements Msg
 func (msg CreateCategoryMsg) GetSignBytes() []byte {

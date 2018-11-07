@@ -28,7 +28,7 @@ func (app *TruChain) initChainer(ctx sdk.Context, req abci.RequestInitChain) abc
 			panic(err)
 		}
 
-		acc.AccountNumber = app.accountMapper.GetNextAccountNumber(ctx)
+		acc.AccountNumber = app.accountKeeper.GetNextAccountNumber(ctx)
 
 		if i == 1 { // TODO: more robust way of identifying registrar account [notduncansmith]
 			err := acc.BaseAccount.SetPubKey(app.registrarKey.PubKey())
@@ -37,7 +37,7 @@ func (app *TruChain) initChainer(ctx sdk.Context, req abci.RequestInitChain) abc
 			}
 		}
 
-		app.accountMapper.SetAccount(ctx, acc)
+		app.accountKeeper.SetAccount(ctx, acc)
 	}
 
 	// get genesis account address
