@@ -56,7 +56,7 @@ func checkExpiredChallenges(ctx sdk.Context, k Keeper, q store.Queue) sdk.Error 
 		if err != nil {
 			return err
 		}
-		story.ChallengeID = 0
+		story.GameID = 0
 		k.storyKeeper.UpdateStory(ctx, story)
 	}
 

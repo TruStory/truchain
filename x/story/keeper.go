@@ -83,19 +83,14 @@ func (k Keeper) NewStory(
 	}
 
 	story := Story{
-		k.GetNextID(ctx),
-		nil,
-		nil,
-		nil,
-		body,
-		categoryID,
-		0,
-		creator,
-		0,
-		Created,
-		kind,
-		nil,
-		app.NewTimestamp(ctx.BlockHeader()),
+		ID:         k.GetNextID(ctx),
+		Body:       body,
+		CategoryID: categoryID,
+		Creator:    creator,
+		GameID:     0,
+		State:      Created,
+		Kind:       kind,
+		Timestamp:  app.NewTimestamp(ctx.BlockHeader()),
 	}
 
 	k.setStory(ctx, story)
@@ -193,17 +188,12 @@ func (k Keeper) GetFeedByCategory(
 func (k Keeper) UpdateStory(ctx sdk.Context, story Story) {
 	newStory := Story{
 		story.ID,
-		story.BackIDs,
-		story.EvidenceIDs,
-		story.Thread,
 		story.Body,
 		story.CategoryID,
-		story.ChallengeID,
 		story.Creator,
-		story.Round,
+		story.GameID,
 		story.State,
 		story.Kind,
-		story.Users,
 		story.Timestamp.Update(ctx.BlockHeader()),
 	}
 
