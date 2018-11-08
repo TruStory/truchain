@@ -5,6 +5,8 @@ import (
 	"encoding/json"
 	"io/ioutil"
 
+	"github.com/TruStory/truchain/x/game"
+
 	params "github.com/TruStory/truchain/parameters"
 	"github.com/TruStory/truchain/types"
 	"github.com/TruStory/truchain/x/backing"
@@ -44,6 +46,7 @@ type TruChain struct {
 	keyBacking   *sdk.KVStoreKey
 	keyChallenge *sdk.KVStoreKey
 	keyFee       *sdk.KVStoreKey
+	keyGame      *sdk.KVStoreKey
 
 	// manage getting and setting accounts
 	accountKeeper       auth.AccountKeeper
@@ -56,6 +59,7 @@ type TruChain struct {
 	categoryKeeper  category.WriteKeeper
 	backingKeeper   backing.WriteKeeper
 	challengeKeeper challenge.WriteKeeper
+	gameKeeper      game.WriteKeeper
 
 	// list of initial categories
 	categories map[string]string
@@ -101,6 +105,7 @@ func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *T
 		keyBacking:   sdk.NewKVStoreKey("backings"),
 		keyChallenge: sdk.NewKVStoreKey("challenges"),
 		keyFee:       sdk.NewKVStoreKey("collectedFees"),
+		keyGame:      sdk.NewKVStoreKey("game"),
 		api:          nil,
 		apiStarted:   false,
 		blockCtx:     nil,
@@ -125,8 +130,10 @@ func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *T
 	app.backingKeeper = backing.NewKeeper(
 		app.keyBacking, app.storyKeeper, app.coinKeeper,
 		app.categoryKeeper, codec)
+	app.gameKeeper = game.NewKeeper(
+		app.keyGame, nil, app.storyKeeper, app.coinKeeper, codec)
 	app.challengeKeeper = challenge.NewKeeper(
-		app.keyChallenge, app.storyKeeper, app.coinKeeper, codec)
+		app.keyChallenge, app.coinKeeper, app.gameKeeper, app.storyKeeper, codec)
 
 	// register message routes for modifying state
 	app.Router().
@@ -213,7 +220,7 @@ func (app *TruChain) BeginBlocker(ctx sdk.Context, req abci.RequestBeginBlock) a
 // application.
 func (app *TruChain) EndBlocker(ctx sdk.Context, _ abci.RequestEndBlock) abci.ResponseEndBlock {
 	app.backingKeeper.NewResponseEndBlock(ctx)
-	app.challengeKeeper.NewResponseEndBlock(ctx)
+	// app.challengeKeeper.NewResponseEndBlock(ctx)
 
 	return abci.ResponseEndBlock{}
 }

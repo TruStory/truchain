@@ -27,9 +27,9 @@ type WriteKeeper interface {
 		ctx sdk.Context, storyID int64, creator sdk.AccAddress) (int64, sdk.Error)
 
 	Update(
-		ctx sdk.Context, gameID int64) (int64, sdk.Error)
+		ctx sdk.Context, gameID int64, amount sdk.Coin) (int64, sdk.Error)
 
-	NewResponseEndBlock(ctx sdk.Context) sdk.Tags
+	// NewResponseEndBlock(ctx sdk.Context) sdk.Tags
 
 	QueueStore(ctx sdk.Context) sdk.KVStore
 }
@@ -109,13 +109,25 @@ func (k Keeper) Get(ctx sdk.Context, id int64) (game Game, err sdk.Error) {
 	return
 }
 
-// Update mutates an existing challenge, adding a new challenger and updating the pool
+// Update the challenge pool
 func (k Keeper) Update(
-	ctx sdk.Context, id int64, creator sdk.AccAddress) (int64, sdk.Error) {
+	ctx sdk.Context, gameID int64, amount sdk.Coin) (int64, sdk.Error) {
 
-	game, err := k.Get(ctx, id)
+	game, err := k.Get(ctx, gameID)
 	if err != nil {
 		return 0, err
+	}
+
+	// add amount to challenge pool
+	game.Pool = game.Pool.Plus(amount)
+
+	// if threshold is reached, start challenge and allow voting to begin
+	if game.Pool.Amount.GT(game.ThresholdAmount) {
+		err = k.storyKeeper.StartChallenge(ctx, game.StoryID)
+		if err != nil {
+			return 0, err
+		}
+		game.Started = true
 	}
 
 	// update existing challenge in KVStore
