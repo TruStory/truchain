@@ -51,17 +51,33 @@ func NewKeeper(
 
 // Create adds a new challenge on a story in the KVStore
 func (k Keeper) Create(
-	ctx sdk.Context, gameID int64, amount sdk.Coin, argument string,
+	ctx sdk.Context, storyID int64, amount sdk.Coin, argument string,
 	creator sdk.AccAddress, evidence []url.URL) (int64, sdk.Error) {
 
-	// get the validation game
-	game, err := k.gameKeeper.Get(ctx, gameID)
+	// get the story
+	story, err := k.storyKeeper.GetStory(ctx, storyID)
 	if err != nil {
 		return 0, err
 	}
 
+	// create game if one doesn't exist yet
+	gameID := story.GameID
+	if gameID == 0 {
+		gameID, err = k.gameKeeper.Create(ctx, story.ID, creator)
+		if err != nil {
+			return 0, err
+		}
+	}
+
+	// make sure creator hasn't already challenged
+	challengeByGameKey := k.challengeByGameIDKey(ctx, gameID, creator)
+	bz := k.GetStore(ctx).Get(challengeByGameKey)
+	if bz != nil {
+		return 0, ErrDuplicateChallenger(gameID, creator)
+	}
+
 	// validate challenger stake before creating challenge
-	if err = validateStake(ctx, k, game.StoryID, creator, amount); err != nil {
+	if err = validateStake(ctx, k, storyID, creator, amount); err != nil {
 		return 0, err
 	}
 
@@ -80,13 +96,19 @@ func (k Keeper) Create(
 		k.GetIDKey(challenge.ID),
 		k.GetCodec().MustMarshalBinary(challenge))
 
+	// persist game <-> challenge association
+	k.GetStore(ctx).Set(
+		challengeByGameKey,
+		k.GetCodec().MustMarshalBinary(challenge.ID))
+
+	// update game pool
+	k.gameKeeper.Update(ctx, gameID, amount)
+
 	// deduct challenge amount from user
 	_, _, err = k.bankKeeper.SubtractCoins(ctx, creator, sdk.Coins{amount})
 	if err != nil {
 		return 0, err
 	}
-
-	k.gameKeeper.Update(ctx, game.ID, amount)
 
 	return challenge.ID, nil
 }

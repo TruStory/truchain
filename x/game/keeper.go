@@ -53,7 +53,7 @@ func NewKeeper(
 
 // ============================================================================
 
-// Create adds a new challenge on a story
+// Create starts a validation game on a story
 func (k Keeper) Create(
 	ctx sdk.Context, storyID int64, creator sdk.AccAddress) (int64, sdk.Error) {
 
@@ -83,7 +83,7 @@ func (k Keeper) Create(
 		app.NewTimestamp(ctx.BlockHeader()),
 	}
 
-	// story.GameID = game.ID
+	story.GameID = game.ID
 	k.storyKeeper.UpdateStory(ctx, story)
 
 	// push game id onto queue that will get checked
@@ -101,9 +101,9 @@ func (k Keeper) Create(
 func (k Keeper) Get(ctx sdk.Context, id int64) (game Game, err sdk.Error) {
 	store := k.GetStore(ctx)
 	bz := store.Get(k.GetIDKey(id))
-	// if bz == nil {
-	// 	return game, ErrNotFound(id)
-	// }
+	if bz == nil {
+		return game, ErrNotFound(id)
+	}
 	k.GetCodec().MustUnmarshalBinary(bz, &game)
 
 	return
@@ -136,6 +136,7 @@ func (k Keeper) Update(
 	return game.ID, nil
 }
 
+// QueueStore returns the game queue store
 func (k Keeper) QueueStore(ctx sdk.Context) sdk.KVStore {
 	return ctx.KVStore(k.queueKey)
 }

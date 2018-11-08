@@ -11,7 +11,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestStartChallengeMsg(t *testing.T) {
+func TestSubmitChallengeMsg(t *testing.T) {
 	ctx, k, sk, ck, bankKeeper := mockDB()
 
 	h := NewHandler(k)
@@ -27,7 +27,7 @@ func TestStartChallengeMsg(t *testing.T) {
 	// give user some funds
 	bankKeeper.AddCoins(ctx, creator, sdk.Coins{amount})
 
-	msg := NewStartChallengeMsg(storyID, amount, argument, creator, evidence)
+	msg := NewSubmitChallengeMsg(storyID, amount, argument, creator, evidence)
 	assert.NotNil(t, msg)
 
 	res := h(ctx, msg)
@@ -37,7 +37,7 @@ func TestStartChallengeMsg(t *testing.T) {
 	assert.Equal(t, int64(1), idres.ID, "incorrect result data")
 }
 
-func TestStartChallengeMsg_ErrInsufficientFunds(t *testing.T) {
+func TestSubmitChallengeMsg_ErrInsufficientFunds(t *testing.T) {
 	ctx, k, sk, ck, _ := mockDB()
 
 	h := NewHandler(k)
@@ -50,7 +50,7 @@ func TestStartChallengeMsg_ErrInsufficientFunds(t *testing.T) {
 	cnn, _ := url.Parse("http://www.cnn.com")
 	evidence := []url.URL{*cnn}
 
-	msg := NewStartChallengeMsg(storyID, amount, argument, creator, evidence)
+	msg := NewSubmitChallengeMsg(storyID, amount, argument, creator, evidence)
 	assert.NotNil(t, msg)
 
 	res := h(ctx, msg)
@@ -58,7 +58,7 @@ func TestStartChallengeMsg_ErrInsufficientFunds(t *testing.T) {
 	assert.Equal(t, int64(0), x, "incorrect result data")
 }
 
-func TestStartChallengeMsg_ErrInsufficientChallengeAmount(t *testing.T) {
+func TestSubmitChallengeMsg_ErrInsufficientChallengeAmount(t *testing.T) {
 	ctx, k, sk, ck, bankKeeper := mockDB()
 
 	h := NewHandler(k)
@@ -74,7 +74,7 @@ func TestStartChallengeMsg_ErrInsufficientChallengeAmount(t *testing.T) {
 	// give user some funds
 	bankKeeper.AddCoins(ctx, creator, sdk.Coins{amount})
 
-	msg := NewStartChallengeMsg(storyID, amount, argument, creator, evidence)
+	msg := NewSubmitChallengeMsg(storyID, amount, argument, creator, evidence)
 	assert.NotNil(t, msg)
 
 	res := h(ctx, msg)
@@ -82,34 +82,34 @@ func TestStartChallengeMsg_ErrInsufficientChallengeAmount(t *testing.T) {
 	assert.Equal(t, int64(0), x, "incorrect result data")
 }
 
-func TestUpdateChallengeMsg(t *testing.T) {
-	ctx, k, sk, ck, bankKeeper := mockDB()
+// func TestUpdateChallengeMsg(t *testing.T) {
+// 	ctx, k, sk, ck, bankKeeper := mockDB()
 
-	h := NewHandler(k)
-	assert.NotNil(t, h)
+// 	h := NewHandler(k)
+// 	assert.NotNil(t, h)
 
-	storyID := createFakeStory(ctx, sk, ck)
-	amount := sdk.NewCoin("trudex", sdk.NewInt(55))
-	argument := "test argument"
-	creator := sdk.AccAddress([]byte{1, 2})
-	creator2 := sdk.AccAddress([]byte{2, 3})
-	cnn, _ := url.Parse("http://www.cnn.com")
-	evidence := []url.URL{*cnn}
+// 	storyID := createFakeStory(ctx, sk, ck)
+// 	amount := sdk.NewCoin("trudex", sdk.NewInt(55))
+// 	argument := "test argument"
+// 	creator := sdk.AccAddress([]byte{1, 2})
+// 	creator2 := sdk.AccAddress([]byte{2, 3})
+// 	cnn, _ := url.Parse("http://www.cnn.com")
+// 	evidence := []url.URL{*cnn}
 
-	// give users some funds
-	bankKeeper.AddCoins(ctx, creator, sdk.Coins{amount})
-	bankKeeper.AddCoins(ctx, creator2, sdk.Coins{amount})
+// 	// give users some funds
+// 	bankKeeper.AddCoins(ctx, creator, sdk.Coins{amount})
+// 	bankKeeper.AddCoins(ctx, creator2, sdk.Coins{amount})
 
-	msg := NewStartChallengeMsg(storyID, amount, argument, creator, evidence)
-	assert.NotNil(t, msg)
+// 	msg := NewSubmitChallengeMsg(storyID, amount, argument, creator, evidence)
+// 	assert.NotNil(t, msg)
 
-	res := h(ctx, msg)
+// 	res := h(ctx, msg)
 
-	updateMsg := NewJoinChallengeMsg(1, amount, creator2)
+// 	updateMsg := NewJoinChallengeMsg(1, amount, creator2)
 
-	res = h(ctx, updateMsg)
-	idres := new(types.IDResult)
-	_ = json.Unmarshal(res.Data, &idres)
+// 	res = h(ctx, updateMsg)
+// 	idres := new(types.IDResult)
+// 	_ = json.Unmarshal(res.Data, &idres)
 
-	assert.Equal(t, int64(1), idres.ID, "incorrect result data")
-}
+// 	assert.Equal(t, int64(1), idres.ID, "incorrect result data")
+// }

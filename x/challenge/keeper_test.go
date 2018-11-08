@@ -9,39 +9,11 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestMarshaling(t *testing.T) {
-	ctx, k, _, _, _ := mockDB()
-
-	challenge := Challenge{
-		ID:      k.GetNextID(ctx),
-		StoryID: int64(5),
-	}
-
-	bz := k.GetCodec().MustMarshalBinary(challenge)
-	assert.NotNil(t, bz)
-
-	var value Challenge
-	k.GetCodec().MustUnmarshalBinary(bz, &value)
-	assert.IsType(t, Challenge{}, value, "should be right type")
-	assert.Equal(t, challenge.StoryID, value.StoryID, "should be equal")
-}
-
 func TestValidKeys(t *testing.T) {
 	_, k, _, _, _ := mockDB()
 
 	key := k.GetIDKey(5)
 	assert.Equal(t, "challenges:id:5", fmt.Sprintf("%s", key), "should be equal")
-}
-
-func TestSetChallenge(t *testing.T) {
-	ctx, k, _, _, _ := mockDB()
-
-	challenge := Challenge{ID: int64(5)}
-	k.set(ctx, challenge)
-
-	savedChallenge, err := k.Get(ctx, int64(5))
-	assert.Nil(t, err)
-	assert.Equal(t, challenge.ID, savedChallenge.ID, "should be equal")
 }
 
 func TestNewGetChallenge(t *testing.T) {
@@ -63,7 +35,7 @@ func TestNewGetChallenge(t *testing.T) {
 	challenge, err := k.Get(ctx, id)
 	assert.Nil(t, err)
 
-	assert.Equal(t, amount, challenge.Pool, "should match")
+	assert.Equal(t, amount, challenge.Amount, "should match")
 }
 
 func TestNewChallenge_Duplicate(t *testing.T) {
@@ -86,7 +58,7 @@ func TestNewChallenge_Duplicate(t *testing.T) {
 
 	_, err = k.Create(ctx, storyID, challengeAmount, argument, creator, evidence)
 	assert.NotNil(t, err)
-	assert.Equal(t, ErrStoryAlreadyChallenged(5).Code(), err.Code())
+	assert.Equal(t, ErrDuplicateChallenger(5, creator).Code(), err.Code())
 }
 
 func TestNewChallenge_MultipleChallengers(t *testing.T) {
@@ -111,13 +83,15 @@ func TestNewChallenge_MultipleChallengers(t *testing.T) {
 
 	challenge, _ := k.Get(ctx, id)
 
-	_, err = k.Update(ctx, challenge.ID, amount, argument, creator2, evidence)
+	_, err = k.Create(ctx, challenge.ID, amount, argument, creator2, evidence)
 	assert.Nil(t, err)
 	assert.False(t, bankKeeper.HasCoins(ctx, creator2, sdk.Coins{amount}))
 
-	challenge, _ = k.Get(ctx, id)
-	assert.True(t, challenge.Pool.IsEqual(challengeAmount.Plus(amount)))
-	assert.True(t, challenge.Started)
+	// TODO: check game pool amount
+
+	// challenge, _ = k.Get(ctx, id)
+	// assert.True(t, challenge.Pool.IsEqual(challengeAmount.Plus(amount)))
+	// assert.True(t, challenge.Started)
 }
 
 func TestNewChallenge_ErrIncorrectCategoryCoin(t *testing.T) {

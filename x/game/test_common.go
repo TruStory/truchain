@@ -1,10 +1,9 @@
-package challenge
+package game
 
 import (
 	"time"
 
 	c "github.com/TruStory/truchain/x/category"
-	game "github.com/TruStory/truchain/x/game"
 	s "github.com/TruStory/truchain/x/story"
 	"github.com/cosmos/cosmos-sdk/store"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -49,37 +48,8 @@ func mockDB() (sdk.Context, Keeper, s.Keeper, c.Keeper, bank.Keeper) {
 	bankKeeper := bank.NewBaseKeeper(am)
 	ck := c.NewKeeper(catKey, codec)
 	sk := s.NewKeeper(storyKey, ck, codec)
-	gameKeeper := game.NewKeeper(gameKey, gameQueueKey, sk, bankKeeper, codec)
 
-	k := NewKeeper(challengeKey, bankKeeper, gameKeeper, sk, codec)
+	k := NewKeeper(gameKey, gameQueueKey, sk, bankKeeper, codec)
 
 	return ctx, k, sk, ck, bankKeeper
-}
-
-func createFakeStory(ctx sdk.Context, sk s.Keeper, ck c.WriteKeeper) int64 {
-	body := "Body of story."
-	cat := createFakeCategory(ctx, ck)
-	creator := sdk.AccAddress([]byte{1, 2})
-	storyType := s.Default
-
-	storyID, _ := sk.NewStory(ctx, body, cat.ID, creator, storyType)
-
-	return storyID
-}
-
-func createFakeCategory(ctx sdk.Context, ck c.WriteKeeper) c.Category {
-	existing, err := ck.GetCategory(ctx, 1)
-	if err == nil {
-		return existing
-	}
-	id, _ := ck.NewCategory(ctx, "decentralized exchanges", sdk.AccAddress([]byte{1, 2}), "trudex", "category for experts in decentralized exchanges")
-	cat, _ := ck.GetCategory(ctx, id)
-	return cat
-}
-
-func createFakeGame(ctx sdk.Context, gameKeeper game.WriteKeeper, storyID int64) int64 {
-	creator := sdk.AccAddress([]byte{1, 2})
-	gameID, _ := gameKeeper.Create(ctx, storyID, creator)
-
-	return gameID
 }

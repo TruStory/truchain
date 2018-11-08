@@ -52,9 +52,9 @@ func ErrNotFoundChallenger(id int64) sdk.Error {
 }
 
 // ErrDuplicateChallenger creates an error when more than one challenge is attempted on a story
-func ErrDuplicateChallenger(id int64, user sdk.AccAddress) sdk.Error {
+func ErrDuplicateChallenger(gameID int64, user sdk.AccAddress) sdk.Error {
 	return sdk.NewError(
 		DefaultCodespace,
 		CodeDuplicateChallenger,
-		"Challenge with id "+fmt.Sprintf("%d", id)+" has already been challenged by "+user.String())
+		"Game with id "+fmt.Sprintf("%d", gameID)+" has already been challenged by "+user.String())
 }
