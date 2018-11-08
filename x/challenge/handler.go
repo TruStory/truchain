@@ -9,8 +9,8 @@ import (
 func NewHandler(k WriteKeeper) sdk.Handler {
 	return func(ctx sdk.Context, msg sdk.Msg) sdk.Result {
 		switch msg := msg.(type) {
-		case StartChallengeMsg:
-			return handleStartChallengeMsg(ctx, k, msg)
+		case SubmitChallengeMsg:
+			return handleSubmitChallengeMsg(ctx, k, msg)
 		default:
 			return app.ErrMsgHandler(msg)
 		}
@@ -20,7 +20,7 @@ func NewHandler(k WriteKeeper) sdk.Handler {
 // ============================================================================
 
 // handleStartChallengeMsg handles a message to start a challenge
-func handleStartChallengeMsg(ctx sdk.Context, k WriteKeeper, msg StartChallengeMsg) sdk.Result {
+func handleSubmitChallengeMsg(ctx sdk.Context, k WriteKeeper, msg SubmitChallengeMsg) sdk.Result {
 	if err := msg.ValidateBasic(); err != nil {
 		return err.Result()
 	}

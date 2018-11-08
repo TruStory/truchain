@@ -1,4 +1,4 @@
-package challenge
+package game
 
 import (
 	amino "github.com/tendermint/go-amino"
@@ -6,5 +6,5 @@ import (
 
 // RegisterAmino registers messages into the codec
 func RegisterAmino(c *amino.Codec) {
-	c.RegisterConcrete(SubmitChallengeMsg{}, "challenge/SubmitChallengeMsg", nil)
+	// c.RegisterConcrete(StartChallengeMsg{}, "challenge/StartChallengeMsg", nil)
 }
