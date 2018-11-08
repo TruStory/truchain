@@ -67,17 +67,12 @@ func (i Kind) String() string {
 
 // Story type
 type Story struct {
-	ID          int64            `json:"id"`
-	BackIDs     []int64          `json:"back_ids,omitempty"`
-	EvidenceIDs []int64          `json:"evidence_i_ds,omitempty"`
-	Thread      []int64          `json:"thread,omitempty"`
-	Body        string           `json:"body"`
-	CategoryID  int64            `json:"category_id"`
-	ChallengeID int64            `json:"challenge_id"`
-	Creator     sdk.AccAddress   `json:"creator"`
-	Round       int64            `json:"round"`
-	State       State            `json:"state"`
-	Kind        Kind             `json:"kind"`
-	Users       []sdk.AccAddress `json:"users"`
-	Timestamp   app.Timestamp    `json:"timestamp"`
+	ID         int64          `json:"id"`
+	Body       string         `json:"body"`
+	CategoryID int64          `json:"category_id"`
+	Creator    sdk.AccAddress `json:"creator"`
+	GameID     int64          `json:"game_id"`
+	State      State          `json:"state"`
+	Kind       Kind           `json:"kind"`
+	Timestamp  app.Timestamp  `json:"timestamp"`
 }
