@@ -70,7 +70,7 @@ func (k Keeper) Create(
 	}
 
 	// check if story already has a challenge
-	if story.ChallengeID > 0 {
+	if story.GameID > 0 {
 		return 0, ErrStoryAlreadyChallenged(storyID)
 	}
 
@@ -93,7 +93,7 @@ func (k Keeper) Create(
 		app.NewTimestamp(ctx.BlockHeader()),
 	}
 
-	story.ChallengeID = challenge.ID
+	story.GameID = challenge.ID
 	k.storyKeeper.UpdateStory(ctx, story)
 
 	// push challenge id onto queue that will get checked
