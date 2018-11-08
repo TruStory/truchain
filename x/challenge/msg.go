@@ -9,8 +9,8 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
-// StartChallengeMsg defines a message to challenge a story
-type StartChallengeMsg struct {
+// SubmitChallengeMsg defines a message to challenge a story
+type SubmitChallengeMsg struct {
 	StoryID  int64          `json:"story_id"`
 	Amount   sdk.Coin       `json:"amount"`
 	Argument string         `json:"argument,omitempty"`
@@ -18,14 +18,14 @@ type StartChallengeMsg struct {
 	Evidence []url.URL      `json:"evidence,omitempty"`
 }
 
-// NewStartChallengeMsg creates a message to challenge a story
-func NewStartChallengeMsg(
+// NewSubmitChallengeMsg creates a message to challenge a story
+func NewSubmitChallengeMsg(
 	storyID int64,
 	amount sdk.Coin,
 	argument string,
 	creator sdk.AccAddress,
-	evidence []url.URL) StartChallengeMsg {
-	return StartChallengeMsg{
+	evidence []url.URL) SubmitChallengeMsg {
+	return SubmitChallengeMsg{
 		StoryID:  storyID,
 		Amount:   amount,
 		Argument: argument,
@@ -35,19 +35,19 @@ func NewStartChallengeMsg(
 }
 
 // Type implements Msg
-func (msg StartChallengeMsg) Type() string { return app.GetType(msg) }
+func (msg SubmitChallengeMsg) Type() string { return app.GetType(msg) }
 
 // Route implements Msg
-func (msg StartChallengeMsg) Route() string { return app.GetName(msg) }
+func (msg SubmitChallengeMsg) Route() string { return app.GetName(msg) }
 
 // GetSignBytes implements Msg. Story creator should sign this message.
 // Serializes Msg into JSON bytes for transport.
-func (msg StartChallengeMsg) GetSignBytes() []byte {
+func (msg SubmitChallengeMsg) GetSignBytes() []byte {
 	return app.MustGetSignBytes(msg)
 }
 
 // ValidateBasic implements Msg
-func (msg StartChallengeMsg) ValidateBasic() sdk.Error {
+func (msg SubmitChallengeMsg) ValidateBasic() sdk.Error {
 	params := DefaultParams()
 
 	if msg.StoryID == 0 {
@@ -69,60 +69,6 @@ func (msg StartChallengeMsg) ValidateBasic() sdk.Error {
 }
 
 // GetSigners implements Msg. Story creator is the only signer of this message.
-func (msg StartChallengeMsg) GetSigners() []sdk.AccAddress {
-	return app.GetSigners(msg.Creator)
-}
-
-// ============================================================================
-
-// JoinChallengeMsg defines a message to join a challenge on a story
-type JoinChallengeMsg struct {
-	ChallengeID int64          `json:"challenge_id"`
-	Amount      sdk.Coin       `json:"amount"`
-	Argument    string         `json:"argument,omitempty"`
-	Creator     sdk.AccAddress `json:"creator"`
-	Evidence    []url.URL      `json:"evidence,omitempty"`
-}
-
-// NewJoinChallengeMsg creates a message to challenge a story
-func NewJoinChallengeMsg(
-	challengeID int64,
-	amount sdk.Coin,
-	creator sdk.AccAddress) JoinChallengeMsg {
-	return JoinChallengeMsg{
-		ChallengeID: challengeID,
-		Amount:      amount,
-		Creator:     creator,
-	}
-}
-
-// Type implements Msg
-func (msg JoinChallengeMsg) Type() string { return app.GetType(msg) }
-
-// Route implements Msg
-func (msg JoinChallengeMsg) Route() string { return app.GetName(msg) }
-
-// GetSignBytes implements Msg. Story creator should sign this message.
-// Serializes Msg into JSON bytes for transport.
-func (msg JoinChallengeMsg) GetSignBytes() []byte {
-	return app.MustGetSignBytes(msg)
-}
-
-// ValidateBasic implements Msg
-func (msg JoinChallengeMsg) ValidateBasic() sdk.Error {
-	if msg.ChallengeID == 0 {
-		return story.ErrInvalidStoryID(msg.ChallengeID)
-	}
-	if msg.Amount.IsZero() == true {
-		return sdk.ErrInvalidCoins("Invalid challenge amount" + msg.Amount.String())
-	}
-	if len(msg.Creator) == 0 {
-		return sdk.ErrInvalidAddress("Invalid address: " + msg.Creator.String())
-	}
-	return nil
-}
-
-// GetSigners implements Msg. Story creator is the only signer of this message.
-func (msg JoinChallengeMsg) GetSigners() []sdk.AccAddress {
+func (msg SubmitChallengeMsg) GetSigners() []sdk.AccAddress {
 	return app.GetSigners(msg.Creator)
 }
