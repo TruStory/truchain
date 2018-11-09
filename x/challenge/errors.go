@@ -11,11 +11,9 @@ import (
 const (
 	DefaultCodespace sdk.CodespaceType = 10
 
-	CodeNotFound            sdk.CodeType = 1001
-	CodeInvalidMsg          sdk.CodeType = 1002
-	CodeDuplicate           sdk.CodeType = 1003
-	CodeNotFoundChallenger  sdk.CodeType = 1004
-	CodeDuplicateChallenger sdk.CodeType = 1005
+	CodeNotFound           sdk.CodeType = 1001
+	CodeInvalidMsg         sdk.CodeType = 1002
+	CodeDuplicateChallenge sdk.CodeType = 1004
 )
 
 // ErrNotFound creates an error when the searched entity is not found
@@ -34,27 +32,10 @@ func ErrInvalidMsg(value interface{}) sdk.Error {
 		"Invalid message field: "+fmt.Sprintf("%s", reflect.TypeOf(value).String()))
 }
 
-// ErrStoryAlreadyChallenged creates an error when more than one challenge is attempted on a story
-func ErrStoryAlreadyChallenged(storyID int64) sdk.Error {
+// ErrDuplicateChallenge creates an error when more than one challenge is attempted on a story
+func ErrDuplicateChallenge(gameID int64, user sdk.AccAddress) sdk.Error {
 	return sdk.NewError(
 		DefaultCodespace,
-		CodeDuplicate,
-		"Story with id "+fmt.Sprintf("%d", storyID)+" has already been challenged")
-}
-
-// ErrNotFoundChallenger creates an error for not finding a challenger
-func ErrNotFoundChallenger(id int64) sdk.Error {
-	return sdk.NewError(
-		DefaultCodespace,
-		CodeNotFoundChallenger,
-		"Challenger not found for challenge "+fmt.Sprintf("%d", id),
-	)
-}
-
-// ErrDuplicateChallenger creates an error when more than one challenge is attempted on a story
-func ErrDuplicateChallenger(gameID int64, user sdk.AccAddress) sdk.Error {
-	return sdk.NewError(
-		DefaultCodespace,
-		CodeDuplicateChallenger,
+		CodeDuplicateChallenge,
 		"Game with id "+fmt.Sprintf("%d", gameID)+" has already been challenged by "+user.String())
 }

@@ -27,12 +27,14 @@ type WriteKeeper interface {
 		ctx sdk.Context, storyID int64, amount sdk.Coin, argument string,
 		creator sdk.AccAddress, evidence []url.URL) (int64, sdk.Error)
 
-	// NewResponseEndBlock(ctx sdk.Context) sdk.Tags
+	NewResponseEndBlock(ctx sdk.Context) sdk.Tags
 }
 
 // Keeper data type storing keys to the key-value store
 type Keeper struct {
 	app.Keeper
+
+	gameQueueKey sdk.StoreKey
 
 	bankKeeper  bank.Keeper
 	gameKeeper  game.WriteKeeper
@@ -41,10 +43,17 @@ type Keeper struct {
 
 // NewKeeper creates a new keeper with write and read access
 func NewKeeper(
-	storeKey sdk.StoreKey, bankKeeper bank.Keeper, gameKeeper game.WriteKeeper,
-	storyKeeper story.WriteKeeper, codec *amino.Codec) Keeper {
+	storeKey sdk.StoreKey, gameQueueKey sdk.StoreKey, bankKeeper bank.Keeper,
+	gameKeeper game.WriteKeeper, storyKeeper story.WriteKeeper,
+	codec *amino.Codec) Keeper {
 
-	return Keeper{app.NewKeeper(codec, storeKey), bankKeeper, gameKeeper, storyKeeper}
+	return Keeper{
+		app.NewKeeper(codec, storeKey),
+		gameQueueKey,
+		bankKeeper,
+		gameKeeper,
+		storyKeeper,
+	}
 }
 
 // ============================================================================
@@ -53,6 +62,11 @@ func NewKeeper(
 func (k Keeper) Create(
 	ctx sdk.Context, storyID int64, amount sdk.Coin, argument string,
 	creator sdk.AccAddress, evidence []url.URL) (int64, sdk.Error) {
+
+	// validate stake before creating challenge
+	if err := validateStake(ctx, k, storyID, creator, amount); err != nil {
+		return 0, err
+	}
 
 	// get the story
 	story, err := k.storyKeeper.GetStory(ctx, storyID)
@@ -73,12 +87,7 @@ func (k Keeper) Create(
 	challengeByGameKey := k.challengeByGameIDKey(ctx, gameID, creator)
 	bz := k.GetStore(ctx).Get(challengeByGameKey)
 	if bz != nil {
-		return 0, ErrDuplicateChallenger(gameID, creator)
-	}
-
-	// validate challenger stake before creating challenge
-	if err = validateStake(ctx, k, storyID, creator, amount); err != nil {
-		return 0, err
+		return 0, ErrDuplicateChallenge(gameID, creator)
 	}
 
 	// create new challenge
@@ -102,7 +111,10 @@ func (k Keeper) Create(
 		k.GetCodec().MustMarshalBinary(challenge.ID))
 
 	// update game pool
-	k.gameKeeper.Update(ctx, gameID, amount)
+	_, err = k.gameKeeper.Update(ctx, gameID, amount)
+	if err != nil {
+		return 0, err
+	}
 
 	// deduct challenge amount from user
 	_, _, err = k.bankKeeper.SubtractCoins(ctx, creator, sdk.Coins{amount})
@@ -126,26 +138,6 @@ func (k Keeper) Get(ctx sdk.Context, challengeID int64) (challenge Challenge, er
 }
 
 // ============================================================================
-
-// Delete removes a challenge from the KVStore
-func (k Keeper) delete(ctx sdk.Context, id int64) sdk.Error {
-	store := k.GetStore(ctx)
-	key := k.GetIDKey(id)
-	bz := store.Get(key)
-	if bz == nil {
-		return ErrNotFound(id)
-	}
-	store.Delete(key)
-
-	return nil
-}
-
-// ============================================================================
-
-// [Shane] TODO: https://github.com/TruStory/truchain/issues/50
-func thresholdAmount(s story.Story) sdk.Int {
-	return sdk.NewInt(10)
-}
 
 // validate if a challenger has the right staking amount
 func validateStake(

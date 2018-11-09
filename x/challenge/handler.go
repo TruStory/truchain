@@ -20,14 +20,15 @@ func NewHandler(k WriteKeeper) sdk.Handler {
 // ============================================================================
 
 // handleStartChallengeMsg handles a message to start a challenge
-func handleSubmitChallengeMsg(ctx sdk.Context, k WriteKeeper, msg SubmitChallengeMsg) sdk.Result {
+func handleSubmitChallengeMsg(
+	ctx sdk.Context, k WriteKeeper, msg SubmitChallengeMsg) sdk.Result {
+
 	if err := msg.ValidateBasic(); err != nil {
 		return err.Result()
 	}
 
 	id, err := k.Create(
-		ctx, msg.StoryID, msg.Amount,
-		msg.Argument, msg.Creator, msg.Evidence)
+		ctx, msg.StoryID, msg.Amount, msg.Argument, msg.Creator, msg.Evidence)
 	if err != nil {
 		return err.Result()
 	}

@@ -19,3 +19,14 @@ func (k Keeper) challengeByGameIDKey(
 
 	return []byte(key)
 }
+
+// generates "games:id:5:challenges:user:"
+func (k Keeper) challengeByGameIDSubspace(ctx sdk.Context, gameID int64) []byte {
+	key := fmt.Sprintf(
+		"%s:id:%d:%s:user:",
+		k.gameKeeper.GetStoreKey().Name(),
+		gameID,
+		k.GetStoreKey().Name())
+
+	return []byte(key)
+}
