@@ -1,6 +1,6 @@
 PACKAGES=$(shell go list ./...)
 
-MODULES = backing category challenge story
+MODULES = backing category challenge game story
 
 define \n
 
