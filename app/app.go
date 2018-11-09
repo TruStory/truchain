@@ -47,6 +47,7 @@ type TruChain struct {
 	keyChallenge *sdk.KVStoreKey
 	keyFee       *sdk.KVStoreKey
 	keyGame      *sdk.KVStoreKey
+	keyGameQueue *sdk.KVStoreKey
 
 	// manage getting and setting accounts
 	accountKeeper       auth.AccountKeeper
@@ -106,6 +107,7 @@ func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *T
 		keyChallenge: sdk.NewKVStoreKey("challenges"),
 		keyFee:       sdk.NewKVStoreKey("collectedFees"),
 		keyGame:      sdk.NewKVStoreKey("game"),
+		keyGameQueue: sdk.NewKVStoreKey("gameQueue"),
 		api:          nil,
 		apiStarted:   false,
 		blockCtx:     nil,
@@ -131,9 +133,10 @@ func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *T
 		app.keyBacking, app.storyKeeper, app.coinKeeper,
 		app.categoryKeeper, codec)
 	app.gameKeeper = game.NewKeeper(
-		app.keyGame, nil, app.storyKeeper, app.coinKeeper, codec)
+		app.keyGame, app.keyGameQueue, app.storyKeeper, app.coinKeeper, codec)
 	app.challengeKeeper = challenge.NewKeeper(
-		app.keyChallenge, app.coinKeeper, app.gameKeeper, app.storyKeeper, codec)
+		app.keyChallenge, app.keyGameQueue, app.coinKeeper,
+		app.gameKeeper, app.storyKeeper, codec)
 
 	// register message routes for modifying state
 	app.Router().
@@ -161,7 +164,7 @@ func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *T
 
 	// mount the multistore and load the latest state
 	app.MountStoresIAVL(
-		app.keyMain, app.keyAccount, app.keyIBC, app.keyFee,
+		app.keyMain, app.keyAccount, app.keyIBC, app.keyFee, app.keyGameQueue,
 		app.keyBacking, app.keyCategory, app.keyChallenge, app.keyStory)
 	err := app.LoadLatestVersion(app.keyMain)
 
@@ -220,7 +223,7 @@ func (app *TruChain) BeginBlocker(ctx sdk.Context, req abci.RequestBeginBlock) a
 // application.
 func (app *TruChain) EndBlocker(ctx sdk.Context, _ abci.RequestEndBlock) abci.ResponseEndBlock {
 	app.backingKeeper.NewResponseEndBlock(ctx)
-	// app.challengeKeeper.NewResponseEndBlock(ctx)
+	app.challengeKeeper.NewResponseEndBlock(ctx)
 
 	return abci.ResponseEndBlock{}
 }

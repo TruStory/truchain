@@ -40,7 +40,6 @@ func mockDB() (sdk.Context, Keeper, s.Keeper, c.Keeper, bank.Keeper) {
 
 	codec := amino.NewCodec()
 	cryptoAmino.RegisterAmino(codec)
-	RegisterAmino(codec)
 	codec.RegisterInterface((*auth.Account)(nil), nil)
 	codec.RegisterConcrete(&auth.BaseAccount{}, "auth/Account", nil)
 
@@ -52,4 +51,25 @@ func mockDB() (sdk.Context, Keeper, s.Keeper, c.Keeper, bank.Keeper) {
 	k := NewKeeper(gameKey, gameQueueKey, sk, bankKeeper, codec)
 
 	return ctx, k, sk, ck, bankKeeper
+}
+
+func createFakeCategory(ctx sdk.Context, ck c.WriteKeeper) c.Category {
+	existing, err := ck.GetCategory(ctx, 1)
+	if err == nil {
+		return existing
+	}
+	id, _ := ck.NewCategory(ctx, "decentralized exchanges", sdk.AccAddress([]byte{1, 2}), "trudex", "category for experts in decentralized exchanges")
+	cat, _ := ck.GetCategory(ctx, id)
+	return cat
+}
+
+func createFakeStory(ctx sdk.Context, sk s.Keeper, ck c.WriteKeeper) int64 {
+	body := "Body of story."
+	cat := createFakeCategory(ctx, ck)
+	creator := sdk.AccAddress([]byte{1, 2})
+	storyType := s.Default
+
+	storyID, _ := sk.NewStory(ctx, body, cat.ID, creator, storyType)
+
+	return storyID
 }

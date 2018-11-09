@@ -25,7 +25,7 @@ func mockDB() (sdk.Context, Keeper, s.Keeper, c.Keeper, bank.Keeper) {
 	catKey := sdk.NewKVStoreKey("categories")
 	challengeKey := sdk.NewKVStoreKey("challenges")
 	gameKey := sdk.NewKVStoreKey("games")
-	gameQueueKey := sdk.NewKVStoreKey("game_queue")
+	gameQueueKey := sdk.NewKVStoreKey("gameQueue")
 
 	ms := store.NewCommitMultiStore(db)
 	ms.MountStoreWithDB(accKey, sdk.StoreTypeIAVL, db)
@@ -51,7 +51,7 @@ func mockDB() (sdk.Context, Keeper, s.Keeper, c.Keeper, bank.Keeper) {
 	sk := s.NewKeeper(storyKey, ck, codec)
 	gameKeeper := game.NewKeeper(gameKey, gameQueueKey, sk, bankKeeper, codec)
 
-	k := NewKeeper(challengeKey, bankKeeper, gameKeeper, sk, codec)
+	k := NewKeeper(challengeKey, gameQueueKey, bankKeeper, gameKeeper, sk, codec)
 
 	return ctx, k, sk, ck, bankKeeper
 }
@@ -75,11 +75,4 @@ func createFakeCategory(ctx sdk.Context, ck c.WriteKeeper) c.Category {
 	id, _ := ck.NewCategory(ctx, "decentralized exchanges", sdk.AccAddress([]byte{1, 2}), "trudex", "category for experts in decentralized exchanges")
 	cat, _ := ck.GetCategory(ctx, id)
 	return cat
-}
-
-func createFakeGame(ctx sdk.Context, gameKeeper game.WriteKeeper, storyID int64) int64 {
-	creator := sdk.AccAddress([]byte{1, 2})
-	gameID, _ := gameKeeper.Create(ctx, storyID, creator)
-
-	return gameID
 }

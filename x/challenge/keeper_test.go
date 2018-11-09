@@ -58,7 +58,7 @@ func TestNewChallenge_Duplicate(t *testing.T) {
 
 	_, err = k.Create(ctx, storyID, challengeAmount, argument, creator, evidence)
 	assert.NotNil(t, err)
-	assert.Equal(t, ErrDuplicateChallenger(5, creator).Code(), err.Code())
+	assert.Equal(t, ErrDuplicateChallenge(5, creator).Code(), err.Code())
 }
 
 func TestNewChallenge_MultipleChallengers(t *testing.T) {
@@ -87,11 +87,12 @@ func TestNewChallenge_MultipleChallengers(t *testing.T) {
 	assert.Nil(t, err)
 	assert.False(t, bankKeeper.HasCoins(ctx, creator2, sdk.Coins{amount}))
 
-	// TODO: check game pool amount
+	// check game pool amount
+	story, _ := k.storyKeeper.GetStory(ctx, storyID)
+	game, _ := k.gameKeeper.Get(ctx, story.GameID)
 
-	// challenge, _ = k.Get(ctx, id)
-	// assert.True(t, challenge.Pool.IsEqual(challengeAmount.Plus(amount)))
-	// assert.True(t, challenge.Started)
+	assert.True(t, game.Pool.IsEqual(challengeAmount.Plus(amount)))
+	assert.True(t, game.Started())
 }
 
 func TestNewChallenge_ErrIncorrectCategoryCoin(t *testing.T) {

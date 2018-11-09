@@ -15,9 +15,17 @@ type Game struct {
 	ExpiresTime     time.Time      `json:"expires_time,omitempty"`
 	EndTime         time.Time      `json:"end_time,omitempty"`
 	Pool            sdk.Coin       `json:"pool"`
-	Started         bool           `json:"started"`
 	ThresholdAmount sdk.Int        `json:"threshold_amount"`
 	Timestamp       app.Timestamp  `json:"timestamp"`
+}
+
+// Started returns true if a validation game has started
+func (g Game) Started() bool {
+	if g.EndTime.After(time.Time{}) {
+		return true
+	}
+
+	return false
 }
 
 // Params holds default parameters for a game
