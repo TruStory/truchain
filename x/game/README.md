@@ -17,3 +17,5 @@ Stores all data pertaining to a validation game.
         * `"stories:id:[StoryID]:games:time:[Time]"` -> `[GameID]`
 
 ## Notes
+
+This module doesn't have a codec and doesn't handle any messages. It is only used internally by TruChain to manage the validation game.

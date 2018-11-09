@@ -28,10 +28,6 @@ type WriteKeeper interface {
 
 	Update(
 		ctx sdk.Context, gameID int64, amount sdk.Coin) (int64, sdk.Error)
-
-	// NewResponseEndBlock(ctx sdk.Context) sdk.Tags
-
-	QueueStore(ctx sdk.Context) sdk.KVStore
 }
 
 // Keeper data type storing keys to the key-value store
@@ -63,6 +59,11 @@ func (k Keeper) Create(
 		return 0, err
 	}
 
+	// check if a game already exists on story
+	if story.GameID != 0 {
+		return 0, ErrExists(storyID)
+	}
+
 	// create an initial empty challenge pool
 	coinName, err := k.storyKeeper.GetCoinName(ctx, storyID)
 	if err != nil {
@@ -78,7 +79,6 @@ func (k Keeper) Create(
 		ctx.BlockHeader().Time.Add(DefaultParams().Expires),
 		time.Time{},
 		emptyPool,
-		false,
 		thresholdAmount(story),
 		app.NewTimestamp(ctx.BlockHeader()),
 	}
@@ -127,7 +127,7 @@ func (k Keeper) Update(
 		if err != nil {
 			return 0, err
 		}
-		game.Started = true
+		game.EndTime = ctx.BlockHeader().Time.Add(DefaultParams().Period)
 	}
 
 	// update existing challenge in KVStore
@@ -136,25 +136,7 @@ func (k Keeper) Update(
 	return game.ID, nil
 }
 
-// QueueStore returns the game queue store
-func (k Keeper) QueueStore(ctx sdk.Context) sdk.KVStore {
-	return ctx.KVStore(k.queueKey)
-}
-
 // ============================================================================
-
-// Delete removes a challenge from the KVStore
-// func (k Keeper) delete(ctx sdk.Context, id int64) sdk.Error {
-// 	store := k.GetStore(ctx)
-// 	key := k.GetIDKey(id)
-// 	bz := store.Get(key)
-// 	if bz == nil {
-// 		return ErrNotFound(id)
-// 	}
-// 	store.Delete(key)
-
-// 	return nil
-// }
 
 // saves the `Game` in the KVStore
 func (k Keeper) set(ctx sdk.Context, game Game) {
