@@ -6,10 +6,6 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
-// TODO:
-// make generic SubspaceList
-// VoterList embeds SubspaceList
-
 // VoterList defines a list of voters associated with a validation game.
 // Voters could be Backers, Challengers, or actual Voters.
 type VoterList struct {
@@ -32,13 +28,34 @@ func (l VoterList) Append(
 		k.GetCodec().MustMarshalBinary(voteID))
 }
 
+// Get gets a saved vote id for the given game
+func (l VoterList) Get(
+	ctx sdk.Context, k WriteKeeper, gameID int64, user sdk.AccAddress) (voteID int64) {
+
+	bz := k.GetStore(ctx).Get(
+		l.gameByUserKey(ctx, k, gameID, user))
+	if bz == nil {
+		// TODO: throw error instead?
+		return 0
+	}
+	k.GetCodec().MustUnmarshalBinary(bz, &voteID)
+
+	return voteID
+}
+
+// Include returns true if the given vote can be found
+func (l VoterList) Include(
+	ctx sdk.Context, k WriteKeeper, gameID int64, user sdk.AccAddress) bool {
+	return l.Get(ctx, k, gameID, user) >= 0
+}
+
 // Map applies a function across the subspace of voters on a game
 func (l VoterList) Map(
-	ctx sdk.Context, k WriteKeeper, gameID int64, fn func(int64)) {
+	ctx sdk.Context, k WriteKeeper, gameID int64, fn func(int64) sdk.Error) sdk.Error {
 
 	store := k.GetStore(ctx)
 
-	// builds prefix of from "game:id:5:votes:user:"
+	// builds prefix of form "game:id:5:votes:user:"
 	prefix := l.gameByUserSubspace(ctx, k, gameID)
 
 	// iterates through keyspace to find all votes on a game
@@ -47,11 +64,15 @@ func (l VoterList) Map(
 	for ; iter.Valid(); iter.Next() {
 		var id int64
 		k.GetCodec().MustUnmarshalBinary(iter.Value(), &id)
-		fn(id)
+		if err := fn(id); err != nil {
+			return err
+		}
 	}
+
+	return nil
 }
 
-// TODO: Also implement Reduce, and use for tallying votes?
+// ============================================================================
 
 // generates "games:id:5:votes:user:[Address]"
 func (l VoterList) gameByUserKey(
