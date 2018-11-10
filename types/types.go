@@ -1,8 +1,10 @@
 package types
 
 import (
+	"net/url"
 	"time"
 
+	sdk "github.com/cosmos/cosmos-sdk/types"
 	abci "github.com/tendermint/tendermint/abci/types"
 )
 
@@ -30,4 +32,22 @@ func (t Timestamp) Update(blockHeader abci.Header) Timestamp {
 	t.UpdatedTime = blockHeader.Time
 
 	return t
+}
+
+// Vote is a type that defines a vote on a story
+type Vote struct {
+	ID        int64          `json:"id"`
+	Amount    sdk.Coin       `json:"amount"`
+	Comment   string         `json:"comment,omitempty"`
+	Creator   sdk.AccAddress `json:"creator"`
+	Evidence  []url.URL      `json:"evidence,omitempty"`
+	Vote      bool           `json:"vote"`
+	Timestamp Timestamp      `json:"timestamp"`
+}
+
+// NewVote creates a new Vote type with defaults
+func NewVote(
+	id int64, amount sdk.Coin, creator sdk.AccAddress, vote bool, timestamp Timestamp) Vote {
+
+	return Vote{id, amount, "", creator, nil, vote, timestamp}
 }
