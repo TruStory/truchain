@@ -91,15 +91,19 @@ func (k Keeper) Create(
 		return 0, ErrDuplicateChallenge(gameID, creator)
 	}
 
-	// create new challenge
-	challenge := Challenge{
+	// create implicit false vote
+	vote := app.Vote{
 		ID:        k.GetNextID(ctx),
 		Amount:    amount,
-		Argument:  argument,
+		Comment:   "",
 		Creator:   creator,
 		Evidence:  evidence,
+		Vote:      false,
 		Timestamp: app.NewTimestamp(ctx.BlockHeader()),
 	}
+
+	// create new challenge with embedded vote
+	challenge := Challenge{vote, argument}
 
 	// persist challenge
 	k.GetStore(ctx).Set(

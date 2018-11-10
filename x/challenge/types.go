@@ -1,20 +1,14 @@
 package challenge
 
 import (
-	"net/url"
-
 	app "github.com/TruStory/truchain/types"
-	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
 // Challenge defines a user's challenge on a story
 type Challenge struct {
-	ID        int64          `json:"id"`
-	Amount    sdk.Coin       `json:"amount"`
-	Argument  string         `json:"argument"`
-	Creator   sdk.AccAddress `json:"creator"`
-	Evidence  []url.URL      `json:"evidence,omitempty"`
-	Timestamp app.Timestamp  `json:"timestamp"`
+	app.Vote
+
+	Argument string `json:"argument"`
 }
 
 // Params holds default parameters for a challenge
