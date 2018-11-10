@@ -55,13 +55,13 @@ func processBacking(ctx sdk.Context, k Keeper) sdk.Error {
 func distributeEarnings(ctx sdk.Context, k Keeper, backing Backing) sdk.Error {
 
 	// give the principal back to the user in category coins
-	_, _, err := k.bankKeeper.AddCoins(ctx, backing.User, sdk.Coins{backing.Principal})
+	_, _, err := k.bankKeeper.AddCoins(ctx, backing.Creator, sdk.Coins{backing.Amount})
 	if err != nil {
 		return err
 	}
 
 	// give the interest earned to the user in category coins
-	_, _, err = k.bankKeeper.AddCoins(ctx, backing.User, sdk.Coins{backing.Interest})
+	_, _, err = k.bankKeeper.AddCoins(ctx, backing.Creator, sdk.Coins{backing.Interest})
 	if err != nil {
 		return err
 	}
