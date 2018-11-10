@@ -29,8 +29,8 @@ type WriteKeeper interface {
 
 	NewStory(
 		ctx sdk.Context, body string, categoryID int64, creator sdk.AccAddress, kind Kind) (int64, sdk.Error)
-	StartChallenge(ctx sdk.Context, storyID int64) sdk.Error
-	EndChallenge(ctx sdk.Context, storyID int64) sdk.Error
+	StartGame(ctx sdk.Context, storyID int64) sdk.Error
+	EndGame(ctx sdk.Context, storyID int64) sdk.Error
 	UpdateStory(ctx sdk.Context, story Story)
 }
 
@@ -52,13 +52,16 @@ func NewKeeper(
 
 // ============================================================================
 
-// StartChallenge records challenging a story
-func (k Keeper) StartChallenge(ctx sdk.Context, storyID int64) sdk.Error {
+// StartGame records challenging a story
+func (k Keeper) StartGame(
+	ctx sdk.Context, storyID int64) sdk.Error {
+
 	// get story
 	story, err := k.GetStory(ctx, storyID)
 	if err != nil {
 		return err
 	}
+
 	// update story state
 	story.State = Challenged
 	k.UpdateStory(ctx, story)
@@ -70,8 +73,8 @@ func (k Keeper) StartChallenge(ctx sdk.Context, storyID int64) sdk.Error {
 	return nil
 }
 
-// EndChallenge records the end of a validation game on a story
-func (k Keeper) EndChallenge(ctx sdk.Context, storyID int64) sdk.Error {
+// EndGame records the end of a validation game on a story
+func (k Keeper) EndGame(ctx sdk.Context, storyID int64) sdk.Error {
 	// get story
 	story, err := k.GetStory(ctx, storyID)
 	if err != nil {

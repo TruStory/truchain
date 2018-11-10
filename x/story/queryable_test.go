@@ -57,7 +57,7 @@ func TestQueryChallengedStoriesWithCategory(t *testing.T) {
 	ctx, sk, ck := mockDB()
 
 	storyID := createFakeStory(ctx, sk, ck)
-	sk.StartChallenge(ctx, storyID)
+	sk.StartGame(ctx, storyID)
 
 	queryParams := QueryCategoryStoriesParams{
 		CategoryID: "1",
@@ -81,7 +81,7 @@ func TestQueryStoryFeed(t *testing.T) {
 	ctx, sk, ck := mockDB()
 
 	storyID := createFakeStory(ctx, sk, ck)
-	sk.StartChallenge(ctx, storyID)
+	sk.StartGame(ctx, storyID)
 
 	queryParams := QueryCategoryStoriesParams{
 		CategoryID: "1",

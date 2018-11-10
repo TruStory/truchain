@@ -17,7 +17,7 @@ type ReadKeeper interface {
 	app.ReadKeeper
 
 	Get(ctx sdk.Context, id int64) (vote app.Vote, err sdk.Error)
-	GetByGame(ctx sdk.Context, gameID int64) ([]app.Vote, sdk.Error)
+	GetVotesByGame(ctx sdk.Context, gameID int64) ([]app.Vote, sdk.Error)
 }
 
 // WriteKeeper defines a module interface that facilities write only access to truchain data
@@ -26,8 +26,6 @@ type WriteKeeper interface {
 		ctx sdk.Context, storyID int64, amount sdk.Coin,
 		choice bool, comment string, creator sdk.AccAddress,
 		evidence []url.URL) (int64, sdk.Error)
-
-	NewResponseEndBlock(ctx sdk.Context) sdk.Tags
 }
 
 // ReadWriteKeeper defines a module interface that facilities read/write access to truchain data
@@ -66,7 +64,7 @@ func NewKeeper(
 
 // ============================================================================
 
-// Create adds a new challenge on a story in the KVStore
+// Create adds a new vote on a story in the KVStore
 func (k Keeper) Create(
 	ctx sdk.Context, storyID int64, amount sdk.Coin,
 	choice bool, comment string, creator sdk.AccAddress,
@@ -78,7 +76,15 @@ func (k Keeper) Create(
 		return 0, err
 	}
 
-	// TODO: check if this voter has already cast a vote
+	// make sure validation game has started
+	if story.GameID <= 0 {
+		return 0, ErrGameNotStarted(storyID)
+	}
+
+	// check if this voter has already cast a vote
+	if !k.voterList.Include(ctx, k, story.GameID, creator) {
+		return 0, ErrDuplicateVoteForGame(story.GameID, creator)
+	}
 
 	// create a new vote
 	vote := app.Vote{
@@ -105,28 +111,31 @@ func (k Keeper) Get(ctx sdk.Context, id int64) (vote app.Vote, err sdk.Error) {
 	store := k.GetStore(ctx)
 	bz := store.Get(k.GetIDKey(id))
 	if bz == nil {
-		// TODO: add error
-		return vote, sdk.ErrInternal("ErrNotFound(id)")
+		return vote, ErrNotFound(id)
 	}
 	k.GetCodec().MustUnmarshalBinary(bz, &vote)
 
-	return
+	return vote, nil
 }
 
-// GetByGame returns a list of votes for a given game
-func (k Keeper) GetByGame(
+// GetVotesByGame returns a list of votes for a given game
+func (k Keeper) GetVotesByGame(
 	ctx sdk.Context, gameID int64) (votes []app.Vote, err sdk.Error) {
 
 	// iterate over voter list and get votes
-	k.voterList.Map(ctx, k, gameID, func(voterID int64) {
+	err = k.voterList.Map(ctx, k, gameID, func(voterID int64) sdk.Error {
 		vote, err := k.Get(ctx, voterID)
 		if err != nil {
-			return
+			return err
 		}
 		votes = append(votes, vote)
+		return nil
 	})
+	if err != nil {
+		return votes, err
+	}
 
-	return
+	return votes, nil
 }
 
 // ============================================================================

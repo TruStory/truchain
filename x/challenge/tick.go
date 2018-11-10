@@ -49,7 +49,7 @@ func checkExpiredGames(ctx sdk.Context, k Keeper, q store.Queue) sdk.Error {
 		}
 
 		// update story state to reflect expired game
-		err = k.storyKeeper.EndChallenge(ctx, game.StoryID)
+		err = k.storyKeeper.EndGame(ctx, game.StoryID)
 		if err != nil {
 			return err
 		}
