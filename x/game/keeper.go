@@ -83,9 +83,6 @@ func (k Keeper) Create(
 		app.NewTimestamp(ctx.BlockHeader()),
 	}
 
-	story.GameID = game.ID
-	k.storyKeeper.UpdateStory(ctx, story)
-
 	// push game id onto queue that will get checked
 	// on each block tick for expired games
 	q := queue.NewQueue(k.GetCodec(), k.GetStore(ctx))
@@ -93,6 +90,10 @@ func (k Keeper) Create(
 
 	// set game in KVStore
 	k.set(ctx, game)
+
+	// update story with gameID
+	story.GameID = game.ID
+	k.storyKeeper.UpdateStory(ctx, story)
 
 	return game.ID, nil
 }
@@ -123,7 +124,7 @@ func (k Keeper) Update(
 
 	// if threshold is reached, start challenge and allow voting to begin
 	if game.Pool.Amount.GT(game.ThresholdAmount) {
-		err = k.storyKeeper.StartChallenge(ctx, game.StoryID)
+		err = k.storyKeeper.StartGame(ctx, game.StoryID)
 		if err != nil {
 			return 0, err
 		}

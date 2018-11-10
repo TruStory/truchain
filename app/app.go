@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 
 	"github.com/TruStory/truchain/x/game"
+	"github.com/TruStory/truchain/x/vote"
 
 	params "github.com/TruStory/truchain/parameters"
 	"github.com/TruStory/truchain/types"
@@ -48,6 +49,7 @@ type TruChain struct {
 	keyFee       *sdk.KVStoreKey
 	keyGame      *sdk.KVStoreKey
 	keyGameQueue *sdk.KVStoreKey
+	keyVote      *sdk.KVStoreKey
 
 	// manage getting and setting accounts
 	accountKeeper       auth.AccountKeeper
@@ -61,6 +63,7 @@ type TruChain struct {
 	backingKeeper   backing.WriteKeeper
 	challengeKeeper challenge.WriteKeeper
 	gameKeeper      game.WriteKeeper
+	voteKeeper      vote.WriteKeeper
 
 	// list of initial categories
 	categories map[string]string
@@ -108,6 +111,7 @@ func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *T
 		keyFee:       sdk.NewKVStoreKey("collectedFees"),
 		keyGame:      sdk.NewKVStoreKey("game"),
 		keyGameQueue: sdk.NewKVStoreKey("gameQueue"),
+		keyVote:      sdk.NewKVStoreKey("vote"),
 		api:          nil,
 		apiStarted:   false,
 		blockCtx:     nil,
@@ -137,6 +141,8 @@ func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *T
 	app.challengeKeeper = challenge.NewKeeper(
 		app.keyChallenge, app.keyGameQueue, app.coinKeeper,
 		app.gameKeeper, app.storyKeeper, codec)
+	app.voteKeeper = vote.NewKeeper(app.keyVote,
+		app.storyKeeper, app.gameKeeper, app.coinKeeper, codec)
 
 	// register message routes for modifying state
 	app.Router().
@@ -146,14 +152,13 @@ func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *T
 		AddRoute("category", category.NewHandler(app.categoryKeeper)).
 		AddRoute("backing", backing.NewHandler(app.backingKeeper)).
 		AddRoute("challenge", challenge.NewHandler(app.challengeKeeper)).
+		AddRoute("vote", vote.NewHandler(app.voteKeeper)).
 		AddRoute(registration.RegisterKeyMsg{}.Type(),
 			registration.NewHandler(app.accountKeeper))
 
 	// register query routes for reading state
 	app.QueryRouter().
-		AddRoute(story.QueryPath, story.NewQuerier(app.storyKeeper))
-
-	app.QueryRouter().
+		AddRoute(story.QueryPath, story.NewQuerier(app.storyKeeper)).
 		AddRoute(category.QueryPath, category.NewQuerier(app.categoryKeeper))
 
 	// perform initialization logic
@@ -164,8 +169,9 @@ func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *T
 
 	// mount the multistore and load the latest state
 	app.MountStoresIAVL(
-		app.keyMain, app.keyAccount, app.keyIBC, app.keyFee, app.keyGameQueue,
-		app.keyBacking, app.keyCategory, app.keyChallenge, app.keyStory)
+		app.keyMain, app.keyAccount, app.keyIBC, app.keyFee,
+		app.keyGameQueue, app.keyBacking, app.keyCategory,
+		app.keyChallenge, app.keyStory, app.keyVote)
 	err := app.LoadLatestVersion(app.keyMain)
 
 	if err != nil {
@@ -194,6 +200,7 @@ func MakeCodec() *codec.Codec {
 	category.RegisterAmino(cdc)
 	challenge.RegisterAmino(cdc)
 	registration.RegisterAmino(cdc)
+	vote.RegisterAmino(cdc)
 
 	// register other types
 	cdc.RegisterInterface((*auth.Account)(nil), nil)
