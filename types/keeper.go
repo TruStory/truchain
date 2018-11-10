@@ -16,6 +16,12 @@ type ReadKeeper interface {
 	GetStoreKey() sdk.StoreKey
 }
 
+type WriteKeeper interface {
+	ReadKeeper
+
+	GetStore(ctx sdk.Context) sdk.KVStore
+}
+
 // Keeper data type with a default codec
 type Keeper struct {
 	codec    *amino.Codec
