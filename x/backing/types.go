@@ -46,13 +46,11 @@ func DefaultParams() Params {
 
 // Backing type
 type Backing struct {
-	ID        int64          `json:"id"`
-	StoryID   int64          `json:"story_id"`
-	Principal sdk.Coin       `json:"principal"`
-	Interest  sdk.Coin       `json:"interest"`
-	Expires   time.Time      `json:"expires"`
-	Params    Params         `json:"params"`
-	Period    time.Duration  `json:"period"`
-	User      sdk.AccAddress `json:"user"`
-	Timestamp app.Timestamp  `json:"timestamp"`
+	app.Vote
+
+	StoryID  int64         `json:"story_id"`
+	Interest sdk.Coin      `json:"interest"`
+	Expires  time.Time     `json:"expires"`
+	Params   Params        `json:"params"`
+	Period   time.Duration `json:"period"`
 }

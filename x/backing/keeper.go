@@ -95,17 +95,18 @@ func (k Keeper) NewBacking(
 	// mint category coin from interest earned
 	interest := getInterest(cat, amount, duration, params)
 
-	// create new backing type
+	// create new implicit true vote type
+	vote := app.NewVote(
+		k.GetNextID(ctx), principal, creator, true, app.NewTimestamp(ctx.BlockHeader()))
+
+	// create new backing type with embedded vote
 	backing := Backing{
-		k.GetNextID(ctx),
-		storyID,
-		principal,
-		interest,
-		time.Now().Add(duration),
-		params,
-		duration,
-		creator,
-		app.NewTimestamp(ctx.BlockHeader()),
+		Vote:     vote,
+		StoryID:  storyID,
+		Interest: interest,
+		Expires:  time.Now().Add(duration),
+		Params:   params,
+		Period:   duration,
 	}
 
 	// store backing

@@ -66,16 +66,25 @@ func Test_distributeEarnings(t *testing.T) {
 	duration := 24 * time.Hour
 	creator := sdk.AccAddress([]byte{1, 2})
 
+	// create new vote type
+	vote := app.Vote{
+		ID:        int64(1),
+		Amount:    principal,
+		Comment:   "",
+		Creator:   creator,
+		Evidence:  nil,
+		Vote:      true,
+		Timestamp: app.NewTimestamp(ctx.BlockHeader()),
+	}
+
+	// create new backing type with embedded vote
 	backing := Backing{
-		int64(1),
+		vote,
 		int64(5),
-		principal,
 		interest,
 		expires,
 		params,
 		duration,
-		creator,
-		app.NewTimestamp(ctx.BlockHeader()),
 	}
 
 	err := distributeEarnings(ctx, bk, backing)
