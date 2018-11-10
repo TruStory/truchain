@@ -1,7 +1,6 @@
 package vote
 
 import (
-	"fmt"
 	"net/url"
 
 	"github.com/TruStory/truchain/x/game"
@@ -44,6 +43,8 @@ type Keeper struct {
 	storyKeeper story.WriteKeeper
 	gameKeeper  game.WriteKeeper
 	bankKeeper  bank.Keeper
+
+	voterList app.VoterList
 }
 
 // NewKeeper creates a new keeper with write and read access
@@ -59,6 +60,7 @@ func NewKeeper(
 		storyKeeper,
 		gameKeeper,
 		bankKeeper,
+		app.NewVoterList(gameKeeper.GetStoreKey()),
 	}
 }
 
@@ -93,7 +95,7 @@ func (k Keeper) Create(
 	k.set(ctx, vote)
 
 	// persist game <-> vote association
-	k.setGameVotePair(ctx, story.GameID, vote.ID)
+	k.voterList.Append(ctx, k, story.GameID, creator, vote.ID)
 
 	return vote.ID, nil
 }
@@ -111,53 +113,20 @@ func (k Keeper) Get(ctx sdk.Context, id int64) (vote app.Vote, err sdk.Error) {
 	return
 }
 
-// GetByChallenge returns a list of votes for a given challenge
-func (k Keeper) GetByChallenge(
-	ctx sdk.Context, challengeID int64) (votes []app.Vote, err sdk.Error) {
+// GetByGame returns a list of votes for a given game
+func (k Keeper) GetByGame(
+	ctx sdk.Context, gameID int64) (votes []app.Vote, err sdk.Error) {
 
-	store := k.GetStore(ctx)
-
-	// builds prefix for game <-> vote association
-	prefix := k.gameVotePrefix(challengeID)
-
-	// iterates through keyspace to find all votes on a challenge
-	iter := sdk.KVStorePrefixIterator(store, prefix)
-	defer iter.Close()
-	for ; iter.Valid(); iter.Next() {
-		var vote app.Vote
-		bz := iter.Value()
-		if bz == nil {
-			// TODO:
-			return votes, sdk.ErrInternal("ErrNotFoundByChallenge(id)")
+	// iterate over voter list and get votes
+	k.voterList.Map(ctx, k, gameID, func(voterID int64) {
+		vote, err := k.Get(ctx, voterID)
+		if err != nil {
+			return
 		}
-		k.GetCodec().MustUnmarshalBinary(bz, &vote)
 		votes = append(votes, vote)
-	}
+	})
 
 	return
-}
-
-// ============================================================================
-
-// "games:id:5:votes:id:10" -> int64
-func (k Keeper) gameVoteKey(gameID int64, voteID int64) []byte {
-	prefix := fmt.Sprintf(
-		"%s:id:%d:%s:id:%d",
-		k.gameKeeper.GetStoreKey().Name(), gameID,
-		k.GetStoreKey().Name(), voteID)
-
-	return []byte(prefix)
-}
-
-// "games:id:5:votes:id:"
-func (k Keeper) gameVotePrefix(challengeID int64) []byte {
-	prefix := fmt.Sprintf(
-		"%s:id:%d:%s:id:",
-		k.gameKeeper.GetStoreKey().Name(),
-		challengeID,
-		k.GetStoreKey().Name())
-
-	return []byte(prefix)
 }
 
 // ============================================================================
@@ -168,12 +137,4 @@ func (k Keeper) set(ctx sdk.Context, vote app.Vote) {
 	store.Set(
 		k.GetIDKey(vote.ID),
 		k.GetCodec().MustMarshalBinary(vote))
-}
-
-// saves a game <-> vote association in the store
-func (k Keeper) setGameVotePair(ctx sdk.Context, gameID int64, voteID int64) {
-	store := k.GetStore(ctx)
-	store.Set(
-		k.gameVoteKey(gameID, voteID),
-		k.GetCodec().MustMarshalBinary(""))
 }
