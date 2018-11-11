@@ -6,59 +6,59 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
-// VoterList defines a list of voters associated with a validation game.
-// Voters could be Backers, Challengers, or actual Voters.
-type VoterList struct {
-	gameStoreKey sdk.StoreKey
+// UserList defines a list of users associated with a type.
+// Users could be backers, challengers, or voters.
+// Store layout:
+// [foreignStoreKey]:id:[keyID]:[storeKey]:users:[user] -> [valueID]
+type UserList struct {
+	foreignStoreKey sdk.StoreKey
 }
 
-// NewVoterList creates a new `VoterList`
-func NewVoterList(
-	gameStoreKey sdk.StoreKey) VoterList {
-
-	return VoterList{gameStoreKey}
+// NewUserList creates a new `UserList`
+func NewUserList(foreignStoreKey sdk.StoreKey) UserList {
+	return UserList{foreignStoreKey}
 }
 
-// Append adds a new game <-> vote association
-func (l VoterList) Append(
-	ctx sdk.Context, k WriteKeeper, gameID int64, user sdk.AccAddress, voteID int64) {
+// Append adds a new key <-> value association
+func (l UserList) Append(
+	ctx sdk.Context, k WriteKeeper, keyID int64, user sdk.AccAddress, valueID int64) {
 
 	k.GetStore(ctx).Set(
-		l.gameByUserKey(ctx, k, gameID, user),
-		k.GetCodec().MustMarshalBinary(voteID))
+		l.typeByUserKey(ctx, k, keyID, user),
+		k.GetCodec().MustMarshalBinary(valueID))
 }
 
-// Get gets a saved vote id for the given game
-func (l VoterList) Get(
-	ctx sdk.Context, k WriteKeeper, gameID int64, user sdk.AccAddress) (voteID int64) {
+// Get gets a saved value id for the given key
+func (l UserList) Get(
+	ctx sdk.Context, k WriteKeeper, keyID int64, user sdk.AccAddress) (valueID int64) {
 
-	bz := k.GetStore(ctx).Get(
-		l.gameByUserKey(ctx, k, gameID, user))
+	bz := k.GetStore(ctx).Get(l.typeByUserKey(ctx, k, keyID, user))
 	if bz == nil {
-		// TODO: throw error instead?
 		return 0
 	}
-	k.GetCodec().MustUnmarshalBinary(bz, &voteID)
+	k.GetCodec().MustUnmarshalBinary(bz, &valueID)
 
-	return voteID
+	return valueID
 }
 
-// Include returns true if the given vote can be found
-func (l VoterList) Include(
-	ctx sdk.Context, k WriteKeeper, gameID int64, user sdk.AccAddress) bool {
-	return l.Get(ctx, k, gameID, user) >= 0
+// Include returns true if the given key is found
+func (l UserList) Include(
+	ctx sdk.Context, k WriteKeeper, keyID int64, user sdk.AccAddress) bool {
+
+	return l.Get(ctx, k, keyID, user) > 0
 }
 
-// Map applies a function across the subspace of voters on a game
-func (l VoterList) Map(
-	ctx sdk.Context, k WriteKeeper, gameID int64, fn func(int64) sdk.Error) sdk.Error {
+// Map applies a function across the subspace of users on a key
+func (l UserList) Map(
+	ctx sdk.Context, k WriteKeeper, keyID int64, fn func(int64) sdk.Error) sdk.Error {
 
+	// get store
 	store := k.GetStore(ctx)
 
-	// builds prefix of form "game:id:5:votes:user:"
-	prefix := l.gameByUserSubspace(ctx, k, gameID)
+	// builds prefix
+	prefix := l.typeByUserSubspaceKey(ctx, k, keyID)
 
-	// iterates through keyspace to find all votes on a game
+	// iterates through keyspace to find all value ids
 	iter := sdk.KVStorePrefixIterator(store, prefix)
 	defer iter.Close()
 	for ; iter.Valid(); iter.Next() {
@@ -74,28 +74,28 @@ func (l VoterList) Map(
 
 // ============================================================================
 
-// generates "games:id:5:votes:user:[Address]"
-func (l VoterList) gameByUserKey(
-	ctx sdk.Context, k WriteKeeper, gameID int64, user sdk.AccAddress) []byte {
+// generates key "[foreignStoreKey]:id:[keyID]:[storeKey]:users:[user]"
+func (l UserList) typeByUserKey(
+	ctx sdk.Context, k WriteKeeper, keyID int64, user sdk.AccAddress) []byte {
 
 	key := fmt.Sprintf(
 		"%s:id:%d:%s:user:%s",
-		l.gameStoreKey.Name(),
-		gameID,
+		l.foreignStoreKey.Name(),
+		keyID,
 		k.GetStoreKey().Name(),
 		user.String())
 
 	return []byte(key)
 }
 
-// generates "games:id:5:votes:user:"
-func (l VoterList) gameByUserSubspace(
-	ctx sdk.Context, k WriteKeeper, gameID int64) []byte {
+// generates key "[foreignStoreKey]:id:[keyID]:[storeKey]:users:"
+func (l UserList) typeByUserSubspaceKey(
+	ctx sdk.Context, k WriteKeeper, keyID int64) []byte {
 
 	key := fmt.Sprintf(
 		"%s:id:%d:%s:user:",
-		l.gameStoreKey.Name(),
-		gameID,
+		l.foreignStoreKey.Name(),
+		keyID,
 		k.GetStoreKey().Name())
 
 	return []byte(key)

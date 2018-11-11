@@ -42,7 +42,7 @@ type Keeper struct {
 	gameKeeper  game.WriteKeeper
 	bankKeeper  bank.Keeper
 
-	voterList app.VoterList
+	voterList app.UserList
 }
 
 // NewKeeper creates a new keeper with write and read access
@@ -58,7 +58,7 @@ func NewKeeper(
 		storyKeeper,
 		gameKeeper,
 		bankKeeper,
-		app.NewVoterList(gameKeeper.GetStoreKey()),
+		app.NewUserList(gameKeeper.GetStoreKey()),
 	}
 }
 
@@ -82,7 +82,7 @@ func (k Keeper) Create(
 	}
 
 	// check if this voter has already cast a vote
-	if !k.voterList.Include(ctx, k, story.GameID, creator) {
+	if k.voterList.Include(ctx, k, story.GameID, creator) {
 		return 0, ErrDuplicateVoteForGame(story.GameID, creator)
 	}
 
@@ -129,8 +129,10 @@ func (k Keeper) GetVotesByGame(
 			return err
 		}
 		votes = append(votes, vote)
+
 		return nil
 	})
+
 	if err != nil {
 		return votes, err
 	}
