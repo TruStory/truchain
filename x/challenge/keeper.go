@@ -111,14 +111,14 @@ func (k Keeper) Create(
 		challengeByGameKey,
 		k.GetCodec().MustMarshalBinary(challenge.ID))
 
-	// update game pool
-	_, err = k.gameKeeper.Update(ctx, gameID, amount)
+	// deduct challenge amount from user
+	_, _, err = k.bankKeeper.SubtractCoins(ctx, creator, sdk.Coins{amount})
 	if err != nil {
 		return 0, err
 	}
 
-	// deduct challenge amount from user
-	_, _, err = k.bankKeeper.SubtractCoins(ctx, creator, sdk.Coins{amount})
+	// update game pool
+	_, err = k.gameKeeper.Update(ctx, gameID, amount)
 	if err != nil {
 		return 0, err
 	}
