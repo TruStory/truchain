@@ -64,7 +64,8 @@ func (k Keeper) Create(
 	creator sdk.AccAddress, evidence []url.URL) (int64, sdk.Error) {
 
 	// validate stake before creating challenge
-	if err := validateStake(ctx, k, storyID, creator, amount); err != nil {
+	err := validateStake(ctx, k, storyID, creator, amount)
+	if err != nil {
 		return 0, err
 	}
 
