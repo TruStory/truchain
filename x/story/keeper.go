@@ -80,7 +80,7 @@ func (k Keeper) EndChallenge(ctx sdk.Context, storyID int64) sdk.Error {
 
 	// update story state
 	story.GameID = 0
-	story.State = Created
+	story.State = Unconfirmed
 	k.UpdateStory(ctx, story)
 
 	return nil
@@ -105,7 +105,7 @@ func (k Keeper) NewStory(
 		CategoryID: categoryID,
 		Creator:    creator,
 		GameID:     0,
-		State:      Created,
+		State:      Unconfirmed,
 		Kind:       kind,
 		Timestamp:  app.NewTimestamp(ctx.BlockHeader()),
 	}

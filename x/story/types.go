@@ -21,25 +21,24 @@ type State int8
 
 // List of acceptable story states
 const (
-	Created = State(iota)
-	Validated
-	Rejected
-	Unverifiable
+	Unconfirmed = State(iota)
 	Challenged
-	Revoked
+	Confirmed
+	Rejected
+	Flagged
 )
 
 // IsValid returns true if the value is listed in the enum definition, false otherwise.
 func (i State) IsValid() bool {
 	switch i {
-	case Created, Validated, Rejected, Unverifiable, Challenged, Revoked:
+	case Unconfirmed, Challenged, Confirmed, Rejected, Flagged:
 		return true
 	}
 	return false
 }
 
 func (i State) String() string {
-	return [...]string{"Created", "Validated", "Rejected", "Unverifiable", "Challenged", "Revoked"}[i]
+	return [...]string{"Unconfirmed", "Challenged", "Confirmed", "Rejected", "Flagged"}[i]
 }
 
 // Kind is a type that defines a story type

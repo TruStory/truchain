@@ -25,7 +25,7 @@ func TestAddGetStory(t *testing.T) {
 		Body:       "Body of story.",
 		CategoryID: int64(1),
 		Creator:    sdk.AccAddress([]byte{1, 2}),
-		State:      Created,
+		State:      Unconfirmed,
 		Kind:       Default,
 	}
 
@@ -48,7 +48,7 @@ func TestChallenge(t *testing.T) {
 
 	storyID := createFakeStory(ctx, sk, ck)
 	story, _ := sk.GetStory(ctx, storyID)
-	assert.Equal(t, Created, story.State, "state should match")
+	assert.Equal(t, Unconfirmed, story.State, "state should match")
 
 	sk.StartChallenge(ctx, storyID)
 	story, _ = sk.GetStory(ctx, storyID)
@@ -115,5 +115,5 @@ func TestFeedWithCategory(t *testing.T) {
 	assert.Equal(t, 5, len(stories))
 	assert.Equal(t, Challenged, stories[0].State)
 	assert.Equal(t, Challenged, stories[1].State)
-	assert.Equal(t, Created, stories[2].State)
+	assert.Equal(t, Unconfirmed, stories[2].State)
 }
