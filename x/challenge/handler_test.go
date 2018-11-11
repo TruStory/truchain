@@ -27,7 +27,7 @@ func TestSubmitChallengeMsg(t *testing.T) {
 	// give user some funds
 	bankKeeper.AddCoins(ctx, creator, sdk.Coins{amount})
 
-	msg := NewSubmitChallengeMsg(storyID, amount, argument, creator, evidence)
+	msg := NewCreateChallengeMsg(storyID, amount, argument, creator, evidence)
 	assert.NotNil(t, msg)
 
 	res := h(ctx, msg)
@@ -50,7 +50,7 @@ func TestSubmitChallengeMsg_ErrInsufficientFunds(t *testing.T) {
 	cnn, _ := url.Parse("http://www.cnn.com")
 	evidence := []url.URL{*cnn}
 
-	msg := NewSubmitChallengeMsg(storyID, amount, argument, creator, evidence)
+	msg := NewCreateChallengeMsg(storyID, amount, argument, creator, evidence)
 	assert.NotNil(t, msg)
 
 	res := h(ctx, msg)
@@ -74,7 +74,7 @@ func TestSubmitChallengeMsg_ErrInsufficientChallengeAmount(t *testing.T) {
 	// give user some funds
 	bankKeeper.AddCoins(ctx, creator, sdk.Coins{amount})
 
-	msg := NewSubmitChallengeMsg(storyID, amount, argument, creator, evidence)
+	msg := NewCreateChallengeMsg(storyID, amount, argument, creator, evidence)
 	assert.NotNil(t, msg)
 
 	res := h(ctx, msg)
