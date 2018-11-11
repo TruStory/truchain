@@ -9,8 +9,8 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
-// SubmitChallengeMsg defines a message to challenge a story
-type SubmitChallengeMsg struct {
+// CreateChallengeMsg defines a message to challenge a story
+type CreateChallengeMsg struct {
 	StoryID  int64          `json:"story_id"`
 	Amount   sdk.Coin       `json:"amount"`
 	Argument string         `json:"argument,omitempty"`
@@ -18,14 +18,14 @@ type SubmitChallengeMsg struct {
 	Evidence []url.URL      `json:"evidence,omitempty"`
 }
 
-// NewSubmitChallengeMsg creates a message to challenge a story
-func NewSubmitChallengeMsg(
+// NewCreateChallengeMsg creates a message to challenge a story
+func NewCreateChallengeMsg(
 	storyID int64,
 	amount sdk.Coin,
 	argument string,
 	creator sdk.AccAddress,
-	evidence []url.URL) SubmitChallengeMsg {
-	return SubmitChallengeMsg{
+	evidence []url.URL) CreateChallengeMsg {
+	return CreateChallengeMsg{
 		StoryID:  storyID,
 		Amount:   amount,
 		Argument: argument,
@@ -35,19 +35,19 @@ func NewSubmitChallengeMsg(
 }
 
 // Type implements Msg
-func (msg SubmitChallengeMsg) Type() string { return app.GetType(msg) }
+func (msg CreateChallengeMsg) Type() string { return app.GetType(msg) }
 
 // Route implements Msg
-func (msg SubmitChallengeMsg) Route() string { return app.GetName(msg) }
+func (msg CreateChallengeMsg) Route() string { return app.GetName(msg) }
 
 // GetSignBytes implements Msg. Story creator should sign this message.
 // Serializes Msg into JSON bytes for transport.
-func (msg SubmitChallengeMsg) GetSignBytes() []byte {
+func (msg CreateChallengeMsg) GetSignBytes() []byte {
 	return app.MustGetSignBytes(msg)
 }
 
 // ValidateBasic implements Msg
-func (msg SubmitChallengeMsg) ValidateBasic() sdk.Error {
+func (msg CreateChallengeMsg) ValidateBasic() sdk.Error {
 	params := DefaultParams()
 
 	if msg.StoryID == 0 {
@@ -69,6 +69,6 @@ func (msg SubmitChallengeMsg) ValidateBasic() sdk.Error {
 }
 
 // GetSigners implements Msg. Story creator is the only signer of this message.
-func (msg SubmitChallengeMsg) GetSigners() []sdk.AccAddress {
+func (msg CreateChallengeMsg) GetSigners() []sdk.AccAddress {
 	return app.GetSigners(msg.Creator)
 }

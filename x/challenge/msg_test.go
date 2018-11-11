@@ -17,12 +17,12 @@ func TestValidStartChallengeMsg(t *testing.T) {
 	cnn, _ := url.Parse("http://www.cnn.com")
 	validEvidence := []url.URL{*cnn}
 
-	msg := NewSubmitChallengeMsg(validStoryID, validAmount, validArugment, validCreator, validEvidence)
+	msg := NewCreateChallengeMsg(validStoryID, validAmount, validArugment, validCreator, validEvidence)
 	err := msg.ValidateBasic()
 	assert.Nil(t, err)
 
 	assert.Equal(t, "challenge", msg.Type())
-	assert.Equal(t, "submit_challenge", msg.Route())
+	assert.Equal(t, "create_challenge", msg.Route())
 	assert.Equal(t, []sdk.AccAddress{validCreator}, msg.GetSigners())
 }
 
@@ -35,7 +35,7 @@ func TestInValidStartChallengeMsg(t *testing.T) {
 	cnn, _ := url.Parse("http://www.cnn.com")
 	validEvidence := []url.URL{*cnn, *cnn, *cnn, *cnn, *cnn, *cnn, *cnn, *cnn, *cnn, *cnn, *cnn}
 
-	msg := NewSubmitChallengeMsg(validStoryID, validAmount, validArugment, validCreator, validEvidence)
+	msg := NewCreateChallengeMsg(validStoryID, validAmount, validArugment, validCreator, validEvidence)
 	err := msg.ValidateBasic()
 	assert.NotNil(t, err)
 	assert.Equal(t, ErrInvalidMsg(msg.Evidence).Code(), err.Code(), "wrong error code")
