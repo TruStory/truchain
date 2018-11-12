@@ -15,7 +15,7 @@ func (k Keeper) QueueHead(ctx sdk.Context) (backing Backing, err sdk.Error) {
 	if q.IsEmpty() {
 		return backing, ErrQueueEmpty()
 	}
-	if backing, err = k.GetBacking(ctx, q[0]); err != nil {
+	if backing, err = k.Backing(ctx, q[0]); err != nil {
 		return
 	}
 	return
@@ -29,7 +29,7 @@ func (k Keeper) QueuePop(ctx sdk.Context) (backing Backing, err sdk.Error) {
 	}
 	headElement, tailQueue := q[0], q[1:]
 	k.setQueue(ctx, tailQueue)
-	if backing, err = k.GetBacking(ctx, headElement); err != nil {
+	if backing, err = k.Backing(ctx, headElement); err != nil {
 		return
 	}
 
