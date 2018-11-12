@@ -16,7 +16,7 @@ import (
 type ReadKeeper interface {
 	app.ReadKeeper
 
-	GetBacking(ctx sdk.Context, id int64) (backing Backing, err sdk.Error)
+	Backing(ctx sdk.Context, id int64) (backing Backing, err sdk.Error)
 }
 
 // WriteKeeper defines a module interface that facilities write only access
@@ -41,16 +41,25 @@ type Keeper struct {
 	storyKeeper    story.WriteKeeper // read-write access to story store
 	bankKeeper     bank.Keeper       // read-write access coin store
 	categoryKeeper cat.ReadKeeper    // read access to category store
+
+	backingsList app.UserList // backings <-> story mappings
 }
 
 // NewKeeper creates a new keeper with write and read access
 func NewKeeper(
 	storeKey sdk.StoreKey,
-	sk story.WriteKeeper,
-	bk bank.Keeper,
-	ck cat.ReadKeeper,
+	storyKeeper story.WriteKeeper,
+	bankKeeper bank.Keeper,
+	categoryKeeper cat.ReadKeeper,
 	codec *amino.Codec) Keeper {
-	return Keeper{app.NewKeeper(codec, storeKey), sk, bk, ck}
+
+	return Keeper{
+		app.NewKeeper(codec, storeKey),
+		storyKeeper,
+		bankKeeper,
+		categoryKeeper,
+		app.NewUserList(storyKeeper.GetStoreKey()),
+	}
 }
 
 // ============================================================================
@@ -116,11 +125,14 @@ func (k Keeper) NewBacking(
 	// add backing to the backing queue for processing
 	k.QueuePush(ctx, backing.ID)
 
+	// add backing <-> story mapping
+	k.backingsList.Append(ctx, k, storyID, creator, backing.ID)
+
 	return backing.ID, nil
 }
 
-// GetBacking gets the backing at the current index from the KVStore
-func (k Keeper) GetBacking(ctx sdk.Context, id int64) (backing Backing, err sdk.Error) {
+// Backing gets the backing at the current index from the KVStore
+func (k Keeper) Backing(ctx sdk.Context, id int64) (backing Backing, err sdk.Error) {
 	store := k.GetStore(ctx)
 	key := k.GetIDKey(id)
 	val := store.Get(key)
@@ -130,6 +142,28 @@ func (k Keeper) GetBacking(ctx sdk.Context, id int64) (backing Backing, err sdk.
 	k.GetCodec().MustUnmarshalBinary(val, &backing)
 
 	return
+}
+
+// BackingsByStory returns backings for a given story id
+func (k Keeper) BackingsByStory(
+	ctx sdk.Context, storyID int64) (backings []Backing, err sdk.Error) {
+
+	// iterate over backing list and get backings
+	err = k.backingsList.Map(ctx, k, storyID, func(backingID int64) sdk.Error {
+		backing, err := k.Backing(ctx, backingID)
+		if err != nil {
+			return err
+		}
+		backings = append(backings, backing)
+
+		return nil
+	})
+
+	if err != nil {
+		return backings, err
+	}
+
+	return backings, nil
 }
 
 // ============================================================================

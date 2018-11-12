@@ -29,7 +29,7 @@ func TestGetBacking_ErrBackingNotFound(t *testing.T) {
 	ctx, bk, _, _, _, _ := mockDB()
 	id := int64(5)
 
-	_, err := bk.GetBacking(ctx, id)
+	_, err := bk.Backing(ctx, id)
 	assert.NotNil(t, err)
 	assert.Equal(t, ErrNotFound(id).Code(), err.Code(), "Should get error")
 }
@@ -43,8 +43,27 @@ func TestGetBacking(t *testing.T) {
 	bankKeeper.AddCoins(ctx, creator, sdk.Coins{amount})
 	backingID, _ := bk.NewBacking(ctx, storyID, amount, creator, duration)
 
-	_, err := bk.GetBacking(ctx, backingID)
+	_, err := bk.Backing(ctx, backingID)
 	assert.Nil(t, err)
+}
+
+func TestBackingsByStory(t *testing.T) {
+	ctx, bk, sk, ck, bankKeeper, _ := mockDB()
+	storyID := createFakeStory(ctx, sk, ck)
+	amount, _ := sdk.ParseCoin("5trudex")
+	duration := DefaultParams().MinPeriod
+
+	creator := sdk.AccAddress([]byte{1, 2})
+	bankKeeper.AddCoins(ctx, creator, sdk.Coins{amount})
+
+	creator2 := sdk.AccAddress([]byte{2, 3})
+	bankKeeper.AddCoins(ctx, creator2, sdk.Coins{amount})
+
+	bk.NewBacking(ctx, storyID, amount, creator, duration)
+	bk.NewBacking(ctx, storyID, amount, creator2, duration)
+
+	backings, _ := bk.BackingsByStory(ctx, storyID)
+	assert.Equal(t, 2, len(backings))
 }
 
 func TestNewBacking_ErrInsufficientFunds(t *testing.T) {

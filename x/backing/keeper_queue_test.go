@@ -37,11 +37,11 @@ func TestQueue(t *testing.T) {
 
 	// create backings
 	backingID, _ := bk.NewBacking(ctx, storyID, amount, creator, duration)
-	_, err := bk.GetBacking(ctx, backingID)
+	_, err := bk.Backing(ctx, backingID)
 	assert.Nil(t, err)
 
 	backingID, _ = bk.NewBacking(ctx, storyID, amount, creator, duration)
-	_, err = bk.GetBacking(ctx, backingID)
+	_, err = bk.Backing(ctx, backingID)
 	assert.Nil(t, err)
 
 	len := bk.QueueLen(ctx)
