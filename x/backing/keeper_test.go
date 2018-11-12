@@ -51,7 +51,7 @@ func TestBackingsByStory(t *testing.T) {
 	ctx, bk, sk, ck, bankKeeper, _ := mockDB()
 	storyID := createFakeStory(ctx, sk, ck)
 	amount, _ := sdk.ParseCoin("5trudex")
-	duration := DefaultParams().MinPeriod
+	duration := DefaultMsgParams().MinPeriod
 
 	creator := sdk.AccAddress([]byte{1, 2})
 	bankKeeper.AddCoins(ctx, creator, sdk.Coins{amount})
