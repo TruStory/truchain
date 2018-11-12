@@ -86,6 +86,17 @@ func (k Keeper) Create(
 		return 0, ErrDuplicateVoteForGame(story.GameID, creator)
 	}
 
+	// check if user has the funds
+	if !k.bankKeeper.HasCoins(ctx, creator, sdk.Coins{amount}) {
+		return 0, sdk.ErrInsufficientFunds("Insufficient funds to vote on story.")
+	}
+
+	// deduct vote fee from user
+	_, _, err = k.bankKeeper.SubtractCoins(ctx, creator, sdk.Coins{amount})
+	if err != nil {
+		return 0, err
+	}
+
 	// create a new vote
 	vote := app.Vote{
 		ID:        k.GetNextID(ctx),
