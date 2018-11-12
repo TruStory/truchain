@@ -19,7 +19,7 @@ func TestCreateGetVote(t *testing.T) {
 	evidence := []url.URL{*cnn}
 
 	// give user some funds
-	bankKeeper.AddCoins(ctx, creator, sdk.Coins{amount})
+	bankKeeper.AddCoins(ctx, creator, sdk.Coins{amount.Plus(amount)})
 
 	argument := "test argument"
 	_, err := challengeKeeper.Create(ctx, storyID, amount, argument, creator, evidence)
@@ -44,7 +44,8 @@ func TestGetVotesByGame(t *testing.T) {
 	evidence := []url.URL{*cnn}
 
 	// give user some funds
-	bankKeeper.AddCoins(ctx, creator, sdk.Coins{amount})
+	bankKeeper.AddCoins(ctx, creator, sdk.Coins{amount.Plus(amount)})
+	bankKeeper.AddCoins(ctx, creator2, sdk.Coins{amount})
 
 	argument := "test argument"
 	_, err := challengeKeeper.Create(ctx, storyID, amount, argument, creator, evidence)
