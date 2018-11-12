@@ -16,6 +16,7 @@ type ReadKeeper interface {
 	GetStoreKey() sdk.StoreKey
 }
 
+// WriteKeeper defines an interface for read/write operations on a KVStore
 type WriteKeeper interface {
 	ReadKeeper
 
