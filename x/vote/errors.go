@@ -33,7 +33,7 @@ func ErrDuplicateVoteForGame(
 		"Vote with for game "+fmt.Sprintf("%d", gameID)+" has already been cast by user "+user.String())
 }
 
-// ErrGameNotStarted is thrown when a vote is attemped on a story
+// ErrGameNotStarted is thrown when a vote is attempted on a story
 // that hasn't begun the validation game yet
 func ErrGameNotStarted(storyID int64) sdk.Error {
 	return sdk.NewError(
