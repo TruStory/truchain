@@ -60,31 +60,27 @@ func checkExpiredGames(ctx sdk.Context, k Keeper, q store.Queue) sdk.Error {
 
 // returnFunds iterates through the challenge keyspace and returns funds
 func returnFunds(ctx sdk.Context, k Keeper, gameID int64) sdk.Error {
-	// store := k.GetStore(ctx)
 
-	// TODO: Fix with map closure
+	// iterates through keyspace to find all challenges on a game
+	err := k.challengeList.Map(ctx, k, gameID, func(challengeID int64) sdk.Error {
+		// get challenge
+		challenge, err := k.Challenge(ctx, challengeID)
+		if err != nil {
+			return err
+		}
+		// return funds
+		_, _, err = k.bankKeeper.AddCoins(
+			ctx, challenge.Creator, sdk.Coins{challenge.Amount})
+		if err != nil {
+			return err
+		}
 
-	// // builds prefix of from "game:id:5:challenges:user:"
-	// prefix := k.challengeByGameIDSubspace(ctx, gameID)
+		return nil
+	})
 
-	// // iterates through keyspace to find all challenges on a game
-	// iter := sdk.KVStorePrefixIterator(store, prefix)
-	// defer iter.Close()
-	// for ; iter.Valid(); iter.Next() {
-	// 	var challengeID int64
-	// 	k.GetCodec().MustUnmarshalBinary(iter.Value(), &challengeID)
-	// 	challenge, err := k.Challenge(ctx, challengeID)
-	// 	if err != nil {
-	// 		return err
-	// 	}
-
-	// 	// return funds
-	// 	_, _, err = k.bankKeeper.AddCoins(
-	// 		ctx, challenge.Creator, sdk.Coins{challenge.Amount})
-	// 	if err != nil {
-	// 		return err
-	// 	}
-	// }
+	if err != nil {
+		return err
+	}
 
 	return nil
 }
