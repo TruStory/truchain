@@ -70,7 +70,7 @@ func Test_distributeEarnings(t *testing.T) {
 	vote := app.Vote{
 		ID:        int64(1),
 		Amount:    principal,
-		Comment:   "",
+		Argument:  "",
 		Creator:   creator,
 		Evidence:  nil,
 		Vote:      true,

@@ -38,7 +38,7 @@ func (t Timestamp) Update(blockHeader abci.Header) Timestamp {
 type Vote struct {
 	ID        int64          `json:"id"`
 	Amount    sdk.Coin       `json:"amount"`
-	Comment   string         `json:"comment,omitempty"`
+	Argument  string         `json:"argument,omitempty"`
 	Creator   sdk.AccAddress `json:"creator"`
 	Evidence  []url.URL      `json:"evidence,omitempty"`
 	Vote      bool           `json:"vote"`

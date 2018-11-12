@@ -90,7 +90,7 @@ func (k Keeper) Create(
 	vote := app.Vote{
 		ID:        k.GetNextID(ctx),
 		Amount:    amount,
-		Comment:   comment,
+		Argument:  comment,
 		Creator:   creator,
 		Evidence:  evidence,
 		Vote:      choice,
