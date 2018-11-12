@@ -82,7 +82,7 @@ func (k Keeper) Create(
 	}
 
 	// check if this voter has already cast a vote
-	if k.voterList.Include(ctx, k, story.GameID, creator) {
+	if k.voterList.Includes(ctx, k, story.GameID, creator) {
 		return 0, ErrDuplicateVoteForGame(story.GameID, creator)
 	}
 

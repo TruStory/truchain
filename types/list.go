@@ -41,8 +41,8 @@ func (l UserList) Get(
 	return valueID
 }
 
-// Include returns true if the given key is found
-func (l UserList) Include(
+// Includes returns true if the given key is found
+func (l UserList) Includes(
 	ctx sdk.Context, k WriteKeeper, keyID int64, user sdk.AccAddress) bool {
 
 	return l.Get(ctx, k, keyID, user) > 0
