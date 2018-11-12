@@ -130,7 +130,7 @@ func (k Keeper) Create(
 	return challenge.ID, nil
 }
 
-// Challenge the challenge for the given id
+// Challenge gets the challenge for the given id
 func (k Keeper) Challenge(
 	ctx sdk.Context, challengeID int64) (challenge Challenge, err sdk.Error) {
 
