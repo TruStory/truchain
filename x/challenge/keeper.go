@@ -16,7 +16,8 @@ import (
 type ReadKeeper interface {
 	app.ReadKeeper
 
-	Get(ctx sdk.Context, challengeID int64) (challenge Challenge, err sdk.Error)
+	Challenge(ctx sdk.Context, challengeID int64) (challenge Challenge, err sdk.Error)
+	ChallengesByGame(ctx sdk.Context, gameID int64) (challenges []Challenge, err sdk.Error)
 }
 
 // WriteKeeper defines a module interface that facilities write only access to truchain data
@@ -39,6 +40,8 @@ type Keeper struct {
 	bankKeeper  bank.Keeper
 	gameKeeper  game.WriteKeeper
 	storyKeeper story.WriteKeeper
+
+	challengeList app.UserList // challenge <-> game mappings
 }
 
 // NewKeeper creates a new keeper with write and read access
@@ -53,6 +56,7 @@ func NewKeeper(
 		bankKeeper,
 		gameKeeper,
 		storyKeeper,
+		app.NewUserList(gameKeeper.GetStoreKey()),
 	}
 }
 
@@ -85,9 +89,7 @@ func (k Keeper) Create(
 	}
 
 	// make sure creator hasn't already challenged
-	challengeByGameKey := k.challengeByGameIDKey(ctx, gameID, creator)
-	bz := k.GetStore(ctx).Get(challengeByGameKey)
-	if bz != nil {
+	if k.challengeList.Includes(ctx, k, gameID, creator) {
 		return 0, ErrDuplicateChallenge(gameID, creator)
 	}
 
@@ -110,10 +112,8 @@ func (k Keeper) Create(
 		k.GetIDKey(challenge.ID),
 		k.GetCodec().MustMarshalBinary(challenge))
 
-	// persist game <-> challenge association
-	k.GetStore(ctx).Set(
-		challengeByGameKey,
-		k.GetCodec().MustMarshalBinary(challenge.ID))
+	// persist challenge <-> game mapping
+	k.challengeList.Append(ctx, k, gameID, creator, challenge.ID)
 
 	// deduct challenge amount from user
 	_, _, err = k.bankKeeper.SubtractCoins(ctx, creator, sdk.Coins{amount})
@@ -130,8 +130,10 @@ func (k Keeper) Create(
 	return challenge.ID, nil
 }
 
-// Get the challenge for the given id
-func (k Keeper) Get(ctx sdk.Context, challengeID int64) (challenge Challenge, err sdk.Error) {
+// Challenge the challenge for the given id
+func (k Keeper) Challenge(
+	ctx sdk.Context, challengeID int64) (challenge Challenge, err sdk.Error) {
+
 	store := k.GetStore(ctx)
 	bz := store.Get(k.GetIDKey(challengeID))
 	if bz == nil {
@@ -140,6 +142,28 @@ func (k Keeper) Get(ctx sdk.Context, challengeID int64) (challenge Challenge, er
 	k.GetCodec().MustUnmarshalBinary(bz, &challenge)
 
 	return
+}
+
+// ChallengesByGame returns the list of challenges for a game id
+func (k Keeper) ChallengesByGame(
+	ctx sdk.Context, gameID int64) (challenges []Challenge, err sdk.Error) {
+
+	// iterate over and return challenges for a game
+	err = k.challengeList.Map(ctx, k, gameID, func(challengeID int64) sdk.Error {
+		challenge, err := k.Challenge(ctx, challengeID)
+		if err != nil {
+			return err
+		}
+		challenges = append(challenges, challenge)
+
+		return nil
+	})
+
+	if err != nil {
+		return challenges, err
+	}
+
+	return challenges, nil
 }
 
 // ============================================================================
