@@ -48,7 +48,7 @@ func (msg CreateChallengeMsg) GetSignBytes() []byte {
 
 // ValidateBasic implements Msg
 func (msg CreateChallengeMsg) ValidateBasic() sdk.Error {
-	params := DefaultParams()
+	params := DefaultMsgParams()
 
 	if msg.StoryID == 0 {
 		return story.ErrInvalidStoryID(msg.StoryID)

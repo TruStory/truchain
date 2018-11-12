@@ -28,17 +28,17 @@ func (g Game) Started() bool {
 	return false
 }
 
-// Params holds default parameters for a game
-type Params struct {
+// MsgParams holds default parameters for a game
+type MsgParams struct {
 	MinChallengeStake sdk.Int       // min amount required to challenge
 	Expires           time.Duration // time to expire if threshold not met
 	Period            time.Duration // length of challenge game / voting period
 	Threshold         int64         // amount at which game begins
 }
 
-// DefaultParams creates a new Params type with defaults
-func DefaultParams() Params {
-	return Params{
+// DefaultMsgParams creates a new MsgParams type with defaults
+func DefaultMsgParams() MsgParams {
+	return MsgParams{
 		MinChallengeStake: sdk.NewInt(10),
 		Expires:           10 * 24 * time.Hour,
 		Period:            30 * 24 * time.Hour,

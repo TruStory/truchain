@@ -13,7 +13,7 @@ func TestValidBackMsg(t *testing.T) {
 	validStoryID := int64(1)
 	validStake := sdk.Coin{Denom: "trustake", Amount: sdk.NewInt(100)}
 	validCreator := sdk.AccAddress([]byte{1, 2})
-	validPeriod := DefaultParams().MinPeriod
+	validPeriod := DefaultMsgParams().MinPeriod
 	msg := NewBackStoryMsg(validStoryID, validStake, validCreator, validPeriod)
 	err := msg.ValidateBasic()
 

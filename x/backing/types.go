@@ -26,21 +26,31 @@ func (asq Queue) IsEmpty() bool {
 type Params struct {
 	AmountWeight    sdk.Dec
 	PeriodWeight    sdk.Dec
-	MinPeriod       time.Duration
-	MaxPeriod       time.Duration
 	MinInterestRate sdk.Dec
 	MaxInterestRate sdk.Dec
 }
 
-// DefaultParams creates a new BackingParams type with defaults
+// DefaultParams creates a new Params type with defaults
 func DefaultParams() Params {
 	return Params{
 		AmountWeight:    sdk.NewDecWithPrec(333, 3), // 33.3%
 		PeriodWeight:    sdk.NewDecWithPrec(667, 3), // 66.7%
-		MinPeriod:       3 * 24 * time.Hour,         // 3 days
-		MaxPeriod:       90 * 24 * time.Hour,        // 90 days
 		MinInterestRate: sdk.ZeroDec(),              // 0%
 		MaxInterestRate: sdk.NewDecWithPrec(10, 2),  // 10%
+	}
+}
+
+// MsgParams holds default validation params
+type MsgParams struct {
+	MinPeriod time.Duration
+	MaxPeriod time.Duration
+}
+
+// DefaultMsgParams creates a new MsgParams type with defaults
+func DefaultMsgParams() MsgParams {
+	return MsgParams{
+		MinPeriod: 3 * 24 * time.Hour,  // 3 days
+		MaxPeriod: 90 * 24 * time.Hour, // 90 days
 	}
 }
 

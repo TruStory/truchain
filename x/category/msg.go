@@ -44,7 +44,7 @@ func (msg CreateCategoryMsg) ValidateBasic() sdk.Error {
 	if len(msg.Creator) == 0 {
 		return sdk.ErrInvalidAddress("Invalid address: " + msg.Creator.String())
 	}
-	params := DefaultParams()
+	params := DefaultMsgParams()
 	if len(msg.Title) < params.MinTitleLen || len(msg.Title) > params.MaxTitleLen {
 		return ErrInvalidCategoryMsg("Invalid title: " + msg.Title)
 	}
