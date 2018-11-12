@@ -93,7 +93,8 @@ func (k Keeper) NewBacking(
 	}
 
 	// mint category coin from interest earned
-	interest := getInterest(cat, amount, duration, params)
+	interest := getInterest(
+		cat, amount, duration, DefaultMsgParams().MaxPeriod, params)
 
 	// create new implicit true vote type
 	vote := app.NewVote(
@@ -201,6 +202,7 @@ func getInterest(
 	category cat.Category,
 	amount sdk.Coin,
 	period time.Duration,
+	maxPeriod time.Duration,
 	params Params) sdk.Coin {
 
 	// TODO: keep track of total supply
@@ -212,7 +214,6 @@ func getInterest(
 
 	// inputs
 	maxAmount := totalSupply
-	maxPeriod := params.MaxPeriod
 	amountWeight := params.AmountWeight
 	periodWeight := params.PeriodWeight
 	maxInterestRate := params.MaxInterestRate
