@@ -20,8 +20,8 @@ func (c Category) CoinName() string {
 	return c.Slug
 }
 
-// Params holds data for category parameters
-type Params struct {
+// MsgParams holds data for category parameters
+type MsgParams struct {
 	MinTitleLen int
 	MaxTitleLen int
 	MinSlugLen  int
@@ -29,9 +29,9 @@ type Params struct {
 	MaxDescLen  int
 }
 
-// DefaultParams creates a new CategoryParams type with defaults
-func DefaultParams() Params {
-	return Params{
+// DefaultMsgParams creates a new MsgParams type with defaults
+func DefaultMsgParams() MsgParams {
+	return MsgParams{
 		MinTitleLen: 5,
 		MaxTitleLen: 25,
 		MinSlugLen:  3,

@@ -76,7 +76,7 @@ func (k Keeper) Create(
 		k.GetNextID(ctx),
 		storyID,
 		creator,
-		ctx.BlockHeader().Time.Add(DefaultParams().Expires),
+		ctx.BlockHeader().Time.Add(DefaultMsgParams().Expires),
 		time.Time{},
 		emptyPool,
 		thresholdAmount(story),
@@ -128,7 +128,7 @@ func (k Keeper) Update(
 		if err != nil {
 			return 0, err
 		}
-		game.EndTime = ctx.BlockHeader().Time.Add(DefaultParams().Period)
+		game.EndTime = ctx.BlockHeader().Time.Add(DefaultMsgParams().Period)
 	}
 
 	// update existing challenge in KVStore
