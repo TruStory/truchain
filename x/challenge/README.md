@@ -11,7 +11,7 @@
 * "challenges"
     *  keyspace
         * `"challenges:id:5"` -> `Challenge`
-        * `"games:id:5:challenges:user:[Address]"` -> `[ChallengeID]`
+        * `"games:id:[GameID]:challenges:user:[AccAddress]"` -> `[ChallengeID]`
 
 ## Notes
 

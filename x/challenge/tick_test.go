@@ -53,7 +53,7 @@ func Test_returnFunds(t *testing.T) {
 	id, err := k.Create(ctx, storyID, amount, argument, creator, evidence)
 	assert.Nil(t, err)
 
-	game, _ := k.Get(ctx, id)
+	game, _ := k.Challenge(ctx, id)
 
 	err = returnFunds(ctx, k, game.ID)
 	assert.Nil(t, err)
