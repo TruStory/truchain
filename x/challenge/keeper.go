@@ -95,7 +95,7 @@ func (k Keeper) Create(
 	vote := app.Vote{
 		ID:        k.GetNextID(ctx),
 		Amount:    amount,
-		Comment:   "",
+		Argument:  argument,
 		Creator:   creator,
 		Evidence:  evidence,
 		Vote:      false,
@@ -103,7 +103,7 @@ func (k Keeper) Create(
 	}
 
 	// create new challenge with embedded vote
-	challenge := Challenge{vote, argument}
+	challenge := Challenge{vote}
 
 	// persist challenge
 	k.GetStore(ctx).Set(

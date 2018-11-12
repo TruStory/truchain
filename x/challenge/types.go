@@ -7,8 +7,6 @@ import (
 // Challenge defines a user's challenge on a story
 type Challenge struct {
 	app.Vote
-
-	Argument string `json:"argument"`
 }
 
 // Params holds default parameters for a challenge
