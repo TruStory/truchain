@@ -15,7 +15,7 @@ const (
 	QueryUsersByAddresses = "addresses"
 )
 
-// QueryUsersByAddressesParams are params for stories by category queries
+// QueryUsersByAddressesParams are params for users by address queries
 type QueryUsersByAddressesParams struct {
 	Addresses []string `json:"addresses"`
 }
@@ -62,7 +62,7 @@ func queryUsersByAddresses(
 		}
 	}
 
-	// return stories JSON bytes
+	// return users JSON bytes
 	return marshalUsers(cdc, users)
 }
 
