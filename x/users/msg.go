@@ -12,7 +12,6 @@ type RegisterKeyMsg struct {
 	PubKey     tcmn.HexBytes  `json:"pubkey"`
 	PubKeyAlgo string         `json:"pubkey_algo"`
 	Coins      sdk.Coins      `json:"coins"`
-	TwitterID  int64          `json:"twitterID"`
 }
 
 // Type implements Msg

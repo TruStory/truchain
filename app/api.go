@@ -53,7 +53,7 @@ func (app *TruChain) startAPI() {
 
 // RegisterKey generates a new address/account for a public key
 // Implements chttp.App
-func (app *TruChain) RegisterKey(k tcmn.HexBytes, algo string, twitterID int64) (sdk.AccAddress, int64, sdk.Coins, error) {
+func (app *TruChain) RegisterKey(k tcmn.HexBytes, algo string) (sdk.AccAddress, int64, sdk.Coins, error) {
 	var addr []byte
 
 	if string(algo[0]) == "*" {
@@ -80,8 +80,6 @@ func (app *TruChain) RegisterKey(k tcmn.HexBytes, algo string, twitterID int64) 
 	stored := app.accountKeeper.GetAccount(*(app.blockCtx), sdk.AccAddress(addr))
 	accaddr := sdk.AccAddress(addr)
 	coins := stored.GetCoins()
-
-	app.Logger.Info("Registering key %v:%v for Twitter ID %v", algo, k, twitterID)
 
 	return accaddr, stored.GetAccountNumber(), coins, nil
 }
