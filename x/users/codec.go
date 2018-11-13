@@ -1,4 +1,4 @@
-package registration
+package users
 
 import (
 	amino "github.com/tendermint/go-amino"

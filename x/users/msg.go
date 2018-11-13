@@ -1,4 +1,4 @@
-package registration
+package users
 
 import (
 	app "github.com/TruStory/truchain/types"

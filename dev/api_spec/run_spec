@@ -1,12 +1,24 @@
 #!/usr/bin/env bash
+# Run the API integration tests against a fresh TruChain node
 
-../../bin/truchaind --home ../empty_truchain unsafe-reset-all
-../../bin/truchaind --home ../empty_truchain start & echo $! > .pid
-cat .pid
+SRC_CHAIN_DIR=../../.chain
+TST_CHAIN_DIR=./.chain
+DAEMON=../../bin/truchaind
+TEST_CMD='./node_modules/.bin/just-api --reporter html --reporter-options logRequests'
+
+# Initialize test chain
+rm -rf $TST_CHAIN_DIR
+cp -R $SRC_CHAIN_DIR $TST_CHAIN_DIR
+$DAEMON --home $TST_CHAIN_DIR unsafe-reset-all
+
+# Start daemon
+$DAEMON --home $TST_CHAIN_DIR start & pid=$!
+
+# Wait for test chain server to start up
 sleep 5
 
-cat ./spec_order | xargs ./node_modules/.bin/just-api --reporter html --reporter-options logRequests
+# Run tests in order
+cat ./spec_order | xargs $TEST_CMD
 
-kill -9 $(cat .pid)
-
-../../bin/truchaind --home ../empty_truchain unsafe-reset-all
+# Kill test chain server
+kill -9 $pid

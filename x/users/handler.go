@@ -1,4 +1,4 @@
-package registration
+package users
 
 import (
 	"encoding/json"
@@ -43,7 +43,7 @@ func handleRegisterKeyMsg(ctx sdk.Context, ak auth.AccountKeeper, msg RegisterKe
 		return sdk.Result{Code: 1, Data: []byte("Registration Error: setting coins: " + err.Error())}
 	}
 
-	acc := app.NewAppAccount(string(msg.Address), bacc)
+	acc := app.NewAppAccount(bacc)
 
 	ak.SetAccount(ctx, auth.Account(*acc))
 
