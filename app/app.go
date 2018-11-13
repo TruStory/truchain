@@ -38,17 +38,18 @@ type TruChain struct {
 	codec *codec.Codec
 
 	// keys to access the multistore
-	keyMain      *sdk.KVStoreKey
-	keyAccount   *sdk.KVStoreKey
-	keyIBC       *sdk.KVStoreKey
-	keyStory     *sdk.KVStoreKey
-	keyCategory  *sdk.KVStoreKey
-	keyBacking   *sdk.KVStoreKey
-	keyChallenge *sdk.KVStoreKey
-	keyFee       *sdk.KVStoreKey
-	keyGame      *sdk.KVStoreKey
-	keyGameQueue *sdk.KVStoreKey
-	keyVote      *sdk.KVStoreKey
+	keyMain            *sdk.KVStoreKey
+	keyAccount         *sdk.KVStoreKey
+	keyIBC             *sdk.KVStoreKey
+	keyStory           *sdk.KVStoreKey
+	keyCategory        *sdk.KVStoreKey
+	keyBacking         *sdk.KVStoreKey
+	keyChallenge       *sdk.KVStoreKey
+	keyFee             *sdk.KVStoreKey
+	keyGame            *sdk.KVStoreKey
+	keyGameQueue       *sdk.KVStoreKey
+	keyActiveGameQueue *sdk.KVStoreKey
+	keyVote            *sdk.KVStoreKey
 
 	// manage getting and setting accounts
 	accountKeeper       auth.AccountKeeper
@@ -97,25 +98,26 @@ func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *T
 
 	// create your application type
 	var app = &TruChain{
-		categories:   categories,
-		codec:        codec,
-		BaseApp:      bam.NewBaseApp(params.AppName, logger, db, auth.DefaultTxDecoder(codec), options...),
-		keyMain:      sdk.NewKVStoreKey("main"),
-		keyAccount:   sdk.NewKVStoreKey("acc"),
-		keyIBC:       sdk.NewKVStoreKey("ibc"),
-		keyStory:     sdk.NewKVStoreKey("stories"),
-		keyCategory:  sdk.NewKVStoreKey("categories"),
-		keyBacking:   sdk.NewKVStoreKey("backings"),
-		keyChallenge: sdk.NewKVStoreKey("challenges"),
-		keyFee:       sdk.NewKVStoreKey("collectedFees"),
-		keyGame:      sdk.NewKVStoreKey("game"),
-		keyGameQueue: sdk.NewKVStoreKey("gameQueue"),
-		keyVote:      sdk.NewKVStoreKey("vote"),
-		api:          nil,
-		apiStarted:   false,
-		blockCtx:     nil,
-		blockHeader:  abci.Header{},
-		registrarKey: loadRegistrarKey(),
+		categories:         categories,
+		codec:              codec,
+		BaseApp:            bam.NewBaseApp(params.AppName, logger, db, auth.DefaultTxDecoder(codec), options...),
+		keyMain:            sdk.NewKVStoreKey("main"),
+		keyAccount:         sdk.NewKVStoreKey("acc"),
+		keyIBC:             sdk.NewKVStoreKey("ibc"),
+		keyStory:           sdk.NewKVStoreKey("stories"),
+		keyCategory:        sdk.NewKVStoreKey("categories"),
+		keyBacking:         sdk.NewKVStoreKey("backings"),
+		keyChallenge:       sdk.NewKVStoreKey("challenges"),
+		keyFee:             sdk.NewKVStoreKey("collectedFees"),
+		keyGame:            sdk.NewKVStoreKey("game"),
+		keyGameQueue:       sdk.NewKVStoreKey("gameQueue"),
+		keyActiveGameQueue: sdk.NewKVStoreKey("activeGameQueue"),
+		keyVote:            sdk.NewKVStoreKey("vote"),
+		api:                nil,
+		apiStarted:         false,
+		blockCtx:           nil,
+		blockHeader:        abci.Header{},
+		registrarKey:       loadRegistrarKey(),
 	}
 
 	// define and attach the mappers and keepers
@@ -136,12 +138,13 @@ func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *T
 		app.keyBacking, app.storyKeeper, app.coinKeeper,
 		app.categoryKeeper, codec)
 	app.gameKeeper = game.NewKeeper(
-		app.keyGame, app.keyGameQueue, app.storyKeeper, app.coinKeeper, codec)
+		app.keyGame, app.keyGameQueue, app.keyActiveGameQueue, app.storyKeeper,
+		app.coinKeeper, codec)
 	app.challengeKeeper = challenge.NewKeeper(
 		app.keyChallenge, app.keyGameQueue, app.coinKeeper,
 		app.gameKeeper, app.storyKeeper, codec)
 	app.voteKeeper = vote.NewKeeper(
-		app.keyVote, app.backingKeeper, app.challengeKeeper,
+		app.keyVote, app.keyActiveGameQueue, app.backingKeeper, app.challengeKeeper,
 		app.storyKeeper, app.gameKeeper, app.coinKeeper, codec)
 
 	// register message routes for modifying state
@@ -170,8 +173,8 @@ func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *T
 
 	// mount the multistore and load the latest state
 	app.MountStoresIAVL(
-		app.keyMain, app.keyAccount, app.keyIBC, app.keyFee,
-		app.keyGameQueue, app.keyBacking, app.keyCategory,
+		app.keyMain, app.keyAccount, app.keyIBC, app.keyFee, app.keyGameQueue,
+		app.keyActiveGameQueue, app.keyBacking, app.keyCategory,
 		app.keyChallenge, app.keyStory, app.keyVote)
 	err := app.LoadLatestVersion(app.keyMain)
 

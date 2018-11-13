@@ -28,6 +28,15 @@ func (g Game) Started() bool {
 	return false
 }
 
+// Ended returns true if a validation game has ended
+func (g Game) Ended(time time.Time) bool {
+	if g.EndTime.After(time) {
+		return true
+	}
+
+	return false
+}
+
 // MsgParams holds default parameters for a game
 type MsgParams struct {
 	MinChallengeStake sdk.Int       // min amount required to challenge
