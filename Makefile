@@ -16,7 +16,7 @@ build: build_cli build_daemon
 
 br: build_daemon run_daemon
 
-bwr: wipe_chain br
+bwr: build_daemon wipe_chain run_daemon
 
 build_cli:
 	go build -o bin/trucli cmd/trucli/main.go
