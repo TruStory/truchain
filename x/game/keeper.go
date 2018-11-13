@@ -34,17 +34,24 @@ type WriteKeeper interface {
 type Keeper struct {
 	app.Keeper
 
-	queueKey    sdk.StoreKey // queue of games currently active
-	storyKeeper story.WriteKeeper
-	bankKeeper  bank.Keeper
+	queueKey       sdk.StoreKey // queue of unexpired active
+	activeQueueKey sdk.StoreKey // queue of started games
+	storyKeeper    story.WriteKeeper
+	bankKeeper     bank.Keeper
 }
 
 // NewKeeper creates a new keeper with write and read access
 func NewKeeper(
-	storeKey sdk.StoreKey, queueKey sdk.StoreKey, storyKeeper story.WriteKeeper, bankKeeper bank.Keeper,
-	codec *amino.Codec) Keeper {
+	storeKey sdk.StoreKey, queueKey sdk.StoreKey, activeQueueKey sdk.StoreKey,
+	storyKeeper story.WriteKeeper, bankKeeper bank.Keeper, codec *amino.Codec) Keeper {
 
-	return Keeper{app.NewKeeper(codec, storeKey), queueKey, storyKeeper, bankKeeper}
+	return Keeper{
+		app.NewKeeper(codec, storeKey),
+		queueKey,
+		activeQueueKey,
+		storyKeeper,
+		bankKeeper,
+	}
 }
 
 // ============================================================================
@@ -129,6 +136,11 @@ func (k Keeper) Update(
 			return 0, err
 		}
 		game.EndTime = ctx.BlockHeader().Time.Add(DefaultMsgParams().Period)
+
+		// push game id onto active game queue that will get checked on each tick
+		activeQueueStore := ctx.KVStore(k.activeQueueKey)
+		q := queue.NewQueue(k.GetCodec(), activeQueueStore)
+		q.Push(game.ID)
 	}
 
 	// update existing challenge in KVStore
