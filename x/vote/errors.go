@@ -2,6 +2,7 @@ package vote
 
 import (
 	"fmt"
+	"reflect"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
@@ -13,6 +14,8 @@ const (
 	CodeNotFound       sdk.CodeType = 1201
 	CodeDuplicate      sdk.CodeType = 1202
 	CodeGameNotStarted sdk.CodeType = 1203
+	CodeUnknownVote    sdk.CodeType = 1204
+	CodeInvalidVote    sdk.CodeType = 1205
 )
 
 // ErrNotFound creates an error when the searched entity is not found
@@ -42,3 +45,24 @@ func ErrGameNotStarted(storyID int64) sdk.Error {
 		"Validation game not started for story: "+
 			fmt.Sprintf("%d", storyID))
 }
+
+// TODO: make better after interface, add vote result
+// ErrVoteHandler returns an unknown Vote type error
+func ErrVoteHandler(vote interface{}) sdk.Error {
+	if mType := reflect.TypeOf(vote); mType != nil {
+		errMsg := "Unrecognized Vote type: " + mType.Name()
+		return sdk.NewError(DefaultCodespace, CodeUnknownVote, errMsg)
+	}
+
+	return sdk.NewError(DefaultCodespace, CodeUnknownVote, "Unknown Vote type")
+}
+
+// ErrInvalidVote returns when a vote in not supported
+// func ErrInvalidVote(vote interface{}, result bool) sdk.Error {
+// 	if mType := reflect.TypeOf(vote); mType != nil {
+// 		errMsg := mType.Name() + " cannot vote " + strconv.FormatBool(result)
+// 		return sdk.NewError(DefaultCodespace, CodeInvalidVote, errMsg)
+// 	}
+
+// 	return sdk.NewError(DefaultCodespace, CodeInvalidVote, "Invalid vote")
+// }
