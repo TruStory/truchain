@@ -3,6 +3,8 @@ package vote
 import (
 	"time"
 
+	"github.com/TruStory/truchain/x/backing"
+
 	"github.com/TruStory/truchain/x/challenge"
 
 	"github.com/TruStory/truchain/x/game"
@@ -30,6 +32,7 @@ func mockDB() (sdk.Context, Keeper, s.Keeper, c.Keeper, challenge.Keeper, bank.K
 	gameKey := sdk.NewKVStoreKey("games")
 	gameQueueKey := sdk.NewKVStoreKey("game_queue")
 	voteKey := sdk.NewKVStoreKey("vote")
+	backingKey := sdk.NewKVStoreKey("backing")
 
 	ms := store.NewCommitMultiStore(db)
 	ms.MountStoreWithDB(accKey, sdk.StoreTypeIAVL, db)
@@ -39,6 +42,7 @@ func mockDB() (sdk.Context, Keeper, s.Keeper, c.Keeper, challenge.Keeper, bank.K
 	ms.MountStoreWithDB(gameKey, sdk.StoreTypeIAVL, db)
 	ms.MountStoreWithDB(gameQueueKey, sdk.StoreTypeIAVL, db)
 	ms.MountStoreWithDB(voteKey, sdk.StoreTypeIAVL, db)
+	ms.MountStoreWithDB(backingKey, sdk.StoreTypeIAVL, db)
 	ms.LoadLatestVersion()
 
 	header := abci.Header{Time: time.Now().Add(50 * 24 * time.Hour)}
@@ -53,10 +57,11 @@ func mockDB() (sdk.Context, Keeper, s.Keeper, c.Keeper, challenge.Keeper, bank.K
 	bankKeeper := bank.NewBaseKeeper(am)
 	ck := c.NewKeeper(catKey, codec)
 	sk := s.NewKeeper(storyKey, ck, codec)
+	backingKeeper := backing.NewKeeper(backingKey, sk, bankKeeper, ck, codec)
 	gameKeeper := game.NewKeeper(gameKey, gameQueueKey, sk, bankKeeper, codec)
 	challengeKeeper := challenge.NewKeeper(challengeKey, gameQueueKey, bankKeeper, gameKeeper, sk, codec)
 
-	k := NewKeeper(voteKey, sk, gameKeeper, bankKeeper, codec)
+	k := NewKeeper(voteKey, backingKeeper, challengeKeeper, sk, gameKeeper, bankKeeper, codec)
 
 	return ctx, k, sk, ck, challengeKeeper, bankKeeper
 }

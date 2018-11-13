@@ -3,6 +3,8 @@ package vote
 import (
 	"net/url"
 
+	"github.com/TruStory/truchain/x/backing"
+	"github.com/TruStory/truchain/x/challenge"
 	"github.com/TruStory/truchain/x/game"
 	"github.com/TruStory/truchain/x/story"
 	"github.com/cosmos/cosmos-sdk/x/bank"
@@ -39,9 +41,11 @@ type ReadWriteKeeper interface {
 type Keeper struct {
 	app.Keeper
 
-	storyKeeper story.WriteKeeper
-	gameKeeper  game.WriteKeeper
-	bankKeeper  bank.Keeper
+	backingKeeper   backing.ReadKeeper
+	challengeKeeper challenge.ReadKeeper
+	storyKeeper     story.WriteKeeper
+	gameKeeper      game.WriteKeeper
+	bankKeeper      bank.Keeper
 
 	voterList app.UserList
 }
@@ -49,6 +53,8 @@ type Keeper struct {
 // NewKeeper creates a new keeper with write and read access
 func NewKeeper(
 	storeKey sdk.StoreKey,
+	backingKeeper backing.ReadKeeper,
+	challengeKeeper challenge.ReadKeeper,
 	storyKeeper story.WriteKeeper,
 	gameKeeper game.WriteKeeper,
 	bankKeeper bank.Keeper,
@@ -56,6 +62,8 @@ func NewKeeper(
 
 	return Keeper{
 		app.NewKeeper(codec, storeKey),
+		backingKeeper,
+		challengeKeeper,
 		storyKeeper,
 		gameKeeper,
 		bankKeeper,
