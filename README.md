@@ -35,25 +35,11 @@ This creates:
 
 `bin/truchaind`: TruStory server node
 
-`trucli`, the light client, will ideally run on it's own machine. It will handle all
-API requests, and communicate via RPC with `truchaind`.
+`trucli`, the light client, will ideally run on it's own machine. It will communicates with `truchaind` via RPC.
 
-`truchaind`, will initially run as a single Cosmos node, but eventually as a zone of many nodes.
+`truchaind` will initially run as a single Cosmos node, but eventually as a zone of many nodes. It includes an HTTP server which handles all API requests.
 
-3. Create genesis file (one-time only)
-
-    a. `bin/truchaind init`
-
-    b. Edit `~/.truchaind/config/genesis.json` and add the following account to the `"accounts"` array:
-
-    ```json
-    {
-      "address": "cosmos1w3e82cmgv95kuctrvdex2emfwd68yctjpzp3mr",
-      "coins": [{"denom": "trustake", "amount": "123456"}]
-    }
-    ```
-
-4. Create registrar key
+3. Create registrar key
 
 Create a file in the root of this project named `registrar.key` containing the upper-case-hex encoding of a secp256k1 private key. Example:
 
@@ -63,7 +49,7 @@ Create a file in the root of this project named `registrar.key` containing the u
 
 This is the private key to the account added in step 3b.
 
-5. Start blockchain
+4. Start blockchain
 
 `bin/truchaind start`
 
