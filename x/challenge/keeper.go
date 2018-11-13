@@ -18,6 +18,7 @@ type ReadKeeper interface {
 
 	Challenge(ctx sdk.Context, challengeID int64) (challenge Challenge, err sdk.Error)
 	ChallengesByGame(ctx sdk.Context, gameID int64) (challenges []Challenge, err sdk.Error)
+	Tally(ctx sdk.Context, gameID int64) (yes []Challenge, no []Challenge, err sdk.Error)
 }
 
 // WriteKeeper defines a module interface that facilities write only access to truchain data
@@ -164,6 +165,32 @@ func (k Keeper) ChallengesByGame(
 	}
 
 	return challenges, nil
+}
+
+// Tally challenges for voting
+func (k Keeper) Tally(
+	ctx sdk.Context, gameID int64) (yes []Challenge, no []Challenge, err sdk.Error) {
+
+	err = k.challengeList.Map(ctx, k, gameID, func(challengeID int64) sdk.Error {
+		challenge, err := k.Challenge(ctx, challengeID)
+		if err != nil {
+			return err
+		}
+
+		if challenge.Vote.Vote == true {
+			yes = append(yes, challenge)
+		} else {
+			no = append(no, challenge)
+		}
+
+		return nil
+	})
+
+	if err != nil {
+		return
+	}
+
+	return
 }
 
 // ============================================================================
