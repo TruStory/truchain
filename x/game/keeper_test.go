@@ -38,7 +38,7 @@ func TestSetGame(t *testing.T) {
 	ctx, k, _, _, _ := mockDB()
 
 	game := Game{ID: int64(5)}
-	k.set(ctx, game)
+	k.Set(ctx, game)
 
 	savedGame, err := k.Get(ctx, int64(5))
 	assert.Nil(t, err)

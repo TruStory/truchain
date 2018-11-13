@@ -110,6 +110,9 @@ func (k Keeper) Create(
 		return 0, err
 	}
 
+	// add vote fee to reward pool
+	k.gameKeeper.AddAmount(ctx, story.GameID, amount)
+
 	// create a new vote
 	vote := app.Vote{
 		ID:        k.GetNextID(ctx),
