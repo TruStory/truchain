@@ -23,11 +23,10 @@ type ReadKeeper interface {
 type WriteKeeper interface {
 	ReadKeeper
 
-	Create(
-		ctx sdk.Context, storyID int64, creator sdk.AccAddress) (int64, sdk.Error)
-
-	Update(
-		ctx sdk.Context, gameID int64, amount sdk.Coin) (int64, sdk.Error)
+	AddAmount(ctx sdk.Context, gameID int64, amount sdk.Coin) (int64, sdk.Error)
+	Create(ctx sdk.Context, storyID int64, creator sdk.AccAddress) (int64, sdk.Error)
+	Set(ctx sdk.Context, game Game)
+	Update(ctx sdk.Context, gameID int64, amount sdk.Coin) (int64, sdk.Error)
 }
 
 // Keeper data type storing keys to the key-value store
@@ -96,7 +95,7 @@ func (k Keeper) Create(
 	q.Push(game.ID)
 
 	// set game in KVStore
-	k.set(ctx, game)
+	k.Set(ctx, game)
 
 	// update story with gameID
 	story.GameID = game.ID
@@ -117,7 +116,15 @@ func (k Keeper) Get(ctx sdk.Context, id int64) (game Game, err sdk.Error) {
 	return
 }
 
-// Update the challenge pool
+// Set saves the `Game` in the KVStore
+func (k Keeper) Set(ctx sdk.Context, game Game) {
+	store := k.GetStore(ctx)
+	store.Set(
+		k.GetIDKey(game.ID),
+		k.GetCodec().MustMarshalBinary(game))
+}
+
+// Update the reward pool and start game if threshold is reached
 func (k Keeper) Update(
 	ctx sdk.Context, gameID int64, amount sdk.Coin) (int64, sdk.Error) {
 
@@ -126,7 +133,7 @@ func (k Keeper) Update(
 		return 0, err
 	}
 
-	// add amount to challenge pool
+	// add amount to reward pool
 	game.Pool = game.Pool.Plus(amount)
 
 	// if threshold is reached, start challenge and allow voting to begin
@@ -143,20 +150,28 @@ func (k Keeper) Update(
 		q.Push(game.ID)
 	}
 
-	// update existing challenge in KVStore
-	k.set(ctx, game)
+	// update existing game in KVStore
+	k.Set(ctx, game)
 
 	return game.ID, nil
 }
 
-// ============================================================================
+// AddAmount adds an amount to the reward pool
+func (k Keeper) AddAmount(
+	ctx sdk.Context, gameID int64, amount sdk.Coin) (int64, sdk.Error) {
 
-// saves the `Game` in the KVStore
-func (k Keeper) set(ctx sdk.Context, game Game) {
-	store := k.GetStore(ctx)
-	store.Set(
-		k.GetIDKey(game.ID),
-		k.GetCodec().MustMarshalBinary(game))
+	game, err := k.Get(ctx, gameID)
+	if err != nil {
+		return 0, err
+	}
+
+	// add amount to reward pool
+	game.Pool = game.Pool.Plus(amount)
+
+	// update existing game in KVStore
+	k.Set(ctx, game)
+
+	return 0, nil
 }
 
 // ============================================================================

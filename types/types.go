@@ -34,6 +34,11 @@ func (t Timestamp) Update(blockHeader abci.Header) Timestamp {
 	return t
 }
 
+// TODO: implement?
+// type Voter interface {
+// 	Amount() sdk.Coin
+// }
+
 // Vote is a type that defines a vote on a story
 type Vote struct {
 	ID        int64          `json:"id"`
