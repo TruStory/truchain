@@ -18,6 +18,7 @@ type ReadKeeper interface {
 
 	Get(ctx sdk.Context, id int64) (vote app.Vote, err sdk.Error)
 	GetVotesByGame(ctx sdk.Context, gameID int64) ([]app.Vote, sdk.Error)
+	Tally(ctx sdk.Context, gameID int64) (yes []app.Vote, no []app.Vote, err sdk.Error)
 }
 
 // WriteKeeper defines a module interface that facilities write only access to truchain data
@@ -149,6 +150,32 @@ func (k Keeper) GetVotesByGame(
 	}
 
 	return votes, nil
+}
+
+// Tally votes
+func (k Keeper) Tally(
+	ctx sdk.Context, gameID int64) (yes []app.Vote, no []app.Vote, err sdk.Error) {
+
+	err = k.voterList.Map(ctx, k, gameID, func(voteID int64) sdk.Error {
+		vote, err := k.Get(ctx, voteID)
+		if err != nil {
+			return err
+		}
+
+		if vote.Vote == true {
+			yes = append(yes, vote)
+		} else {
+			no = append(no, vote)
+		}
+
+		return nil
+	})
+
+	if err != nil {
+		return
+	}
+
+	return
 }
 
 // ============================================================================
