@@ -1,6 +1,7 @@
 package vote
 
 import (
+	"github.com/TruStory/truchain/x/game"
 	queue "github.com/cosmos/cosmos-sdk/store"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
@@ -25,82 +26,121 @@ func (k Keeper) NewResponseEndBlock(ctx sdk.Context) sdk.Tags {
 // checkGames checks to see if a validation game has ended.
 // It calls itself recursively until all games have been processed.
 func checkGames(ctx sdk.Context, k Keeper, q queue.Queue) (err sdk.Error) {
-	// 	// check the head of the queue
-	// 	var challengeID int64
-	// 	if err := q.Peek(&challengeID); err != nil {
-	// 		return nil
+	// check the head of the queue
+	var gameID int64
+	if err := q.Peek(&gameID); err != nil {
+		return nil
+	}
+
+	// retrieve the game
+	game, err := k.gameKeeper.Get(ctx, gameID)
+	if err != nil {
+		return err
+	}
+
+	// terminate recursion on finding the first non-ended game
+	if game.Ended(ctx.BlockHeader().Time) {
+		return nil
+	}
+
+	// remove ended game from queue
+	q.Pop()
+
+	// tally backings, challenges, and votes
+	confirmed, yes, no, err := tally(ctx, k, game)
+	if err != nil {
+		return err
+	}
+
+	if confirmed {
+		err = distributeConfirmedCase(ctx, k, yes, no)
+	} else {
+		err = distributeRejectedCase(ctx, k, yes, no)
+	}
+	if err != nil {
+		return err
+	}
+
+	return checkGames(ctx, k, q)
+}
+
+func distributeConfirmedCase(
+	ctx sdk.Context, k Keeper, yes []interface{}, no []interface{}) (err sdk.Error) {
+
+	// for _, vote := range votes {
+	// 	switch vote.(type) {
+	// 	case backing.Backing:
+	// 		//
+	// 	case challenge.Challenge:
+	// 		//
+	// 	case app.Vote:
+	// 		//
+	// 	default:
+	// 		return sdk.ErrInternal("invalid type")
 	// 	}
+	// }
 
-	// 	// retrieve challenge from kvstore
-	// 	game, err := k.challengeKeeper.Get(ctx, challengeID)
-	// 	if err != nil {
-	// 		return err
-	// 	}
-
-	// 	// terminate recursion on finding the first unfinished challenge
-	// 	if game.EndTime.After(ctx.BlockHeader().Time) {
-	// 		return nil
-	// 	}
-
-	// 	// remove finished challenge from queue
-	// 	q.Pop()
-
-	// 	// tally backings, challenges, and votes
-	// 	err = tally(ctx, k, game)
-	// 	if err != nil {
-	// 		return err
-	// 	}
-
-	// 	// TODO: distribute rewards
-
-	// 	return checkGames(ctx, k, q)
 	return
 }
 
-// func tally(
-// 	ctx sdk.Context, keeper Keeper, game challenge.Game) (err sdk.Error) {
+func distributeRejectedCase(
+	ctx sdk.Context, k Keeper, yes []interface{}, no []interface{}) (err sdk.Error) {
 
-// 	// win is votes weighted by amount
-// 	// noVotes = []interface{} (Backing, Challenge, Vote)
-// 	// yesVotes = []interface{} (Backing, Challenge, Vote)
+	// for _, vote := range votes {
+	// 	switch vote.(type) {
+	// 	case backing.Backing:
+	// 		//
+	// 	case challenge.Challenge:
+	// 		//
+	// 	case app.Vote:
+	// 		//
+	// 	default:
+	// 		return sdk.ErrInternal("invalid type")
+	// 	}
+	// }
 
-// 	// map ensures there can be no double counting
-// 	var votes map[string]interface{}
+	return
+}
 
-// 	// tally backings
-// 	err = tallyBackings(ctx, keeper.backingKeeper, game.StoryID, votes)
-// 	if err != nil {
-// 		return
-// 	}
+func tally(
+	ctx sdk.Context,
+	k Keeper,
+	game game.Game) (confirmed bool, yes []interface{}, no []interface{}, err sdk.Error) {
 
-// 	// tally challenges
-// 	err = tallyChallenges(keeper.challengeKeeper)
-// 	if err != nil {
-// 		return
-// 	}
+	// TODO: win is votes weighted by amount
 
-// 	// tally votes
-// 	err = tallyVotes(keeper)
-// 	if err != nil {
-// 		return
-// 	}
+	// tally backings
+	yesBackings, noBackings, err := k.backingKeeper.Tally(ctx, game.StoryID)
+	if err != nil {
+		return
+	}
+	yes = append(yes, yesBackings)
+	no = append(no, noBackings)
 
-// 	// Vote type
-// 	// Backing embeds Vote
-// 	// Challenge embeds Vote
+	// tally challenges
+	yesChallenges, noChallenges, err := k.challengeKeeper.Tally(ctx, game.ID)
+	if err != nil {
+		return
+	}
+	yes = append(yes, yesChallenges)
+	no = append(no, noChallenges)
 
-// 	for _, vote := range votes {
-// 		switch vote.(type) {
-// 		case backing.Backing:
-// 			//
-// 		case challenge.Challenge:
-// 			//
-// 		case app.Vote:
-// 			//
-// 		default:
-// 			return sdk.ErrInternal("invalid type")
-// 		}
-// 	}
+	// tally votes
+	yesVotes, noVotes, err := k.Tally(ctx, game.ID)
+	if err != nil {
+		return
+	}
+	yes = append(yes, yesVotes)
+	no = append(no, noVotes)
 
-// 	return
-// }
+	numYesVotes := len(yes)
+	numNoVotes := len(no)
+
+	if numYesVotes > numNoVotes {
+		// story confirmed
+		return true, yes, no, nil
+	}
+
+	// story rejected
+	return false, yes, no, nil
+}
