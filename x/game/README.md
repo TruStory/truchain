@@ -14,7 +14,9 @@ Stores all data pertaining to a validation game.
     * keys
         * `"games:id:[GameID]"` -> `Game`
         * `"games:len"` -> `[int64]`
-        * `"stories:id:[StoryID]:games:time:[Time]"` -> `[GameID]`
+        * lists
+            * `sdk.Queue` (started games)
+            * `"stories:id:[StoryID]:games:time:[Time]"` -> `[GameID]`
 
 ## Notes
 
