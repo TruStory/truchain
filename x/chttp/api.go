@@ -16,7 +16,7 @@ type MsgTypes map[string]interface{}
 
 // App is implemented by a Cosmos app to provide chain functionality to the API
 type App interface {
-	RegisterKey(tcmn.HexBytes, string, int64) (sdk.AccAddress, int64, sdk.Coins, error)
+	RegisterKey(tcmn.HexBytes, string) (sdk.AccAddress, int64, sdk.Coins, error)
 	RunQuery(string, interface{}) abci.ResponseQuery
 	DeliverPresigned(auth.StdTx) (*trpctypes.ResultBroadcastTxCommit, error)
 }

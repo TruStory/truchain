@@ -46,8 +46,7 @@ func (ta *TruAPI) HandleRegistration(r *http.Request) chttp.Response {
 	}
 
 	// TODO: Store TwitterID off-chain [notduncansmith]
-
-	addr, num, coins, err := (*(ta.App)).RegisterKey(rr.PubKey, rr.PubKeyAlgo, rr.TwitterID)
+	addr, num, coins, err := (*(ta.App)).RegisterKey(rr.PubKey, rr.PubKeyAlgo)
 
 	if err != nil {
 		return chttp.SimpleErrorResponse(400, err)
