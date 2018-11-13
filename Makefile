@@ -2,6 +2,8 @@ PACKAGES=$(shell go list ./...)
 
 MODULES = backing category challenge game story vote
 
+CHAIN_DIR = ./.chain
+
 define \n
 
 
@@ -16,7 +18,7 @@ build: build_cli build_daemon
 
 br: build_daemon run_daemon
 
-bwr: wipe_chain br
+bwr: build_daemon wipe_chain run_daemon
 
 build_cli:
 	go build -o bin/trucli cmd/trucli/main.go
@@ -24,11 +26,14 @@ build_cli:
 build_daemon:
 	go build -o bin/truchaind cmd/truchaind/main.go
 
+init:
+	cp -R ./dev/empty_truchain $(CHAIN_DIR)
+
 run_daemon:
-	bin/truchaind start
+	bin/truchaind --home $(CHAIN_DIR) start
 
 wipe_chain:
-	bin/truchaind unsafe-reset-all
+	bin/truchaind --home $(CHAIN_DIR) unsafe-reset-all
 
 check:
 	gometalinter ./...

@@ -5,7 +5,11 @@ bin/*
 mytestnet/*
 report.html
 .pid
+
+# Chain data
 write-file-atomic-*
+.chain/data
+dev/api_spec/.chain
 
 # Dependencies
 vendor/*

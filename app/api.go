@@ -12,8 +12,8 @@ import (
 	params "github.com/TruStory/truchain/parameters"
 	"github.com/TruStory/truchain/types"
 	"github.com/TruStory/truchain/x/chttp"
-	"github.com/TruStory/truchain/x/registration"
 	"github.com/TruStory/truchain/x/truapi"
+	"github.com/TruStory/truchain/x/users"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth"
 	"github.com/oklog/ulid"
@@ -103,7 +103,7 @@ func (app *TruChain) RunQuery(path string, params interface{}) abci.ResponseQuer
 	return app.Query(abci.RequestQuery{Data: bz, Path: "/custom/" + path})
 }
 
-// GenerateAddress returns the first 20 characters of a ULID generated with github.com/oklog/ulid
+// GenerateAddress returns the first 20 characters of a ULID (https://github.com/oklog/ulid)
 func GenerateAddress() []byte {
 	t := time.Now()
 	entropy := ulid.Monotonic(rand.New(rand.NewSource(t.UnixNano())), 0)
@@ -114,7 +114,7 @@ func GenerateAddress() []byte {
 }
 
 func (app *TruChain) signedRegistrationTx(addr []byte, k tcmn.HexBytes, algo string) (auth.StdTx, error) {
-	msg := registration.RegisterKeyMsg{Address: addr, PubKey: k, PubKeyAlgo: algo, Coins: params.InitialCoins}
+	msg := users.RegisterKeyMsg{Address: addr, PubKey: k, PubKeyAlgo: algo, Coins: params.InitialCoins}
 	chainID := app.blockHeader.ChainID
 	registrarAcc := app.accountKeeper.GetAccount(*(app.blockCtx), []byte(types.RegistrarAccAddress))
 	registrarNum := registrarAcc.GetAccountNumber()

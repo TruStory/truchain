@@ -18,65 +18,52 @@ const RegistrarAccAddress = "truchainaccregistrar"
 // library.
 type AppAccount struct {
 	auth.BaseAccount
-
-	Name string `json:"name"`
 }
 
-// nolint
-func (acc AppAccount) GetName() string { return acc.Name }
-
-// nolint
-func (acc *AppAccount) SetName(name string) { acc.Name = name }
-
-// nolint
+// GetAccountNumber returns the account number
 func (acc AppAccount) GetAccountNumber() int64 {
 	return acc.AccountNumber
 }
 
-// nolint
+// GetCoins returns the coins
 func (acc AppAccount) GetCoins() sdk.Coins {
 	return acc.Coins
 }
 
-// nolint
+// GetSequence returns the sequence
 func (acc AppAccount) GetSequence() int64 {
 	return acc.Sequence
 }
 
-// nolint
+// SetAccountNumber sets the account number
 func (acc AppAccount) SetAccountNumber(accNumber int64) error {
-	acc.BaseAccount.SetAccountNumber(accNumber)
-	return nil
+	return acc.BaseAccount.SetAccountNumber(accNumber)
 }
 
-// nolint
+// SetAddress sets the address
 func (acc AppAccount) SetAddress(address sdk.AccAddress) error {
-	acc.BaseAccount.SetAddress(address)
-	return nil
+	return acc.BaseAccount.SetAddress(address)
 }
 
-// nolint
+// SetSequence sets the sequence
 func (acc AppAccount) SetSequence(seq int64) error {
-	acc.BaseAccount.SetSequence(seq)
-	return nil
+	return acc.BaseAccount.SetSequence(seq)
 }
 
-// nolint
+// SetCoins sets the coins
 func (acc AppAccount) SetCoins(coins sdk.Coins) error {
-	acc.BaseAccount.SetCoins(coins)
-	return nil
+	return acc.BaseAccount.SetCoins(coins)
 }
 
-// nolint
+// SetPubKey sets the public key
 func (acc AppAccount) SetPubKey(pubkey crypto.PubKey) error {
-	acc.PubKey = pubkey
-	return nil
+	return acc.BaseAccount.SetPubKey(pubkey)
 }
 
 // NewAppAccount returns a reference to a new AppAccount given a name and an
 // auth.BaseAccount.
-func NewAppAccount(name string, baseAcct auth.BaseAccount) *AppAccount {
-	return &AppAccount{BaseAccount: baseAcct, Name: name}
+func NewAppAccount(baseAcct auth.BaseAccount) *AppAccount {
+	return &AppAccount{BaseAccount: baseAcct}
 }
 
 // GetAccountDecoder returns the AccountDecoder function for the custom
@@ -105,7 +92,6 @@ type GenesisState struct {
 // GenesisAccount reflects a genesis account the application expects in it's
 // genesis state.
 type GenesisAccount struct {
-	Name    string         `json:"name"`
 	Address sdk.AccAddress `json:"address"`
 	Coins   sdk.Coins      `json:"coins"`
 }
@@ -114,7 +100,6 @@ type GenesisAccount struct {
 // AppAccount.
 func NewGenesisAccount(aa *AppAccount) *GenesisAccount {
 	return &GenesisAccount{
-		Name:    aa.Name,
 		Address: aa.Address,
 		Coins:   aa.Coins.Sort(),
 	}
@@ -123,7 +108,6 @@ func NewGenesisAccount(aa *AppAccount) *GenesisAccount {
 // ToAppAccount converts a GenesisAccount to an AppAccount.
 func (ga *GenesisAccount) ToAppAccount() (acc *AppAccount, err error) {
 	return &AppAccount{
-		Name: ga.Name,
 		BaseAccount: auth.BaseAccount{
 			Address: ga.Address,
 			Coins:   ga.Coins.Sort(),

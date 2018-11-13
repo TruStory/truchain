@@ -5,17 +5,16 @@ import (
 	"encoding/json"
 	"io/ioutil"
 
-	"github.com/TruStory/truchain/x/game"
-	"github.com/TruStory/truchain/x/vote"
-
 	params "github.com/TruStory/truchain/parameters"
 	"github.com/TruStory/truchain/types"
 	"github.com/TruStory/truchain/x/backing"
 	"github.com/TruStory/truchain/x/category"
 	"github.com/TruStory/truchain/x/challenge"
-	"github.com/TruStory/truchain/x/registration"
+	"github.com/TruStory/truchain/x/game"
 	"github.com/TruStory/truchain/x/story"
 	"github.com/TruStory/truchain/x/truapi"
+	"github.com/TruStory/truchain/x/users"
+	"github.com/TruStory/truchain/x/vote"
 	bam "github.com/cosmos/cosmos-sdk/baseapp"
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -153,13 +152,14 @@ func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *T
 		AddRoute("backing", backing.NewHandler(app.backingKeeper)).
 		AddRoute("challenge", challenge.NewHandler(app.challengeKeeper)).
 		AddRoute("vote", vote.NewHandler(app.voteKeeper)).
-		AddRoute(registration.RegisterKeyMsg{}.Type(),
-			registration.NewHandler(app.accountKeeper))
+		AddRoute(users.RegisterKeyMsg{}.Type(),
+			users.NewHandler(app.accountKeeper))
 
 	// register query routes for reading state
 	app.QueryRouter().
 		AddRoute(story.QueryPath, story.NewQuerier(app.storyKeeper)).
-		AddRoute(category.QueryPath, category.NewQuerier(app.categoryKeeper))
+		AddRoute(category.QueryPath, category.NewQuerier(app.categoryKeeper)).
+		AddRoute(users.QueryPath, users.NewQuerier(codec, app.accountKeeper))
 
 	// perform initialization logic
 	app.SetInitChainer(app.initChainer)
@@ -199,8 +199,8 @@ func MakeCodec() *codec.Codec {
 	backing.RegisterAmino(cdc)
 	category.RegisterAmino(cdc)
 	challenge.RegisterAmino(cdc)
-	registration.RegisterAmino(cdc)
 	vote.RegisterAmino(cdc)
+	users.RegisterAmino(cdc)
 
 	// register other types
 	cdc.RegisterInterface((*auth.Account)(nil), nil)

@@ -51,7 +51,7 @@ func TestGenesis(t *testing.T) {
 	require.Nil(t, err)
 
 	// create a new test AppAccount with the given auth.BaseAccount
-	appAcct := types.NewAppAccount("foobar", baseAcct)
+	appAcct := types.NewAppAccount(baseAcct)
 	genState, err := setGenesis(baseApp, appAcct)
 	require.Nil(t, err)
 
