@@ -7,6 +7,7 @@ import (
 	"github.com/TruStory/truchain/x/game"
 	queue "github.com/cosmos/cosmos-sdk/store"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/cosmos/cosmos-sdk/x/auth"
 )
 
 // NewResponseEndBlock is called at the end of every block tick
@@ -50,39 +51,39 @@ func checkGames(ctx sdk.Context, k Keeper, q queue.Queue) (err sdk.Error) {
 	q.Pop()
 
 	// tally backings, challenges, and votes
-	yes, no, err := tally(ctx, k, game)
+	trueVotes, falseVotes, err := tally(ctx, k, game)
 	if err != nil {
 		return err
 	}
 
 	// update reward pool, return funds to losers, reward winners
-	if confirmStory(yes, no) {
-		err = updateRewardPoolForConfirmedStory(ctx, k, game, no)
+	if confirmStory(trueVotes, falseVotes) {
+		err = confirmedStoryRewardPool(ctx, k, game, falseVotes)
 		if err != nil {
 			return err
 		}
 
-		err = returnFunds(ctx, k, game, no)
+		err = returnFunds(ctx, k, game, falseVotes)
 		if err != nil {
 			return err
 		}
 
-		err = rewardWinners(ctx, k, game, yes)
+		err = rewardWinners(ctx, k, game, trueVotes)
 		if err != nil {
 			return err
 		}
 	} else {
-		err = updateRewardPoolForRejectedStory(ctx, k, game, yes, no)
+		err = rejectedStoryRewardPool(ctx, k, game, trueVotes, falseVotes)
 		if err != nil {
 			return err
 		}
 
-		err = returnFunds(ctx, k, game, yes)
+		err = returnFunds(ctx, k, game, trueVotes)
 		if err != nil {
 			return err
 		}
 
-		err = rewardWinners(ctx, k, game, no)
+		err = rewardWinners(ctx, k, game, falseVotes)
 		if err != nil {
 			return err
 		}
@@ -94,50 +95,42 @@ func checkGames(ctx sdk.Context, k Keeper, q queue.Queue) (err sdk.Error) {
 func tally(
 	ctx sdk.Context,
 	k Keeper,
-	game game.Game) (yes []interface{}, no []interface{}, err sdk.Error) {
+	game game.Game) (trueVotes []interface{}, falseVotes []interface{}, err sdk.Error) {
 
 	// tally backings
 	yesBackings, noBackings, err := k.backingKeeper.Tally(ctx, game.StoryID)
 	if err != nil {
 		return
 	}
-	yes = append(yes, yesBackings)
-	no = append(no, noBackings)
+	trueVotes = append(trueVotes, yesBackings)
+	falseVotes = append(falseVotes, noBackings)
 
 	// tally challenges
 	yesChallenges, noChallenges, err := k.challengeKeeper.Tally(ctx, game.ID)
 	if err != nil {
 		return
 	}
-	yes = append(yes, yesChallenges)
-	no = append(no, noChallenges)
+	trueVotes = append(trueVotes, yesChallenges)
+	falseVotes = append(falseVotes, noChallenges)
 
 	// tally votes
-	yesVotes, noVotes, err := k.Tally(ctx, game.ID)
+	trueTokenVotes, falseTokenVotes, err := k.Tally(ctx, game.ID)
 	if err != nil {
 		return
 	}
-	yes = append(yes, yesVotes)
-	no = append(no, noVotes)
+	trueVotes = append(trueVotes, trueTokenVotes)
+	falseVotes = append(falseVotes, falseTokenVotes)
 
 	return
 }
 
-func confirmStory(yes []interface{}, no []interface{}) (confirmed bool) {
+// determine if a story is confirmed or rejected
+func confirmStory(trueVotes []interface{}, falseVotes []interface{}) (confirmed bool) {
 	// calculate weighted votes
-	yesWeight := sdk.ZeroInt()
-	for _, vote := range yes {
-		v := vote.(app.Vote)
-		yesWeight = yesWeight.Add(v.Amount.Amount)
-	}
+	trueWeight := calculateWeightedVote(trueVotes)
+	falseWeight := calculateWeightedVote(falseVotes)
 
-	noWeight := sdk.ZeroInt()
-	for _, vote := range no {
-		v := vote.(app.Vote)
-		noWeight = noWeight.Add(v.Amount.Amount)
-	}
-
-	if yesWeight.GT(noWeight) {
+	if trueWeight.GT(falseWeight) {
 		// story confirmed
 		return true
 	}
@@ -146,8 +139,21 @@ func confirmStory(yes []interface{}, no []interface{}) (confirmed bool) {
 	return false
 }
 
+// calculate weighted vote based on user's total category coin balance
+func calculateWeightedVote(poll []interface{}) sdk.Int {
+	weightedAmount := sdk.ZeroInt()
+	for _, vote := range poll {
+		v := vote.(app.Vote)
+		user := auth.NewBaseAccountWithAddress(v.Creator)
+		categoryCoins := user.Coins.AmountOf(v.Amount.Denom)
+		weightedAmount = weightedAmount.Add(categoryCoins)
+	}
+
+	return weightedAmount
+}
+
 // people who voted no on a confirmed story
-func updateRewardPoolForConfirmedStory(
+func confirmedStoryRewardPool(
 	ctx sdk.Context,
 	k Keeper,
 	game game.Game,
@@ -175,7 +181,7 @@ func updateRewardPoolForConfirmedStory(
 	return nil
 }
 
-func updateRewardPoolForRejectedStory(
+func rejectedStoryRewardPool(
 	ctx sdk.Context,
 	k Keeper,
 	game game.Game,
