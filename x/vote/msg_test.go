@@ -10,7 +10,7 @@ import (
 )
 
 func TestValidCreateVoteMsg(t *testing.T) {
-	ctx, _, sk, ck, _, _ := mockDB()
+	ctx, _, sk, ck, _, _, _ := mockDB()
 
 	storyID := createFakeStory(ctx, sk, ck)
 	amount := sdk.NewCoin("testcoin", sdk.NewInt(5))
@@ -28,7 +28,7 @@ func TestValidCreateVoteMsg(t *testing.T) {
 }
 
 func TestInValidCreateVoteMsg(t *testing.T) {
-	ctx, _, sk, ck, _, _ := mockDB()
+	ctx, _, sk, ck, _, _, _ := mockDB()
 
 	storyID := createFakeStory(ctx, sk, ck)
 	amount := sdk.NewCoin("testcoin", sdk.NewInt(5))
