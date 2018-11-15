@@ -24,7 +24,7 @@ type ReadKeeper interface {
 type WriteKeeper interface {
 	ReadKeeper
 
-	NewBacking(
+	Create(
 		ctx sdk.Context,
 		storyID int64,
 		amount sdk.Coin,
@@ -65,8 +65,8 @@ func NewKeeper(
 
 // ============================================================================
 
-// NewBacking adds a new backing to the backing store
-func (k Keeper) NewBacking(
+// Create adds a new backing to the backing store
+func (k Keeper) Create(
 	ctx sdk.Context,
 	storyID int64,
 	amount sdk.Coin,

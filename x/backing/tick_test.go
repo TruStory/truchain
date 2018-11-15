@@ -30,9 +30,9 @@ func Test_processEarnings_UnexpiredBackings(t *testing.T) {
 	creator := sdk.AccAddress([]byte{1, 2})
 	duration := 99 * time.Hour
 	bankKeeper.AddCoins(ctx, creator, sdk.Coins{amount})
-	bk.NewBacking(ctx, storyID, amount, creator, duration)
-	bk.NewBacking(ctx, storyID, amount, creator, duration)
-	bk.NewBacking(ctx, storyID, amount, creator, duration)
+	bk.Create(ctx, storyID, amount, creator, duration)
+	bk.Create(ctx, storyID, amount, creator, duration)
+	bk.Create(ctx, storyID, amount, creator, duration)
 
 	err := processBacking(ctx, bk)
 	assert.Nil(t, err)
@@ -45,11 +45,11 @@ func Test_processEarnings_ExpiredBackings(t *testing.T) {
 	creator := sdk.AccAddress([]byte{1, 2})
 	duration := 4 * time.Hour
 	bankKeeper.AddCoins(ctx, creator, sdk.Coins{amount})
-	bk.NewBacking(ctx, storyID, amount, creator, duration)
-	bk.NewBacking(ctx, storyID, amount, creator, duration)
-	bk.NewBacking(ctx, storyID, amount, creator, duration)
-	bk.NewBacking(ctx, storyID, amount, creator, duration)
-	bk.NewBacking(ctx, storyID, amount, creator, duration)
+	bk.Create(ctx, storyID, amount, creator, duration)
+	bk.Create(ctx, storyID, amount, creator, duration)
+	bk.Create(ctx, storyID, amount, creator, duration)
+	bk.Create(ctx, storyID, amount, creator, duration)
+	bk.Create(ctx, storyID, amount, creator, duration)
 
 	// process each backing recursively until queue is empty
 	err := processBacking(ctx, bk)
