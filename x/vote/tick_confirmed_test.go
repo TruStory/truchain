@@ -47,10 +47,10 @@ func createFakeConfirmedStory() (
 
 	// fake backings
 	duration := 1 * time.Hour
-	b1id, _ := backingKeeper.NewBacking(ctx, storyID, amount, creator1, duration)
-	b2id, _ := backingKeeper.NewBacking(ctx, storyID, amount, creator2, duration)
-	b3id, _ := backingKeeper.NewBacking(ctx, storyID, amount, creator3, duration)
-	b4id, _ := backingKeeper.NewBacking(ctx, storyID, amount, creator4, duration)
+	b1id, _ := backingKeeper.Create(ctx, storyID, amount, creator1, duration)
+	b2id, _ := backingKeeper.Create(ctx, storyID, amount, creator2, duration)
+	b3id, _ := backingKeeper.Create(ctx, storyID, amount, creator3, duration)
+	b4id, _ := backingKeeper.Create(ctx, storyID, amount, creator4, duration)
 
 	// fake challenges
 	c1id, _ := challengeKeeper.Create(ctx, storyID, amount, argument, creator5, evidence)
