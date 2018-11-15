@@ -9,7 +9,7 @@ import (
 )
 
 func TestCreateGetVote(t *testing.T) {
-	ctx, k, sk, ck, challengeKeeper, bankKeeper := mockDB()
+	ctx, k, sk, ck, challengeKeeper, bankKeeper, _ := mockDB()
 
 	storyID := createFakeStory(ctx, sk, ck)
 	amount := sdk.NewCoin("trudex", sdk.NewInt(15))
@@ -33,7 +33,7 @@ func TestCreateGetVote(t *testing.T) {
 }
 
 func TestGetVotesByGame(t *testing.T) {
-	ctx, k, sk, ck, challengeKeeper, bankKeeper := mockDB()
+	ctx, k, sk, ck, challengeKeeper, bankKeeper, _ := mockDB()
 
 	storyID := createFakeStory(ctx, sk, ck)
 	amount := sdk.NewCoin("trudex", sdk.NewInt(15))
@@ -64,7 +64,7 @@ func TestGetVotesByGame(t *testing.T) {
 }
 
 func TestCreateVote_ErrGameNotStarted(t *testing.T) {
-	ctx, k, sk, ck, _, _ := mockDB()
+	ctx, k, sk, ck, _, _, _ := mockDB()
 
 	storyID := createFakeStory(ctx, sk, ck)
 	amount := sdk.NewCoin("trudex", sdk.NewInt(15))

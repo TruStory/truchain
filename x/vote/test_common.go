@@ -22,7 +22,9 @@ import (
 	"github.com/tendermint/tendermint/libs/log"
 )
 
-func mockDB() (sdk.Context, Keeper, s.Keeper, c.Keeper, challenge.Keeper, bank.Keeper) {
+func mockDB() (
+	sdk.Context, Keeper, s.Keeper, c.Keeper, challenge.Keeper, bank.Keeper, backing.Keeper) {
+
 	db := dbm.NewMemDB()
 
 	accKey := sdk.NewKVStoreKey("acc")
@@ -63,7 +65,7 @@ func mockDB() (sdk.Context, Keeper, s.Keeper, c.Keeper, challenge.Keeper, bank.K
 
 	k := NewKeeper(voteKey, gameQueueKey, backingKeeper, challengeKeeper, sk, gameKeeper, bankKeeper, codec)
 
-	return ctx, k, sk, ck, challengeKeeper, bankKeeper
+	return ctx, k, sk, ck, challengeKeeper, bankKeeper, backingKeeper
 }
 
 func createFakeStory(ctx sdk.Context, sk s.Keeper, ck c.WriteKeeper) int64 {
