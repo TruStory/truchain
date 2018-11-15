@@ -36,11 +36,11 @@ func TestQueue(t *testing.T) {
 	bankKeeper.AddCoins(ctx, creator, sdk.Coins{amount})
 
 	// create backings
-	backingID, _ := bk.NewBacking(ctx, storyID, amount, creator, duration)
+	backingID, _ := bk.Create(ctx, storyID, amount, creator, duration)
 	_, err := bk.Backing(ctx, backingID)
 	assert.Nil(t, err)
 
-	backingID, _ = bk.NewBacking(ctx, storyID, amount, creator, duration)
+	backingID, _ = bk.Create(ctx, storyID, amount, creator, duration)
 	_, err = bk.Backing(ctx, backingID)
 	assert.Nil(t, err)
 

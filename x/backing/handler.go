@@ -24,7 +24,7 @@ func handleBackStoryMsg(ctx sdk.Context, k WriteKeeper, msg BackStoryMsg) sdk.Re
 		return err.Result()
 	}
 
-	id, err := k.NewBacking(
+	id, err := k.Create(
 		ctx,
 		msg.StoryID,
 		msg.Amount,
