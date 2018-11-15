@@ -30,7 +30,8 @@ type WriteKeeper interface {
 	NewStory(
 		ctx sdk.Context, body string, categoryID int64, creator sdk.AccAddress, kind Kind) (int64, sdk.Error)
 	StartGame(ctx sdk.Context, storyID int64) sdk.Error
-	EndGame(ctx sdk.Context, storyID int64) sdk.Error
+	EndGame(ctx sdk.Context, storyID int64, confirmed bool) sdk.Error
+	ExpireGame(ctx sdk.Context, storyID int64) sdk.Error
 	UpdateStory(ctx sdk.Context, story Story)
 }
 
@@ -74,7 +75,27 @@ func (k Keeper) StartGame(
 }
 
 // EndGame records the end of a validation game on a story
-func (k Keeper) EndGame(ctx sdk.Context, storyID int64) sdk.Error {
+func (k Keeper) EndGame(ctx sdk.Context, storyID int64, confirmed bool) sdk.Error {
+	// get story
+	story, err := k.GetStory(ctx, storyID)
+	if err != nil {
+		return err
+	}
+
+	// update story state
+	story.GameID = 0
+	if confirmed {
+		story.State = Confirmed
+	} else {
+		story.State = Rejected
+	}
+	k.UpdateStory(ctx, story)
+
+	return nil
+}
+
+// ExpireGame resets a story after a game has expired
+func (k Keeper) ExpireGame(ctx sdk.Context, storyID int64) sdk.Error {
 	// get story
 	story, err := k.GetStory(ctx, storyID)
 	if err != nil {

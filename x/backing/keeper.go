@@ -212,7 +212,7 @@ func (k Keeper) getPrincipal(
 		}
 	case params.StakeDenom:
 		// mint category coins from trustake
-		return mintFromNativeToken(ctx, k, cat, amount, userAddr)
+		return mintFromNativeToken(ctx, k.bankKeeper, cat, amount, userAddr)
 	default:
 		return principal, sdk.ErrInvalidCoins("Invalid backing token")
 
@@ -234,7 +234,7 @@ func (k Keeper) setBacking(ctx sdk.Context, backing Backing) {
 // mintFromNativeToken creates category coins by burning trustake
 func mintFromNativeToken(
 	ctx sdk.Context,
-	k Keeper,
+	bankKeeper bank.Keeper,
 	cat cat.Category,
 	amount sdk.Coin,
 	userAddr sdk.AccAddress) (principal sdk.Coin, err sdk.Error) {
@@ -250,7 +250,7 @@ func mintFromNativeToken(
 
 	// burn equivalent trustake
 	trustake := sdk.Coins{sdk.NewCoin(params.StakeDenom, principal.Amount)}
-	_, _, err = k.bankKeeper.SubtractCoins(ctx, userAddr, trustake)
+	_, _, err = bankKeeper.SubtractCoins(ctx, userAddr, trustake)
 	if err != nil {
 		return
 	}

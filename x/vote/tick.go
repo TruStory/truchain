@@ -2,12 +2,11 @@ package vote
 
 import (
 	app "github.com/TruStory/truchain/types"
-	"github.com/TruStory/truchain/x/backing"
-	"github.com/TruStory/truchain/x/challenge"
 	"github.com/TruStory/truchain/x/game"
 	queue "github.com/cosmos/cosmos-sdk/store"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth"
+	"github.com/cosmos/cosmos-sdk/x/bank"
 )
 
 // NewResponseEndBlock is called at the end of every block tick
@@ -50,70 +49,112 @@ func checkGames(ctx sdk.Context, k Keeper, q queue.Queue) (err sdk.Error) {
 	// remove ended game from queue
 	q.Pop()
 
+	// process ended game
+	err = processGame(ctx, k, game)
+	if err != nil {
+		return err
+	}
+
+	// check next game
+	return checkGames(ctx, k, q)
+}
+
+// tally votes and distribute rewards
+func processGame(ctx sdk.Context, k Keeper, game game.Game) sdk.Error {
 	// tally backings, challenges, and votes
 	trueVotes, falseVotes, err := tally(ctx, k, game)
 	if err != nil {
 		return err
 	}
 
-	// update reward pool, return funds to losers, reward winners
-	if confirmStory(trueVotes, falseVotes) {
-		err = confirmedStoryRewardPool(ctx, k, game, falseVotes)
-		if err != nil {
-			return err
-		}
+	// check if story was confirmed
+	confirmed := confirmStory(trueVotes, falseVotes)
 
-		err = returnFunds(ctx, k, game, falseVotes)
-		if err != nil {
-			return err
-		}
-
-		err = rewardWinners(ctx, k, game, trueVotes)
-		if err != nil {
-			return err
-		}
-	} else {
-		err = rejectedStoryRewardPool(ctx, k, game, trueVotes, falseVotes)
-		if err != nil {
-			return err
-		}
-
-		err = returnFunds(ctx, k, game, trueVotes)
-		if err != nil {
-			return err
-		}
-
-		err = rewardWinners(ctx, k, game, falseVotes)
-		if err != nil {
-			return err
-		}
+	// calculate reward pool
+	rewardPool, err := rewardPool(ctx, k.bankKeeper, trueVotes, falseVotes, confirmed)
+	if err != nil {
+		return err
 	}
 
-	return checkGames(ctx, k, q)
+	// distribute rewards
+	err = distributeRewards(ctx, k.bankKeeper, rewardPool, trueVotes, falseVotes, confirmed)
+	if err != nil {
+		return err
+	}
+
+	// update story state
+	err = k.storyKeeper.EndGame(ctx, game.StoryID, confirmed)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
+func rewardPool(
+	ctx sdk.Context,
+	bankKeeper bank.Keeper,
+	trueVotes []interface{},
+	falseVotes []interface{},
+	confirmed bool) (rewardPool sdk.Coin, err sdk.Error) {
+
+	if confirmed {
+		rewardPool, err = confirmedStoryRewardPool(ctx, bankKeeper, falseVotes)
+	} else {
+		rewardPool, err = rejectedStoryRewardPool(ctx, bankKeeper, trueVotes, falseVotes)
+	}
+	if err != nil {
+		return
+	}
+
+	return
+}
+
+func distributeRewards(
+	ctx sdk.Context,
+	bankKeeper bank.Keeper,
+	rewardPool sdk.Coin,
+	trueVotes []interface{},
+	falseVotes []interface{},
+	confirmed bool) (err sdk.Error) {
+
+	if confirmed {
+		err = distributeConfirmedStoryRewards(
+			ctx, bankKeeper, trueVotes, falseVotes, rewardPool)
+	} else {
+		err = distributeRejectedStoryRewards(
+			ctx, bankKeeper, falseVotes, rewardPool)
+	}
+	if err != nil {
+		return
+	}
+
+	return
+}
+
+// tally backings, challenges, and token votes into two true and false vote arrays
 func tally(
 	ctx sdk.Context,
 	k Keeper,
 	game game.Game) (trueVotes []interface{}, falseVotes []interface{}, err sdk.Error) {
 
 	// tally backings
-	yesBackings, noBackings, err := k.backingKeeper.Tally(ctx, game.StoryID)
+	trueBackings, falseBackings, err := k.backingKeeper.Tally(ctx, game.StoryID)
 	if err != nil {
 		return
 	}
-	trueVotes = append(trueVotes, yesBackings)
-	falseVotes = append(falseVotes, noBackings)
+	trueVotes = append(trueVotes, trueBackings)
+	falseVotes = append(falseVotes, falseBackings)
 
 	// tally challenges
-	yesChallenges, noChallenges, err := k.challengeKeeper.Tally(ctx, game.ID)
+	trueChallenges, falseChallenges, err := k.challengeKeeper.Tally(ctx, game.ID)
 	if err != nil {
 		return
 	}
-	trueVotes = append(trueVotes, yesChallenges)
-	falseVotes = append(falseVotes, noChallenges)
+	trueVotes = append(trueVotes, trueChallenges)
+	falseVotes = append(falseVotes, falseChallenges)
 
-	// tally votes
+	// tally token votes
 	trueTokenVotes, falseTokenVotes, err := k.Tally(ctx, game.ID)
 	if err != nil {
 		return
@@ -121,15 +162,16 @@ func tally(
 	trueVotes = append(trueVotes, trueTokenVotes)
 	falseVotes = append(falseVotes, falseTokenVotes)
 
-	return
+	return trueVotes, falseVotes, nil
 }
 
 // determine if a story is confirmed or rejected
 func confirmStory(trueVotes []interface{}, falseVotes []interface{}) (confirmed bool) {
 	// calculate weighted votes
-	trueWeight := calculateWeightedVote(trueVotes)
-	falseWeight := calculateWeightedVote(falseVotes)
+	trueWeight := weightedVote(trueVotes)
+	falseWeight := weightedVote(falseVotes)
 
+	// majority wins
 	if trueWeight.GT(falseWeight) {
 		// story confirmed
 		return true
@@ -140,9 +182,9 @@ func confirmStory(trueVotes []interface{}, falseVotes []interface{}) (confirmed 
 }
 
 // calculate weighted vote based on user's total category coin balance
-func calculateWeightedVote(poll []interface{}) sdk.Int {
+func weightedVote(votes []interface{}) sdk.Int {
 	weightedAmount := sdk.ZeroInt()
-	for _, vote := range poll {
+	for _, vote := range votes {
 		v := vote.(app.Vote)
 		user := auth.NewBaseAccountWithAddress(v.Creator)
 		categoryCoins := user.Coins.AmountOf(v.Amount.Denom)
@@ -150,194 +192,4 @@ func calculateWeightedVote(poll []interface{}) sdk.Int {
 	}
 
 	return weightedAmount
-}
-
-// people who voted no on a confirmed story
-func confirmedStoryRewardPool(
-	ctx sdk.Context,
-	k Keeper,
-	game game.Game,
-	no []interface{}) (err sdk.Error) {
-
-	for _, vote := range no {
-		switch v := vote.(type) {
-		case backing.Backing:
-			err = handleConfirmedStoryNoVoteBacker(ctx, k, v, game)
-		case challenge.Challenge:
-			// skip
-			// already added amount to reward pool, lost funds
-		case app.Vote:
-			// skip
-			// already added amount to reward pool, lost funds
-		default:
-			return ErrVoteHandler(v)
-		}
-
-		if err != nil {
-			return err
-		}
-	}
-
-	return nil
-}
-
-func rejectedStoryRewardPool(
-	ctx sdk.Context,
-	k Keeper,
-	game game.Game,
-	yes []interface{},
-	no []interface{}) (err sdk.Error) {
-
-	for _, vote := range yes {
-		switch v := vote.(type) {
-		case backing.Backing:
-			err = handleRejectedStoryYesVoteBacker(ctx, k, v, game)
-		case app.Vote:
-			err = handleRejectedStoryYesVoteVoter(ctx, k, v, game)
-		default:
-			err = ErrVoteHandler(v)
-		}
-
-		if err != nil {
-			return err
-		}
-	}
-
-	for _, vote := range no {
-		switch v := vote.(type) {
-		case backing.Backing:
-			err = handleRejectedStoryNoVoteBacker(ctx, k, v, game)
-		case challenge.Challenge:
-			// skip
-			// already added amount to reward pool
-		case app.Vote:
-			// skip
-			// already added vote fee to reward pool
-		default:
-			return ErrVoteHandler(v)
-		}
-
-		if err != nil {
-			return err
-		}
-	}
-
-	return
-}
-
-// return funds to losers
-func returnFunds(
-	ctx sdk.Context, k Keeper, game game.Game, losers []interface{}) (err sdk.Error) {
-
-	for _, vote := range losers {
-		switch v := vote.(type) {
-		case backing.Backing:
-			// return backing amount to backer
-			_, _, err = k.bankKeeper.AddCoins(ctx, v.Creator, sdk.Coins{v.Amount})
-		case challenge.Challenge:
-			// skip
-		case app.Vote:
-			// skip
-		default:
-			return ErrVoteHandler(v)
-		}
-
-		if err != nil {
-			return err
-		}
-	}
-
-	return nil
-}
-
-// reward winners
-func rewardWinners(
-	ctx sdk.Context, k Keeper, game game.Game, winners []interface{}) (err sdk.Error) {
-
-	// divide reward pool equally
-	numWinners := int64(len(winners))
-	rewardAmount := game.Pool.Amount.Div(sdk.NewInt(numWinners))
-	rewardCoin := sdk.NewCoin(game.Pool.Denom, rewardAmount)
-
-	// distribute reward
-	for _, vote := range winners {
-		v := vote.(app.Vote)
-		_, _, err = k.bankKeeper.AddCoins(ctx, v.Creator, sdk.Coins{rewardCoin})
-		if err != nil {
-			return err
-		}
-	}
-
-	return nil
-}
-
-// ============================================================================
-
-// backer who changed their implicit TRUE vote to FALSE and lost
-func handleConfirmedStoryNoVoteBacker(
-	ctx sdk.Context, k Keeper, b backing.Backing, game game.Game) sdk.Error {
-
-	// TODO: shouldn't this be from a "backing pool"?
-	// remove backing amount from reward pool
-	// game.Pool = game.Pool.Minus(b.Amount)
-
-	// return backing amount to backer
-	_, _, err := k.bankKeeper.AddCoins(ctx, b.Creator, sdk.Coins{b.Amount})
-	if err != nil {
-		return err
-	}
-
-	// slash inflationary rewards and add to reward pool
-	game.Pool = game.Pool.Plus(b.Interest)
-
-	// persist changes to reward pool
-	k.gameKeeper.Set(ctx, game)
-
-	return nil
-}
-
-// ============================================================================
-
-func handleRejectedStoryYesVoteBacker(
-	ctx sdk.Context, k Keeper, b backing.Backing, game game.Game) sdk.Error {
-
-	// forfeit backing and inflationary rewards, add to reward pool
-	game.Pool = game.Pool.Plus(b.Amount).Plus(b.Interest)
-
-	// persist changes to reward pool
-	k.gameKeeper.Set(ctx, game)
-
-	return nil
-}
-
-// token holders who voted TRUE
-func handleRejectedStoryYesVoteVoter(
-	ctx sdk.Context, k Keeper, v app.Vote, game game.Game) sdk.Error {
-
-	// forfeit vote fee and add to reward pool
-	game.Pool = game.Pool.Plus(v.Amount)
-
-	// persist changes to reward pool
-	k.gameKeeper.Set(ctx, game)
-
-	return nil
-}
-
-// backer who changed their implicit TRUE vote to FALSE, and lost
-func handleRejectedStoryNoVoteBacker(
-	ctx sdk.Context, k Keeper, b backing.Backing, game game.Game) sdk.Error {
-
-	// return backing
-	_, _, err := k.bankKeeper.AddCoins(ctx, b.Creator, sdk.Coins{b.Amount})
-	if err != nil {
-		return err
-	}
-
-	// slash inflationary reward and add to reward pool
-	game.Pool = game.Pool.Plus(b.Interest)
-
-	// persist changes to reward pool
-	k.gameKeeper.Set(ctx, game)
-
-	return nil
 }
