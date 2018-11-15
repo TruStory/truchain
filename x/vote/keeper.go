@@ -18,8 +18,8 @@ import (
 type ReadKeeper interface {
 	app.ReadKeeper
 
-	Get(ctx sdk.Context, id int64) (vote app.Vote, err sdk.Error)
-	GetVotesByGame(ctx sdk.Context, gameID int64) ([]app.Vote, sdk.Error)
+	Vote(ctx sdk.Context, id int64) (vote app.Vote, err sdk.Error)
+	VotesByGame(ctx sdk.Context, gameID int64) ([]app.Vote, sdk.Error)
 	Tally(ctx sdk.Context, gameID int64) (yes []app.Vote, no []app.Vote, err sdk.Error)
 }
 
@@ -130,8 +130,8 @@ func (k Keeper) Create(
 	return vote.ID, nil
 }
 
-// Get returns a `Vote` from the KVStore
-func (k Keeper) Get(ctx sdk.Context, id int64) (vote app.Vote, err sdk.Error) {
+// Vote returns a `Vote` from the KVStore
+func (k Keeper) Vote(ctx sdk.Context, id int64) (vote app.Vote, err sdk.Error) {
 	store := k.GetStore(ctx)
 	bz := store.Get(k.GetIDKey(id))
 	if bz == nil {
@@ -142,13 +142,13 @@ func (k Keeper) Get(ctx sdk.Context, id int64) (vote app.Vote, err sdk.Error) {
 	return vote, nil
 }
 
-// GetVotesByGame returns a list of votes for a given game
-func (k Keeper) GetVotesByGame(
+// VotesByGame returns a list of votes for a given game
+func (k Keeper) VotesByGame(
 	ctx sdk.Context, gameID int64) (votes []app.Vote, err sdk.Error) {
 
 	// iterate over voter list and get votes
 	err = k.voterList.Map(ctx, k, gameID, func(voterID int64) sdk.Error {
-		vote, err := k.Get(ctx, voterID)
+		vote, err := k.Vote(ctx, voterID)
 		if err != nil {
 			return err
 		}
@@ -169,7 +169,7 @@ func (k Keeper) Tally(
 	ctx sdk.Context, gameID int64) (yes []app.Vote, no []app.Vote, err sdk.Error) {
 
 	err = k.voterList.Map(ctx, k, gameID, func(voteID int64) sdk.Error {
-		vote, err := k.Get(ctx, voteID)
+		vote, err := k.Vote(ctx, voteID)
 		if err != nil {
 			return err
 		}
