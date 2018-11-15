@@ -69,9 +69,9 @@ func createFakeConfirmedStory() (
 	c1, _ := challengeKeeper.Challenge(ctx, c1id)
 	c2, _ := challengeKeeper.Challenge(ctx, c2id)
 
-	v1, _ := k.Get(ctx, v1id)
-	v2, _ := k.Get(ctx, v2id)
-	v3, _ := k.Get(ctx, v3id)
+	v1, _ := k.Vote(ctx, v1id)
+	v2, _ := k.Vote(ctx, v2id)
+	v3, _ := k.Vote(ctx, v3id)
 
 	trueVotes = append(trueVotes, b1, b2, b3, v1, v2)
 	falseVotes = append(falseVotes, b4, c1, c2, v3)
