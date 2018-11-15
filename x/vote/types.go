@@ -1,5 +1,7 @@
 package vote
 
+import sdk "github.com/cosmos/cosmos-sdk/types"
+
 // NOTE: the main type for vote lives in the top-level `types` package.
 // This is because it is embedded in multiple other types like
 // `Backing` and `Challenge` in other modules. So it should exist
@@ -20,5 +22,17 @@ func DefaultMsgParams() MsgParams {
 		MaxCommentLength: 340,
 		MinEvidenceCount: 0,
 		MaxEvidenceCount: 10,
+	}
+}
+
+// Params holds parameters for voting
+type Params struct {
+	ChallengerRewardPoolShare sdk.Dec
+}
+
+// DefaultParams is the default parameters for voting
+func DefaultParams() Params {
+	return Params{
+		ChallengerRewardPoolShare: sdk.NewDecWithPrec(75, 2), // 75%
 	}
 }

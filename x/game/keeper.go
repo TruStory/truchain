@@ -23,7 +23,6 @@ type ReadKeeper interface {
 type WriteKeeper interface {
 	ReadKeeper
 
-	AddAmount(ctx sdk.Context, gameID int64, amount sdk.Coin) (int64, sdk.Error)
 	Create(ctx sdk.Context, storyID int64, creator sdk.AccAddress) (int64, sdk.Error)
 	Set(ctx sdk.Context, game Game)
 	Update(ctx sdk.Context, gameID int64, amount sdk.Coin) (int64, sdk.Error)
@@ -154,24 +153,6 @@ func (k Keeper) Update(
 	k.Set(ctx, game)
 
 	return game.ID, nil
-}
-
-// AddAmount adds an amount to the reward pool
-func (k Keeper) AddAmount(
-	ctx sdk.Context, gameID int64, amount sdk.Coin) (int64, sdk.Error) {
-
-	game, err := k.Get(ctx, gameID)
-	if err != nil {
-		return 0, err
-	}
-
-	// add amount to reward pool
-	game.Pool = game.Pool.Plus(amount)
-
-	// update existing game in KVStore
-	k.Set(ctx, game)
-
-	return 0, nil
 }
 
 // ============================================================================

@@ -46,7 +46,6 @@ func ErrGameNotStarted(storyID int64) sdk.Error {
 			fmt.Sprintf("%d", storyID))
 }
 
-// TODO: make better after interface, add vote result
 // ErrVoteHandler returns an unknown Vote type error
 func ErrVoteHandler(vote interface{}) sdk.Error {
 	if mType := reflect.TypeOf(vote); mType != nil {
@@ -56,13 +55,3 @@ func ErrVoteHandler(vote interface{}) sdk.Error {
 
 	return sdk.NewError(DefaultCodespace, CodeUnknownVote, "Unknown Vote type")
 }
-
-// ErrInvalidVote returns when a vote in not supported
-// func ErrInvalidVote(vote interface{}, result bool) sdk.Error {
-// 	if mType := reflect.TypeOf(vote); mType != nil {
-// 		errMsg := mType.Name() + " cannot vote " + strconv.FormatBool(result)
-// 		return sdk.NewError(DefaultCodespace, CodeInvalidVote, errMsg)
-// 	}
-
-// 	return sdk.NewError(DefaultCodespace, CodeInvalidVote, "Invalid vote")
-// }
