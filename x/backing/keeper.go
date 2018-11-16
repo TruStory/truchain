@@ -25,12 +25,10 @@ type WriteKeeper interface {
 	ReadKeeper
 
 	Create(
-		ctx sdk.Context,
-		storyID int64,
-		amount sdk.Coin,
-		creator sdk.AccAddress,
-		duration time.Duration,
+		ctx sdk.Context, storyID int64, amount sdk.Coin, creator sdk.AccAddress, duration time.Duration,
 	) (int64, sdk.Error)
+
+	Update(ctx sdk.Context, backing Backing)
 
 	NewResponseEndBlock(ctx sdk.Context) sdk.Tags
 }
@@ -130,6 +128,20 @@ func (k Keeper) Create(
 	k.backingsList.Append(ctx, k, storyID, creator, backing.ID)
 
 	return backing.ID, nil
+}
+
+// Update updates an existing backing
+func (k Keeper) Update(ctx sdk.Context, backing Backing) {
+	newBacking := Backing{
+		Vote:     backing.Vote,
+		StoryID:  backing.StoryID,
+		Interest: backing.Interest,
+		Expires:  backing.Expires,
+		Params:   backing.Params,
+		Period:   backing.Period,
+	}
+
+	k.setBacking(ctx, newBacking)
 }
 
 // Backing gets the backing at the current index from the KVStore

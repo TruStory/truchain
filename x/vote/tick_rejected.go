@@ -8,8 +8,9 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/bank"
 )
 
-func rejectedStoryRewardPool(
-	ctx sdk.Context, bankKeeper bank.Keeper, trueVotes []interface{}, falseVotes []interface{}) (pool sdk.Coin, err sdk.Error) {
+func rejectedPool(
+	ctx sdk.Context, trueVotes []interface{}, falseVotes []interface{}, pool *sdk.Coin) (
+	err sdk.Error) {
 
 	// people who voted TRUE / lost the game
 	for _, vote := range trueVotes {
@@ -17,18 +18,16 @@ func rejectedStoryRewardPool(
 
 		case backing.Backing:
 			// forfeit backing and inflationary rewards, add to pool
-			pool = pool.Plus(v.Amount).Plus(v.Interest)
+			*pool = (*pool).Plus(v.Amount).Plus(v.Interest)
 
 		case app.Vote:
 			// add vote fee to reward pool
-			pool = pool.Plus(v.Amount)
+			*pool = (*pool).Plus(v.Amount)
 
 		default:
-			err = ErrVoteHandler(v)
-		}
-
-		if err != nil {
-			return pool, err
+			if err = ErrVoteHandler(v); err != nil {
+				return err
+			}
 		}
 	}
 
@@ -38,7 +37,7 @@ func rejectedStoryRewardPool(
 
 		case backing.Backing:
 			// slash inflationary rewards and add to pool, bad boy
-			pool = pool.Plus(v.Interest)
+			*pool = (*pool).Plus(v.Interest)
 
 		case challenge.Challenge:
 			// do nothing
@@ -49,18 +48,16 @@ func rejectedStoryRewardPool(
 			// winning voters keep their stake
 
 		default:
-			err = ErrVoteHandler(v)
-		}
-
-		if err != nil {
-			return pool, err
+			if err = ErrVoteHandler(v); err != nil {
+				return err
+			}
 		}
 	}
 
-	return pool, nil
+	return nil
 }
 
-func distributeRejectedStoryRewards(
+func distributeRewardsRejected(
 	ctx sdk.Context, bankKeeper bank.Keeper, winners []interface{}, pool sdk.Coin) (err sdk.Error) {
 
 	// load default parameters
@@ -92,6 +89,9 @@ func distributeRejectedStoryRewards(
 		case challenge.Challenge:
 			// get back staked amount
 			_, _, err = bankKeeper.AddCoins(ctx, v.Creator, sdk.Coins{v.Amount})
+			if err != nil {
+				return err
+			}
 
 			// get reward (X% of pool, in proportion to stake)
 			rewardAmount := challengerRewardAmount(
@@ -104,6 +104,9 @@ func distributeRejectedStoryRewards(
 		case app.Vote:
 			// get back original staked amount
 			_, _, err = bankKeeper.AddCoins(ctx, v.Creator, sdk.Coins{v.Amount})
+			if err != nil {
+				return err
+			}
 
 			// get reward (1-X% of pool, in equal proportions)
 			rewardCoin := sdk.NewCoin(pool.Denom, voterRewardAmount)

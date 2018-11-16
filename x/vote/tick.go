@@ -71,13 +71,14 @@ func processGame(ctx sdk.Context, k Keeper, game game.Game) sdk.Error {
 	confirmed := confirmStory(trueVotes, falseVotes)
 
 	// calculate reward pool
-	rewardPool, err := rewardPool(ctx, k.bankKeeper, trueVotes, falseVotes, confirmed)
+	rewardPool, err := rewardPool(ctx, trueVotes, falseVotes, confirmed)
 	if err != nil {
 		return err
 	}
 
 	// distribute rewards
-	err = distributeRewards(ctx, k.bankKeeper, rewardPool, trueVotes, falseVotes, confirmed)
+	err = distributeRewards(
+		ctx, k.bankKeeper, rewardPool, trueVotes, falseVotes, confirmed)
 	if err != nil {
 		return err
 	}
@@ -92,22 +93,27 @@ func processGame(ctx sdk.Context, k Keeper, game game.Game) sdk.Error {
 }
 
 func rewardPool(
-	ctx sdk.Context,
-	bankKeeper bank.Keeper,
-	trueVotes []interface{},
-	falseVotes []interface{},
-	confirmed bool) (rewardPool sdk.Coin, err sdk.Error) {
+	ctx sdk.Context, trueVotes []interface{}, falseVotes []interface{}, confirmed bool) (
+	pool sdk.Coin, err sdk.Error) {
+
+	// initialize an empty reward pool, false votes will always exist
+	// because challengers with implicit false votes will always exist
+	v, ok := falseVotes[0].(app.Voter)
+	if !ok {
+		return pool, sdk.ErrInternal("Error initializing reward pool")
+	}
+	pool = sdk.NewCoin(v.AmountDenom(), sdk.ZeroInt())
 
 	if confirmed {
-		rewardPool, err = confirmedStoryRewardPool(ctx, bankKeeper, falseVotes)
+		err = confirmedPool(ctx, falseVotes, &pool)
 	} else {
-		rewardPool, err = rejectedStoryRewardPool(ctx, bankKeeper, trueVotes, falseVotes)
+		err = rejectedPool(ctx, trueVotes, falseVotes, &pool)
 	}
 	if err != nil {
-		return
+		return pool, err
 	}
 
-	return
+	return pool, nil
 }
 
 func distributeRewards(
@@ -119,10 +125,10 @@ func distributeRewards(
 	confirmed bool) (err sdk.Error) {
 
 	if confirmed {
-		err = distributeConfirmedStoryRewards(
+		err = distributeRewardsConfirmed(
 			ctx, bankKeeper, trueVotes, falseVotes, rewardPool)
 	} else {
-		err = distributeRejectedStoryRewards(
+		err = distributeRewardsRejected(
 			ctx, bankKeeper, falseVotes, rewardPool)
 	}
 	if err != nil {
