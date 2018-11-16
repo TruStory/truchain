@@ -64,3 +64,8 @@ type Backing struct {
 	Params   Params        `json:"params"`
 	Period   time.Duration `json:"period"`
 }
+
+// AmountDenom implements `Voter`
+func (b Backing) AmountDenom() string {
+	return b.Amount.Denom
+}
