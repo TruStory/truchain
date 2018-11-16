@@ -17,7 +17,8 @@ type ReadKeeper interface {
 	app.ReadKeeper
 
 	Backing(ctx sdk.Context, id int64) (backing Backing, err sdk.Error)
-	Tally(ctx sdk.Context, storyID int64) (yes []Backing, no []Backing, err sdk.Error)
+	Tally(ctx sdk.Context, storyID int64) (
+		trueVotes []Backing, falseVotes []Backing, err sdk.Error)
 }
 
 // WriteKeeper defines a module interface that facilities write only access
@@ -187,7 +188,8 @@ func (k Keeper) BackingsByStory(
 
 // Tally backings for voting
 func (k Keeper) Tally(
-	ctx sdk.Context, storyID int64) (yes []Backing, no []Backing, err sdk.Error) {
+	ctx sdk.Context, storyID int64) (
+	trueVotes []Backing, falseVotes []Backing, err sdk.Error) {
 
 	err = k.backingsList.Map(ctx, k, storyID, func(backingID int64) sdk.Error {
 		backing, err := k.Backing(ctx, backingID)
@@ -196,9 +198,9 @@ func (k Keeper) Tally(
 		}
 
 		if backing.Vote.Vote == true {
-			yes = append(yes, backing)
+			trueVotes = append(trueVotes, backing)
 		} else {
-			no = append(no, backing)
+			falseVotes = append(falseVotes, backing)
 		}
 
 		return nil

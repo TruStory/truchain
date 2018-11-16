@@ -10,9 +10,9 @@ import (
 )
 
 func TestValidCreateVoteMsg(t *testing.T) {
-	ctx, _, sk, ck, _, _, _, _ := mockDB()
+	ctx, k, ck := mockDB()
 
-	storyID := createFakeStory(ctx, sk, ck)
+	storyID := createFakeStory(ctx, k.storyKeeper, ck)
 	amount := sdk.NewCoin("testcoin", sdk.NewInt(5))
 	creator := sdk.AccAddress([]byte{1, 2})
 	cnn, _ := url.Parse("http://www.cnn.com")
@@ -28,9 +28,9 @@ func TestValidCreateVoteMsg(t *testing.T) {
 }
 
 func TestInValidCreateVoteMsg(t *testing.T) {
-	ctx, _, sk, ck, _, _, _, _ := mockDB()
+	ctx, k, ck := mockDB()
 
-	storyID := createFakeStory(ctx, sk, ck)
+	storyID := createFakeStory(ctx, k.storyKeeper, ck)
 	amount := sdk.NewCoin("testcoin", sdk.NewInt(5))
 	creator := sdk.AccAddress([]byte{1, 2})
 	cnn, _ := url.Parse("http://www.cnn.com")

@@ -45,8 +45,8 @@ type Keeper struct {
 	activeGamesQueueKey sdk.StoreKey
 
 	accountKeeper   auth.AccountKeeper
-	backingKeeper   backing.ReadKeeper
-	challengeKeeper challenge.ReadKeeper
+	backingKeeper   backing.WriteKeeper
+	challengeKeeper challenge.WriteKeeper
 	storyKeeper     story.WriteKeeper
 	gameKeeper      game.WriteKeeper
 	bankKeeper      bank.Keeper
@@ -59,8 +59,8 @@ func NewKeeper(
 	storeKey sdk.StoreKey,
 	activeGamesQueueKey sdk.StoreKey,
 	accountKeeper auth.AccountKeeper,
-	backingKeeper backing.ReadKeeper,
-	challengeKeeper challenge.ReadKeeper,
+	backingKeeper backing.WriteKeeper,
+	challengeKeeper challenge.WriteKeeper,
 	storyKeeper story.WriteKeeper,
 	gameKeeper game.WriteKeeper,
 	bankKeeper bank.Keeper,

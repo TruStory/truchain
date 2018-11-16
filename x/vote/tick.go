@@ -92,6 +92,40 @@ func processGame(ctx sdk.Context, k Keeper, game game.Game) sdk.Error {
 	return nil
 }
 
+// tally backings, challenges, and token votes into two true and false vote arrays
+func tally(
+	ctx sdk.Context,
+	k Keeper,
+	game game.Game) (trueVotes []interface{}, falseVotes []interface{}, err sdk.Error) {
+
+	// tally backings
+	trueBackings, falseBackings, err := k.backingKeeper.Tally(ctx, game.StoryID)
+	if err != nil {
+		return
+	}
+	trueVotes = append(trueVotes, trueBackings)
+	falseVotes = append(falseVotes, falseBackings)
+
+	// tally challenges
+	_, falseChallenges, err := k.challengeKeeper.Tally(ctx, game.ID)
+	if err != nil {
+		return
+	}
+	// spew.Dump(trueChallenges)
+	// trueVotes = append(trueVotes, trueChallenges)
+	falseVotes = append(falseVotes, falseChallenges)
+
+	// tally token votes
+	trueTokenVotes, falseTokenVotes, err := k.Tally(ctx, game.ID)
+	if err != nil {
+		return
+	}
+	trueVotes = append(trueVotes, trueTokenVotes)
+	falseVotes = append(falseVotes, falseTokenVotes)
+
+	return trueVotes, falseVotes, nil
+}
+
 func rewardPool(
 	ctx sdk.Context, trueVotes []interface{}, falseVotes []interface{}, confirmed bool) (
 	pool sdk.Coin, err sdk.Error) {
@@ -136,39 +170,6 @@ func distributeRewards(
 	}
 
 	return
-}
-
-// tally backings, challenges, and token votes into two true and false vote arrays
-func tally(
-	ctx sdk.Context,
-	k Keeper,
-	game game.Game) (trueVotes []interface{}, falseVotes []interface{}, err sdk.Error) {
-
-	// tally backings
-	trueBackings, falseBackings, err := k.backingKeeper.Tally(ctx, game.StoryID)
-	if err != nil {
-		return
-	}
-	trueVotes = append(trueVotes, trueBackings)
-	falseVotes = append(falseVotes, falseBackings)
-
-	// tally challenges
-	trueChallenges, falseChallenges, err := k.challengeKeeper.Tally(ctx, game.ID)
-	if err != nil {
-		return
-	}
-	trueVotes = append(trueVotes, trueChallenges)
-	falseVotes = append(falseVotes, falseChallenges)
-
-	// tally token votes
-	trueTokenVotes, falseTokenVotes, err := k.Tally(ctx, game.ID)
-	if err != nil {
-		return
-	}
-	trueVotes = append(trueVotes, trueTokenVotes)
-	falseVotes = append(falseVotes, falseTokenVotes)
-
-	return trueVotes, falseVotes, nil
 }
 
 // determine if a story is confirmed or rejected

@@ -11,22 +11,22 @@ import (
 )
 
 func TestCreateVoteMsg(t *testing.T) {
-	ctx, k, sk, ck, challengeKeeper, bankKeeper, _, _ := mockDB()
+	ctx, k, ck := mockDB()
 
 	h := NewHandler(k)
 	assert.NotNil(t, h)
 
-	storyID := createFakeStory(ctx, sk, ck)
+	storyID := createFakeStory(ctx, k.storyKeeper, ck)
 	amount := sdk.NewCoin("trudex", sdk.NewInt(15))
 	creator := sdk.AccAddress([]byte{1, 2})
 	cnn, _ := url.Parse("http://www.cnn.com")
 	evidence := []url.URL{*cnn}
 
 	// give user some funds
-	bankKeeper.AddCoins(ctx, creator, sdk.Coins{amount.Plus(amount)})
+	k.bankKeeper.AddCoins(ctx, creator, sdk.Coins{amount.Plus(amount)})
 
 	argument := "test argument"
-	_, err := challengeKeeper.Create(ctx, storyID, amount, argument, creator, evidence)
+	_, err := k.challengeKeeper.Create(ctx, storyID, amount, argument, creator, evidence)
 	assert.Nil(t, err)
 
 	msg := NewCreateVoteMsg(storyID, amount, "valid comment", creator, evidence, true)
