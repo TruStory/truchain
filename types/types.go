@@ -37,6 +37,7 @@ func (t Timestamp) Update(blockHeader abci.Header) Timestamp {
 // Voter defined an interface for any kind of voter, implicit or explicit
 type Voter interface {
 	AmountDenom() string
+	VoteCreator() sdk.AccAddress
 }
 
 // Vote is a type that defines a vote on a story
@@ -60,4 +61,9 @@ func NewVote(
 // AmountDenom implements `Voter`
 func (v Vote) AmountDenom() string {
 	return v.Amount.Denom
+}
+
+// VoteCreator implements `Voter`
+func (v Vote) VoteCreator() sdk.AccAddress {
+	return v.Creator
 }

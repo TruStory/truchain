@@ -2,6 +2,7 @@ package challenge
 
 import (
 	app "github.com/TruStory/truchain/types"
+	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
 // Challenge defines a user's challenge on a story
@@ -12,6 +13,11 @@ type Challenge struct {
 // AmountDenom implements `Voter`
 func (c Challenge) AmountDenom() string {
 	return c.Amount.Denom
+}
+
+// VoteCreator implements `Voter`
+func (c Challenge) VoteCreator() sdk.AccAddress {
+	return c.Creator
 }
 
 // MsgParams holds default parameters for a challenge

@@ -11,7 +11,7 @@ import (
 )
 
 func TestCreateVoteMsg(t *testing.T) {
-	ctx, k, sk, ck, challengeKeeper, bankKeeper, _ := mockDB()
+	ctx, k, sk, ck, challengeKeeper, bankKeeper, _, _ := mockDB()
 
 	h := NewHandler(k)
 	assert.NotNil(t, h)
