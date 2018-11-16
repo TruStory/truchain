@@ -68,7 +68,7 @@ func processGame(ctx sdk.Context, k Keeper, game game.Game) sdk.Error {
 	}
 
 	// check if story was confirmed
-	confirmed := confirmStory(trueVotes, falseVotes)
+	confirmed := confirmStory(ctx, k.accountKeeper, trueVotes, falseVotes)
 
 	// calculate reward pool
 	rewardPool, err := rewardPool(ctx, trueVotes, falseVotes, confirmed)
@@ -172,10 +172,15 @@ func tally(
 }
 
 // determine if a story is confirmed or rejected
-func confirmStory(trueVotes []interface{}, falseVotes []interface{}) (confirmed bool) {
+func confirmStory(
+	ctx sdk.Context,
+	accountKeeper auth.AccountKeeper,
+	trueVotes []interface{},
+	falseVotes []interface{}) (confirmed bool) {
+
 	// calculate weighted votes
-	trueWeight := weightedVote(trueVotes)
-	falseWeight := weightedVote(falseVotes)
+	trueWeight := weightedVote(ctx, accountKeeper, trueVotes)
+	falseWeight := weightedVote(ctx, accountKeeper, falseVotes)
 
 	// majority wins
 	if trueWeight.GT(falseWeight) {
@@ -188,12 +193,16 @@ func confirmStory(trueVotes []interface{}, falseVotes []interface{}) (confirmed 
 }
 
 // calculate weighted vote based on user's total category coin balance
-func weightedVote(votes []interface{}) sdk.Int {
+func weightedVote(
+	ctx sdk.Context, accountKeeper auth.AccountKeeper, votes []interface{}) sdk.Int {
+
 	weightedAmount := sdk.ZeroInt()
+
 	for _, vote := range votes {
-		v := vote.(app.Vote)
-		user := auth.NewBaseAccountWithAddress(v.Creator)
-		categoryCoins := user.Coins.AmountOf(v.Amount.Denom)
+		v := vote.(app.Voter)
+
+		user := accountKeeper.GetAccount(ctx, v.VoteCreator())
+		categoryCoins := user.GetCoins().AmountOf(v.AmountDenom())
 		weightedAmount = weightedAmount.Add(categoryCoins)
 	}
 

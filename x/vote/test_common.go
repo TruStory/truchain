@@ -23,7 +23,13 @@ import (
 )
 
 func mockDB() (
-	sdk.Context, Keeper, s.Keeper, c.Keeper, challenge.Keeper, bank.Keeper, backing.Keeper) {
+	sdk.Context,
+	Keeper,
+	s.Keeper,
+	c.Keeper,
+	challenge.Keeper,
+	bank.Keeper,
+	backing.Keeper, auth.AccountKeeper) {
 
 	db := dbm.NewMemDB()
 
@@ -63,9 +69,18 @@ func mockDB() (
 	gameKeeper := game.NewKeeper(gameKey, gameQueueKey, gameQueueKey, sk, bankKeeper, codec)
 	challengeKeeper := challenge.NewKeeper(challengeKey, gameQueueKey, bankKeeper, gameKeeper, sk, codec)
 
-	k := NewKeeper(voteKey, gameQueueKey, backingKeeper, challengeKeeper, sk, gameKeeper, bankKeeper, codec)
+	k := NewKeeper(
+		voteKey,
+		gameQueueKey,
+		am,
+		backingKeeper,
+		challengeKeeper,
+		sk,
+		gameKeeper,
+		bankKeeper,
+		codec)
 
-	return ctx, k, sk, ck, challengeKeeper, bankKeeper, backingKeeper
+	return ctx, k, sk, ck, challengeKeeper, bankKeeper, backingKeeper, am
 }
 
 func createFakeStory(ctx sdk.Context, sk s.Keeper, ck c.WriteKeeper) int64 {

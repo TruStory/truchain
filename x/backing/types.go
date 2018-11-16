@@ -69,3 +69,8 @@ type Backing struct {
 func (b Backing) AmountDenom() string {
 	return b.Amount.Denom
 }
+
+// VoteCreator implements `Voter`
+func (b Backing) VoteCreator() sdk.AccAddress {
+	return b.Creator
+}
