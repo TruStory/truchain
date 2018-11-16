@@ -9,44 +9,35 @@ import (
 )
 
 // calculate reward pool for a confirmed story
-func confirmedStoryRewardPool(
-	ctx sdk.Context, bankKeeper bank.Keeper, falseVotes []interface{}) (
-	pool sdk.Coin, err sdk.Error) {
-
-	// initialize an empty reward pool
-	v, ok := falseVotes[0].(app.Voter)
-	if !ok {
-		return pool, sdk.ErrInternal("Error initializing reward pool")
-	}
-	pool = sdk.NewCoin(v.AmountDenom(), sdk.ZeroInt())
+func confirmedPool(
+	ctx sdk.Context, falseVotes []interface{}, pool *sdk.Coin) (err sdk.Error) {
 
 	for _, vote := range falseVotes {
 		switch v := vote.(type) {
 
 		case backing.Backing:
 			// slash inflationary rewards and add to pool
-			pool = pool.Plus(v.Interest)
+			*pool = (*pool).Plus(v.Interest)
 
 		case challenge.Challenge:
 			// add challenge amount to reward pool
-			pool = pool.Plus(v.Amount)
+			*pool = (*pool).Plus(v.Amount)
 
 		case app.Vote:
 			// add vote fee to reward pool
-			pool = pool.Plus(v.Amount)
+			*pool = (*pool).Plus(v.Amount)
 
 		default:
-			err = ErrVoteHandler(v)
-			if err != nil {
-				return pool, err
+			if err = ErrVoteHandler(v); err != nil {
+				return err
 			}
 		}
 	}
 
-	return pool, nil
+	return nil
 }
 
-func distributeConfirmedStoryRewards(
+func distributeRewardsConfirmed(
 	ctx sdk.Context,
 	bankKeeper bank.Keeper,
 	winners []interface{},
@@ -66,17 +57,21 @@ func distributeConfirmedStoryRewards(
 		case app.Vote:
 			// get back original staked amount
 			_, _, err = bankKeeper.AddCoins(ctx, v.Creator, sdk.Coins{v.Amount})
+			if err != nil {
+				return err
+			}
 
 			// get money, an equal portion of the reward pool
 			rewardCoin := sdk.NewCoin(pool.Denom, voterRewardAmount)
 			_, _, err = bankKeeper.AddCoins(ctx, v.Creator, sdk.Coins{rewardCoin})
+			if err != nil {
+				return err
+			}
 
 		default:
-			err = ErrVoteHandler(v)
-		}
-
-		if err != nil {
-			return err
+			if err = ErrVoteHandler(v); err != nil {
+				return err
+			}
 		}
 	}
 
@@ -121,6 +116,5 @@ func voterCount(winners []interface{}) (voterCount int64) {
 }
 
 func voterRewardAmount(pool sdk.Coin, voterCount int64) sdk.Int {
-
 	return pool.Amount.Div(sdk.NewInt(voterCount))
 }
