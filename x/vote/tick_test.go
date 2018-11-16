@@ -18,7 +18,7 @@ func fakeFundedCreator(ctx sdk.Context, k bank.Keeper) sdk.AccAddress {
 	creator := sdk.AccAddress(bz)
 
 	// give user some funds
-	amount := sdk.NewCoin("trudex", sdk.NewInt(15))
+	amount := sdk.NewCoin("trudex", sdk.NewInt(10))
 	k.AddCoins(ctx, creator, sdk.Coins{amount})
 
 	return creator
