@@ -87,5 +87,5 @@ func TestConfirmedStoryRewardPool(t *testing.T) {
 	pool, err := confirmedStoryRewardPool(ctx, bankKeeper, falseVotes)
 	spew.Dump(pool)
 	spew.Dump(err)
-	assert.NotNil(t, pool)
+	assert.Nil(t, pool)
 }
