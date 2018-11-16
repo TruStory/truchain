@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/davecgh/go-spew/spew"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -42,17 +43,18 @@ func TestQueue(t *testing.T) {
 
 	backingID, _ = bk.Create(ctx, storyID, amount, creator, duration)
 	_, err = bk.Backing(ctx, backingID)
+	spew.Dump(err)
 	assert.Nil(t, err)
 
 	len := bk.QueueLen(ctx)
-	assert.Equal(t, 2, len, "length of queue should be correct")
+	assert.Equal(t, 2, len)
 
 	backing, _ := bk.QueuePop(ctx)
-	assert.Equal(t, backing.ID, int64(1), "backing id should match")
+	assert.Equal(t, backing.ID, int64(1))
 
 	backing, _ = bk.QueuePop(ctx)
-	assert.Equal(t, backing.ID, int64(2), "backing id should match")
+	assert.Equal(t, backing.ID, int64(2))
 
 	len = bk.QueueLen(ctx)
-	assert.Equal(t, 0, len, "length of queue should be correct")
+	assert.Equal(t, 0, len)
 }
