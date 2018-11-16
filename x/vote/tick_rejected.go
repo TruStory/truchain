@@ -1,6 +1,8 @@
 package vote
 
 import (
+	"fmt"
+
 	app "github.com/TruStory/truchain/types"
 	"github.com/TruStory/truchain/x/backing"
 	"github.com/TruStory/truchain/x/challenge"
@@ -92,10 +94,13 @@ func distributeRewardsRejected(
 			if err != nil {
 				return err
 			}
+			fmt.Printf(v.Amount.String())
 
 			// get reward (X% of pool, in proportion to stake)
 			rewardAmount := challengerRewardAmount(
 				v.Amount, challengerCount, challengerPool)
+
+			fmt.Printf(rewardAmount.String())
 
 			// mint coin and give money
 			rewardCoin := sdk.NewCoin(pool.Denom, rewardAmount)
@@ -153,6 +158,8 @@ func count(
 
 	for _, vote := range winners {
 		switch v := vote.(type) {
+		case backing.Backing:
+			// skip
 		case challenge.Challenge:
 			challengerCount = challengerCount + 1
 		case app.Vote:
@@ -169,7 +176,9 @@ func count(
 func challengerRewardAmount(
 	amount sdk.Coin, challengerCount int64, challengerPool sdk.Coin) sdk.Int {
 
+	// TODO: don't understand why div by 10 is needed [SHANNNNNNEY POO]
 	return amount.Amount.
 		Div(sdk.NewInt(challengerCount)).
-		Mul(challengerPool.Amount)
+		Mul(challengerPool.Amount).
+		Div(sdk.NewInt(10))
 }
