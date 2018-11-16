@@ -22,14 +22,7 @@ import (
 	"github.com/tendermint/tendermint/libs/log"
 )
 
-func mockDB() (
-	sdk.Context,
-	Keeper,
-	s.Keeper,
-	c.Keeper,
-	challenge.Keeper,
-	bank.Keeper,
-	backing.Keeper, auth.AccountKeeper) {
+func mockDB() (sdk.Context, Keeper, c.Keeper) {
 
 	db := dbm.NewMemDB()
 
@@ -80,10 +73,10 @@ func mockDB() (
 		bankKeeper,
 		codec)
 
-	return ctx, k, sk, ck, challengeKeeper, bankKeeper, backingKeeper, am
+	return ctx, k, ck
 }
 
-func createFakeStory(ctx sdk.Context, sk s.Keeper, ck c.WriteKeeper) int64 {
+func createFakeStory(ctx sdk.Context, sk s.WriteKeeper, ck c.WriteKeeper) int64 {
 	body := "Body of story."
 	cat := createFakeCategory(ctx, ck)
 	creator := sdk.AccAddress([]byte{1, 2})
