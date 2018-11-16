@@ -34,10 +34,10 @@ func (t Timestamp) Update(blockHeader abci.Header) Timestamp {
 	return t
 }
 
-// TODO: implement?
-// type Voter interface {
-// 	Amount() sdk.Coin
-// }
+// Voter defined an interface for any kind of voter, implicit or explicit
+type Voter interface {
+	AmountDenom() string
+}
 
 // Vote is a type that defines a vote on a story
 type Vote struct {
@@ -55,4 +55,9 @@ func NewVote(
 	id int64, amount sdk.Coin, creator sdk.AccAddress, vote bool, timestamp Timestamp) Vote {
 
 	return Vote{id, amount, "", creator, nil, vote, timestamp}
+}
+
+// AmountDenom implements `Voter`
+func (v Vote) AmountDenom() string {
+	return v.Amount.Denom
 }

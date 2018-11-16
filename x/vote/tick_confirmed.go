@@ -1,6 +1,8 @@
 package vote
 
 import (
+	"fmt"
+
 	app "github.com/TruStory/truchain/types"
 	"github.com/TruStory/truchain/x/backing"
 	"github.com/TruStory/truchain/x/challenge"
@@ -10,7 +12,13 @@ import (
 
 // calculate reward pool for a confirmed story
 func confirmedStoryRewardPool(
-	ctx sdk.Context, bankKeeper bank.Keeper, falseVotes []interface{}) (pool sdk.Coin, err sdk.Error) {
+	ctx sdk.Context, bankKeeper bank.Keeper, falseVotes []interface{}) (sdk.Coin, sdk.Error) {
+
+	v, ok := falseVotes[0].(app.Voter)
+	fmt.Println(v.AmountDenom(), ok)
+
+	// initialize an empty reward pool
+	pool := sdk.NewCoin(v.AmountDenom(), sdk.ZeroInt())
 
 	for _, vote := range falseVotes {
 		switch v := vote.(type) {
@@ -28,12 +36,12 @@ func confirmedStoryRewardPool(
 			pool = pool.Plus(v.Amount)
 
 		default:
-			err = ErrVoteHandler(v)
+			err := ErrVoteHandler(v)
+			if err != nil {
+				return pool, err
+			}
 		}
 
-		if err != nil {
-			return pool, err
-		}
 	}
 
 	return pool, nil

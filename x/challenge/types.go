@@ -9,6 +9,11 @@ type Challenge struct {
 	app.Vote
 }
 
+// AmountDenom implements `Voter`
+func (c Challenge) AmountDenom() string {
+	return c.Amount.Denom
+}
+
 // MsgParams holds default parameters for a challenge
 type MsgParams struct {
 	MinArgumentLength int // min number of chars for argument
