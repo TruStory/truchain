@@ -6,7 +6,9 @@ import (
 	"testing"
 	"time"
 
+	app "github.com/TruStory/truchain/types"
 	"github.com/TruStory/truchain/x/backing"
+	"github.com/TruStory/truchain/x/challenge"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/bank"
 	"github.com/stretchr/testify/assert"
@@ -103,15 +105,6 @@ func TestConfirmedStoryRewardPool(t *testing.T) {
 	assert.Equal(t, "35trudex", pool.String())
 }
 
-func TestRejectedStoryRewardPool(t *testing.T) {
-	ctx, trueVotes, falseVotes, _ := createFakeConfirmedStory()
-
-	pool := sdk.NewCoin("trudex", sdk.ZeroInt())
-
-	rejectedPool(ctx, trueVotes, falseVotes, &pool)
-	assert.Equal(t, "70trudex", pool.String())
-}
-
 func TestDistributeRewardsConfirmed(t *testing.T) {
 	ctx, trueVotes, falseVotes, bankKeeper := createFakeConfirmedStory()
 	pool := sdk.NewCoin("trudex", sdk.ZeroInt())
@@ -126,35 +119,128 @@ func TestDistributeRewardsConfirmed(t *testing.T) {
 	coins = bankKeeper.GetCoins(ctx, winningBacker1.Creator)
 	assert.Equal(t, "0", coins.AmountOf("trudex").String())
 
-	// winningBacker2 := trueVotes[1].(backing.Backing)
-	// coins = bankKeeper.GetCoins(ctx, winningBacker2.Creator)
-	// assert.Equal(t, "0", coins.AmountOf("trudex").String())
+	winningBacker2 := trueVotes[1].(backing.Backing)
+	coins = bankKeeper.GetCoins(ctx, winningBacker2.Creator)
+	assert.Equal(t, "0", coins.AmountOf("trudex").String())
 
-	// winningBacker3 := trueVotes[2].(backing.Backing)
-	// coins = bankKeeper.GetCoins(ctx, winningBacker3.Creator)
-	// assert.Equal(t, "0", coins.AmountOf("trudex").String())
+	winningBacker3 := trueVotes[2].(backing.Backing)
+	coins = bankKeeper.GetCoins(ctx, winningBacker3.Creator)
+	assert.Equal(t, "0", coins.AmountOf("trudex").String())
 
-	// winningVoter1 := trueVotes[3].(app.Vote)
-	// coins := bankKeeper.GetCoins(ctx, winningVoter1.Creator)
-	// assert.Equal(t, "27.5", coins.AmountOf("trudex").String())
+	winningVoter1 := trueVotes[3].(app.Vote)
+	coins = bankKeeper.GetCoins(ctx, winningVoter1.Creator)
+	assert.Equal(t, "27", coins.AmountOf("trudex").String())
 
-	// winningVoter2 := trueVotes[4].(app.Vote)
-	// coins = bankKeeper.GetCoins(ctx, winningVoter2.Creator)
-	// assert.Equal(t, "27.5", coins.AmountOf("trudex").String())
+	winningVoter2 := trueVotes[4].(app.Vote)
+	coins = bankKeeper.GetCoins(ctx, winningVoter2.Creator)
+	assert.Equal(t, "27", coins.AmountOf("trudex").String())
 
-	// losingBacker1 := falseVotes[0].(backing.Backing)
-	// coins = bankKeeper.GetCoins(ctx, losingBacker1.Creator)
-	// assert.Equal(t, "10", coins.AmountOf("trudex").String())
+	losingBacker1 := falseVotes[0].(backing.Backing)
+	coins = bankKeeper.GetCoins(ctx, losingBacker1.Creator)
+	assert.Equal(t, "10", coins.AmountOf("trudex").String())
 
-	// losingChallenger1 := falseVotes[1].(challenge.Challenge)
-	// coins = bankKeeper.GetCoins(ctx, losingChallenger1.Creator)
-	// assert.Equal(t, "0", coins.AmountOf("trudex").String())
+	losingChallenger1 := falseVotes[1].(challenge.Challenge)
+	coins = bankKeeper.GetCoins(ctx, losingChallenger1.Creator)
+	assert.Equal(t, "0", coins.AmountOf("trudex").String())
 
-	// losingChallenger2 := falseVotes[2].(challenge.Challenge)
-	// coins = bankKeeper.GetCoins(ctx, losingChallenger2.Creator)
-	// assert.Equal(t, "0", coins.AmountOf("trudex").String())
+	losingChallenger2 := falseVotes[2].(challenge.Challenge)
+	coins = bankKeeper.GetCoins(ctx, losingChallenger2.Creator)
+	assert.Equal(t, "0", coins.AmountOf("trudex").String())
 
-	// losingVoter1 := falseVotes[3].(app.Vote)
-	// coins = bankKeeper.GetCoins(ctx, losingVoter1.Creator)
-	// assert.Equal(t, "0", coins.AmountOf("trudex").String())
+	losingVoter1 := falseVotes[3].(app.Vote)
+	coins = bankKeeper.GetCoins(ctx, losingVoter1.Creator)
+	assert.Equal(t, "0", coins.AmountOf("trudex").String())
+}
+
+func TestRejectedStoryRewardPool(t *testing.T) {
+	ctx, trueVotes, falseVotes, _ := createFakeConfirmedStory()
+
+	pool := sdk.NewCoin("trudex", sdk.ZeroInt())
+
+	rejectedPool(ctx, trueVotes, falseVotes, &pool)
+	assert.Equal(t, "70trudex", pool.String())
+}
+
+func TestChallengerPool(t *testing.T) {
+	ctx, trueVotes, falseVotes, _ := createFakeConfirmedStory()
+	pool := sdk.NewCoin("trudex", sdk.ZeroInt())
+	rejectedPool(ctx, trueVotes, falseVotes, &pool)
+
+	coin := challengerPool(pool, DefaultParams())
+	assert.Equal(t, "52trudex", coin.String())
+}
+
+func TestVoterPool(t *testing.T) {
+	ctx, trueVotes, falseVotes, _ := createFakeConfirmedStory()
+	pool := sdk.NewCoin("trudex", sdk.ZeroInt())
+	rejectedPool(ctx, trueVotes, falseVotes, &pool)
+
+	coin := voterPool(pool, DefaultParams())
+	assert.Equal(t, "18trudex", coin.String())
+}
+
+func TestCount(t *testing.T) {
+	ctx, trueVotes, falseVotes, _ := createFakeConfirmedStory()
+	pool := sdk.NewCoin("trudex", sdk.ZeroInt())
+	rejectedPool(ctx, trueVotes, falseVotes, &pool)
+
+	cCount, vCount, _ := count(falseVotes)
+	assert.Equal(t, int64(2), cCount)
+	assert.Equal(t, int64(1), vCount)
+}
+
+func TestChallengerRewardAmount(t *testing.T) {
+	coin := challengerRewardAmount(
+		sdk.NewCoin("trudex", sdk.NewInt(10)),
+		int64(2),
+		sdk.NewCoin("trudex", sdk.NewInt(52)))
+
+	assert.Equal(t, "26", coin.String())
+}
+
+func TestDistributeRewardsRejected(t *testing.T) {
+	ctx, trueVotes, falseVotes, bankKeeper := createFakeConfirmedStory()
+	pool := sdk.NewCoin("trudex", sdk.ZeroInt())
+	rejectedPool(ctx, trueVotes, falseVotes, &pool)
+
+	err := distributeRewardsRejected(ctx, bankKeeper, falseVotes, pool)
+	assert.Nil(t, err)
+
+	coins := sdk.Coins{}
+
+	winningBacker1 := falseVotes[0].(backing.Backing)
+	coins = bankKeeper.GetCoins(ctx, winningBacker1.Creator)
+	assert.Equal(t, "10", coins.AmountOf("trudex").String())
+
+	winningChallenger1 := falseVotes[1].(challenge.Challenge)
+	coins = bankKeeper.GetCoins(ctx, winningChallenger1.Creator)
+	assert.Equal(t, "36", coins.AmountOf("trudex").String())
+
+	winningChallenger2 := falseVotes[2].(challenge.Challenge)
+	coins = bankKeeper.GetCoins(ctx, winningChallenger2.Creator)
+	assert.Equal(t, "36", coins.AmountOf("trudex").String())
+
+	winningVoter1 := falseVotes[3].(app.Vote)
+	coins = bankKeeper.GetCoins(ctx, winningVoter1.Creator)
+	assert.Equal(t, "28", coins.AmountOf("trudex").String())
+
+	losingBacker1 := trueVotes[0].(backing.Backing)
+	coins = bankKeeper.GetCoins(ctx, losingBacker1.Creator)
+	assert.Equal(t, "0", coins.AmountOf("trudex").String())
+
+	losingBacker2 := trueVotes[1].(backing.Backing)
+	coins = bankKeeper.GetCoins(ctx, losingBacker2.Creator)
+	assert.Equal(t, "0", coins.AmountOf("trudex").String())
+
+	losingBacker3 := trueVotes[2].(backing.Backing)
+	coins = bankKeeper.GetCoins(ctx, losingBacker3.Creator)
+	assert.Equal(t, "0", coins.AmountOf("trudex").String())
+
+	losingVoter1 := trueVotes[3].(app.Vote)
+	coins = bankKeeper.GetCoins(ctx, losingVoter1.Creator)
+	assert.Equal(t, "0", coins.AmountOf("trudex").String())
+
+	losingVoter2 := trueVotes[4].(app.Vote)
+	coins = bankKeeper.GetCoins(ctx, losingVoter2.Creator)
+	assert.Equal(t, "0", coins.AmountOf("trudex").String())
 }
