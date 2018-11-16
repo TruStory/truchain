@@ -100,6 +100,12 @@ func (k Keeper) Create(
 		return
 	}
 
+	// subtract principal from user
+	_, _, err = k.bankKeeper.SubtractCoins(ctx, creator, sdk.Coins{principal})
+	if err != nil {
+		return
+	}
+
 	// mint category coin from interest earned
 	interest := getInterest(
 		cat, amount, duration, DefaultMsgParams().MaxPeriod, params)
