@@ -144,8 +144,8 @@ func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *T
 		app.keyChallenge, app.keyGameQueue, app.coinKeeper,
 		app.gameKeeper, app.storyKeeper, codec)
 	app.voteKeeper = vote.NewKeeper(
-		app.keyVote, app.keyActiveGameQueue, app.backingKeeper, app.challengeKeeper,
-		app.storyKeeper, app.gameKeeper, app.coinKeeper, codec)
+		app.keyVote, app.keyActiveGameQueue, app.accountKeeper, app.backingKeeper,
+		app.challengeKeeper, app.storyKeeper, app.gameKeeper, app.coinKeeper, codec)
 
 	// register message routes for modifying state
 	app.Router().

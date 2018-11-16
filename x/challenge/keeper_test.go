@@ -61,6 +61,29 @@ func TestChallengesByGame(t *testing.T) {
 	assert.Equal(t, 2, len(challenges))
 }
 
+func TestTally(t *testing.T) {
+	ctx, k, sk, ck, bankKeeper := mockDB()
+
+	storyID := createFakeStory(ctx, sk, ck)
+	amount := sdk.NewCoin("trudex", sdk.NewInt(15))
+	argument := "test argument is long enough"
+	cnn, _ := url.Parse("http://www.cnn.com")
+	evidence := []url.URL{*cnn}
+
+	creator := sdk.AccAddress([]byte{1, 2})
+	bankKeeper.AddCoins(ctx, creator, sdk.Coins{amount})
+
+	creator2 := sdk.AccAddress([]byte{3, 4})
+	bankKeeper.AddCoins(ctx, creator2, sdk.Coins{amount})
+
+	k.Create(ctx, storyID, amount, argument, creator, evidence)
+	k.Create(ctx, storyID, amount, argument, creator2, evidence)
+
+	falseVotes, _ := k.Tally(ctx, storyID)
+
+	assert.Equal(t, 2, len(falseVotes))
+}
+
 func TestNewChallenge_Duplicate(t *testing.T) {
 	ctx, k, sk, ck, bankKeeper := mockDB()
 
