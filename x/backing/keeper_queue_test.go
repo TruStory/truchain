@@ -43,7 +43,7 @@ func TestQueue(t *testing.T) {
 	_, err := bk.Backing(ctx, backingID)
 	assert.Nil(t, err)
 
-	backingID, err = bk.Create(ctx, storyID, amount, creator2, duration)
+	backingID, _ = bk.Create(ctx, storyID, amount, creator2, duration)
 	_, err = bk.Backing(ctx, backingID)
 	assert.Nil(t, err)
 

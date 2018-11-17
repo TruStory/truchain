@@ -211,7 +211,7 @@ func validateStake(
 	}
 
 	// check if challenge amount is greater than minimum stake
-	minStake := sdk.NewCoin(coinName, game.DefaultMsgParams().MinChallengeStake)
+	minStake := sdk.NewCoin(coinName, game.DefaultParams().MinChallengeStake)
 	if amount.IsLT(minStake) {
 		return sdk.ErrInsufficientFunds("Does not meet minimum stake amount.")
 	}
