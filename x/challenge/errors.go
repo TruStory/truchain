@@ -13,6 +13,7 @@ const (
 
 	CodeNotFound           sdk.CodeType = 1001
 	CodeInvalidMsg         sdk.CodeType = 1002
+	CodeInvalidVote        sdk.CodeType = 1003
 	CodeDuplicateChallenge sdk.CodeType = 1004
 )
 
@@ -38,4 +39,12 @@ func ErrDuplicateChallenge(gameID int64, user sdk.AccAddress) sdk.Error {
 		DefaultCodespace,
 		CodeDuplicateChallenge,
 		"Game with id "+fmt.Sprintf("%d", gameID)+" has already been challenged by "+user.String())
+}
+
+// ErrInvalidVote creates an error when Challenge has a true vote
+func ErrInvalidVote() sdk.Error {
+	return sdk.NewError(
+		DefaultCodespace,
+		CodeInvalidMsg,
+		"Challenges cannot have a TRUE vote.")
 }

@@ -28,7 +28,7 @@ func confirmedPool(
 			*pool = (*pool).Plus(v.Amount)
 
 		default:
-			if err = ErrVoteHandler(v); err != nil {
+			if err = ErrInvalidVote(v); err != nil {
 				return err
 			}
 		}
@@ -69,7 +69,7 @@ func distributeRewardsConfirmed(
 			}
 
 		default:
-			if err = ErrVoteHandler(v); err != nil {
+			if err = ErrInvalidVote(v); err != nil {
 				return err
 			}
 		}
@@ -93,7 +93,7 @@ func distributeRewardsConfirmed(
 			// don't get their stake back
 
 		default:
-			err = ErrVoteHandler(v)
+			err = ErrInvalidVote(v)
 		}
 
 		if err != nil {

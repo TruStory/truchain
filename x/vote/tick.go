@@ -19,8 +19,6 @@ func (k Keeper) NewResponseEndBlock(ctx sdk.Context) sdk.Tags {
 		panic(err)
 	}
 
-	// TODO: maybe tags should return err?
-
 	return sdk.NewTags()
 }
 
@@ -144,7 +142,7 @@ func rewardPool(
 	// because challengers with implicit false votes will always exist
 	v, ok := falseVotes[0].(app.Voter)
 	if !ok {
-		return pool, sdk.ErrInternal("Error initializing reward pool")
+		return pool, ErrInvalidVote(v, "Initializing reward pool")
 	}
 	pool = sdk.NewCoin(v.AmountDenom(), sdk.ZeroInt())
 
@@ -220,8 +218,7 @@ func weightedVote(
 	for _, vote := range votes {
 		v, ok := vote.(app.Voter)
 		if !ok {
-			// TODO: add to errors
-			return weightedAmount, sdk.ErrInternal("Received an invalid vote type")
+			return weightedAmount, ErrInvalidVote(v)
 		}
 
 		user := accountKeeper.GetAccount(ctx, v.VoteCreator())
