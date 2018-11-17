@@ -68,7 +68,10 @@ func processGame(ctx sdk.Context, k Keeper, game game.Game) sdk.Error {
 	}
 
 	// check if story was confirmed
-	confirmed := confirmStory(ctx, k.accountKeeper, trueVotes, falseVotes)
+	confirmed, err := confirmStory(ctx, k.accountKeeper, trueVotes, falseVotes)
+	if err != nil {
+		return err
+	}
 
 	// calculate reward pool
 	rewardPool, err := rewardPool(ctx, trueVotes, falseVotes, confirmed)
@@ -94,34 +97,41 @@ func processGame(ctx sdk.Context, k Keeper, game game.Game) sdk.Error {
 
 // tally backings, challenges, and token votes into two true and false vote arrays
 func tally(
-	ctx sdk.Context,
-	k Keeper,
-	game game.Game) (trueVotes []interface{}, falseVotes []interface{}, err sdk.Error) {
+	ctx sdk.Context, k Keeper, game game.Game) (
+	trueVotes []interface{}, falseVotes []interface{}, err sdk.Error) {
 
 	// tally backings
 	trueBackings, falseBackings, err := k.backingKeeper.Tally(ctx, game.StoryID)
 	if err != nil {
 		return
 	}
-	trueVotes = append(trueVotes, trueBackings)
-	falseVotes = append(falseVotes, falseBackings)
+	for _, v := range trueBackings {
+		trueVotes = append(trueVotes, v)
+	}
+	for _, v := range falseBackings {
+		falseVotes = append(falseVotes, v)
+	}
 
 	// tally challenges
-	_, falseChallenges, err := k.challengeKeeper.Tally(ctx, game.ID)
+	falseChallenges, err := k.challengeKeeper.Tally(ctx, game.ID)
 	if err != nil {
 		return
 	}
-	// spew.Dump(trueChallenges)
-	// trueVotes = append(trueVotes, trueChallenges)
-	falseVotes = append(falseVotes, falseChallenges)
+	for _, v := range falseChallenges {
+		falseVotes = append(falseVotes, v)
+	}
 
 	// tally token votes
 	trueTokenVotes, falseTokenVotes, err := k.Tally(ctx, game.ID)
 	if err != nil {
 		return
 	}
-	trueVotes = append(trueVotes, trueTokenVotes)
-	falseVotes = append(falseVotes, falseTokenVotes)
+	for _, v := range trueTokenVotes {
+		trueVotes = append(trueVotes, v)
+	}
+	for _, v := range falseTokenVotes {
+		falseVotes = append(falseVotes, v)
+	}
 
 	return trueVotes, falseVotes, nil
 }
@@ -177,35 +187,47 @@ func confirmStory(
 	ctx sdk.Context,
 	accountKeeper auth.AccountKeeper,
 	trueVotes []interface{},
-	falseVotes []interface{}) (confirmed bool) {
+	falseVotes []interface{}) (confirmed bool, err sdk.Error) {
 
 	// calculate weighted votes
-	trueWeight := weightedVote(ctx, accountKeeper, trueVotes)
-	falseWeight := weightedVote(ctx, accountKeeper, falseVotes)
+	trueWeight, err := weightedVote(ctx, accountKeeper, trueVotes)
+	if err != nil {
+		return confirmed, err
+	}
+
+	falseWeight, err := weightedVote(ctx, accountKeeper, falseVotes)
+	if err != nil {
+		return confirmed, err
+	}
 
 	// majority wins
 	if trueWeight.GT(falseWeight) {
 		// story confirmed
-		return true
+		return true, nil
 	}
 
 	// story rejected
-	return false
+	return false, nil
 }
 
 // calculate weighted vote based on user's total category coin balance
 func weightedVote(
-	ctx sdk.Context, accountKeeper auth.AccountKeeper, votes []interface{}) sdk.Int {
+	ctx sdk.Context, accountKeeper auth.AccountKeeper, votes []interface{}) (
+	weightedAmount sdk.Int, err sdk.Error) {
 
-	weightedAmount := sdk.ZeroInt()
+	weightedAmount = sdk.ZeroInt()
 
 	for _, vote := range votes {
-		v := vote.(app.Voter)
+		v, ok := vote.(app.Voter)
+		if !ok {
+			// TODO: add to errors
+			return weightedAmount, sdk.ErrInternal("Received an invalid vote type")
+		}
 
 		user := accountKeeper.GetAccount(ctx, v.VoteCreator())
 		categoryCoins := user.GetCoins().AmountOf(v.AmountDenom())
 		weightedAmount = weightedAmount.Add(categoryCoins)
 	}
 
-	return weightedAmount
+	return weightedAmount, nil
 }
