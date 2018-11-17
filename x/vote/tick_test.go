@@ -26,7 +26,7 @@ func fakeFundedCreator(ctx sdk.Context, k bank.Keeper) sdk.AccAddress {
 	return creator
 }
 
-func createFakeConfirmedStory() (
+func fakeValidationGame() (
 	ctx sdk.Context, trueVotes []interface{}, falseVotes []interface{}, k Keeper) {
 
 	ctx, k, ck := mockDB()
@@ -95,43 +95,30 @@ func createFakeConfirmedStory() (
 	return
 }
 
-// func TestTally(t *testing.T) {
-// 	ctx, _, _, k := createFakeConfirmedStory()
+func TestProcessGame(t *testing.T) {
+	ctx, _, _, k := fakeValidationGame()
 
-// 	gameID := int64(1)
-// 	game, _ := k.gameKeeper.Get(ctx, gameID)
+	gameID := int64(1)
+	game, _ := k.gameKeeper.Get(ctx, gameID)
 
-// 	trueVotes, _, _ := tally(ctx, k, game)
+	err := processGame(ctx, k, game)
+	assert.Nil(t, err)
+}
 
-// 	spew.Dump(trueVotes)
+func TestTally(t *testing.T) {
+	ctx, _, _, k := fakeValidationGame()
 
-// 	var backers, challengers, voters int
+	gameID := int64(1)
+	game, _ := k.gameKeeper.Get(ctx, gameID)
 
-// 	for _, vote := range trueVotes {
-// 		switch vote.(type) {
+	trueVotes, falseVotes, _ := tally(ctx, k, game)
 
-// 		case backing.Backing:
-// 			backers = backers + 1
-// 		case challenge.Challenge:
-// 			challengers = challengers + 1
-// 		case app.Vote:
-// 			voters = voters + 1
-
-// 		default:
-// 			fmt.Print("should not happen")
-// 		}
-// 	}
-
-// 	// FIXE: should be 5,4
-// 	assert.Equal(t, 3, backers)
-// 	assert.Equal(t, 0, challengers)
-// 	assert.Equal(t, 2, voters)
-// 	// assert.Equal(t, 5, len(trueVotes))
-// 	// assert.Equal(t, 4, len(falseVotes))
-// }
+	assert.Equal(t, 5, len(trueVotes))
+	assert.Equal(t, 4, len(falseVotes))
+}
 
 func TestRewardPool(t *testing.T) {
-	ctx, trueVotes, falseVotes, _ := createFakeConfirmedStory()
+	ctx, trueVotes, falseVotes, _ := fakeValidationGame()
 
 	expectedPool := sdk.NewCoin("trudex", sdk.NewInt(35))
 
@@ -140,7 +127,7 @@ func TestRewardPool(t *testing.T) {
 }
 
 func TestDistributeRewards(t *testing.T) {
-	ctx, trueVotes, falseVotes, k := createFakeConfirmedStory()
+	ctx, trueVotes, falseVotes, k := fakeValidationGame()
 
 	pool := sdk.NewCoin("trudex", sdk.NewInt(35))
 
@@ -149,21 +136,24 @@ func TestDistributeRewards(t *testing.T) {
 }
 
 func TestConfirmStory(t *testing.T) {
-	ctx, trueVotes, falseVotes, k := createFakeConfirmedStory()
+	ctx, trueVotes, falseVotes, k := fakeValidationGame()
 
-	confirmed := confirmStory(ctx, k.accountKeeper, trueVotes, falseVotes)
+	confirmed, _ := confirmStory(ctx, k.accountKeeper, trueVotes, falseVotes)
 	assert.True(t, confirmed)
 }
 
 func TestWeightedVote(t *testing.T) {
-	ctx, trueVotes, falseVotes, k := createFakeConfirmedStory()
+	ctx, trueVotes, falseVotes, k := fakeValidationGame()
 
-	assert.Equal(t, sdk.NewInt(50), weightedVote(ctx, k.accountKeeper, trueVotes))
-	assert.Equal(t, sdk.NewInt(40), weightedVote(ctx, k.accountKeeper, falseVotes))
+	trueWeights, _ := weightedVote(ctx, k.accountKeeper, trueVotes)
+	falseWeights, _ := weightedVote(ctx, k.accountKeeper, falseVotes)
+
+	assert.Equal(t, sdk.NewInt(50), trueWeights)
+	assert.Equal(t, sdk.NewInt(40), falseWeights)
 }
 
 func TestConfirmedStoryRewardPool(t *testing.T) {
-	ctx, _, falseVotes, _ := createFakeConfirmedStory()
+	ctx, _, falseVotes, _ := fakeValidationGame()
 
 	pool := sdk.NewCoin("trudex", sdk.ZeroInt())
 
@@ -172,7 +162,7 @@ func TestConfirmedStoryRewardPool(t *testing.T) {
 }
 
 func TestDistributeRewardsConfirmed(t *testing.T) {
-	ctx, trueVotes, falseVotes, k := createFakeConfirmedStory()
+	ctx, trueVotes, falseVotes, k := fakeValidationGame()
 	pool := sdk.NewCoin("trudex", sdk.ZeroInt())
 	confirmedPool(ctx, falseVotes, &pool)
 
@@ -219,7 +209,7 @@ func TestDistributeRewardsConfirmed(t *testing.T) {
 }
 
 func TestRejectedStoryRewardPool(t *testing.T) {
-	ctx, trueVotes, falseVotes, _ := createFakeConfirmedStory()
+	ctx, trueVotes, falseVotes, _ := fakeValidationGame()
 
 	pool := sdk.NewCoin("trudex", sdk.ZeroInt())
 
@@ -228,7 +218,7 @@ func TestRejectedStoryRewardPool(t *testing.T) {
 }
 
 func TestChallengerPool(t *testing.T) {
-	ctx, trueVotes, falseVotes, _ := createFakeConfirmedStory()
+	ctx, trueVotes, falseVotes, _ := fakeValidationGame()
 	pool := sdk.NewCoin("trudex", sdk.ZeroInt())
 	rejectedPool(ctx, trueVotes, falseVotes, &pool)
 
@@ -237,7 +227,7 @@ func TestChallengerPool(t *testing.T) {
 }
 
 func TestVoterPool(t *testing.T) {
-	ctx, trueVotes, falseVotes, _ := createFakeConfirmedStory()
+	ctx, trueVotes, falseVotes, _ := fakeValidationGame()
 	pool := sdk.NewCoin("trudex", sdk.ZeroInt())
 	rejectedPool(ctx, trueVotes, falseVotes, &pool)
 
@@ -246,7 +236,7 @@ func TestVoterPool(t *testing.T) {
 }
 
 func TestCount(t *testing.T) {
-	ctx, trueVotes, falseVotes, _ := createFakeConfirmedStory()
+	ctx, trueVotes, falseVotes, _ := fakeValidationGame()
 	pool := sdk.NewCoin("trudex", sdk.ZeroInt())
 	rejectedPool(ctx, trueVotes, falseVotes, &pool)
 
@@ -265,7 +255,7 @@ func TestChallengerRewardAmount(t *testing.T) {
 }
 
 func TestDistributeRewardsRejected(t *testing.T) {
-	ctx, trueVotes, falseVotes, k := createFakeConfirmedStory()
+	ctx, trueVotes, falseVotes, k := fakeValidationGame()
 	pool := sdk.NewCoin("trudex", sdk.ZeroInt())
 	rejectedPool(ctx, trueVotes, falseVotes, &pool)
 
