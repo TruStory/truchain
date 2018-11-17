@@ -28,11 +28,13 @@ func DefaultMsgParams() MsgParams {
 // Params holds parameters for voting
 type Params struct {
 	ChallengerRewardPoolShare sdk.Dec
+	SupermajorityPercent      sdk.Dec
 }
 
 // DefaultParams is the default parameters for voting
 func DefaultParams() Params {
 	return Params{
 		ChallengerRewardPoolShare: sdk.NewDecWithPrec(75, 2), // 75%
+		SupermajorityPercent:      sdk.NewDecWithPrec(51, 2), // 51%
 	}
 }
