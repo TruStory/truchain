@@ -31,7 +31,7 @@ func TestUpdateGame(t *testing.T) {
 	gameID, _ = k.Update(ctx, gameID, amount)
 
 	game, _ := k.Get(ctx, gameID)
-	assert.Equal(t, sdk.NewInt(50), game.Pool.Amount)
+	assert.Equal(t, sdk.NewInt(50), game.Threshold.Amount)
 }
 
 func TestSetGame(t *testing.T) {

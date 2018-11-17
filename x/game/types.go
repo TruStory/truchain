@@ -9,14 +9,13 @@ import (
 
 // Game defines a validation game on a story
 type Game struct {
-	ID              int64          `json:"id"`
-	StoryID         int64          `json:"story_id"`
-	Creator         sdk.AccAddress `json:"creator"`
-	ExpiresTime     time.Time      `json:"expires_time,omitempty"`
-	EndTime         time.Time      `json:"end_time,omitempty"`
-	Pool            sdk.Coin       `json:"pool"`
-	ThresholdAmount sdk.Int        `json:"threshold_amount"`
-	Timestamp       app.Timestamp  `json:"timestamp"`
+	ID          int64          `json:"id"`
+	StoryID     int64          `json:"story_id"`
+	Creator     sdk.AccAddress `json:"creator"`
+	ExpiresTime time.Time      `json:"expires_time,omitempty"`
+	EndTime     time.Time      `json:"end_time,omitempty"`
+	Threshold   sdk.Coin       `json:"threshold,omitempty"`
+	Timestamp   app.Timestamp  `json:"timestamp"`
 }
 
 // Started returns true if a validation game has started
@@ -37,17 +36,17 @@ func (g Game) Ended(time time.Time) bool {
 	return false
 }
 
-// MsgParams holds default parameters for a game
-type MsgParams struct {
+// Params holds default parameters for a game
+type Params struct {
 	MinChallengeStake sdk.Int       // min amount required to challenge
 	Expires           time.Duration // time to expire if threshold not met
 	Period            time.Duration // length of challenge game / voting period
 	Threshold         int64         // amount at which game begins
 }
 
-// DefaultMsgParams creates a new MsgParams type with defaults
-func DefaultMsgParams() MsgParams {
-	return MsgParams{
+// DefaultParams creates a new MsgParams type with defaults
+func DefaultParams() Params {
+	return Params{
 		MinChallengeStake: sdk.NewInt(10),
 		Expires:           10 * 24 * time.Hour,
 		Period:            30 * 24 * time.Hour,
