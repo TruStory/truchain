@@ -44,7 +44,7 @@ func processGame(ctx sdk.Context, k Keeper, game game.Game) sdk.Error {
 	return nil
 }
 
-// tally backings, challenges, and token votes into two true and false vote arrays
+// tally backings, challenges, and token votes into two true and false slices
 func tally(
 	ctx sdk.Context, k Keeper, game game.Game) (
 	trueVotes []interface{}, falseVotes []interface{}, err sdk.Error) {
@@ -149,8 +149,12 @@ func confirmStory(
 		return confirmed, err
 	}
 
-	// majority wins
-	if trueWeight.GT(falseWeight) {
+	totalWeight := trueWeight.Add(falseWeight)
+	trueWeightDec := sdk.NewDecFromInt(trueWeight)
+	truePercentOfTotal := trueWeightDec.QuoInt(totalWeight)
+
+	// supermajority wins
+	if truePercentOfTotal.GT(DefaultParams().SupermajorityPercent) {
 		// story confirmed
 		return true, nil
 	}
