@@ -1,8 +1,6 @@
 package vote
 
 import (
-	"fmt"
-
 	app "github.com/TruStory/truchain/types"
 	"github.com/TruStory/truchain/x/backing"
 	"github.com/TruStory/truchain/x/challenge"
@@ -27,7 +25,7 @@ func rejectedPool(
 			*pool = (*pool).Plus(v.Amount)
 
 		default:
-			if err = ErrVoteHandler(v); err != nil {
+			if err = ErrInvalidVote(v); err != nil {
 				return err
 			}
 		}
@@ -50,7 +48,7 @@ func rejectedPool(
 			// winning voters keep their stake
 
 		default:
-			if err = ErrVoteHandler(v); err != nil {
+			if err = ErrInvalidVote(v); err != nil {
 				return err
 			}
 		}
@@ -60,7 +58,8 @@ func rejectedPool(
 }
 
 func distributeRewardsRejected(
-	ctx sdk.Context, bankKeeper bank.Keeper, winners []interface{}, pool sdk.Coin) (err sdk.Error) {
+	ctx sdk.Context, bankKeeper bank.Keeper, winners []interface{}, pool sdk.Coin) (
+	err sdk.Error) {
 
 	// load default parameters
 	params := DefaultParams()
@@ -94,13 +93,10 @@ func distributeRewardsRejected(
 			if err != nil {
 				return err
 			}
-			fmt.Printf(v.Amount.String())
 
 			// get reward (X% of pool, in proportion to stake)
 			rewardAmount := challengerRewardAmount(
 				v.Amount, challengerCount, challengerPool)
-
-			fmt.Printf(rewardAmount.String())
 
 			// mint coin and give money
 			rewardCoin := sdk.NewCoin(pool.Denom, rewardAmount)
@@ -118,7 +114,7 @@ func distributeRewardsRejected(
 			_, _, err = bankKeeper.AddCoins(ctx, v.Creator, sdk.Coins{rewardCoin})
 
 		default:
-			err = ErrVoteHandler(v)
+			err = ErrInvalidVote(v)
 		}
 
 		if err != nil {
@@ -154,7 +150,8 @@ func voterPool(pool sdk.Coin, params Params) sdk.Coin {
 
 // count challengers and voters
 func count(
-	winners []interface{}) (challengerCount int64, voterCount int64, err sdk.Error) {
+	winners []interface{}) (
+	challengerCount int64, voterCount int64, err sdk.Error) {
 
 	for _, vote := range winners {
 		switch v := vote.(type) {
@@ -165,7 +162,7 @@ func count(
 		case app.Vote:
 			voterCount = voterCount + 1
 		default:
-			return 0, 0, ErrVoteHandler(v)
+			return 0, 0, ErrInvalidVote(v)
 		}
 	}
 
@@ -176,7 +173,6 @@ func count(
 func challengerRewardAmount(
 	amount sdk.Coin, challengerCount int64, challengerPool sdk.Coin) sdk.Int {
 
-	// TODO: don't understand why div by 10 is needed [SHANNNNNNEY POO]
 	return amount.Amount.
 		Div(sdk.NewInt(challengerCount)).
 		Mul(challengerPool.Amount).

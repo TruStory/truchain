@@ -3,6 +3,7 @@ package vote
 import (
 	"fmt"
 	"reflect"
+	"strings"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
@@ -46,10 +47,10 @@ func ErrGameNotStarted(storyID int64) sdk.Error {
 			fmt.Sprintf("%d", storyID))
 }
 
-// ErrVoteHandler returns an unknown Vote type error
-func ErrVoteHandler(vote interface{}) sdk.Error {
+// ErrInvalidVote returns an unknown Vote type error
+func ErrInvalidVote(vote interface{}, msg ...string) sdk.Error {
 	if mType := reflect.TypeOf(vote); mType != nil {
-		errMsg := "Unrecognized Vote type: " + mType.Name()
+		errMsg := "Unrecognized Vote type: " + mType.Name() + strings.Join(msg, ",")
 		return sdk.NewError(DefaultCodespace, CodeUnknownVote, errMsg)
 	}
 
