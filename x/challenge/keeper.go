@@ -178,8 +178,7 @@ func (k Keeper) Tally(
 		}
 
 		if challenge.Vote.Vote == true {
-			// TODO: return a trustory err
-			return sdk.ErrInternal("Challenges cannot have a TRUE vote")
+			return ErrInvalidVote()
 		}
 		falseVotes = append(falseVotes, challenge)
 
