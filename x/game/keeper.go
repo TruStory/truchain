@@ -81,10 +81,9 @@ func (k Keeper) Create(
 		k.GetNextID(ctx),
 		storyID,
 		creator,
-		ctx.BlockHeader().Time.Add(DefaultMsgParams().Expires),
+		ctx.BlockHeader().Time.Add(DefaultParams().Expires),
 		time.Time{},
 		emptyPool,
-		thresholdAmount(story),
 		app.NewTimestamp(ctx.BlockHeader()),
 	}
 
@@ -123,25 +122,27 @@ func (k Keeper) Set(ctx sdk.Context, game Game) {
 		k.GetCodec().MustMarshalBinary(game))
 }
 
-// Update the reward pool and start game if threshold is reached
+// Update the threshold pool and start game if threshold is reached
 func (k Keeper) Update(
 	ctx sdk.Context, gameID int64, amount sdk.Coin) (int64, sdk.Error) {
+
+	params := DefaultParams()
 
 	game, err := k.Get(ctx, gameID)
 	if err != nil {
 		return 0, err
 	}
 
-	// add amount to reward pool
-	game.Pool = game.Pool.Plus(amount)
+	// add amount to threshold pool
+	game.Threshold = game.Threshold.Plus(amount)
 
 	// if threshold is reached, start challenge and allow voting to begin
-	if game.Pool.Amount.GT(game.ThresholdAmount) {
+	if game.Threshold.Amount.GT(sdk.NewInt(params.Threshold)) {
 		err = k.storyKeeper.StartGame(ctx, game.StoryID)
 		if err != nil {
 			return 0, err
 		}
-		game.EndTime = ctx.BlockHeader().Time.Add(DefaultMsgParams().Period)
+		game.EndTime = ctx.BlockHeader().Time.Add(params.Period)
 
 		// push game id onto active game queue that will get checked on each tick
 		activeQueueStore := ctx.KVStore(k.activeQueueKey)
@@ -153,11 +154,4 @@ func (k Keeper) Update(
 	k.Set(ctx, game)
 
 	return game.ID, nil
-}
-
-// ============================================================================
-
-// [Shane] TODO: https://github.com/TruStory/truchain/issues/50
-func thresholdAmount(s story.Story) sdk.Int {
-	return sdk.NewInt(10)
 }
