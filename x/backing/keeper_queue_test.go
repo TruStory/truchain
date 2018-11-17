@@ -3,6 +3,7 @@ package backing
 import (
 	"testing"
 
+	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -24,37 +25,37 @@ func TestQueue_ErrQueueEmpty(t *testing.T) {
 	assert.Equal(t, ErrNotFound(5).Code(), err.Code(), "backing should not be found")
 }
 
-// FIX ME SHANNNNNNNE
+func TestQueue(t *testing.T) {
+	ctx, bk, sk, ck, bankKeeper, _ := mockDB()
 
-// func TestQueue(t *testing.T) {
-// 	ctx, bk, sk, ck, bankKeeper, _ := mockDB()
+	// create fake backing
+	storyID := createFakeStory(ctx, sk, ck)
+	amount, _ := sdk.ParseCoin("5trudex")
+	creator1 := sdk.AccAddress([]byte{1, 2})
+	creator2 := sdk.AccAddress([]byte{1, 2})
+	duration := DefaultMsgParams().MinPeriod
 
-// 	// create fake backing
-// 	storyID := createFakeStory(ctx, sk, ck)
-// 	amount, _ := sdk.ParseCoin("5trudex")
-// 	creator := sdk.AccAddress([]byte{1, 2})
-// 	duration := DefaultMsgParams().MinPeriod
-// 	bankKeeper.AddCoins(ctx, creator, sdk.Coins{amount})
+	bankKeeper.AddCoins(ctx, creator1, sdk.Coins{amount})
+	bankKeeper.AddCoins(ctx, creator2, sdk.Coins{amount})
 
-// 	// create backings
-// 	backingID, _ := bk.Create(ctx, storyID, amount, creator, duration)
-// 	_, err := bk.Backing(ctx, backingID)
-// 	assert.Nil(t, err)
+	// create backings
+	backingID, _ := bk.Create(ctx, storyID, amount, creator1, duration)
+	_, err := bk.Backing(ctx, backingID)
+	assert.Nil(t, err)
 
-// 	backingID, _ = bk.Create(ctx, storyID, amount, creator, duration)
-// 	_, err = bk.Backing(ctx, backingID)
-// 	spew.Dump(err)
-// 	assert.Nil(t, err)
+	backingID, err = bk.Create(ctx, storyID, amount, creator2, duration)
+	_, err = bk.Backing(ctx, backingID)
+	assert.Nil(t, err)
 
-// 	len := bk.QueueLen(ctx)
-// 	assert.Equal(t, 2, len)
+	len := bk.QueueLen(ctx)
+	assert.Equal(t, 2, len)
 
-// 	backing, _ := bk.QueuePop(ctx)
-// 	assert.Equal(t, backing.ID, int64(1))
+	backing, _ := bk.QueuePop(ctx)
+	assert.Equal(t, backing.ID, int64(1))
 
-// 	backing, _ = bk.QueuePop(ctx)
-// 	assert.Equal(t, backing.ID, int64(2))
+	backing, _ = bk.QueuePop(ctx)
+	assert.Equal(t, backing.ID, int64(2))
 
-// 	len = bk.QueueLen(ctx)
-// 	assert.Equal(t, 0, len)
-// }
+	len = bk.QueueLen(ctx)
+	assert.Equal(t, 0, len)
+}
