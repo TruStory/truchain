@@ -155,8 +155,8 @@ func confirmStory(
 	trueWeightDec := sdk.NewDecFromInt(trueWeight)
 	truePercentOfTotal := trueWeightDec.QuoInt(totalWeight)
 
-	// supermajority wins
-	if truePercentOfTotal.GT(DefaultParams().SupermajorityPercent) {
+	// majority weight wins
+	if truePercentOfTotal.GT(DefaultParams().MajorityPercent) {
 		// story confirmed
 		return true, nil
 	}
