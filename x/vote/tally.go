@@ -138,17 +138,19 @@ func confirmStory(
 	trueVotes []interface{},
 	falseVotes []interface{}) (confirmed bool, err sdk.Error) {
 
-	// calculate weighted votes
+	// calculate weighted true votes
 	trueWeight, err := weightedVote(ctx, accountKeeper, trueVotes)
 	if err != nil {
 		return confirmed, err
 	}
 
+	// calculate weighted false votes
 	falseWeight, err := weightedVote(ctx, accountKeeper, falseVotes)
 	if err != nil {
 		return confirmed, err
 	}
 
+	// calculate what percent of the total weight is true votes
 	totalWeight := trueWeight.Add(falseWeight)
 	trueWeightDec := sdk.NewDecFromInt(trueWeight)
 	truePercentOfTotal := trueWeightDec.QuoInt(totalWeight)
@@ -170,14 +172,20 @@ func weightedVote(
 
 	weightedAmount = sdk.ZeroInt()
 
+	// iterate through all types of votes
 	for _, vote := range votes {
 		v, ok := vote.(app.Voter)
 		if !ok {
 			return weightedAmount, ErrInvalidVote(v)
 		}
 
+		// get the user account
 		user := accountKeeper.GetAccount(ctx, v.VoteCreator())
+
+		// get user's total amount of category coins for story category
 		categoryCoins := user.GetCoins().AmountOf(v.AmountDenom())
+
+		// total up the amount of category coins all voters have
 		weightedAmount = weightedAmount.Add(categoryCoins)
 	}
 
