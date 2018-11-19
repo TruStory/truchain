@@ -1,7 +1,6 @@
 package vote
 
 import (
-	app "github.com/TruStory/truchain/types"
 	"github.com/TruStory/truchain/x/backing"
 	"github.com/TruStory/truchain/x/challenge"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -18,11 +17,11 @@ func rejectedPool(
 
 		case backing.Backing:
 			// forfeit backing and inflationary rewards, add to pool
-			*pool = (*pool).Plus(v.Amount).Plus(v.Interest)
+			*pool = (*pool).Plus(v.Amount()).Plus(v.Interest)
 
-		case app.Vote:
+		case TokenVote:
 			// add vote fee to reward pool
-			*pool = (*pool).Plus(v.Amount)
+			*pool = (*pool).Plus(v.Amount())
 
 		default:
 			if err = ErrInvalidVote(v); err != nil {
@@ -43,7 +42,7 @@ func rejectedPool(
 			// do nothing
 			// winning challengers keep their stake
 
-		case app.Vote:
+		case TokenVote:
 			// do nothing
 			// winning voters keep their stake
 
@@ -85,33 +84,33 @@ func distributeRewardsRejected(
 
 		case backing.Backing:
 			// get back stake amount because we are nice
-			_, _, err = bankKeeper.AddCoins(ctx, v.Creator, sdk.Coins{v.Amount})
+			_, _, err = bankKeeper.AddCoins(ctx, v.Creator(), sdk.Coins{v.Amount()})
 
 		case challenge.Challenge:
 			// get back staked amount
-			_, _, err = bankKeeper.AddCoins(ctx, v.Creator, sdk.Coins{v.Amount})
+			_, _, err = bankKeeper.AddCoins(ctx, v.Creator(), sdk.Coins{v.Amount()})
 			if err != nil {
 				return err
 			}
 
 			// get reward (X% of pool, in proportion to stake)
 			rewardAmount := challengerRewardAmount(
-				v.Amount, challengerCount, challengerPool)
+				v.Amount(), challengerCount, challengerPool)
 
 			// mint coin and give money
 			rewardCoin := sdk.NewCoin(pool.Denom, rewardAmount)
-			_, _, err = bankKeeper.AddCoins(ctx, v.Creator, sdk.Coins{rewardCoin})
+			_, _, err = bankKeeper.AddCoins(ctx, v.Creator(), sdk.Coins{rewardCoin})
 
-		case app.Vote:
+		case TokenVote:
 			// get back original staked amount
-			_, _, err = bankKeeper.AddCoins(ctx, v.Creator, sdk.Coins{v.Amount})
+			_, _, err = bankKeeper.AddCoins(ctx, v.Creator(), sdk.Coins{v.Amount()})
 			if err != nil {
 				return err
 			}
 
 			// get reward (1-X% of pool, in equal proportions)
 			rewardCoin := sdk.NewCoin(pool.Denom, voterRewardAmount)
-			_, _, err = bankKeeper.AddCoins(ctx, v.Creator, sdk.Coins{rewardCoin})
+			_, _, err = bankKeeper.AddCoins(ctx, v.Creator(), sdk.Coins{rewardCoin})
 
 		default:
 			err = ErrInvalidVote(v)
@@ -159,7 +158,7 @@ func count(
 			// skip
 		case challenge.Challenge:
 			challengerCount = challengerCount + 1
-		case app.Vote:
+		case TokenVote:
 			voterCount = voterCount + 1
 		default:
 			return 0, 0, ErrInvalidVote(v)

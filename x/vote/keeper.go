@@ -19,10 +19,10 @@ import (
 type ReadKeeper interface {
 	app.ReadKeeper
 
-	Vote(ctx sdk.Context, id int64) (vote app.Vote, err sdk.Error)
-	VotesByGame(ctx sdk.Context, gameID int64) ([]app.Vote, sdk.Error)
+	TokenVote(ctx sdk.Context, id int64) (vote TokenVote, err sdk.Error)
+	TokenVotesByGame(ctx sdk.Context, gameID int64) ([]TokenVote, sdk.Error)
 	Tally(ctx sdk.Context, gameID int64) (
-		trueVotes []app.Vote, falseVotes []app.Vote, err sdk.Error)
+		trueVotes []TokenVote, falseVotes []TokenVote, err sdk.Error)
 }
 
 // WriteKeeper defines a module interface that facilities write only access to truchain data
@@ -127,17 +127,19 @@ func (k Keeper) Create(
 		Timestamp: app.NewTimestamp(ctx.BlockHeader()),
 	}
 
-	// persist vote
-	k.set(ctx, vote)
+	tokenVote := TokenVote{vote}
 
-	// persist game <-> vote association
+	// persist vote
+	k.set(ctx, tokenVote)
+
+	// persist game <-> tokenVote association
 	k.voterList.Append(ctx, k, story.GameID, creator, vote.ID)
 
 	return vote.ID, nil
 }
 
-// Vote returns a `Vote` from the KVStore
-func (k Keeper) Vote(ctx sdk.Context, id int64) (vote app.Vote, err sdk.Error) {
+// TokenVote returns a `TokenVote` from the KVStore
+func (k Keeper) TokenVote(ctx sdk.Context, id int64) (vote TokenVote, err sdk.Error) {
 	store := k.GetStore(ctx)
 	bz := store.Get(k.GetIDKey(id))
 	if bz == nil {
@@ -148,13 +150,13 @@ func (k Keeper) Vote(ctx sdk.Context, id int64) (vote app.Vote, err sdk.Error) {
 	return vote, nil
 }
 
-// VotesByGame returns a list of votes for a given game
-func (k Keeper) VotesByGame(
-	ctx sdk.Context, gameID int64) (votes []app.Vote, err sdk.Error) {
+// TokenVotesByGame returns a list of votes for a given game
+func (k Keeper) TokenVotesByGame(
+	ctx sdk.Context, gameID int64) (votes []TokenVote, err sdk.Error) {
 
 	// iterate over voter list and get votes
 	err = k.voterList.Map(ctx, k, gameID, func(voterID int64) sdk.Error {
-		vote, err := k.Vote(ctx, voterID)
+		vote, err := k.TokenVote(ctx, voterID)
 		if err != nil {
 			return err
 		}
@@ -173,18 +175,18 @@ func (k Keeper) VotesByGame(
 // Tally votes
 func (k Keeper) Tally(
 	ctx sdk.Context, gameID int64) (
-	trueVotes []app.Vote, falseVotes []app.Vote, err sdk.Error) {
+	trueVotes []TokenVote, falseVotes []TokenVote, err sdk.Error) {
 
 	err = k.voterList.Map(ctx, k, gameID, func(voteID int64) sdk.Error {
-		vote, err := k.Vote(ctx, voteID)
+		tokenVote, err := k.TokenVote(ctx, voteID)
 		if err != nil {
 			return err
 		}
 
-		if vote.Vote == true {
-			trueVotes = append(trueVotes, vote)
+		if tokenVote.VoteChoice() == true {
+			trueVotes = append(trueVotes, tokenVote)
 		} else {
-			falseVotes = append(falseVotes, vote)
+			falseVotes = append(falseVotes, tokenVote)
 		}
 
 		return nil
@@ -200,9 +202,9 @@ func (k Keeper) Tally(
 // ============================================================================
 
 // saves a `Vote` in the KVStore
-func (k Keeper) set(ctx sdk.Context, vote app.Vote) {
+func (k Keeper) set(ctx sdk.Context, vote TokenVote) {
 	store := k.GetStore(ctx)
 	store.Set(
-		k.GetIDKey(vote.ID),
+		k.GetIDKey(vote.ID()),
 		k.GetCodec().MustMarshalBinary(vote))
 }

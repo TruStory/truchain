@@ -34,6 +34,20 @@ func TestGetBacking_ErrBackingNotFound(t *testing.T) {
 	assert.Equal(t, ErrNotFound(id).Code(), err.Code(), "Should get error")
 }
 
+func TestToggleVote(t *testing.T) {
+	ctx, bk, sk, ck, bankKeeper, _ := mockDB()
+	storyID := createFakeStory(ctx, sk, ck)
+	amount, _ := sdk.ParseCoin("5trudex")
+	creator := sdk.AccAddress([]byte{1, 2})
+	duration := DefaultMsgParams().MinPeriod
+	bankKeeper.AddCoins(ctx, creator, sdk.Coins{amount})
+	backingID, _ := bk.Create(ctx, storyID, amount, creator, duration)
+
+	bk.ToggleVote(ctx, backingID)
+	b, _ := bk.Backing(ctx, backingID)
+	assert.False(t, b.VoteChoice())
+}
+
 func TestGetBacking(t *testing.T) {
 	ctx, bk, sk, ck, bankKeeper, _ := mockDB()
 	storyID := createFakeStory(ctx, sk, ck)
@@ -43,8 +57,9 @@ func TestGetBacking(t *testing.T) {
 	bankKeeper.AddCoins(ctx, creator, sdk.Coins{amount})
 	backingID, _ := bk.Create(ctx, storyID, amount, creator, duration)
 
-	_, err := bk.Backing(ctx, backingID)
+	b, err := bk.Backing(ctx, backingID)
 	assert.Nil(t, err)
+	assert.Equal(t, int64(1), b.ID())
 }
 
 func TestBackingsByStory(t *testing.T) {

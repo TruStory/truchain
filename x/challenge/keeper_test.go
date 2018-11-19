@@ -35,7 +35,7 @@ func TestNewGetChallenge(t *testing.T) {
 	challenge, err := k.Challenge(ctx, id)
 	assert.Nil(t, err)
 
-	assert.Equal(t, amount, challenge.Amount, "should match")
+	assert.Equal(t, amount, challenge.Amount())
 }
 
 func TestChallengesByGame(t *testing.T) {
@@ -129,7 +129,7 @@ func TestNewChallenge_MultipleChallengers(t *testing.T) {
 
 	challenge, _ := k.Challenge(ctx, id)
 
-	_, err = k.Create(ctx, challenge.ID, amount, argument, creator2, evidence)
+	_, err = k.Create(ctx, challenge.ID(), amount, argument, creator2, evidence)
 	assert.Nil(t, err)
 	assert.False(t, bankKeeper.HasCoins(ctx, creator2, sdk.Coins{amount}))
 

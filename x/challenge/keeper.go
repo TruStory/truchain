@@ -110,11 +110,11 @@ func (k Keeper) Create(
 
 	// persist challenge
 	k.GetStore(ctx).Set(
-		k.GetIDKey(challenge.ID),
+		k.GetIDKey(challenge.ID()),
 		k.GetCodec().MustMarshalBinary(challenge))
 
 	// persist challenge <-> game mapping
-	k.challengeList.Append(ctx, k, gameID, creator, challenge.ID)
+	k.challengeList.Append(ctx, k, gameID, creator, challenge.ID())
 
 	// deduct challenge amount from user
 	_, _, err = k.bankKeeper.SubtractCoins(ctx, creator, sdk.Coins{amount})
@@ -128,7 +128,7 @@ func (k Keeper) Create(
 		return 0, err
 	}
 
-	return challenge.ID, nil
+	return challenge.ID(), nil
 }
 
 // Challenge gets the challenge for the given id
@@ -177,7 +177,7 @@ func (k Keeper) Tally(
 			return err
 		}
 
-		if challenge.Vote.Vote == true {
+		if challenge.VoteChoice() == true {
 			return ErrInvalidVote()
 		}
 		falseVotes = append(falseVotes, challenge)

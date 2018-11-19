@@ -1,7 +1,6 @@
 package vote
 
 import (
-	app "github.com/TruStory/truchain/types"
 	"github.com/TruStory/truchain/x/backing"
 	"github.com/TruStory/truchain/x/challenge"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -82,7 +81,7 @@ func distributeRewardsConfirmed(
 		// backer who changed their implicit TRUE vote to FALSE
 		case backing.Backing:
 			// return backing because we are nice people
-			_, _, err = bankKeeper.AddCoins(ctx, v.Creator, sdk.Coins{v.Amount})
+			_, _, err = bankKeeper.AddCoins(ctx, v.Creator(), sdk.Coins{v.Amount()})
 
 		case challenge.Challenge:
 			// do nothing
@@ -107,7 +106,7 @@ func distributeRewardsConfirmed(
 // count voters
 func voterCount(winners []interface{}) (voterCount int64) {
 	for _, voter := range winners {
-		if _, ok := voter.(app.Vote); ok {
+		if _, ok := voter.(TokenVote); ok {
 			voterCount = voterCount + 1
 		}
 	}

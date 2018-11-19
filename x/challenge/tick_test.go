@@ -53,9 +53,9 @@ func Test_returnFunds(t *testing.T) {
 	id, err := k.Create(ctx, storyID, amount, argument, creator, evidence)
 	assert.Nil(t, err)
 
-	game, _ := k.Challenge(ctx, id)
+	challenge, _ := k.Challenge(ctx, id)
 
-	err = returnFunds(ctx, k, game.ID)
+	err = returnFunds(ctx, k, challenge.ID())
 	assert.Nil(t, err)
 
 	coin := bankKeeper.GetCoins(ctx, creator)
