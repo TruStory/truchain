@@ -239,18 +239,36 @@ func TestCount(t *testing.T) {
 	pool := sdk.NewCoin("trudex", sdk.ZeroInt())
 	rejectedPool(ctx, trueVotes, falseVotes, &pool)
 
-	cCount, vCount, _ := count(falseVotes)
-	assert.Equal(t, int64(2), cCount)
+	cAmount, vCount, _ := winnerInfo(falseVotes)
+	assert.Equal(t, int64(20), cAmount.Int64())
 	assert.Equal(t, int64(1), vCount)
 }
 
 func TestChallengerRewardAmount(t *testing.T) {
 	coin := challengerRewardAmount(
 		sdk.NewCoin("trudex", sdk.NewInt(10)),
-		int64(2),
+		sdk.NewInt(20),
 		sdk.NewCoin("trudex", sdk.NewInt(52)))
 
 	assert.Equal(t, "26", coin.String())
+}
+
+func TestChallengerRewardAmount2(t *testing.T) {
+	coin := challengerRewardAmount(
+		sdk.NewCoin("trudex", sdk.NewInt(15)),
+		sdk.NewInt(20),
+		sdk.NewCoin("trudex", sdk.NewInt(52)))
+
+	assert.Equal(t, "39", coin.String())
+}
+
+func TestChallengerRewardAmount3(t *testing.T) {
+	coin := challengerRewardAmount(
+		sdk.NewCoin("trudex", sdk.NewInt(5)),
+		sdk.NewInt(20),
+		sdk.NewCoin("trudex", sdk.NewInt(52)))
+
+	assert.Equal(t, "13", coin.String())
 }
 
 func TestDistributeRewardsRejected(t *testing.T) {
