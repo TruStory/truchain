@@ -65,12 +65,12 @@ type Backing struct {
 	Period   time.Duration `json:"period"`
 }
 
-// AmountDenom implements `Voter`
-func (b Backing) AmountDenom() string {
-	return b.Amount.Denom
+// Amount implements `Voter`
+func (b Backing) Amount() sdk.Coin {
+	return b.Vote.Amount
 }
 
-// VoteCreator implements `Voter`
-func (b Backing) VoteCreator() sdk.AccAddress {
-	return b.Creator
+// Creator implements `Voter`
+func (b Backing) Creator() sdk.AccAddress {
+	return b.Vote.Creator
 }

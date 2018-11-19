@@ -36,11 +36,12 @@ func (t Timestamp) Update(blockHeader abci.Header) Timestamp {
 
 // Voter defined an interface for any kind of voter, implicit or explicit
 type Voter interface {
-	AmountDenom() string
-	VoteCreator() sdk.AccAddress
+	Amount() sdk.Coin
+	Creator() sdk.AccAddress
 }
 
-// Vote is a type that defines a vote on a story
+// Vote is a type that defines a vote on a story. It serves as an inner struct
+// for `Backing`, `Challenge`, and `TokenVote`, containing common fields.
 type Vote struct {
 	ID        int64          `json:"id"`
 	Amount    sdk.Coin       `json:"amount"`
@@ -56,14 +57,4 @@ func NewVote(
 	id int64, amount sdk.Coin, creator sdk.AccAddress, vote bool, timestamp Timestamp) Vote {
 
 	return Vote{id, amount, "", creator, nil, vote, timestamp}
-}
-
-// AmountDenom implements `Voter`
-func (v Vote) AmountDenom() string {
-	return v.Amount.Denom
-}
-
-// VoteCreator implements `Voter`
-func (v Vote) VoteCreator() sdk.AccAddress {
-	return v.Creator
 }

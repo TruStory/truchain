@@ -1,11 +1,24 @@
 package vote
 
-import sdk "github.com/cosmos/cosmos-sdk/types"
+import (
+	app "github.com/TruStory/truchain/types"
+	sdk "github.com/cosmos/cosmos-sdk/types"
+)
 
-// NOTE: the main type for vote lives in the top-level `types` package.
-// This is because it is embedded in multiple other types like
-// `Backing` and `Challenge` in other modules. So it should exist
-// at a higher level than this module.
+// TokenVote defines a simple token vote on a story
+type TokenVote struct {
+	app.Vote
+}
+
+// Amount implements `Voter`
+func (v TokenVote) Amount() sdk.Coin {
+	return v.Vote.Amount
+}
+
+// Creator implements `Voter`
+func (v TokenVote) Creator() sdk.AccAddress {
+	return v.Vote.Creator
+}
 
 // MsgParams holds default parameters for a vote
 type MsgParams struct {

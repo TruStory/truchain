@@ -21,11 +21,11 @@ func confirmedPool(
 
 		case challenge.Challenge:
 			// add challenge amount to reward pool
-			*pool = (*pool).Plus(v.Amount)
+			*pool = (*pool).Plus(v.Amount())
 
-		case app.Vote:
+		case TokenVote:
 			// add vote fee to reward pool
-			*pool = (*pool).Plus(v.Amount)
+			*pool = (*pool).Plus(v.Amount())
 
 		default:
 			if err = ErrInvalidVote(v); err != nil {
@@ -54,16 +54,16 @@ func distributeRewardsConfirmed(
 		case backing.Backing:
 			// keep backing as is
 
-		case app.Vote:
+		case TokenVote:
 			// get back original staked amount
-			_, _, err = bankKeeper.AddCoins(ctx, v.Creator, sdk.Coins{v.Amount})
+			_, _, err = bankKeeper.AddCoins(ctx, v.Creator(), sdk.Coins{v.Amount()})
 			if err != nil {
 				return err
 			}
 
 			// get money, an equal portion of the reward pool
 			rewardCoin := sdk.NewCoin(pool.Denom, voterRewardAmount)
-			_, _, err = bankKeeper.AddCoins(ctx, v.Creator, sdk.Coins{rewardCoin})
+			_, _, err = bankKeeper.AddCoins(ctx, v.Creator(), sdk.Coins{rewardCoin})
 			if err != nil {
 				return err
 			}
@@ -88,7 +88,7 @@ func distributeRewardsConfirmed(
 			// do nothing
 			// don't get their stake back
 
-		case app.Vote:
+		case TokenVote:
 			// do nothing
 			// don't get their stake back
 
