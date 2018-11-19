@@ -7,7 +7,12 @@ import (
 
 // TokenVote defines a simple token vote on a story
 type TokenVote struct {
-	app.Vote
+	app.Vote `json:"vote"`
+}
+
+// ID implements `Voter`
+func (v TokenVote) ID() int64 {
+	return v.Vote.ID
 }
 
 // Amount implements `Voter`
@@ -18,6 +23,11 @@ func (v TokenVote) Amount() sdk.Coin {
 // Creator implements `Voter`
 func (v TokenVote) Creator() sdk.AccAddress {
 	return v.Vote.Creator
+}
+
+// VoteChoice implements `Voter`
+func (v TokenVote) VoteChoice() bool {
+	return v.Vote.Vote
 }
 
 // MsgParams holds default parameters for a vote

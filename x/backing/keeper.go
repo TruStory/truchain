@@ -31,6 +31,8 @@ type WriteKeeper interface {
 
 	Update(ctx sdk.Context, backing Backing)
 
+	ToggleVote(ctx sdk.Context, backingID int64) (int64, sdk.Error)
+
 	NewResponseEndBlock(ctx sdk.Context) sdk.Tags
 }
 
@@ -129,12 +131,12 @@ func (k Keeper) Create(
 	k.setBacking(ctx, backing)
 
 	// add backing to the backing queue for processing
-	k.QueuePush(ctx, backing.ID)
+	k.QueuePush(ctx, backing.ID())
 
 	// add backing <-> story mapping
-	k.backingsList.Append(ctx, k, storyID, creator, backing.ID)
+	k.backingsList.Append(ctx, k, storyID, creator, backing.ID())
 
-	return backing.ID, nil
+	return backing.ID(), nil
 }
 
 // Update updates an existing backing
@@ -149,6 +151,19 @@ func (k Keeper) Update(ctx sdk.Context, backing Backing) {
 	}
 
 	k.setBacking(ctx, newBacking)
+}
+
+// ToggleVote changes a true vote to false and vice versa
+func (k Keeper) ToggleVote(ctx sdk.Context, backingID int64) (int64, sdk.Error) {
+	backing, err := k.Backing(ctx, backingID)
+	if err != nil {
+		return 0, err
+	}
+
+	backing.Vote.Vote = !backing.VoteChoice()
+	k.Update(ctx, backing)
+
+	return backingID, nil
 }
 
 // Backing gets the backing at the current index from the KVStore
@@ -197,7 +212,7 @@ func (k Keeper) Tally(
 			return err
 		}
 
-		if backing.Vote.Vote == true {
+		if backing.VoteChoice() == true {
 			trueVotes = append(trueVotes, backing)
 		} else {
 			falseVotes = append(falseVotes, backing)
@@ -245,7 +260,7 @@ func (k Keeper) getPrincipal(
 func (k Keeper) setBacking(ctx sdk.Context, backing Backing) {
 	store := k.GetStore(ctx)
 	store.Set(
-		k.GetIDKey(backing.ID),
+		k.GetIDKey(backing.ID()),
 		k.GetCodec().MustMarshalBinary(backing))
 }
 

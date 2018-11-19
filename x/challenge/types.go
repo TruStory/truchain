@@ -7,7 +7,12 @@ import (
 
 // Challenge defines a user's challenge on a story
 type Challenge struct {
-	app.Vote
+	app.Vote `json:"vote"`
+}
+
+// ID implements `Voter`
+func (c Challenge) ID() int64 {
+	return c.Vote.ID
 }
 
 // Amount implements `Voter`
@@ -18,6 +23,11 @@ func (c Challenge) Amount() sdk.Coin {
 // Creator implements `Voter`
 func (c Challenge) Creator() sdk.AccAddress {
 	return c.Vote.Creator
+}
+
+// VoteChoice implements `Voter`
+func (c Challenge) VoteChoice() bool {
+	return c.Vote.Vote
 }
 
 // MsgParams holds default parameters for a challenge

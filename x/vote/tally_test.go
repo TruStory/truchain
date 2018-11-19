@@ -6,7 +6,6 @@ import (
 	"testing"
 	"time"
 
-	app "github.com/TruStory/truchain/types"
 	"github.com/TruStory/truchain/x/backing"
 	"github.com/TruStory/truchain/x/challenge"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -77,17 +76,17 @@ func fakeValidationGame() (
 	k.backingKeeper.Update(ctx, b3)
 
 	b4, _ := k.backingKeeper.Backing(ctx, b4id)
-	// change last backing vote to FALSE
-	b4.Vote.Vote = false
 	b4.Interest = sdk.NewCoin("trudex", sdk.NewInt(5))
 	k.backingKeeper.Update(ctx, b4)
+	// change last backing vote to FALSE
+	k.backingKeeper.ToggleVote(ctx, b4.ID())
 
 	c1, _ := k.challengeKeeper.Challenge(ctx, c1id)
 	c2, _ := k.challengeKeeper.Challenge(ctx, c2id)
 
-	v1, _ := k.Vote(ctx, v1id)
-	v2, _ := k.Vote(ctx, v2id)
-	v3, _ := k.Vote(ctx, v3id)
+	v1, _ := k.TokenVote(ctx, v1id)
+	v2, _ := k.TokenVote(ctx, v2id)
+	v3, _ := k.TokenVote(ctx, v3id)
 
 	trueVotes = append(trueVotes, b1, b2, b3, v1, v2)
 	falseVotes = append(falseVotes, b4, c1, c2, v3)
@@ -172,39 +171,39 @@ func TestDistributeRewardsConfirmed(t *testing.T) {
 	coins := sdk.Coins{}
 
 	winningBacker1 := trueVotes[0].(backing.Backing)
-	coins = k.bankKeeper.GetCoins(ctx, winningBacker1.Creator)
+	coins = k.bankKeeper.GetCoins(ctx, winningBacker1.Creator())
 	assert.Equal(t, "10", coins.AmountOf("trudex").String())
 
 	winningBacker2 := trueVotes[1].(backing.Backing)
-	coins = k.bankKeeper.GetCoins(ctx, winningBacker2.Creator)
+	coins = k.bankKeeper.GetCoins(ctx, winningBacker2.Creator())
 	assert.Equal(t, "10", coins.AmountOf("trudex").String())
 
 	winningBacker3 := trueVotes[2].(backing.Backing)
-	coins = k.bankKeeper.GetCoins(ctx, winningBacker3.Creator)
+	coins = k.bankKeeper.GetCoins(ctx, winningBacker3.Creator())
 	assert.Equal(t, "10", coins.AmountOf("trudex").String())
 
-	winningVoter1 := trueVotes[3].(app.Vote)
-	coins = k.bankKeeper.GetCoins(ctx, winningVoter1.Creator)
+	winningVoter1 := trueVotes[3].(TokenVote)
+	coins = k.bankKeeper.GetCoins(ctx, winningVoter1.Creator())
 	assert.Equal(t, "37", coins.AmountOf("trudex").String())
 
-	winningVoter2 := trueVotes[4].(app.Vote)
-	coins = k.bankKeeper.GetCoins(ctx, winningVoter2.Creator)
+	winningVoter2 := trueVotes[4].(TokenVote)
+	coins = k.bankKeeper.GetCoins(ctx, winningVoter2.Creator())
 	assert.Equal(t, "37", coins.AmountOf("trudex").String())
 
 	losingBacker1 := falseVotes[0].(backing.Backing)
-	coins = k.bankKeeper.GetCoins(ctx, losingBacker1.Creator)
+	coins = k.bankKeeper.GetCoins(ctx, losingBacker1.Creator())
 	assert.Equal(t, "20", coins.AmountOf("trudex").String())
 
 	losingChallenger1 := falseVotes[1].(challenge.Challenge)
-	coins = k.bankKeeper.GetCoins(ctx, losingChallenger1.Creator)
+	coins = k.bankKeeper.GetCoins(ctx, losingChallenger1.Creator())
 	assert.Equal(t, "10", coins.AmountOf("trudex").String())
 
 	losingChallenger2 := falseVotes[2].(challenge.Challenge)
-	coins = k.bankKeeper.GetCoins(ctx, losingChallenger2.Creator)
+	coins = k.bankKeeper.GetCoins(ctx, losingChallenger2.Creator())
 	assert.Equal(t, "10", coins.AmountOf("trudex").String())
 
-	losingVoter1 := falseVotes[3].(app.Vote)
-	coins = k.bankKeeper.GetCoins(ctx, losingVoter1.Creator)
+	losingVoter1 := falseVotes[3].(TokenVote)
+	coins = k.bankKeeper.GetCoins(ctx, losingVoter1.Creator())
 	assert.Equal(t, "10", coins.AmountOf("trudex").String())
 }
 
@@ -265,38 +264,38 @@ func TestDistributeRewardsRejected(t *testing.T) {
 	coins := sdk.Coins{}
 
 	winningBacker1 := falseVotes[0].(backing.Backing)
-	coins = k.bankKeeper.GetCoins(ctx, winningBacker1.Creator)
+	coins = k.bankKeeper.GetCoins(ctx, winningBacker1.Creator())
 	assert.Equal(t, "20", coins.AmountOf("trudex").String())
 
 	winningChallenger1 := falseVotes[1].(challenge.Challenge)
-	coins = k.bankKeeper.GetCoins(ctx, winningChallenger1.Creator)
+	coins = k.bankKeeper.GetCoins(ctx, winningChallenger1.Creator())
 	assert.Equal(t, "46", coins.AmountOf("trudex").String())
 
 	winningChallenger2 := falseVotes[2].(challenge.Challenge)
-	coins = k.bankKeeper.GetCoins(ctx, winningChallenger2.Creator)
+	coins = k.bankKeeper.GetCoins(ctx, winningChallenger2.Creator())
 	assert.Equal(t, "46", coins.AmountOf("trudex").String())
 
-	winningVoter1 := falseVotes[3].(app.Vote)
-	coins = k.bankKeeper.GetCoins(ctx, winningVoter1.Creator)
+	winningVoter1 := falseVotes[3].(TokenVote)
+	coins = k.bankKeeper.GetCoins(ctx, winningVoter1.Creator())
 	assert.Equal(t, "38", coins.AmountOf("trudex").String())
 
 	losingBacker1 := trueVotes[0].(backing.Backing)
-	coins = k.bankKeeper.GetCoins(ctx, losingBacker1.Creator)
+	coins = k.bankKeeper.GetCoins(ctx, losingBacker1.Creator())
 	assert.Equal(t, "10", coins.AmountOf("trudex").String())
 
 	losingBacker2 := trueVotes[1].(backing.Backing)
-	coins = k.bankKeeper.GetCoins(ctx, losingBacker2.Creator)
+	coins = k.bankKeeper.GetCoins(ctx, losingBacker2.Creator())
 	assert.Equal(t, "10", coins.AmountOf("trudex").String())
 
 	losingBacker3 := trueVotes[2].(backing.Backing)
-	coins = k.bankKeeper.GetCoins(ctx, losingBacker3.Creator)
+	coins = k.bankKeeper.GetCoins(ctx, losingBacker3.Creator())
 	assert.Equal(t, "10", coins.AmountOf("trudex").String())
 
-	losingVoter1 := trueVotes[3].(app.Vote)
-	coins = k.bankKeeper.GetCoins(ctx, losingVoter1.Creator)
+	losingVoter1 := trueVotes[3].(TokenVote)
+	coins = k.bankKeeper.GetCoins(ctx, losingVoter1.Creator())
 	assert.Equal(t, "10", coins.AmountOf("trudex").String())
 
-	losingVoter2 := trueVotes[4].(app.Vote)
-	coins = k.bankKeeper.GetCoins(ctx, losingVoter2.Creator)
+	losingVoter2 := trueVotes[4].(TokenVote)
+	coins = k.bankKeeper.GetCoins(ctx, losingVoter2.Creator())
 	assert.Equal(t, "10", coins.AmountOf("trudex").String())
 }
