@@ -1,6 +1,7 @@
 package backing
 
 import (
+	"fmt"
 	"testing"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -32,7 +33,7 @@ func TestQueue(t *testing.T) {
 	storyID := createFakeStory(ctx, sk, ck)
 	amount, _ := sdk.ParseCoin("5trudex")
 	creator1 := sdk.AccAddress([]byte{1, 2})
-	creator2 := sdk.AccAddress([]byte{1, 2})
+	creator2 := sdk.AccAddress([]byte{3, 4})
 	duration := DefaultMsgParams().MinPeriod
 
 	bankKeeper.AddCoins(ctx, creator1, sdk.Coins{amount})
@@ -40,6 +41,7 @@ func TestQueue(t *testing.T) {
 
 	// create backings
 	backingID, _ := bk.Create(ctx, storyID, amount, creator1, duration)
+	fmt.Println(backingID)
 	_, err := bk.Backing(ctx, backingID)
 	assert.Nil(t, err)
 
@@ -51,10 +53,10 @@ func TestQueue(t *testing.T) {
 	assert.Equal(t, 2, len)
 
 	backing, _ := bk.QueuePop(ctx)
-	assert.Equal(t, backing.ID, int64(1))
+	assert.Equal(t, int64(1), backing.ID())
 
 	backing, _ = bk.QueuePop(ctx)
-	assert.Equal(t, backing.ID, int64(2))
+	assert.Equal(t, int64(2), backing.ID())
 
 	len = bk.QueueLen(ctx)
 	assert.Equal(t, 0, len)

@@ -34,10 +34,13 @@ func (t Timestamp) Update(blockHeader abci.Header) Timestamp {
 	return t
 }
 
-// Voter defined an interface for any kind of voter, implicit or explicit
+// Voter defines an interface for any kind of voter. It should be implemented
+// by any type that has voting capabilities, implicit or explicit.
 type Voter interface {
+	ID() int64
 	Amount() sdk.Coin
 	Creator() sdk.AccAddress
+	VoteChoice() bool
 }
 
 // Vote is a type that defines a vote on a story. It serves as an inner struct

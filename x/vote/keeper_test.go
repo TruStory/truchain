@@ -28,8 +28,8 @@ func TestCreateGetVote(t *testing.T) {
 	voteID, err := k.Create(ctx, storyID, amount, true, comment, creator, evidence)
 	assert.Nil(t, err)
 
-	vote, _ := k.Vote(ctx, voteID)
-	assert.Equal(t, voteID, vote.ID)
+	vote, _ := k.TokenVote(ctx, voteID)
+	assert.Equal(t, voteID, vote.ID())
 }
 
 func TestGetVotesByGame(t *testing.T) {
@@ -59,7 +59,7 @@ func TestGetVotesByGame(t *testing.T) {
 
 	story, _ := k.storyKeeper.GetStory(ctx, storyID)
 
-	votes, _ := k.VotesByGame(ctx, story.GameID)
+	votes, _ := k.TokenVotesByGame(ctx, story.GameID)
 	assert.Equal(t, 2, len(votes))
 }
 
