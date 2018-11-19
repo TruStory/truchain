@@ -70,7 +70,7 @@ func returnFunds(ctx sdk.Context, k Keeper, gameID int64) sdk.Error {
 		}
 		// return funds
 		_, _, err = k.bankKeeper.AddCoins(
-			ctx, challenge.Creator, sdk.Coins{challenge.Amount})
+			ctx, challenge.Creator(), sdk.Coins{challenge.Amount()})
 		if err != nil {
 			return err
 		}
