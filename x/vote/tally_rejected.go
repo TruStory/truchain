@@ -69,8 +69,8 @@ func distributeRewardsRejected(
 	// calculate reward pool for voters (25% of pool)
 	voterPool := voterPool(pool, params)
 
-	// count challengers and voters
-	challengerCount, voterCount, err := count(winners)
+	// get the total challenger stake amount and voter count
+	challengerTotalAmount, voterCount, err := winnerInfo(winners)
 	if err != nil {
 		return err
 	}
@@ -95,7 +95,7 @@ func distributeRewardsRejected(
 
 			// get reward (X% of pool, in proportion to stake)
 			rewardAmount := challengerRewardAmount(
-				v.Amount(), challengerCount, challengerPool)
+				v.Amount(), challengerTotalAmount, challengerPool)
 
 			// mint coin and give money
 			rewardCoin := sdk.NewCoin(pool.Denom, rewardAmount)
@@ -147,33 +147,38 @@ func voterPool(pool sdk.Coin, params Params) sdk.Coin {
 	return sdk.NewCoin(pool.Denom, voterPoolAmount.RoundInt())
 }
 
-// count challengers and voters
-func count(
+// winnerInfo returns data needed to calculate the reward pool
+func winnerInfo(
 	winners []interface{}) (
-	challengerCount int64, voterCount int64, err sdk.Error) {
+	challengerTotalAmount sdk.Int, voterCount int64, err sdk.Error) {
+
+	challengerTotalAmount = sdk.ZeroInt()
 
 	for _, vote := range winners {
 		switch v := vote.(type) {
 		case backing.Backing:
 			// skip
 		case challenge.Challenge:
-			challengerCount = challengerCount + 1
+			challengerTotalAmount = challengerTotalAmount.Add(v.Amount().Amount)
 		case TokenVote:
 			voterCount = voterCount + 1
 		default:
-			return 0, 0, ErrInvalidVote(v)
+			return challengerTotalAmount, voterCount, ErrInvalidVote(v)
 		}
 	}
 
-	return challengerCount, voterCount, nil
+	return challengerTotalAmount, voterCount, nil
 }
 
-// amount / challengerCount * challengerPool
+// amount / challengerTotalAmount * challengerPool
 func challengerRewardAmount(
-	amount sdk.Coin, challengerCount int64, challengerPool sdk.Coin) sdk.Int {
+	amount sdk.Coin, challengerTotalAmount sdk.Int, challengerPool sdk.Coin) sdk.Int {
 
-	return amount.Amount.
-		Div(sdk.NewInt(challengerCount)).
-		Mul(challengerPool.Amount).
-		Div(sdk.NewInt(10))
+	amountDec := sdk.NewDecFromInt(amount.Amount)
+
+	rewardAmountDec := amountDec.
+		QuoInt(challengerTotalAmount).
+		MulInt(challengerPool.Amount)
+
+	return rewardAmountDec.RoundInt()
 }
