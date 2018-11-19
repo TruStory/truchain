@@ -4,8 +4,6 @@
 
 ## Keeper
 
-### Dependencies
-
 ### Stores
 * "votes"
     *  keyspace
