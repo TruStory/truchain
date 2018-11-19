@@ -95,7 +95,7 @@ func rewardPool(
 	if !ok {
 		return pool, ErrInvalidVote(v, "Initializing reward pool")
 	}
-	pool = sdk.NewCoin(v.AmountDenom(), sdk.ZeroInt())
+	pool = sdk.NewCoin(v.Amount().Denom, sdk.ZeroInt())
 
 	if confirmed {
 		err = confirmedPool(ctx, falseVotes, &pool)
@@ -180,10 +180,10 @@ func weightedVote(
 		}
 
 		// get the user account
-		user := accountKeeper.GetAccount(ctx, v.VoteCreator())
+		user := accountKeeper.GetAccount(ctx, v.Creator())
 
 		// get user's total amount of category coins for story category
-		categoryCoins := user.GetCoins().AmountOf(v.AmountDenom())
+		categoryCoins := user.GetCoins().AmountOf(v.Amount().Denom)
 
 		// total up the amount of category coins all voters have
 		weightedAmount = weightedAmount.Add(categoryCoins)

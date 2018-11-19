@@ -10,14 +10,14 @@ type Challenge struct {
 	app.Vote
 }
 
-// AmountDenom implements `Voter`
-func (c Challenge) AmountDenom() string {
-	return c.Amount.Denom
+// Amount implements `Voter`
+func (c Challenge) Amount() sdk.Coin {
+	return c.Vote.Amount
 }
 
-// VoteCreator implements `Voter`
-func (c Challenge) VoteCreator() sdk.AccAddress {
-	return c.Creator
+// Creator implements `Voter`
+func (c Challenge) Creator() sdk.AccAddress {
+	return c.Vote.Creator
 }
 
 // MsgParams holds default parameters for a challenge
