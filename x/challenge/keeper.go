@@ -160,11 +160,7 @@ func (k Keeper) ChallengesByGame(
 		return nil
 	})
 
-	if err != nil {
-		return challenges, err
-	}
-
-	return challenges, nil
+	return
 }
 
 // Tally challenges for voting
