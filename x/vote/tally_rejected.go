@@ -1,6 +1,7 @@
 package vote
 
 import (
+	app "github.com/TruStory/truchain/types"
 	"github.com/TruStory/truchain/x/backing"
 	"github.com/TruStory/truchain/x/challenge"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -8,11 +9,10 @@ import (
 )
 
 func rejectedPool(
-	ctx sdk.Context, trueVotes []interface{}, falseVotes []interface{}, pool *sdk.Coin) (
-	err sdk.Error) {
+	ctx sdk.Context, votes poll, pool *sdk.Coin) (err sdk.Error) {
 
 	// people who voted TRUE / lost the game
-	for _, vote := range trueVotes {
+	for _, vote := range votes.trueVotes {
 		switch v := vote.(type) {
 
 		case backing.Backing:
@@ -31,7 +31,7 @@ func rejectedPool(
 	}
 
 	// people who voted FALSE / won the game
-	for _, vote := range falseVotes {
+	for _, vote := range votes.falseVotes {
 		switch v := vote.(type) {
 
 		case backing.Backing:
@@ -57,7 +57,7 @@ func rejectedPool(
 }
 
 func distributeRewardsRejected(
-	ctx sdk.Context, bankKeeper bank.Keeper, winners []interface{}, pool sdk.Coin) (
+	ctx sdk.Context, bankKeeper bank.Keeper, winners []app.Voter, pool sdk.Coin) (
 	err sdk.Error) {
 
 	// load default parameters
@@ -164,7 +164,7 @@ func voterPool(pool sdk.Coin, params Params) sdk.Coin {
 
 // winnerInfo returns data needed to calculate the reward pool
 func winnerInfo(
-	winners []interface{}) (
+	winners []app.Voter) (
 	challengerTotalAmount sdk.Int, voterCount int64, err sdk.Error) {
 
 	challengerTotalAmount = sdk.ZeroInt()
