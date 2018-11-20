@@ -41,7 +41,7 @@ type Params struct {
 	MinChallengeStake sdk.Int       // min amount required to challenge
 	Expires           time.Duration // time to expire if threshold not met
 	Period            time.Duration // length of challenge game / voting period
-	Threshold         int64         // amount at which game begins
+	Threshold         sdk.Int       // amount at which game begins
 }
 
 // DefaultParams creates a new MsgParams type with defaults
@@ -50,6 +50,6 @@ func DefaultParams() Params {
 		MinChallengeStake: sdk.NewInt(10),
 		Expires:           10 * 24 * time.Hour,
 		Period:            30 * 24 * time.Hour,
-		Threshold:         10,
+		Threshold:         sdk.NewInt(10),
 	}
 }

@@ -165,11 +165,7 @@ func (k Keeper) TokenVotesByGame(
 		return nil
 	})
 
-	if err != nil {
-		return votes, err
-	}
-
-	return votes, nil
+	return
 }
 
 // Tally votes
