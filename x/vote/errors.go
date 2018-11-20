@@ -12,11 +12,12 @@ import (
 const (
 	DefaultCodespace sdk.CodespaceType = 12
 
-	CodeNotFound       sdk.CodeType = 1201
-	CodeDuplicate      sdk.CodeType = 1202
-	CodeGameNotStarted sdk.CodeType = 1203
-	CodeUnknownVote    sdk.CodeType = 1204
-	CodeInvalidVote    sdk.CodeType = 1205
+	CodeNotFound           sdk.CodeType = 1201
+	CodeDuplicate          sdk.CodeType = 1202
+	CodeGameNotStarted     sdk.CodeType = 1203
+	CodeUnknownVote        sdk.CodeType = 1204
+	CodeInvalidVote        sdk.CodeType = 1205
+	CodeRewardPoolNotEmpty sdk.CodeType = 1206
 )
 
 // ErrNotFound creates an error when the searched entity is not found
@@ -55,4 +56,12 @@ func ErrInvalidVote(vote interface{}, msg ...string) sdk.Error {
 	}
 
 	return sdk.NewError(DefaultCodespace, CodeUnknownVote, "Unknown Vote type")
+}
+
+// ErrNonEmptyRewardPool throws when a reward pool is not empty
+func ErrNonEmptyRewardPool(amount sdk.Coin) sdk.Error {
+	return sdk.NewError(
+		DefaultCodespace,
+		CodeRewardPoolNotEmpty,
+		"Reward pool not empty: "+amount.String())
 }

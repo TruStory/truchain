@@ -60,8 +60,13 @@ func distributeRewardsConfirmed(
 				return err
 			}
 
-			// get money, an equal portion of the reward pool
+			// calculate reward, an equal portion of the reward pool
 			rewardCoin := sdk.NewCoin(pool.Denom, voterRewardAmount)
+
+			// remove reward amount from pool
+			pool = pool.Minus(rewardCoin)
+
+			// payout user
 			_, _, err = bankKeeper.AddCoins(ctx, v.Creator(), sdk.Coins{rewardCoin})
 			if err != nil {
 				return err
@@ -100,6 +105,11 @@ func distributeRewardsConfirmed(
 		}
 	}
 
+	// make sure reward pool is empty
+	if pool.IsPositive() {
+		return ErrNonEmptyRewardPool(pool)
+	}
+
 	return nil
 }
 
@@ -115,5 +125,11 @@ func voterCount(winners []interface{}) (voterCount int64) {
 }
 
 func voterRewardAmount(pool sdk.Coin, voterCount int64) sdk.Int {
-	return pool.Amount.Div(sdk.NewInt(voterCount))
+
+	poolDec := sdk.NewDecFromInt(pool.Amount)
+	voterCountInt := sdk.NewInt(voterCount)
+
+	return poolDec.
+		QuoInt(voterCountInt).
+		RoundInt()
 }
