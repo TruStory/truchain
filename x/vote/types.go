@@ -61,3 +61,8 @@ func DefaultParams() Params {
 		MajorityPercent:           sdk.NewDecWithPrec(51, 2), // 51%
 	}
 }
+
+type poll struct {
+	trueVotes  []app.Voter
+	falseVotes []app.Voter
+}
