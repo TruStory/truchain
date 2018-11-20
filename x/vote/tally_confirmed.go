@@ -1,6 +1,7 @@
 package vote
 
 import (
+	app "github.com/TruStory/truchain/types"
 	"github.com/TruStory/truchain/x/backing"
 	"github.com/TruStory/truchain/x/challenge"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -9,7 +10,7 @@ import (
 
 // calculate reward pool for a confirmed story
 func confirmedPool(
-	ctx sdk.Context, falseVotes []interface{}, pool *sdk.Coin) (err sdk.Error) {
+	ctx sdk.Context, falseVotes []app.Voter, pool *sdk.Coin) (err sdk.Error) {
 
 	for _, vote := range falseVotes {
 		switch v := vote.(type) {
@@ -39,15 +40,14 @@ func confirmedPool(
 func distributeRewardsConfirmed(
 	ctx sdk.Context,
 	bankKeeper bank.Keeper,
-	winners []interface{},
-	losers []interface{},
+	votes poll,
 	pool sdk.Coin) (err sdk.Error) {
 
 	// determine pool share per voter
-	voterRewardAmount := voterRewardAmount(pool, voterCount(winners))
+	voterRewardAmount := voterRewardAmount(pool, voterCount(votes.trueVotes))
 
 	// distribute reward to winners
-	for _, vote := range winners {
+	for _, vote := range votes.trueVotes {
 		switch v := vote.(type) {
 
 		case backing.Backing:
@@ -80,7 +80,7 @@ func distributeRewardsConfirmed(
 	}
 
 	// slash losers
-	for _, vote := range losers {
+	for _, vote := range votes.falseVotes {
 		switch v := vote.(type) {
 
 		// backer who changed their implicit TRUE vote to FALSE
@@ -114,7 +114,7 @@ func distributeRewardsConfirmed(
 }
 
 // count voters
-func voterCount(winners []interface{}) (voterCount int64) {
+func voterCount(winners []app.Voter) (voterCount int64) {
 	for _, voter := range winners {
 		if _, ok := voter.(TokenVote); ok {
 			voterCount = voterCount + 1
