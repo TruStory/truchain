@@ -22,10 +22,6 @@ func fakeFundedCreator(ctx sdk.Context, k bank.Keeper) sdk.AccAddress {
 	amount := sdk.NewCoin("trudex", sdk.NewInt(2000))
 	k.AddCoins(ctx, creator, sdk.Coins{amount})
 
-	// give user some trusteak
-	amount = sdk.NewCoin("trusteak", sdk.NewInt(2000))
-	k.AddCoins(ctx, creator, sdk.Coins{amount})
-
 	return creator
 }
 
@@ -43,8 +39,9 @@ func fakeValidationGame() (
 
 	creator1 := fakeFundedCreator(ctx, k.bankKeeper)
 	// remove cat coins to simulate backing conversion from trusteak
-	creator1CatCoin := sdk.NewCoin("trudex", sdk.NewInt(2000))
-	k.bankKeeper.SubtractCoins(ctx, creator1, sdk.Coins{creator1CatCoin})
+	k.bankKeeper.SubtractCoins(ctx, creator1, sdk.Coins{amount})
+	// add trustake
+	k.bankKeeper.AddCoins(ctx, creator1, sdk.Coins{trustake})
 
 	creator2 := fakeFundedCreator(ctx, k.bankKeeper)
 	creator3 := fakeFundedCreator(ctx, k.bankKeeper)
