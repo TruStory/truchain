@@ -42,6 +42,10 @@ func fakeValidationGame() (
 	evidence := []url.URL{*cnn}
 
 	creator1 := fakeFundedCreator(ctx, k.bankKeeper)
+	// remove cat coins to simulate backing conversion from trusteak
+	creator1CatCoin := sdk.NewCoin("trudex", sdk.NewInt(2000))
+	k.bankKeeper.SubtractCoins(ctx, creator1, sdk.Coins{creator1CatCoin})
+
 	creator2 := fakeFundedCreator(ctx, k.bankKeeper)
 	creator3 := fakeFundedCreator(ctx, k.bankKeeper)
 	creator4 := fakeFundedCreator(ctx, k.bankKeeper)

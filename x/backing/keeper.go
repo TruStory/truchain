@@ -282,6 +282,9 @@ func mintFromNativeToken(
 		return
 	}
 
+	// give category coins to user
+	_, _, err = bankKeeper.AddCoins(ctx, userAddr, sdk.Coins{principal})
+
 	return
 }
 
