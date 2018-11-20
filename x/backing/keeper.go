@@ -194,11 +194,7 @@ func (k Keeper) BackingsByStory(
 		return nil
 	})
 
-	if err != nil {
-		return backings, err
-	}
-
-	return backings, nil
+	return
 }
 
 // Tally backings for voting
@@ -221,11 +217,7 @@ func (k Keeper) Tally(
 		return nil
 	})
 
-	if err != nil {
-		return trueVotes, falseVotes, err
-	}
-
-	return trueVotes, falseVotes, nil
+	return
 }
 
 // ============================================================================
