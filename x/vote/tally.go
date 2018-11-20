@@ -147,7 +147,7 @@ func confirmStory(
 	truePercentOfTotal := trueWeightDec.QuoInt(totalWeight)
 
 	// majority weight wins
-	if truePercentOfTotal.GT(DefaultParams().MajorityPercent) {
+	if truePercentOfTotal.GTE(DefaultParams().MajorityPercent) {
 		// story confirmed
 		return true, nil
 	}
