@@ -93,12 +93,17 @@ func distributeRewardsRejected(
 				return err
 			}
 
-			// get reward (X% of pool, in proportion to stake)
+			// calculate reward (X% of pool, in proportion to stake)
 			rewardAmount := challengerRewardAmount(
 				v.Amount(), challengerTotalAmount, challengerPool)
 
-			// mint coin and give money
+			// mint reward coin
 			rewardCoin := sdk.NewCoin(pool.Denom, rewardAmount)
+
+			// remove reward amount from pool
+			pool = pool.Minus(rewardCoin)
+
+			// payout user
 			_, _, err = bankKeeper.AddCoins(ctx, v.Creator(), sdk.Coins{rewardCoin})
 
 		case TokenVote:
@@ -108,8 +113,13 @@ func distributeRewardsRejected(
 				return err
 			}
 
-			// get reward (1-X% of pool, in equal proportions)
+			// calculate reward (1-X% of pool, in equal proportions)
 			rewardCoin := sdk.NewCoin(pool.Denom, voterRewardAmount)
+
+			// remove reward amount from pool
+			pool = pool.Minus(rewardCoin)
+
+			// payout user
 			_, _, err = bankKeeper.AddCoins(ctx, v.Creator(), sdk.Coins{rewardCoin})
 
 		default:
@@ -119,6 +129,11 @@ func distributeRewardsRejected(
 		if err != nil {
 			return err
 		}
+	}
+
+	// make sure reward pool is empty
+	if pool.IsPositive() {
+		return ErrNonEmptyRewardPool(pool)
 	}
 
 	return nil
