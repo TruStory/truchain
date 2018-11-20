@@ -136,8 +136,10 @@ func (k Keeper) Update(
 	// add amount to threshold pool
 	game.Threshold = game.Threshold.Plus(amount)
 
+	//
+
 	// if threshold is reached, start challenge and allow voting to begin
-	if game.Threshold.Amount.GT(sdk.NewInt(params.Threshold)) {
+	if game.Threshold.Amount.GT(params.Threshold) {
 		err = k.storyKeeper.StartGame(ctx, game.StoryID)
 		if err != nil {
 			return 0, err
@@ -154,4 +156,17 @@ func (k Keeper) Update(
 	k.Set(ctx, game)
 
 	return game.ID, nil
+}
+
+func canGameStart(k Keeper, game Game) bool {
+	// params := DefaultParams()
+
+	// threshold must be met
+	// metChallengeThreshold := game.Threshold.Amount.GT(params.Threshold)
+
+	// voter quorum must be met
+	// metVoterQuorum :=
+	// iterate over all voters
+
+	return false
 }
