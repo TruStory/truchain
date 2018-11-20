@@ -192,11 +192,7 @@ func (k Keeper) Tally(
 		return nil
 	})
 
-	if err != nil {
-		return trueVotes, falseVotes, err
-	}
-
-	return trueVotes, falseVotes, nil
+	return
 }
 
 // ============================================================================
