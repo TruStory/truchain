@@ -15,6 +15,7 @@ type Game struct {
 	ExpiresTime time.Time      `json:"expires_time,omitempty"`
 	EndTime     time.Time      `json:"end_time,omitempty"`
 	Threshold   sdk.Coin       `json:"threshold,omitempty"`
+	VoteQuorum  int64          `json:"vote_quorum,omitempty"`
 	Timestamp   app.Timestamp  `json:"timestamp"`
 }
 
@@ -42,6 +43,7 @@ type Params struct {
 	Expires           time.Duration // time to expire if threshold not met
 	Period            time.Duration // length of challenge game / voting period
 	Threshold         sdk.Int       // amount at which game begins
+	VoterQuorum       int64         // num voters required
 }
 
 // DefaultParams creates a new MsgParams type with defaults
@@ -51,5 +53,6 @@ func DefaultParams() Params {
 		Expires:           10 * 24 * time.Hour,
 		Period:            30 * 24 * time.Hour,
 		Threshold:         sdk.NewInt(10),
+		VoterQuorum:       7,
 	}
 }

@@ -16,7 +16,7 @@ import (
 type ReadKeeper interface {
 	app.ReadKeeper
 
-	Get(ctx sdk.Context, id int64) (game Game, err sdk.Error)
+	Game(ctx sdk.Context, id int64) (game Game, err sdk.Error)
 }
 
 // WriteKeeper defines a module interface that facilities write only access to truchain data
@@ -25,7 +25,9 @@ type WriteKeeper interface {
 
 	Create(ctx sdk.Context, storyID int64, creator sdk.AccAddress) (int64, sdk.Error)
 	Set(ctx sdk.Context, game Game)
-	Update(ctx sdk.Context, gameID int64, amount sdk.Coin) (int64, sdk.Error)
+	Update(ctx sdk.Context, game Game)
+	UpdateThreshold(ctx sdk.Context, gameID int64, amount sdk.Coin) (int64, sdk.Error)
+	RegisterVote(ctx sdk.Context, gameID int64)
 }
 
 // Keeper data type storing keys to the key-value store
@@ -84,6 +86,7 @@ func (k Keeper) Create(
 		ctx.BlockHeader().Time.Add(DefaultParams().Expires),
 		time.Time{},
 		emptyPool,
+		0,
 		app.NewTimestamp(ctx.BlockHeader()),
 	}
 
@@ -102,8 +105,8 @@ func (k Keeper) Create(
 	return game.ID, nil
 }
 
-// Get the game for the given id
-func (k Keeper) Get(ctx sdk.Context, id int64) (game Game, err sdk.Error) {
+// Game the game for the given id
+func (k Keeper) Game(ctx sdk.Context, id int64) (game Game, err sdk.Error) {
 	store := k.GetStore(ctx)
 	bz := store.Get(k.GetIDKey(id))
 	if bz == nil {
@@ -122,13 +125,46 @@ func (k Keeper) Set(ctx sdk.Context, game Game) {
 		k.GetCodec().MustMarshalBinary(game))
 }
 
-// Update the threshold pool and start game if threshold is reached
-func (k Keeper) Update(
+// RegisterVote increments the voter quorum
+func (k Keeper) RegisterVote(ctx sdk.Context, gameID int64) (
+	quorum int64, err sdk.Error) {
+
+	// get game
+	game, err := k.Game(ctx, gameID)
+	if err != nil {
+		return
+	}
+
+	game.VoteQuorum = game.VoteQuorum + 1
+	k.Update(ctx, game)
+
+	return game.VoteQuorum, nil
+}
+
+// Update updates the `Game` object
+func (k Keeper) Update(ctx sdk.Context, game Game) {
+
+	newGame := Game{
+		ID:          game.ID,
+		StoryID:     game.StoryID,
+		Creator:     game.Creator,
+		ExpiresTime: game.ExpiresTime,
+		EndTime:     game.EndTime,
+		Threshold:   game.Threshold,
+		VoteQuorum:  game.VoteQuorum,
+		Timestamp:   game.Timestamp,
+	}
+
+	k.Set(ctx, newGame)
+}
+
+// UpdateThreshold the threshold pool and start game if threshold is reached
+func (k Keeper) UpdateThreshold(
 	ctx sdk.Context, gameID int64, amount sdk.Coin) (int64, sdk.Error) {
 
 	params := DefaultParams()
 
-	game, err := k.Get(ctx, gameID)
+	game, err := k.Game(ctx, gameID)
 	if err != nil {
 		return 0, err
 	}
@@ -136,10 +172,9 @@ func (k Keeper) Update(
 	// add amount to threshold pool
 	game.Threshold = game.Threshold.Plus(amount)
 
-	//
-
-	// if threshold is reached, start challenge and allow voting to begin
-	if game.Threshold.Amount.GT(params.Threshold) {
+	// if threshold is reached, and minimum quorum met,
+	// start challenge and allow voting to begin
+	if canGameStart(k, game) {
 		err = k.storyKeeper.StartGame(ctx, game.StoryID)
 		if err != nil {
 			return 0, err
@@ -159,14 +194,13 @@ func (k Keeper) Update(
 }
 
 func canGameStart(k Keeper, game Game) bool {
-	// params := DefaultParams()
+	params := DefaultParams()
 
 	// threshold must be met
-	// metChallengeThreshold := game.Threshold.Amount.GT(params.Threshold)
+	metChallengeThreshold := game.Threshold.Amount.GT(params.Threshold)
 
 	// voter quorum must be met
-	// metVoterQuorum :=
-	// iterate over all voters
+	metVoterQuorum := (game.VoteQuorum >= params.VoterQuorum)
 
-	return false
+	return metChallengeThreshold && metVoterQuorum
 }

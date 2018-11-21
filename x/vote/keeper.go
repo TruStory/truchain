@@ -135,6 +135,12 @@ func (k Keeper) Create(
 	// persist game <-> tokenVote association
 	k.voterList.Append(ctx, k, story.GameID, creator, vote.ID)
 
+	// register vote to add to the vote quorum
+	_, err = k.gameKeeper.RegisterVote(ctx, story.gameID)
+	if err != nil {
+		return 0, err
+	}
+
 	return vote.ID, nil
 }
 
