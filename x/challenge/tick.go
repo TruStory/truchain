@@ -28,7 +28,7 @@ func checkExpiredGames(ctx sdk.Context, k Keeper, q store.Queue) sdk.Error {
 	}
 
 	// retrieve game from kvstore
-	game, err := k.gameKeeper.Get(ctx, gameID)
+	game, err := k.gameKeeper.Game(ctx, gameID)
 	if err != nil {
 		return err
 	}

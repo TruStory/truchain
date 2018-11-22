@@ -122,8 +122,8 @@ func (k Keeper) Create(
 		return 0, err
 	}
 
-	// update game pool
-	_, err = k.gameKeeper.Update(ctx, gameID, amount)
+	// update game threshold
+	err = k.gameKeeper.RegisterChallenge(ctx, gameID, amount)
 	if err != nil {
 		return 0, err
 	}
