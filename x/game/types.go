@@ -9,14 +9,14 @@ import (
 
 // Game defines a validation game on a story
 type Game struct {
-	ID          int64          `json:"id"`
-	StoryID     int64          `json:"story_id"`
-	Creator     sdk.AccAddress `json:"creator"`
-	ExpiresTime time.Time      `json:"expires_time,omitempty"`
-	EndTime     time.Time      `json:"end_time,omitempty"`
-	Threshold   sdk.Coin       `json:"threshold,omitempty"`
-	VoteQuorum  int64          `json:"vote_quorum,omitempty"`
-	Timestamp   app.Timestamp  `json:"timestamp"`
+	ID                 int64          `json:"id"`
+	StoryID            int64          `json:"story_id"`
+	Creator            sdk.AccAddress `json:"creator"`
+	ExpiresTime        time.Time      `json:"expires_time,omitempty"`
+	EndTime            time.Time      `json:"end_time,omitempty"`
+	ChallengeThreshold sdk.Coin       `json:"challenge_threshold,omitempty"`
+	VoteQuorum         int64          `json:"vote_quorum,omitempty"`
+	Timestamp          app.Timestamp  `json:"timestamp"`
 }
 
 // Started returns true if a validation game has started

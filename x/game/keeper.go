@@ -76,18 +76,20 @@ func (k Keeper) Create(
 	if err != nil {
 		return 0, err
 	}
+
+	params := DefaultParams()
 	emptyPool := sdk.NewCoin(coinName, sdk.ZeroInt())
 
 	// create new game type
 	game := Game{
-		k.GetNextID(ctx),
-		storyID,
-		creator,
-		ctx.BlockHeader().Time.Add(DefaultParams().Expires),
-		time.Time{},
-		emptyPool,
-		0,
-		app.NewTimestamp(ctx.BlockHeader()),
+		ID:                 k.GetNextID(ctx),
+		StoryID:            storyID,
+		Creator:            creator,
+		ExpiresTime:        ctx.BlockHeader().Time.Add(params.Expires),
+		EndTime:            time.Time{},
+		ChallengeThreshold: emptyPool,
+		VoteQuorum:         0,
+		Timestamp:          app.NewTimestamp(ctx.BlockHeader()),
 	}
 
 	// push game id onto queue that will get checked
@@ -127,7 +129,7 @@ func (k Keeper) RegisterChallenge(
 	}
 
 	// add amount to threshold pool
-	game.Threshold = game.Threshold.Plus(amount)
+	game.ChallengeThreshold = game.ChallengeThreshold.Plus(amount)
 	k.update(ctx, game)
 
 	// if threshold is reached, and minimum quorum met,
@@ -170,7 +172,7 @@ func (k Keeper) startGameIfCan(ctx sdk.Context, game Game) (err sdk.Error) {
 	params := DefaultParams()
 
 	// threshold must be met
-	metChallengeThreshold := game.Threshold.Amount.GT(params.Threshold)
+	metChallengeThreshold := game.ChallengeThreshold.Amount.GT(params.Threshold)
 
 	// voter quorum must be met
 	metVoterQuorum := (game.VoteQuorum >= params.VoterQuorum)
@@ -198,14 +200,14 @@ func (k Keeper) startGameIfCan(ctx sdk.Context, game Game) (err sdk.Error) {
 func (k Keeper) update(ctx sdk.Context, game Game) {
 
 	newGame := Game{
-		ID:          game.ID,
-		StoryID:     game.StoryID,
-		Creator:     game.Creator,
-		ExpiresTime: game.ExpiresTime,
-		EndTime:     game.EndTime,
-		Threshold:   game.Threshold,
-		VoteQuorum:  game.VoteQuorum,
-		Timestamp:   game.Timestamp,
+		ID:                 game.ID,
+		StoryID:            game.StoryID,
+		Creator:            game.Creator,
+		ExpiresTime:        game.ExpiresTime,
+		EndTime:            game.EndTime,
+		ChallengeThreshold: game.ChallengeThreshold,
+		VoteQuorum:         game.VoteQuorum,
+		Timestamp:          game.Timestamp,
 	}
 
 	k.set(ctx, newGame)
