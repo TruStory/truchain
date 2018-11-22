@@ -136,7 +136,7 @@ func (k Keeper) Create(
 	k.voterList.Append(ctx, k, story.GameID, creator, vote.ID)
 
 	// register vote to add to the vote quorum
-	_, err = k.gameKeeper.RegisterVote(ctx, story.gameID)
+	err = k.gameKeeper.RegisterVote(ctx, story.GameID)
 	if err != nil {
 		return 0, err
 	}

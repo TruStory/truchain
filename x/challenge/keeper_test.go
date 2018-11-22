@@ -135,10 +135,12 @@ func TestNewChallenge_MultipleChallengers(t *testing.T) {
 
 	// check game pool amount
 	story, _ := k.storyKeeper.GetStory(ctx, storyID)
-	game, _ := k.gameKeeper.Get(ctx, story.GameID)
+	game, _ := k.gameKeeper.Game(ctx, story.GameID)
 
 	assert.True(t, game.Threshold.IsEqual(challengeAmount.Plus(amount)))
-	assert.True(t, game.Started())
+
+	// we also need voters
+	assert.False(t, game.Started())
 }
 
 func TestNewChallenge_ErrIncorrectCategoryCoin(t *testing.T) {
