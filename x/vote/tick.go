@@ -30,7 +30,7 @@ func checkGames(ctx sdk.Context, k Keeper, q queue.Queue) (err sdk.Error) {
 	}
 
 	// retrieve the game
-	game, err := k.gameKeeper.Get(ctx, gameID)
+	game, err := k.gameKeeper.Game(ctx, gameID)
 	if err != nil {
 		return err
 	}

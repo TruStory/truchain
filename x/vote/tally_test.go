@@ -104,7 +104,7 @@ func TestProcessGame(t *testing.T) {
 	ctx, _, k := fakeValidationGame()
 
 	gameID := int64(1)
-	game, _ := k.gameKeeper.Get(ctx, gameID)
+	game, _ := k.gameKeeper.Game(ctx, gameID)
 
 	err := processGame(ctx, k, game)
 	assert.Nil(t, err)
@@ -114,7 +114,7 @@ func TestTally(t *testing.T) {
 	ctx, _, k := fakeValidationGame()
 
 	gameID := int64(1)
-	game, _ := k.gameKeeper.Get(ctx, gameID)
+	game, _ := k.gameKeeper.Game(ctx, gameID)
 
 	votes, _ := tally(ctx, k, game)
 

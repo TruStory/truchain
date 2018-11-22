@@ -23,11 +23,11 @@ type ReadKeeper interface {
 type WriteKeeper interface {
 	ReadKeeper
 
-	Create(ctx sdk.Context, storyID int64, creator sdk.AccAddress) (int64, sdk.Error)
-	Set(ctx sdk.Context, game Game)
-	Update(ctx sdk.Context, game Game)
-	UpdateThreshold(ctx sdk.Context, gameID int64, amount sdk.Coin) (int64, sdk.Error)
-	RegisterVote(ctx sdk.Context, gameID int64)
+	Create(ctx sdk.Context, storyID int64, creator sdk.AccAddress) (
+		int64, sdk.Error)
+	RegisterChallenge(
+		ctx sdk.Context, gameID int64, amount sdk.Coin) (err sdk.Error)
+	RegisterVote(ctx sdk.Context, gameID int64) (err sdk.Error)
 }
 
 // Keeper data type storing keys to the key-value store
@@ -96,7 +96,7 @@ func (k Keeper) Create(
 	q.Push(game.ID)
 
 	// set game in KVStore
-	k.Set(ctx, game)
+	k.set(ctx, game)
 
 	// update story with gameID
 	story.GameID = game.ID
@@ -117,32 +117,85 @@ func (k Keeper) Game(ctx sdk.Context, id int64) (game Game, err sdk.Error) {
 	return
 }
 
-// Set saves the `Game` in the KVStore
-func (k Keeper) Set(ctx sdk.Context, game Game) {
+// RegisterChallenge updates threshold pool and starts game if possible
+func (k Keeper) RegisterChallenge(
+	ctx sdk.Context, gameID int64, amount sdk.Coin) (err sdk.Error) {
+
+	game, err := k.Game(ctx, gameID)
+	if err != nil {
+		return
+	}
+
+	// add amount to threshold pool
+	game.Threshold = game.Threshold.Plus(amount)
+	k.update(ctx, game)
+
+	// if threshold is reached, and minimum quorum met,
+	// start challenge and allow voting to begin
+	err = k.startGameIfCan(ctx, game)
+
+	return
+}
+
+// RegisterVote increments the voter quorum and starts game if possible
+func (k Keeper) RegisterVote(ctx sdk.Context, gameID int64) (err sdk.Error) {
+
+	game, err := k.Game(ctx, gameID)
+	if err != nil {
+		return
+	}
+
+	// update the voter quorum count
+	game.VoteQuorum = game.VoteQuorum + 1
+	k.update(ctx, game)
+
+	// if threshold is reached, and minimum quorum met,
+	// start challenge and allow voting to begin
+	err = k.startGameIfCan(ctx, game)
+
+	return
+}
+
+// ============================================================================
+
+// set saves the `Game` in the KVStore
+func (k Keeper) set(ctx sdk.Context, game Game) {
 	store := k.GetStore(ctx)
 	store.Set(
 		k.GetIDKey(game.ID),
 		k.GetCodec().MustMarshalBinary(game))
 }
 
-// RegisterVote increments the voter quorum
-func (k Keeper) RegisterVote(ctx sdk.Context, gameID int64) (
-	quorum int64, err sdk.Error) {
+func (k Keeper) startGameIfCan(ctx sdk.Context, game Game) (err sdk.Error) {
+	params := DefaultParams()
 
-	// get game
-	game, err := k.Game(ctx, gameID)
-	if err != nil {
-		return
+	// threshold must be met
+	metChallengeThreshold := game.Threshold.Amount.GT(params.Threshold)
+
+	// voter quorum must be met
+	metVoterQuorum := (game.VoteQuorum >= params.VoterQuorum)
+
+	if metChallengeThreshold && metVoterQuorum {
+		err = k.storyKeeper.StartGame(ctx, game.StoryID)
+		if err != nil {
+			return err
+		}
+		game.EndTime = ctx.BlockHeader().Time.Add(params.Period)
+
+		// push game id onto active game queue that will get checked on each tick
+		activeQueueStore := ctx.KVStore(k.activeQueueKey)
+		q := queue.NewQueue(k.GetCodec(), activeQueueStore)
+		q.Push(game.ID)
+
+		// update existing game in KVStore
+		k.set(ctx, game)
 	}
 
-	game.VoteQuorum = game.VoteQuorum + 1
-	k.Update(ctx, game)
-
-	return game.VoteQuorum, nil
+	return nil
 }
 
-// Update updates the `Game` object
-func (k Keeper) Update(ctx sdk.Context, game Game) {
+// update updates the `Game` object
+func (k Keeper) update(ctx sdk.Context, game Game) {
 
 	newGame := Game{
 		ID:          game.ID,
@@ -155,52 +208,5 @@ func (k Keeper) Update(ctx sdk.Context, game Game) {
 		Timestamp:   game.Timestamp,
 	}
 
-	k.Set(ctx, newGame)
-}
-
-// UpdateThreshold the threshold pool and start game if threshold is reached
-func (k Keeper) UpdateThreshold(
-	ctx sdk.Context, gameID int64, amount sdk.Coin) (int64, sdk.Error) {
-
-	params := DefaultParams()
-
-	game, err := k.Game(ctx, gameID)
-	if err != nil {
-		return 0, err
-	}
-
-	// add amount to threshold pool
-	game.Threshold = game.Threshold.Plus(amount)
-
-	// if threshold is reached, and minimum quorum met,
-	// start challenge and allow voting to begin
-	if canGameStart(k, game) {
-		err = k.storyKeeper.StartGame(ctx, game.StoryID)
-		if err != nil {
-			return 0, err
-		}
-		game.EndTime = ctx.BlockHeader().Time.Add(params.Period)
-
-		// push game id onto active game queue that will get checked on each tick
-		activeQueueStore := ctx.KVStore(k.activeQueueKey)
-		q := queue.NewQueue(k.GetCodec(), activeQueueStore)
-		q.Push(game.ID)
-	}
-
-	// update existing game in KVStore
-	k.Set(ctx, game)
-
-	return game.ID, nil
-}
-
-func canGameStart(k Keeper, game Game) bool {
-	params := DefaultParams()
-
-	// threshold must be met
-	metChallengeThreshold := game.Threshold.Amount.GT(params.Threshold)
-
-	// voter quorum must be met
-	metVoterQuorum := (game.VoteQuorum >= params.VoterQuorum)
-
-	return metChallengeThreshold && metVoterQuorum
+	k.set(ctx, newGame)
 }
