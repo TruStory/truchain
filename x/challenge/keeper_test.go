@@ -137,7 +137,7 @@ func TestNewChallenge_MultipleChallengers(t *testing.T) {
 	story, _ := k.storyKeeper.GetStory(ctx, storyID)
 	game, _ := k.gameKeeper.Game(ctx, story.GameID)
 
-	assert.True(t, game.ChallengeThreshold.IsEqual(challengeAmount.Plus(amount)))
+	assert.True(t, game.ChallengePool.IsEqual(challengeAmount.Plus(amount)))
 
 	// we also need voters
 	assert.False(t, game.Started())

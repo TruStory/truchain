@@ -31,7 +31,7 @@ func TestRegisterChallenge(t *testing.T) {
 	assert.Nil(t, err)
 
 	game, _ := k.Game(ctx, gameID)
-	assert.Equal(t, sdk.NewInt(50), game.ChallengeThreshold.Amount)
+	assert.Equal(t, sdk.NewInt(50), game.ChallengePool.Amount)
 }
 
 func TestRegisterVoteGameNotStarted(t *testing.T) {

@@ -82,14 +82,14 @@ func (k Keeper) Create(
 
 	// create new game type
 	game := Game{
-		ID:                 k.GetNextID(ctx),
-		StoryID:            storyID,
-		Creator:            creator,
-		ExpiresTime:        ctx.BlockHeader().Time.Add(params.Expires),
-		EndTime:            time.Time{},
-		ChallengeThreshold: emptyPool,
-		VoteQuorum:         0,
-		Timestamp:          app.NewTimestamp(ctx.BlockHeader()),
+		ID:            k.GetNextID(ctx),
+		StoryID:       storyID,
+		Creator:       creator,
+		ExpiresTime:   ctx.BlockHeader().Time.Add(params.Expires),
+		EndTime:       time.Time{},
+		ChallengePool: emptyPool,
+		VoteQuorum:    0,
+		Timestamp:     app.NewTimestamp(ctx.BlockHeader()),
 	}
 
 	// push game id onto queue that will get checked
@@ -129,7 +129,7 @@ func (k Keeper) RegisterChallenge(
 	}
 
 	// add amount to threshold pool
-	game.ChallengeThreshold = game.ChallengeThreshold.Plus(amount)
+	game.ChallengePool = game.ChallengePool.Plus(amount)
 	k.update(ctx, game)
 
 	// if threshold is reached, and minimum quorum met,
@@ -172,7 +172,7 @@ func (k Keeper) startGameIfCan(ctx sdk.Context, game Game) (err sdk.Error) {
 	params := DefaultParams()
 
 	// threshold must be met
-	metChallengeThreshold := game.ChallengeThreshold.Amount.GT(params.Threshold)
+	metChallengeThreshold := game.ChallengePool.Amount.GT(params.ChallengeThreshold)
 
 	// voter quorum must be met
 	metVoterQuorum := (game.VoteQuorum >= params.VoterQuorum)
@@ -200,14 +200,14 @@ func (k Keeper) startGameIfCan(ctx sdk.Context, game Game) (err sdk.Error) {
 func (k Keeper) update(ctx sdk.Context, game Game) {
 
 	newGame := Game{
-		ID:                 game.ID,
-		StoryID:            game.StoryID,
-		Creator:            game.Creator,
-		ExpiresTime:        game.ExpiresTime,
-		EndTime:            game.EndTime,
-		ChallengeThreshold: game.ChallengeThreshold,
-		VoteQuorum:         game.VoteQuorum,
-		Timestamp:          game.Timestamp,
+		ID:            game.ID,
+		StoryID:       game.StoryID,
+		Creator:       game.Creator,
+		ExpiresTime:   game.ExpiresTime,
+		EndTime:       game.EndTime,
+		ChallengePool: game.ChallengePool,
+		VoteQuorum:    game.VoteQuorum,
+		Timestamp:     game.Timestamp,
 	}
 
 	k.set(ctx, newGame)
