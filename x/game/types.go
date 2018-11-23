@@ -8,8 +8,6 @@ import (
 )
 
 // game states
-// created
-// * at least one challenge
 // started
 // * challenge threshold met
 // * voting begins
@@ -42,6 +40,17 @@ func (g Game) Started() bool {
 func (g Game) Ended(time time.Time) bool {
 	if time.After(g.EndTime) &&
 		g.VoteQuorum >= DefaultParams().VoteQuorum {
+
+		return true
+	}
+
+	return false
+}
+
+// Expired returns true if game is over and quorum is not reached
+func (g Game) Expired(time time.Time) bool {
+	if time.After(g.EndTime) &&
+		g.VoteQuorum < DefaultParams().VoteQuorum {
 
 		return true
 	}
