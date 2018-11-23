@@ -9,14 +9,14 @@ import (
 
 // Game defines a validation game on a story
 type Game struct {
-	ID                 int64          `json:"id"`
-	StoryID            int64          `json:"story_id"`
-	Creator            sdk.AccAddress `json:"creator"`
-	ExpiresTime        time.Time      `json:"expires_time,omitempty"`
-	EndTime            time.Time      `json:"end_time,omitempty"`
-	ChallengeThreshold sdk.Coin       `json:"challenge_threshold,omitempty"`
-	VoteQuorum         int64          `json:"vote_quorum,omitempty"`
-	Timestamp          app.Timestamp  `json:"timestamp"`
+	ID            int64          `json:"id"`
+	StoryID       int64          `json:"story_id"`
+	Creator       sdk.AccAddress `json:"creator"`
+	ExpiresTime   time.Time      `json:"expires_time,omitempty"`
+	EndTime       time.Time      `json:"end_time,omitempty"`
+	ChallengePool sdk.Coin       `json:"challenge_pool,omitempty"`
+	VoteQuorum    int64          `json:"vote_quorum,omitempty"`
+	Timestamp     app.Timestamp  `json:"timestamp"`
 }
 
 // Started returns true if a validation game has started
@@ -39,20 +39,20 @@ func (g Game) Ended(time time.Time) bool {
 
 // Params holds default parameters for a game
 type Params struct {
-	MinChallengeStake sdk.Int       // min amount required to challenge
-	Expires           time.Duration // time to expire if threshold not met
-	Period            time.Duration // length of challenge game / voting period
-	Threshold         sdk.Int       // amount at which game begins
-	VoterQuorum       int64         // num voters required
+	MinChallengeStake  sdk.Int       // min amount required to challenge
+	Expires            time.Duration // time to expire if threshold not met
+	Period             time.Duration // length of challenge game / voting period
+	ChallengeThreshold sdk.Int       // amount at which game begins
+	VoterQuorum        int64         // num voters required
 }
 
 // DefaultParams creates a new MsgParams type with defaults
 func DefaultParams() Params {
 	return Params{
-		MinChallengeStake: sdk.NewInt(10),
-		Expires:           10 * 24 * time.Hour,
-		Period:            30 * 24 * time.Hour,
-		Threshold:         sdk.NewInt(10),
-		VoterQuorum:       7,
+		MinChallengeStake:  sdk.NewInt(10),
+		Expires:            10 * 24 * time.Hour,
+		Period:             30 * 24 * time.Hour,
+		ChallengeThreshold: sdk.NewInt(10),
+		VoterQuorum:        7,
 	}
 }
