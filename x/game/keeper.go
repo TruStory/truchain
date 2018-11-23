@@ -132,9 +132,23 @@ func (k Keeper) RegisterChallenge(
 	game.ChallengePool = game.ChallengePool.Plus(amount)
 	k.update(ctx, game)
 
-	// if threshold is reached, and minimum quorum met,
-	// start challenge and allow voting to begin
-	err = k.startGameIfCan(ctx, game)
+	if game.Started() {
+		err = k.storyKeeper.StartGame(ctx, game.StoryID)
+		if err != nil {
+			return err
+		}
+
+		// set end time = block time + voting period
+		game.EndTime = ctx.BlockHeader().Time.Add(DefaultParams().VotingPeriod)
+
+		// push game id onto active game queue that will get checked on each tick
+		activeQueueStore := ctx.KVStore(k.activeQueueKey)
+		q := queue.NewQueue(k.GetCodec(), activeQueueStore)
+		q.Push(game.ID)
+
+		// update existing game in KVStore
+		k.set(ctx, game)
+	}
 
 	return
 }
@@ -147,13 +161,13 @@ func (k Keeper) RegisterVote(ctx sdk.Context, gameID int64) (err sdk.Error) {
 		return
 	}
 
+	if !game.Started() {
+		return ErrNotStarted(gameID)
+	}
+
 	// update the voter quorum count
 	game.VoteQuorum = game.VoteQuorum + 1
 	k.update(ctx, game)
-
-	// if threshold is reached, and minimum quorum met,
-	// start challenge and allow voting to begin
-	err = k.startGameIfCan(ctx, game)
 
 	return
 }
@@ -166,34 +180,6 @@ func (k Keeper) set(ctx sdk.Context, game Game) {
 	store.Set(
 		k.GetIDKey(game.ID),
 		k.GetCodec().MustMarshalBinary(game))
-}
-
-func (k Keeper) startGameIfCan(ctx sdk.Context, game Game) (err sdk.Error) {
-	params := DefaultParams()
-
-	// threshold must be met
-	metChallengeThreshold := game.ChallengePool.Amount.GT(params.ChallengeThreshold)
-
-	// voter quorum must be met
-	metVoterQuorum := (game.VoteQuorum >= params.VoterQuorum)
-
-	if metChallengeThreshold && metVoterQuorum {
-		err = k.storyKeeper.StartGame(ctx, game.StoryID)
-		if err != nil {
-			return err
-		}
-		game.EndTime = ctx.BlockHeader().Time.Add(params.Period)
-
-		// push game id onto active game queue that will get checked on each tick
-		activeQueueStore := ctx.KVStore(k.activeQueueKey)
-		q := queue.NewQueue(k.GetCodec(), activeQueueStore)
-		q.Push(game.ID)
-
-		// update existing game in KVStore
-		k.set(ctx, game)
-	}
-
-	return nil
 }
 
 // update updates the `Game` object
