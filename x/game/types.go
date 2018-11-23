@@ -7,6 +7,20 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
+// game states
+// created
+// * at least one challenge
+// started
+// * challenge threshold met
+// * voting begins
+// ended
+// * voting period ended (24 hrs)
+// * AND received min quorum (9+ votes)
+// expired
+// * voting period ended (24 hrs)
+// * NOT received min quorum (9+ votes)
+// * stake returned
+
 // Game defines a validation game on a story
 type Game struct {
 	ID            int64          `json:"id"`
@@ -19,18 +33,16 @@ type Game struct {
 	Timestamp     app.Timestamp  `json:"timestamp"`
 }
 
-// Started returns true if a validation game has started
+// Started returns true if challenge pool meets threshold
 func (g Game) Started() bool {
-	if g.EndTime.After(time.Time{}) {
-		return true
-	}
-
-	return false
+	return g.ChallengePool.Amount.GT(DefaultParams().ChallengeThreshold)
 }
 
-// Ended returns true if a validation game has ended
+// Ended returns true if game is over time and quorum is reached
 func (g Game) Ended(time time.Time) bool {
-	if g.EndTime.After(time) {
+	if time.After(g.EndTime) &&
+		g.VoteQuorum >= DefaultParams().VoteQuorum {
+
 		return true
 	}
 
@@ -41,9 +53,9 @@ func (g Game) Ended(time time.Time) bool {
 type Params struct {
 	MinChallengeStake  sdk.Int       // min amount required to challenge
 	Expires            time.Duration // time to expire if threshold not met
-	Period             time.Duration // length of challenge game / voting period
+	VotingPeriod       time.Duration // length of challenge game / voting period
 	ChallengeThreshold sdk.Int       // amount at which game begins
-	VoterQuorum        int64         // num voters required
+	VoteQuorum         int64         // num voters required
 }
 
 // DefaultParams creates a new MsgParams type with defaults
@@ -51,8 +63,8 @@ func DefaultParams() Params {
 	return Params{
 		MinChallengeStake:  sdk.NewInt(10),
 		Expires:            10 * 24 * time.Hour,
-		Period:             30 * 24 * time.Hour,
+		VotingPeriod:       1 * 24 * time.Hour,
 		ChallengeThreshold: sdk.NewInt(10),
-		VoterQuorum:        7,
+		VoteQuorum:         7,
 	}
 }

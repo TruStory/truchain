@@ -2,6 +2,7 @@ package game
 
 import (
 	"testing"
+	"time"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/stretchr/testify/assert"
@@ -34,25 +35,6 @@ func TestRegisterChallenge(t *testing.T) {
 	assert.Equal(t, sdk.NewInt(50), game.ChallengePool.Amount)
 }
 
-func TestRegisterVoteGameNotStarted(t *testing.T) {
-	ctx, k, storyKeeper, categoryKeeper, _ := mockDB()
-
-	storyID := createFakeStory(ctx, storyKeeper, categoryKeeper)
-	creator := sdk.AccAddress([]byte{1, 2})
-	gameID, _ := k.Create(ctx, storyID, creator)
-
-	amount, _ := sdk.ParseCoin("50trudex")
-	k.RegisterChallenge(ctx, gameID, amount)
-
-	quorum := DefaultParams().VoterQuorum - 1
-	for i := 0; i < int(quorum); i = i + 1 {
-		k.RegisterVote(ctx, gameID)
-	}
-
-	game, _ := k.Game(ctx, gameID)
-	assert.False(t, game.Started())
-}
-
 func TestRegisterVoteGameStarted(t *testing.T) {
 	ctx, k, storyKeeper, categoryKeeper, _ := mockDB()
 
@@ -63,13 +45,34 @@ func TestRegisterVoteGameStarted(t *testing.T) {
 	amount, _ := sdk.ParseCoin("50trudex")
 	k.RegisterChallenge(ctx, gameID, amount)
 
-	quorum := DefaultParams().VoterQuorum + 1
+	quorum := DefaultParams().VoteQuorum - 1
 	for i := 0; i < int(quorum); i = i + 1 {
 		k.RegisterVote(ctx, gameID)
 	}
 
 	game, _ := k.Game(ctx, gameID)
 	assert.True(t, game.Started())
+}
+
+func TestRegisterVoteGameEnded(t *testing.T) {
+	ctx, k, storyKeeper, categoryKeeper, _ := mockDB()
+
+	storyID := createFakeStory(ctx, storyKeeper, categoryKeeper)
+	creator := sdk.AccAddress([]byte{1, 2})
+	gameID, _ := k.Create(ctx, storyID, creator)
+
+	amount, _ := sdk.ParseCoin("50trudex")
+	k.RegisterChallenge(ctx, gameID, amount)
+
+	quorum := DefaultParams().VoteQuorum + 1
+	for i := 0; i < int(quorum); i = i + 1 {
+		k.RegisterVote(ctx, gameID)
+	}
+
+	game, _ := k.Game(ctx, gameID)
+	assert.True(t, game.Started())
+	endTime := game.EndTime.Add(20 * 24 * time.Hour)
+	assert.True(t, game.Ended(endTime))
 }
 
 func TestSetGame(t *testing.T) {
