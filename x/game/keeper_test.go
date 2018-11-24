@@ -75,6 +75,26 @@ func TestRegisterVoteGameEnded(t *testing.T) {
 	assert.True(t, game.Ended(endTime))
 }
 
+func TestRegisterVoteGameExpired(t *testing.T) {
+	ctx, k, storyKeeper, categoryKeeper, _ := mockDB()
+
+	storyID := createFakeStory(ctx, storyKeeper, categoryKeeper)
+	creator := sdk.AccAddress([]byte{1, 2})
+	gameID, _ := k.Create(ctx, storyID, creator)
+
+	amount, _ := sdk.ParseCoin("50trudex")
+	k.RegisterChallenge(ctx, gameID, amount)
+
+	quorum := DefaultParams().VoteQuorum - 1
+	for i := 0; i < int(quorum); i = i + 1 {
+		k.RegisterVote(ctx, gameID)
+	}
+
+	game, _ := k.Game(ctx, gameID)
+	endTime := game.EndTime.Add(20 * 24 * time.Hour)
+	assert.True(t, game.Expired(endTime))
+}
+
 func TestSetGame(t *testing.T) {
 	ctx, k, _, _, _ := mockDB()
 
