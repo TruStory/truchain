@@ -16,7 +16,7 @@ func (k Keeper) NewResponseEndBlock(ctx sdk.Context) sdk.Tags {
 		panic(err)
 	}
 
-	return sdk.NewTags()
+	return sdk.EmptyTags()
 }
 
 // ============================================================================
@@ -44,7 +44,10 @@ func (k Keeper) checkGames(ctx sdk.Context, gameQueue queue.Queue) sdk.Error {
 		gameQueue.Pop()
 
 		// return funds
-		k.returnFunds(ctx, gameID)
+		err = k.returnFunds(ctx, gameID)
+		if err != nil {
+			return err
+		}
 
 		// update story
 		err = k.storyKeeper.ExpireGame(ctx, game.StoryID)
