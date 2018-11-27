@@ -36,7 +36,7 @@ func NewQuerier(k ReadKeeper) sdk.Querier {
 func queryCategoryByID(ctx sdk.Context, req abci.RequestQuery, k ReadKeeper) (res []byte, err sdk.Error) {
 	params := QueryCategoryByIDParams{}
 
-	if err = unmarshalQueryParams(req, params); err != nil {
+	if err = unmarshalQueryParams(req, &params); err != nil {
 		return
 	}
 
@@ -50,7 +50,7 @@ func queryCategoryByID(ctx sdk.Context, req abci.RequestQuery, k ReadKeeper) (re
 }
 
 func unmarshalQueryParams(req abci.RequestQuery, params interface{}) (sdkErr sdk.Error) {
-	parseErr := json.Unmarshal(req.Data, &params)
+	parseErr := json.Unmarshal(req.Data, params)
 	if parseErr != nil {
 		sdkErr = sdk.ErrUnknownRequest(fmt.Sprintf("Incorrectly formatted request data - %s", parseErr.Error()))
 		return

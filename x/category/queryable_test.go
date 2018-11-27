@@ -1,9 +1,9 @@
 package category
 
 import (
+	"encoding/json"
 	"testing"
 
-	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/stretchr/testify/require"
 	abci "github.com/tendermint/tendermint/abci/types"
 )
@@ -15,13 +15,11 @@ func TestQueryCategories_ErrNotFound(t *testing.T) {
 		ID: 1,
 	}
 
-	cdc := codec.New()
-
-	bz, errRes := cdc.MarshalJSON(queryParams)
+	bz, errRes := json.Marshal(queryParams)
 	require.Nil(t, errRes)
 
 	query := abci.RequestQuery{
-		Path: "/custom/category/id",
+		Path: "/custom/categories/id",
 		Data: bz,
 	}
 
@@ -39,16 +37,15 @@ func TestQueryCategoriesWithID(t *testing.T) {
 		ID: 1,
 	}
 
-	cdc := codec.New()
-
-	bz, errRes := cdc.MarshalJSON(queryParams)
+	bz, errRes := json.Marshal(queryParams)
 	require.Nil(t, errRes)
 
 	query := abci.RequestQuery{
-		Path: "/custom/category/id",
+		Path: "/custom/categories/id",
 		Data: bz,
 	}
 
 	_, err := queryCategoryByID(ctx, query, k)
+
 	require.Nil(t, err)
 }
