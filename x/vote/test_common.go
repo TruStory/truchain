@@ -60,7 +60,7 @@ func mockDB() (sdk.Context, Keeper, c.Keeper) {
 	sk := s.NewKeeper(storyKey, ck, codec)
 	backingKeeper := backing.NewKeeper(backingKey, sk, bankKeeper, ck, codec)
 	gameKeeper := game.NewKeeper(gameKey, gameQueueKey, gameQueueKey, sk, bankKeeper, codec)
-	challengeKeeper := challenge.NewKeeper(challengeKey, gameQueueKey, bankKeeper, gameKeeper, sk, codec)
+	challengeKeeper := challenge.NewKeeper(challengeKey, bankKeeper, gameKeeper, sk, codec)
 
 	k := NewKeeper(
 		voteKey,

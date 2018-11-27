@@ -141,8 +141,8 @@ func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *T
 		app.keyGame, app.keyGameQueue, app.keyActiveGameQueue, app.storyKeeper,
 		app.coinKeeper, codec)
 	app.challengeKeeper = challenge.NewKeeper(
-		app.keyChallenge, app.keyGameQueue, app.coinKeeper,
-		app.gameKeeper, app.storyKeeper, codec)
+		app.keyChallenge, app.coinKeeper, app.gameKeeper,
+		app.storyKeeper, codec)
 	app.voteKeeper = vote.NewKeeper(
 		app.keyVote, app.keyActiveGameQueue, app.accountKeeper, app.backingKeeper,
 		app.challengeKeeper, app.storyKeeper, app.gameKeeper, app.coinKeeper, codec)
@@ -234,7 +234,6 @@ func (app *TruChain) BeginBlocker(ctx sdk.Context, req abci.RequestBeginBlock) a
 // application.
 func (app *TruChain) EndBlocker(ctx sdk.Context, _ abci.RequestEndBlock) abci.ResponseEndBlock {
 	app.backingKeeper.NewResponseEndBlock(ctx)
-	app.challengeKeeper.NewResponseEndBlock(ctx)
 	app.voteKeeper.NewResponseEndBlock(ctx)
 
 	return abci.ResponseEndBlock{}

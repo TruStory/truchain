@@ -28,15 +28,11 @@ type WriteKeeper interface {
 	Create(
 		ctx sdk.Context, storyID int64, amount sdk.Coin, argument string,
 		creator sdk.AccAddress, evidence []url.URL) (int64, sdk.Error)
-
-	NewResponseEndBlock(ctx sdk.Context) sdk.Tags
 }
 
 // Keeper data type storing keys to the key-value store
 type Keeper struct {
 	app.Keeper
-
-	gameQueueKey sdk.StoreKey
 
 	bankKeeper  bank.Keeper
 	gameKeeper  game.WriteKeeper
@@ -47,13 +43,12 @@ type Keeper struct {
 
 // NewKeeper creates a new keeper with write and read access
 func NewKeeper(
-	storeKey sdk.StoreKey, gameQueueKey sdk.StoreKey, bankKeeper bank.Keeper,
+	storeKey sdk.StoreKey, bankKeeper bank.Keeper,
 	gameKeeper game.WriteKeeper, storyKeeper story.WriteKeeper,
 	codec *amino.Codec) Keeper {
 
 	return Keeper{
 		app.NewKeeper(codec, storeKey),
-		gameQueueKey,
 		bankKeeper,
 		gameKeeper,
 		storyKeeper,
