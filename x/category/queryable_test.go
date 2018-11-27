@@ -11,8 +11,8 @@ import (
 func TestQueryCategories_ErrNotFound(t *testing.T) {
 	ctx, k := mockDB()
 
-	queryParams := QueryCategoryParams{
-		ID: "1",
+	queryParams := QueryCategoryByIDParams{
+		ID: 1,
 	}
 
 	cdc := codec.New()
@@ -35,8 +35,8 @@ func TestQueryCategoriesWithID(t *testing.T) {
 
 	createFakeCategory(ctx, k)
 
-	queryParams := QueryCategoryParams{
-		ID: "1",
+	queryParams := QueryCategoryByIDParams{
+		ID: 1,
 	}
 
 	cdc := codec.New()
