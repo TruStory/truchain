@@ -1,9 +1,9 @@
 package story
 
 import (
+	"encoding/json"
 	"testing"
 
-	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/stretchr/testify/require"
 	abci "github.com/tendermint/tendermint/abci/types"
 )
@@ -15,13 +15,11 @@ func TestQueryStories_ErrNotFound(t *testing.T) {
 		CategoryID: 1,
 	}
 
-	cdc := codec.New()
-
-	bz, errRes := cdc.MarshalJSON(queryParams)
+	bz, errRes := json.Marshal(queryParams)
 	require.Nil(t, errRes)
 
 	query := abci.RequestQuery{
-		Path: "/custom/category/stories",
+		Path: "/custom/stories/category",
 		Data: bz,
 	}
 
@@ -39,16 +37,14 @@ func TestQueryStoriesWithCategory(t *testing.T) {
 		CategoryID: 1,
 	}
 
-	cdc := codec.New()
-
-	bz, errRes := cdc.MarshalJSON(queryParams)
+	bz, errRes := json.Marshal(queryParams)
 	require.Nil(t, errRes)
 
 	query := abci.RequestQuery{
-		Path: "/custom/category/stories",
+		Path: "/custom/stories/category",
 		Data: bz,
 	}
-
 	_, err := queryStoriesByCategory(ctx, query, sk)
+
 	require.Nil(t, err)
 }
