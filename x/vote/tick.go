@@ -57,7 +57,7 @@ func (k Keeper) checkGames(ctx sdk.Context, gameQueue queue.Queue) sdk.Error {
 	}
 
 	// terminate recursion on finding the first non-ended game
-	if game.Ended(blockTime) {
+	if !game.Ended(blockTime) {
 		return nil
 	}
 
