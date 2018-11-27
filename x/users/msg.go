@@ -18,7 +18,7 @@ type RegisterKeyMsg struct {
 func (msg RegisterKeyMsg) Type() string { return app.GetType(msg) }
 
 // Route implements Msg
-func (msg RegisterKeyMsg) Route() string { return app.GetName(msg) }
+func (msg RegisterKeyMsg) Route() string { return app.GetType(msg) }
 
 // GetSignBytes implements Msg
 func (msg RegisterKeyMsg) GetSignBytes() []byte {

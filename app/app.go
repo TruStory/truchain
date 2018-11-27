@@ -163,7 +163,7 @@ func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *T
 		AddRoute("backing", backing.NewHandler(app.backingKeeper)).
 		AddRoute("challenge", challenge.NewHandler(app.challengeKeeper)).
 		AddRoute("vote", vote.NewHandler(app.voteKeeper)).
-		AddRoute("users", users.NewHandler(app.accountKeeper))
+		AddRoute(users.RegisterKeyMsg{}.Route(), users.NewHandler(app.accountKeeper))
 
 	// register query routes for reading state
 	app.QueryRouter().
