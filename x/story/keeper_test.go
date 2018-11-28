@@ -1,6 +1,7 @@
 package story
 
 import (
+	"net/url"
 	"testing"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -35,8 +36,9 @@ func TestAddGetStory(t *testing.T) {
 	body := "Body of story 2."
 	creator := sdk.AccAddress([]byte{3, 4})
 	kind := Default
+	source := url.URL{}
 
-	storyID, _ = sk.NewStory(ctx, body, int64(1), creator, kind)
+	storyID, _ = sk.NewStory(ctx, body, int64(1), creator, source, kind)
 	assert.Equal(t, int64(2), storyID, "Story ID did not increment properly")
 
 	coinName, _ := sk.GetCoinName(ctx, storyID)

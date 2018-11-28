@@ -16,6 +16,7 @@ const (
 	CodeInvalidEvidenceURL          sdk.CodeType = 704
 	CodeInvalidStoryType            sdk.CodeType = 706
 	CodeStoriesWithCategoryNotFound sdk.CodeType = 707
+	CodeInvalidSourceURL            sdk.CodeType = 708
 )
 
 // ErrInvalidStoryBody throws an error on invalid title
@@ -37,6 +38,11 @@ func ErrInvalidStoryType(msg string) sdk.Error {
 // ErrInvalidEvidenceURL throws an error when a URL in invalid
 func ErrInvalidEvidenceURL(url string) sdk.Error {
 	return sdk.NewError(DefaultCodespace, CodeInvalidEvidenceURL, "Invalid evidence URL: "+url)
+}
+
+// ErrInvalidSourceURL throws an error when a URL in invalid
+func ErrInvalidSourceURL(url string) sdk.Error {
+	return sdk.NewError(DefaultCodespace, CodeInvalidSourceURL, "Invalid source URL: "+url)
 }
 
 // ErrStoryNotFound throws an error when the searched story is not found

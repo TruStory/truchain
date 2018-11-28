@@ -1,6 +1,8 @@
 package story
 
 import (
+	"net/url"
+
 	app "github.com/TruStory/truchain/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
@@ -24,7 +26,13 @@ func handleSubmitStoryMsg(ctx sdk.Context, k WriteKeeper, msg SubmitStoryMsg) sd
 		return err.Result()
 	}
 
-	id, err := k.NewStory(ctx, msg.Body, msg.CategoryID, msg.Creator, msg.StoryType)
+	// parse url from string
+	sourceURL, urlError := url.ParseRequestURI(msg.Source)
+	if urlError != nil {
+		return ErrInvalidSourceURL(msg.Source).Result()
+	}
+
+	id, err := k.NewStory(ctx, msg.Body, msg.CategoryID, msg.Creator, *sourceURL, msg.StoryType)
 	if err != nil {
 		return err.Result()
 	}

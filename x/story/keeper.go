@@ -1,6 +1,8 @@
 package story
 
 import (
+	"net/url"
+
 	app "github.com/TruStory/truchain/types"
 	"github.com/TruStory/truchain/x/category"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -28,7 +30,12 @@ type WriteKeeper interface {
 	ReadKeeper
 
 	NewStory(
-		ctx sdk.Context, body string, categoryID int64, creator sdk.AccAddress, storyType Type) (int64, sdk.Error)
+		ctx sdk.Context,
+		body string,
+		categoryID int64,
+		creator sdk.AccAddress,
+		source url.URL,
+		storyType Type) (int64, sdk.Error)
 	StartGame(ctx sdk.Context, storyID int64) sdk.Error
 	EndGame(ctx sdk.Context, storyID int64, confirmed bool) sdk.Error
 	ExpireGame(ctx sdk.Context, storyID int64) sdk.Error
@@ -116,6 +123,7 @@ func (k Keeper) NewStory(
 	body string,
 	categoryID int64,
 	creator sdk.AccAddress,
+	source url.URL,
 	storyType Type) (int64, sdk.Error) {
 
 	_, err := k.categoryKeeper.GetCategory(ctx, categoryID)
@@ -129,6 +137,7 @@ func (k Keeper) NewStory(
 		CategoryID: categoryID,
 		Creator:    creator,
 		GameID:     0,
+		Source:     source,
 		State:      Unconfirmed,
 		Type:       storyType,
 		Timestamp:  app.NewTimestamp(ctx.BlockHeader()),
@@ -233,6 +242,7 @@ func (k Keeper) UpdateStory(ctx sdk.Context, story Story) {
 		story.CategoryID,
 		story.Creator,
 		story.GameID,
+		story.Source,
 		story.State,
 		story.Type,
 		story.Timestamp.Update(ctx.BlockHeader()),

@@ -12,18 +12,14 @@ func TestValidSubmitStoryMsg(t *testing.T) {
 	validBody := "This is a valid story body @shanev amirite?"
 	validCategoryID := int64(1)
 	validCreator := sdk.AccAddress([]byte{1, 2})
+	validSource := "http://shanesbrain.net"
 	validStoryType := Default
-	msg := NewSubmitStoryMsg(validBody, validCategoryID, validCreator, validStoryType)
+	msg := NewSubmitStoryMsg(validBody, validCategoryID, validCreator, validSource, validStoryType)
 	err := msg.ValidateBasic()
 
 	assert.Nil(t, err)
 	assert.Equal(t, "story", msg.Route())
 	assert.Equal(t, "submit_story", msg.Type())
-	assert.Equal(
-		t,
-		`{"body":"This is a valid story body @shanev amirite?","category_id":1,"creator":"cosmos1qypq36vzru","story_type":0}`,
-		fmt.Sprintf("%s", msg.GetSignBytes()),
-	)
 	assert.Equal(t, []sdk.AccAddress{validCreator}, msg.GetSigners())
 }
 
@@ -31,8 +27,9 @@ func TestInValidBodySubmitStoryMsg(t *testing.T) {
 	invalidBody := ""
 	validCategoryID := int64(1)
 	validCreator := sdk.AccAddress([]byte{1, 2})
+	validSource := "http://shanesbrain.net"
 	validStoryType := Default
-	msg := NewSubmitStoryMsg(invalidBody, validCategoryID, validCreator, validStoryType)
+	msg := NewSubmitStoryMsg(invalidBody, validCategoryID, validCreator, validSource, validStoryType)
 	err := msg.ValidateBasic()
 
 	assert.Equal(t, sdk.CodeType(701), err.Code(), err.Error())
@@ -42,8 +39,9 @@ func TestInValidCreatorSubmitStoryMsg(t *testing.T) {
 	validBody := "This is a valid story body @shanev amirite?"
 	validCategoryID := int64(1)
 	invalidCreator := sdk.AccAddress([]byte{})
+	validSource := "http://shanesbrain.net"
 	validStoryType := Default
-	msg := NewSubmitStoryMsg(validBody, validCategoryID, invalidCreator, validStoryType)
+	msg := NewSubmitStoryMsg(validBody, validCategoryID, invalidCreator, validSource, validStoryType)
 	err := msg.ValidateBasic()
 
 	assert.Equal(t, sdk.CodeType(7), err.Code(), err.Error())
