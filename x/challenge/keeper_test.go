@@ -142,7 +142,7 @@ func TestNewChallenge_MultipleChallengers(t *testing.T) {
 }
 
 func TestNewChallenge_ErrIncorrectCategoryCoin(t *testing.T) {
-	ctx, k, sk, ck, bankKeeper := mockDB()
+	ctx, k, sk, ck, _ := mockDB()
 
 	storyID := createFakeStory(ctx, sk, ck)
 	amount := sdk.NewCoin("testcoin", sdk.NewInt(15))
@@ -150,9 +150,6 @@ func TestNewChallenge_ErrIncorrectCategoryCoin(t *testing.T) {
 	creator := sdk.AccAddress([]byte{1, 2})
 	cnn, _ := url.Parse("http://www.cnn.com")
 	evidence := []url.URL{*cnn}
-
-	// give user some funds
-	bankKeeper.AddCoins(ctx, creator, sdk.Coins{amount})
 
 	_, err := k.Create(ctx, storyID, amount, argument, creator, evidence)
 	assert.NotNil(t, err)
