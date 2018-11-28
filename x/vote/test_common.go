@@ -1,6 +1,7 @@
 package vote
 
 import (
+	"net/url"
 	"time"
 
 	"github.com/TruStory/truchain/x/backing"
@@ -81,8 +82,9 @@ func createFakeStory(ctx sdk.Context, sk s.WriteKeeper, ck c.WriteKeeper) int64 
 	cat := createFakeCategory(ctx, ck)
 	creator := sdk.AccAddress([]byte{1, 2})
 	storyType := s.Default
+	source := url.URL{}
 
-	storyID, _ := sk.NewStory(ctx, body, cat.ID, creator, storyType)
+	storyID, _ := sk.NewStory(ctx, body, cat.ID, creator, source, storyType)
 
 	return storyID
 }

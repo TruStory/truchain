@@ -1,6 +1,7 @@
 package challenge
 
 import (
+	"net/url"
 	"time"
 
 	c "github.com/TruStory/truchain/x/category"
@@ -61,8 +62,9 @@ func createFakeStory(ctx sdk.Context, sk s.Keeper, ck c.WriteKeeper) int64 {
 	cat := createFakeCategory(ctx, ck)
 	creator := sdk.AccAddress([]byte{1, 2})
 	storyType := s.Default
+	source := url.URL{}
 
-	storyID, _ := sk.NewStory(ctx, body, cat.ID, creator, storyType)
+	storyID, _ := sk.NewStory(ctx, body, cat.ID, creator, source, storyType)
 
 	return storyID
 }

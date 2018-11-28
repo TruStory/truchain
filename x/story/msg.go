@@ -13,15 +13,23 @@ type SubmitStoryMsg struct {
 	Body       string         `json:"body"`
 	CategoryID int64          `json:"category_id"`
 	Creator    sdk.AccAddress `json:"creator"`
+	Source     string         `json:"source"`
 	StoryType  Type           `json:"story_type"`
 }
 
 // NewSubmitStoryMsg creates a new message to submit a story
-func NewSubmitStoryMsg(body string, categoryID int64, creator sdk.AccAddress, storyType Type) SubmitStoryMsg {
+func NewSubmitStoryMsg(
+	body string,
+	categoryID int64,
+	creator sdk.AccAddress,
+	source string,
+	storyType Type) SubmitStoryMsg {
+
 	return SubmitStoryMsg{
 		Body:       body,
 		CategoryID: categoryID,
 		Creator:    creator,
+		Source:     source,
 		StoryType:  storyType,
 	}
 }
