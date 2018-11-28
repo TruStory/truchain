@@ -39,6 +39,9 @@ func (k Keeper) checkGames(ctx sdk.Context, gameQueue queue.Queue) sdk.Error {
 	blockTime := ctx.BlockHeader().Time
 
 	// handle expired games
+	// an expired game meets the following criteria:
+	// 1. passed the voting period (`EndTime` > block time)
+	// 2. didn't meet the minimum voter quorum
 	if game.Expired(blockTime) {
 		// remove from queue
 		gameQueue.Pop()
@@ -60,6 +63,9 @@ func (k Keeper) checkGames(ctx sdk.Context, gameQueue queue.Queue) sdk.Error {
 	}
 
 	// terminate recursion on finding the first non-ended game
+	// an ended game meets the following criteria:
+	// 1. passed the voting period (`EndTime` > block time)
+	// 2. met the minimum voter quorum
 	if !game.Ended(blockTime) {
 		return nil
 	}
