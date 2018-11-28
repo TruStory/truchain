@@ -151,7 +151,7 @@ func (k Keeper) TokenVote(ctx sdk.Context, id int64) (vote TokenVote, err sdk.Er
 	if bz == nil {
 		return vote, ErrNotFound(id)
 	}
-	k.GetCodec().MustUnmarshalBinary(bz, &vote)
+	k.GetCodec().MustUnmarshalBinaryLengthPrefixed(bz, &vote)
 
 	return vote, nil
 }
@@ -204,5 +204,5 @@ func (k Keeper) set(ctx sdk.Context, vote TokenVote) {
 	store := k.GetStore(ctx)
 	store.Set(
 		k.GetIDKey(vote.ID()),
-		k.GetCodec().MustMarshalBinary(vote))
+		k.GetCodec().MustMarshalBinaryLengthPrefixed(vote))
 }
