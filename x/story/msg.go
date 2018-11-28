@@ -13,16 +13,16 @@ type SubmitStoryMsg struct {
 	Body       string         `json:"body"`
 	CategoryID int64          `json:"category_id"`
 	Creator    sdk.AccAddress `json:"creator"`
-	Kind       Kind           `json:"kind"`
+	StoryType  Type           `json:"story_type"`
 }
 
 // NewSubmitStoryMsg creates a new message to submit a story
-func NewSubmitStoryMsg(body string, categoryID int64, creator sdk.AccAddress, kind Kind) SubmitStoryMsg {
+func NewSubmitStoryMsg(body string, categoryID int64, creator sdk.AccAddress, storyType Type) SubmitStoryMsg {
 	return SubmitStoryMsg{
 		Body:       body,
 		CategoryID: categoryID,
 		Creator:    creator,
-		Kind:       kind,
+		StoryType:  storyType,
 	}
 }
 
@@ -49,8 +49,8 @@ func (msg SubmitStoryMsg) ValidateBasic() sdk.Error {
 	if len(msg.Creator) == 0 {
 		return sdk.ErrInvalidAddress("Invalid address: " + msg.Creator.String())
 	}
-	if msg.Kind.IsValid() == false {
-		return ErrInvalidStoryKind(msg.Kind.String())
+	if msg.StoryType.IsValid() == false {
+		return ErrInvalidStoryType(msg.StoryType.String())
 	}
 	return nil
 }

@@ -26,7 +26,7 @@ func TestAddGetStory(t *testing.T) {
 		CategoryID: int64(1),
 		Creator:    sdk.AccAddress([]byte{1, 2}),
 		State:      Unconfirmed,
-		Kind:       Default,
+		Type:       Default,
 	}
 
 	assert.Equal(t, story.ID, savedStory.ID, "Story received from store does not match expected value")
