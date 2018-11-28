@@ -2,6 +2,7 @@ package truapi
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 
 	"github.com/TruStory/truchain/x/category"
@@ -19,7 +20,7 @@ func (ta *TruAPI) storyResolver(_ context.Context, q story.QueryCategoryStoriesP
 	}
 
 	s := new([]story.Story)
-	err := amino.UnmarshalJSON(res.Value, s)
+	err := json.Unmarshal(res.Value, s)
 
 	if err != nil {
 		panic(err)
@@ -36,14 +37,14 @@ func (ta *TruAPI) storyCategoryResolver(ctx context.Context, q story.Story) cate
 		return category.Category{}
 	}
 
-	s := new(category.Category)
-	err := amino.UnmarshalJSON(res.Value, s)
+	c := new(category.Category)
+	err := json.Unmarshal(res.Value, c)
 
 	if err != nil {
 		panic(err)
 	}
 
-	return *s
+	return *c
 }
 
 func (ta *TruAPI) usersResolver(ctx context.Context, q users.QueryUsersByAddressesParams) []users.User {
@@ -54,15 +55,15 @@ func (ta *TruAPI) usersResolver(ctx context.Context, q users.QueryUsersByAddress
 		return []users.User{}
 	}
 
-	s := new([]users.User)
+	u := new([]users.User)
 
-	err := amino.UnmarshalJSON(res.Value, s)
+	err := amino.UnmarshalJSON(res.Value, u)
 
 	if err != nil {
 		panic(err)
 	}
 
-	return *s
+	return *u
 }
 
 func (ta *TruAPI) twitterProfileResolver(ctx context.Context, q users.User) users.TwitterProfile {
