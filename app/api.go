@@ -3,6 +3,7 @@ package app
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"log"
 	"math/rand"
@@ -77,8 +78,13 @@ func (app *TruChain) RegisterKey(k tcmn.HexBytes, algo string) (sdk.AccAddress, 
 		return sdk.AccAddress{}, 0, sdk.Coins{}, err
 	}
 
-	stored := app.accountKeeper.GetAccount(*(app.blockCtx), sdk.AccAddress(addr))
 	accaddr := sdk.AccAddress(addr)
+	stored := app.accountKeeper.GetAccount(*(app.blockCtx), accaddr)
+
+	if stored == nil {
+		return sdk.AccAddress{}, 0, sdk.Coins{}, errors.New("Unable to locate account " + string(addr))
+	}
+
 	coins := stored.GetCoins()
 
 	return accaddr, stored.GetAccountNumber(), coins, nil

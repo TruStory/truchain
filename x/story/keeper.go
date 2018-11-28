@@ -19,7 +19,7 @@ type ReadKeeper interface {
 	GetFeedByCategory(
 		ctx sdk.Context,
 		catID int64) (stories []Story, err sdk.Error)
-	GetStoriesByCategory(ctx sdk.Context, catID int64) (stories []Story, err sdk.Error)
+	GetStoriesByCategoryID(ctx sdk.Context, catID int64) (stories []Story, err sdk.Error)
 	GetStory(ctx sdk.Context, storyID int64) (Story, sdk.Error)
 }
 
@@ -169,11 +169,11 @@ func (k Keeper) GetStory(
 	return
 }
 
-// GetStoriesByCategory gets the stories for a given category id
-func (k Keeper) GetStoriesByCategory(
+// GetStoriesByCategoryID gets the stories for a given category id
+func (k Keeper) GetStoriesByCategoryID(
 	ctx sdk.Context, catID int64) (stories []Story, err sdk.Error) {
 
-	return k.storiesByCategory(
+	return k.storiesByCategoryID(
 		ctx, storyIDsByCategorySubspaceKey(k, catID, false), catID)
 }
 
@@ -181,7 +181,7 @@ func (k Keeper) GetStoriesByCategory(
 func (k Keeper) GetChallengedStoriesWithCategory(
 	ctx sdk.Context, catID int64) (stories []Story, err sdk.Error) {
 
-	return k.storiesByCategory(
+	return k.storiesByCategoryID(
 		ctx, storyIDsByCategorySubspaceKey(k, catID, true), catID)
 }
 
@@ -191,14 +191,14 @@ func (k Keeper) GetFeedByCategory(
 	catID int64) (stories []Story, err sdk.Error) {
 
 	// get all story ids by category
-	storyIDs, err := k.storyIDsByCategory(
+	storyIDs, err := k.storyIDsByCategoryID(
 		ctx, storyIDsByCategorySubspaceKey(k, catID, false), catID)
 	if err != nil {
 		return
 	}
 
 	// get all challenged story ids by category
-	challengedStoryIDs, err := k.storyIDsByCategory(
+	challengedStoryIDs, err := k.storyIDsByCategoryID(
 		ctx, storyIDsByCategorySubspaceKey(k, catID, true), catID)
 	if err != nil {
 		return
@@ -263,12 +263,12 @@ func (k Keeper) setStory(ctx sdk.Context, story Story) {
 		k.GetCodec().MustMarshalBinary(story))
 }
 
-func (k Keeper) storiesByCategory(
+func (k Keeper) storiesByCategoryID(
 	ctx sdk.Context,
 	prefix []byte,
 	catID int64) (stories []Story, err sdk.Error) {
 
-	storyIDs, err := k.storyIDsByCategory(ctx, prefix, catID)
+	storyIDs, err := k.storyIDsByCategoryID(ctx, prefix, catID)
 	if err != nil {
 		return
 	}
@@ -294,7 +294,7 @@ func (k Keeper) storiesByID(
 	return
 }
 
-func (k Keeper) storyIDsByCategory(
+func (k Keeper) storyIDsByCategoryID(
 	ctx sdk.Context, prefix []byte, catID int64) (storyIDs []int64, err sdk.Error) {
 
 	store := k.GetStore(ctx)

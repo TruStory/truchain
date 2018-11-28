@@ -6,5 +6,5 @@ import (
 
 // RegisterAmino registers messages into the codec
 func RegisterAmino(c *amino.Codec) {
-	c.RegisterConcrete(RegisterKeyMsg{}, "registration/RegisterKeyMsg", nil)
+	c.RegisterConcrete(RegisterKeyMsg{}, "users/RegisterKeyMsg", nil)
 }
