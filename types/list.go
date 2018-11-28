@@ -25,7 +25,7 @@ func (l UserList) Append(
 
 	k.GetStore(ctx).Set(
 		l.typeByUserKey(ctx, k, keyID, user),
-		k.GetCodec().MustMarshalBinary(valueID))
+		k.GetCodec().MustMarshalBinaryBare(valueID))
 }
 
 // Get gets a saved value id for the given key
@@ -36,7 +36,7 @@ func (l UserList) Get(
 	if bz == nil {
 		return 0
 	}
-	k.GetCodec().MustUnmarshalBinary(bz, &valueID)
+	k.GetCodec().MustUnmarshalBinaryBare(bz, &valueID)
 
 	return valueID
 }
@@ -63,7 +63,7 @@ func (l UserList) Map(
 	defer iter.Close()
 	for ; iter.Valid(); iter.Next() {
 		var id int64
-		k.GetCodec().MustUnmarshalBinary(iter.Value(), &id)
+		k.GetCodec().MustUnmarshalBinaryBare(iter.Value(), &id)
 		if err := fn(id); err != nil {
 			return err
 		}

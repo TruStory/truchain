@@ -93,7 +93,7 @@ func (app *TruChain) RegisterKey(k tcmn.HexBytes, algo string) (sdk.AccAddress, 
 // DeliverPresigned broadcasts a transaction to the network and returns the result.
 // Implements chttp.App
 func (app *TruChain) DeliverPresigned(tx auth.StdTx) (*trpctypes.ResultBroadcastTxCommit, error) {
-	bz := app.codec.MustMarshalBinary(tx)
+	bz := app.codec.MustMarshalBinaryLengthPrefixed(tx)
 	return trpc.BroadcastTxCommit(bz)
 }
 

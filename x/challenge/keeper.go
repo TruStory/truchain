@@ -106,7 +106,7 @@ func (k Keeper) Create(
 	// persist challenge
 	k.GetStore(ctx).Set(
 		k.GetIDKey(challenge.ID()),
-		k.GetCodec().MustMarshalBinary(challenge))
+		k.GetCodec().MustMarshalBinaryLengthPrefixed(challenge))
 
 	// persist challenge <-> game mapping
 	k.challengeList.Append(ctx, k, gameID, creator, challenge.ID())
@@ -135,7 +135,7 @@ func (k Keeper) Challenge(
 	if bz == nil {
 		return challenge, ErrNotFound(challengeID)
 	}
-	k.GetCodec().MustUnmarshalBinary(bz, &challenge)
+	k.GetCodec().MustUnmarshalBinaryLengthPrefixed(bz, &challenge)
 
 	return
 }

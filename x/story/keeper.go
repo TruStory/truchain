@@ -164,7 +164,7 @@ func (k Keeper) GetStory(
 	if val == nil {
 		return story, ErrStoryNotFound(storyID)
 	}
-	k.GetCodec().MustUnmarshalBinary(val, &story)
+	k.GetCodec().MustUnmarshalBinaryLengthPrefixed(val, &story)
 
 	return
 }
@@ -252,7 +252,7 @@ func (k Keeper) appendStoriesList(
 	// marshal story id to list
 	store.Set(
 		key,
-		k.GetCodec().MustMarshalBinary(story.ID))
+		k.GetCodec().MustMarshalBinaryBare(story.ID))
 }
 
 // setStory saves a `Story` type to the KVStore
@@ -260,7 +260,7 @@ func (k Keeper) setStory(ctx sdk.Context, story Story) {
 	store := k.GetStore(ctx)
 	store.Set(
 		k.GetIDKey(story.ID),
-		k.GetCodec().MustMarshalBinary(story))
+		k.GetCodec().MustMarshalBinaryLengthPrefixed(story))
 }
 
 func (k Keeper) storiesByCategoryID(
@@ -304,7 +304,7 @@ func (k Keeper) storyIDsByCategoryID(
 	defer iter.Close()
 	for ; iter.Valid(); iter.Next() {
 		var storyID int64
-		k.GetCodec().MustUnmarshalBinary(iter.Value(), &storyID)
+		k.GetCodec().MustUnmarshalBinaryBare(iter.Value(), &storyID)
 		storyIDs = append(storyIDs, storyID)
 	}
 
