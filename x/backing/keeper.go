@@ -174,7 +174,7 @@ func (k Keeper) Backing(ctx sdk.Context, id int64) (backing Backing, err sdk.Err
 	if val == nil {
 		return backing, ErrNotFound(id)
 	}
-	k.GetCodec().MustUnmarshalBinary(val, &backing)
+	k.GetCodec().MustUnmarshalBinaryLengthPrefixed(val, &backing)
 
 	return
 }
@@ -253,7 +253,7 @@ func (k Keeper) setBacking(ctx sdk.Context, backing Backing) {
 	store := k.GetStore(ctx)
 	store.Set(
 		k.GetIDKey(backing.ID()),
-		k.GetCodec().MustMarshalBinary(backing))
+		k.GetCodec().MustMarshalBinaryLengthPrefixed(backing))
 }
 
 // ============================================================================

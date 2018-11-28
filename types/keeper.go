@@ -56,15 +56,15 @@ func (k Keeper) GetNextID(ctx sdk.Context) (id int64) {
 
 	bz := store.Get(lenKey)
 	if bz == nil {
-		one := k.GetCodec().MustMarshalBinary(int64(1))
+		one := k.GetCodec().MustMarshalBinaryBare(int64(1))
 		store.Set(lenKey, one)
 
 		return 1
 	}
 
-	k.GetCodec().MustUnmarshalBinary(bz, &id)
+	k.GetCodec().MustUnmarshalBinaryBare(bz, &id)
 	nextID := id + 1
-	bz = k.GetCodec().MustMarshalBinary(nextID)
+	bz = k.GetCodec().MustMarshalBinaryBare(nextID)
 	store.Set(lenKey, bz)
 
 	return nextID

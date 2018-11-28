@@ -114,7 +114,7 @@ func (k Keeper) Game(ctx sdk.Context, id int64) (game Game, err sdk.Error) {
 	if bz == nil {
 		return game, ErrNotFound(id)
 	}
-	k.GetCodec().MustUnmarshalBinary(bz, &game)
+	k.GetCodec().MustUnmarshalBinaryLengthPrefixed(bz, &game)
 
 	return
 }
@@ -179,7 +179,7 @@ func (k Keeper) set(ctx sdk.Context, game Game) {
 	store := k.GetStore(ctx)
 	store.Set(
 		k.GetIDKey(game.ID),
-		k.GetCodec().MustMarshalBinary(game))
+		k.GetCodec().MustMarshalBinaryLengthPrefixed(game))
 }
 
 // update updates the `Game` object

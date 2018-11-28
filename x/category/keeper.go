@@ -76,7 +76,7 @@ func (k Keeper) GetCategory(ctx sdk.Context, id int64) (cat Category, err sdk.Er
 	if val == nil {
 		return cat, ErrCategoryNotFound(id)
 	}
-	k.GetCodec().MustUnmarshalBinary(val, &cat)
+	k.GetCodec().MustUnmarshalBinaryLengthPrefixed(val, &cat)
 
 	return
 }
@@ -88,5 +88,5 @@ func (k Keeper) setCategory(ctx sdk.Context, cat Category) {
 	store := k.GetStore(ctx)
 	store.Set(
 		k.GetIDKey(cat.ID),
-		k.GetCodec().MustMarshalBinary(cat))
+		k.GetCodec().MustMarshalBinaryLengthPrefixed(cat))
 }
