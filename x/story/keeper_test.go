@@ -80,7 +80,7 @@ func TestGetStoriesWithCategory(t *testing.T) {
 		createFakeStory(ctx, sk, ck)
 	}
 
-	stories, _ := sk.GetStoriesByCategory(ctx, 1)
+	stories, _ := sk.GetStoriesByCategoryID(ctx, 1)
 	assert.Equal(t, numStories, len(stories))
 }
 
