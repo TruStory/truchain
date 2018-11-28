@@ -15,7 +15,7 @@ import (
 type RegistrationRequest struct {
 	PubKeyAlgo string        `json:"pubkey_algo"`
 	PubKey     tcmn.HexBytes `json:"pubkey"`
-	TwitterID  int64         `json:"twitterID"` // Twitter numeric user ID
+	TwitterID  string        `json:"twitterID"` // Twitter numeric user ID
 }
 
 // RegistrationResponse is a JSON response body representing the result of registering a key
@@ -41,7 +41,7 @@ func (ta *TruAPI) HandleRegistration(r *http.Request) chttp.Response {
 		return chttp.SimpleErrorResponse(400, err)
 	}
 
-	if rr.TwitterID == 0 {
+	if rr.TwitterID == "" {
 		return chttp.SimpleErrorResponse(400, errors.New("Twitter ID is required"))
 	}
 

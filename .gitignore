@@ -9,6 +9,7 @@ report.html
 # Chain data
 write-file-atomic-*
 .chain/data
+.chain/config/addrbook.json
 dev/api_spec/.chain
 
 # Dependencies

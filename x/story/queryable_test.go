@@ -1,9 +1,9 @@
 package story
 
 import (
+	"encoding/json"
 	"testing"
 
-	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/stretchr/testify/require"
 	abci "github.com/tendermint/tendermint/abci/types"
 )
@@ -12,20 +12,18 @@ func TestQueryStories_ErrNotFound(t *testing.T) {
 	ctx, k, _ := mockDB()
 
 	queryParams := QueryCategoryStoriesParams{
-		CategoryID: "1",
+		CategoryID: 1,
 	}
 
-	cdc := codec.New()
-
-	bz, errRes := cdc.MarshalJSON(queryParams)
+	bz, errRes := json.Marshal(queryParams)
 	require.Nil(t, errRes)
 
 	query := abci.RequestQuery{
-		Path: "/custom/category/stories",
+		Path: "/custom/stories/category",
 		Data: bz,
 	}
 
-	_, err := queryStoriesByCategory(ctx, query, k)
+	_, err := queryStoriesByCategoryID(ctx, query, k)
 	require.NotNil(t, err)
 	require.Equal(t, ErrStoriesWithCategoryNotFound(1).Code(), err.Code(), "should get error")
 }
@@ -36,67 +34,17 @@ func TestQueryStoriesWithCategory(t *testing.T) {
 	createFakeStory(ctx, sk, ck)
 
 	queryParams := QueryCategoryStoriesParams{
-		CategoryID: "1",
+		CategoryID: 1,
 	}
 
-	cdc := codec.New()
-
-	bz, errRes := cdc.MarshalJSON(queryParams)
+	bz, errRes := json.Marshal(queryParams)
 	require.Nil(t, errRes)
 
 	query := abci.RequestQuery{
-		Path: "/custom/category/stories",
+		Path: "/custom/stories/category",
 		Data: bz,
 	}
+	_, err := queryStoriesByCategoryID(ctx, query, sk)
 
-	_, err := queryStoriesByCategory(ctx, query, sk)
-	require.Nil(t, err)
-}
-
-func TestQueryChallengedStoriesWithCategory(t *testing.T) {
-	ctx, sk, ck := mockDB()
-
-	storyID := createFakeStory(ctx, sk, ck)
-	sk.StartGame(ctx, storyID)
-
-	queryParams := QueryCategoryStoriesParams{
-		CategoryID: "1",
-	}
-
-	cdc := codec.New()
-
-	bz, errRes := cdc.MarshalJSON(queryParams)
-	require.Nil(t, errRes)
-
-	query := abci.RequestQuery{
-		Path: "/custom/category/stories",
-		Data: bz,
-	}
-
-	_, err := queryChallengedStoriesByCategory(ctx, query, sk)
-	require.Nil(t, err)
-}
-
-func TestQueryStoryFeed(t *testing.T) {
-	ctx, sk, ck := mockDB()
-
-	storyID := createFakeStory(ctx, sk, ck)
-	sk.StartGame(ctx, storyID)
-
-	queryParams := QueryCategoryStoriesParams{
-		CategoryID: "1",
-	}
-
-	cdc := codec.New()
-
-	bz, errRes := cdc.MarshalJSON(queryParams)
-	require.Nil(t, errRes)
-
-	query := abci.RequestQuery{
-		Path: "/custom/category/stories",
-		Data: bz,
-	}
-
-	_, err := queryStoryFeed(ctx, query, sk)
 	require.Nil(t, err)
 }

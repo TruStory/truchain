@@ -1,10 +1,9 @@
 package category
 
 import (
+	"encoding/json"
 	"fmt"
-	"strconv"
 
-	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	abci "github.com/tendermint/tendermint/abci/types"
 )
@@ -15,9 +14,9 @@ const (
 	QueryCategoriesByID = "id"
 )
 
-// QueryCategoryParams are params for  by category queries
-type QueryCategoryParams struct {
-	ID string
+// QueryCategoryByIDParams are params for  by category queries
+type QueryCategoryByIDParams struct {
+	ID int64
 }
 
 // NewQuerier returns a function that handles queries on the KVStore
@@ -34,49 +33,33 @@ func NewQuerier(k ReadKeeper) sdk.Querier {
 
 // ============================================================================
 
-func queryCategoryByID(
-	ctx sdk.Context,
-	req abci.RequestQuery,
-	k ReadKeeper) (res []byte, err sdk.Error) {
+func queryCategoryByID(ctx sdk.Context, req abci.RequestQuery, k ReadKeeper) (res []byte, err sdk.Error) {
+	params := QueryCategoryByIDParams{}
 
-	// get query params
-	params, err := unmarshalQueryParams(k, req)
+	if err = unmarshalQueryParams(req, &params); err != nil {
+		return
+	}
+
+	category, err := k.GetCategory(ctx, params.ID)
+
 	if err != nil {
 		return
 	}
 
-	cid, parseErr := strconv.ParseInt(params.ID, 10, 64)
-
-	if parseErr != nil {
-		return res,
-			sdk.ErrUnknownRequest(fmt.Sprintf("Incorrectly formatted request data - %s", err.Error()))
-	}
-
-	// fetch
-	category, sdkErr := k.GetCategory(ctx, cid)
-	if sdkErr != nil {
-		return res, sdkErr
-	}
-
-	// return JSON bytes
-	return marshalCategory(k, category)
+	return mustMarshal(category), nil
 }
 
-// unmarshal query params into struct
-func unmarshalQueryParams(
-	k ReadKeeper,
-	req abci.RequestQuery) (params QueryCategoryParams, sdkErr sdk.Error) {
-	err := k.GetCodec().UnmarshalJSON(req.Data, &params)
-	if err != nil {
-		return params,
-			sdk.ErrUnknownRequest(fmt.Sprintf("Incorrectly formatted request data - %s", err.Error()))
+func unmarshalQueryParams(req abci.RequestQuery, params interface{}) (sdkErr sdk.Error) {
+	parseErr := json.Unmarshal(req.Data, params)
+	if parseErr != nil {
+		sdkErr = sdk.ErrUnknownRequest(fmt.Sprintf("Incorrectly formatted request data - %s", parseErr.Error()))
+		return
 	}
 	return
 }
 
-// marshal  into pretty JSON bytes
-func marshalCategory(k ReadKeeper, c Category) (res []byte, sdkErr sdk.Error) {
-	res, err := codec.MarshalJSONIndent(k.GetCodec(), c)
+func mustMarshal(v interface{}) (res []byte) {
+	res, err := json.MarshalIndent(v, "", "  ")
 	if err != nil {
 		panic("Could not marshal result to JSON")
 	}
