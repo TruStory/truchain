@@ -41,18 +41,18 @@ func (i State) String() string {
 	return [...]string{"Unconfirmed", "Challenged", "Confirmed", "Rejected", "Flagged"}[i]
 }
 
-// Kind is a type that defines a story type
-type Kind int
+// Type is a type that defines a story type
+type Type int
 
 // List of acceptable story types
 const (
-	Default Kind = iota
+	Default Type = iota
 	Identity
 	Recovery
 )
 
 // IsValid returns true if a story type is valid, false otherwise.
-func (i Kind) IsValid() bool {
+func (i Type) IsValid() bool {
 	switch i {
 	case Default, Identity, Recovery:
 		return true
@@ -60,7 +60,7 @@ func (i Kind) IsValid() bool {
 	return false
 }
 
-func (i Kind) String() string {
+func (i Type) String() string {
 	return [...]string{"Default", "Identity", "Recovery"}[i]
 }
 
@@ -72,6 +72,6 @@ type Story struct {
 	Creator    sdk.AccAddress `json:"creator"`
 	GameID     int64          `json:"game_id"`
 	State      State          `json:"state"`
-	Kind       Kind           `json:"kind"`
+	Type       Type           `json:"type"`
 	Timestamp  app.Timestamp  `json:"timestamp"`
 }

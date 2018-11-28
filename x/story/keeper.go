@@ -28,7 +28,7 @@ type WriteKeeper interface {
 	ReadKeeper
 
 	NewStory(
-		ctx sdk.Context, body string, categoryID int64, creator sdk.AccAddress, kind Kind) (int64, sdk.Error)
+		ctx sdk.Context, body string, categoryID int64, creator sdk.AccAddress, storyType Type) (int64, sdk.Error)
 	StartGame(ctx sdk.Context, storyID int64) sdk.Error
 	EndGame(ctx sdk.Context, storyID int64, confirmed bool) sdk.Error
 	ExpireGame(ctx sdk.Context, storyID int64) sdk.Error
@@ -116,7 +116,7 @@ func (k Keeper) NewStory(
 	body string,
 	categoryID int64,
 	creator sdk.AccAddress,
-	kind Kind) (int64, sdk.Error) {
+	storyType Type) (int64, sdk.Error) {
 
 	_, err := k.categoryKeeper.GetCategory(ctx, categoryID)
 	if err != nil {
@@ -130,7 +130,7 @@ func (k Keeper) NewStory(
 		Creator:    creator,
 		GameID:     0,
 		State:      Unconfirmed,
-		Kind:       kind,
+		Type:       storyType,
 		Timestamp:  app.NewTimestamp(ctx.BlockHeader()),
 	}
 
@@ -234,7 +234,7 @@ func (k Keeper) UpdateStory(ctx sdk.Context, story Story) {
 		story.Creator,
 		story.GameID,
 		story.State,
-		story.Kind,
+		story.Type,
 		story.Timestamp.Update(ctx.BlockHeader()),
 	}
 

@@ -24,7 +24,7 @@ func handleSubmitStoryMsg(ctx sdk.Context, k WriteKeeper, msg SubmitStoryMsg) sd
 		return err.Result()
 	}
 
-	id, err := k.NewStory(ctx, msg.Body, msg.CategoryID, msg.Creator, msg.Kind)
+	id, err := k.NewStory(ctx, msg.Body, msg.CategoryID, msg.Creator, msg.StoryType)
 	if err != nil {
 		return err.Result()
 	}
