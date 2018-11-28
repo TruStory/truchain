@@ -4,6 +4,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"io/ioutil"
+	"os"
 
 	params "github.com/TruStory/truchain/parameters"
 	"github.com/TruStory/truchain/types"
@@ -27,6 +28,12 @@ import (
 	dbm "github.com/tendermint/tendermint/libs/db"
 	"github.com/tendermint/tendermint/libs/log"
 	tmtypes "github.com/tendermint/tendermint/types"
+)
+
+// default home directories for expected binaries
+var (
+	DefaultCLIHome  = os.ExpandEnv("$HOME/.trucli")
+	DefaultNodeHome = os.ExpandEnv("$HOME/.truchaind")
 )
 
 // TruChain implements an extended ABCI application. It contains a BaseApp,
