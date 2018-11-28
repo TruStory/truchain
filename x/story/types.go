@@ -1,6 +1,8 @@
 package story
 
 import (
+	"net/url"
+
 	app "github.com/TruStory/truchain/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
@@ -71,6 +73,7 @@ type Story struct {
 	CategoryID int64          `json:"category_id"`
 	Creator    sdk.AccAddress `json:"creator"`
 	GameID     int64          `json:"game_id"`
+	Source     url.URL        `json:"source"`
 	State      State          `json:"state"`
 	Type       Type           `json:"type"`
 	Timestamp  app.Timestamp  `json:"timestamp"`

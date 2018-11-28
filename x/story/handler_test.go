@@ -22,7 +22,8 @@ func TestSubmitStoryMsg(t *testing.T) {
 	body := "fake story"
 	creator := sdk.AccAddress([]byte{1, 2})
 	kind := Default
-	msg := NewSubmitStoryMsg(body, cat.ID, creator, kind)
+	source := "http://trustory.io"
+	msg := NewSubmitStoryMsg(body, cat.ID, creator, source, kind)
 	assert.NotNil(t, msg)
 
 	res := h(ctx, msg)
@@ -47,7 +48,8 @@ func TestSubmitStoryMsg_ErrInvalidCategory(t *testing.T) {
 	body := "fake story"
 	creator := sdk.AccAddress([]byte{1, 2})
 	kind := Default
-	msg := NewSubmitStoryMsg(body, catID, creator, kind)
+	source := "http://trustory.io"
+	msg := NewSubmitStoryMsg(body, catID, creator, source, kind)
 	assert.NotNil(t, msg)
 
 	res := h(ctx, msg)
