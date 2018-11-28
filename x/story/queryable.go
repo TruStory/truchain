@@ -10,8 +10,8 @@ import (
 
 // query endpoints supported by the truchain Querier
 const (
-	QueryPath              = "stories"
-	QueryStoriesByCategory = "category"
+	QueryPath                = "stories"
+	QueryStoriesByCategoryID = "category"
 )
 
 // QueryCategoryStoriesParams are params for stories by category queries
@@ -23,8 +23,8 @@ type QueryCategoryStoriesParams struct {
 func NewQuerier(k ReadKeeper) sdk.Querier {
 	return func(ctx sdk.Context, path []string, req abci.RequestQuery) (res []byte, err sdk.Error) {
 		switch path[0] {
-		case QueryStoriesByCategory:
-			return queryStoriesByCategory(ctx, req, k)
+		case QueryStoriesByCategoryID:
+			return queryStoriesByCategoryID(ctx, req, k)
 		default:
 			return nil, sdk.ErrUnknownRequest("Unknown truchain query endpoint")
 		}
@@ -33,14 +33,14 @@ func NewQuerier(k ReadKeeper) sdk.Querier {
 
 // ============================================================================
 
-func queryStoriesByCategory(ctx sdk.Context, req abci.RequestQuery, k ReadKeeper) (res []byte, err sdk.Error) {
+func queryStoriesByCategoryID(ctx sdk.Context, req abci.RequestQuery, k ReadKeeper) (res []byte, err sdk.Error) {
 	params := QueryCategoryStoriesParams{}
 
 	if err = unmarshalQueryParams(req, &params); err != nil {
 		return
 	}
 
-	stories, err := k.GetStoriesByCategory(ctx, params.CategoryID)
+	stories, err := k.GetStoriesByCategoryID(ctx, params.CategoryID)
 
 	if err != nil {
 		return

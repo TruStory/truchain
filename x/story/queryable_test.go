@@ -23,7 +23,7 @@ func TestQueryStories_ErrNotFound(t *testing.T) {
 		Data: bz,
 	}
 
-	_, err := queryStoriesByCategory(ctx, query, k)
+	_, err := queryStoriesByCategoryID(ctx, query, k)
 	require.NotNil(t, err)
 	require.Equal(t, ErrStoriesWithCategoryNotFound(1).Code(), err.Code(), "should get error")
 }
@@ -44,7 +44,7 @@ func TestQueryStoriesWithCategory(t *testing.T) {
 		Path: "/custom/stories/category",
 		Data: bz,
 	}
-	_, err := queryStoriesByCategory(ctx, query, sk)
+	_, err := queryStoriesByCategoryID(ctx, query, sk)
 
 	require.Nil(t, err)
 }
