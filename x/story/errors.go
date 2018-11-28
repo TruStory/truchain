@@ -28,9 +28,9 @@ func ErrInvalidStoryID(id int64) sdk.Error {
 	return sdk.NewError(DefaultCodespace, CodeInvalidStoryID, "Invalid story id: "+fmt.Sprintf("%d", id))
 }
 
-// ErrInvalidStoryKind throws an error on invalid story type
-func ErrInvalidStoryKind(msg string) sdk.Error {
-	return sdk.NewError(DefaultCodespace, CodeInvalidStoryType, "Invalid story kind: "+msg)
+// ErrInvalidStoryType throws an error on invalid story type
+func ErrInvalidStoryType(msg string) sdk.Error {
+	return sdk.NewError(DefaultCodespace, CodeInvalidStoryType, "Invalid story type: "+msg)
 
 }
 
