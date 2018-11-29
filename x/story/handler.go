@@ -109,8 +109,10 @@ func handleFlagStoryMsg(ctx sdk.Context, k WriteKeeper, msg FlagStoryMsg) sdk.Re
 		err.Result()
 	}
 
-	story.Flagged = true
-	k.UpdateStory(ctx, story)
+	if story.Flagged != true {
+		story.Flagged = true
+		k.UpdateStory(ctx, story)
+	}
 
 	return app.Result(story.ID)
 }
