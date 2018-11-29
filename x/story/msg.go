@@ -125,3 +125,47 @@ func (msg AddEvidenceMsg) ValidateBasic() sdk.Error {
 func (msg AddEvidenceMsg) GetSigners() []sdk.AccAddress {
 	return app.GetSigners(msg.Creator)
 }
+
+// ============================================================================
+
+// FlagStoryMsg defines a message to flag a story
+type FlagStoryMsg struct {
+	StoryID int64          `json:"story_id"`
+	Creator sdk.AccAddress `json:"creator"`
+}
+
+// NewFlagStoryMsg creates a new message to flag a story
+func NewFlagStoryMsg(storyID int64, creator sdk.AccAddress) FlagStoryMsg {
+	return FlagStoryMsg{
+		StoryID: storyID,
+		Creator: creator,
+	}
+}
+
+// Route implements Msg.Route
+func (msg FlagStoryMsg) Route() string { return app.GetName(msg) }
+
+// Type implements Msg.Type
+func (msg FlagStoryMsg) Type() string { return app.GetType(msg) }
+
+// GetSignBytes implements Msg.GetSignBytes
+func (msg FlagStoryMsg) GetSignBytes() []byte {
+	return app.MustGetSignBytes(msg)
+}
+
+// ValidateBasic implements Msg.ValidateBasic
+func (msg FlagStoryMsg) ValidateBasic() sdk.Error {
+	if msg.StoryID <= 0 {
+		return ErrInvalidStoryID(msg.StoryID)
+	}
+	if len(msg.Creator) == 0 {
+		return sdk.ErrInvalidAddress("Invalid address: " + msg.Creator.String())
+	}
+
+	return nil
+}
+
+// GetSigners implements Msg.GetSigners
+func (msg FlagStoryMsg) GetSigners() []sdk.AccAddress {
+	return app.GetSigners(msg.Creator)
+}

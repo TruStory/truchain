@@ -93,3 +93,24 @@ func TestAddEvidenceMsg(t *testing.T) {
 
 	assert.Equal(t, int64(1), idres.ID, "incorrect result data")
 }
+
+func TestFlagStoryMsg(t *testing.T) {
+	ctx, sk, ck := mockDB()
+
+	h := NewHandler(sk)
+	creator := sdk.AccAddress([]byte{1, 2})
+
+	storyID := createFakeStory(ctx, sk, ck)
+
+	msg := NewFlagStoryMsg(storyID, creator)
+	assert.NotNil(t, msg)
+
+	res := h(ctx, msg)
+	idres := new(types.IDResult)
+	_ = json.Unmarshal(res.Data, &idres)
+
+	assert.Equal(t, int64(1), idres.ID, "incorrect result data")
+
+	story, _ := sk.Story(ctx, storyID)
+	assert.True(t, story.Flagged)
+}

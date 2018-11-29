@@ -15,6 +15,8 @@ func NewHandler(k WriteKeeper) sdk.Handler {
 			return handleSubmitStoryMsg(ctx, k, msg)
 		case AddEvidenceMsg:
 			return handleAddEvidenceMsg(ctx, k, msg)
+		case FlagStoryMsg:
+			return handleFlagStoryMsg(ctx, k, msg)
 		default:
 			return app.ErrMsgHandler(msg)
 		}
@@ -92,6 +94,25 @@ func handleAddEvidenceMsg(ctx sdk.Context, k WriteKeeper, msg AddEvidenceMsg) sd
 	}
 	story.Evidence = append(story.Evidence, evidence)
 	k.UpdateStory(ctx, story)
+
+	return app.Result(story.ID)
+}
+
+func handleFlagStoryMsg(ctx sdk.Context, k WriteKeeper, msg FlagStoryMsg) sdk.Result {
+	if err := msg.ValidateBasic(); err != nil {
+		return err.Result()
+	}
+
+	// get story
+	story, err := k.Story(ctx, msg.StoryID)
+	if err != nil {
+		err.Result()
+	}
+
+	if story.Flagged != true {
+		story.Flagged = true
+		k.UpdateStory(ctx, story)
+	}
 
 	return app.Result(story.ID)
 }
