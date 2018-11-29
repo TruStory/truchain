@@ -74,3 +74,22 @@ func TestByzantineMsg(t *testing.T) {
 	hasUnrecognizedMessage := strings.Contains(res.Log, "65542")
 	assert.True(t, hasUnrecognizedMessage, "should return err code")
 }
+
+func TestAddEvidenceMsg(t *testing.T) {
+	ctx, sk, ck := mockDB()
+
+	h := NewHandler(sk)
+	creator := sdk.AccAddress([]byte{1, 2})
+	evidence := "http://shanesbrain.net"
+
+	storyID := createFakeStory(ctx, sk, ck)
+
+	msg := NewAddEvidenceMsg(storyID, creator, evidence)
+	assert.NotNil(t, msg)
+
+	res := h(ctx, msg)
+	idres := new(types.IDResult)
+	_ = json.Unmarshal(res.Data, &idres)
+
+	assert.Equal(t, int64(1), idres.ID, "incorrect result data")
+}
