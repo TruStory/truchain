@@ -11,7 +11,7 @@ import (
 	"github.com/TruStory/truchain/x/game"
 
 	c "github.com/TruStory/truchain/x/category"
-	s "github.com/TruStory/truchain/x/story"
+	"github.com/TruStory/truchain/x/story"
 	"github.com/cosmos/cosmos-sdk/store"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth"
@@ -58,7 +58,7 @@ func mockDB() (sdk.Context, Keeper, c.Keeper) {
 	am := auth.NewAccountKeeper(codec, accKey, auth.ProtoBaseAccount)
 	bankKeeper := bank.NewBaseKeeper(am)
 	ck := c.NewKeeper(catKey, codec)
-	sk := s.NewKeeper(storyKey, ck, codec)
+	sk := story.NewKeeper(storyKey, ck, codec)
 	backingKeeper := backing.NewKeeper(backingKey, sk, bankKeeper, ck, codec)
 	gameKeeper := game.NewKeeper(gameKey, gameQueueKey, gameQueueKey, sk, bankKeeper, codec)
 	challengeKeeper := challenge.NewKeeper(challengeKey, bankKeeper, gameKeeper, sk, codec)
@@ -77,14 +77,15 @@ func mockDB() (sdk.Context, Keeper, c.Keeper) {
 	return ctx, k, ck
 }
 
-func createFakeStory(ctx sdk.Context, sk s.WriteKeeper, ck c.WriteKeeper) int64 {
+func createFakeStory(ctx sdk.Context, sk story.WriteKeeper, ck c.WriteKeeper) int64 {
 	body := "Body of story."
 	cat := createFakeCategory(ctx, ck)
 	creator := sdk.AccAddress([]byte{1, 2})
-	storyType := s.Default
+	storyType := story.Default
 	source := url.URL{}
+	evidence := []story.Evidence{}
 
-	storyID, _ := sk.NewStory(ctx, body, cat.ID, creator, source, storyType)
+	storyID, _ := sk.NewStory(ctx, body, cat.ID, creator, evidence, source, storyType)
 
 	return storyID
 }

@@ -9,10 +9,8 @@ import (
 
 // Evidence for a story
 type Evidence struct {
-	ID        int64          `json:"id"`
-	StoryID   int64          `json:"story_id"`
 	Creator   sdk.AccAddress `json:"creator"`
-	URI       string         `json:"uri"`
+	URL       url.URL        `json:"url"`
 	Timestamp app.Timestamp  `json:"timestamp"`
 }
 
@@ -72,6 +70,7 @@ type Story struct {
 	Body       string         `json:"body"`
 	CategoryID int64          `json:"category_id"`
 	Creator    sdk.AccAddress `json:"creator"`
+	Evidence   []Evidence     `json:"evidence"`
 	GameID     int64          `json:"game_id"`
 	Source     url.URL        `json:"source"`
 	State      State          `json:"state"`
