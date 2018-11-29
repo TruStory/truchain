@@ -13,7 +13,7 @@ func NewHandler(k WriteKeeper) sdk.Handler {
 		switch msg := msg.(type) {
 		case SubmitStoryMsg:
 			return handleSubmitStoryMsg(ctx, k, msg)
-		case SubmitEvidenceMsg:
+		case AddEvidenceMsg:
 			return handleSubmitEvidenceMsg(ctx, k, msg)
 		default:
 			return app.ErrMsgHandler(msg)
@@ -67,7 +67,7 @@ func handleSubmitStoryMsg(ctx sdk.Context, k WriteKeeper, msg SubmitStoryMsg) sd
 	return app.Result(id)
 }
 
-func handleSubmitEvidenceMsg(ctx sdk.Context, k WriteKeeper, msg SubmitEvidenceMsg) sdk.Result {
+func handleSubmitEvidenceMsg(ctx sdk.Context, k WriteKeeper, msg AddEvidenceMsg) sdk.Result {
 	if err := msg.ValidateBasic(); err != nil {
 		return err.Result()
 	}
