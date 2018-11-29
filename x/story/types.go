@@ -25,20 +25,19 @@ const (
 	Challenged
 	Confirmed
 	Rejected
-	Flagged
 )
 
 // IsValid returns true if the value is listed in the enum definition, false otherwise.
 func (i State) IsValid() bool {
 	switch i {
-	case Unconfirmed, Challenged, Confirmed, Rejected, Flagged:
+	case Unconfirmed, Challenged, Confirmed, Rejected:
 		return true
 	}
 	return false
 }
 
 func (i State) String() string {
-	return [...]string{"Unconfirmed", "Challenged", "Confirmed", "Rejected", "Flagged"}[i]
+	return [...]string{"Unconfirmed", "Challenged", "Confirmed", "Rejected"}[i]
 }
 
 // Type is a type that defines a story type
@@ -72,6 +71,7 @@ type Story struct {
 	CategoryID int64          `json:"category_id"`
 	Creator    sdk.AccAddress `json:"creator"`
 	Evidence   []Evidence     `json:"evidence,omitempty"`
+	Flagged    bool           `json:"flagged,omitempty"`
 	GameID     int64          `json:"game_id,omitempty"`
 	Source     url.URL        `json:"source,omitempty"`
 	State      State          `json:"state"`
