@@ -83,7 +83,7 @@ func (k Keeper) Create(
 	}
 
 	// get story value from story id
-	story, err := k.storyKeeper.GetStory(ctx, storyID)
+	story, err := k.storyKeeper.Story(ctx, storyID)
 	if err != nil {
 		return
 	}

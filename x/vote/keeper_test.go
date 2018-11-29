@@ -57,7 +57,7 @@ func TestGetVotesByGame(t *testing.T) {
 	_, err = k.Create(ctx, storyID, amount, true, comment, creator2, evidence)
 	assert.Nil(t, err)
 
-	story, _ := k.storyKeeper.GetStory(ctx, storyID)
+	story, _ := k.storyKeeper.Story(ctx, storyID)
 
 	votes, _ := k.TokenVotesByGame(ctx, story.GameID)
 	assert.Equal(t, 2, len(votes))
