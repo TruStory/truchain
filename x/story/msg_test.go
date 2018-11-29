@@ -15,7 +15,8 @@ func TestValidSubmitStoryMsg(t *testing.T) {
 	validSource := "http://shanesbrain.net"
 	validStoryType := Default
 	validEvidence := []url.URL{}
-	msg := NewSubmitStoryMsg(validBody, validCategoryID, validCreator, validEvidence, validSource, validStoryType)
+	validArgument := "argument"
+	msg := NewSubmitStoryMsg(validArgument, validBody, validCategoryID, validCreator, validEvidence, validSource, validStoryType)
 	err := msg.ValidateBasic()
 
 	assert.Nil(t, err)
@@ -31,7 +32,9 @@ func TestInValidBodySubmitStoryMsg(t *testing.T) {
 	validSource := "http://shanesbrain.net"
 	validStoryType := Default
 	validEvidence := []url.URL{}
-	msg := NewSubmitStoryMsg(invalidBody, validCategoryID, validCreator, validEvidence, validSource, validStoryType)
+	validArgument := "argument"
+
+	msg := NewSubmitStoryMsg(validArgument, invalidBody, validCategoryID, validCreator, validEvidence, validSource, validStoryType)
 	err := msg.ValidateBasic()
 
 	assert.Equal(t, sdk.CodeType(701), err.Code(), err.Error())
@@ -44,7 +47,9 @@ func TestInValidCreatorSubmitStoryMsg(t *testing.T) {
 	validSource := "http://shanesbrain.net"
 	validStoryType := Default
 	validEvidence := []url.URL{}
-	msg := NewSubmitStoryMsg(validBody, validCategoryID, invalidCreator, validEvidence, validSource, validStoryType)
+	validArgument := "argument"
+
+	msg := NewSubmitStoryMsg(validArgument, validBody, validCategoryID, invalidCreator, validEvidence, validSource, validStoryType)
 	err := msg.ValidateBasic()
 
 	assert.Equal(t, sdk.CodeType(7), err.Code(), err.Error())

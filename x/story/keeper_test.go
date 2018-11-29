@@ -38,8 +38,9 @@ func TestAddGetStory(t *testing.T) {
 	kind := Default
 	source := url.URL{}
 	evidence := []Evidence{}
+	argument := "argument"
 
-	storyID, _ = sk.NewStory(ctx, body, int64(1), creator, evidence, source, kind)
+	storyID, _ = sk.NewStory(ctx, argument, body, int64(1), creator, evidence, source, kind)
 	assert.Equal(t, int64(2), storyID, "Story ID did not increment properly")
 
 	coinName, _ := sk.GetCoinName(ctx, storyID)
