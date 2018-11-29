@@ -31,6 +31,7 @@ type WriteKeeper interface {
 
 	NewStory(
 		ctx sdk.Context,
+		argument string,
 		body string,
 		categoryID int64,
 		creator sdk.AccAddress,
@@ -121,6 +122,7 @@ func (k Keeper) ExpireGame(ctx sdk.Context, storyID int64) sdk.Error {
 // NewStory adds a story to the key-value store
 func (k Keeper) NewStory(
 	ctx sdk.Context,
+	argument string,
 	body string,
 	categoryID int64,
 	creator sdk.AccAddress,
@@ -135,6 +137,7 @@ func (k Keeper) NewStory(
 
 	story := Story{
 		ID:         k.GetNextID(ctx),
+		Argument:   argument,
 		Body:       body,
 		CategoryID: categoryID,
 		Creator:    creator,
@@ -241,6 +244,7 @@ func (k Keeper) GetFeedByCategory(
 func (k Keeper) UpdateStory(ctx sdk.Context, story Story) {
 	newStory := Story{
 		story.ID,
+		story.Argument,
 		story.Body,
 		story.CategoryID,
 		story.Creator,

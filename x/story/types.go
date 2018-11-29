@@ -67,12 +67,13 @@ func (i Type) String() string {
 // Story type
 type Story struct {
 	ID         int64          `json:"id"`
+	Argument   string         `json:"argument,omitempty"`
 	Body       string         `json:"body"`
 	CategoryID int64          `json:"category_id"`
 	Creator    sdk.AccAddress `json:"creator"`
-	Evidence   []Evidence     `json:"evidence"`
-	GameID     int64          `json:"game_id"`
-	Source     url.URL        `json:"source"`
+	Evidence   []Evidence     `json:"evidence,omitempty"`
+	GameID     int64          `json:"game_id,omitempty"`
+	Source     url.URL        `json:"source,omitempty"`
 	State      State          `json:"state"`
 	Type       Type           `json:"type"`
 	Timestamp  app.Timestamp  `json:"timestamp"`
