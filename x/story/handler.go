@@ -13,6 +13,8 @@ func NewHandler(k WriteKeeper) sdk.Handler {
 		switch msg := msg.(type) {
 		case SubmitStoryMsg:
 			return handleSubmitStoryMsg(ctx, k, msg)
+		case SubmitEvidenceMsg:
+			return handleSubmitEvidenceMsg(ctx, k, msg)
 		default:
 			return app.ErrMsgHandler(msg)
 		}
@@ -34,10 +36,16 @@ func handleSubmitStoryMsg(ctx sdk.Context, k WriteKeeper, msg SubmitStoryMsg) sd
 
 	// create evidence type from url
 	var evidence []Evidence
-	for _, url := range msg.Evidence {
+	for _, urlString := range msg.Evidence {
+
+		evidenceURL, urlError := url.ParseRequestURI(urlString)
+		if urlError != nil {
+			return ErrInvalidEvidenceURL(urlString).Result()
+		}
+
 		e := Evidence{
 			Creator:   msg.Creator,
-			URL:       url,
+			URL:       *evidenceURL,
 			Timestamp: app.NewTimestamp(ctx.BlockHeader()),
 		}
 		evidence = append(evidence, e)
@@ -57,4 +65,33 @@ func handleSubmitStoryMsg(ctx sdk.Context, k WriteKeeper, msg SubmitStoryMsg) sd
 	}
 
 	return app.Result(id)
+}
+
+func handleSubmitEvidenceMsg(ctx sdk.Context, k WriteKeeper, msg SubmitEvidenceMsg) sdk.Result {
+	if err := msg.ValidateBasic(); err != nil {
+		return err.Result()
+	}
+
+	// get story
+	story, err := k.Story(ctx, msg.StoryID)
+	if err != nil {
+		err.Result()
+	}
+
+	// parse url from string
+	evidenceURL, urlError := url.ParseRequestURI(msg.URL)
+	if urlError != nil {
+		return ErrInvalidEvidenceURL(msg.URL).Result()
+	}
+
+	// update story with evidence
+	evidence := Evidence{
+		Creator:   msg.Creator,
+		URL:       *evidenceURL,
+		Timestamp: app.NewTimestamp(ctx.BlockHeader()),
+	}
+	story.Evidence = append(story.Evidence, evidence)
+	k.UpdateStory(ctx, story)
+
+	return app.Result(story.ID)
 }
