@@ -8,4 +8,5 @@ import (
 func RegisterAmino(c *amino.Codec) {
 	c.RegisterConcrete(AddEvidenceMsg{}, "story/SubmitEvidenceMsg", nil)
 	c.RegisterConcrete(SubmitStoryMsg{}, "story/SubmitStoryMsg", nil)
+	c.RegisterConcrete(FlagStoryMsg{}, "story/FlagStoryMsg", nil)
 }
