@@ -40,7 +40,7 @@ func queryStoriesByCategoryID(ctx sdk.Context, req abci.RequestQuery, k ReadKeep
 		return
 	}
 
-	stories, err := k.GetStoriesByCategoryID(ctx, params.CategoryID)
+	stories, err := k.StoriesByCategoryID(ctx, params.CategoryID)
 
 	if err != nil {
 		return

@@ -70,7 +70,7 @@ func (k Keeper) Create(
 	}
 
 	// get the story
-	story, err := k.storyKeeper.GetStory(ctx, storyID)
+	story, err := k.storyKeeper.Story(ctx, storyID)
 	if err != nil {
 		return 0, err
 	}
@@ -187,7 +187,7 @@ func validateStake(
 	creator sdk.AccAddress, amount sdk.Coin) (err sdk.Error) {
 
 	// get category coin name
-	coinName, err := k.storyKeeper.GetCoinName(ctx, storyID)
+	coinName, err := k.storyKeeper.CoinName(ctx, storyID)
 	if err != nil {
 		return
 	}

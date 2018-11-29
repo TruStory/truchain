@@ -12,13 +12,13 @@ func TestAddGetStory(t *testing.T) {
 	ctx, sk, ck := mockDB()
 
 	// test getting a non-existent story
-	_, err := sk.GetStory(ctx, int64(5))
+	_, err := sk.Story(ctx, int64(5))
 	assert.NotNil(t, err)
 
 	storyID := createFakeStory(ctx, sk, ck)
 
 	// test getting an existing story
-	savedStory, err := sk.GetStory(ctx, storyID)
+	savedStory, err := sk.Story(ctx, storyID)
 	assert.Nil(t, err)
 
 	story := Story{
@@ -43,7 +43,7 @@ func TestAddGetStory(t *testing.T) {
 	storyID, _ = sk.NewStory(ctx, argument, body, int64(1), creator, evidence, source, kind)
 	assert.Equal(t, int64(2), storyID, "Story ID did not increment properly")
 
-	coinName, _ := sk.GetCoinName(ctx, storyID)
+	coinName, _ := sk.CoinName(ctx, storyID)
 	assert.Equal(t, "trudex", coinName)
 }
 
@@ -51,11 +51,11 @@ func TestChallenge(t *testing.T) {
 	ctx, sk, ck := mockDB()
 
 	storyID := createFakeStory(ctx, sk, ck)
-	story, _ := sk.GetStory(ctx, storyID)
+	story, _ := sk.Story(ctx, storyID)
 	assert.Equal(t, Unconfirmed, story.State, "state should match")
 
 	sk.StartGame(ctx, storyID)
-	story, _ = sk.GetStory(ctx, storyID)
+	story, _ = sk.Story(ctx, storyID)
 	assert.Equal(t, Challenged, story.State, "state should match")
 }
 
@@ -63,13 +63,13 @@ func TestUpdateStory(t *testing.T) {
 	ctx, sk, ck := mockDB()
 
 	storyID := createFakeStory(ctx, sk, ck)
-	story, _ := sk.GetStory(ctx, storyID)
+	story, _ := sk.Story(ctx, storyID)
 
 	story.State = Challenged
 	story.Body = "akjdsfhadskf"
 
 	sk.UpdateStory(ctx, story)
-	updatedStory, _ := sk.GetStory(ctx, storyID)
+	updatedStory, _ := sk.Story(ctx, storyID)
 
 	assert.Equal(t, story.Body, updatedStory.Body, "should match")
 	assert.Equal(t, story.State, updatedStory.State, "should match")
@@ -84,7 +84,7 @@ func TestGetStoriesWithCategory(t *testing.T) {
 		createFakeStory(ctx, sk, ck)
 	}
 
-	stories, _ := sk.GetStoriesByCategoryID(ctx, 1)
+	stories, _ := sk.StoriesByCategoryID(ctx, 1)
 	assert.Equal(t, numStories, len(stories))
 }
 
@@ -99,7 +99,7 @@ func TestGetChallengedStoriesWithCategory(t *testing.T) {
 	sk.StartGame(ctx, 2)
 	sk.StartGame(ctx, 3)
 
-	stories, _ := sk.GetChallengedStoriesWithCategory(ctx, 1)
+	stories, _ := sk.ChallengedStoriesWithCategory(ctx, 1)
 	assert.Equal(t, 2, len(stories))
 }
 
@@ -114,7 +114,7 @@ func TestFeedWithCategory(t *testing.T) {
 	sk.StartGame(ctx, 2)
 	sk.StartGame(ctx, 4)
 
-	stories, _ := sk.GetFeedByCategory(ctx, 1)
+	stories, _ := sk.FeedByCategoryID(ctx, 1)
 
 	assert.Equal(t, 5, len(stories))
 	assert.Equal(t, Challenged, stories[0].State)

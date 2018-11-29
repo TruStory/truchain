@@ -61,7 +61,7 @@ func (k Keeper) Create(
 	ctx sdk.Context, storyID int64, creator sdk.AccAddress) (int64, sdk.Error) {
 
 	// get the story being challenged
-	story, err := k.storyKeeper.GetStory(ctx, storyID)
+	story, err := k.storyKeeper.Story(ctx, storyID)
 	if err != nil {
 		return 0, err
 	}
@@ -72,7 +72,7 @@ func (k Keeper) Create(
 	}
 
 	// create an initial empty challenge pool
-	coinName, err := k.storyKeeper.GetCoinName(ctx, storyID)
+	coinName, err := k.storyKeeper.CoinName(ctx, storyID)
 	if err != nil {
 		return 0, err
 	}
