@@ -79,16 +79,16 @@ func (msg SubmitStoryMsg) GetSigners() []sdk.AccAddress {
 
 // ============================================================================
 
-// SubmitEvidenceMsg defines a message to submit evidence for a story
-type SubmitEvidenceMsg struct {
+// AddEvidenceMsg defines a message to submit evidence for a story
+type AddEvidenceMsg struct {
 	StoryID int64          `json:"story_id"`
 	Creator sdk.AccAddress `json:"creator"`
 	URL     string         `json:"url"`
 }
 
-// NewSubmitEvidenceMsg creates a new message to submit evidence for a story
-func NewSubmitEvidenceMsg(storyID int64, creator sdk.AccAddress, url string) SubmitEvidenceMsg {
-	return SubmitEvidenceMsg{
+// NewAddEvidenceMsg creates a new message to submit evidence for a story
+func NewAddEvidenceMsg(storyID int64, creator sdk.AccAddress, url string) AddEvidenceMsg {
+	return AddEvidenceMsg{
 		StoryID: storyID,
 		Creator: creator,
 		URL:     url,
@@ -96,18 +96,18 @@ func NewSubmitEvidenceMsg(storyID int64, creator sdk.AccAddress, url string) Sub
 }
 
 // Route implements Msg
-func (msg SubmitEvidenceMsg) Route() string { return app.GetName(msg) }
+func (msg AddEvidenceMsg) Route() string { return app.GetName(msg) }
 
 // Type implements Msg
-func (msg SubmitEvidenceMsg) Type() string { return app.GetType(msg) }
+func (msg AddEvidenceMsg) Type() string { return app.GetType(msg) }
 
 // GetSignBytes implements Msg
-func (msg SubmitEvidenceMsg) GetSignBytes() []byte {
+func (msg AddEvidenceMsg) GetSignBytes() []byte {
 	return app.MustGetSignBytes(msg)
 }
 
 // ValidateBasic implements Msg
-func (msg SubmitEvidenceMsg) ValidateBasic() sdk.Error {
+func (msg AddEvidenceMsg) ValidateBasic() sdk.Error {
 	if msg.StoryID <= 0 {
 		return ErrInvalidStoryID(msg.StoryID)
 	}
@@ -122,6 +122,6 @@ func (msg SubmitEvidenceMsg) ValidateBasic() sdk.Error {
 }
 
 // GetSigners implements Msg
-func (msg SubmitEvidenceMsg) GetSigners() []sdk.AccAddress {
+func (msg AddEvidenceMsg) GetSigners() []sdk.AccAddress {
 	return app.GetSigners(msg.Creator)
 }
