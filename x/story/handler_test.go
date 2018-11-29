@@ -25,7 +25,9 @@ func TestSubmitStoryMsg(t *testing.T) {
 	kind := Default
 	source := "http://trustory.io"
 	evidence := []url.URL{}
-	msg := NewSubmitStoryMsg(body, cat.ID, creator, evidence, source, kind)
+	argument := "argument"
+
+	msg := NewSubmitStoryMsg(argument, body, cat.ID, creator, evidence, source, kind)
 	assert.NotNil(t, msg)
 
 	res := h(ctx, msg)
@@ -52,7 +54,8 @@ func TestSubmitStoryMsg_ErrInvalidCategory(t *testing.T) {
 	kind := Default
 	source := "http://trustory.io"
 	evidence := []url.URL{}
-	msg := NewSubmitStoryMsg(body, catID, creator, evidence, source, kind)
+	argument := "argument"
+	msg := NewSubmitStoryMsg(argument, body, catID, creator, evidence, source, kind)
 	assert.NotNil(t, msg)
 
 	res := h(ctx, msg)
