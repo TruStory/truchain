@@ -57,7 +57,7 @@ func TestInValidCreatorSubmitStoryMsg(t *testing.T) {
 
 // ============================================================================
 
-func TestValidSubmitEvidencetMsg(t *testing.T) {
+func TestValidAddEvidencetMsg(t *testing.T) {
 	validStoryID := int64(1)
 	validCreator := sdk.AccAddress([]byte{1, 2})
 	validURI := "http://www.truchain.io"
