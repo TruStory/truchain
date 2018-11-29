@@ -15,7 +15,7 @@ type SubmitStoryMsg struct {
 	CategoryID int64          `json:"category_id"`
 	Creator    sdk.AccAddress `json:"creator"`
 	Source     string         `json:"source"`
-	Evidence   []url.URL      `json:"evidence"`
+	Evidence   []string       `json:"evidence"`
 	StoryType  Type           `json:"story_type"`
 }
 
@@ -25,8 +25,8 @@ func NewSubmitStoryMsg(
 	body string,
 	categoryID int64,
 	creator sdk.AccAddress,
+	evidence []string,
 	source string,
-	evidence []url.URL,
 	storyType Type) SubmitStoryMsg {
 
 	return SubmitStoryMsg{
@@ -54,6 +54,9 @@ func (msg SubmitStoryMsg) GetSignBytes() []byte {
 
 // ValidateBasic implements Msg
 func (msg SubmitStoryMsg) ValidateBasic() sdk.Error {
+	if len(msg.Argument) == 0 {
+		return ErrInvalidStoryArgument(msg.Argument)
+	}
 	if len(msg.Body) == 0 {
 		return ErrInvalidStoryBody(msg.Body)
 	}
@@ -80,15 +83,15 @@ func (msg SubmitStoryMsg) GetSigners() []sdk.AccAddress {
 type SubmitEvidenceMsg struct {
 	StoryID int64          `json:"story_id"`
 	Creator sdk.AccAddress `json:"creator"`
-	URI     string         `json:"url"`
+	URL     string         `json:"url"`
 }
 
 // NewSubmitEvidenceMsg creates a new message to submit evidence for a story
-func NewSubmitEvidenceMsg(storyID int64, creator sdk.AccAddress, uri string) SubmitEvidenceMsg {
+func NewSubmitEvidenceMsg(storyID int64, creator sdk.AccAddress, url string) SubmitEvidenceMsg {
 	return SubmitEvidenceMsg{
 		StoryID: storyID,
 		Creator: creator,
-		URI:     uri,
+		URL:     url,
 	}
 }
 
@@ -111,9 +114,9 @@ func (msg SubmitEvidenceMsg) ValidateBasic() sdk.Error {
 	if len(msg.Creator) == 0 {
 		return sdk.ErrInvalidAddress("Invalid address: " + msg.Creator.String())
 	}
-	_, err := url.ParseRequestURI(msg.URI)
+	_, err := url.ParseRequestURI(msg.URL)
 	if err != nil {
-		return ErrInvalidEvidenceURL(msg.URI)
+		return ErrInvalidEvidenceURL(msg.URL)
 	}
 	return nil
 }

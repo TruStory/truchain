@@ -2,7 +2,6 @@ package story
 
 import (
 	"encoding/json"
-	"net/url"
 	"strings"
 	"testing"
 
@@ -24,7 +23,7 @@ func TestSubmitStoryMsg(t *testing.T) {
 	creator := sdk.AccAddress([]byte{1, 2})
 	kind := Default
 	source := "http://trustory.io"
-	evidence := []url.URL{}
+	evidence := []string{"http://shanesbrain.net"}
 	argument := "argument"
 
 	msg := NewSubmitStoryMsg(argument, body, cat.ID, creator, evidence, source, kind)
@@ -53,7 +52,7 @@ func TestSubmitStoryMsg_ErrInvalidCategory(t *testing.T) {
 	creator := sdk.AccAddress([]byte{1, 2})
 	kind := Default
 	source := "http://trustory.io"
-	evidence := []url.URL{}
+	evidence := []string{"http://shanesbrain.net"}
 	argument := "argument"
 	msg := NewSubmitStoryMsg(argument, body, catID, creator, evidence, source, kind)
 	assert.NotNil(t, msg)
