@@ -14,15 +14,15 @@ import (
 type ReadKeeper interface {
 	app.ReadKeeper
 
-	GetChallengedStoriesWithCategory(
+	ChallengedStoriesWithCategory(
 		ctx sdk.Context,
 		catID int64) (stories []Story, err sdk.Error)
-	GetCoinName(ctx sdk.Context, id int64) (name string, err sdk.Error)
-	GetFeedByCategory(
+	CoinName(ctx sdk.Context, id int64) (name string, err sdk.Error)
+	FeedByCategoryID(
 		ctx sdk.Context,
 		catID int64) (stories []Story, err sdk.Error)
-	GetStoriesByCategoryID(ctx sdk.Context, catID int64) (stories []Story, err sdk.Error)
-	GetStory(ctx sdk.Context, storyID int64) (Story, sdk.Error)
+	StoriesByCategoryID(ctx sdk.Context, catID int64) (stories []Story, err sdk.Error)
+	Story(ctx sdk.Context, storyID int64) (Story, sdk.Error)
 }
 
 // WriteKeeper defines a module interface that facilities read/write access
@@ -67,7 +67,7 @@ func (k Keeper) StartGame(
 	ctx sdk.Context, storyID int64) sdk.Error {
 
 	// get story
-	story, err := k.GetStory(ctx, storyID)
+	story, err := k.Story(ctx, storyID)
 	if err != nil {
 		return err
 	}
@@ -86,7 +86,7 @@ func (k Keeper) StartGame(
 // EndGame records the end of a validation game on a story
 func (k Keeper) EndGame(ctx sdk.Context, storyID int64, confirmed bool) sdk.Error {
 	// get story
-	story, err := k.GetStory(ctx, storyID)
+	story, err := k.Story(ctx, storyID)
 	if err != nil {
 		return err
 	}
@@ -106,7 +106,7 @@ func (k Keeper) EndGame(ctx sdk.Context, storyID int64, confirmed bool) sdk.Erro
 // ExpireGame resets a story after a game has expired
 func (k Keeper) ExpireGame(ctx sdk.Context, storyID int64) sdk.Error {
 	// get story
-	story, err := k.GetStory(ctx, storyID)
+	story, err := k.Story(ctx, storyID)
 	if err != nil {
 		return err
 	}
@@ -156,9 +156,9 @@ func (k Keeper) NewStory(
 	return story.ID, nil
 }
 
-// GetCoinName returns the name of the category coin for the story
-func (k Keeper) GetCoinName(ctx sdk.Context, id int64) (name string, err sdk.Error) {
-	story, err := k.GetStory(ctx, id)
+// CoinName returns the name of the category coin for the story
+func (k Keeper) CoinName(ctx sdk.Context, id int64) (name string, err sdk.Error) {
+	story, err := k.Story(ctx, id)
 	if err != nil {
 		return
 	}
@@ -170,8 +170,8 @@ func (k Keeper) GetCoinName(ctx sdk.Context, id int64) (name string, err sdk.Err
 	return cat.CoinName(), nil
 }
 
-// GetStory gets the story with the given id from the key-value store
-func (k Keeper) GetStory(
+// Story gets the story with the given id from the key-value store
+func (k Keeper) Story(
 	ctx sdk.Context, storyID int64) (story Story, err sdk.Error) {
 
 	store := k.GetStore(ctx)
@@ -184,24 +184,24 @@ func (k Keeper) GetStory(
 	return
 }
 
-// GetStoriesByCategoryID gets the stories for a given category id
-func (k Keeper) GetStoriesByCategoryID(
+// StoriesByCategoryID gets the stories for a given category id
+func (k Keeper) StoriesByCategoryID(
 	ctx sdk.Context, catID int64) (stories []Story, err sdk.Error) {
 
 	return k.storiesByCategoryID(
 		ctx, storyIDsByCategorySubspaceKey(k, catID, false), catID)
 }
 
-// GetChallengedStoriesWithCategory gets all challenged stories for a category
-func (k Keeper) GetChallengedStoriesWithCategory(
+// ChallengedStoriesWithCategory gets all challenged stories for a category
+func (k Keeper) ChallengedStoriesWithCategory(
 	ctx sdk.Context, catID int64) (stories []Story, err sdk.Error) {
 
 	return k.storiesByCategoryID(
 		ctx, storyIDsByCategorySubspaceKey(k, catID, true), catID)
 }
 
-// GetFeedByCategory gets stories ordered by challenged stories first
-func (k Keeper) GetFeedByCategory(
+// FeedByCategoryID gets stories ordered by challenged stories first
+func (k Keeper) FeedByCategoryID(
 	ctx sdk.Context,
 	catID int64) (stories []Story, err sdk.Error) {
 
@@ -302,7 +302,7 @@ func (k Keeper) storiesByID(
 	ctx sdk.Context, storyIDs []int64) (stories []Story, err sdk.Error) {
 
 	for _, storyID := range storyIDs {
-		story, err := k.GetStory(ctx, storyID)
+		story, err := k.Story(ctx, storyID)
 		if err != nil {
 			return stories, ErrStoryNotFound(storyID)
 		}

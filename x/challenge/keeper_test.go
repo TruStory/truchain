@@ -56,7 +56,7 @@ func TestChallengesByGame(t *testing.T) {
 	k.Create(ctx, storyID, amount, argument, creator, evidence)
 	k.Create(ctx, storyID, amount, argument, creator2, evidence)
 
-	story, _ := sk.GetStory(ctx, storyID)
+	story, _ := sk.Story(ctx, storyID)
 	challenges, _ := k.ChallengesByGame(ctx, story.GameID)
 	assert.Equal(t, 2, len(challenges))
 }
@@ -134,7 +134,7 @@ func TestNewChallenge_MultipleChallengers(t *testing.T) {
 	assert.False(t, bankKeeper.HasCoins(ctx, creator2, sdk.Coins{amount}))
 
 	// check game pool amount
-	story, _ := k.storyKeeper.GetStory(ctx, storyID)
+	story, _ := k.storyKeeper.Story(ctx, storyID)
 	game, _ := k.gameKeeper.Game(ctx, story.GameID)
 
 	assert.True(t, game.ChallengePool.IsEqual(challengeAmount.Plus(amount)))

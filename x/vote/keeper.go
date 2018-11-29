@@ -90,7 +90,7 @@ func (k Keeper) Create(
 	evidence []url.URL) (int64, sdk.Error) {
 
 	// get the story
-	story, err := k.storyKeeper.GetStory(ctx, storyID)
+	story, err := k.storyKeeper.Story(ctx, storyID)
 	if err != nil {
 		return 0, err
 	}
