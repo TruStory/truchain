@@ -32,7 +32,19 @@ func handleSubmitStoryMsg(ctx sdk.Context, k WriteKeeper, msg SubmitStoryMsg) sd
 		return ErrInvalidSourceURL(msg.Source).Result()
 	}
 
-	id, err := k.NewStory(ctx, msg.Body, msg.CategoryID, msg.Creator, *sourceURL, msg.StoryType)
+	// create evidence type from url
+	var evidence []Evidence
+	for _, url := range msg.Evidence {
+		e := Evidence{
+			Creator:   msg.Creator,
+			URL:       url,
+			Timestamp: app.NewTimestamp(ctx.BlockHeader()),
+		}
+		evidence = append(evidence, e)
+	}
+
+	id, err := k.NewStory(
+		ctx, msg.Body, msg.CategoryID, msg.Creator, evidence, *sourceURL, msg.StoryType)
 	if err != nil {
 		return err.Result()
 	}

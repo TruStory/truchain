@@ -3,8 +3,8 @@ package backing
 import (
 	"net/url"
 
-	c "github.com/TruStory/truchain/x/category"
-	s "github.com/TruStory/truchain/x/story"
+	"github.com/TruStory/truchain/x/category"
+	"github.com/TruStory/truchain/x/story"
 	"github.com/cosmos/cosmos-sdk/store"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth"
@@ -21,8 +21,8 @@ import (
 func mockDB() (
 	sdk.Context,
 	Keeper,
-	s.Keeper,
-	c.Keeper,
+	story.Keeper,
+	category.Keeper,
 	bank.Keeper,
 	auth.AccountKeeper) {
 
@@ -50,28 +50,29 @@ func mockDB() (
 	codec.RegisterInterface((*auth.Account)(nil), nil)
 	codec.RegisterConcrete(&auth.BaseAccount{}, "auth/Account", nil)
 
-	ck := c.NewKeeper(catKey, codec)
+	ck := category.NewKeeper(catKey, codec)
 	am := auth.NewAccountKeeper(codec, accKey, auth.ProtoBaseAccount)
 	bankKeeper := bank.NewBaseKeeper(am)
-	sk := s.NewKeeper(storyKey, ck, codec)
+	sk := story.NewKeeper(storyKey, ck, codec)
 	bk := NewKeeper(backingKey, sk, bankKeeper, ck, codec)
 
 	return ctx, bk, sk, ck, bankKeeper, am
 }
 
-func createFakeStory(ctx sdk.Context, sk s.Keeper, ck c.WriteKeeper) int64 {
+func createFakeStory(ctx sdk.Context, sk story.Keeper, ck category.WriteKeeper) int64 {
 	body := "Body of story."
 	cat := createFakeCategory(ctx, ck)
 	creator := sdk.AccAddress([]byte{1, 2})
-	storyType := s.Default
+	storyType := story.Default
 	source := url.URL{}
+	evidence := []story.Evidence{}
 
-	storyID, _ := sk.NewStory(ctx, body, cat.ID, creator, source, storyType)
+	storyID, _ := sk.NewStory(ctx, body, cat.ID, creator, evidence, source, storyType)
 
 	return storyID
 }
 
-func createFakeCategory(ctx sdk.Context, ck c.WriteKeeper) c.Category {
+func createFakeCategory(ctx sdk.Context, ck category.WriteKeeper) category.Category {
 	id, _ := ck.NewCategory(ctx, "decentralized exchanges", sdk.AccAddress([]byte{1, 2}), "trudex", "category for experts in decentralized exchanges")
 	cat, _ := ck.GetCategory(ctx, id)
 	return cat

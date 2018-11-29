@@ -34,6 +34,7 @@ type WriteKeeper interface {
 		body string,
 		categoryID int64,
 		creator sdk.AccAddress,
+		evidence []Evidence,
 		source url.URL,
 		storyType Type) (int64, sdk.Error)
 	StartGame(ctx sdk.Context, storyID int64) sdk.Error
@@ -123,6 +124,7 @@ func (k Keeper) NewStory(
 	body string,
 	categoryID int64,
 	creator sdk.AccAddress,
+	evidence []Evidence,
 	source url.URL,
 	storyType Type) (int64, sdk.Error) {
 
@@ -136,6 +138,7 @@ func (k Keeper) NewStory(
 		Body:       body,
 		CategoryID: categoryID,
 		Creator:    creator,
+		Evidence:   evidence,
 		GameID:     0,
 		Source:     source,
 		State:      Unconfirmed,
@@ -241,6 +244,7 @@ func (k Keeper) UpdateStory(ctx sdk.Context, story Story) {
 		story.Body,
 		story.CategoryID,
 		story.Creator,
+		story.Evidence,
 		story.GameID,
 		story.Source,
 		story.State,
