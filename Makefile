@@ -41,8 +41,13 @@ install_tools_macos:
 	brew install dep && brew upgrade dep
 	brew tap alecthomas/homebrew-tap && brew install gometalinter
 
-test:
+go_test:
 	@go test $(PACKAGES)
+
+set_registrar:
+	cp $(CHAIN_DIR)/registrar.key $(HOME)/.truchaind/registrar.key
+
+test: set_registrar go_test
 
 test_cover:
 	go test $(PACKAGES) -v -timeout 30m -race -covermode=atomic
