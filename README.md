@@ -49,13 +49,9 @@ Create a file in the root of this project named `registrar.key` containing the u
 
 This is the private key to the account added in step 3b.
 
-4. Initialize the chain (one-time only)
+4. Start blockchain
 
-`bin/truchaind init --name [CHAIN_NAME]`
-
-5. Start blockchain
-
-`bin/truchaind start`
+`make run_daemon`
 
 ### Architecture
 
