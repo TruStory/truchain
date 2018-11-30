@@ -75,6 +75,28 @@ func TestByzantineMsg(t *testing.T) {
 	assert.True(t, hasUnrecognizedMessage, "should return err code")
 }
 
+func TestAddArgumentMsg(t *testing.T) {
+	ctx, sk, ck := mockDB()
+
+	h := NewHandler(sk)
+	creator := sdk.AccAddress([]byte{1, 2})
+	argument := "this is an argument"
+
+	storyID := createFakeStory(ctx, sk, ck)
+
+	msg := NewAddArgumentMsg(storyID, creator, argument)
+	assert.NotNil(t, msg)
+
+	res := h(ctx, msg)
+	idres := new(types.IDResult)
+	_ = json.Unmarshal(res.Data, &idres)
+
+	story, _ := sk.Story(ctx, storyID)
+	assert.Equal(t, story.Arguments[0].Body, argument)
+
+	assert.Equal(t, int64(1), idres.ID, "incorrect result data")
+}
+
 func TestAddEvidenceMsg(t *testing.T) {
 	ctx, sk, ck := mockDB()
 

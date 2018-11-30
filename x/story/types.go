@@ -7,6 +7,13 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
+// Argument for a story
+type Argument struct {
+	Creator   sdk.AccAddress `json:"creator"`
+	Body      string         `json:"body"`
+	Timestamp app.Timestamp  `json:"timestamp"`
+}
+
 // Evidence for a story
 type Evidence struct {
 	Creator   sdk.AccAddress `json:"creator"`
@@ -66,7 +73,7 @@ func (i Type) String() string {
 // Story type
 type Story struct {
 	ID         int64          `json:"id"`
-	Argument   string         `json:"argument,omitempty"`
+	Arguments  []Argument     `json:"arguments,omitempty"`
 	Body       string         `json:"body"`
 	CategoryID int64          `json:"category_id"`
 	Creator    sdk.AccAddress `json:"creator"`
