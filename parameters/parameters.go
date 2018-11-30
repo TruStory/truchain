@@ -33,3 +33,8 @@ var RegistrationFee = auth.StdFee{
 	Amount: sdk.Coins{sdk.Coin{Amount: sdk.NewInt(1), Denom: StakeDenom}},
 	Gas:    10000,
 }
+
+// Fee is for spam prevention and validator rewards
+var Fee = sdk.Coins{
+	sdk.Coin{Amount: sdk.NewInt(10), Denom: StakeDenom},
+}
