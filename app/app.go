@@ -180,6 +180,9 @@ func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *T
 	app.SetEndBlocker(app.EndBlocker)
 	app.SetAnteHandler(auth.NewAnteHandler(app.accountKeeper, app.feeCollectionKeeper))
 
+	// set fee for spam prevention and validator rewards
+	app.SetMinimumFees(params.Fee)
+
 	// mount the multistore and load the latest state
 	app.MountStoresIAVL(
 		app.keyMain, app.keyAccount, app.keyIBC, app.keyFee, app.keyGameQueue,
