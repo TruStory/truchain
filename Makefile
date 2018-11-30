@@ -26,9 +26,6 @@ build_cli:
 build_daemon:
 	go build -o bin/truchaind cmd/truchaind/main.go
 
-init:
-	cp -R ./dev/empty_truchain $(CHAIN_DIR)
-
 run_daemon:
 	bin/truchaind --home $(CHAIN_DIR) start
 
