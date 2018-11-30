@@ -45,6 +45,7 @@ go_test:
 	@go test $(PACKAGES)
 
 set_registrar:
+	mkdir -p $(HOME)/.truchaind
 	cp $(CHAIN_DIR)/registrar.key $(HOME)/.truchaind/registrar.key
 
 test: set_registrar go_test
