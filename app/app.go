@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"os"
+	"path/filepath"
 
 	params "github.com/TruStory/truchain/parameters"
 	"github.com/TruStory/truchain/types"
@@ -22,12 +23,14 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/auth"
 	"github.com/cosmos/cosmos-sdk/x/bank"
 	"github.com/cosmos/cosmos-sdk/x/ibc"
+	"github.com/spf13/viper"
 	abci "github.com/tendermint/tendermint/abci/types"
 	"github.com/tendermint/tendermint/crypto/secp256k1"
 	cmn "github.com/tendermint/tendermint/libs/common"
 	dbm "github.com/tendermint/tendermint/libs/db"
 	"github.com/tendermint/tendermint/libs/log"
 	tmtypes "github.com/tendermint/tendermint/types"
+	"github.com/tendermint/tmlibs/cli"
 )
 
 // default home directories for expected binaries
@@ -274,7 +277,9 @@ func (app *TruChain) ExportAppStateAndValidators() (appState json.RawMessage, va
 }
 
 func loadRegistrarKey() secp256k1.PrivKeySecp256k1 {
-	fileBytes, err := ioutil.ReadFile("registrar.key")
+	rootdir := viper.GetString(cli.HomeFlag)
+	keypath := filepath.Join(rootdir, "registrar.key")
+	fileBytes, err := ioutil.ReadFile(keypath)
 
 	if err != nil {
 		panic(err)
