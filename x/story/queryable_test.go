@@ -28,6 +28,27 @@ func TestQueryStories_ErrNotFound(t *testing.T) {
 	require.Equal(t, ErrStoriesWithCategoryNotFound(1).Code(), err.Code(), "should get error")
 }
 
+func TestQueryStoryByID(t *testing.T) {
+	ctx, sk, ck := mockDB()
+
+	createFakeStory(ctx, sk, ck)
+
+	queryParams := QueryStoryByIDParams{
+		ID: 1,
+	}
+
+	bz, errRes := json.Marshal(queryParams)
+	require.Nil(t, errRes)
+
+	query := abci.RequestQuery{
+		Path: "/custom/stories/id",
+		Data: bz,
+	}
+	_, err := queryStoryByID(ctx, query, sk)
+
+	require.Nil(t, err)
+}
+
 func TestQueryStoriesWithCategory(t *testing.T) {
 	ctx, sk, ck := mockDB()
 
