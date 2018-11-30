@@ -75,6 +75,24 @@ func TestValidAddEvidencetMsg(t *testing.T) {
 	assert.Equal(t, []sdk.AccAddress{validCreator}, msg.GetSigners())
 }
 
+func TestValidAddArgumentMsg(t *testing.T) {
+	validStoryID := int64(1)
+	validCreator := sdk.AccAddress([]byte{1, 2})
+	validArgument := "another argument"
+	msg := NewAddArgumentMsg(validStoryID, validCreator, validArgument)
+	err := msg.ValidateBasic()
+
+	assert.Nil(t, err)
+	assert.Equal(t, "story", msg.Type())
+	assert.Equal(t, "add_argument", msg.Route())
+	assert.Equal(
+		t,
+		`{"argument":"another argument","creator":"cosmos1qypq36vzru","story_id":1}`,
+		fmt.Sprintf("%s", msg.GetSignBytes()),
+	)
+	assert.Equal(t, []sdk.AccAddress{validCreator}, msg.GetSigners())
+}
+
 func TestValidFlagStoryMsg(t *testing.T) {
 	validStoryID := int64(1)
 	validCreator := sdk.AccAddress([]byte{1, 2})
