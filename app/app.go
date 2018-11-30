@@ -278,6 +278,10 @@ func (app *TruChain) ExportAppStateAndValidators() (appState json.RawMessage, va
 
 func loadRegistrarKey() secp256k1.PrivKeySecp256k1 {
 	rootdir := viper.GetString(cli.HomeFlag)
+	if rootdir == "" {
+		rootdir = "../.chain"
+	}
+
 	keypath := filepath.Join(rootdir, "registrar.key")
 	fileBytes, err := ioutil.ReadFile(keypath)
 
