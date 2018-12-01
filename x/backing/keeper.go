@@ -239,7 +239,14 @@ func (k Keeper) getPrincipal(
 		}
 	case params.StakeDenom:
 		// mint category coins from trustake
-		return mintFromNativeToken(ctx, k.bankKeeper, cat, amount, userAddr)
+		principal, err = app.CategoryCoinFromTruStake(
+			ctx, k.bankKeeper, cat.Slug, amount, userAddr)
+		if err != nil {
+			return
+		}
+		// give category coins to user
+		_, _, err = k.bankKeeper.AddCoins(ctx, userAddr, sdk.Coins{principal})
+
 	default:
 		return principal, sdk.ErrInvalidCoins("Invalid backing token")
 
@@ -257,36 +264,6 @@ func (k Keeper) setBacking(ctx sdk.Context, backing Backing) {
 }
 
 // ============================================================================
-
-// mintFromNativeToken creates category coins by burning trustake
-func mintFromNativeToken(
-	ctx sdk.Context,
-	bankKeeper bank.Keeper,
-	cat cat.Category,
-	amount sdk.Coin,
-	userAddr sdk.AccAddress) (principal sdk.Coin, err sdk.Error) {
-
-	// naïve implementation: 1 trustake = 1 category coin
-	// TODO [Shane]: https://github.com/TruStory/truchain/issues/21
-	conversionRate := sdk.NewDec(1)
-
-	// mint new category coins
-	principal = sdk.NewCoin(
-		cat.CoinName(),
-		sdk.NewDecFromInt(amount.Amount).Mul(conversionRate).RoundInt())
-
-	// burn equivalent trustake
-	trustake := sdk.Coins{sdk.NewCoin(params.StakeDenom, principal.Amount)}
-	_, _, err = bankKeeper.SubtractCoins(ctx, userAddr, trustake)
-	if err != nil {
-		return
-	}
-
-	// give category coins to user
-	_, _, err = bankKeeper.AddCoins(ctx, userAddr, sdk.Coins{principal})
-
-	return
-}
 
 // getInterest calcuates the interest for the backing
 func getInterest(
