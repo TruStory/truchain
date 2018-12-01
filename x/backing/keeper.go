@@ -237,15 +237,11 @@ func (k Keeper) getPrincipal(
 		if k.bankKeeper.HasCoins(ctx, userAddr, sdk.Coins{amount}) {
 			return amount, nil
 		}
+
 	case params.StakeDenom:
 		// mint category coins from trustake
-		principal, err = app.CategoryCoinFromTruStake(
-			ctx, k.bankKeeper, cat.Slug, amount, userAddr)
-		if err != nil {
-			return
-		}
-		// give category coins to user
-		_, _, err = k.bankKeeper.AddCoins(ctx, userAddr, sdk.Coins{principal})
+		principal, err = app.SwapForCategoryCoin(
+			ctx, k.bankKeeper, amount, cat.Slug, userAddr)
 
 	default:
 		return principal, sdk.ErrInvalidCoins("Invalid backing token")
