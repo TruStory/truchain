@@ -38,6 +38,29 @@ func TestNewGetChallenge(t *testing.T) {
 	assert.Equal(t, amount, challenge.Amount())
 }
 
+func TestNewGetChallengeUsingTruStake(t *testing.T) {
+	ctx, k, sk, ck, bankKeeper := mockDB()
+
+	storyID := createFakeStory(ctx, sk, ck)
+	amount := sdk.NewCoin("trusteak", sdk.NewInt(15))
+	argument := "test argument is long enough"
+	creator := sdk.AccAddress([]byte{1, 2})
+	cnn, _ := url.Parse("http://www.cnn.com")
+	evidence := []url.URL{*cnn}
+
+	// give user some funds
+	bankKeeper.AddCoins(ctx, creator, sdk.Coins{amount})
+
+	id, err := k.Create(ctx, storyID, amount, argument, creator, evidence)
+	assert.Nil(t, err)
+
+	challenge, err := k.Challenge(ctx, id)
+	assert.Nil(t, err)
+
+	expectedCoin := sdk.NewCoin("trudex", amount.Amount)
+	assert.Equal(t, expectedCoin, challenge.Amount())
+}
+
 func TestChallengesByGame(t *testing.T) {
 	ctx, k, sk, ck, bankKeeper := mockDB()
 

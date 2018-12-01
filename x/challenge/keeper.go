@@ -5,6 +5,7 @@ import (
 
 	"github.com/cosmos/cosmos-sdk/x/bank"
 
+	params "github.com/TruStory/truchain/parameters"
 	app "github.com/TruStory/truchain/types"
 	"github.com/TruStory/truchain/x/game"
 	"github.com/TruStory/truchain/x/story"
@@ -61,12 +62,24 @@ func NewKeeper(
 // Create adds a new challenge on a story in the KVStore
 func (k Keeper) Create(
 	ctx sdk.Context, storyID int64, amount sdk.Coin, argument string,
-	creator sdk.AccAddress, evidence []url.URL) (int64, sdk.Error) {
+	creator sdk.AccAddress, evidence []url.URL) (challengeID int64, err sdk.Error) {
 
-	// validate stake before creating challenge
-	err := validateStake(ctx, k, storyID, creator, amount)
+	// check if user has the stake they are claiming
+	if !k.bankKeeper.HasCoins(ctx, creator, sdk.Coins{amount}) {
+		return 0, sdk.ErrInsufficientFunds("Insufficient funds for challenging story.")
+	}
+
+	// get category coin name
+	coinName, err := k.storyKeeper.CoinName(ctx, storyID)
 	if err != nil {
-		return 0, err
+		return
+	}
+
+	catCoin := app.NewCategoryCoin(coinName, amount)
+
+	// check if challenge amount is greater than minimum stake
+	if catCoin.Amount.LT(game.DefaultParams().MinChallengeStake) {
+		return 0, sdk.ErrInsufficientFunds("Does not meet minimum stake amount.")
 	}
 
 	// get the story
@@ -92,7 +105,7 @@ func (k Keeper) Create(
 	// create implicit false vote
 	vote := app.Vote{
 		ID:        k.GetNextID(ctx),
-		Amount:    amount,
+		Amount:    catCoin,
 		Argument:  argument,
 		Creator:   creator,
 		Evidence:  evidence,
@@ -111,14 +124,19 @@ func (k Keeper) Create(
 	// persist challenge <-> game mapping
 	k.challengeList.Append(ctx, k, gameID, creator, challenge.ID())
 
+	// convert from trustake if needed
+	if amount.Denom == params.StakeDenom {
+		err = app.SwapCoin(ctx, k.bankKeeper, amount, catCoin, creator)
+	}
+
 	// deduct challenge amount from user
-	_, _, err = k.bankKeeper.SubtractCoins(ctx, creator, sdk.Coins{amount})
+	_, _, err = k.bankKeeper.SubtractCoins(ctx, creator, sdk.Coins{catCoin})
 	if err != nil {
 		return 0, err
 	}
 
 	// update game threshold
-	err = k.gameKeeper.RegisterChallenge(ctx, gameID, amount)
+	err = k.gameKeeper.RegisterChallenge(ctx, gameID, catCoin)
 	if err != nil {
 		return 0, err
 	}
@@ -175,33 +193,6 @@ func (k Keeper) Tally(
 
 		return nil
 	})
-
-	return
-}
-
-// ============================================================================
-
-// validate if a challenger has the right staking amount
-func validateStake(
-	ctx sdk.Context, k Keeper, storyID int64,
-	creator sdk.AccAddress, amount sdk.Coin) (err sdk.Error) {
-
-	// get category coin name
-	coinName, err := k.storyKeeper.CoinName(ctx, storyID)
-	if err != nil {
-		return
-	}
-
-	// check if user has the stake they are claiming
-	if !k.bankKeeper.HasCoins(ctx, creator, sdk.Coins{amount}) {
-		return sdk.ErrInsufficientFunds("Insufficient funds for challenging story.")
-	}
-
-	// check if challenge amount is greater than minimum stake
-	minStake := sdk.NewCoin(coinName, game.DefaultParams().MinChallengeStake)
-	if amount.IsLT(minStake) {
-		return sdk.ErrInsufficientFunds("Does not meet minimum stake amount.")
-	}
 
 	return
 }
