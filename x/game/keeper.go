@@ -3,6 +3,8 @@ package game
 import (
 	"time"
 
+	"github.com/TruStory/truchain/x/backing"
+
 	"github.com/cosmos/cosmos-sdk/x/bank"
 
 	app "github.com/TruStory/truchain/types"
@@ -37,19 +39,26 @@ type Keeper struct {
 	queueKey       sdk.StoreKey // queue of unexpired active
 	activeQueueKey sdk.StoreKey // queue of started games
 	storyKeeper    story.WriteKeeper
+	backingKeeper  backing.ReadKeeper
 	bankKeeper     bank.Keeper
 }
 
 // NewKeeper creates a new keeper with write and read access
 func NewKeeper(
-	storeKey sdk.StoreKey, queueKey sdk.StoreKey, activeQueueKey sdk.StoreKey,
-	storyKeeper story.WriteKeeper, bankKeeper bank.Keeper, codec *amino.Codec) Keeper {
+	storeKey sdk.StoreKey,
+	queueKey sdk.StoreKey,
+	activeQueueKey sdk.StoreKey,
+	storyKeeper story.WriteKeeper,
+	backingKeeper backing.ReadKeeper,
+	bankKeeper bank.Keeper,
+	codec *amino.Codec) Keeper {
 
 	return Keeper{
 		app.NewKeeper(codec, storeKey),
 		queueKey,
 		activeQueueKey,
 		storyKeeper,
+		backingKeeper,
 		bankKeeper,
 	}
 }
@@ -131,6 +140,15 @@ func (k Keeper) RegisterChallenge(
 	// add amount to threshold pool
 	game.ChallengePool = game.ChallengePool.Plus(amount)
 	k.update(ctx, game)
+
+	// TODO: calculate challenge threshold amount (based on total backings)
+	//
+	// totalBackingAmount, err := k.backingKeeper.TotalBacking(ctx, storyID)
+	// if err != nil {
+	//  return
+	// }
+
+	// if total backings is zero, start game if challenger meets min stake
 
 	if game.Started() {
 		err = k.storyKeeper.StartGame(ctx, game.StoryID)
