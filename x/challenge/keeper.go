@@ -64,7 +64,7 @@ func (k Keeper) Create(
 	ctx sdk.Context, storyID int64, amount sdk.Coin, argument string,
 	creator sdk.AccAddress, evidence []url.URL) (challengeID int64, err sdk.Error) {
 
-	// check if user has the stake they are claiming
+	// check is user has the coins they are staking
 	if !k.bankKeeper.HasCoins(ctx, creator, sdk.Coins{amount}) {
 		return 0, sdk.ErrInsufficientFunds("Insufficient funds for challenging story.")
 	}
