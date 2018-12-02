@@ -241,7 +241,7 @@ func (k Keeper) getPrincipal(
 	case params.StakeDenom:
 		// mint category coins from trustake
 		principal, err = app.SwapForCategoryCoin(
-			ctx, k.bankKeeper, amount, cat.Slug, userAddr)
+			ctx, k.bankKeeper, amount, cat.CoinName(), userAddr)
 
 	default:
 		return principal, sdk.ErrInvalidCoins("Invalid backing token")

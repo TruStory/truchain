@@ -50,5 +50,9 @@ func SwapCoin(
 // naïve implementation: 1 trustake = 1 category coin
 // TODO [Shane]: https://github.com/TruStory/truchain/issues/21
 func exchangeRate(from sdk.Coin, toDenom string) sdk.Dec {
+
+	if from.Denom == toDenom {
+		return sdk.NewDec(1)
+	}
 	return sdk.NewDec(1)
 }
