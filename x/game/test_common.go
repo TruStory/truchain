@@ -4,6 +4,7 @@ import (
 	"net/url"
 	"time"
 
+	"github.com/TruStory/truchain/x/backing"
 	c "github.com/TruStory/truchain/x/category"
 	"github.com/TruStory/truchain/x/story"
 	"github.com/cosmos/cosmos-sdk/store"
@@ -27,6 +28,7 @@ func mockDB() (sdk.Context, Keeper, story.Keeper, c.Keeper, bank.Keeper) {
 	gameKey := sdk.NewKVStoreKey("games")
 	gameQueueKey := sdk.NewKVStoreKey("gameQueue")
 	activeGameQueueKey := sdk.NewKVStoreKey("activeGameQueue")
+	backingKey := sdk.NewKVStoreKey("backings")
 
 	ms := store.NewCommitMultiStore(db)
 	ms.MountStoreWithDB(accKey, sdk.StoreTypeIAVL, db)
@@ -36,6 +38,7 @@ func mockDB() (sdk.Context, Keeper, story.Keeper, c.Keeper, bank.Keeper) {
 	ms.MountStoreWithDB(gameKey, sdk.StoreTypeIAVL, db)
 	ms.MountStoreWithDB(gameQueueKey, sdk.StoreTypeIAVL, db)
 	ms.MountStoreWithDB(activeGameQueueKey, sdk.StoreTypeIAVL, db)
+	ms.MountStoreWithDB(backingKey, sdk.StoreTypeIAVL, db)
 	ms.LoadLatestVersion()
 
 	header := abci.Header{Time: time.Now().Add(50 * 24 * time.Hour)}
@@ -50,8 +53,9 @@ func mockDB() (sdk.Context, Keeper, story.Keeper, c.Keeper, bank.Keeper) {
 	bankKeeper := bank.NewBaseKeeper(am)
 	ck := c.NewKeeper(catKey, codec)
 	sk := story.NewKeeper(storyKey, ck, codec)
+	backingKeeper := backing.NewKeeper(backingKey, sk, bankKeeper, ck, codec)
 
-	k := NewKeeper(gameKey, gameQueueKey, activeGameQueueKey, sk, bankKeeper, codec)
+	k := NewKeeper(gameKey, gameQueueKey, activeGameQueueKey, sk, backingKeeper, bankKeeper, codec)
 
 	return ctx, k, sk, ck, bankKeeper
 }
