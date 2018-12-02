@@ -17,8 +17,11 @@ type ReadKeeper interface {
 	app.ReadKeeper
 
 	Backing(ctx sdk.Context, id int64) (backing Backing, err sdk.Error)
+
 	Tally(ctx sdk.Context, storyID int64) (
 		trueVotes []Backing, falseVotes []Backing, err sdk.Error)
+
+	TotalBacking(ctx sdk.Context, storyID int64) (totalAmount sdk.Int, err sdk.Error)
 }
 
 // WriteKeeper defines a module interface that facilities write only access
@@ -218,6 +221,29 @@ func (k Keeper) Tally(
 	})
 
 	return
+}
+
+// TotalBacking returns the total of all backings
+func (k Keeper) TotalBacking(ctx sdk.Context, storyID int64) (
+	sdk.Int, sdk.Error) {
+
+	totalAmount := sdk.ZeroInt()
+
+	err := k.backingsList.Map(ctx, k, storyID, func(backingID int64) sdk.Error {
+		backing, err := k.Backing(ctx, backingID)
+		if err != nil {
+			return err
+		}
+
+		totalAmount = totalAmount.Add(backing.Amount().Amount)
+
+		return nil
+	})
+	if err != nil {
+		return totalAmount, err
+	}
+
+	return totalAmount, nil
 }
 
 // ============================================================================
