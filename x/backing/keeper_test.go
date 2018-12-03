@@ -116,7 +116,7 @@ func TestTotalBacking(t *testing.T) {
 	bankKeeper.AddCoins(ctx, creator2, sdk.Coins{amount})
 	k.Create(ctx, storyID, amount, creator2, duration)
 
-	total, _ := k.TotalBacking(ctx, storyID)
+	total, _ := k.TotalBackingAmount(ctx, storyID)
 
 	assert.Equal(t, "10", total.String())
 }

@@ -144,7 +144,7 @@ func (k Keeper) RegisterChallenge(
 	k.update(ctx, game)
 
 	// get the total of all backings on story
-	totalBackingAmount, err := k.backingKeeper.TotalBacking(ctx, game.StoryID)
+	totalBackingAmount, err := k.backingKeeper.TotalBackingAmount(ctx, game.StoryID)
 	if err != nil {
 		return err
 	}
@@ -154,7 +154,7 @@ func (k Keeper) RegisterChallenge(
 		// we have zero backers
 		// start game if challenge pool meets min challenge stake
 		if game.ChallengePool.Amount.GT(params.MinChallengeStake) {
-			k.start(ctx, &game)
+			err = k.start(ctx, &game)
 		}
 	} else {
 		// we have backers
@@ -163,8 +163,11 @@ func (k Keeper) RegisterChallenge(
 
 		// start game if challenge pool meets threshold
 		if game.ChallengePool.Amount.GT(threshold) {
-			k.start(ctx, &game)
+			err = k.start(ctx, &game)
 		}
+	}
+	if err != nil {
+		return err
 	}
 
 	return nil
