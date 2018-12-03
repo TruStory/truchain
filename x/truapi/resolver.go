@@ -11,8 +11,8 @@ import (
 	"github.com/tendermint/go-amino"
 )
 
-func (ta *TruAPI) storyResolver(_ context.Context, q story.QueryCategoryStoriesParams) []story.Story {
-	res := ta.RunQuery("stories/category", q)
+func (ta *TruAPI) categoryStoriesResolver(_ context.Context, q category.Category) []story.Story {
+	res := ta.RunQuery("stories/category", story.QueryCategoryStoriesParams{CategoryID: q.ID})
 
 	if res.Code != 0 {
 		fmt.Println("Resolver err: ", res)
@@ -29,8 +29,44 @@ func (ta *TruAPI) storyResolver(_ context.Context, q story.QueryCategoryStoriesP
 	return *s
 }
 
-func (ta *TruAPI) storyCategoryResolver(ctx context.Context, q story.Story) category.Category {
-	res := ta.RunQuery("categories/id", category.QueryCategoryByIDParams{ID: q.CategoryID})
+func (ta *TruAPI) storyResolver(_ context.Context, q story.QueryStoryByIDParams) story.Story {
+	res := ta.RunQuery("stories/id", q)
+
+	if res.Code != 0 {
+		fmt.Println("Resolver err: ", res)
+		return story.Story{}
+	}
+
+	s := new(story.Story)
+	err := json.Unmarshal(res.Value, s)
+
+	if err != nil {
+		panic(err)
+	}
+
+	return *s
+}
+
+func (ta *TruAPI) allCategoriesResolver(ctx context.Context, q struct{}) []category.Category {
+	res := ta.RunQuery("categories/all", struct{}{})
+
+	if res.Code != 0 {
+		fmt.Println("Resolver err: ", res)
+		return []category.Category{}
+	}
+
+	cs := new([]category.Category)
+	err := json.Unmarshal(res.Value, cs)
+
+	if err != nil {
+		panic(err)
+	}
+
+	return *cs
+}
+
+func (ta *TruAPI) categoryResolver(ctx context.Context, q category.QueryCategoryByIDParams) category.Category {
+	res := ta.RunQuery("categories/id", q)
 
 	if res.Code != 0 {
 		fmt.Println("Resolver err: ", res)
@@ -45,6 +81,10 @@ func (ta *TruAPI) storyCategoryResolver(ctx context.Context, q story.Story) cate
 	}
 
 	return *c
+}
+
+func (ta *TruAPI) storyCategoryResolver(ctx context.Context, q story.Story) category.Category {
+	return ta.categoryResolver(ctx, category.QueryCategoryByIDParams{ID: q.CategoryID})
 }
 
 func (ta *TruAPI) usersResolver(ctx context.Context, q users.QueryUsersByAddressesParams) []users.User {

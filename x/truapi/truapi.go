@@ -4,6 +4,7 @@ import (
 	"context"
 	"net/http"
 
+	"github.com/TruStory/truchain/x/category"
 	"github.com/TruStory/truchain/x/chttp"
 	"github.com/TruStory/truchain/x/graphql"
 	"github.com/TruStory/truchain/x/story"
@@ -41,14 +42,32 @@ func (ta *TruAPI) RegisterRoutes() {
 
 // RegisterResolvers builds the app's GraphQL schema from resolvers (declared in `resolver.go`)
 func (ta *TruAPI) RegisterResolvers() {
-	ta.GraphQLClient.RegisterQueryResolver("stories", ta.storyResolver)
+	getUser := func(ctx context.Context, addr sdk.AccAddress) users.User {
+		res := ta.usersResolver(ctx, users.QueryUsersByAddressesParams{Addresses: []string{addr.String()}})
+		if len(res) > 0 {
+			return res[0]
+		}
+		return users.User{}
+	}
+
+	ta.GraphQLClient.RegisterQueryResolver("allCategories", ta.allCategoriesResolver)
+	ta.GraphQLClient.RegisterQueryResolver("category", ta.categoryResolver)
+	ta.GraphQLClient.RegisterObjectResolver("Category", category.Category{}, map[string]interface{}{
+		"id":      func(_ context.Context, q category.Category) int64 { return q.ID },
+		"stories": ta.categoryStoriesResolver,
+		"creator": func(ctx context.Context, q category.Category) users.User { return getUser(ctx, q.Creator) },
+	})
+
+	ta.GraphQLClient.RegisterQueryResolver("story", ta.storyResolver)
 	ta.GraphQLClient.RegisterObjectResolver("Story", story.Story{}, map[string]interface{}{
 		"id":       func(_ context.Context, q story.Story) int64 { return q.ID },
 		"category": ta.storyCategoryResolver,
+		"creator":  func(ctx context.Context, q story.Story) users.User { return getUser(ctx, q.Creator) },
 	})
 
 	ta.GraphQLClient.RegisterQueryResolver("users", ta.usersResolver)
 	ta.GraphQLClient.RegisterObjectResolver("User", users.User{}, map[string]interface{}{
+		"id":             func(_ context.Context, q users.User) string { return q.Address },
 		"pubkey":         func(_ context.Context, q users.User) string { return q.Pubkey.String() },
 		"twitterProfile": ta.twitterProfileResolver,
 	})
