@@ -71,11 +71,14 @@ func (k Keeper) GetNextID(ctx sdk.Context) (id int64) {
 	return nextID
 }
 
-// Each calls `fn` for each record in a store. Iteration will stop if `fn` returns false
-func (k Keeper) Each(ctx sdk.Context, fn func([]byte) bool) (err sdk.Error) {
+// EachPrefix calls `fn` for each record in a store with a given prefix. Iteration will stop if `fn` returns false
+func (k Keeper) EachPrefix(ctx sdk.Context, prefix string, fn func([]byte) bool) (err sdk.Error) {
 	var val []byte
 	store := k.GetStore(ctx)
 	iter := store.Iterator(nil, nil)
+	if prefix != "" {
+		iter = sdk.KVStorePrefixIterator(store, []byte(prefix))
+	}
 
 	for iter.Valid() {
 		val = iter.Value()
@@ -89,6 +92,11 @@ func (k Keeper) Each(ctx sdk.Context, fn func([]byte) bool) (err sdk.Error) {
 
 	iter.Close()
 	return
+}
+
+// Each calls `EachPrefix` with an empty prefix
+func (k Keeper) Each(ctx sdk.Context, fn func([]byte) bool) (err sdk.Error) {
+	return k.EachPrefix(ctx, "", fn)
 }
 
 // GetIDKey returns the key for a given index
