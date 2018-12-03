@@ -12,6 +12,7 @@ import (
 const (
 	QueryPath           = "categories"
 	QueryCategoriesByID = "id"
+	QueryAllCategories  = "all"
 )
 
 // QueryCategoryByIDParams are params for  by category queries
@@ -25,6 +26,8 @@ func NewQuerier(k ReadKeeper) sdk.Querier {
 		switch path[0] {
 		case QueryCategoriesByID:
 			return queryCategoryByID(ctx, req, k)
+		case QueryAllCategories:
+			return queryAllCategories(ctx, k)
 		default:
 			return nil, sdk.ErrUnknownRequest("Unknown truchain query endpoint: categories/" + path[0])
 		}
@@ -47,6 +50,16 @@ func queryCategoryByID(ctx sdk.Context, req abci.RequestQuery, k ReadKeeper) (re
 	}
 
 	return mustMarshal(category), nil
+}
+
+func queryAllCategories(ctx sdk.Context, k ReadKeeper) (res []byte, err sdk.Error) {
+	categories, err := k.GetAllCategories(ctx)
+
+	if err != nil {
+		return
+	}
+
+	return mustMarshal(categories), nil
 }
 
 func unmarshalQueryParams(req abci.RequestQuery, params interface{}) (sdkErr sdk.Error) {
