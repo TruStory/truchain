@@ -39,7 +39,7 @@ type Keeper struct {
 	queueKey       sdk.StoreKey // queue of unexpired active
 	activeQueueKey sdk.StoreKey // queue of started games
 	storyKeeper    story.WriteKeeper
-	backingKeeper  backing.ReadKeeper
+	backingKeeper  backing.WriteKeeper
 	bankKeeper     bank.Keeper
 }
 
@@ -49,7 +49,7 @@ func NewKeeper(
 	queueKey sdk.StoreKey,
 	activeQueueKey sdk.StoreKey,
 	storyKeeper story.WriteKeeper,
-	backingKeeper backing.ReadKeeper,
+	backingKeeper backing.WriteKeeper,
 	bankKeeper bank.Keeper,
 	codec *amino.Codec) Keeper {
 
@@ -132,43 +132,42 @@ func (k Keeper) Game(ctx sdk.Context, id int64) (game Game, err sdk.Error) {
 func (k Keeper) RegisterChallenge(
 	ctx sdk.Context, gameID int64, amount sdk.Coin) (err sdk.Error) {
 
+	params := DefaultParams()
+
 	game, err := k.Game(ctx, gameID)
 	if err != nil {
-		return
+		return err
 	}
 
 	// add amount to threshold pool
 	game.ChallengePool = game.ChallengePool.Plus(amount)
 	k.update(ctx, game)
 
-	// TODO: calculate challenge threshold amount (based on total backings)
-	//
-	// totalBackingAmount, err := k.backingKeeper.TotalBacking(ctx, storyID)
-	// if err != nil {
-	//  return
-	// }
-
-	// if total backings is zero, start game if challenger meets min stake
-
-	if game.Started() {
-		err = k.storyKeeper.StartGame(ctx, game.StoryID)
-		if err != nil {
-			return err
-		}
-
-		// set end time = block time + voting period
-		game.EndTime = ctx.BlockHeader().Time.Add(DefaultParams().VotingPeriod)
-
-		// push game id onto active game queue that will get checked on each tick
-		activeQueueStore := ctx.KVStore(k.activeQueueKey)
-		q := queue.NewQueue(k.GetCodec(), activeQueueStore)
-		q.Push(game.ID)
-
-		// update existing game in KVStore
-		k.set(ctx, game)
+	// get the total of all backings on story
+	totalBackingAmount, err := k.backingKeeper.TotalBacking(ctx, game.StoryID)
+	if err != nil {
+		return err
 	}
 
-	return
+	// see if game can be started based on challenge threshold
+	if totalBackingAmount.IsZero() {
+		// we have zero backers
+		// start game if challenge pool meets min challenge stake
+		if game.ChallengePool.Amount.GT(params.MinChallengeStake) {
+			k.start(ctx, &game)
+		}
+	} else {
+		// we have backers
+		// calculate challenge threshold amount (based on total backings)
+		threshold := challengeThreshold(totalBackingAmount)
+
+		// start game if challenge pool meets threshold
+		if game.ChallengePool.Amount.GT(threshold) {
+			k.start(ctx, &game)
+		}
+	}
+
+	return nil
 }
 
 // RegisterVote increments the voter quorum and starts game if possible
@@ -179,7 +178,7 @@ func (k Keeper) RegisterVote(ctx sdk.Context, gameID int64) (err sdk.Error) {
 		return
 	}
 
-	if !game.Started() {
+	if !game.Started {
 		return ErrNotStarted(gameID)
 	}
 
@@ -200,6 +199,28 @@ func (k Keeper) set(ctx sdk.Context, game Game) {
 		k.GetCodec().MustMarshalBinaryLengthPrefixed(game))
 }
 
+// start registers that a validation game has started
+func (k Keeper) start(ctx sdk.Context, game *Game) (err sdk.Error) {
+	err = k.storyKeeper.StartGame(ctx, game.StoryID)
+	if err != nil {
+		return
+	}
+
+	// set end time = block time + voting period
+	game.EndTime = ctx.BlockHeader().Time.Add(DefaultParams().VotingPeriod)
+	game.Started = true
+
+	// push game id onto active game queue that will get checked on each tick
+	activeQueueStore := ctx.KVStore(k.activeQueueKey)
+	q := queue.NewQueue(k.GetCodec(), activeQueueStore)
+	q.Push(game.ID)
+
+	// update existing game in KVStore
+	k.set(ctx, *game)
+
+	return
+}
+
 // update updates the `Game` object
 func (k Keeper) update(ctx sdk.Context, game Game) {
 
@@ -210,9 +231,17 @@ func (k Keeper) update(ctx sdk.Context, game Game) {
 		ExpiresTime:   game.ExpiresTime,
 		EndTime:       game.EndTime,
 		ChallengePool: game.ChallengePool,
+		Started:       game.Started,
 		VoteQuorum:    game.VoteQuorum,
 		Timestamp:     game.Timestamp,
 	}
 
 	k.set(ctx, newGame)
+}
+
+func challengeThreshold(totalBackingAmount sdk.Int) sdk.Int {
+	params := DefaultParams()
+
+	totalBackingDec := sdk.NewDecFromInt(totalBackingAmount)
+	return totalBackingDec.Mul(params.ChallengeThreshold).RoundInt()
 }
