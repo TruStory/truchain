@@ -11,6 +11,7 @@ type ReadKeeper interface {
 	app.ReadKeeper
 
 	GetCategory(ctx sdk.Context, id int64) (Category, sdk.Error)
+	GetAllCategories(ctx sdk.Context) ([]Category, sdk.Error)
 }
 
 // WriteKeeper defines a module interface that facilities write only access
@@ -78,6 +79,17 @@ func (k Keeper) GetCategory(ctx sdk.Context, id int64) (cat Category, err sdk.Er
 	}
 	k.GetCodec().MustUnmarshalBinaryLengthPrefixed(val, &cat)
 
+	return
+}
+
+// GetAllCategories gets the category with the given id from the key-value store
+func (k Keeper) GetAllCategories(ctx sdk.Context) (cats []Category, err sdk.Error) {
+	cat := Category{}
+	err = k.Each(ctx, func(val []byte) bool {
+		k.GetCodec().MustUnmarshalBinaryLengthPrefixed(val, &cat)
+		cats = append(cats, cat)
+		return true
+	})
 	return
 }
 
