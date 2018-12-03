@@ -18,7 +18,7 @@ import (
 	"github.com/tendermint/tendermint/libs/log"
 )
 
-func mockDB() (sdk.Context, Keeper, story.Keeper, c.Keeper, bank.Keeper) {
+func mockDB() (sdk.Context, Keeper, c.Keeper) {
 	db := dbm.NewMemDB()
 
 	accKey := sdk.NewKVStoreKey("acc")
@@ -57,7 +57,7 @@ func mockDB() (sdk.Context, Keeper, story.Keeper, c.Keeper, bank.Keeper) {
 
 	k := NewKeeper(gameKey, gameQueueKey, activeGameQueueKey, sk, backingKeeper, bankKeeper, codec)
 
-	return ctx, k, sk, ck, bankKeeper
+	return ctx, k, ck
 }
 
 func createFakeCategory(ctx sdk.Context, ck c.WriteKeeper) c.Category {
@@ -70,7 +70,7 @@ func createFakeCategory(ctx sdk.Context, ck c.WriteKeeper) c.Category {
 	return cat
 }
 
-func createFakeStory(ctx sdk.Context, sk story.Keeper, ck c.WriteKeeper) int64 {
+func createFakeStory(ctx sdk.Context, sk story.WriteKeeper, ck c.WriteKeeper) int64 {
 	body := "Body of story."
 	cat := createFakeCategory(ctx, ck)
 	creator := sdk.AccAddress([]byte{1, 2})
