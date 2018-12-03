@@ -56,20 +56,20 @@ func (g Game) Expired(time time.Time) bool {
 
 // Params holds default parameters for a game
 type Params struct {
-	ChallengeThreshold sdk.Dec       // % backings at which game begins
-	MinChallengeStake  sdk.Int       // min amount required to challenge
-	Expires            time.Duration // time to expire if threshold not met
-	VotingPeriod       time.Duration // length of challenge game / voting period
-	VoteQuorum         int64         // num voters required
+	ChallengeToBackingRatio sdk.Dec       // % backings at which game begins
+	MinChallengeStake       sdk.Int       // min amount required to challenge
+	Expires                 time.Duration // time to expire if threshold not met
+	VotingPeriod            time.Duration // length of challenge game / voting period
+	VoteQuorum              int64         // num voters required
 }
 
 // DefaultParams creates a new MsgParams type with defaults
 func DefaultParams() Params {
 	return Params{
-		ChallengeThreshold: sdk.NewDecWithPrec(33, 2), // 33%
-		MinChallengeStake:  sdk.NewInt(10),
-		Expires:            10 * 24 * time.Hour,
-		VotingPeriod:       1 * 24 * time.Hour,
-		VoteQuorum:         7,
+		ChallengeToBackingRatio: sdk.NewDecWithPrec(33, 2), // 33%
+		MinChallengeStake:       sdk.NewInt(10),
+		Expires:                 10 * 24 * time.Hour,
+		VotingPeriod:            1 * 24 * time.Hour,
+		VoteQuorum:              7,
 	}
 }
