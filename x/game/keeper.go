@@ -246,5 +246,5 @@ func challengeThreshold(totalBackingAmount sdk.Int) sdk.Int {
 	params := DefaultParams()
 
 	totalBackingDec := sdk.NewDecFromInt(totalBackingAmount)
-	return totalBackingDec.Mul(params.ChallengeThreshold).RoundInt()
+	return totalBackingDec.Mul(params.ChallengeToBackingRatio).RoundInt()
 }
