@@ -14,6 +14,7 @@ import (
 type ReadKeeper interface {
 	GetCodec() *amino.Codec
 	GetStoreKey() sdk.StoreKey
+	Each(sdk.Context, func([]byte) bool) sdk.Error
 }
 
 // WriteKeeper defines an interface for read/write operations on a KVStore
@@ -68,6 +69,26 @@ func (k Keeper) GetNextID(ctx sdk.Context) (id int64) {
 	store.Set(lenKey, bz)
 
 	return nextID
+}
+
+// Each calls `fn` for each record in a store. Iteration will stop if `fn` returns false
+func (k Keeper) Each(ctx sdk.Context, fn func([]byte) bool) (err sdk.Error) {
+	var val []byte
+	store := k.GetStore(ctx)
+	iter := store.Iterator(nil, nil)
+
+	for iter.Valid() {
+		val = iter.Value()
+		if len(val) > 1 {
+			if fn(val) == false {
+				break
+			}
+		}
+		iter.Next()
+	}
+
+	iter.Close()
+	return
 }
 
 // GetIDKey returns the key for a given index
