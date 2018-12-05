@@ -55,6 +55,21 @@ func TestInValidCreatorSubmitStoryMsg(t *testing.T) {
 	assert.Equal(t, sdk.CodeType(7), err.Code(), err.Error())
 }
 
+func TestInValidSourceSubmitStoryMsg(t *testing.T) {
+	validBody := "This is a valid story body @shanev amirite?"
+	validCategoryID := int64(1)
+	validCreator := sdk.AccAddress([]byte{1, 2})
+	invalidSource := ""
+	validStoryType := Default
+	validEvidence := []string{"http://shanesbrain.net"}
+	validArgument := ""
+
+	msg := NewSubmitStoryMsg(validArgument, validBody, validCategoryID, validCreator, validEvidence, invalidSource, validStoryType)
+	err := msg.ValidateBasic()
+
+	assert.Equal(t, sdk.CodeType(708), err.Code(), err.Error())
+}
+
 // ============================================================================
 
 func TestValidAddEvidencetMsg(t *testing.T) {
