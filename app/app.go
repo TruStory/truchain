@@ -236,6 +236,10 @@ func (app *TruChain) BeginBlocker(ctx sdk.Context, req abci.RequestBeginBlock) a
 	app.blockCtx = &ctx
 	app.blockHeader = req.Header
 
+	if params.Features["bootstrap"] {
+		loadTestDB(ctx, app.storyKeeper)
+	}
+
 	if !(app.apiStarted) {
 		go app.startAPI()
 		app.apiStarted = true
