@@ -6,12 +6,11 @@ import (
 	"fmt"
 	"math/rand"
 
-	"github.com/TruStory/truchain/x/game"
-
 	"github.com/TruStory/truchain/x/category"
+	"github.com/TruStory/truchain/x/game"
 	"github.com/TruStory/truchain/x/story"
 	"github.com/TruStory/truchain/x/users"
-	"github.com/tendermint/go-amino"
+	amino "github.com/tendermint/go-amino"
 )
 
 func (ta *TruAPI) categoryStoriesResolver(_ context.Context, q category.Category) []story.Story {
