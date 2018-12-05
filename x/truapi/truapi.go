@@ -6,6 +6,7 @@ import (
 
 	"github.com/TruStory/truchain/x/category"
 	"github.com/TruStory/truchain/x/chttp"
+	"github.com/TruStory/truchain/x/game"
 	"github.com/TruStory/truchain/x/graphql"
 	"github.com/TruStory/truchain/x/story"
 	"github.com/TruStory/truchain/x/users"
@@ -65,6 +66,12 @@ func (ta *TruAPI) RegisterResolvers() {
 		"updatedTime": func(ctx context.Context, q story.Evidence) string { return q.Timestamp.UpdatedTime.String() },
 	})
 
+	ta.GraphQLClient.RegisterObjectResolver("Game", game.Game{}, map[string]interface{}{
+		"id":              func(_ context.Context, q game.Game) int64 { return q.ID },
+		"creator":         func(ctx context.Context, q game.Game) users.User { return getUser(ctx, q.Creator) },
+		"challengeAmount": func(_ context.Context, q game.Game) string { return q.ChallengePool.Amount.String() },
+	})
+
 	ta.GraphQLClient.RegisterQueryResolver("story", ta.storyResolver)
 	ta.GraphQLClient.RegisterObjectResolver("Story", story.Story{}, map[string]interface{}{
 		"id":       func(_ context.Context, q story.Story) int64 { return q.ID },
@@ -72,6 +79,7 @@ func (ta *TruAPI) RegisterResolvers() {
 		"creator":  func(ctx context.Context, q story.Story) users.User { return getUser(ctx, q.Creator) },
 		"source":   func(ctx context.Context, q story.Story) string { return q.Source.String() },
 		"evidence": func(ctx context.Context, q story.Story) []story.Evidence { return q.Evidence },
+		"game":     ta.gameResolver,
 	})
 
 	ta.GraphQLClient.RegisterQueryResolver("users", ta.usersResolver)
