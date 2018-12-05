@@ -5,6 +5,8 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"github.com/TruStory/truchain/x/game"
+
 	"github.com/TruStory/truchain/x/category"
 	"github.com/TruStory/truchain/x/story"
 	"github.com/TruStory/truchain/x/users"
@@ -104,6 +106,25 @@ func (ta *TruAPI) usersResolver(ctx context.Context, q users.QueryUsersByAddress
 	}
 
 	return *u
+}
+
+func (ta *TruAPI) gameResolver(_ context.Context, q story.Story) game.Game {
+	res := ta.RunQuery("games/id", q.GameID)
+
+	if res.Code != 0 {
+		fmt.Println("Resolver err: ", res)
+		return game.Game{}
+	}
+
+	g := new(game.Game)
+
+	err := amino.UnmarshalJSON(res.Value, g)
+
+	if err != nil {
+		panic(err)
+	}
+
+	return *g
 }
 
 func (ta *TruAPI) twitterProfileResolver(ctx context.Context, q users.User) users.TwitterProfile {
