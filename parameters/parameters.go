@@ -42,9 +42,11 @@ var Fee = sdk.Coins{
 // Feature flags
 const (
 	FeeFlag = iota
+	BootstrapFlag
 )
 
 // Features sets flags on features to turn on/off during testnet
 var Features = map[int]bool{
-	FeeFlag: false,
+	FeeFlag:       false,
+	BootstrapFlag: true,
 }
