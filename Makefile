@@ -48,7 +48,11 @@ set_registrar:
 	mkdir -p $(HOME)/.truchaind
 	cp $(CHAIN_DIR)/registrar.key $(HOME)/.truchaind/registrar.key
 
-test: set_registrar go_test
+set_seed_data:
+	mkdir -p $(HOME)/.truchaind
+	cp $(CHAIN_DIR)/bootstrap.csv $(HOME)/.truchaind/bootstrap.csv
+
+test: set_registrar set_seed_data go_test
 
 test_cover:
 	go test $(PACKAGES) -v -timeout 30m -race -covermode=atomic
