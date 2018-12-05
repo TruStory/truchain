@@ -55,10 +55,13 @@ func handleSubmitStoryMsg(ctx sdk.Context, k WriteKeeper, msg SubmitStoryMsg) sd
 		evidence = append(evidence, e)
 	}
 
-	argument := Argument{
-		Creator:   msg.Creator,
-		Body:      msg.Argument,
-		Timestamp: app.NewTimestamp(ctx.BlockHeader()),
+	argument := Argument{}
+	if len(msg.Argument) > 0 {
+		argument = Argument{
+			Creator:   msg.Creator,
+			Body:      msg.Argument,
+			Timestamp: app.NewTimestamp(ctx.BlockHeader()),
+		}
 	}
 
 	id, err := k.NewStory(
