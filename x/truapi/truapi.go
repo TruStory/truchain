@@ -58,11 +58,20 @@ func (ta *TruAPI) RegisterResolvers() {
 		"creator": func(ctx context.Context, q category.Category) users.User { return getUser(ctx, q.Creator) },
 	})
 
+	ta.GraphQLClient.RegisterObjectResolver("Evidence", story.Evidence{}, map[string]interface{}{
+		"creator":     func(ctx context.Context, q story.Evidence) users.User { return getUser(ctx, q.Creator) },
+		"url":         func(ctx context.Context, q story.Evidence) string { return q.URL.String() },
+		"createdTime": func(ctx context.Context, q story.Evidence) string { return q.Timestamp.CreatedTime.String() },
+		"updatedTime": func(ctx context.Context, q story.Evidence) string { return q.Timestamp.UpdatedTime.String() },
+	})
+
 	ta.GraphQLClient.RegisterQueryResolver("story", ta.storyResolver)
 	ta.GraphQLClient.RegisterObjectResolver("Story", story.Story{}, map[string]interface{}{
 		"id":       func(_ context.Context, q story.Story) int64 { return q.ID },
 		"category": ta.storyCategoryResolver,
 		"creator":  func(ctx context.Context, q story.Story) users.User { return getUser(ctx, q.Creator) },
+		"source":   func(ctx context.Context, q story.Story) string { return q.Source.String() },
+		"evidence": func(ctx context.Context, q story.Story) []story.Evidence { return q.Evidence },
 	})
 
 	ta.GraphQLClient.RegisterQueryResolver("users", ta.usersResolver)
