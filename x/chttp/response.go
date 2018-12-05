@@ -15,8 +15,8 @@ type Response interface {
 // JSONResponse is an implementation of Response which encodes the required data as JSON
 type JSONResponse struct {
 	status int
-	Body   *json.RawMessage `json:"data"`
-	Err    string           `json:"error"`
+	Body   *json.RawMessage `json:"data,omitempty"`
+	Err    string           `json:"error,omitempty"`
 }
 
 // NewResponse returns a JSONResponse with the given status/data/err
