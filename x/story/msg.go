@@ -10,12 +10,12 @@ import (
 
 // SubmitStoryMsg defines a message to submit a story
 type SubmitStoryMsg struct {
-	Argument   string         `json:"argument"`
+	Argument   string         `json:"argument,omitempty"`
 	Body       string         `json:"body"`
 	CategoryID int64          `json:"category_id"`
 	Creator    sdk.AccAddress `json:"creator"`
 	Source     string         `json:"source"`
-	Evidence   []string       `json:"evidence"`
+	Evidence   []string       `json:"evidence,omitempty"`
 	StoryType  Type           `json:"story_type"`
 }
 
@@ -54,9 +54,6 @@ func (msg SubmitStoryMsg) GetSignBytes() []byte {
 
 // ValidateBasic implements Msg
 func (msg SubmitStoryMsg) ValidateBasic() sdk.Error {
-	if len(msg.Argument) == 0 {
-		return ErrInvalidStoryArgument(msg.Argument)
-	}
 	if len(msg.Body) == 0 {
 		return ErrInvalidStoryBody(msg.Body)
 	}
@@ -68,6 +65,9 @@ func (msg SubmitStoryMsg) ValidateBasic() sdk.Error {
 	}
 	if msg.StoryType.IsValid() == false {
 		return ErrInvalidStoryType(msg.StoryType.String())
+	}
+	if len(msg.Source) == 0 {
+		return ErrInvalidSourceURL(msg.Source)
 	}
 	return nil
 }
