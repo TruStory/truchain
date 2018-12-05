@@ -50,7 +50,7 @@ func (ta *TruAPI) RegisterResolvers() {
 		return users.User{}
 	}
 
-	ta.GraphQLClient.RegisterQueryResolver("allCategories", ta.allCategoriesResolver)
+	ta.GraphQLClient.RegisterQueryResolver("categories", ta.allCategoriesResolver)
 	ta.GraphQLClient.RegisterQueryResolver("category", ta.categoryResolver)
 	ta.GraphQLClient.RegisterObjectResolver("Category", category.Category{}, map[string]interface{}{
 		"id":      func(_ context.Context, q category.Category) int64 { return q.ID },
