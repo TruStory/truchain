@@ -181,7 +181,9 @@ func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *T
 	app.SetAnteHandler(auth.NewAnteHandler(app.accountKeeper, app.feeCollectionKeeper))
 
 	// set fee for spam prevention and validator rewards
-	app.SetMinimumFees(params.Fee)
+	if params.Features[params.FeeFlag] {
+		app.SetMinimumFees(params.Fee)
+	}
 
 	// mount the multistore and load the latest state
 	app.MountStoresIAVL(

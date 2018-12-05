@@ -38,3 +38,13 @@ var RegistrationFee = auth.StdFee{
 var Fee = sdk.Coins{
 	sdk.Coin{Amount: sdk.NewInt(10), Denom: StakeDenom},
 }
+
+// Feature flags
+const (
+	FeeFlag = iota
+)
+
+// Features sets flags on features to turn on/off during testnet
+var Features = map[int]bool{
+	FeeFlag: false,
+}
