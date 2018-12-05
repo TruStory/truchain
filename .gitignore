@@ -10,6 +10,7 @@ report.html
 write-file-atomic-*
 .chain/data
 .chain/config/addrbook.json
+.chain/config/priv_validator.json
 dev/api_spec/.chain
 
 # Dependencies
