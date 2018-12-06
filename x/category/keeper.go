@@ -1,6 +1,8 @@
 package category
 
 import (
+	"sort"
+
 	app "github.com/TruStory/truchain/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	amino "github.com/tendermint/go-amino"
@@ -38,7 +40,15 @@ func NewKeeper(storeKey sdk.StoreKey, codec *amino.Codec) Keeper {
 func (k Keeper) InitCategories(
 	ctx sdk.Context, creator sdk.AccAddress, categories map[string]string) (err sdk.Error) {
 
-	for slug, title := range categories {
+	var keys []string
+	for key := range categories {
+		keys = append(keys, key)
+	}
+	sort.Strings(keys)
+
+	for _, key := range keys {
+		title := categories[key]
+		slug := key
 		_, err = k.NewCategory(ctx, title, creator, slug, "")
 		if err != nil {
 			return err
