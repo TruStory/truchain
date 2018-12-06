@@ -8,6 +8,10 @@ import (
 	"path/filepath"
 	"time"
 
+	"github.com/TruStory/truchain/x/challenge"
+
+	"github.com/TruStory/truchain/x/backing"
+
 	tru "github.com/TruStory/truchain/types"
 	"github.com/TruStory/truchain/x/chttp"
 	"github.com/TruStory/truchain/x/story"
@@ -44,7 +48,7 @@ func createUser(
 		panic(err)
 	}
 
-	coins, _ := sdk.ParseCoins("5000000trusteak")
+	coins, _ := sdk.ParseCoins("5000000trusteak, 3000000btc, 1000000shitcoin")
 
 	err = bacc.SetCoins(coins)
 	if err != nil {
@@ -97,7 +101,9 @@ func createStory(
 func loadTestDB(
 	ctx sdk.Context,
 	storyKeeper story.WriteKeeper,
-	accountKeeper auth.AccountKeeper) {
+	accountKeeper auth.AccountKeeper,
+	backingKeeper backing.WriteKeeper,
+	challengeKeeper challenge.WriteKeeper) {
 
 	rootdir := viper.GetString(cli.HomeFlag)
 	if rootdir == "" {
@@ -118,4 +124,24 @@ func loadTestDB(
 	for _, record := range records {
 		createStory(ctx, storyKeeper, addr, record[0], record[1], record[2], record[3])
 	}
+
+	// get the 1st story
+	story, _ := storyKeeper.Story(ctx, 1)
+
+	// back it
+	amount, _ := sdk.ParseCoin("1000trusteak")
+	duration := 30 * 24 * time.Hour
+	_, err = backingKeeper.Create(ctx, story.ID, amount, addr, duration)
+	if err != nil {
+		panic(err)
+	}
+
+	// challenge it
+	// amount, _ := sdk.ParseCoin("1000trusteak")
+	// argument := "This is wrong"
+	// evidence := []url.URL{}
+	// _, err = challengeKeeper.Create(ctx, story.ID, amount, argument, addr, evidence)
+	// if err != nil {
+	// 	panic(err)
+	// }
 }
