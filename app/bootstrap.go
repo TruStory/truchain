@@ -8,6 +8,8 @@ import (
 	"path/filepath"
 	"time"
 
+	"github.com/TruStory/truchain/x/game"
+
 	"github.com/TruStory/truchain/x/challenge"
 
 	"github.com/TruStory/truchain/x/backing"
@@ -103,7 +105,8 @@ func loadTestDB(
 	storyKeeper story.WriteKeeper,
 	accountKeeper auth.AccountKeeper,
 	backingKeeper backing.WriteKeeper,
-	challengeKeeper challenge.WriteKeeper) {
+	challengeKeeper challenge.WriteKeeper,
+	gameKeeper game.WriteKeeper) {
 
 	rootdir := viper.GetString(cli.HomeFlag)
 	if rootdir == "" {
@@ -137,11 +140,17 @@ func loadTestDB(
 	}
 
 	// challenge it
-	// amount, _ := sdk.ParseCoin("1000trusteak")
-	// argument := "This is wrong"
-	// evidence := []url.URL{}
-	// _, err = challengeKeeper.Create(ctx, story.ID, amount, argument, addr, evidence)
+	amount, _ = sdk.ParseCoin("1000trusteak")
+	argument := "This is wrong"
+	evidence := []url.URL{}
+	_, err = challengeKeeper.Create(ctx, story.ID, amount, argument, addr, evidence)
+	if err != nil {
+		panic(err)
+	}
+
+	// game, err := gameKeeper.Game(ctx, int64(1))
 	// if err != nil {
 	// 	panic(err)
 	// }
+	// spew.Dump(game)
 }
