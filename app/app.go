@@ -48,17 +48,17 @@ type TruChain struct {
 	codec *codec.Codec
 
 	// keys to access the multistore
-	keyMain            *sdk.KVStoreKey
 	keyAccount         *sdk.KVStoreKey
-	keyIBC             *sdk.KVStoreKey
-	keyStory           *sdk.KVStoreKey
-	keyCategory        *sdk.KVStoreKey
 	keyBacking         *sdk.KVStoreKey
+	keyCategory        *sdk.KVStoreKey
 	keyChallenge       *sdk.KVStoreKey
 	keyFee             *sdk.KVStoreKey
 	keyGame            *sdk.KVStoreKey
 	keyGameQueue       *sdk.KVStoreKey
-	keyActiveGameQueue *sdk.KVStoreKey
+	keyGameQueueActive *sdk.KVStoreKey
+	keyIBC             *sdk.KVStoreKey
+	keyMain            *sdk.KVStoreKey
+	keyStory           *sdk.KVStoreKey
 	keyVote            *sdk.KVStoreKey
 
 	// manage getting and setting accounts
@@ -121,7 +121,7 @@ func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *T
 		keyFee:             sdk.NewKVStoreKey("collectedFees"),
 		keyGame:            sdk.NewKVStoreKey("game"),
 		keyGameQueue:       sdk.NewKVStoreKey("gameQueue"),
-		keyActiveGameQueue: sdk.NewKVStoreKey("activeGameQueue"),
+		keyGameQueueActive: sdk.NewKVStoreKey("activeGameQueue"),
 		keyVote:            sdk.NewKVStoreKey("vote"),
 		api:                nil,
 		apiStarted:         false,
@@ -148,13 +148,13 @@ func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *T
 		app.keyBacking, app.storyKeeper, app.coinKeeper,
 		app.categoryKeeper, codec)
 	app.gameKeeper = game.NewKeeper(
-		app.keyGame, app.keyGameQueue, app.keyActiveGameQueue, app.storyKeeper,
+		app.keyGame, app.keyGameQueue, app.keyGameQueueActive, app.storyKeeper,
 		app.backingKeeper, app.coinKeeper, codec)
 	app.challengeKeeper = challenge.NewKeeper(
 		app.keyChallenge, app.coinKeeper, app.gameKeeper,
 		app.storyKeeper, codec)
 	app.voteKeeper = vote.NewKeeper(
-		app.keyVote, app.keyActiveGameQueue, app.accountKeeper, app.backingKeeper,
+		app.keyVote, app.keyGameQueueActive, app.accountKeeper, app.backingKeeper,
 		app.challengeKeeper, app.storyKeeper, app.gameKeeper, app.coinKeeper, codec)
 
 	// register message routes for modifying state
@@ -188,9 +188,18 @@ func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *T
 
 	// mount the multistore and load the latest state
 	app.MountStoresIAVL(
-		app.keyMain, app.keyAccount, app.keyIBC, app.keyFee, app.keyGameQueue,
-		app.keyActiveGameQueue, app.keyBacking, app.keyCategory,
-		app.keyChallenge, app.keyStory, app.keyVote)
+		app.keyAccount,
+		app.keyBacking,
+		app.keyCategory,
+		app.keyChallenge,
+		app.keyFee,
+		app.keyGame,
+		app.keyGameQueue,
+		app.keyGameQueueActive,
+		app.keyIBC,
+		app.keyMain,
+		app.keyStory,
+		app.keyVote)
 	err := app.LoadLatestVersion(app.keyMain)
 
 	if err != nil {

@@ -40,6 +40,7 @@ func NewKeeper(storeKey sdk.StoreKey, codec *amino.Codec) Keeper {
 func (k Keeper) InitCategories(
 	ctx sdk.Context, creator sdk.AccAddress, categories map[string]string) (err sdk.Error) {
 
+	// sort keys to make category creation deterministic
 	var keys []string
 	for key := range categories {
 		keys = append(keys, key)

@@ -57,6 +57,7 @@ func (app *TruChain) initChainer(ctx sdk.Context, req abci.RequestInitChain) abc
 			app.accountKeeper,
 			app.backingKeeper,
 			app.challengeKeeper,
+			app.gameKeeper,
 		)
 	}
 
