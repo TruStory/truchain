@@ -52,7 +52,12 @@ func (app *TruChain) initChainer(ctx sdk.Context, req abci.RequestInitChain) abc
 	}
 
 	if params.Features[params.BootstrapFlag] {
-		loadTestDB(ctx, app.storyKeeper, app.accountKeeper)
+		loadTestDB(
+			ctx, app.storyKeeper,
+			app.accountKeeper,
+			app.backingKeeper,
+			app.challengeKeeper,
+		)
 	}
 
 	return abci.ResponseInitChain{}
