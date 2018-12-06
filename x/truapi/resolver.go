@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"math/rand"
 
 	"github.com/TruStory/truchain/x/category"
 	"github.com/TruStory/truchain/x/story"
@@ -110,9 +111,10 @@ func (ta *TruAPI) twitterProfileResolver(ctx context.Context, q users.User) user
 	addr := q.Address
 	fmt.Println("Mocking ('fetching') Twitter profile for address: " + addr)
 	return users.TwitterProfile{
-		ID:       "1234567890123456789",
-		Username: "someone",
-		FullName: "Some Person",
-		Address:  addr,
+		ID:        "1234567890123456789",
+		Username:  "someone",
+		FullName:  "Some Person",
+		Address:   addr,
+		AvatarURI: fmt.Sprintf("https://randomuser.me/api/portraits/thumb/men/%d.jpg", rand.Intn(50)+1),
 	}
 }
