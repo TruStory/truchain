@@ -8,14 +8,11 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/TruStory/truchain/x/game"
-
-	"github.com/TruStory/truchain/x/challenge"
-
-	"github.com/TruStory/truchain/x/backing"
-
 	tru "github.com/TruStory/truchain/types"
+	"github.com/TruStory/truchain/x/backing"
+	"github.com/TruStory/truchain/x/challenge"
 	"github.com/TruStory/truchain/x/chttp"
+	"github.com/TruStory/truchain/x/game"
 	"github.com/TruStory/truchain/x/story"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth"
