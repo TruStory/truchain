@@ -173,7 +173,8 @@ func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *T
 		AddRoute(story.QueryPath, story.NewQuerier(app.storyKeeper)).
 		AddRoute(category.QueryPath, category.NewQuerier(app.categoryKeeper)).
 		AddRoute(users.QueryPath, users.NewQuerier(codec, app.accountKeeper)).
-		AddRoute(game.QueryPath, game.NewQuerier(app.gameKeeper))
+		AddRoute(game.QueryPath, game.NewQuerier(app.gameKeeper)).
+		AddRoute(backing.QueryPath, backing.NewQuerier(app.backingKeeper))
 
 	// perform initialization logic
 	app.SetInitChainer(app.initChainer)

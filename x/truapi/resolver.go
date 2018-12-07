@@ -127,6 +127,25 @@ func (ta *TruAPI) gameResolver(_ context.Context, q story.Story) game.Game {
 	return *g
 }
 
+// func (ta *TruAPI) backingResolver(_ context.Context, q story.Story) backing.Backing {
+// 	res := ta.RunQuery("games/id", game.QueryGameByIDParams{ID: q.GameID})
+
+// 	if res.Code != 0 {
+// 		fmt.Println("Resolver err: ", res)
+// 		return game.Game{}
+// 	}
+
+// 	g := new(game.Game)
+
+// 	err := json.Unmarshal(res.Value, g)
+
+// 	if err != nil {
+// 		panic(err)
+// 	}
+
+// 	return *g
+// }
+
 func (ta *TruAPI) twitterProfileResolver(ctx context.Context, q users.User) users.TwitterProfile {
 	addr := q.Address
 	fmt.Println("Mocking ('fetching') Twitter profile for address: " + addr)
