@@ -51,6 +51,11 @@ func (ta *TruAPI) RegisterResolvers() {
 		return users.User{}
 	}
 
+	ta.GraphQLClient.RegisterObjectResolver("Argument", story.Argument{}, map[string]interface{}{
+		"creator":     func(ctx context.Context, q story.Argument) users.User { return getUser(ctx, q.Creator) },
+		"createdTime": func(ctx context.Context, q story.Argument) string { return q.Timestamp.CreatedTime.String() },
+	})
+
 	ta.GraphQLClient.RegisterQueryResolver("categories", ta.allCategoriesResolver)
 	ta.GraphQLClient.RegisterQueryResolver("category", ta.categoryResolver)
 	ta.GraphQLClient.RegisterObjectResolver("Category", category.Category{}, map[string]interface{}{
@@ -78,6 +83,7 @@ func (ta *TruAPI) RegisterResolvers() {
 		"category": ta.storyCategoryResolver,
 		"creator":  func(ctx context.Context, q story.Story) users.User { return getUser(ctx, q.Creator) },
 		"source":   func(ctx context.Context, q story.Story) string { return q.Source.String() },
+		"argument": func(ctx context.Context, q story.Story) []story.Argument { return q.Arguments },
 		"evidence": func(ctx context.Context, q story.Story) []story.Evidence { return q.Evidence },
 		"game":     ta.gameResolver,
 	})
