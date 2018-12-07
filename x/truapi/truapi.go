@@ -84,6 +84,7 @@ func (ta *TruAPI) RegisterResolvers() {
 		"argument": func(ctx context.Context, q story.Story) []story.Argument { return q.Arguments },
 		"evidence": func(ctx context.Context, q story.Story) []story.Evidence { return q.Evidence },
 		"game":     ta.gameResolver,
+		// "backing":  ta.backingResolver,
 	})
 
 	ta.GraphQLClient.RegisterQueryResolver("users", ta.usersResolver)
