@@ -28,8 +28,9 @@ func NewUser(acc auth.Account) User {
 
 // TwitterProfile is the Twitter profile associated with the account with address `Address`
 type TwitterProfile struct {
-	ID       string `json:"id"`
-	Address  string `json:"address"`
-	Username string `json:"username"`
-	FullName string `json:"full_name"`
+	ID        string `json:"id"`
+	Address   string `json:"address"`
+	Username  string `json:"username"`
+	FullName  string `json:"full_name"`
+	AvatarURI string `json:"avatar_uri"`
 }
