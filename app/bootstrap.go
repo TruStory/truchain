@@ -147,10 +147,4 @@ func loadTestDB(
 	if err != nil {
 		panic(err)
 	}
-
-	// game, err := gameKeeper.Game(ctx, int64(1))
-	// if err != nil {
-	// 	panic(err)
-	// }
-	// spew.Dump(game)
 }

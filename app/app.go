@@ -257,6 +257,7 @@ func (app *TruChain) BeginBlocker(ctx sdk.Context, req abci.RequestBeginBlock) a
 // EndBlocker reflects logic to run after all TXs are processed by the
 // application.
 func (app *TruChain) EndBlocker(ctx sdk.Context, _ abci.RequestEndBlock) abci.ResponseEndBlock {
+	// TODO [shanev] https://github.com/TruStory/truchain/issues/185
 	// app.backingKeeper.NewResponseEndBlock(ctx)
 	// app.voteKeeper.NewResponseEndBlock(ctx)
 
