@@ -111,9 +111,6 @@ func (ta *TruAPI) usersResolver(ctx context.Context, q users.QueryUsersByAddress
 func (ta *TruAPI) gameResolver(_ context.Context, q story.Story) game.Game {
 	res := ta.RunQuery("games/id", game.QueryGameByIDParams{ID: q.GameID})
 
-	// spew.Dump(q)
-	// fmt.Printf("GAMEID: %d\n", q.GameID)
-
 	if res.Code != 0 {
 		fmt.Println("Resolver err: ", res)
 		return game.Game{}
@@ -121,7 +118,7 @@ func (ta *TruAPI) gameResolver(_ context.Context, q story.Story) game.Game {
 
 	g := new(game.Game)
 
-	err := amino.UnmarshalJSON(res.Value, g)
+	err := json.Unmarshal(res.Value, g)
 
 	if err != nil {
 		panic(err)
