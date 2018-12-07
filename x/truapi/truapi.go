@@ -77,14 +77,14 @@ func (ta *TruAPI) RegisterResolvers() {
 
 	ta.GraphQLClient.RegisterQueryResolver("story", ta.storyResolver)
 	ta.GraphQLClient.RegisterObjectResolver("Story", story.Story{}, map[string]interface{}{
-		"id":       func(_ context.Context, q story.Story) int64 { return q.ID },
-		"category": ta.storyCategoryResolver,
-		"creator":  func(ctx context.Context, q story.Story) users.User { return getUser(ctx, q.Creator) },
-		"source":   func(ctx context.Context, q story.Story) string { return q.Source.String() },
-		"argument": func(ctx context.Context, q story.Story) []story.Argument { return q.Arguments },
-		"evidence": func(ctx context.Context, q story.Story) []story.Evidence { return q.Evidence },
-		"game":     ta.gameResolver,
-		// "backing":  ta.backingResolver,
+		"id":            func(_ context.Context, q story.Story) int64 { return q.ID },
+		"backingAmount": ta.backingTotalResolver,
+		"category":      ta.storyCategoryResolver,
+		"creator":       func(ctx context.Context, q story.Story) users.User { return getUser(ctx, q.Creator) },
+		"source":        func(ctx context.Context, q story.Story) string { return q.Source.String() },
+		"argument":      func(ctx context.Context, q story.Story) []story.Argument { return q.Arguments },
+		"evidence":      func(ctx context.Context, q story.Story) []story.Evidence { return q.Evidence },
+		"game":          ta.gameResolver,
 	})
 
 	ta.GraphQLClient.RegisterQueryResolver("users", ta.usersResolver)
