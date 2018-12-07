@@ -6,10 +6,12 @@ import (
 	"fmt"
 	"math/rand"
 
+	app "github.com/TruStory/truchain/types"
 	"github.com/TruStory/truchain/x/category"
 	"github.com/TruStory/truchain/x/game"
 	"github.com/TruStory/truchain/x/story"
 	"github.com/TruStory/truchain/x/users"
+	sdk "github.com/cosmos/cosmos-sdk/types"
 	amino "github.com/tendermint/go-amino"
 )
 
@@ -127,24 +129,22 @@ func (ta *TruAPI) gameResolver(_ context.Context, q story.Story) game.Game {
 	return *g
 }
 
-// func (ta *TruAPI) backingResolver(_ context.Context, q story.Story) backing.Backing {
-// 	res := ta.RunQuery("games/id", game.QueryGameByIDParams{ID: q.GameID})
+func (ta *TruAPI) backingTotalResolver(_ context.Context, q story.Story) string {
+	res := ta.RunQuery("backings/totalAmountByStoryID", app.QueryByIDParams{ID: q.ID})
 
-// 	if res.Code != 0 {
-// 		fmt.Println("Resolver err: ", res)
-// 		return game.Game{}
-// 	}
+	if res.Code != 0 {
+		fmt.Println("Resolver err: ", res)
+		return ""
+	}
 
-// 	g := new(game.Game)
+	amount := new(sdk.Int)
+	err := amino.UnmarshalJSON(res.Value, amount)
+	if err != nil {
+		panic(err)
+	}
 
-// 	err := json.Unmarshal(res.Value, g)
-
-// 	if err != nil {
-// 		panic(err)
-// 	}
-
-// 	return *g
-// }
+	return amount.String()
+}
 
 func (ta *TruAPI) twitterProfileResolver(ctx context.Context, q users.User) users.TwitterProfile {
 	addr := q.Address
