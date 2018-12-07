@@ -52,8 +52,7 @@ func (ta *TruAPI) RegisterResolvers() {
 	}
 
 	ta.GraphQLClient.RegisterObjectResolver("Argument", story.Argument{}, map[string]interface{}{
-		"creator":     func(ctx context.Context, q story.Argument) users.User { return getUser(ctx, q.Creator) },
-		"createdTime": func(ctx context.Context, q story.Argument) string { return q.Timestamp.CreatedTime.String() },
+		"creator": func(ctx context.Context, q story.Argument) users.User { return getUser(ctx, q.Creator) },
 	})
 
 	ta.GraphQLClient.RegisterQueryResolver("categories", ta.allCategoriesResolver)
@@ -65,10 +64,8 @@ func (ta *TruAPI) RegisterResolvers() {
 	})
 
 	ta.GraphQLClient.RegisterObjectResolver("Evidence", story.Evidence{}, map[string]interface{}{
-		"creator":     func(ctx context.Context, q story.Evidence) users.User { return getUser(ctx, q.Creator) },
-		"url":         func(ctx context.Context, q story.Evidence) string { return q.URL.String() },
-		"createdTime": func(ctx context.Context, q story.Evidence) string { return q.Timestamp.CreatedTime.String() },
-		"updatedTime": func(ctx context.Context, q story.Evidence) string { return q.Timestamp.UpdatedTime.String() },
+		"creator": func(ctx context.Context, q story.Evidence) users.User { return getUser(ctx, q.Creator) },
+		"url":     func(ctx context.Context, q story.Evidence) string { return q.URL.String() },
 	})
 
 	ta.GraphQLClient.RegisterObjectResolver("Game", game.Game{}, map[string]interface{}{
