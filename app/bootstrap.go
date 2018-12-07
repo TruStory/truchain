@@ -70,8 +70,6 @@ func createStory(
 	evidence string,
 	argument string) int64 {
 
-	ctx = ctx.WithBlockHeader(abci.Header{Time: time.Now().UTC()})
-
 	catID := int64(1)
 	storyType := story.Default
 	sourceURL, _ := url.Parse(source)
@@ -104,6 +102,9 @@ func loadTestDB(
 	backingKeeper backing.WriteKeeper,
 	challengeKeeper challenge.WriteKeeper,
 	gameKeeper game.WriteKeeper) {
+
+	// fake a block time
+	ctx = ctx.WithBlockHeader(abci.Header{Time: time.Now().UTC()})
 
 	rootdir := viper.GetString(cli.HomeFlag)
 	if rootdir == "" {

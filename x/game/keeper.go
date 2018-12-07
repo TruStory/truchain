@@ -209,6 +209,8 @@ func (k Keeper) start(ctx sdk.Context, game *Game) (err sdk.Error) {
 		return
 	}
 
+	// spew.Dump(ctx.BlockHeader())
+
 	// set end time = block time + voting period
 	game.EndTime = ctx.BlockHeader().Time.Add(DefaultParams().VotingPeriod)
 	game.Started = true
