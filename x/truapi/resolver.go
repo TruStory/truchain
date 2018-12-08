@@ -146,6 +146,25 @@ func (ta *TruAPI) backingTotalResolver(_ context.Context, q story.Story) string 
 	return amount.String()
 }
 
+func (ta *TruAPI) challengeThresholdResolver(_ context.Context, q game.Game) string {
+	res := ta.RunQuery("games/challengeThresholdByGameID", app.QueryByIDParams{ID: q.ID})
+
+	if res.Code != 0 {
+		fmt.Println("Resolver err: ", res)
+		return ""
+	}
+
+	amount := new(string)
+	err := json.Unmarshal(res.Value, amount)
+	if err != nil {
+		panic(err)
+	}
+
+	return *amount
+}
+
+// TODO: [shanev/truted] Handle this when working on user profiles
+// https://github.com/TruStory/truchain/issues/196
 func (ta *TruAPI) twitterProfileResolver(ctx context.Context, q users.User) users.TwitterProfile {
 	addr := q.Address
 	fmt.Println("Mocking ('fetching') Twitter profile for address: " + addr)
