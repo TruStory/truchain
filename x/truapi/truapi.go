@@ -69,10 +69,11 @@ func (ta *TruAPI) RegisterResolvers() {
 	})
 
 	ta.GraphQLClient.RegisterObjectResolver("Game", game.Game{}, map[string]interface{}{
-		"id":              func(_ context.Context, q game.Game) int64 { return q.ID },
-		"creator":         func(ctx context.Context, q game.Game) users.User { return getUser(ctx, q.Creator) },
-		"challengeDenom":  func(_ context.Context, q game.Game) string { return q.ChallengePool.Denom },
-		"challengeAmount": func(_ context.Context, q game.Game) string { return q.ChallengePool.Amount.String() },
+		"id":                 func(_ context.Context, q game.Game) int64 { return q.ID },
+		"creator":            func(ctx context.Context, q game.Game) users.User { return getUser(ctx, q.Creator) },
+		"challengeDenom":     func(_ context.Context, q game.Game) string { return q.ChallengePool.Denom },
+		"challengeAmount":    func(_ context.Context, q game.Game) string { return q.ChallengePool.Amount.String() },
+		"challengeThreshold": ta.challengeThresholdResolver,
 	})
 
 	ta.GraphQLClient.RegisterQueryResolver("story", ta.storyResolver)

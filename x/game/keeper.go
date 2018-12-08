@@ -18,6 +18,7 @@ import (
 type ReadKeeper interface {
 	app.ReadKeeper
 
+	ChallengeThreshold(totalBackingAmount sdk.Int) sdk.Int
 	Game(ctx sdk.Context, id int64) (game Game, err sdk.Error)
 }
 
@@ -159,7 +160,7 @@ func (k Keeper) RegisterChallenge(
 	} else {
 		// we have backers
 		// calculate challenge threshold amount (based on total backings)
-		threshold := challengeThreshold(totalBackingAmount)
+		threshold := k.ChallengeThreshold(totalBackingAmount)
 
 		// start game if challenge pool meets threshold
 		if game.ChallengePool.Amount.GT(threshold) {
@@ -192,6 +193,14 @@ func (k Keeper) RegisterVote(ctx sdk.Context, gameID int64) (err sdk.Error) {
 	return
 }
 
+// ChallengeThreshold calculates the challenge threshold
+func (k Keeper) ChallengeThreshold(totalBackingAmount sdk.Int) sdk.Int {
+	params := DefaultParams()
+
+	totalBackingDec := sdk.NewDecFromInt(totalBackingAmount)
+	return totalBackingDec.Mul(params.ChallengeToBackingRatio).RoundInt()
+}
+
 // ============================================================================
 
 // set saves the `Game` in the KVStore
@@ -208,8 +217,6 @@ func (k Keeper) start(ctx sdk.Context, game *Game) (err sdk.Error) {
 	if err != nil {
 		return
 	}
-
-	// spew.Dump(ctx.BlockHeader())
 
 	// set end time = block time + voting period
 	game.EndTime = ctx.BlockHeader().Time.Add(DefaultParams().VotingPeriod)
@@ -242,11 +249,4 @@ func (k Keeper) update(ctx sdk.Context, game Game) {
 	}
 
 	k.set(ctx, newGame)
-}
-
-func challengeThreshold(totalBackingAmount sdk.Int) sdk.Int {
-	params := DefaultParams()
-
-	totalBackingDec := sdk.NewDecFromInt(totalBackingAmount)
-	return totalBackingDec.Mul(params.ChallengeToBackingRatio).RoundInt()
 }
