@@ -42,7 +42,7 @@ type MsgParams struct {
 func DefaultMsgParams() MsgParams {
 	return MsgParams{
 		MinArgumentLength: 10,
-		MaxArgumentLength: 340,
+		MaxArgumentLength: 1000,
 		MinEvidenceCount:  0,
 		MaxEvidenceCount:  10,
 	}
