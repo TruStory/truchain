@@ -15,7 +15,7 @@ func TestValidSubmitStoryMsg(t *testing.T) {
 	validSource := "http://shanesbrain.net"
 	validStoryType := Default
 	validEvidence := []string{"http://shanesbrain.net"}
-	validArgument := "argument"
+	validArgument := "argument body"
 	msg := NewSubmitStoryMsg(validArgument, validBody, validCategoryID, validCreator, validEvidence, validSource, validStoryType)
 	err := msg.ValidateBasic()
 
