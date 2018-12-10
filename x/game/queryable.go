@@ -81,7 +81,7 @@ func queryChallengeThresholdByGameID(
 		return nil, err
 	}
 
-	challengeThresholdAmount := gameKeeper.ChallengeThreshold(totalBackingAmount)
+	challengeThresholdAmount := gameKeeper.ChallengeThreshold(totalBackingAmount.Amount)
 	fmt.Println("CHALLLENGE")
 	spew.Dump(challengeThresholdAmount)
 	amountString := challengeThresholdAmount.String()

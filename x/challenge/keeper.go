@@ -70,7 +70,7 @@ func (k Keeper) Create(
 	}
 
 	// get category coin name
-	coinName, err := k.storyKeeper.CoinName(ctx, storyID)
+	coinName, err := k.storyKeeper.CategoryDenom(ctx, storyID)
 	if err != nil {
 		return
 	}

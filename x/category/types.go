@@ -15,8 +15,8 @@ type Category struct {
 	Timestamp   app.Timestamp  `json:"timestamp"`
 }
 
-// CoinName returns the name of the coin, alias for slug
-func (c Category) CoinName() string {
+// Denom returns the name of the coin, alias for slug
+func (c Category) Denom() string {
 	return c.Slug
 }
 

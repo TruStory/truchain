@@ -118,7 +118,7 @@ func TestTotalBacking(t *testing.T) {
 
 	total, _ := k.TotalBackingAmount(ctx, storyID)
 
-	assert.Equal(t, "10", total.String())
+	assert.Equal(t, "10trudex", total.String())
 }
 
 func TestNewBacking_ErrInsufficientFunds(t *testing.T) {

@@ -22,7 +22,7 @@ type ReadKeeper interface {
 		trueVotes []Backing, falseVotes []Backing, err sdk.Error)
 
 	TotalBackingAmount(
-		ctx sdk.Context, storyID int64) (totalAmount sdk.Int, err sdk.Error)
+		ctx sdk.Context, storyID int64) (totalAmount sdk.Coin, err sdk.Error)
 }
 
 // WriteKeeper defines a module interface that facilities write only access
@@ -226,25 +226,31 @@ func (k Keeper) Tally(
 
 // TotalBackingAmount returns the total of all backings
 func (k Keeper) TotalBackingAmount(ctx sdk.Context, storyID int64) (
-	sdk.Int, sdk.Error) {
+	totalCoin sdk.Coin, err sdk.Error) {
 
 	totalAmount := sdk.ZeroInt()
 
-	err := k.backingsList.Map(ctx, k, storyID, func(backingID int64) sdk.Error {
+	err = k.backingsList.Map(ctx, k, storyID, func(backingID int64) sdk.Error {
 		backing, err := k.Backing(ctx, backingID)
 		if err != nil {
 			return err
 		}
 
+		// totalAmount = totalAmount.Add(backing.Amount().Amount)
 		totalAmount = totalAmount.Add(backing.Amount().Amount)
 
 		return nil
 	})
 	if err != nil {
-		return totalAmount, err
+		return
 	}
 
-	return totalAmount, nil
+	denom, err := k.storyKeeper.CategoryDenom(ctx, storyID)
+	if err != nil {
+		return
+	}
+
+	return sdk.NewCoin(denom, totalAmount), nil
 }
 
 // ============================================================================
@@ -259,7 +265,7 @@ func (k Keeper) getPrincipal(
 
 	// check which type of coin user wants to back in
 	switch amount.Denom {
-	case cat.CoinName():
+	case cat.Denom():
 		// check and return amount if user has enough category coins
 		if k.bankKeeper.HasCoins(ctx, userAddr, sdk.Coins{amount}) {
 			return amount, nil
@@ -268,7 +274,7 @@ func (k Keeper) getPrincipal(
 	case params.StakeDenom:
 		// mint category coins from trustake
 		principal, err = app.SwapForCategoryCoin(
-			ctx, k.bankKeeper, amount, cat.CoinName(), userAddr)
+			ctx, k.bankKeeper, amount, cat.Denom(), userAddr)
 
 	default:
 		return principal, sdk.ErrInvalidCoins("Invalid backing token")
@@ -328,7 +334,7 @@ func getInterest(
 	interest := amountDec.Mul(interestRate)
 
 	// return coin with rounded interest
-	coin := sdk.NewCoin(category.CoinName(), interest.RoundInt())
+	coin := sdk.NewCoin(category.Denom(), interest.RoundInt())
 
 	return coin
 }

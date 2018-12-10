@@ -43,7 +43,7 @@ func TestAddGetStory(t *testing.T) {
 	storyID, _ = sk.NewStory(ctx, argument, body, int64(1), creator, evidence, source, kind)
 	assert.Equal(t, int64(2), storyID, "Story ID did not increment properly")
 
-	coinName, _ := sk.CoinName(ctx, storyID)
+	coinName, _ := sk.CategoryDenom(ctx, storyID)
 	assert.Equal(t, "trudex", coinName)
 }
 
