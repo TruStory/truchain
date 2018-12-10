@@ -85,3 +85,25 @@ type Story struct {
 	Type       Type           `json:"type"`
 	Timestamp  app.Timestamp  `json:"timestamp"`
 }
+
+// MsgParams holds default parameters for a story
+type MsgParams struct {
+	MinStoryLength    int // min number of chars for story body
+	MaxStoryLength    int // max number of chars for story body
+	MinArgumentLength int // min number of chars for argument
+	MaxArgumentLength int // max number of chars for argument
+	MinEvidenceCount  int // min number of evidence URLs
+	MaxEvidenceCount  int // max number of evidence URLs
+}
+
+// DefaultMsgParams creates a new MsgParams type with defaults
+func DefaultMsgParams() MsgParams {
+	return MsgParams{
+		MinStoryLength:    25,
+		MaxStoryLength:    350,
+		MinArgumentLength: 10,
+		MaxArgumentLength: 1000,
+		MinEvidenceCount:  0,
+		MaxEvidenceCount:  10,
+	}
+}
