@@ -82,7 +82,7 @@ func (k Keeper) Create(
 	}
 
 	// create an initial empty challenge pool
-	coinName, err := k.storyKeeper.CoinName(ctx, storyID)
+	coinName, err := k.storyKeeper.CategoryDenom(ctx, storyID)
 	if err != nil {
 		return 0, err
 	}
@@ -160,7 +160,7 @@ func (k Keeper) RegisterChallenge(
 	} else {
 		// we have backers
 		// calculate challenge threshold amount (based on total backings)
-		threshold := k.ChallengeThreshold(totalBackingAmount)
+		threshold := k.ChallengeThreshold(totalBackingAmount.Amount)
 
 		// start game if challenge pool meets threshold
 		if game.ChallengePool.Amount.GT(threshold) {
