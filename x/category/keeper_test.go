@@ -22,7 +22,7 @@ func TestNewGetCategory(t *testing.T) {
 	catID, _ := ck.NewCategory(ctx, "dog memes", sdk.AccAddress([]byte{1, 2}), "doggo", "category for dog memes")
 	cat, _ := ck.GetCategory(ctx, catID)
 
-	assert.Equal(t, cat.CoinName(), "doggo", "should return coin name")
+	assert.Equal(t, cat.Denom(), "doggo", "should return coin name")
 }
 
 func TestInitCategories(t *testing.T) {

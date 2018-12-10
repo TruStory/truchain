@@ -17,7 +17,7 @@ type ReadKeeper interface {
 	ChallengedStoriesWithCategory(
 		ctx sdk.Context,
 		catID int64) (stories []Story, err sdk.Error)
-	CoinName(ctx sdk.Context, id int64) (name string, err sdk.Error)
+	CategoryDenom(ctx sdk.Context, id int64) (name string, err sdk.Error)
 	FeedByCategoryID(
 		ctx sdk.Context,
 		catID int64) (stories []Story, err sdk.Error)
@@ -157,8 +157,8 @@ func (k Keeper) NewStory(
 	return story.ID, nil
 }
 
-// CoinName returns the name of the category coin for the story
-func (k Keeper) CoinName(ctx sdk.Context, id int64) (name string, err sdk.Error) {
+// CategoryDenom returns the name of the category coin for the story
+func (k Keeper) CategoryDenom(ctx sdk.Context, id int64) (name string, err sdk.Error) {
 	story, err := k.Story(ctx, id)
 	if err != nil {
 		return
@@ -168,7 +168,7 @@ func (k Keeper) CoinName(ctx sdk.Context, id int64) (name string, err sdk.Error)
 		return
 	}
 
-	return cat.CoinName(), nil
+	return cat.Denom(), nil
 }
 
 // Story gets the story with the given id from the key-value store
