@@ -162,7 +162,7 @@ func TestSetGame(t *testing.T) {
 
 func Test_challengeThreshold(t *testing.T) {
 	_, k, _ := mockDB()
-	amt := k.ChallengeThreshold(sdk.NewInt(100))
+	amt := k.ChallengeThreshold(sdk.NewCoin("trudex", sdk.NewInt(100)))
 
-	assert.Equal(t, "33", amt.String())
+	assert.Equal(t, "33trudex", amt.String())
 }
