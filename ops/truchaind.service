@@ -1,0 +1,24 @@
+# Sets up systemd to start, stop, and restart the truchaind daemon.
+# This should live in /etc/systemd/system on an Ubuntu instance.
+#
+# Use like so:
+# sudo systemctl start truchaind.service
+# sudo systemctl stop truchaind.service
+# sudo systemctl restart truchaind.service
+#
+# Tail logs:
+# journalctl -u truchaind.service -f
+
+[Unit]
+Description=Cosmos TruStory Node
+After=network-online.target
+
+[Service]
+User=ubuntu
+ExecStart=/home/ubuntu/go/bin/truchaind start
+Restart=always
+RestartSec=3
+LimitNOFILE=4096
+
+[Install]
+WantedBy=multi-user.target
