@@ -59,7 +59,7 @@ func (msg CreateVoteMsg) ValidateBasic() sdk.Error {
 	if msg.Amount.IsZero() == true {
 		return sdk.ErrInsufficientFunds("Invalid vote amount" + msg.Amount.String())
 	}
-	if len := len(msg.Comment); len < params.MinCommentLength || len > params.MaxCommentLength {
+	if len := len(msg.Comment); len < params.MinArgumentLength || len > params.MaxArgumentLength {
 		return app.ErrInvalidCommentMsg()
 	}
 	if len(msg.Creator) == 0 {

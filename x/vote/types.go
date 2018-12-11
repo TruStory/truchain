@@ -32,19 +32,19 @@ func (v TokenVote) VoteChoice() bool {
 
 // MsgParams holds default parameters for a vote
 type MsgParams struct {
-	MinCommentLength int // min number of chars for argument
-	MaxCommentLength int // max number of chars for argument
-	MinEvidenceCount int // min number of evidence URLs
-	MaxEvidenceCount int // max number of evidence URLs
+	MinArgumentLength int // min number of chars for argument
+	MaxArgumentLength int // max number of chars for argument
+	MinEvidenceCount  int // min number of evidence URLs
+	MaxEvidenceCount  int // max number of evidence URLs
 }
 
 // DefaultMsgParams creates a new MsgParams type with defaults
 func DefaultMsgParams() MsgParams {
 	return MsgParams{
-		MinCommentLength: 10,
-		MaxCommentLength: 340,
-		MinEvidenceCount: 0,
-		MaxEvidenceCount: 10,
+		MinArgumentLength: 10,
+		MaxArgumentLength: 1000,
+		MinEvidenceCount:  0,
+		MaxEvidenceCount:  10,
 	}
 }
 

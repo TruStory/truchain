@@ -19,12 +19,12 @@ func TestSubmitStoryMsg(t *testing.T) {
 
 	cat := createFakeCategory(ctx, ck)
 
-	body := "fake story"
+	body := "fake story body"
 	creator := sdk.AccAddress([]byte{1, 2})
 	kind := Default
 	source := "http://trustory.io"
 	evidence := []string{"http://shanesbrain.net"}
-	argument := "argument"
+	argument := "argument body"
 
 	msg := NewSubmitStoryMsg(argument, body, cat.ID, creator, evidence, source, kind)
 	assert.NotNil(t, msg)
@@ -48,12 +48,12 @@ func TestSubmitStoryMsg_ErrInvalidCategory(t *testing.T) {
 
 	catID := int64(5)
 
-	body := "fake story"
+	body := "fake story body"
 	creator := sdk.AccAddress([]byte{1, 2})
 	kind := Default
 	source := "http://trustory.io"
 	evidence := []string{"http://shanesbrain.net"}
-	argument := "argument"
+	argument := "argument body"
 	msg := NewSubmitStoryMsg(argument, body, catID, creator, evidence, source, kind)
 	assert.NotNil(t, msg)
 
