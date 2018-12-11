@@ -1,12 +1,9 @@
 package game
 
 import (
-	"fmt"
-
 	app "github.com/TruStory/truchain/types"
 	"github.com/TruStory/truchain/x/backing"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/davecgh/go-spew/spew"
 	abci "github.com/tendermint/tendermint/abci/types"
 )
 
@@ -81,10 +78,7 @@ func queryChallengeThresholdByGameID(
 		return nil, err
 	}
 
-	challengeThresholdAmount := gameKeeper.ChallengeThreshold(totalBackingAmount.Amount)
-	fmt.Println("CHALLLENGE")
-	spew.Dump(challengeThresholdAmount)
-	amountString := challengeThresholdAmount.String()
+	challengeThresholdAmount := gameKeeper.ChallengeThreshold(totalBackingAmount)
 
-	return app.MustMarshal(amountString), nil
+	return app.MustMarshal(challengeThresholdAmount), nil
 }

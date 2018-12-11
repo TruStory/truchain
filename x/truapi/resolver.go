@@ -129,32 +129,32 @@ func (ta *TruAPI) gameResolver(_ context.Context, q story.Story) game.Game {
 	return *g
 }
 
-func (ta *TruAPI) backingTotalResolver(_ context.Context, q story.Story) string {
+func (ta *TruAPI) backingTotalResolver(_ context.Context, q story.Story) sdk.Coin {
 	res := ta.RunQuery("backings/totalAmountByStoryID", app.QueryByIDParams{ID: q.ID})
 
 	if res.Code != 0 {
 		fmt.Println("Resolver err: ", res)
-		return ""
+		return sdk.Coin{}
 	}
 
-	amount := new(sdk.Int)
+	amount := new(sdk.Coin)
 	err := amino.UnmarshalJSON(res.Value, amount)
 	if err != nil {
 		panic(err)
 	}
 
-	return amount.String()
+	return *amount
 }
 
-func (ta *TruAPI) challengeThresholdResolver(_ context.Context, q game.Game) string {
+func (ta *TruAPI) challengeThresholdResolver(_ context.Context, q game.Game) sdk.Coin {
 	res := ta.RunQuery("games/challengeThresholdByGameID", app.QueryByIDParams{ID: q.ID})
 
 	if res.Code != 0 {
 		fmt.Println("Resolver err: ", res)
-		return ""
+		return sdk.Coin{}
 	}
 
-	amount := new(string)
+	amount := new(sdk.Coin)
 	err := json.Unmarshal(res.Value, amount)
 	if err != nil {
 		panic(err)
