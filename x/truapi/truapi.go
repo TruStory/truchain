@@ -63,6 +63,11 @@ func (ta *TruAPI) RegisterResolvers() {
 		"creator": func(ctx context.Context, q category.Category) users.User { return getUser(ctx, q.Creator) },
 	})
 
+	ta.GraphQLClient.RegisterObjectResolver("Coin", sdk.Coin{}, map[string]interface{}{
+		"amount": func(_ context.Context, q sdk.Coin) string { return q.Amount.String() },
+		"denom":  func(_ context.Context, q sdk.Coin) string { return q.Denom },
+	})
+
 	ta.GraphQLClient.RegisterObjectResolver("Evidence", story.Evidence{}, map[string]interface{}{
 		"creator": func(ctx context.Context, q story.Evidence) users.User { return getUser(ctx, q.Creator) },
 		"url":     func(ctx context.Context, q story.Evidence) string { return q.URL.String() },
@@ -71,21 +76,20 @@ func (ta *TruAPI) RegisterResolvers() {
 	ta.GraphQLClient.RegisterObjectResolver("Game", game.Game{}, map[string]interface{}{
 		"id":                 func(_ context.Context, q game.Game) int64 { return q.ID },
 		"creator":            func(ctx context.Context, q game.Game) users.User { return getUser(ctx, q.Creator) },
-		"challengeDenom":     func(_ context.Context, q game.Game) string { return q.ChallengePool.Denom },
-		"challengeAmount":    func(_ context.Context, q game.Game) string { return q.ChallengePool.Amount.String() },
+		"challengePool":      func(_ context.Context, q game.Game) sdk.Coin { return q.ChallengePool },
 		"challengeThreshold": ta.challengeThresholdResolver,
 	})
 
 	ta.GraphQLClient.RegisterQueryResolver("story", ta.storyResolver)
 	ta.GraphQLClient.RegisterObjectResolver("Story", story.Story{}, map[string]interface{}{
-		"id":            func(_ context.Context, q story.Story) int64 { return q.ID },
-		"backingAmount": ta.backingTotalResolver,
-		"category":      ta.storyCategoryResolver,
-		"creator":       func(ctx context.Context, q story.Story) users.User { return getUser(ctx, q.Creator) },
-		"source":        func(ctx context.Context, q story.Story) string { return q.Source.String() },
-		"argument":      func(ctx context.Context, q story.Story) []story.Argument { return q.Arguments },
-		"evidence":      func(ctx context.Context, q story.Story) []story.Evidence { return q.Evidence },
-		"game":          ta.gameResolver,
+		"id":           func(_ context.Context, q story.Story) int64 { return q.ID },
+		"backingTotal": ta.backingTotalResolver,
+		"category":     ta.storyCategoryResolver,
+		"creator":      func(ctx context.Context, q story.Story) users.User { return getUser(ctx, q.Creator) },
+		"source":       func(ctx context.Context, q story.Story) string { return q.Source.String() },
+		"argument":     func(ctx context.Context, q story.Story) []story.Argument { return q.Arguments },
+		"evidence":     func(ctx context.Context, q story.Story) []story.Evidence { return q.Evidence },
+		"game":         ta.gameResolver,
 	})
 
 	ta.GraphQLClient.RegisterQueryResolver("users", ta.usersResolver)
@@ -97,10 +101,6 @@ func (ta *TruAPI) RegisterResolvers() {
 
 	ta.GraphQLClient.RegisterObjectResolver("TwitterProfile", users.TwitterProfile{}, map[string]interface{}{
 		"id": func(_ context.Context, q users.TwitterProfile) string { return q.ID },
-	})
-
-	ta.GraphQLClient.RegisterObjectResolver("Coin", sdk.Coin{}, map[string]interface{}{
-		"amount": func(_ context.Context, q sdk.Coin) int64 { return q.Amount.Int64() },
 	})
 
 	ta.GraphQLClient.BuildSchema()

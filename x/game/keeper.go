@@ -18,7 +18,7 @@ import (
 type ReadKeeper interface {
 	app.ReadKeeper
 
-	ChallengeThreshold(totalBackingAmount sdk.Int) sdk.Int
+	ChallengeThreshold(totalBackingAmount sdk.Coin) sdk.Coin
 	Game(ctx sdk.Context, id int64) (game Game, err sdk.Error)
 }
 
@@ -160,10 +160,10 @@ func (k Keeper) RegisterChallenge(
 	} else {
 		// we have backers
 		// calculate challenge threshold amount (based on total backings)
-		threshold := k.ChallengeThreshold(totalBackingAmount.Amount)
+		threshold := k.ChallengeThreshold(totalBackingAmount)
 
 		// start game if challenge pool meets threshold
-		if game.ChallengePool.Amount.GT(threshold) {
+		if game.ChallengePool.Amount.GT(threshold.Amount) {
 			err = k.start(ctx, &game)
 		}
 	}
@@ -194,11 +194,13 @@ func (k Keeper) RegisterVote(ctx sdk.Context, gameID int64) (err sdk.Error) {
 }
 
 // ChallengeThreshold calculates the challenge threshold
-func (k Keeper) ChallengeThreshold(totalBackingAmount sdk.Int) sdk.Int {
+func (k Keeper) ChallengeThreshold(totalBackingAmount sdk.Coin) sdk.Coin {
 	params := DefaultParams()
 
-	totalBackingDec := sdk.NewDecFromInt(totalBackingAmount)
-	return totalBackingDec.Mul(params.ChallengeToBackingRatio).RoundInt()
+	totalBackingDec := sdk.NewDecFromInt(totalBackingAmount.Amount)
+	challengeThresholdAmount := totalBackingDec.Mul(params.ChallengeToBackingRatio).RoundInt()
+
+	return sdk.NewCoin(totalBackingAmount.Denom, challengeThresholdAmount)
 }
 
 // ============================================================================
