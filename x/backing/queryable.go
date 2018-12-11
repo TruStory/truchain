@@ -20,7 +20,7 @@ func NewQuerier(k ReadKeeper) sdk.Querier {
 		case QueryBackingByID:
 			return queryBackingByID(ctx, req, k)
 		case QueryBackingAmountByStoryID:
-			return queryBackinAmountByStoryID(ctx, req, k)
+			return queryBackingAmountByStoryID(ctx, req, k)
 		default:
 			return nil, sdk.ErrUnknownRequest("Unknown truchain query endpoint")
 		}
@@ -44,7 +44,7 @@ func queryBackingByID(ctx sdk.Context, req abci.RequestQuery, k ReadKeeper) (res
 	return app.MustMarshal(backing), nil
 }
 
-func queryBackinAmountByStoryID(ctx sdk.Context, req abci.RequestQuery, k ReadKeeper) (res []byte, err sdk.Error) {
+func queryBackingAmountByStoryID(ctx sdk.Context, req abci.RequestQuery, k ReadKeeper) (res []byte, err sdk.Error) {
 	params := app.QueryByIDParams{}
 
 	if err = app.UnmarshalQueryParams(req, &params); err != nil {
