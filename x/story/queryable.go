@@ -1,9 +1,7 @@
 package story
 
 import (
-	"encoding/json"
-	"fmt"
-
+	app "github.com/TruStory/truchain/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	abci "github.com/tendermint/tendermint/abci/types"
 )
@@ -13,6 +11,7 @@ const (
 	QueryPath                = "stories"
 	QueryStoryByID           = "id"
 	QueryStoriesByCategoryID = "category"
+	QueryStoriesByFeedID     = "feedID"
 )
 
 // QueryCategoryStoriesParams are params for stories by category queries
@@ -44,48 +43,35 @@ func NewQuerier(k ReadKeeper) sdk.Querier {
 func queryStoryByID(ctx sdk.Context, req abci.RequestQuery, k ReadKeeper) (res []byte, err sdk.Error) {
 	params := QueryStoryByIDParams{}
 
-	if err = unmarshalQueryParams(req, &params); err != nil {
+	if err = app.UnmarshalQueryParams(req, &params); err != nil {
 		return
 	}
 
 	story, err := k.Story(ctx, params.ID)
-
 	if err != nil {
 		return
 	}
 
-	return mustMarshal(story), nil
+	return app.MustMarshal(story), nil
 }
 
 func queryStoriesByCategoryID(ctx sdk.Context, req abci.RequestQuery, k ReadKeeper) (res []byte, err sdk.Error) {
 	params := QueryCategoryStoriesParams{}
 
-	if err = unmarshalQueryParams(req, &params); err != nil {
+	if err = app.UnmarshalQueryParams(req, &params); err != nil {
 		return
 	}
 
 	stories, err := k.StoriesByCategoryID(ctx, params.CategoryID)
-
 	if err != nil {
 		return
 	}
 
-	return mustMarshal(stories), nil
+	return app.MustMarshal(stories), nil
 }
 
-func unmarshalQueryParams(req abci.RequestQuery, params interface{}) (sdkErr sdk.Error) {
-	parseErr := json.Unmarshal(req.Data, params)
-	if parseErr != nil {
-		sdkErr = sdk.ErrUnknownRequest(fmt.Sprintf("Incorrectly formatted request data - %s", parseErr.Error()))
-		return
-	}
-	return
-}
+func queryStoriesByFeedID(ctx sdk.Context, req abci.RequestQuery, k ReadKeeper) (res []byte, err sdk.Error) {
+	stories := k.FeedTrending(ctx)
 
-func mustMarshal(v interface{}) (res []byte) {
-	res, err := json.MarshalIndent(v, "", "  ")
-	if err != nil {
-		panic("Could not marshal result to JSON")
-	}
-	return
+	return app.MustMarshal(stories), nil
 }

@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"testing"
 
+	app "github.com/TruStory/truchain/types"
 	"github.com/stretchr/testify/require"
 	abci "github.com/tendermint/tendermint/abci/types"
 )
@@ -67,5 +68,26 @@ func TestQueryStoriesWithCategory(t *testing.T) {
 	}
 	_, err := queryStoriesByCategoryID(ctx, query, sk)
 
+	require.Nil(t, err)
+}
+
+func TestQueryStoriesByFeedID(t *testing.T) {
+	ctx, sk, ck := mockDB()
+
+	createFakeStory(ctx, sk, ck)
+
+	queryParams := app.QueryByIDParams{
+		ID: 1,
+	}
+
+	bz, errRes := json.Marshal(queryParams)
+	require.Nil(t, errRes)
+
+	query := abci.RequestQuery{
+		Path: "/custom/stories/feedID",
+		Data: bz,
+	}
+
+	_, err := queryStoriesByFeedID(ctx, query, sk)
 	require.Nil(t, err)
 }
