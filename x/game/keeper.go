@@ -133,8 +133,6 @@ func (k Keeper) Game(ctx sdk.Context, id int64) (game Game, err sdk.Error) {
 func (k Keeper) RegisterChallenge(
 	ctx sdk.Context, gameID int64, amount sdk.Coin) (err sdk.Error) {
 
-	params := DefaultParams()
-
 	game, err := k.Game(ctx, gameID)
 	if err != nil {
 		return err
@@ -150,22 +148,11 @@ func (k Keeper) RegisterChallenge(
 		return err
 	}
 
-	// see if game can be started based on challenge threshold
-	if totalBackingAmount.IsZero() {
-		// we have zero backers
-		// start game if challenge pool meets min challenge stake
-		if game.ChallengePool.Amount.GT(params.MinChallengeStake) {
-			err = k.start(ctx, &game)
-		}
-	} else {
-		// we have backers
-		// calculate challenge threshold amount (based on total backings)
-		threshold := k.ChallengeThreshold(totalBackingAmount)
+	threshold := k.ChallengeThreshold(totalBackingAmount)
 
-		// start game if challenge pool meets threshold
-		if game.ChallengePool.Amount.GT(threshold.Amount) {
-			err = k.start(ctx, &game)
-		}
+	// start game if challenge pool meets threshold
+	if game.ChallengePool.Amount.GT(threshold.Amount) {
+		err = k.start(ctx, &game)
 	}
 	if err != nil {
 		return err
@@ -197,6 +184,14 @@ func (k Keeper) RegisterVote(ctx sdk.Context, gameID int64) (err sdk.Error) {
 func (k Keeper) ChallengeThreshold(totalBackingAmount sdk.Coin) sdk.Coin {
 	params := DefaultParams()
 
+	// we have zero backers
+	// challenge threshold equals min challenge stake
+	if totalBackingAmount.IsZero() {
+		return sdk.NewCoin(totalBackingAmount.Denom, params.MinChallengeStake)
+	}
+
+	// we have backers
+	// calculate challenge threshold amount (based on total backings)
 	totalBackingDec := sdk.NewDecFromInt(totalBackingAmount.Amount)
 	challengeThresholdAmount := totalBackingDec.Mul(params.ChallengeToBackingRatio).RoundInt()
 
