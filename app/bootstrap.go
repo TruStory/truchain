@@ -74,6 +74,9 @@ func createStory(
 	storyType := story.Default
 	sourceURL, _ := url.Parse(source)
 
+	// fake a block time
+	ctx = ctx.WithBlockHeader(abci.Header{Time: time.Now().UTC()})
+
 	url, _ := url.Parse(evidence)
 	e := story.Evidence{
 		Creator:   creator,
@@ -102,9 +105,6 @@ func loadTestDB(
 	backingKeeper backing.WriteKeeper,
 	challengeKeeper challenge.WriteKeeper,
 	gameKeeper game.WriteKeeper) {
-
-	// fake a block time
-	ctx = ctx.WithBlockHeader(abci.Header{Time: time.Now().UTC()})
 
 	rootdir := viper.GetString(cli.HomeFlag)
 	if rootdir == "" {
@@ -136,6 +136,9 @@ func loadTestDB(
 	if err != nil {
 		panic(err)
 	}
+
+	// fake a block time
+	ctx = ctx.WithBlockHeader(abci.Header{Time: time.Now().UTC()})
 
 	// challenge it
 	amount, _ = sdk.ParseCoin("1000trusteak")
