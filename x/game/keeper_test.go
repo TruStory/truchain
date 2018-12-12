@@ -160,7 +160,14 @@ func TestSetGame(t *testing.T) {
 	assert.Equal(t, game.ID, savedGame.ID)
 }
 
-func Test_challengeThreshold(t *testing.T) {
+func Test_challengeThresholdNoBacking(t *testing.T) {
+	_, k, _ := mockDB()
+	amt := k.ChallengeThreshold(sdk.NewCoin("trudex", sdk.ZeroInt()))
+
+	assert.Equal(t, "10trudex", amt.String())
+}
+
+func Test_challengeThresholdWithBacking(t *testing.T) {
 	_, k, _ := mockDB()
 	amt := k.ChallengeThreshold(sdk.NewCoin("trudex", sdk.NewInt(100)))
 
