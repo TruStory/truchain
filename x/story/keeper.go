@@ -1,6 +1,7 @@
 package story
 
 import (
+	"fmt"
 	"net/url"
 
 	app "github.com/TruStory/truchain/types"
@@ -21,6 +22,7 @@ type ReadKeeper interface {
 	FeedByCategoryID(
 		ctx sdk.Context,
 		catID int64) (stories []Story, err sdk.Error)
+	FeedTrending(ctx sdk.Context) (stories []Story)
 	StoriesByCategoryID(ctx sdk.Context, catID int64) (stories []Story, err sdk.Error)
 	Story(ctx sdk.Context, storyID int64) (Story, sdk.Error)
 }
@@ -239,6 +241,31 @@ func (k Keeper) FeedByCategoryID(
 	feedIDs := append(challengedStoryIDs, unchallengedStoryIDs...)
 
 	return k.storiesByID(ctx, feedIDs)
+}
+
+// FeedTrending returns all stories in reverse chronological order
+func (k Keeper) FeedTrending(ctx sdk.Context) (stories []Story) {
+
+	// get store
+	store := k.GetStore(ctx)
+
+	// builds prefix "stories:id:"
+	searchKey := fmt.Sprintf("%s:id:", k.GetStoreKey().Name())
+	searchPrefix := []byte(searchKey)
+
+	// setup iterator
+	iter := sdk.KVStoreReversePrefixIterator(store, searchPrefix)
+	defer iter.Close()
+
+	// iterates through keyspace to find all stories
+	for ; iter.Valid(); iter.Next() {
+		var story Story
+		k.GetCodec().MustUnmarshalBinaryLengthPrefixed(
+			iter.Value(), &story)
+		stories = append(stories, story)
+	}
+
+	return stories
 }
 
 // UpdateStory updates an existing story in the store
