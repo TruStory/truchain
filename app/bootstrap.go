@@ -8,6 +8,9 @@ import (
 	"path/filepath"
 	"time"
 
+	"github.com/cosmos/cosmos-sdk/x/bank"
+	"github.com/davecgh/go-spew/spew"
+
 	tru "github.com/TruStory/truchain/types"
 	"github.com/TruStory/truchain/x/backing"
 	"github.com/TruStory/truchain/x/challenge"
@@ -104,7 +107,8 @@ func loadTestDB(
 	accountKeeper auth.AccountKeeper,
 	backingKeeper backing.WriteKeeper,
 	challengeKeeper challenge.WriteKeeper,
-	gameKeeper game.WriteKeeper) {
+	gameKeeper game.WriteKeeper,
+	bankKeeper bank.Keeper) {
 
 	rootdir := viper.GetString(cli.HomeFlag)
 	if rootdir == "" {
@@ -129,6 +133,20 @@ func loadTestDB(
 	// get the 1st story
 	story, _ := storyKeeper.Story(ctx, 1)
 
+	coins := bankKeeper.GetCoins(ctx, addr)
+	spew.Dump("COINS1 -- GetCoins", coins)
+	amt, _ := sdk.ParseCoins("10bananas")
+	tokens, tags, err := bankKeeper.AddCoins(ctx, addr, amt)
+	if err != nil {
+		panic(err)
+	}
+	spew.Dump("COINS2 -- AddCoins", tokens, tags)
+	coins = bankKeeper.GetCoins(ctx, addr)
+	spew.Dump("COINS3 -- GetCoins", coins)
+
+	acc := accountKeeper.GetAccount(ctx, addr)
+	spew.Dump("ACCNT", acc)
+
 	// back it
 	amount, _ := sdk.ParseCoin("1000trusteak")
 	duration := 30 * 24 * time.Hour
@@ -136,6 +154,9 @@ func loadTestDB(
 	if err != nil {
 		panic(err)
 	}
+
+	// coins = bankKeeper.GetCoins(ctx, addr)
+	// spew.Dump("COINS3", coins)
 
 	// fake a block time
 	ctx = ctx.WithBlockHeader(abci.Header{Time: time.Now().UTC()})

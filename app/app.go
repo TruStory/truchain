@@ -222,6 +222,7 @@ func MakeCodec() *codec.Codec {
 	sdk.RegisterCodec(cdc)
 	bank.RegisterCodec(cdc)
 	ibc.RegisterCodec(cdc)
+	auth.RegisterCodec(cdc)
 
 	// register msg types
 	story.RegisterAmino(cdc)
@@ -232,9 +233,8 @@ func MakeCodec() *codec.Codec {
 	users.RegisterAmino(cdc)
 
 	// register other types
-	cdc.RegisterInterface((*auth.Account)(nil), nil)
-	cdc.RegisterConcrete(&types.AppAccount{}, "truchain/Account", nil)
-	cdc.RegisterConcrete(&auth.StdTx{}, "cosmos-sdk/StdTx", nil)
+	// cdc.RegisterConcrete(&types.AppAccount{}, "AppAccount", nil)
+	cdc.RegisterConcrete(types.AppAccount{}, "types/AppAccount", nil)
 
 	cdc.Seal()
 
@@ -250,6 +250,17 @@ func (app *TruChain) BeginBlocker(ctx sdk.Context, req abci.RequestBeginBlock) a
 	if !(app.apiStarted) {
 		go app.startAPI()
 		app.apiStarted = true
+
+		if params.Features[params.BootstrapFlag] {
+			loadTestDB(
+				ctx, app.storyKeeper,
+				app.accountKeeper,
+				app.backingKeeper,
+				app.challengeKeeper,
+				app.gameKeeper,
+				app.coinKeeper,
+			)
+		}
 	}
 
 	return abci.ResponseBeginBlock{}
