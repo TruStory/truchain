@@ -1,7 +1,6 @@
 package app
 
 import (
-	params "github.com/TruStory/truchain/parameters"
 	"github.com/TruStory/truchain/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	abci "github.com/tendermint/tendermint/abci/types"
@@ -46,19 +45,8 @@ func (app *TruChain) initChainer(ctx sdk.Context, req abci.RequestInitChain) abc
 
 	// persist initial categories on chain
 	err = app.categoryKeeper.InitCategories(ctx, genesisAddr, app.categories)
-
 	if err != nil {
 		panic(err)
-	}
-
-	if params.Features[params.BootstrapFlag] {
-		loadTestDB(
-			ctx, app.storyKeeper,
-			app.accountKeeper,
-			app.backingKeeper,
-			app.challengeKeeper,
-			app.gameKeeper,
-		)
 	}
 
 	return abci.ResponseInitChain{}
