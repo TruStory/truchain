@@ -96,6 +96,7 @@ func (ta *TruAPI) RegisterResolvers() {
 	ta.GraphQLClient.RegisterQueryResolver("users", ta.usersResolver)
 	ta.GraphQLClient.RegisterObjectResolver("User", users.User{}, map[string]interface{}{
 		"id":             func(_ context.Context, q users.User) string { return q.Address },
+		"coins":          func(_ context.Context, q users.User) sdk.Coins { return q.Coins },
 		"pubkey":         func(_ context.Context, q users.User) string { return q.Pubkey.String() },
 		"twitterProfile": ta.twitterProfileResolver,
 	})
