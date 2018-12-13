@@ -22,8 +22,8 @@ func TestValidCreateVoteMsg(t *testing.T) {
 	err := msg.ValidateBasic()
 	assert.Nil(t, err)
 
-	assert.Equal(t, "vote", msg.Type())
-	assert.Equal(t, "create_vote", msg.Route())
+	assert.Equal(t, "vote", msg.Route())
+	assert.Equal(t, "create_vote", msg.Type())
 	assert.Equal(t, []sdk.AccAddress{creator}, msg.GetSigners())
 }
 

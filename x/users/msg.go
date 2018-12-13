@@ -14,11 +14,11 @@ type RegisterKeyMsg struct {
 	Coins      sdk.Coins      `json:"coins"`
 }
 
+// Route implements Msg
+func (msg RegisterKeyMsg) Route() string { return app.GetRoute(msg) }
+
 // Type implements Msg
 func (msg RegisterKeyMsg) Type() string { return app.GetType(msg) }
-
-// Route implements Msg
-func (msg RegisterKeyMsg) Route() string { return app.GetType(msg) }
 
 // GetSignBytes implements Msg
 func (msg RegisterKeyMsg) GetSignBytes() []byte {

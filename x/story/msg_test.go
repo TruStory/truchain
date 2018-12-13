@@ -80,8 +80,8 @@ func TestValidAddEvidencetMsg(t *testing.T) {
 	err := msg.ValidateBasic()
 
 	assert.Nil(t, err)
-	assert.Equal(t, "story", msg.Type())
-	assert.Equal(t, "add_evidence", msg.Route())
+	assert.Equal(t, "story", msg.Route())
+	assert.Equal(t, "add_evidence", msg.Type())
 	assert.Equal(
 		t,
 		`{"creator":"cosmos1qypq36vzru","story_id":1,"url":"http://www.truchain.io"}`,
@@ -98,8 +98,8 @@ func TestValidAddArgumentMsg(t *testing.T) {
 	err := msg.ValidateBasic()
 
 	assert.Nil(t, err)
-	assert.Equal(t, "story", msg.Type())
-	assert.Equal(t, "add_argument", msg.Route())
+	assert.Equal(t, "story", msg.Route())
+	assert.Equal(t, "add_argument", msg.Type())
 	assert.Equal(
 		t,
 		`{"argument":"another argument","creator":"cosmos1qypq36vzru","story_id":1}`,
@@ -115,8 +115,8 @@ func TestValidFlagStoryMsg(t *testing.T) {
 	err := msg.ValidateBasic()
 
 	assert.Nil(t, err)
-	assert.Equal(t, "story", msg.Type())
-	assert.Equal(t, "flag_story", msg.Route())
+	assert.Equal(t, "story", msg.Route())
+	assert.Equal(t, "flag_story", msg.Type())
 	assert.Equal(
 		t,
 		`{"creator":"cosmos1qypq36vzru","story_id":1}`,
