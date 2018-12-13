@@ -41,10 +41,10 @@ func NewSubmitStoryMsg(
 }
 
 // Route implements Msg
-func (msg SubmitStoryMsg) Route() string { return app.GetType(msg) }
+func (msg SubmitStoryMsg) Route() string { return app.GetRoute(msg) }
 
 // Type implements Msg
-func (msg SubmitStoryMsg) Type() string { return app.GetName(msg) }
+func (msg SubmitStoryMsg) Type() string { return app.GetType(msg) }
 
 // GetSignBytes implements Msg. Story creator should sign this message.
 // Serializes Msg into JSON bytes for transport.
@@ -101,7 +101,7 @@ func NewAddArgumentMsg(storyID int64, creator sdk.AccAddress, argument string) A
 }
 
 // Route implements Msg.Route
-func (msg AddArgumentMsg) Route() string { return app.GetName(msg) }
+func (msg AddArgumentMsg) Route() string { return app.GetRoute(msg) }
 
 // Type implements Msg.Type
 func (msg AddArgumentMsg) Type() string { return app.GetType(msg) }
@@ -149,7 +149,7 @@ func NewAddEvidenceMsg(storyID int64, creator sdk.AccAddress, url string) AddEvi
 }
 
 // Route implements Msg
-func (msg AddEvidenceMsg) Route() string { return app.GetName(msg) }
+func (msg AddEvidenceMsg) Route() string { return app.GetRoute(msg) }
 
 // Type implements Msg
 func (msg AddEvidenceMsg) Type() string { return app.GetType(msg) }
@@ -196,7 +196,7 @@ func NewFlagStoryMsg(storyID int64, creator sdk.AccAddress) FlagStoryMsg {
 }
 
 // Route implements Msg.Route
-func (msg FlagStoryMsg) Route() string { return app.GetName(msg) }
+func (msg FlagStoryMsg) Route() string { return app.GetRoute(msg) }
 
 // Type implements Msg.Type
 func (msg FlagStoryMsg) Type() string { return app.GetType(msg) }

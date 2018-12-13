@@ -12,14 +12,14 @@ import (
 
 // Utilities for all `sdk.Msg` types
 
-// GetType returns the package name of the containing `Msg`
-func GetType(msg sdk.Msg) string {
+// GetRoute returns the package name of the containing `Msg`
+func GetRoute(msg sdk.Msg) string {
 	pkgPath := reflect.TypeOf(msg).PkgPath()
 	return path.Base(pkgPath)
 }
 
-// GetName returns the name of the `Msg` in snake_case
-func GetName(msg sdk.Msg) string {
+// GetType returns the name of the `Msg` in snake_case
+func GetType(msg sdk.Msg) string {
 	name := reflect.TypeOf(msg).Name()
 	prefix := strings.Split(toSnakeCase(name), "_")
 	return strings.Join(prefix[:len(prefix)-1], "_")

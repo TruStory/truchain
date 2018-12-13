@@ -21,8 +21,8 @@ func TestValidStartChallengeMsg(t *testing.T) {
 	err := msg.ValidateBasic()
 	assert.Nil(t, err)
 
-	assert.Equal(t, "challenge", msg.Type())
-	assert.Equal(t, "create_challenge", msg.Route())
+	assert.Equal(t, "challenge", msg.Route())
+	assert.Equal(t, "create_challenge", msg.Type())
 	assert.Equal(t, []sdk.AccAddress{validCreator}, msg.GetSigners())
 }
 

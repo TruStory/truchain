@@ -34,11 +34,11 @@ func NewCreateChallengeMsg(
 	}
 }
 
+// Route implements Msg
+func (msg CreateChallengeMsg) Route() string { return app.GetRoute(msg) }
+
 // Type implements Msg
 func (msg CreateChallengeMsg) Type() string { return app.GetType(msg) }
-
-// Route implements Msg
-func (msg CreateChallengeMsg) Route() string { return app.GetName(msg) }
 
 // GetSignBytes implements Msg. Story creator should sign this message.
 // Serializes Msg into JSON bytes for transport.

@@ -29,7 +29,7 @@ func NewCreateCategoryMsg(
 }
 
 // Route implements Msg
-func (msg CreateCategoryMsg) Route() string { return app.GetName(msg) }
+func (msg CreateCategoryMsg) Route() string { return app.GetRoute(msg) }
 
 // Type implements Msg
 func (msg CreateCategoryMsg) Type() string { return app.GetType(msg) }

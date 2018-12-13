@@ -37,11 +37,11 @@ func NewCreateVoteMsg(
 	}
 }
 
+// Route implements Msg
+func (msg CreateVoteMsg) Route() string { return app.GetRoute(msg) }
+
 // Type implements Msg
 func (msg CreateVoteMsg) Type() string { return app.GetType(msg) }
-
-// Route implements Msg
-func (msg CreateVoteMsg) Route() string { return app.GetName(msg) }
 
 // GetSignBytes implements Msg. Story creator should sign this message.
 // Serializes Msg into JSON bytes for transport.

@@ -16,8 +16,8 @@ func TestCreateCategoryMsg(t *testing.T) {
 	msg := NewCreateCategoryMsg(validTitle, validCreator, validSlug, validDescription)
 	err := msg.ValidateBasic()
 	assert.Nil(t, err)
-	assert.Equal(t, "category", msg.Type())
-	assert.Equal(t, "create_category", msg.Route())
+	assert.Equal(t, "category", msg.Route())
+	assert.Equal(t, "create_category", msg.Type())
 }
 
 func TestCreateCategoryMsg_Invalid(t *testing.T) {
