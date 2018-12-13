@@ -87,6 +87,23 @@ func (ta *TruAPI) categoryResolver(ctx context.Context, q category.QueryCategory
 	return *c
 }
 
+func (ta *TruAPI) allStoriesResolver(ctx context.Context, q struct{}) []story.Story {
+	res := ta.RunQuery("stories/all", struct{}{})
+
+	if res.Code != 0 {
+		fmt.Println("Resolver err: ", res)
+		return []story.Story{}
+	}
+
+	stories := new([]story.Story)
+	err := json.Unmarshal(res.Value, stories)
+	if err != nil {
+		panic(err)
+	}
+
+	return *stories
+}
+
 func (ta *TruAPI) storyCategoryResolver(ctx context.Context, q story.Story) category.Category {
 	return ta.categoryResolver(ctx, category.QueryCategoryByIDParams{ID: q.CategoryID})
 }
