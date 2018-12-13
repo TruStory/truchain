@@ -22,7 +22,7 @@ type ReadKeeper interface {
 	FeedByCategoryID(
 		ctx sdk.Context,
 		catID int64) (stories []Story, err sdk.Error)
-	FeedTrending(ctx sdk.Context) (stories []Story)
+	Stories(ctx sdk.Context) (stories []Story)
 	StoriesByCategoryID(ctx sdk.Context, catID int64) (stories []Story, err sdk.Error)
 	Story(ctx sdk.Context, storyID int64) (Story, sdk.Error)
 }
@@ -243,8 +243,8 @@ func (k Keeper) FeedByCategoryID(
 	return k.storiesByID(ctx, feedIDs)
 }
 
-// FeedTrending returns all stories in reverse chronological order
-func (k Keeper) FeedTrending(ctx sdk.Context) (stories []Story) {
+// Stories returns all stories in reverse chronological order
+func (k Keeper) Stories(ctx sdk.Context) (stories []Story) {
 
 	// get store
 	store := k.GetStore(ctx)

@@ -70,7 +70,7 @@ func TestQueryStoriesWithCategory(t *testing.T) {
 	require.Nil(t, err)
 }
 
-func TestQueryStoriesByFeedID(t *testing.T) {
+func TestQueryStories(t *testing.T) {
 	ctx, sk, ck := mockDB()
 
 	createFakeStory(ctx, sk, ck)

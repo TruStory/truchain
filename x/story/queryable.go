@@ -73,7 +73,7 @@ func queryStoriesByCategoryID(ctx sdk.Context, req abci.RequestQuery, k ReadKeep
 }
 
 func queryStories(ctx sdk.Context, _ abci.RequestQuery, k ReadKeeper) (res []byte, err sdk.Error) {
-	stories := k.FeedTrending(ctx)
+	stories := k.Stories(ctx)
 
 	return app.MustMarshal(stories), nil
 }
