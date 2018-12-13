@@ -11,7 +11,7 @@ const (
 	QueryPath                = "stories"
 	QueryStoryByID           = "id"
 	QueryStoriesByCategoryID = "category"
-	QueryStoriesByFeedID     = "feedID"
+	QueryStories             = "all"
 )
 
 // QueryCategoryStoriesParams are params for stories by category queries
@@ -32,6 +32,8 @@ func NewQuerier(k ReadKeeper) sdk.Querier {
 			return queryStoryByID(ctx, req, k)
 		case QueryStoriesByCategoryID:
 			return queryStoriesByCategoryID(ctx, req, k)
+		case QueryStories:
+			return queryStories(ctx, req, k)
 		default:
 			return nil, sdk.ErrUnknownRequest("Unknown truchain query endpoint")
 		}
@@ -70,7 +72,7 @@ func queryStoriesByCategoryID(ctx sdk.Context, req abci.RequestQuery, k ReadKeep
 	return app.MustMarshal(stories), nil
 }
 
-func queryStoriesByFeedID(ctx sdk.Context, req abci.RequestQuery, k ReadKeeper) (res []byte, err sdk.Error) {
+func queryStories(ctx sdk.Context, _ abci.RequestQuery, k ReadKeeper) (res []byte, err sdk.Error) {
 	stories := k.FeedTrending(ctx)
 
 	return app.MustMarshal(stories), nil

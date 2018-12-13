@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"testing"
 
-	app "github.com/TruStory/truchain/types"
 	"github.com/stretchr/testify/require"
 	abci "github.com/tendermint/tendermint/abci/types"
 )
@@ -76,18 +75,11 @@ func TestQueryStoriesByFeedID(t *testing.T) {
 
 	createFakeStory(ctx, sk, ck)
 
-	queryParams := app.QueryByIDParams{
-		ID: 1,
-	}
-
-	bz, errRes := json.Marshal(queryParams)
-	require.Nil(t, errRes)
-
 	query := abci.RequestQuery{
-		Path: "/custom/stories/feedID",
-		Data: bz,
+		Path: "/custom/stories/all",
+		Data: nil,
 	}
 
-	_, err := queryStoriesByFeedID(ctx, query, sk)
+	_, err := queryStories(ctx, query, sk)
 	require.Nil(t, err)
 }
