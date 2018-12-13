@@ -80,6 +80,7 @@ func (ta *TruAPI) RegisterResolvers() {
 		"challengeThreshold": ta.challengeThresholdResolver,
 	})
 
+	ta.GraphQLClient.RegisterQueryResolver("stories", ta.allStoriesResolver)
 	ta.GraphQLClient.RegisterQueryResolver("story", ta.storyResolver)
 	ta.GraphQLClient.RegisterObjectResolver("Story", story.Story{}, map[string]interface{}{
 		"id":           func(_ context.Context, q story.Story) int64 { return q.ID },
