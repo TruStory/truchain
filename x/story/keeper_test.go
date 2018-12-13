@@ -130,7 +130,7 @@ func TestFeedTrending(t *testing.T) {
 		createFakeStory(ctx, sk, ck)
 	}
 
-	stories := sk.FeedTrending(ctx)
+	stories := sk.Stories(ctx)
 
 	assert.Equal(t, 5, len(stories))
 	assert.Equal(t, int64(5), stories[0].ID)
