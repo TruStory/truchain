@@ -53,7 +53,9 @@ This is the private key to the account added in step 3b.
 
 Copy `genesis.json` from secrets repo into `.chain/config`.
 
-Run `make wipe_chain`. Copy the validator info from `.chain/config/priv_validator.json` into the "validators" section of `genesis.json`.
+Run `make wipe_chain`. 
+
+Open the `genesis.json` file and in the "validators" section overwrite the "address" and "pub_key"->"value" fields with the corresponding values from `.chain/config/priv_validator.json`.
 
 5. Start blockchain
 
