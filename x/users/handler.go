@@ -32,22 +32,21 @@ func handleRegisterKeyMsg(ctx sdk.Context, ak auth.AccountKeeper, msg RegisterKe
 	}
 
 	err = bacc.SetPubKey(key)
-
 	if err != nil {
 		return sdk.Result{Code: 1, Data: []byte("Registration Error: setting public key: " + err.Error())}
 	}
 
 	err = bacc.SetCoins(msg.Coins)
-
 	if err != nil {
 		return sdk.Result{Code: 1, Data: []byte("Registration Error: setting coins: " + err.Error())}
 	}
 
 	acc := app.NewAppAccount(bacc)
-
-	ak.SetAccount(ctx, auth.Account(*acc))
-
-	bz, _ := json.Marshal(*acc)
+	ak.SetAccount(ctx, acc)
+	bz, err := json.Marshal(*acc)
+	if err != nil {
+		return sdk.Result{Code: 1, Data: []byte("Registration Error: marshaling account: " + err.Error())}
+	}
 
 	return sdk.Result{Code: 0, Data: bz}
 }
