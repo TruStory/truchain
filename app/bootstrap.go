@@ -59,7 +59,7 @@ func createUser(
 
 	acc := tru.NewAppAccount(bacc)
 
-	accountKeeper.SetAccount(ctx, auth.Account(*acc))
+	accountKeeper.SetAccount(ctx, acc)
 
 	return addr
 }
@@ -134,18 +134,7 @@ func loadTestDB(
 	story, _ := storyKeeper.Story(ctx, 1)
 
 	coins := bankKeeper.GetCoins(ctx, addr)
-	spew.Dump("COINS1 -- GetCoins", coins)
-	amt, _ := sdk.ParseCoins("10bananas")
-	tokens, tags, err := bankKeeper.AddCoins(ctx, addr, amt)
-	if err != nil {
-		panic(err)
-	}
-	spew.Dump("COINS2 -- AddCoins", tokens, tags)
-	coins = bankKeeper.GetCoins(ctx, addr)
-	spew.Dump("COINS3 -- GetCoins", coins)
-
-	acc := accountKeeper.GetAccount(ctx, addr)
-	spew.Dump("ACCNT", acc)
+	spew.Dump("DEBUG", coins)
 
 	// back it
 	amount, _ := sdk.ParseCoin("1000trusteak")
@@ -155,8 +144,8 @@ func loadTestDB(
 		panic(err)
 	}
 
-	// coins = bankKeeper.GetCoins(ctx, addr)
-	// spew.Dump("COINS3", coins)
+	coins = bankKeeper.GetCoins(ctx, addr)
+	spew.Dump("DEBUG", coins)
 
 	// fake a block time
 	ctx = ctx.WithBlockHeader(abci.Header{Time: time.Now().UTC()})

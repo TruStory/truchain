@@ -4,7 +4,6 @@ import (
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth"
-	"github.com/tendermint/tendermint/crypto"
 )
 
 var _ auth.Account = (*AppAccount)(nil)
@@ -18,46 +17,6 @@ const RegistrarAccAddress = "truchainaccregistrar"
 // library.
 type AppAccount struct {
 	auth.BaseAccount
-}
-
-// GetAccountNumber returns the account number
-func (acc AppAccount) GetAccountNumber() int64 {
-	return acc.AccountNumber
-}
-
-// GetCoins returns the coins
-func (acc AppAccount) GetCoins() sdk.Coins {
-	return acc.Coins
-}
-
-// GetSequence returns the sequence
-func (acc AppAccount) GetSequence() int64 {
-	return acc.Sequence
-}
-
-// SetAccountNumber sets the account number
-func (acc AppAccount) SetAccountNumber(accNumber int64) error {
-	return acc.BaseAccount.SetAccountNumber(accNumber)
-}
-
-// SetAddress sets the address
-func (acc AppAccount) SetAddress(address sdk.AccAddress) error {
-	return acc.BaseAccount.SetAddress(address)
-}
-
-// SetSequence sets the sequence
-func (acc AppAccount) SetSequence(seq int64) error {
-	return acc.BaseAccount.SetSequence(seq)
-}
-
-// SetCoins sets the coins
-func (acc AppAccount) SetCoins(coins sdk.Coins) error {
-	return acc.BaseAccount.SetCoins(coins)
-}
-
-// SetPubKey sets the public key
-func (acc AppAccount) SetPubKey(pubkey crypto.PubKey) error {
-	return acc.BaseAccount.SetPubKey(pubkey)
 }
 
 // NewAppAccount returns a reference to a new AppAccount given a name and an

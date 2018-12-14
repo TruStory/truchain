@@ -233,8 +233,7 @@ func MakeCodec() *codec.Codec {
 	users.RegisterAmino(cdc)
 
 	// register other types
-	// cdc.RegisterConcrete(&types.AppAccount{}, "AppAccount", nil)
-	cdc.RegisterConcrete(types.AppAccount{}, "types/AppAccount", nil)
+	cdc.RegisterConcrete(&types.AppAccount{}, "types/AppAccount", nil)
 
 	cdc.Seal()
 
