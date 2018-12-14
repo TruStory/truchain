@@ -49,9 +49,17 @@ Create a file in the root of this project named `registrar.key` containing the u
 
 This is the private key to the account added in step 3b.
 
-4. Start blockchain
+4. Copy genesis file and setup private validator
+
+Copy `genesis.json` from secrets repo into `.chain/config`.
+
+Run `make wipe_chain`. Copy the validator info from `.chain/config/priv_validator.json` into the "validators" section of `genesis.json`.
+
+5. Start blockchain
 
 `make run_daemon`
+
+You can wipe the chain, build, and start using the alias `make bwr`.
 
 ### Architecture
 
