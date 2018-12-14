@@ -11,6 +11,7 @@ write-file-atomic-*
 .chain/data
 .chain/config/addrbook.json
 .chain/config/priv_validator.json
+.chain/config/genesis.json
 dev/api_spec/.chain
 
 # Dependencies
