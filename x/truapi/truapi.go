@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/TruStory/truchain/x/challenge"
+	"github.com/TruStory/truchain/x/vote"
 
 	"github.com/TruStory/truchain/x/backing"
 
@@ -67,19 +68,19 @@ func (ta *TruAPI) RegisterResolvers() {
 		"vote":     func(ctx context.Context, q backing.Backing) bool { return q.VoteChoice() },
 	})
 
-	ta.GraphQLClient.RegisterQueryResolver("challenge", ta.challengeResolver)
-	ta.GraphQLClient.RegisterObjectResolver("Challenge", challenge.Challenge{}, map[string]interface{}{
-		"amount":   func(ctx context.Context, q challenge.Challenge) sdk.Coin { return q.Amount() },
-		"argument": func(ctx context.Context, q challenge.Challenge) string { return q.Argument },
-		"vote":     func(ctx context.Context, q challenge.Challenge) bool { return q.VoteChoice() },
-	})
-
 	ta.GraphQLClient.RegisterQueryResolver("categories", ta.allCategoriesResolver)
 	ta.GraphQLClient.RegisterQueryResolver("category", ta.categoryResolver)
 	ta.GraphQLClient.RegisterObjectResolver("Category", category.Category{}, map[string]interface{}{
 		"id":      func(_ context.Context, q category.Category) int64 { return q.ID },
 		"stories": ta.categoryStoriesResolver,
 		"creator": func(ctx context.Context, q category.Category) users.User { return getUser(ctx, q.Creator) },
+	})
+
+	ta.GraphQLClient.RegisterQueryResolver("challenge", ta.challengeResolver)
+	ta.GraphQLClient.RegisterObjectResolver("Challenge", challenge.Challenge{}, map[string]interface{}{
+		"amount":   func(ctx context.Context, q challenge.Challenge) sdk.Coin { return q.Amount() },
+		"argument": func(ctx context.Context, q challenge.Challenge) string { return q.Argument },
+		"vote":     func(ctx context.Context, q challenge.Challenge) bool { return q.VoteChoice() },
 	})
 
 	ta.GraphQLClient.RegisterObjectResolver("Coin", sdk.Coin{}, map[string]interface{}{
@@ -112,6 +113,10 @@ func (ta *TruAPI) RegisterResolvers() {
 		"game":         ta.gameResolver,
 	})
 
+	ta.GraphQLClient.RegisterObjectResolver("TwitterProfile", users.TwitterProfile{}, map[string]interface{}{
+		"id": func(_ context.Context, q users.TwitterProfile) string { return q.ID },
+	})
+
 	ta.GraphQLClient.RegisterQueryResolver("users", ta.usersResolver)
 	ta.GraphQLClient.RegisterObjectResolver("User", users.User{}, map[string]interface{}{
 		"id":             func(_ context.Context, q users.User) string { return q.Address },
@@ -120,8 +125,11 @@ func (ta *TruAPI) RegisterResolvers() {
 		"twitterProfile": ta.twitterProfileResolver,
 	})
 
-	ta.GraphQLClient.RegisterObjectResolver("TwitterProfile", users.TwitterProfile{}, map[string]interface{}{
-		"id": func(_ context.Context, q users.TwitterProfile) string { return q.ID },
+	ta.GraphQLClient.RegisterQueryResolver("vote", ta.voteResolver)
+	ta.GraphQLClient.RegisterObjectResolver("Vote", vote.TokenVote{}, map[string]interface{}{
+		"amount":   func(ctx context.Context, q vote.TokenVote) sdk.Coin { return q.Amount() },
+		"argument": func(ctx context.Context, q vote.TokenVote) string { return q.Argument },
+		"vote":     func(ctx context.Context, q vote.TokenVote) bool { return q.VoteChoice() },
 	})
 
 	ta.GraphQLClient.BuildSchema()

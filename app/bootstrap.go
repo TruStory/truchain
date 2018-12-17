@@ -17,6 +17,7 @@ import (
 	"github.com/TruStory/truchain/x/chttp"
 	"github.com/TruStory/truchain/x/game"
 	"github.com/TruStory/truchain/x/story"
+	"github.com/TruStory/truchain/x/vote"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth"
 	"github.com/spf13/viper"
@@ -109,6 +110,7 @@ func loadTestDB(
 	accountKeeper auth.AccountKeeper,
 	backingKeeper backing.WriteKeeper,
 	challengeKeeper challenge.WriteKeeper,
+	voteKeeper vote.WriteKeeper,
 	gameKeeper game.WriteKeeper,
 	bankKeeper bank.Keeper) {
 
@@ -157,6 +159,12 @@ func loadTestDB(
 	argument := "This is wrong"
 	evidence := []url.URL{}
 	_, err = challengeKeeper.Create(ctx, story.ID, amount, argument, addr, evidence)
+	if err != nil {
+		panic(err)
+	}
+
+	// vote on it
+	_, err = voteKeeper.Create(ctx, story.ID, amount, true, "comment", addr, evidence)
 	if err != nil {
 		panic(err)
 	}

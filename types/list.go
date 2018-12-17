@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/davecgh/go-spew/spew"
 )
 
 // UserList defines a list of users associated with a type.
@@ -23,9 +22,6 @@ func NewUserList(foreignStoreKey sdk.StoreKey) UserList {
 // Append adds a new key <-> value association
 func (l UserList) Append(
 	ctx sdk.Context, k WriteKeeper, keyID int64, user sdk.AccAddress, valueID int64) {
-
-	spew.Dump("DEBUG", l.typeByUserKey(ctx, k, keyID, user))
-	spew.Dump("DEBUG", valueID)
 
 	k.GetStore(ctx).Set(
 		l.typeByUserKey(ctx, k, keyID, user),

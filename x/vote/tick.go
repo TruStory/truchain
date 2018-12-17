@@ -91,7 +91,7 @@ func (k Keeper) returnFunds(ctx sdk.Context, gameID int64) sdk.Error {
 	}
 
 	// get token votes
-	tokenVotes, err := k.TokenVotesByGame(ctx, gameID)
+	tokenVotes, err := k.TokenVotesByGameID(ctx, gameID)
 	if err != nil {
 		return err
 	}

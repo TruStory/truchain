@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"math/rand"
 
+	"github.com/TruStory/truchain/x/vote"
+
 	"github.com/TruStory/truchain/x/challenge"
 
 	"github.com/TruStory/truchain/x/backing"
@@ -232,4 +234,22 @@ func (ta *TruAPI) twitterProfileResolver(ctx context.Context, q users.User) user
 		Address:   addr,
 		AvatarURI: fmt.Sprintf("https://randomuser.me/api/portraits/thumb/men/%d.jpg", rand.Intn(50)+1),
 	}
+}
+
+func (ta *TruAPI) voteResolver(
+	_ context.Context, q vote.QueryByStoryIDAndCreatorParams) vote.TokenVote {
+	res := ta.RunQuery("votes/storyIDAndCreator", q)
+
+	if res.Code != 0 {
+		fmt.Println("Resolver err: ", res)
+		return vote.TokenVote{}
+	}
+
+	tokenVote := new(vote.TokenVote)
+	err := json.Unmarshal(res.Value, tokenVote)
+	if err != nil {
+		panic(err)
+	}
+
+	return *tokenVote
 }
