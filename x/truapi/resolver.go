@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"math/rand"
 
+	"github.com/TruStory/truchain/x/challenge"
+
 	"github.com/TruStory/truchain/x/backing"
 
 	app "github.com/TruStory/truchain/types"
@@ -33,6 +35,24 @@ func (ta *TruAPI) backingResolver(
 	}
 
 	return *backing
+}
+
+func (ta *TruAPI) challengeResolver(
+	_ context.Context, q challenge.QueryByStoryIDAndCreatorParams) challenge.Challenge {
+	res := ta.RunQuery("challenges/storyIDAndCreator", q)
+
+	if res.Code != 0 {
+		fmt.Println("Resolver err: ", res)
+		return challenge.Challenge{}
+	}
+
+	challenge := new(challenge.Challenge)
+	err := json.Unmarshal(res.Value, challenge)
+	if err != nil {
+		panic(err)
+	}
+
+	return *challenge
 }
 
 func (ta *TruAPI) categoryStoriesResolver(_ context.Context, q category.Category) []story.Story {

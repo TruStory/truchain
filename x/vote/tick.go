@@ -85,7 +85,7 @@ func (k Keeper) checkGames(ctx sdk.Context, gameQueue queue.Queue) sdk.Error {
 
 func (k Keeper) returnFunds(ctx sdk.Context, gameID int64) sdk.Error {
 	// get challenges
-	challenges, err := k.challengeKeeper.ChallengesByGame(ctx, gameID)
+	challenges, err := k.challengeKeeper.ChallengesByGameID(ctx, gameID)
 	if err != nil {
 		return err
 	}

@@ -17,8 +17,17 @@ import (
 type ReadKeeper interface {
 	app.ReadKeeper
 
-	Challenge(ctx sdk.Context, challengeID int64) (challenge Challenge, err sdk.Error)
-	ChallengesByGame(ctx sdk.Context, gameID int64) (challenges []Challenge, err sdk.Error)
+	Challenge(
+		ctx sdk.Context, challengeID int64) (challenge Challenge, err sdk.Error)
+
+	ChallengesByGameID(
+		ctx sdk.Context, gameID int64) (challenges []Challenge, err sdk.Error)
+
+	ChallengeByStoryIDAndCreator(
+		ctx sdk.Context,
+		storyID int64,
+		creator sdk.AccAddress) (challenge Challenge, err sdk.Error)
+
 	Tally(ctx sdk.Context, gameID int64) (falseVotes []Challenge, err sdk.Error)
 }
 
@@ -158,8 +167,8 @@ func (k Keeper) Challenge(
 	return
 }
 
-// ChallengesByGame returns the list of challenges for a game id
-func (k Keeper) ChallengesByGame(
+// ChallengesByGameID returns the list of challenges for a game id
+func (k Keeper) ChallengesByGameID(
 	ctx sdk.Context, gameID int64) (challenges []Challenge, err sdk.Error) {
 
 	// iterate over and return challenges for a game
@@ -172,6 +181,25 @@ func (k Keeper) ChallengesByGame(
 
 		return nil
 	})
+
+	return
+}
+
+// ChallengeByStoryIDAndCreator returns a challenge for a given story id and creator
+func (k Keeper) ChallengeByStoryIDAndCreator(
+	ctx sdk.Context,
+	storyID int64,
+	creator sdk.AccAddress) (challenge Challenge, err sdk.Error) {
+
+	// get the story
+	s, err := k.storyKeeper.Story(ctx, storyID)
+	if err != nil {
+		return challenge, story.ErrInvalidStoryID(storyID)
+	}
+
+	// get the challenge
+	challengeID := k.challengeList.Get(ctx, k, s.GameID, creator)
+	challenge, err = k.Challenge(ctx, challengeID)
 
 	return
 }
