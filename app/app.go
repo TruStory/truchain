@@ -174,7 +174,9 @@ func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *T
 		AddRoute(category.QueryPath, category.NewQuerier(app.categoryKeeper)).
 		AddRoute(users.QueryPath, users.NewQuerier(codec, app.accountKeeper)).
 		AddRoute(game.QueryPath, game.NewQuerier(app.gameKeeper, app.backingKeeper)).
-		AddRoute(backing.QueryPath, backing.NewQuerier(app.backingKeeper))
+		AddRoute(backing.QueryPath, backing.NewQuerier(app.backingKeeper)).
+		AddRoute(challenge.QueryPath, challenge.NewQuerier(app.challengeKeeper)).
+		AddRoute(vote.QueryPath, vote.NewQuerier(app.voteKeeper))
 
 	// perform initialization logic
 	app.SetInitChainer(app.initChainer)
@@ -256,6 +258,7 @@ func (app *TruChain) BeginBlocker(ctx sdk.Context, req abci.RequestBeginBlock) a
 				app.accountKeeper,
 				app.backingKeeper,
 				app.challengeKeeper,
+				app.voteKeeper,
 				app.gameKeeper,
 				app.coinKeeper,
 			)

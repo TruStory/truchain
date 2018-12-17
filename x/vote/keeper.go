@@ -20,24 +20,28 @@ type ReadKeeper interface {
 	app.ReadKeeper
 
 	TokenVote(ctx sdk.Context, id int64) (vote TokenVote, err sdk.Error)
-	TokenVotesByGame(ctx sdk.Context, gameID int64) ([]TokenVote, sdk.Error)
+
+	TokenVotesByGameID(ctx sdk.Context, gameID int64) ([]TokenVote, sdk.Error)
+
+	TokenVotesByStoryIDAndCreator(
+		ctx sdk.Context,
+		storyID int64,
+		creator sdk.AccAddress) (vote TokenVote, err sdk.Error)
+
 	Tally(ctx sdk.Context, gameID int64) (
 		trueVotes []TokenVote, falseVotes []TokenVote, err sdk.Error)
 }
 
 // WriteKeeper defines a module interface that facilities write only access to truchain data
 type WriteKeeper interface {
+	ReadKeeper
+
 	Create(
 		ctx sdk.Context, storyID int64, amount sdk.Coin,
 		choice bool, comment string, creator sdk.AccAddress,
 		evidence []url.URL) (int64, sdk.Error)
-	NewResponseEndBlock(ctx sdk.Context) sdk.Tags
-}
 
-// ReadWriteKeeper defines a module interface that facilities read/write access to truchain data
-type ReadWriteKeeper interface {
-	ReadKeeper
-	WriteKeeper
+	NewResponseEndBlock(ctx sdk.Context) sdk.Tags
 }
 
 // Keeper data type storing keys to the key-value store
@@ -156,8 +160,8 @@ func (k Keeper) TokenVote(ctx sdk.Context, id int64) (vote TokenVote, err sdk.Er
 	return vote, nil
 }
 
-// TokenVotesByGame returns a list of votes for a given game
-func (k Keeper) TokenVotesByGame(
+// TokenVotesByGameID returns a list of votes for a given game
+func (k Keeper) TokenVotesByGameID(
 	ctx sdk.Context, gameID int64) (votes []TokenVote, err sdk.Error) {
 
 	// iterate over voter list and get votes
@@ -170,6 +174,25 @@ func (k Keeper) TokenVotesByGame(
 
 		return nil
 	})
+
+	return
+}
+
+// TokenVotesByStoryIDAndCreator returns a vote for a given story id and creator
+func (k Keeper) TokenVotesByStoryIDAndCreator(
+	ctx sdk.Context,
+	storyID int64,
+	creator sdk.AccAddress) (vote TokenVote, err sdk.Error) {
+
+	// get the story
+	s, err := k.storyKeeper.Story(ctx, storyID)
+	if err != nil {
+		return vote, story.ErrInvalidStoryID(storyID)
+	}
+
+	// get the vote
+	tokenVoteID := k.voterList.Get(ctx, k, s.GameID, creator)
+	vote, err = k.TokenVote(ctx, tokenVoteID)
 
 	return
 }

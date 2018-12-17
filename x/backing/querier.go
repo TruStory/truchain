@@ -11,6 +11,7 @@ const (
 	QueryPath                   = "backings"
 	QueryBackingByID            = "id"
 	QueryBackingAmountByStoryID = "totalAmountByStoryID"
+	QueryByStoryIDAndCreator    = "storyIDAndCreator"
 )
 
 // NewQuerier returns a function that handles queries on the KVStore
@@ -21,6 +22,8 @@ func NewQuerier(k ReadKeeper) sdk.Querier {
 			return queryBackingByID(ctx, req, k)
 		case QueryBackingAmountByStoryID:
 			return queryBackingAmountByStoryID(ctx, req, k)
+		case QueryByStoryIDAndCreator:
+			return queryByStoryIDAndCreator(ctx, req, k)
 		default:
 			return nil, sdk.ErrUnknownRequest("Unknown truchain query endpoint")
 		}
@@ -57,4 +60,30 @@ func queryBackingAmountByStoryID(ctx sdk.Context, req abci.RequestQuery, k ReadK
 	}
 
 	return app.MustMarshal(backingTotal), nil
+}
+
+func queryByStoryIDAndCreator(
+	ctx sdk.Context,
+	req abci.RequestQuery,
+	k ReadKeeper) (res []byte, sdkErr sdk.Error) {
+
+	params := app.QueryByStoryIDAndCreatorParams{}
+
+	sdkErr = app.UnmarshalQueryParams(req, &params)
+	if sdkErr != nil {
+		return
+	}
+
+	// convert address bech32 string to bytes
+	addr, err := sdk.AccAddressFromBech32(params.Creator)
+	if err != nil {
+		return res, sdk.ErrInvalidAddress("Cannot decode address")
+	}
+
+	backing, sdkErr := k.BackingByStoryIDAndCreator(ctx, params.StoryID, addr)
+	if sdkErr != nil {
+		return
+	}
+
+	return app.MustMarshal(backing), nil
 }

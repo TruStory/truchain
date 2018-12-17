@@ -15,6 +15,13 @@ type QueryByIDParams struct {
 	ID int64
 }
 
+// QueryByStoryIDAndCreatorParams is query params for backing,
+// challenge, and token votes by story id and creator
+type QueryByStoryIDAndCreatorParams struct {
+	StoryID int64
+	Creator string
+}
+
 // UnmarshalQueryParams unmarshals the request query from a client
 func UnmarshalQueryParams(req abci.RequestQuery, params interface{}) (sdkErr sdk.Error) {
 	parseErr := json.Unmarshal(req.Data, params)
