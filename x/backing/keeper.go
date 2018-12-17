@@ -18,6 +18,14 @@ type ReadKeeper interface {
 
 	Backing(ctx sdk.Context, id int64) (backing Backing, err sdk.Error)
 
+	BackingByStoryIDAndCreator(
+		ctx sdk.Context,
+		storyID int64,
+		creator sdk.AccAddress) (backing Backing, err sdk.Error)
+
+	BackingsByStoryID(
+		ctx sdk.Context, storyID int64) (backings []Backing, err sdk.Error)
+
 	Tally(ctx sdk.Context, storyID int64) (
 		trueVotes []Backing, falseVotes []Backing, err sdk.Error)
 
@@ -183,8 +191,8 @@ func (k Keeper) Backing(ctx sdk.Context, id int64) (backing Backing, err sdk.Err
 	return
 }
 
-// BackingsByStory returns backings for a given story id
-func (k Keeper) BackingsByStory(
+// BackingsByStoryID returns backings for a given story id
+func (k Keeper) BackingsByStoryID(
 	ctx sdk.Context, storyID int64) (backings []Backing, err sdk.Error) {
 
 	// iterate over backing list and get backings
@@ -197,6 +205,18 @@ func (k Keeper) BackingsByStory(
 
 		return nil
 	})
+
+	return
+}
+
+// BackingByStoryIDAndCreator returns backings for a given story id and creator
+func (k Keeper) BackingByStoryIDAndCreator(
+	ctx sdk.Context,
+	storyID int64,
+	creator sdk.AccAddress) (backing Backing, err sdk.Error) {
+
+	backingID := k.backingsList.Get(ctx, k, storyID, creator)
+	backing, err = k.Backing(ctx, backingID)
 
 	return
 }

@@ -4,6 +4,8 @@ import (
 	"context"
 	"net/http"
 
+	"github.com/TruStory/truchain/x/backing"
+
 	"github.com/TruStory/truchain/x/category"
 	"github.com/TruStory/truchain/x/chttp"
 	"github.com/TruStory/truchain/x/game"
@@ -53,6 +55,14 @@ func (ta *TruAPI) RegisterResolvers() {
 
 	ta.GraphQLClient.RegisterObjectResolver("Argument", story.Argument{}, map[string]interface{}{
 		"creator": func(ctx context.Context, q story.Argument) users.User { return getUser(ctx, q.Creator) },
+	})
+
+	ta.GraphQLClient.RegisterQueryResolver("backing", ta.backingResolver)
+	ta.GraphQLClient.RegisterObjectResolver("Backing", backing.Backing{}, map[string]interface{}{
+		"amount":   func(ctx context.Context, q backing.Backing) sdk.Coin { return q.Amount() },
+		"argument": func(ctx context.Context, q backing.Backing) string { return q.Argument },
+		"interest": func(ctx context.Context, q backing.Backing) sdk.Coin { return q.Interest },
+		"vote":     func(ctx context.Context, q backing.Backing) bool { return q.VoteChoice() },
 	})
 
 	ta.GraphQLClient.RegisterQueryResolver("categories", ta.allCategoriesResolver)

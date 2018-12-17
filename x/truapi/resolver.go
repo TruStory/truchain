@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"math/rand"
 
+	"github.com/TruStory/truchain/x/backing"
+
 	app "github.com/TruStory/truchain/types"
 	"github.com/TruStory/truchain/x/category"
 	"github.com/TruStory/truchain/x/game"
@@ -14,6 +16,24 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	amino "github.com/tendermint/go-amino"
 )
+
+func (ta *TruAPI) backingResolver(
+	_ context.Context, q backing.QueryByStoryIDAndCreatorParams) backing.Backing {
+	res := ta.RunQuery("backings/storyIDAndCreator", q)
+
+	if res.Code != 0 {
+		fmt.Println("Resolver err: ", res)
+		return backing.Backing{}
+	}
+
+	backing := new(backing.Backing)
+	err := json.Unmarshal(res.Value, backing)
+	if err != nil {
+		panic(err)
+	}
+
+	return *backing
+}
 
 func (ta *TruAPI) categoryStoriesResolver(_ context.Context, q category.Category) []story.Story {
 	res := ta.RunQuery("stories/category", story.QueryCategoryStoriesParams{CategoryID: q.ID})
