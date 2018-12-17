@@ -12,12 +12,6 @@ const (
 	QueryByStoryIDAndCreator = "storyIDAndCreator"
 )
 
-// QueryByStoryIDAndCreatorParams is query params for any ID
-type QueryByStoryIDAndCreatorParams struct {
-	StoryID int64
-	Creator string
-}
-
 // NewQuerier returns a function that handles queries on the KVStore
 func NewQuerier(k ReadKeeper) sdk.Querier {
 	return func(ctx sdk.Context, path []string, req abci.RequestQuery) (res []byte, err sdk.Error) {
@@ -37,7 +31,7 @@ func queryByStoryIDAndCreator(
 	req abci.RequestQuery,
 	k ReadKeeper) (res []byte, sdkErr sdk.Error) {
 
-	params := QueryByStoryIDAndCreatorParams{}
+	params := app.QueryByStoryIDAndCreatorParams{}
 
 	sdkErr = app.UnmarshalQueryParams(req, &params)
 	if sdkErr != nil {

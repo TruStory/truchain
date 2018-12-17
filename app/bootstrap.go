@@ -41,7 +41,7 @@ func createUser(
 	_, pubKey, addr := keyPubAddr()
 	bacc := auth.NewBaseAccountWithAddress(addr)
 
-	spew.Dump("DEBUG", addr)
+	spew.Dump("DEBUG -- CREATOR ADDRESS", addr)
 
 	key, err := chttp.StdKey("ed25519", pubKey.Bytes())
 	if err != nil {

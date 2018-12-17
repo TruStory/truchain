@@ -22,7 +22,7 @@ import (
 )
 
 func (ta *TruAPI) backingResolver(
-	_ context.Context, q backing.QueryByStoryIDAndCreatorParams) backing.Backing {
+	_ context.Context, q app.QueryByStoryIDAndCreatorParams) backing.Backing {
 	res := ta.RunQuery("backings/storyIDAndCreator", q)
 
 	if res.Code != 0 {
@@ -40,7 +40,7 @@ func (ta *TruAPI) backingResolver(
 }
 
 func (ta *TruAPI) challengeResolver(
-	_ context.Context, q challenge.QueryByStoryIDAndCreatorParams) challenge.Challenge {
+	_ context.Context, q app.QueryByStoryIDAndCreatorParams) challenge.Challenge {
 	res := ta.RunQuery("challenges/storyIDAndCreator", q)
 
 	if res.Code != 0 {
@@ -237,7 +237,7 @@ func (ta *TruAPI) twitterProfileResolver(ctx context.Context, q users.User) user
 }
 
 func (ta *TruAPI) voteResolver(
-	_ context.Context, q vote.QueryByStoryIDAndCreatorParams) vote.TokenVote {
+	_ context.Context, q app.QueryByStoryIDAndCreatorParams) vote.TokenVote {
 	res := ta.RunQuery("votes/storyIDAndCreator", q)
 
 	if res.Code != 0 {

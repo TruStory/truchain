@@ -4,17 +4,15 @@ import (
 	"context"
 	"net/http"
 
-	"github.com/TruStory/truchain/x/challenge"
-	"github.com/TruStory/truchain/x/vote"
-
 	"github.com/TruStory/truchain/x/backing"
-
 	"github.com/TruStory/truchain/x/category"
+	"github.com/TruStory/truchain/x/challenge"
 	"github.com/TruStory/truchain/x/chttp"
 	"github.com/TruStory/truchain/x/game"
 	"github.com/TruStory/truchain/x/graphql"
 	"github.com/TruStory/truchain/x/story"
 	"github.com/TruStory/truchain/x/users"
+	"github.com/TruStory/truchain/x/vote"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	thunder "github.com/samsarahq/thunder/graphql"
 	"github.com/samsarahq/thunder/graphql/graphiql"
