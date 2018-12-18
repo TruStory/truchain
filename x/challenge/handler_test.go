@@ -3,7 +3,6 @@ package challenge
 import (
 	"encoding/binary"
 	"encoding/json"
-	"net/url"
 	"testing"
 
 	"github.com/TruStory/truchain/types"
@@ -21,8 +20,7 @@ func TestSubmitChallengeMsg(t *testing.T) {
 	amount := sdk.NewCoin("trudex", sdk.NewInt(15))
 	argument := "test argument"
 	creator := sdk.AccAddress([]byte{1, 2})
-	cnn, _ := url.Parse("http://www.cnn.com")
-	evidence := []url.URL{*cnn}
+	evidence := []string{"http://www.cnn.com"}
 
 	// give user some funds
 	bankKeeper.AddCoins(ctx, creator, sdk.Coins{amount})
@@ -47,8 +45,7 @@ func TestSubmitChallengeMsg_ErrInsufficientFunds(t *testing.T) {
 	amount := sdk.NewCoin("testcoin", sdk.NewInt(5))
 	argument := "test argument"
 	creator := sdk.AccAddress([]byte{1, 2})
-	cnn, _ := url.Parse("http://www.cnn.com")
-	evidence := []url.URL{*cnn}
+	evidence := []string{"http://www.cnn.com"}
 
 	msg := NewCreateChallengeMsg(storyID, amount, argument, creator, evidence)
 	assert.NotNil(t, msg)
@@ -68,8 +65,7 @@ func TestSubmitChallengeMsg_ErrInsufficientChallengeAmount(t *testing.T) {
 	amount := sdk.NewCoin("trudex", sdk.NewInt(1))
 	argument := "test argument"
 	creator := sdk.AccAddress([]byte{1, 2})
-	cnn, _ := url.Parse("http://www.cnn.com")
-	evidence := []url.URL{*cnn}
+	evidence := []string{"http://www.cnn.com"}
 
 	// give user some funds
 	bankKeeper.AddCoins(ctx, creator, sdk.Coins{amount})

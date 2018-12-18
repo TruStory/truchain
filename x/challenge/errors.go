@@ -15,6 +15,7 @@ const (
 	CodeInvalidMsg         sdk.CodeType = 1002
 	CodeInvalidVote        sdk.CodeType = 1003
 	CodeDuplicateChallenge sdk.CodeType = 1004
+	CodeInvalidEvidenceURL sdk.CodeType = 1005
 )
 
 // ErrNotFound creates an error when the searched entity is not found
@@ -47,4 +48,12 @@ func ErrInvalidVote() sdk.Error {
 		DefaultCodespace,
 		CodeInvalidMsg,
 		"Challenges cannot have a TRUE vote.")
+}
+
+// ErrInvalidEvidenceURL throws an error when a URL in invalid
+func ErrInvalidEvidenceURL(url string) sdk.Error {
+	return sdk.NewError(
+		DefaultCodespace,
+		CodeInvalidEvidenceURL,
+		"Invalid evidence URL: "+url)
 }
