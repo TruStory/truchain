@@ -1,8 +1,6 @@
 package challenge
 
 import (
-	"net/url"
-
 	"github.com/TruStory/truchain/x/story"
 
 	app "github.com/TruStory/truchain/types"
@@ -15,7 +13,7 @@ type CreateChallengeMsg struct {
 	Amount   sdk.Coin       `json:"amount"`
 	Argument string         `json:"argument,omitempty"`
 	Creator  sdk.AccAddress `json:"creator"`
-	Evidence []url.URL      `json:"evidence,omitempty"`
+	Evidence []string       `json:"evidence,omitempty"`
 }
 
 // NewCreateChallengeMsg creates a message to challenge a story
@@ -24,7 +22,7 @@ func NewCreateChallengeMsg(
 	amount sdk.Coin,
 	argument string,
 	creator sdk.AccAddress,
-	evidence []url.URL) CreateChallengeMsg {
+	evidence []string) CreateChallengeMsg {
 	return CreateChallengeMsg{
 		StoryID:  storyID,
 		Amount:   amount,
