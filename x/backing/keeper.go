@@ -106,11 +106,8 @@ func (k Keeper) Create(
 		return
 	}
 
-	// load default backing parameters
-	params := DefaultParams()
-
 	// set principal, converting from trustake if needed
-	principal, err := k.getPrincipal(ctx, cat, amount, creator)
+	principal, err := k.getPrincipal(ctx, cat.Denom(), amount, creator)
 	if err != nil {
 		return
 	}
@@ -120,6 +117,9 @@ func (k Keeper) Create(
 	if err != nil {
 		return
 	}
+
+	// load default backing parameters
+	params := DefaultParams()
 
 	// mint category coin from interest earned
 	interest := getInterest(
@@ -279,13 +279,13 @@ func (k Keeper) TotalBackingAmount(ctx sdk.Context, storyID int64) (
 // after the backing expires/matures. Returns a coin.
 func (k Keeper) getPrincipal(
 	ctx sdk.Context,
-	cat cat.Category,
+	denom string,
 	amount sdk.Coin,
 	userAddr sdk.AccAddress) (principal sdk.Coin, err sdk.Error) {
 
 	// check which type of coin user wants to back in
 	switch amount.Denom {
-	case cat.Denom():
+	case denom:
 		// check and return amount if user has enough category coins
 		if k.bankKeeper.HasCoins(ctx, userAddr, sdk.Coins{amount}) {
 			return amount, nil
@@ -294,7 +294,7 @@ func (k Keeper) getPrincipal(
 	case params.StakeDenom:
 		// mint category coins from trustake
 		principal, err = app.SwapForCategoryCoin(
-			ctx, k.bankKeeper, amount, cat.Denom(), userAddr)
+			ctx, k.bankKeeper, amount, denom, userAddr)
 
 	default:
 		return principal, sdk.ErrInvalidCoins("Invalid backing token")
