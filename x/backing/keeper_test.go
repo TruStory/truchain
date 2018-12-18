@@ -160,6 +160,22 @@ func TestNewBacking(t *testing.T) {
 	assert.NotNil(t, backingID)
 }
 
+func TestDuplicateBacking(t *testing.T) {
+	ctx, bk, sk, ck, bankKeeper, _ := mockDB()
+	storyID := createFakeStory(ctx, sk, ck)
+	amount, _ := sdk.ParseCoin("5trudex")
+	creator := sdk.AccAddress([]byte{1, 2})
+	duration := DefaultMsgParams().MinPeriod
+	bankKeeper.AddCoins(ctx, creator, sdk.Coins{amount})
+	bankKeeper.AddCoins(ctx, creator, sdk.Coins{amount})
+
+	backingID, _ := bk.Create(ctx, storyID, amount, creator, duration)
+	assert.NotNil(t, backingID)
+
+	_, err := bk.Create(ctx, storyID, amount, creator, duration)
+	assert.Equal(t, ErrDuplicate(storyID, creator).Code(), err.Code())
+}
+
 func Test_getPrincipal_InCategoryCoins(t *testing.T) {
 	ctx, bk, _, ck, bankKeeper, _ := mockDB()
 	cat := createFakeCategory(ctx, ck)
