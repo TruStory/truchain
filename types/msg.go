@@ -10,6 +10,16 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
+// VoteStoryMsg defines data common to backing, challenge, and
+// token vote messages.
+type VoteStoryMsg struct {
+	StoryID  int64          `json:"story_id"`
+	Amount   sdk.Coin       `json:"amount"`
+	Argument string         `json:"argument,omitempty"`
+	Creator  sdk.AccAddress `json:"creator"`
+	Evidence []string       `json:"evidence,omitempty"`
+}
+
 // Utilities for all `sdk.Msg` types
 
 // GetRoute returns the package name of the containing `Msg`
