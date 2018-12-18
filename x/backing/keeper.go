@@ -87,11 +87,17 @@ func (k Keeper) Create(
 	duration time.Duration,
 ) (id int64, err sdk.Error) {
 
-	// Check if user has enough cat coins or trustake to back
+	// check if user has enough cat coins or trustake to back
 	trustake := sdk.NewCoin(params.StakeDenom, amount.Amount)
 	if !k.bankKeeper.HasCoins(ctx, creator, sdk.Coins{amount}) &&
 		!k.bankKeeper.HasCoins(ctx, creator, sdk.Coins{trustake}) {
 		return 0, sdk.ErrInsufficientFunds("Insufficient funds for backing.")
+	}
+
+	// check if user has already backed
+	_, err = k.BackingByStoryIDAndCreator(ctx, storyID, creator)
+	if err == nil {
+		return 0, ErrDuplicate(storyID, creator)
 	}
 
 	// get story value from story id
