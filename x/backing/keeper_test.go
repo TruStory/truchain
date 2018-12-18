@@ -169,7 +169,7 @@ func Test_getPrincipal_InCategoryCoins(t *testing.T) {
 	// give fake user some fake category coins
 	bankKeeper.AddCoins(ctx, userAddr, sdk.Coins{amount})
 
-	coin, err := bk.getPrincipal(ctx, cat, amount, userAddr)
+	coin, err := bk.getPrincipal(ctx, cat.Denom(), amount, userAddr)
 	assert.Nil(t, err)
 	assert.Equal(t, amount, coin, "Incorrect principal calculation")
 	assert.Equal(t, "trudex", amount.Denom, "Incorrect principal coin")
@@ -184,7 +184,7 @@ func Test_getPrincipal_InTrustake(t *testing.T) {
 	bankKeeper.AddCoins(ctx, userAddr, sdk.Coins{fiver})
 
 	// back with trustake, get principal in cat coins
-	coin, err := bk.getPrincipal(ctx, cat, fiver, userAddr)
+	coin, err := bk.getPrincipal(ctx, cat.Denom(), fiver, userAddr)
 	assert.Nil(t, err)
 	assert.Equal(t, fiver.Amount, coin.Amount, "Incorrect principal calculation")
 	assert.Equal(t, "trudex", coin.Denom, "Incorrect principal coin")
@@ -199,7 +199,7 @@ func Test_getPrincipal_ErrInvalidCoin(t *testing.T) {
 	// give fake user some fake coins
 	bankKeeper.AddCoins(ctx, userAddr, sdk.Coins{fiver})
 
-	_, err := bk.getPrincipal(ctx, cat, amount, userAddr)
+	_, err := bk.getPrincipal(ctx, cat.Denom(), amount, userAddr)
 	assert.NotNil(t, err)
 	// assert.Equal(t, sdk.ErrInsufficientCoins().Code(), err.Code(), "invalid error")
 }
