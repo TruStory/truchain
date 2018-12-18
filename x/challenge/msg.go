@@ -9,11 +9,7 @@ import (
 
 // CreateChallengeMsg defines a message to challenge a story
 type CreateChallengeMsg struct {
-	StoryID  int64          `json:"story_id"`
-	Amount   sdk.Coin       `json:"amount"`
-	Argument string         `json:"argument,omitempty"`
-	Creator  sdk.AccAddress `json:"creator"`
-	Evidence []string       `json:"evidence,omitempty"`
+	app.VoteStoryMsg
 }
 
 // NewCreateChallengeMsg creates a message to challenge a story
@@ -23,13 +19,17 @@ func NewCreateChallengeMsg(
 	argument string,
 	creator sdk.AccAddress,
 	evidence []string) CreateChallengeMsg {
-	return CreateChallengeMsg{
+
+	// populate embedded vote msg struct
+	voteMsg := app.VoteStoryMsg{
 		StoryID:  storyID,
 		Amount:   amount,
 		Argument: argument,
 		Creator:  creator,
 		Evidence: evidence,
 	}
+
+	return CreateChallengeMsg{voteMsg}
 }
 
 // Route implements Msg
