@@ -95,8 +95,7 @@ func (k Keeper) Create(
 	}
 
 	// check if user has already backed
-	_, err = k.BackingByStoryIDAndCreator(ctx, storyID, creator)
-	if err == nil {
+	if k.backingsList.Includes(ctx, k, storyID, creator) {
 		return 0, ErrDuplicate(storyID, creator)
 	}
 
