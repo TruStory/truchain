@@ -14,9 +14,8 @@ func TestValidSubmitStoryMsg(t *testing.T) {
 	validCreator := sdk.AccAddress([]byte{1, 2})
 	validSource := "http://shanesbrain.net"
 	validStoryType := Default
-	validEvidence := []string{"http://shanesbrain.net"}
 	validArgument := "argument body"
-	msg := NewSubmitStoryMsg(validArgument, validBody, validCategoryID, validCreator, validEvidence, validSource, validStoryType)
+	msg := NewSubmitStoryMsg(validArgument, validBody, validCategoryID, validCreator, validSource, validStoryType)
 	err := msg.ValidateBasic()
 
 	assert.Nil(t, err)
@@ -31,10 +30,9 @@ func TestInValidBodySubmitStoryMsg(t *testing.T) {
 	validCreator := sdk.AccAddress([]byte{1, 2})
 	validSource := "http://shanesbrain.net"
 	validStoryType := Default
-	validEvidence := []string{"http://shanesbrain.net"}
 	validArgument := "argument"
 
-	msg := NewSubmitStoryMsg(validArgument, invalidBody, validCategoryID, validCreator, validEvidence, validSource, validStoryType)
+	msg := NewSubmitStoryMsg(validArgument, invalidBody, validCategoryID, validCreator, validSource, validStoryType)
 	err := msg.ValidateBasic()
 
 	assert.Equal(t, sdk.CodeType(701), err.Code(), err.Error())
@@ -46,10 +44,9 @@ func TestInValidCreatorSubmitStoryMsg(t *testing.T) {
 	invalidCreator := sdk.AccAddress([]byte{})
 	validSource := "http://shanesbrain.net"
 	validStoryType := Default
-	validEvidence := []string{"http://shanesbrain.net"}
 	validArgument := "argument"
 
-	msg := NewSubmitStoryMsg(validArgument, validBody, validCategoryID, invalidCreator, validEvidence, validSource, validStoryType)
+	msg := NewSubmitStoryMsg(validArgument, validBody, validCategoryID, invalidCreator, validSource, validStoryType)
 	err := msg.ValidateBasic()
 
 	assert.Equal(t, sdk.CodeType(7), err.Code(), err.Error())
@@ -61,10 +58,9 @@ func TestInValidSourceSubmitStoryMsg(t *testing.T) {
 	validCreator := sdk.AccAddress([]byte{1, 2})
 	invalidSource := ""
 	validStoryType := Default
-	validEvidence := []string{"http://shanesbrain.net"}
 	validArgument := ""
 
-	msg := NewSubmitStoryMsg(validArgument, validBody, validCategoryID, validCreator, validEvidence, invalidSource, validStoryType)
+	msg := NewSubmitStoryMsg(validArgument, validBody, validCategoryID, validCreator, invalidSource, validStoryType)
 	err := msg.ValidateBasic()
 
 	assert.Equal(t, sdk.CodeType(708), err.Code(), err.Error())
