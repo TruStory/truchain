@@ -23,10 +23,9 @@ func TestSubmitStoryMsg(t *testing.T) {
 	creator := sdk.AccAddress([]byte{1, 2})
 	kind := Default
 	source := "http://trustory.io"
-	evidence := []string{"http://shanesbrain.net"}
 	argument := "argument body"
 
-	msg := NewSubmitStoryMsg(argument, body, cat.ID, creator, evidence, source, kind)
+	msg := NewSubmitStoryMsg(argument, body, cat.ID, creator, source, kind)
 	assert.NotNil(t, msg)
 
 	res := h(ctx, msg)
@@ -52,10 +51,9 @@ func TestSubmitStoryMsgWithOnlyRequiredFields(t *testing.T) {
 	creator := sdk.AccAddress([]byte{1, 2})
 	kind := Default
 	source := "http://trustory.io"
-	evidence := []string{}
 	argument := ""
 
-	msg := NewSubmitStoryMsg(argument, body, cat.ID, creator, evidence, source, kind)
+	msg := NewSubmitStoryMsg(argument, body, cat.ID, creator, source, kind)
 	assert.NotNil(t, msg)
 
 	res := h(ctx, msg)
@@ -81,9 +79,8 @@ func TestSubmitStoryMsg_ErrInvalidCategory(t *testing.T) {
 	creator := sdk.AccAddress([]byte{1, 2})
 	kind := Default
 	source := "http://trustory.io"
-	evidence := []string{"http://shanesbrain.net"}
 	argument := "argument body"
-	msg := NewSubmitStoryMsg(argument, body, catID, creator, evidence, source, kind)
+	msg := NewSubmitStoryMsg(argument, body, catID, creator, source, kind)
 	assert.NotNil(t, msg)
 
 	res := h(ctx, msg)

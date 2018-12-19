@@ -40,20 +40,6 @@ func handleSubmitStoryMsg(ctx sdk.Context, k WriteKeeper, msg SubmitStoryMsg) sd
 
 	// create evidence type from url
 	var evidence []Evidence
-	for _, urlString := range msg.Evidence {
-
-		evidenceURL, urlError := url.ParseRequestURI(urlString)
-		if urlError != nil {
-			return ErrInvalidEvidenceURL(urlString).Result()
-		}
-
-		e := Evidence{
-			Creator:   msg.Creator,
-			URL:       *evidenceURL,
-			Timestamp: app.NewTimestamp(ctx.BlockHeader()),
-		}
-		evidence = append(evidence, e)
-	}
 
 	argument := Argument{}
 	if len(msg.Argument) > 0 {

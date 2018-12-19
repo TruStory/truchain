@@ -15,7 +15,6 @@ type SubmitStoryMsg struct {
 	CategoryID int64          `json:"category_id"`
 	Creator    sdk.AccAddress `json:"creator"`
 	Source     string         `json:"source"`
-	Evidence   []string       `json:"evidence,omitempty"`
 	StoryType  Type           `json:"story_type"`
 }
 
@@ -25,7 +24,6 @@ func NewSubmitStoryMsg(
 	body string,
 	categoryID int64,
 	creator sdk.AccAddress,
-	evidence []string,
 	source string,
 	storyType Type) SubmitStoryMsg {
 
@@ -34,7 +32,6 @@ func NewSubmitStoryMsg(
 		Body:       body,
 		CategoryID: categoryID,
 		Creator:    creator,
-		Evidence:   evidence,
 		Source:     source,
 		StoryType:  storyType,
 	}
