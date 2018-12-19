@@ -26,9 +26,14 @@ func handleCreateVoteMsg(
 		return err.Result()
 	}
 
+	evidence, err := app.ParseEvidence(msg.Evidence)
+	if err != nil {
+		return err.Result()
+	}
+
 	id, err := k.Create(
-		ctx, msg.StoryID, msg.Amount, msg.Vote, msg.Comment,
-		msg.Creator, msg.Evidence)
+		ctx, msg.StoryID, msg.Amount, msg.Vote, msg.Argument,
+		msg.Creator, evidence)
 	if err != nil {
 		return err.Result()
 	}

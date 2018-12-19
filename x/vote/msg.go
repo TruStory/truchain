@@ -1,8 +1,6 @@
 package vote
 
 import (
-	"net/url"
-
 	app "github.com/TruStory/truchain/types"
 	"github.com/TruStory/truchain/x/story"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -10,31 +8,31 @@ import (
 
 // CreateVoteMsg defines a message to create a vote
 type CreateVoteMsg struct {
-	StoryID  int64          `json:"story_id"`
-	Amount   sdk.Coin       `json:"amount"`
-	Comment  string         `json:"comment,omitempty"`
-	Creator  sdk.AccAddress `json:"creator"`
-	Evidence []url.URL      `json:"evidence,omitempty"`
-	Vote     bool           `json:"vote"`
+	app.VoteStoryMsg
+
+	// explicit vote
+	Vote bool `json:"vote"`
 }
 
 // NewCreateVoteMsg creates a message to vote
 func NewCreateVoteMsg(
 	storyID int64,
 	amount sdk.Coin,
-	comment string,
+	argument string,
 	creator sdk.AccAddress,
-	evidence []url.URL,
+	evidence []string,
 	vote bool) CreateVoteMsg {
 
-	return CreateVoteMsg{
+	// populate embedded vote msg struct
+	voteMsg := app.VoteStoryMsg{
 		StoryID:  storyID,
 		Amount:   amount,
-		Comment:  comment,
+		Argument: argument,
 		Creator:  creator,
-		Evidence: evidence,
-		Vote:     vote,
+		Evidence: []string{},
 	}
+
+	return CreateVoteMsg{voteMsg, vote}
 }
 
 // Route implements Msg
@@ -59,8 +57,8 @@ func (msg CreateVoteMsg) ValidateBasic() sdk.Error {
 	if msg.Amount.IsZero() == true {
 		return sdk.ErrInsufficientFunds("Invalid vote amount" + msg.Amount.String())
 	}
-	if len := len(msg.Comment); len < params.MinArgumentLength || len > params.MaxArgumentLength {
-		return app.ErrInvalidCommentMsg()
+	if len := len(msg.Argument); len < params.MinArgumentLength || len > params.MaxArgumentLength {
+		return app.ErrInvalidArgumentMsg()
 	}
 	if len(msg.Creator) == 0 {
 		return sdk.ErrInvalidAddress("Invalid address: " + msg.Creator.String())

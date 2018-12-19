@@ -8,18 +8,27 @@ import (
 const (
 	DefaultCodespace sdk.CodespaceType = 1
 
-	CodeInvalidCommentMsg  sdk.CodeType = 101
+	CodeInvalidArgumentMsg sdk.CodeType = 101
 	CodeInvalidEvidenceMsg sdk.CodeType = 102
+	CodeInvalidEvidenceURL sdk.CodeType = 103
 )
 
-// ErrInvalidCommentMsg creates an error when `Msg` validation fails
-func ErrInvalidCommentMsg() sdk.Error {
+// ErrInvalidArgumentMsg creates an error when `Msg` validation fails
+func ErrInvalidArgumentMsg() sdk.Error {
 	return sdk.NewError(
-		DefaultCodespace, CodeInvalidCommentMsg, "Invalid comment")
+		DefaultCodespace, CodeInvalidArgumentMsg, "Invalid argument")
 }
 
 // ErrInvalidEvidenceMsg creates an error when `Msg` validation fails
 func ErrInvalidEvidenceMsg() sdk.Error {
 	return sdk.NewError(
 		DefaultCodespace, CodeInvalidEvidenceMsg, "Invalid evidence")
+}
+
+// ErrInvalidEvidenceURL throws an error when a URL in invalid
+func ErrInvalidEvidenceURL(url string) sdk.Error {
+	return sdk.NewError(
+		DefaultCodespace,
+		CodeInvalidEvidenceURL,
+		"Invalid evidence URL: "+url)
 }
