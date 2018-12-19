@@ -142,8 +142,9 @@ func loadTestDB(
 
 	// back it
 	amount, _ := sdk.ParseCoin("1000trusteak")
+	argument := "this is an argument"
 	duration := 30 * 24 * time.Hour
-	_, err = backingKeeper.Create(ctx, story.ID, amount, addr, duration)
+	_, err = backingKeeper.Create(ctx, story.ID, amount, argument, addr, duration)
 	if err != nil {
 		panic(err)
 	}
@@ -156,7 +157,6 @@ func loadTestDB(
 
 	// challenge it
 	amount, _ = sdk.ParseCoin("1000trusteak")
-	argument := "This is wrong"
 	evidence := []url.URL{}
 	_, err = challengeKeeper.Create(ctx, story.ID, amount, argument, addr, evidence)
 	if err != nil {
@@ -164,7 +164,7 @@ func loadTestDB(
 	}
 
 	// vote on it
-	_, err = voteKeeper.Create(ctx, story.ID, amount, true, "comment", addr, evidence)
+	_, err = voteKeeper.Create(ctx, story.ID, amount, true, argument, addr, evidence)
 	if err != nil {
 		panic(err)
 	}
