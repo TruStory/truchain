@@ -32,6 +32,7 @@ func TestQueue(t *testing.T) {
 	// create fake backing
 	storyID := createFakeStory(ctx, sk, ck)
 	amount, _ := sdk.ParseCoin("5trudex")
+	argument := "cool story brew"
 	creator1 := sdk.AccAddress([]byte{1, 2})
 	creator2 := sdk.AccAddress([]byte{3, 4})
 	duration := DefaultMsgParams().MinPeriod
@@ -40,12 +41,12 @@ func TestQueue(t *testing.T) {
 	bankKeeper.AddCoins(ctx, creator2, sdk.Coins{amount})
 
 	// create backings
-	backingID, _ := bk.Create(ctx, storyID, amount, creator1, duration)
+	backingID, _ := bk.Create(ctx, storyID, amount, argument, creator1, duration)
 	fmt.Println(backingID)
 	_, err := bk.Backing(ctx, backingID)
 	assert.Nil(t, err)
 
-	backingID, _ = bk.Create(ctx, storyID, amount, creator2, duration)
+	backingID, _ = bk.Create(ctx, storyID, amount, argument, creator2, duration)
 	_, err = bk.Backing(ctx, backingID)
 	assert.Nil(t, err)
 

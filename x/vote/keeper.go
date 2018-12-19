@@ -38,7 +38,7 @@ type WriteKeeper interface {
 
 	Create(
 		ctx sdk.Context, storyID int64, amount sdk.Coin,
-		choice bool, comment string, creator sdk.AccAddress,
+		choice bool, argument string, creator sdk.AccAddress,
 		evidence []url.URL) (int64, sdk.Error)
 
 	NewResponseEndBlock(ctx sdk.Context) sdk.Tags
@@ -90,7 +90,7 @@ func NewKeeper(
 // Create adds a new vote on a story in the KVStore
 func (k Keeper) Create(
 	ctx sdk.Context, storyID int64, amount sdk.Coin,
-	choice bool, comment string, creator sdk.AccAddress,
+	choice bool, argument string, creator sdk.AccAddress,
 	evidence []url.URL) (int64, sdk.Error) {
 
 	// get the story
@@ -124,7 +124,7 @@ func (k Keeper) Create(
 	vote := app.Vote{
 		ID:        k.GetNextID(ctx),
 		Amount:    amount,
-		Argument:  comment,
+		Argument:  argument,
 		Creator:   creator,
 		Evidence:  evidence,
 		Vote:      choice,

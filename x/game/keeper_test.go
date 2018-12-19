@@ -56,11 +56,12 @@ func TestRegisterChallengeHaveBackersMeetThreshold(t *testing.T) {
 	storyID := createFakeStory(ctx, k.storyKeeper, categoryKeeper)
 	gameID, _ := k.Create(ctx, storyID, creator)
 	amount, _ := sdk.ParseCoin("100trudex")
+	argument := "cool story brew"
 
 	// back story with 100trudex
 	k.bankKeeper.AddCoins(ctx, creator, sdk.Coins{amount})
 	duration := 30 * 24 * time.Hour
-	k.backingKeeper.Create(ctx, storyID, amount, creator, duration)
+	k.backingKeeper.Create(ctx, storyID, amount, argument, creator, duration)
 
 	// challenge with 34trudex (34% of total backings)
 	amount, _ = sdk.ParseCoin("34trudex")
@@ -77,11 +78,12 @@ func TestRegisterChallengeHaveBackersNotMeetThreshold(t *testing.T) {
 	storyID := createFakeStory(ctx, k.storyKeeper, categoryKeeper)
 	gameID, _ := k.Create(ctx, storyID, creator)
 	amount, _ := sdk.ParseCoin("100trudex")
+	argument := "cool story brew"
 
 	// back story with 100trudex
 	k.bankKeeper.AddCoins(ctx, creator, sdk.Coins{amount})
 	duration := 30 * 24 * time.Hour
-	k.backingKeeper.Create(ctx, storyID, amount, creator, duration)
+	k.backingKeeper.Create(ctx, storyID, amount, argument, creator, duration)
 
 	// challenge with 32trudex (32% of total backings)
 	amount, _ = sdk.ParseCoin("32trudex")

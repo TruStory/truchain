@@ -38,8 +38,12 @@ type WriteKeeper interface {
 	ReadKeeper
 
 	Create(
-		ctx sdk.Context, storyID int64, amount sdk.Coin, creator sdk.AccAddress, duration time.Duration,
-	) (int64, sdk.Error)
+		ctx sdk.Context,
+		storyID int64,
+		amount sdk.Coin,
+		argument string,
+		creator sdk.AccAddress,
+		duration time.Duration) (int64, sdk.Error)
 
 	Update(ctx sdk.Context, backing Backing)
 
@@ -83,9 +87,9 @@ func (k Keeper) Create(
 	ctx sdk.Context,
 	storyID int64,
 	amount sdk.Coin,
+	argument string,
 	creator sdk.AccAddress,
-	duration time.Duration,
-) (id int64, err sdk.Error) {
+	duration time.Duration) (id int64, err sdk.Error) {
 
 	// check if user has enough cat coins or trustake to back
 	trustake := sdk.NewCoin(params.StakeDenom, amount.Amount)
@@ -131,8 +135,14 @@ func (k Keeper) Create(
 		cat, amount, duration, DefaultMsgParams().MaxPeriod, params)
 
 	// create new implicit true vote type
-	vote := app.NewVote(
-		k.GetNextID(ctx), principal, creator, true, app.NewTimestamp(ctx.BlockHeader()))
+	vote := app.Vote{
+		ID:        k.GetNextID(ctx),
+		Amount:    principal,
+		Argument:  argument,
+		Creator:   creator,
+		Vote:      true,
+		Timestamp: app.NewTimestamp(ctx.BlockHeader()),
+	}
 
 	// create new backing type with embedded vote
 	backing := Backing{

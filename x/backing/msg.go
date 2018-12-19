@@ -20,6 +20,7 @@ type BackStoryMsg struct {
 func NewBackStoryMsg(
 	storyID int64,
 	amount sdk.Coin,
+	argument string,
 	creator sdk.AccAddress,
 	duration time.Duration) BackStoryMsg {
 
@@ -27,7 +28,7 @@ func NewBackStoryMsg(
 	voteMsg := app.VoteStoryMsg{
 		StoryID:  storyID,
 		Amount:   amount,
-		Argument: "",
+		Argument: argument,
 		Creator:  creator,
 		Evidence: []string{},
 	}
