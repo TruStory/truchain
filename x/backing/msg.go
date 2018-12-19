@@ -11,10 +11,9 @@ import (
 // BackStoryMsg defines a message to back a story. It implements the
 // `Msg` interface which is required for transactions on Cosmos blockchains.
 type BackStoryMsg struct {
-	StoryID  int64          `json:"story_id"`
-	Amount   sdk.Coin       `json:"amount"`
-	Creator  sdk.AccAddress `json:"creator"`
-	Duration time.Duration  `json:"duration"`
+	app.VoteStoryMsg
+
+	Duration time.Duration `json:"duration"`
 }
 
 // NewBackStoryMsg creates a message to back a story
@@ -23,12 +22,17 @@ func NewBackStoryMsg(
 	amount sdk.Coin,
 	creator sdk.AccAddress,
 	duration time.Duration) BackStoryMsg {
-	return BackStoryMsg{
+
+	// populate embedded vote msg struct
+	voteMsg := app.VoteStoryMsg{
 		StoryID:  storyID,
 		Amount:   amount,
+		Argument: "",
 		Creator:  creator,
-		Duration: duration,
+		Evidence: []string{},
 	}
+
+	return BackStoryMsg{voteMsg, duration}
 }
 
 // Route implements Msg
