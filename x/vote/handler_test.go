@@ -29,7 +29,8 @@ func TestCreateVoteMsg(t *testing.T) {
 	_, err := k.challengeKeeper.Create(ctx, storyID, amount, argument, creator, evidence)
 	assert.Nil(t, err)
 
-	msg := NewCreateVoteMsg(storyID, amount, "valid comment", creator, evidence, true)
+	evidence1 := []string{"http://www.trustory.io"}
+	msg := NewCreateVoteMsg(storyID, amount, "valid comment", creator, evidence1, true)
 	assert.NotNil(t, msg)
 
 	res := h(ctx, msg)
