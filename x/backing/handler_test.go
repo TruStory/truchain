@@ -22,7 +22,7 @@ func TestBackStoryMsg_FailBasicValidation(t *testing.T) {
 	argument := "cool story brew"
 	creator := sdk.AccAddress([]byte{1, 2})
 	duration := 5 * time.Hour
-	msg := NewBackStoryMsg(storyID, amount, argument, creator, duration, validEvidence())
+	msg := NewBackStoryMsg(storyID, amount, argument, creator, duration)
 	assert.NotNil(t, msg)
 
 	res := h(ctx, msg)
@@ -41,7 +41,7 @@ func TestBackStoryMsg_FailInsufficientFunds(t *testing.T) {
 	argument := "cool story brew"
 	creator := sdk.AccAddress([]byte{1, 2})
 	duration := 99 * time.Hour
-	msg := NewBackStoryMsg(storyID, amount, argument, creator, duration, validEvidence())
+	msg := NewBackStoryMsg(storyID, amount, argument, creator, duration)
 	assert.NotNil(t, msg)
 
 	res := h(ctx, msg)
@@ -60,7 +60,7 @@ func TestBackStoryMsg(t *testing.T) {
 	argument := "cool story brew"
 	creator := createFakeFundedAccount(ctx, am, sdk.Coins{amount})
 	duration := 99 * time.Hour
-	msg := NewBackStoryMsg(storyID, amount, argument, creator, duration, validEvidence())
+	msg := NewBackStoryMsg(storyID, amount, argument, creator, duration)
 	assert.NotNil(t, msg)
 
 	res := h(ctx, msg)

@@ -20,7 +20,6 @@ func NewCreateVoteMsg(
 	amount sdk.Coin,
 	argument string,
 	creator sdk.AccAddress,
-	evidence []string,
 	vote bool) CreateVoteMsg {
 
 	// populate embedded vote msg struct
@@ -29,7 +28,6 @@ func NewCreateVoteMsg(
 		Amount:   amount,
 		Argument: argument,
 		Creator:  creator,
-		Evidence: []string{},
 	}
 
 	return CreateVoteMsg{voteMsg, vote}
@@ -62,9 +60,6 @@ func (msg CreateVoteMsg) ValidateBasic() sdk.Error {
 	}
 	if len(msg.Creator) == 0 {
 		return sdk.ErrInvalidAddress("Invalid address: " + msg.Creator.String())
-	}
-	if len := len(msg.Evidence); len < params.MinEvidenceCount || len > params.MaxEvidenceCount {
-		return app.ErrInvalidEvidenceMsg()
 	}
 	return nil
 }
