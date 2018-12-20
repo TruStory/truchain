@@ -24,13 +24,19 @@ func handleBackStoryMsg(ctx sdk.Context, k WriteKeeper, msg BackStoryMsg) sdk.Re
 		return err.Result()
 	}
 
+	evidence, err := app.ParseEvidence(msg.Evidence)
+	if err != nil {
+		return err.Result()
+	}
+
 	id, err := k.Create(
 		ctx,
 		msg.StoryID,
 		msg.Amount,
 		msg.Argument,
 		msg.Creator,
-		msg.Duration)
+		msg.Duration,
+		evidence)
 	if err != nil {
 		return err.Result()
 	}
