@@ -22,7 +22,8 @@ func NewBackStoryMsg(
 	amount sdk.Coin,
 	argument string,
 	creator sdk.AccAddress,
-	duration time.Duration) BackStoryMsg {
+	duration time.Duration,
+	evidence []string) BackStoryMsg {
 
 	// populate embedded vote msg struct
 	voteMsg := app.VoteStoryMsg{
@@ -30,7 +31,7 @@ func NewBackStoryMsg(
 		Amount:   amount,
 		Argument: argument,
 		Creator:  creator,
-		Evidence: []string{},
+		Evidence: evidence,
 	}
 
 	return BackStoryMsg{voteMsg, duration}

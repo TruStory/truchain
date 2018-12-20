@@ -1,6 +1,7 @@
 package backing
 
 import (
+	"net/url"
 	"time"
 
 	params "github.com/TruStory/truchain/parameters"
@@ -43,7 +44,8 @@ type WriteKeeper interface {
 		amount sdk.Coin,
 		argument string,
 		creator sdk.AccAddress,
-		duration time.Duration) (int64, sdk.Error)
+		duration time.Duration,
+		evidence []url.URL) (int64, sdk.Error)
 
 	Update(ctx sdk.Context, backing Backing)
 
@@ -89,7 +91,8 @@ func (k Keeper) Create(
 	amount sdk.Coin,
 	argument string,
 	creator sdk.AccAddress,
-	duration time.Duration) (id int64, err sdk.Error) {
+	duration time.Duration,
+	evidence []url.URL) (id int64, err sdk.Error) {
 
 	// check if user has enough cat coins or trustake to back
 	trustake := sdk.NewCoin(params.StakeDenom, amount.Amount)
@@ -140,6 +143,7 @@ func (k Keeper) Create(
 		Amount:    principal,
 		Argument:  argument,
 		Creator:   creator,
+		Evidence:  evidence,
 		Vote:      true,
 		Timestamp: app.NewTimestamp(ctx.BlockHeader()),
 	}
