@@ -109,7 +109,7 @@ func (ta *TruAPI) RegisterResolvers() {
 		"category":     ta.storyCategoryResolver,
 		"creator":      func(ctx context.Context, q story.Story) users.User { return getUser(ctx, q.Creator) },
 		"source":       func(ctx context.Context, q story.Story) string { return q.Source.String() },
-		"argument":     func(ctx context.Context, q story.Story) []story.Argument { return q.Arguments },
+		"argument":     func(ctx context.Context, q story.Story) []story.Argument { return q.Argument },
 		"evidence":     func(ctx context.Context, q story.Story) []story.Evidence { return q.Evidence },
 		"game":         ta.gameResolver,
 	})

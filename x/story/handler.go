@@ -41,18 +41,9 @@ func handleSubmitStoryMsg(ctx sdk.Context, k WriteKeeper, msg SubmitStoryMsg) sd
 	// create evidence type from url
 	var evidence []Evidence
 
-	argument := Argument{}
-	if len(msg.Argument) > 0 {
-		argument = Argument{
-			Creator:   msg.Creator,
-			Body:      msg.Argument,
-			Timestamp: app.NewTimestamp(ctx.BlockHeader()),
-		}
-	}
-
 	id, err := k.Create(
 		ctx,
-		[]Argument{argument},
+		msg.Argument,
 		msg.Body,
 		msg.CategoryID,
 		msg.Creator,
@@ -77,13 +68,6 @@ func handleAddArgumentMsg(ctx sdk.Context, k WriteKeeper, msg AddArgumentMsg) sd
 		err.Result()
 	}
 
-	// update story with argument
-	argument := Argument{
-		Creator:   msg.Creator,
-		Body:      msg.Argument,
-		Timestamp: app.NewTimestamp(ctx.BlockHeader()),
-	}
-	story.Arguments = append(story.Arguments, argument)
 	k.UpdateStory(ctx, story)
 
 	return app.Result(story.ID)
