@@ -8,17 +8,13 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func validEvidence() []string {
-	return []string{"http://www.trustory.io"}
-}
-
 func TestValidBackMsg(t *testing.T) {
 	validStoryID := int64(1)
 	validStake := sdk.Coin{Denom: "trustake", Amount: sdk.NewInt(100)}
 	validCreator := sdk.AccAddress([]byte{1, 2})
 	validPeriod := DefaultMsgParams().MinPeriod
 	validArgument := "valid argument"
-	msg := NewBackStoryMsg(validStoryID, validStake, validArgument, validCreator, validPeriod, validEvidence())
+	msg := NewBackStoryMsg(validStoryID, validStake, validArgument, validCreator, validPeriod)
 	err := msg.ValidateBasic()
 
 	assert.Nil(t, err)
@@ -34,7 +30,7 @@ func TestInvalidStoryIdBackMsg(t *testing.T) {
 	validCreator := sdk.AccAddress([]byte{1, 2})
 	validPeriod := time.Duration(3 * 24 * time.Hour)
 	validArgument := "valid argument"
-	msg := NewBackStoryMsg(invalidStoryID, validStake, validArgument, validCreator, validPeriod, validEvidence())
+	msg := NewBackStoryMsg(invalidStoryID, validStake, validArgument, validCreator, validPeriod)
 	err := msg.ValidateBasic()
 
 	assert.Equal(t, sdk.CodeType(702), err.Code(), err.Error())
@@ -46,7 +42,7 @@ func TestInvalidAddressBackMsg(t *testing.T) {
 	invalidCreator := sdk.AccAddress([]byte{})
 	validPeriod := time.Duration(3 * 24 * time.Hour)
 	validArgument := "valid argument"
-	msg := NewBackStoryMsg(validStoryID, validStake, validArgument, invalidCreator, validPeriod, validEvidence())
+	msg := NewBackStoryMsg(validStoryID, validStake, validArgument, invalidCreator, validPeriod)
 	err := msg.ValidateBasic()
 
 	assert.Equal(t, sdk.CodeType(7), err.Code(), err.Error())
@@ -58,7 +54,7 @@ func TestInValidStakeBackMsg(t *testing.T) {
 	validCreator := sdk.AccAddress([]byte{1, 2})
 	validPeriod := time.Duration(3 * 24 * time.Hour)
 	validArgument := "valid argument"
-	msg := NewBackStoryMsg(validStoryID, invalidStake, validArgument, validCreator, validPeriod, validEvidence())
+	msg := NewBackStoryMsg(validStoryID, invalidStake, validArgument, validCreator, validPeriod)
 	err := msg.ValidateBasic()
 
 	assert.Equal(t, sdk.CodeType(5), err.Code(), err.Error())
@@ -70,7 +66,7 @@ func TestInValidBackingPeriodBackMsg(t *testing.T) {
 	validCreator := sdk.AccAddress([]byte{1, 2})
 	invalidPeriod := time.Duration(0 * time.Hour)
 	validArgument := "valid argument"
-	msg := NewBackStoryMsg(validStoryID, validStake, validArgument, validCreator, invalidPeriod, validEvidence())
+	msg := NewBackStoryMsg(validStoryID, validStake, validArgument, validCreator, invalidPeriod)
 	err := msg.ValidateBasic()
 
 	assert.Equal(t, sdk.CodeType(901), err.Code(), err.Error())
@@ -82,7 +78,7 @@ func TestInValidBackingPeriod2BackMsg(t *testing.T) {
 	validCreator := sdk.AccAddress([]byte{1, 2})
 	invalidPeriod := time.Duration(366 * 24 * time.Hour)
 	validArgument := "valid argument"
-	msg := NewBackStoryMsg(validStoryID, validStake, validArgument, validCreator, invalidPeriod, validEvidence())
+	msg := NewBackStoryMsg(validStoryID, validStake, validArgument, validCreator, invalidPeriod)
 	err := msg.ValidateBasic()
 
 	assert.Equal(t, sdk.CodeType(901), err.Code(), err.Error())

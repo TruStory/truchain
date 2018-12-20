@@ -19,18 +19,15 @@ func TestCreateVoteMsg(t *testing.T) {
 	storyID := createFakeStory(ctx, k.storyKeeper, ck)
 	amount := sdk.NewCoin("trudex", sdk.NewInt(15))
 	creator := sdk.AccAddress([]byte{1, 2})
-	testURL, _ := url.Parse("http://www.trustory.io")
-	evidence := []url.URL{*testURL}
 
 	// give user some funds
 	k.bankKeeper.AddCoins(ctx, creator, sdk.Coins{amount.Plus(amount)})
 
 	argument := "test argument"
-	_, err := k.challengeKeeper.Create(ctx, storyID, amount, argument, creator, evidence)
+	_, err := k.challengeKeeper.Create(ctx, storyID, amount, argument, creator, []url.URL{})
 	assert.Nil(t, err)
 
-	evidence1 := []string{"http://www.trustory.io"}
-	msg := NewCreateVoteMsg(storyID, amount, "valid comment", creator, evidence1, true)
+	msg := NewCreateVoteMsg(storyID, amount, "valid comment", creator, true)
 	assert.NotNil(t, msg)
 
 	res := h(ctx, msg)

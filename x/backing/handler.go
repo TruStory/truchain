@@ -1,6 +1,8 @@
 package backing
 
 import (
+	"net/url"
+
 	app "github.com/TruStory/truchain/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
@@ -24,11 +26,6 @@ func handleBackStoryMsg(ctx sdk.Context, k WriteKeeper, msg BackStoryMsg) sdk.Re
 		return err.Result()
 	}
 
-	evidence, err := app.ParseEvidence(msg.Evidence)
-	if err != nil {
-		return err.Result()
-	}
-
 	id, err := k.Create(
 		ctx,
 		msg.StoryID,
@@ -36,7 +33,7 @@ func handleBackStoryMsg(ctx sdk.Context, k WriteKeeper, msg BackStoryMsg) sdk.Re
 		msg.Argument,
 		msg.Creator,
 		msg.Duration,
-		evidence)
+		[]url.URL{})
 	if err != nil {
 		return err.Result()
 	}

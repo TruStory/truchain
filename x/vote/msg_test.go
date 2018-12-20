@@ -14,9 +14,8 @@ func TestValidCreateVoteMsg(t *testing.T) {
 	storyID := createFakeStory(ctx, k.storyKeeper, ck)
 	amount := sdk.NewCoin("testcoin", sdk.NewInt(5))
 	creator := sdk.AccAddress([]byte{1, 2})
-	evidence := []string{"http://www.trustory.io"}
 
-	msg := NewCreateVoteMsg(storyID, amount, "valid comment", creator, evidence, true)
+	msg := NewCreateVoteMsg(storyID, amount, "valid comment", creator, true)
 	err := msg.ValidateBasic()
 	assert.Nil(t, err)
 
@@ -31,9 +30,8 @@ func TestInValidCreateVoteMsg(t *testing.T) {
 	storyID := createFakeStory(ctx, k.storyKeeper, ck)
 	amount := sdk.NewCoin("testcoin", sdk.NewInt(5))
 	creator := sdk.AccAddress([]byte{1, 2})
-	evidence := []string{"http://www.trustory.io"}
 
-	msg := NewCreateVoteMsg(storyID, amount, "", creator, evidence, true)
+	msg := NewCreateVoteMsg(storyID, amount, "", creator, true)
 	err := msg.ValidateBasic()
 	assert.NotNil(t, err)
 	assert.Equal(t, app.ErrInvalidArgumentMsg().Code(), err.Code())

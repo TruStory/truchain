@@ -3,7 +3,6 @@ package types
 import (
 	"encoding/binary"
 	"encoding/json"
-	"net/url"
 	"reflect"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -24,22 +23,6 @@ func ErrMsgHandler(msg sdk.Msg) sdk.Result {
 	}
 
 	return sdk.ErrUnknownRequest("Unrecognized Msg").Result()
-}
-
-// ParseEvidence parses evidence url strings into real URLs
-func ParseEvidence(urlStrings []string) (
-	urls []url.URL, err sdk.Error) {
-	for _, urlString := range urlStrings {
-
-		evidenceURL, err := url.ParseRequestURI(urlString)
-		if err != nil {
-			return urls, ErrInvalidEvidenceURL(urlString)
-		}
-
-		urls = append(urls, *evidenceURL)
-	}
-
-	return urls, nil
 }
 
 // Result returns a successful handler result with id of the type

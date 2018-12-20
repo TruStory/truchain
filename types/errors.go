@@ -24,11 +24,3 @@ func ErrInvalidEvidenceMsg() sdk.Error {
 	return sdk.NewError(
 		DefaultCodespace, CodeInvalidEvidenceMsg, "Invalid evidence")
 }
-
-// ErrInvalidEvidenceURL throws an error when a URL in invalid
-func ErrInvalidEvidenceURL(url string) sdk.Error {
-	return sdk.NewError(
-		DefaultCodespace,
-		CodeInvalidEvidenceURL,
-		"Invalid evidence URL: "+url)
-}
