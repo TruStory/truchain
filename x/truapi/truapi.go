@@ -80,6 +80,7 @@ func (ta *TruAPI) RegisterResolvers() {
 	ta.GraphQLClient.RegisterObjectResolver("Challenge", challenge.Challenge{}, map[string]interface{}{
 		"amount":   func(ctx context.Context, q challenge.Challenge) sdk.Coin { return q.Amount() },
 		"argument": func(ctx context.Context, q challenge.Challenge) string { return q.Argument },
+		"evidence": func(ctx context.Context, q challenge.Challenge) []url.URL { return q.Evidence },
 		"vote":     func(ctx context.Context, q challenge.Challenge) bool { return q.VoteChoice() },
 	})
 
@@ -133,6 +134,7 @@ func (ta *TruAPI) RegisterResolvers() {
 	ta.GraphQLClient.RegisterObjectResolver("Vote", vote.TokenVote{}, map[string]interface{}{
 		"amount":   func(ctx context.Context, q vote.TokenVote) sdk.Coin { return q.Amount() },
 		"argument": func(ctx context.Context, q vote.TokenVote) string { return q.Argument },
+		"evidence": func(ctx context.Context, q vote.TokenVote) []url.URL { return q.Evidence },
 		"vote":     func(ctx context.Context, q vote.TokenVote) bool { return q.VoteChoice() },
 	})
 
