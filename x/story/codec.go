@@ -6,7 +6,6 @@ import (
 
 // RegisterAmino registers messages into the codec
 func RegisterAmino(c *amino.Codec) {
-	c.RegisterConcrete(AddArgumentMsg{}, "story/AddArgumentMsg", nil)
 	c.RegisterConcrete(AddEvidenceMsg{}, "story/AddEvidenceMsg", nil)
 	c.RegisterConcrete(SubmitStoryMsg{}, "story/SubmitStoryMsg", nil)
 	c.RegisterConcrete(FlagStoryMsg{}, "story/FlagStoryMsg", nil)

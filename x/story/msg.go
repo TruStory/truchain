@@ -81,54 +81,6 @@ func (msg SubmitStoryMsg) GetSigners() []sdk.AccAddress {
 
 // ============================================================================
 
-// AddArgumentMsg defines a message to submit evidence for a story
-type AddArgumentMsg struct {
-	StoryID  int64          `json:"story_id"`
-	Creator  sdk.AccAddress `json:"creator"`
-	Argument string         `json:"argument"`
-}
-
-// NewAddArgumentMsg creates a new message to add an argument for a story
-func NewAddArgumentMsg(storyID int64, creator sdk.AccAddress, argument string) AddArgumentMsg {
-	return AddArgumentMsg{
-		StoryID:  storyID,
-		Creator:  creator,
-		Argument: argument,
-	}
-}
-
-// Route implements Msg.Route
-func (msg AddArgumentMsg) Route() string { return app.GetRoute(msg) }
-
-// Type implements Msg.Type
-func (msg AddArgumentMsg) Type() string { return app.GetType(msg) }
-
-// GetSignBytes implements Msg.GetSignBytes
-func (msg AddArgumentMsg) GetSignBytes() []byte {
-	return app.MustGetSignBytes(msg)
-}
-
-// ValidateBasic implements Msg.ValidateBasic
-func (msg AddArgumentMsg) ValidateBasic() sdk.Error {
-	if msg.StoryID <= 0 {
-		return ErrInvalidStoryID(msg.StoryID)
-	}
-	if len(msg.Creator) == 0 {
-		return sdk.ErrInvalidAddress("Invalid address: " + msg.Creator.String())
-	}
-	if len(msg.Argument) == 0 {
-		return ErrInvalidStoryArgument(msg.Argument)
-	}
-	return nil
-}
-
-// GetSigners implements Msg.GetSigners
-func (msg AddArgumentMsg) GetSigners() []sdk.AccAddress {
-	return app.GetSigners(msg.Creator)
-}
-
-// ============================================================================
-
 // AddEvidenceMsg defines a message to submit evidence for a story
 type AddEvidenceMsg struct {
 	StoryID int64          `json:"story_id"`
