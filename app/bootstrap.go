@@ -99,7 +99,7 @@ func createStory(
 
 	arguments := []story.Argument{arg}
 
-	storyID, _ := sk.NewStory(ctx, arguments, claim, catID, creator, evidenceURLs, *sourceURL, storyType)
+	storyID, _ := sk.Create(ctx, arguments, claim, catID, creator, evidenceURLs, *sourceURL, storyType)
 
 	return storyID
 }

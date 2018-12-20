@@ -50,7 +50,7 @@ func handleSubmitStoryMsg(ctx sdk.Context, k WriteKeeper, msg SubmitStoryMsg) sd
 		}
 	}
 
-	id, err := k.NewStory(
+	id, err := k.Create(
 		ctx,
 		[]Argument{argument},
 		msg.Body,
