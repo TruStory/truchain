@@ -13,7 +13,7 @@ import (
 	abci "github.com/tendermint/tendermint/abci/types"
 	"github.com/tendermint/tendermint/crypto"
 	"github.com/tendermint/tendermint/crypto/ed25519"
-	"github.com/tendermint/tendermint/crypto/encoding/amino"
+	cryptoAmino "github.com/tendermint/tendermint/crypto/encoding/amino"
 	dbm "github.com/tendermint/tendermint/libs/db"
 	"github.com/tendermint/tendermint/libs/log"
 )
@@ -68,7 +68,7 @@ func createFakeStory(ctx sdk.Context, sk story.Keeper, ck category.WriteKeeper) 
 	evidence := []story.Evidence{}
 	argument := []story.Argument{}
 
-	storyID, _ := sk.NewStory(ctx, argument, body, cat.ID, creator, evidence, source, storyType)
+	storyID, _ := sk.Create(ctx, argument, body, cat.ID, creator, evidence, source, storyType)
 
 	return storyID
 }

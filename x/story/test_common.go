@@ -9,7 +9,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	amino "github.com/tendermint/go-amino"
 	abci "github.com/tendermint/tendermint/abci/types"
-	"github.com/tendermint/tendermint/crypto/encoding/amino"
+	cryptoAmino "github.com/tendermint/tendermint/crypto/encoding/amino"
 	dbm "github.com/tendermint/tendermint/libs/db"
 	"github.com/tendermint/tendermint/libs/log"
 )
@@ -51,7 +51,7 @@ func createFakeStory(ctx sdk.Context, sk Keeper, ck c.WriteKeeper) int64 {
 	evidence := []Evidence{}
 	argument := []Argument{}
 
-	storyID, _ := sk.NewStory(ctx, argument, body, cat.ID, creator, evidence, source, storyType)
+	storyID, _ := sk.Create(ctx, argument, body, cat.ID, creator, evidence, source, storyType)
 
 	return storyID
 }

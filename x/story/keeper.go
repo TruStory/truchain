@@ -31,7 +31,7 @@ type ReadKeeper interface {
 type WriteKeeper interface {
 	ReadKeeper
 
-	NewStory(
+	Create(
 		ctx sdk.Context,
 		arguments []Argument,
 		body string,
@@ -121,8 +121,8 @@ func (k Keeper) ExpireGame(ctx sdk.Context, storyID int64) sdk.Error {
 	return nil
 }
 
-// NewStory adds a story to the key-value store
-func (k Keeper) NewStory(
+// Create adds a story to the key-value store
+func (k Keeper) Create(
 	ctx sdk.Context,
 	arguments []Argument,
 	body string,
