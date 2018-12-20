@@ -118,7 +118,7 @@ func TestAddArgumentMsg(t *testing.T) {
 	_ = json.Unmarshal(res.Data, &idres)
 
 	story, _ := sk.Story(ctx, storyID)
-	assert.Equal(t, story.Arguments[0].Body, argument)
+	assert.Equal(t, story.Argument, argument)
 
 	assert.Equal(t, int64(1), idres.ID, "incorrect result data")
 }
