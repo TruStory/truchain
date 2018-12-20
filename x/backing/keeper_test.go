@@ -17,8 +17,8 @@ var fiver = sdk.Coin{
 }
 
 func evidence() []url.URL {
-	cnn, _ := url.Parse("http://www.cnn.com")
-	return []url.URL{*cnn}
+	testURL, _ := url.Parse("http://www.trustory.io")
+	return []url.URL{*testURL}
 }
 
 func Test_key(t *testing.T) {

@@ -19,8 +19,8 @@ func TestCreateVoteMsg(t *testing.T) {
 	storyID := createFakeStory(ctx, k.storyKeeper, ck)
 	amount := sdk.NewCoin("trudex", sdk.NewInt(15))
 	creator := sdk.AccAddress([]byte{1, 2})
-	cnn, _ := url.Parse("http://www.cnn.com")
-	evidence := []url.URL{*cnn}
+	testURL, _ := url.Parse("http://www.trustory.io")
+	evidence := []url.URL{*testURL}
 
 	// give user some funds
 	k.bankKeeper.AddCoins(ctx, creator, sdk.Coins{amount.Plus(amount)})

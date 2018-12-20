@@ -12,8 +12,8 @@ import (
 var creator = sdk.AccAddress([]byte{1, 2})
 
 func evidence() []url.URL {
-	cnn, _ := url.Parse("http://www.cnn.com")
-	return []url.URL{*cnn}
+	testURL, _ := url.Parse("http://www.trustory.io")
+	return []url.URL{*testURL}
 }
 
 func TestCreateGame(t *testing.T) {

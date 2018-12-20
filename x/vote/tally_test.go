@@ -33,8 +33,8 @@ func fakeValidationGame() (ctx sdk.Context, votes poll, k Keeper) {
 	amount := sdk.NewCoin("trudex", sdk.NewInt(1000))
 	trustake := sdk.NewCoin("trusteak", sdk.NewInt(1000))
 	argument := "test argument"
-	cnn, _ := url.Parse("http://www.cnn.com")
-	evidence := []url.URL{*cnn}
+	testURL, _ := url.Parse("http://www.trustory.io")
+	evidence := []url.URL{*testURL}
 
 	creator1 := fakeFundedCreator(ctx, k.bankKeeper)
 	// remove cat coins to simulate backing conversion from trusteak
