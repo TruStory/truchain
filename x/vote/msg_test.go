@@ -5,7 +5,6 @@ import (
 
 	app "github.com/TruStory/truchain/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/davecgh/go-spew/spew"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -19,7 +18,6 @@ func TestValidCreateVoteMsg(t *testing.T) {
 
 	msg := NewCreateVoteMsg(storyID, amount, "valid comment", creator, evidence, true)
 	err := msg.ValidateBasic()
-	spew.Dump(err)
 	assert.Nil(t, err)
 
 	assert.Equal(t, "vote", msg.Route())

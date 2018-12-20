@@ -20,7 +20,7 @@ func TestSubmitChallengeMsg(t *testing.T) {
 	amount := sdk.NewCoin("trudex", sdk.NewInt(15))
 	argument := "test argument"
 	creator := sdk.AccAddress([]byte{1, 2})
-	evidence := []string{"http://www.cnn.com"}
+	evidence := []string{"http://www.trustory.io"}
 
 	// give user some funds
 	bankKeeper.AddCoins(ctx, creator, sdk.Coins{amount})
@@ -45,7 +45,7 @@ func TestSubmitChallengeMsg_ErrInsufficientFunds(t *testing.T) {
 	amount := sdk.NewCoin("testcoin", sdk.NewInt(5))
 	argument := "test argument"
 	creator := sdk.AccAddress([]byte{1, 2})
-	evidence := []string{"http://www.cnn.com"}
+	evidence := []string{"http://www.trustory.io"}
 
 	msg := NewCreateChallengeMsg(storyID, amount, argument, creator, evidence)
 	assert.NotNil(t, msg)
@@ -65,7 +65,7 @@ func TestSubmitChallengeMsg_ErrInsufficientChallengeAmount(t *testing.T) {
 	amount := sdk.NewCoin("trudex", sdk.NewInt(1))
 	argument := "test argument"
 	creator := sdk.AccAddress([]byte{1, 2})
-	evidence := []string{"http://www.cnn.com"}
+	evidence := []string{"http://www.trustory.io"}
 
 	// give user some funds
 	bankKeeper.AddCoins(ctx, creator, sdk.Coins{amount})

@@ -37,8 +37,8 @@ func TestQueue(t *testing.T) {
 	creator1 := sdk.AccAddress([]byte{1, 2})
 	creator2 := sdk.AccAddress([]byte{3, 4})
 	duration := DefaultMsgParams().MinPeriod
-	cnn, _ := url.Parse("http://www.cnn.com")
-	evidence := []url.URL{*cnn}
+	testURL, _ := url.Parse("http://www.trustory.io")
+	evidence := []url.URL{*testURL}
 
 	bankKeeper.AddCoins(ctx, creator1, sdk.Coins{amount})
 	bankKeeper.AddCoins(ctx, creator2, sdk.Coins{amount})
