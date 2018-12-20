@@ -3,6 +3,7 @@ package truapi
 import (
 	"context"
 	"net/http"
+	"net/url"
 
 	"github.com/TruStory/truchain/x/backing"
 	"github.com/TruStory/truchain/x/category"
@@ -63,6 +64,7 @@ func (ta *TruAPI) RegisterResolvers() {
 		"amount":   func(ctx context.Context, q backing.Backing) sdk.Coin { return q.Amount() },
 		"argument": func(ctx context.Context, q backing.Backing) string { return q.Argument },
 		"interest": func(ctx context.Context, q backing.Backing) sdk.Coin { return q.Interest },
+		"evidence": func(ctx context.Context, q backing.Backing) []url.URL { return q.Evidence },
 		"vote":     func(ctx context.Context, q backing.Backing) bool { return q.VoteChoice() },
 	})
 
@@ -121,6 +123,10 @@ func (ta *TruAPI) RegisterResolvers() {
 		"coins":          func(_ context.Context, q users.User) sdk.Coins { return q.Coins },
 		"pubkey":         func(_ context.Context, q users.User) string { return q.Pubkey.String() },
 		"twitterProfile": ta.twitterProfileResolver,
+	})
+
+	ta.GraphQLClient.RegisterObjectResolver("URL", url.URL{}, map[string]interface{}{
+		"url": func(_ context.Context, q url.URL) string { return q.String() },
 	})
 
 	ta.GraphQLClient.RegisterQueryResolver("vote", ta.voteResolver)

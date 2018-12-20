@@ -144,7 +144,9 @@ func loadTestDB(
 	amount, _ := sdk.ParseCoin("1000trusteak")
 	argument := "this is an argument"
 	duration := 30 * 24 * time.Hour
-	evidence := []url.URL{}
+	testURL, _ := url.Parse("http://www.trustory.io")
+	evidence := []url.URL{*testURL}
+
 	_, err = backingKeeper.Create(ctx, story.ID, amount, argument, addr, duration, evidence)
 	if err != nil {
 		panic(err)
