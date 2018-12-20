@@ -1,7 +1,6 @@
 package backing
 
 import (
-	"fmt"
 	"testing"
 	"time"
 
@@ -25,11 +24,7 @@ func TestValidBackMsg(t *testing.T) {
 	assert.Nil(t, err)
 	assert.Equal(t, "backing", msg.Route())
 	assert.Equal(t, "back_story", msg.Type())
-	assert.Equal(
-		t,
-		`{"amount":{"amount":"100","denom":"trustake"},"argument":"valid argument","creator":"cosmos1qypq36vzru","duration":259200000000000,"story_id":1}`,
-		fmt.Sprintf("%s", msg.GetSignBytes()),
-	)
+	assert.Equal(t, validStake.Amount.String(), msg.Amount.Amount.String())
 	assert.Equal(t, []sdk.AccAddress{validCreator}, msg.GetSigners())
 }
 

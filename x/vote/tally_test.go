@@ -53,10 +53,10 @@ func fakeValidationGame() (ctx sdk.Context, votes poll, k Keeper) {
 
 	// fake backings
 	duration := 1 * time.Hour
-	b1id, _ := k.backingKeeper.Create(ctx, storyID, trustake, argument, creator1, duration)
-	b2id, _ := k.backingKeeper.Create(ctx, storyID, amount, argument, creator2, duration)
-	b3id, _ := k.backingKeeper.Create(ctx, storyID, amount, argument, creator3, duration)
-	b4id, _ := k.backingKeeper.Create(ctx, storyID, amount, argument, creator4, duration)
+	b1id, _ := k.backingKeeper.Create(ctx, storyID, trustake, argument, creator1, duration, evidence)
+	b2id, _ := k.backingKeeper.Create(ctx, storyID, amount, argument, creator2, duration, evidence)
+	b3id, _ := k.backingKeeper.Create(ctx, storyID, amount, argument, creator3, duration, evidence)
+	b4id, _ := k.backingKeeper.Create(ctx, storyID, amount, argument, creator4, duration, evidence)
 
 	// fake challenges
 	c1id, _ := k.challengeKeeper.Create(ctx, storyID, amount, argument, creator5, evidence)
