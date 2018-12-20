@@ -42,15 +42,19 @@ func DefaultParams() Params {
 
 // MsgParams holds default validation params
 type MsgParams struct {
-	MinPeriod time.Duration
-	MaxPeriod time.Duration
+	MinArgumentLength int // min number of chars for argument
+	MaxArgumentLength int // max number of chars for argument
+	MinPeriod         time.Duration
+	MaxPeriod         time.Duration
 }
 
 // DefaultMsgParams creates a new MsgParams type with defaults
 func DefaultMsgParams() MsgParams {
 	return MsgParams{
-		MinPeriod: 3 * 24 * time.Hour,  // 3 days
-		MaxPeriod: 90 * 24 * time.Hour, // 90 days
+		MinArgumentLength: 10,
+		MaxArgumentLength: 1000,
+		MinPeriod:         3 * 24 * time.Hour,  // 3 days
+		MaxPeriod:         90 * 24 * time.Hour, // 90 days
 	}
 }
 
