@@ -68,24 +68,6 @@ func TestInValidSourceSubmitStoryMsg(t *testing.T) {
 
 // ============================================================================
 
-func TestValidAddEvidencetMsg(t *testing.T) {
-	validStoryID := int64(1)
-	validCreator := sdk.AccAddress([]byte{1, 2})
-	validURI := "http://www.truchain.io"
-	msg := NewAddEvidenceMsg(validStoryID, validCreator, validURI)
-	err := msg.ValidateBasic()
-
-	assert.Nil(t, err)
-	assert.Equal(t, "story", msg.Route())
-	assert.Equal(t, "add_evidence", msg.Type())
-	assert.Equal(
-		t,
-		`{"creator":"cosmos1qypq36vzru","story_id":1,"url":"http://www.truchain.io"}`,
-		fmt.Sprintf("%s", msg.GetSignBytes()),
-	)
-	assert.Equal(t, []sdk.AccAddress{validCreator}, msg.GetSigners())
-}
-
 func TestValidFlagStoryMsg(t *testing.T) {
 	validStoryID := int64(1)
 	validCreator := sdk.AccAddress([]byte{1, 2})
@@ -101,34 +83,4 @@ func TestValidFlagStoryMsg(t *testing.T) {
 		fmt.Sprintf("%s", msg.GetSignBytes()),
 	)
 	assert.Equal(t, []sdk.AccAddress{validCreator}, msg.GetSigners())
-}
-
-func TestInValidStoryIDSubmitEvidencetMsg(t *testing.T) {
-	invalidStoryID := int64(-1)
-	validCreator := sdk.AccAddress([]byte{1, 2})
-	validURI := "http://www.truchain.io"
-	msg := NewAddEvidenceMsg(invalidStoryID, validCreator, validURI)
-	err := msg.ValidateBasic()
-
-	assert.Equal(t, sdk.CodeType(702), err.Code(), err.Error())
-}
-
-func TestInValidCreatorSubmitEvidencetMsg(t *testing.T) {
-	validStoryID := int64(1)
-	invalidCreator := sdk.AccAddress([]byte{})
-	validURI := "http://www.truchain.io"
-	msg := NewAddEvidenceMsg(validStoryID, invalidCreator, validURI)
-	err := msg.ValidateBasic()
-
-	assert.Equal(t, sdk.CodeType(7), err.Code(), err.Error())
-}
-
-func TestInValidURISubmitEvidencetMsg(t *testing.T) {
-	validStoryID := int64(1)
-	validCreator := sdk.AccAddress([]byte{1, 2})
-	invalidURI := ""
-	msg := NewAddEvidenceMsg(validStoryID, validCreator, invalidURI)
-	err := msg.ValidateBasic()
-
-	assert.Equal(t, sdk.CodeType(704), err.Code(), err.Error())
 }
