@@ -11,6 +11,5 @@ var supported = chttp.MsgTypes{
 	"SubmitStoryMsg":     story.SubmitStoryMsg{},
 	"BackStoryMsg":       backing.BackStoryMsg{},
 	"CreateChallengeMsg": challenge.CreateChallengeMsg{},
-	"AddEvidenceMsg":     story.AddEvidenceMsg{},
 	"FlagStoryMsg":       story.FlagStoryMsg{},
 }

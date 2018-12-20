@@ -1,8 +1,6 @@
 package story
 
 import (
-	"net/url"
-
 	app "github.com/TruStory/truchain/types"
 	"github.com/TruStory/truchain/x/category"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -76,55 +74,6 @@ func (msg SubmitStoryMsg) ValidateBasic() sdk.Error {
 
 // GetSigners implements Msg. Story creator is the only signer of this message.
 func (msg SubmitStoryMsg) GetSigners() []sdk.AccAddress {
-	return app.GetSigners(msg.Creator)
-}
-
-// ============================================================================
-
-// AddEvidenceMsg defines a message to submit evidence for a story
-type AddEvidenceMsg struct {
-	StoryID int64          `json:"story_id"`
-	Creator sdk.AccAddress `json:"creator"`
-	URL     string         `json:"url"`
-}
-
-// NewAddEvidenceMsg creates a new message to submit evidence for a story
-func NewAddEvidenceMsg(storyID int64, creator sdk.AccAddress, url string) AddEvidenceMsg {
-	return AddEvidenceMsg{
-		StoryID: storyID,
-		Creator: creator,
-		URL:     url,
-	}
-}
-
-// Route implements Msg
-func (msg AddEvidenceMsg) Route() string { return app.GetRoute(msg) }
-
-// Type implements Msg
-func (msg AddEvidenceMsg) Type() string { return app.GetType(msg) }
-
-// GetSignBytes implements Msg
-func (msg AddEvidenceMsg) GetSignBytes() []byte {
-	return app.MustGetSignBytes(msg)
-}
-
-// ValidateBasic implements Msg
-func (msg AddEvidenceMsg) ValidateBasic() sdk.Error {
-	if msg.StoryID <= 0 {
-		return ErrInvalidStoryID(msg.StoryID)
-	}
-	if len(msg.Creator) == 0 {
-		return sdk.ErrInvalidAddress("Invalid address: " + msg.Creator.String())
-	}
-	_, err := url.ParseRequestURI(msg.URL)
-	if err != nil {
-		return ErrInvalidEvidenceURL(msg.URL)
-	}
-	return nil
-}
-
-// GetSigners implements Msg
-func (msg AddEvidenceMsg) GetSigners() []sdk.AccAddress {
 	return app.GetSigners(msg.Creator)
 }
 
