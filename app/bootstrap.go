@@ -91,15 +91,7 @@ func createStory(
 	}
 	evidenceURLs := []story.Evidence{e}
 
-	arg := story.Argument{
-		Creator:   creator,
-		Body:      argument,
-		Timestamp: tru.NewTimestamp(ctx.BlockHeader()),
-	}
-
-	arguments := []story.Argument{arg}
-
-	storyID, _ := sk.Create(ctx, arguments, claim, catID, creator, evidenceURLs, *sourceURL, storyType)
+	storyID, _ := sk.Create(ctx, argument, claim, catID, creator, evidenceURLs, *sourceURL, storyType)
 
 	return storyID
 }

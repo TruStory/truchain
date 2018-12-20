@@ -84,7 +84,7 @@ func createFakeStory(ctx sdk.Context, sk story.WriteKeeper, ck c.WriteKeeper) in
 	storyType := story.Default
 	source := url.URL{}
 	evidence := []story.Evidence{}
-	argument := []story.Argument{}
+	argument := "this is a fake argument"
 
 	storyID, _ := sk.Create(ctx, argument, body, cat.ID, creator, evidence, source, storyType)
 
