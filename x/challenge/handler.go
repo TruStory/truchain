@@ -1,8 +1,6 @@
 package challenge
 
 import (
-	"net/url"
-
 	app "github.com/TruStory/truchain/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
@@ -29,15 +27,9 @@ func handleCreateChallengeMsg(
 		return err.Result()
 	}
 
-	var evidence []url.URL
-	for _, urlString := range msg.Evidence {
-
-		evidenceURL, urlError := url.ParseRequestURI(urlString)
-		if urlError != nil {
-			return ErrInvalidEvidenceURL(urlString).Result()
-		}
-
-		evidence = append(evidence, *evidenceURL)
+	evidence, err := app.ParseEvidence(msg.Evidence)
+	if err != nil {
+		return err.Result()
 	}
 
 	id, err := k.Create(
