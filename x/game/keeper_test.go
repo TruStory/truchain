@@ -1,6 +1,7 @@
 package game
 
 import (
+	"net/url"
 	"testing"
 	"time"
 
@@ -9,6 +10,11 @@ import (
 )
 
 var creator = sdk.AccAddress([]byte{1, 2})
+
+func evidence() []url.URL {
+	cnn, _ := url.Parse("http://www.cnn.com")
+	return []url.URL{*cnn}
+}
 
 func TestCreateGame(t *testing.T) {
 	ctx, k, categoryKeeper := mockDB()
@@ -61,7 +67,7 @@ func TestRegisterChallengeHaveBackersMeetThreshold(t *testing.T) {
 	// back story with 100trudex
 	k.bankKeeper.AddCoins(ctx, creator, sdk.Coins{amount})
 	duration := 30 * 24 * time.Hour
-	k.backingKeeper.Create(ctx, storyID, amount, argument, creator, duration)
+	k.backingKeeper.Create(ctx, storyID, amount, argument, creator, duration, evidence())
 
 	// challenge with 34trudex (34% of total backings)
 	amount, _ = sdk.ParseCoin("34trudex")
@@ -83,7 +89,7 @@ func TestRegisterChallengeHaveBackersNotMeetThreshold(t *testing.T) {
 	// back story with 100trudex
 	k.bankKeeper.AddCoins(ctx, creator, sdk.Coins{amount})
 	duration := 30 * 24 * time.Hour
-	k.backingKeeper.Create(ctx, storyID, amount, argument, creator, duration)
+	k.backingKeeper.Create(ctx, storyID, amount, argument, creator, duration, evidence())
 
 	// challenge with 32trudex (32% of total backings)
 	amount, _ = sdk.ParseCoin("32trudex")
