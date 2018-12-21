@@ -31,7 +31,7 @@ func TestInValidCreateVoteMsg(t *testing.T) {
 	amount := sdk.NewCoin("testcoin", sdk.NewInt(5))
 	creator := sdk.AccAddress([]byte{1, 2})
 
-	msg := NewCreateVoteMsg(storyID, amount, "", creator, true)
+	msg := NewCreateVoteMsg(storyID, amount, "too short", creator, true)
 	err := msg.ValidateBasic()
 	assert.NotNil(t, err)
 	assert.Equal(t, app.ErrInvalidArgumentMsg().Code(), err.Code())

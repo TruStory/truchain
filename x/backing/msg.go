@@ -54,6 +54,9 @@ func (msg BackStoryMsg) ValidateBasic() sdk.Error {
 	if msg.StoryID <= 0 {
 		return story.ErrInvalidStoryID(msg.StoryID)
 	}
+	if len := len(msg.Argument); len > 0 && (len < params.MinArgumentLength || len > params.MaxArgumentLength) {
+		return app.ErrInvalidArgumentMsg()
+	}
 	if len(msg.Creator) == 0 {
 		return sdk.ErrInvalidAddress("Invalid address: " + msg.Creator.String())
 	}
