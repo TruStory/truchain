@@ -135,7 +135,7 @@ func loadTestDB(
 	// back it
 	amount, _ := sdk.ParseCoin("1000trusteak")
 	argument := "this is an argument"
-	duration := 30 * 24 * time.Hour
+	duration := 3 * time.Second
 	testURL, _ := url.Parse("http://www.trustory.io")
 	evidence := []url.URL{*testURL}
 
