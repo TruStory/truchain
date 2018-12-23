@@ -19,6 +19,11 @@ import (
 type ReadKeeper interface {
 	app.ReadKeeper
 
+	Quorum(ctx sdk.Context, storyID int64) (total int, err sdk.Error)
+
+	Tally(ctx sdk.Context, gameID int64) (
+		trueVotes []TokenVote, falseVotes []TokenVote, err sdk.Error)
+
 	TokenVote(ctx sdk.Context, id int64) (vote TokenVote, err sdk.Error)
 
 	TokenVotesByGameID(ctx sdk.Context, gameID int64) ([]TokenVote, sdk.Error)
@@ -27,9 +32,6 @@ type ReadKeeper interface {
 		ctx sdk.Context,
 		storyID int64,
 		creator sdk.AccAddress) (vote TokenVote, err sdk.Error)
-
-	Tally(ctx sdk.Context, gameID int64) (
-		trueVotes []TokenVote, falseVotes []TokenVote, err sdk.Error)
 }
 
 // WriteKeeper defines a module interface that facilities write only access to truchain data
@@ -146,6 +148,33 @@ func (k Keeper) Create(
 	}
 
 	return vote.ID, nil
+}
+
+// Quorum returns the total count of backings, challenges, votes
+func (k Keeper) Quorum(ctx sdk.Context, storyID int64) (total int, err sdk.Error) {
+	backings, err := k.backingKeeper.BackingsByStoryID(ctx, storyID)
+	if err != nil {
+		return
+	}
+
+	story, err := k.storyKeeper.Story(ctx, storyID)
+	if err != nil {
+		return
+	}
+
+	challenges, err := k.challengeKeeper.ChallengesByGameID(ctx, story.GameID)
+	if err != nil {
+		return
+	}
+
+	tokenVotes, err := k.TokenVotesByGameID(ctx, story.GameID)
+	if err != nil {
+		return
+	}
+
+	total = len(backings) + len(challenges) + len(tokenVotes)
+
+	return total, nil
 }
 
 // TokenVote returns a `TokenVote` from the KVStore

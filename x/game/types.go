@@ -60,7 +60,7 @@ type Params struct {
 	MinChallengeStake       sdk.Int       // min amount required to challenge
 	Expires                 time.Duration // time to expire if threshold not met
 	VotingPeriod            time.Duration // length of challenge game / voting period
-	VoteQuorum              int64         // num voters required
+	VoteQuorum              int           // num voters required
 }
 
 // DefaultParams creates a new MsgParams type with defaults
