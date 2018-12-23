@@ -30,7 +30,6 @@ type WriteKeeper interface {
 		int64, sdk.Error)
 	RegisterChallenge(
 		ctx sdk.Context, gameID int64, amount sdk.Coin) (err sdk.Error)
-	RegisterVote(ctx sdk.Context, gameID int64) (err sdk.Error)
 }
 
 // Keeper data type storing keys to the key-value store
@@ -98,7 +97,6 @@ func (k Keeper) Create(
 		ExpiresTime:   ctx.BlockHeader().Time.Add(params.Expires),
 		EndTime:       time.Time{},
 		ChallengePool: emptyPool,
-		VoteQuorum:    0,
 		Timestamp:     app.NewTimestamp(ctx.BlockHeader()),
 	}
 
@@ -161,25 +159,6 @@ func (k Keeper) RegisterChallenge(
 	return nil
 }
 
-// RegisterVote increments the voter quorum and starts game if possible
-func (k Keeper) RegisterVote(ctx sdk.Context, gameID int64) (err sdk.Error) {
-
-	game, err := k.Game(ctx, gameID)
-	if err != nil {
-		return
-	}
-
-	if !game.Started {
-		return ErrNotStarted(gameID)
-	}
-
-	// update the voter quorum count
-	game.VoteQuorum = game.VoteQuorum + 1
-	k.update(ctx, game)
-
-	return
-}
-
 // ChallengeThreshold calculates the challenge threshold
 func (k Keeper) ChallengeThreshold(totalBackingAmount sdk.Coin) sdk.Coin {
 	params := DefaultParams()
@@ -240,7 +219,6 @@ func (k Keeper) update(ctx sdk.Context, game Game) {
 		EndTime:       game.EndTime,
 		ChallengePool: game.ChallengePool,
 		Started:       game.Started,
-		VoteQuorum:    game.VoteQuorum,
 		Timestamp:     game.Timestamp,
 	}
 

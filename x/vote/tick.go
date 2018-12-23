@@ -38,7 +38,7 @@ func (k Keeper) checkGames(ctx sdk.Context, gameQueue queue.Queue) sdk.Error {
 
 	blockTime := ctx.BlockHeader().Time
 
-	quorum, err := k.Quorum(ctx, game.StoryID)
+	quorum, err := k.quorum(ctx, game.StoryID)
 	if err != nil {
 		return err
 	}
@@ -75,7 +75,7 @@ func (k Keeper) checkGames(ctx sdk.Context, gameQueue queue.Queue) sdk.Error {
 	// 2. met the minimum voter quorum
 
 	// TODO: simplify
-	if !(game.EndTime.After(blockTime) && (quorum >= minQuorum) {
+	if !(game.EndTime.After(blockTime) && (quorum >= minQuorum)) {
 		return nil
 	}
 
@@ -91,6 +91,33 @@ func (k Keeper) checkGames(ctx sdk.Context, gameQueue queue.Queue) sdk.Error {
 
 	// check next game
 	return k.checkGames(ctx, gameQueue)
+}
+
+// quorum returns the total count of backings, challenges, votes
+func (k Keeper) quorum(ctx sdk.Context, storyID int64) (total int, err sdk.Error) {
+	backings, err := k.backingKeeper.BackingsByStoryID(ctx, storyID)
+	if err != nil {
+		return
+	}
+
+	story, err := k.storyKeeper.Story(ctx, storyID)
+	if err != nil {
+		return
+	}
+
+	challenges, err := k.challengeKeeper.ChallengesByGameID(ctx, story.GameID)
+	if err != nil {
+		return
+	}
+
+	tokenVotes, err := k.TokenVotesByGameID(ctx, story.GameID)
+	if err != nil {
+		return
+	}
+
+	total = len(backings) + len(challenges) + len(tokenVotes)
+
+	return total, nil
 }
 
 func (k Keeper) returnFunds(ctx sdk.Context, gameID int64) sdk.Error {

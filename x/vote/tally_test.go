@@ -77,8 +77,7 @@ func fakeValidationGame() (ctx sdk.Context, votes poll, k Keeper) {
 	k.backingKeeper.Update(ctx, b2)
 
 	b3, _ := k.backingKeeper.Backing(ctx, b3id)
-	b3.Interest = sdk.NewCoin("trudex", sdk.NewInt(
-		500))
+	b3.Interest = sdk.NewCoin("trudex", sdk.NewInt(500))
 	k.backingKeeper.Update(ctx, b3)
 
 	b4, _ := k.backingKeeper.Backing(ctx, b4id)

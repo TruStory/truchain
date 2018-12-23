@@ -28,30 +28,7 @@ type Game struct {
 	EndTime       time.Time      `json:"end_time,omitempty"`
 	ChallengePool sdk.Coin       `json:"challenge_pool,omitempty"`
 	Started       bool           `json:"started,omitempty"`
-	VoteQuorum    int64          `json:"vote_quorum,omitempty"`
 	Timestamp     app.Timestamp  `json:"timestamp"`
-}
-
-// Ended returns true if game is over time and quorum is reached
-func (g Game) Ended(time time.Time) bool {
-	if time.After(g.EndTime) &&
-		g.VoteQuorum >= DefaultParams().VoteQuorum {
-
-		return true
-	}
-
-	return false
-}
-
-// Expired returns true if game is over and quorum is not reached
-func (g Game) Expired(time time.Time) bool {
-	if time.After(g.EndTime) &&
-		g.VoteQuorum < DefaultParams().VoteQuorum {
-
-		return true
-	}
-
-	return false
 }
 
 // Params holds default parameters for a game
@@ -60,7 +37,6 @@ type Params struct {
 	MinChallengeStake       sdk.Int       // min amount required to challenge
 	Expires                 time.Duration // time to expire if threshold not met
 	VotingPeriod            time.Duration // length of challenge game / voting period
-	VoteQuorum              int           // num voters required
 }
 
 // DefaultParams creates a new MsgParams type with defaults
@@ -70,6 +46,5 @@ func DefaultParams() Params {
 		MinChallengeStake:       sdk.NewInt(10),
 		Expires:                 10 * 24 * time.Hour,
 		VotingPeriod:            1 * 24 * time.Hour,
-		VoteQuorum:              7,
 	}
 }
