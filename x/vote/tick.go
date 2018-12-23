@@ -38,11 +38,18 @@ func (k Keeper) checkGames(ctx sdk.Context, gameQueue queue.Queue) sdk.Error {
 
 	blockTime := ctx.BlockHeader().Time
 
+	quorum, err := k.Quorum(ctx, game.StoryID)
+	if err != nil {
+		return err
+	}
+
+	minQuorum := DefaultParams().VoteQuorum
+
 	// handle expired games
 	// an expired game meets the following criteria:
 	// 1. passed the voting period (`EndTime` > block time)
 	// 2. didn't meet the minimum voter quorum
-	if game.Expired(blockTime) {
+	if game.EndTime.After(blockTime) && (quorum < minQuorum) {
 		// remove from queue
 		gameQueue.Pop()
 
@@ -66,10 +73,13 @@ func (k Keeper) checkGames(ctx sdk.Context, gameQueue queue.Queue) sdk.Error {
 	// an ended game meets the following criteria:
 	// 1. passed the voting period (`EndTime` > block time)
 	// 2. met the minimum voter quorum
-	if !game.Ended(blockTime) {
+
+	// TODO: simplify
+	if !(game.EndTime.After(blockTime) && (quorum >= minQuorum) {
 		return nil
 	}
 
+	// only left with ended games at this point...
 	// remove ended game from queue
 	gameQueue.Pop()
 
