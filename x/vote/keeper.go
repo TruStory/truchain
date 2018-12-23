@@ -19,8 +19,6 @@ import (
 type ReadKeeper interface {
 	app.ReadKeeper
 
-	Quorum(ctx sdk.Context, storyID int64) (total int, err sdk.Error)
-
 	Tally(ctx sdk.Context, gameID int64) (
 		trueVotes []TokenVote, falseVotes []TokenVote, err sdk.Error)
 
@@ -141,40 +139,7 @@ func (k Keeper) Create(
 	// persist game <-> tokenVote association
 	k.voterList.Append(ctx, k, story.GameID, creator, vote.ID)
 
-	// register vote to add to the vote quorum
-	err = k.gameKeeper.RegisterVote(ctx, story.GameID)
-	if err != nil {
-		return 0, err
-	}
-
 	return vote.ID, nil
-}
-
-// Quorum returns the total count of backings, challenges, votes
-func (k Keeper) Quorum(ctx sdk.Context, storyID int64) (total int, err sdk.Error) {
-	backings, err := k.backingKeeper.BackingsByStoryID(ctx, storyID)
-	if err != nil {
-		return
-	}
-
-	story, err := k.storyKeeper.Story(ctx, storyID)
-	if err != nil {
-		return
-	}
-
-	challenges, err := k.challengeKeeper.ChallengesByGameID(ctx, story.GameID)
-	if err != nil {
-		return
-	}
-
-	tokenVotes, err := k.TokenVotesByGameID(ctx, story.GameID)
-	if err != nil {
-		return
-	}
-
-	total = len(backings) + len(challenges) + len(tokenVotes)
-
-	return total, nil
 }
 
 // TokenVote returns a `TokenVote` from the KVStore

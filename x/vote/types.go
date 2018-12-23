@@ -52,7 +52,7 @@ func DefaultMsgParams() MsgParams {
 type Params struct {
 	ChallengerRewardPoolShare sdk.Dec
 	MajorityPercent           sdk.Dec
-	VoteQuorum                int64 // num voters required
+	VoteQuorum                int // num voters required
 }
 
 // DefaultParams is the default parameters for voting

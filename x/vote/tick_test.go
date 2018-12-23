@@ -24,6 +24,25 @@ func Test_checkGames(t *testing.T) {
 	assert.Nil(t, err)
 }
 
+func Test_quorum(t *testing.T) {
+	ctx, votes, k := fakeValidationGame()
+
+	// get the gameID
+	qStore := ctx.KVStore(k.activeGamesQueueKey)
+	q := store.NewQueue(k.GetCodec(), qStore)
+	var gameID int64
+	q.Peek(&gameID)
+
+	// retrieve the game
+	game, _ := k.gameKeeper.Game(ctx, gameID)
+
+	story, _ := k.storyKeeper.Story(ctx, game.StoryID)
+
+	totalBCV, _ := k.quorum(ctx, story.ID)
+
+	assert.Equal(t, len(votes.falseVotes)+len(votes.trueVotes), totalBCV)
+}
+
 func Test_returnFunds(t *testing.T) {
 	ctx, votes, k := fakeValidationGame()
 
