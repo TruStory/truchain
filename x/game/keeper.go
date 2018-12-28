@@ -150,8 +150,8 @@ func (k Keeper) RegisterChallenge(
 
 	threshold := k.ChallengeThreshold(totalBackingAmount)
 
-	// start game if challenge pool meets threshold
-	if game.ChallengePool.Amount.GT(threshold.Amount) {
+	// start game if challenge pool is greater than OR equal to challenge threshold
+	if game.ChallengePool.IsGTE(threshold) {
 		err = k.start(ctx, &game)
 	}
 	if err != nil {

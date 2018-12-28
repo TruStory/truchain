@@ -69,8 +69,8 @@ func TestRegisterChallengeHaveBackersMeetThreshold(t *testing.T) {
 	duration := 30 * 24 * time.Hour
 	k.backingKeeper.Create(ctx, storyID, amount, argument, creator, duration, evidence())
 
-	// challenge with 34trudex (34% of total backings)
-	amount, _ = sdk.ParseCoin("34trudex")
+	// challenge with 33trudex (33% of total backings)
+	amount, _ = sdk.ParseCoin("33trudex")
 	err := k.RegisterChallenge(ctx, gameID, amount)
 	assert.Nil(t, err)
 
