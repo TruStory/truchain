@@ -184,16 +184,15 @@ func (k Keeper) RegisterVote(ctx sdk.Context, gameID int64) (err sdk.Error) {
 func (k Keeper) ChallengeThreshold(totalBackingAmount sdk.Coin) sdk.Coin {
 	params := DefaultParams()
 
-	// we have zero backers
-	// challenge threshold equals min challenge stake
-	if totalBackingAmount.IsZero() {
-		return sdk.NewCoin(totalBackingAmount.Denom, params.MinChallengeStake)
-	}
-
 	// we have backers
 	// calculate challenge threshold amount (based on total backings)
 	totalBackingDec := sdk.NewDecFromInt(totalBackingAmount.Amount)
 	challengeThresholdAmount := totalBackingDec.Mul(params.ChallengeToBackingRatio).RoundInt()
+
+	// challenge threshold can't be less than min challenge stake
+	if challengeThresholdAmount.LT(params.MinChallengeStake) {
+		return sdk.NewCoin(totalBackingAmount.Denom, params.MinChallengeStake)
+	}
 
 	return sdk.NewCoin(totalBackingAmount.Denom, challengeThresholdAmount)
 }
