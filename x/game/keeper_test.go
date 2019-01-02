@@ -175,6 +175,17 @@ func Test_challengeThresholdNoBacking(t *testing.T) {
 	assert.Equal(t, "10trudex", amt.String())
 }
 
+// challenge threshold should not go below min challenge stake
+// if challenge threshold is 1/3 of backing and min challenge stake is 10
+// when a story has backing amount of 21, challenge threshold should be 10, not 7
+// then instead
+func Test_challengeThresholdWithSmallBacking(t *testing.T) {
+	_, k, _ := mockDB()
+	amt := k.ChallengeThreshold(sdk.NewCoin("trudex", sdk.NewInt(21)))
+
+	assert.Equal(t, "10trudex", amt.String())
+}
+
 func Test_challengeThresholdWithBacking(t *testing.T) {
 	_, k, _ := mockDB()
 	amt := k.ChallengeThreshold(sdk.NewCoin("trudex", sdk.NewInt(100)))
