@@ -11,7 +11,7 @@ import (
 // started
 // * challenge threshold met
 // * voting begins
-// ended
+// finished
 // * voting period ended (24 hrs)
 // * AND received min quorum (9+ votes)
 // expired
@@ -31,12 +31,27 @@ type Game struct {
 	Timestamp     app.Timestamp  `json:"timestamp"`
 }
 
+// IsExpired returns true if a game has expired
+// 1. passed the voting period (`EndTime` > block time)
+// 2. didn't meet the minimum voter quorum
+func (g Game) IsExpired(blockTime time.Time, quorum int) bool {
+	return g.EndTime.After(blockTime) && (quorum < DefaultParams().VoteQuorum)
+}
+
+// IsFinished returns true if a game is finished
+// 1. passed the voting period (`EndTime` > block time)
+// 2. met the minimum voter quorum
+func (g Game) IsFinished(blockTime time.Time, quorum int) bool {
+	return g.EndTime.After(blockTime) && (quorum >= DefaultParams().VoteQuorum)
+}
+
 // Params holds default parameters for a game
 type Params struct {
 	ChallengeToBackingRatio sdk.Dec       // % backings at which game begins
 	MinChallengeStake       sdk.Int       // min amount required to challenge
 	Expires                 time.Duration // time to expire if threshold not met
 	VotingPeriod            time.Duration // length of challenge game / voting period
+	VoteQuorum              int           // num voters (BCV) required
 }
 
 // DefaultParams creates a new MsgParams type with defaults
@@ -46,5 +61,6 @@ func DefaultParams() Params {
 		MinChallengeStake:       sdk.NewInt(10),
 		Expires:                 10 * 24 * time.Hour,
 		VotingPeriod:            1 * 24 * time.Hour,
+		VoteQuorum:              7,
 	}
 }
