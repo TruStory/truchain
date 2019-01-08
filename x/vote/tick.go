@@ -21,8 +21,8 @@ func (k Keeper) NewResponseEndBlock(ctx sdk.Context) sdk.Tags {
 
 // ============================================================================
 
-// checkGames checks to see if a validation game has ended.
-// It calls itself recursively until all games have been processed.
+// checkGames checks to see if a validation game has ended, then processes
+// that game. It calls itself recursively until all games have been processed.
 func (k Keeper) checkGames(ctx sdk.Context, gameQueue queue.Queue) sdk.Error {
 	// check the head of the queue
 	var gameID int64
@@ -43,13 +43,8 @@ func (k Keeper) checkGames(ctx sdk.Context, gameQueue queue.Queue) sdk.Error {
 		return err
 	}
 
-	minQuorum := DefaultParams().VoteQuorum
-
 	// handle expired games
-	// an expired game meets the following criteria:
-	// 1. passed the voting period (`EndTime` > block time)
-	// 2. didn't meet the minimum voter quorum
-	if game.EndTime.After(blockTime) && (quorum < minQuorum) {
+	if game.IsExpired(blockTime, quorum) {
 		// remove from queue
 		gameQueue.Pop()
 
@@ -69,21 +64,17 @@ func (k Keeper) checkGames(ctx sdk.Context, gameQueue queue.Queue) sdk.Error {
 		return k.checkGames(ctx, gameQueue)
 	}
 
-	// terminate recursion on finding the first non-ended game
-	// an ended game meets the following criteria:
-	// 1. passed the voting period (`EndTime` > block time)
-	// 2. met the minimum voter quorum
-
-	// TODO: simplify
-	if !(game.EndTime.After(blockTime) && (quorum >= minQuorum)) {
+	// terminate recursion on finding the first unfinished game
+	// we only care about processing finished games
+	if !game.IsFinished(blockTime, quorum) {
 		return nil
 	}
 
-	// only left with ended games at this point...
-	// remove ended game from queue
+	// only left with finished games at this point...
+	// remove finished game from queue
 	gameQueue.Pop()
 
-	// process ended game
+	// process game
 	err = processGame(ctx, k, game)
 	if err != nil {
 		return err
