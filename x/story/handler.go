@@ -29,7 +29,7 @@ func handleSubmitStoryMsg(ctx sdk.Context, k WriteKeeper, msg SubmitStoryMsg) sd
 	}
 
 	// parse url from string
-	sourceURL, urlError := url.ParseRequestURI(msg.Source)
+	sourceURL, urlError := url.Parse(msg.Source)
 	if urlError != nil {
 		return ErrInvalidSourceURL(msg.Source).Result()
 	}

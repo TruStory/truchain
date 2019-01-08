@@ -39,6 +39,34 @@ func TestSubmitStoryMsg(t *testing.T) {
 	assert.Equal(t, int64(2), idres1.ID, "incorrect result data")
 }
 
+func TestSubmitStoryWithoutHostInSourceURLMsg(t *testing.T) {
+	ctx, sk, ck := mockDB()
+
+	h := NewHandler(sk)
+	assert.NotNil(t, h)
+
+	cat := createFakeCategory(ctx, ck)
+
+	body := "fake story body with minimum length"
+	creator := sdk.AccAddress([]byte{1, 2})
+	kind := Default
+	source := "www.nbd.com"
+	argument := "argument body"
+
+	msg := NewSubmitStoryMsg(argument, body, cat.ID, creator, source, kind)
+	assert.NotNil(t, msg)
+
+	res := h(ctx, msg)
+	res1 := h(ctx, msg)
+	idres := new(types.IDResult)
+	idres1 := new(types.IDResult)
+	_ = json.Unmarshal(res.Data, &idres)
+	_ = json.Unmarshal(res1.Data, &idres1)
+
+	assert.Equal(t, int64(1), idres.ID, "incorrect result data")
+	assert.Equal(t, int64(2), idres1.ID, "incorrect result data")
+}
+
 func TestSubmitStoryMsgWithOnlyRequiredFields(t *testing.T) {
 	ctx, sk, ck := mockDB()
 
