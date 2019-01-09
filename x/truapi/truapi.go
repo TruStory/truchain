@@ -70,12 +70,13 @@ func (ta *TruAPI) RegisterResolvers() {
 
 	ta.GraphQLClient.RegisterQueryResolver("backing", ta.backingResolver)
 	ta.GraphQLClient.RegisterObjectResolver("Backing", backing.Backing{}, map[string]interface{}{
-		"amount":   func(ctx context.Context, q backing.Backing) sdk.Coin { return q.Amount() },
-		"argument": func(ctx context.Context, q backing.Backing) string { return q.Argument },
-		"interest": func(ctx context.Context, q backing.Backing) sdk.Coin { return q.Interest },
-		"evidence": func(ctx context.Context, q backing.Backing) []url.URL { return q.Evidence },
-		"vote":     func(ctx context.Context, q backing.Backing) bool { return q.VoteChoice() },
-		"creator":  func(ctx context.Context, q backing.Backing) users.User { return getUser(ctx, q.Creator()) },
+		"amount":    func(ctx context.Context, q backing.Backing) sdk.Coin { return q.Amount() },
+		"argument":  func(ctx context.Context, q backing.Backing) string { return q.Argument },
+		"interest":  func(ctx context.Context, q backing.Backing) sdk.Coin { return q.Interest },
+		"evidence":  func(ctx context.Context, q backing.Backing) []url.URL { return q.Evidence },
+		"vote":      func(ctx context.Context, q backing.Backing) bool { return q.VoteChoice() },
+		"creator":   func(ctx context.Context, q backing.Backing) users.User { return getUser(ctx, q.Creator()) },
+		"timestamp": func(ctx context.Context, q backing.Backing) app.Timestamp { return q.Timestamp },
 	})
 
 	ta.GraphQLClient.RegisterQueryResolver("categories", ta.allCategoriesResolver)
@@ -88,11 +89,12 @@ func (ta *TruAPI) RegisterResolvers() {
 
 	ta.GraphQLClient.RegisterQueryResolver("challenge", ta.challengeResolver)
 	ta.GraphQLClient.RegisterObjectResolver("Challenge", challenge.Challenge{}, map[string]interface{}{
-		"amount":   func(ctx context.Context, q challenge.Challenge) sdk.Coin { return q.Amount() },
-		"argument": func(ctx context.Context, q challenge.Challenge) string { return q.Argument },
-		"evidence": func(ctx context.Context, q challenge.Challenge) []url.URL { return q.Evidence },
-		"vote":     func(ctx context.Context, q challenge.Challenge) bool { return q.VoteChoice() },
-		"creator":  func(ctx context.Context, q challenge.Challenge) users.User { return getUser(ctx, q.Creator()) },
+		"amount":    func(ctx context.Context, q challenge.Challenge) sdk.Coin { return q.Amount() },
+		"argument":  func(ctx context.Context, q challenge.Challenge) string { return q.Argument },
+		"evidence":  func(ctx context.Context, q challenge.Challenge) []url.URL { return q.Evidence },
+		"vote":      func(ctx context.Context, q challenge.Challenge) bool { return q.VoteChoice() },
+		"creator":   func(ctx context.Context, q challenge.Challenge) users.User { return getUser(ctx, q.Creator()) },
+		"timestamp": func(ctx context.Context, q challenge.Challenge) app.Timestamp { return q.Timestamp },
 	})
 
 	ta.GraphQLClient.RegisterObjectResolver("Coin", sdk.Coin{}, map[string]interface{}{
@@ -128,6 +130,11 @@ func (ta *TruAPI) RegisterResolvers() {
 		"votes":        func(ctx context.Context, q story.Story) []vote.TokenVote { return getVotes(ctx, q.GameID) },
 	})
 
+	ta.GraphQLClient.RegisterObjectResolver("Timestamp", app.Timestamp{}, map[string]interface{}{
+		"created": func(_ context.Context, q app.Timestamp) string { return q.CreatedTime.String() },
+		"updated": func(_ context.Context, q app.Timestamp) string { return q.UpdatedTime.String() },
+	})
+
 	ta.GraphQLClient.RegisterObjectResolver("TwitterProfile", users.TwitterProfile{}, map[string]interface{}{
 		"id": func(_ context.Context, q users.TwitterProfile) string { return q.ID },
 	})
@@ -146,11 +153,12 @@ func (ta *TruAPI) RegisterResolvers() {
 
 	ta.GraphQLClient.RegisterQueryResolver("vote", ta.voteResolver)
 	ta.GraphQLClient.RegisterObjectResolver("Vote", vote.TokenVote{}, map[string]interface{}{
-		"amount":   func(ctx context.Context, q vote.TokenVote) sdk.Coin { return q.Amount() },
-		"argument": func(ctx context.Context, q vote.TokenVote) string { return q.Argument },
-		"evidence": func(ctx context.Context, q vote.TokenVote) []url.URL { return q.Evidence },
-		"vote":     func(ctx context.Context, q vote.TokenVote) bool { return q.VoteChoice() },
-		"creator":  func(ctx context.Context, q vote.TokenVote) users.User { return getUser(ctx, q.Creator()) },
+		"amount":    func(ctx context.Context, q vote.TokenVote) sdk.Coin { return q.Amount() },
+		"argument":  func(ctx context.Context, q vote.TokenVote) string { return q.Argument },
+		"evidence":  func(ctx context.Context, q vote.TokenVote) []url.URL { return q.Evidence },
+		"vote":      func(ctx context.Context, q vote.TokenVote) bool { return q.VoteChoice() },
+		"creator":   func(ctx context.Context, q vote.TokenVote) users.User { return getUser(ctx, q.Creator()) },
+		"timestamp": func(ctx context.Context, q vote.TokenVote) app.Timestamp { return q.Timestamp },
 	})
 
 	ta.GraphQLClient.BuildSchema()
