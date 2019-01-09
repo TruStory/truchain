@@ -11,6 +11,7 @@ const (
 	QueryPath                   = "backings"
 	QueryBackingByID            = "id"
 	QueryBackingAmountByStoryID = "totalAmountByStoryID"
+	QueryByStoryID              = "storyID"
 	QueryByStoryIDAndCreator    = "storyIDAndCreator"
 )
 
@@ -22,6 +23,8 @@ func NewQuerier(k ReadKeeper) sdk.Querier {
 			return queryBackingByID(ctx, req, k)
 		case QueryBackingAmountByStoryID:
 			return queryBackingAmountByStoryID(ctx, req, k)
+		case QueryByStoryID:
+			return queryByStoryID(ctx, req, k)
 		case QueryByStoryIDAndCreator:
 			return queryByStoryIDAndCreator(ctx, req, k)
 		default:
@@ -60,6 +63,26 @@ func queryBackingAmountByStoryID(ctx sdk.Context, req abci.RequestQuery, k ReadK
 	}
 
 	return app.MustMarshal(backingTotal), nil
+}
+
+func queryByStoryID(
+	ctx sdk.Context,
+	req abci.RequestQuery,
+	k ReadKeeper) (res []byte, sdkErr sdk.Error) {
+
+	params := app.QueryByIDParams{}
+
+	sdkErr = app.UnmarshalQueryParams(req, &params)
+	if sdkErr != nil {
+		return
+	}
+
+	backings, sdkErr := k.BackingsByStoryID(ctx, params.ID)
+	if sdkErr != nil {
+		return
+	}
+
+	return app.MustMarshal(backings), nil
 }
 
 func queryByStoryIDAndCreator(

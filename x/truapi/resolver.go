@@ -58,6 +58,7 @@ func (ta *TruAPI) allStoriesResolver(ctx context.Context, q struct{}) []story.St
 
 func (ta *TruAPI) backingResolver(
 	_ context.Context, q app.QueryByStoryIDAndCreatorParams) backing.Backing {
+
 	res := ta.RunQuery("backings/storyIDAndCreator", q)
 
 	if res.Code != 0 {
@@ -72,6 +73,25 @@ func (ta *TruAPI) backingResolver(
 	}
 
 	return *backing
+}
+
+func (ta *TruAPI) backingsResolver(
+	_ context.Context, q app.QueryByIDParams) []backing.Backing {
+
+	res := ta.RunQuery("backings/storyID", q)
+
+	if res.Code != 0 {
+		fmt.Println("Resolver err: ", res)
+		return []backing.Backing{}
+	}
+
+	backings := new([]backing.Backing)
+	err := json.Unmarshal(res.Value, backings)
+	if err != nil {
+		panic(err)
+	}
+
+	return *backings
 }
 
 func (ta *TruAPI) backingTotalResolver(_ context.Context, q story.Story) sdk.Coin {

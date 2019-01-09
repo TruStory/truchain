@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"net/url"
 
+	app "github.com/TruStory/truchain/types"
 	"github.com/TruStory/truchain/x/backing"
 	"github.com/TruStory/truchain/x/category"
 	"github.com/TruStory/truchain/x/challenge"
@@ -55,6 +56,22 @@ func (ta *TruAPI) RegisterResolvers() {
 		return users.User{}
 	}
 
+	// getBacking := func(ctx context.Context, storyID int64) backing.Backing {
+	// 	// spew.Dump("DEBUG", ctx.Value)
+	// 	// res := ta.usersResolver(ctx, users.QueryUsersByAddressesParams{Addresses: []string{addr.String()}})
+	// 	// if len(res) > 0 {
+	// 	// 	return res[0]
+	// 	// }
+
+	// 	return backing.Backing{}
+	// }
+
+	getBackings := func(ctx context.Context, storyID int64) []backing.Backing {
+		res := ta.backingsResolver(ctx, app.QueryByIDParams{ID: storyID})
+
+		return res
+	}
+
 	ta.GraphQLClient.RegisterQueryResolver("backing", ta.backingResolver)
 	ta.GraphQLClient.RegisterObjectResolver("Backing", backing.Backing{}, map[string]interface{}{
 		"amount":   func(ctx context.Context, q backing.Backing) sdk.Coin { return q.Amount() },
@@ -100,8 +117,8 @@ func (ta *TruAPI) RegisterResolvers() {
 	ta.GraphQLClient.RegisterQueryResolver("stories", ta.allStoriesResolver)
 	ta.GraphQLClient.RegisterQueryResolver("story", ta.storyResolver)
 	ta.GraphQLClient.RegisterObjectResolver("Story", story.Story{}, map[string]interface{}{
-		"id": func(_ context.Context, q story.Story) int64 { return q.ID },
-		// "backing": ta.backingResolver
+		"id":           func(_ context.Context, q story.Story) int64 { return q.ID },
+		"backings":     func(ctx context.Context, q story.Story) []backing.Backing { return getBackings(ctx, q.ID) },
 		"backingTotal": ta.backingTotalResolver,
 		"category":     ta.storyCategoryResolver,
 		"creator":      func(ctx context.Context, q story.Story) users.User { return getUser(ctx, q.Creator) },
