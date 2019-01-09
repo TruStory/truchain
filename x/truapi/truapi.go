@@ -75,6 +75,7 @@ func (ta *TruAPI) RegisterResolvers() {
 		"interest": func(ctx context.Context, q backing.Backing) sdk.Coin { return q.Interest },
 		"evidence": func(ctx context.Context, q backing.Backing) []url.URL { return q.Evidence },
 		"vote":     func(ctx context.Context, q backing.Backing) bool { return q.VoteChoice() },
+		"creator":  func(ctx context.Context, q backing.Backing) users.User { return getUser(ctx, q.Creator()) },
 	})
 
 	ta.GraphQLClient.RegisterQueryResolver("categories", ta.allCategoriesResolver)
@@ -91,6 +92,7 @@ func (ta *TruAPI) RegisterResolvers() {
 		"argument": func(ctx context.Context, q challenge.Challenge) string { return q.Argument },
 		"evidence": func(ctx context.Context, q challenge.Challenge) []url.URL { return q.Evidence },
 		"vote":     func(ctx context.Context, q challenge.Challenge) bool { return q.VoteChoice() },
+		"creator":  func(ctx context.Context, q challenge.Challenge) users.User { return getUser(ctx, q.Creator()) },
 	})
 
 	ta.GraphQLClient.RegisterObjectResolver("Coin", sdk.Coin{}, map[string]interface{}{
@@ -148,6 +150,7 @@ func (ta *TruAPI) RegisterResolvers() {
 		"argument": func(ctx context.Context, q vote.TokenVote) string { return q.Argument },
 		"evidence": func(ctx context.Context, q vote.TokenVote) []url.URL { return q.Evidence },
 		"vote":     func(ctx context.Context, q vote.TokenVote) bool { return q.VoteChoice() },
+		"creator":  func(ctx context.Context, q vote.TokenVote) users.User { return getUser(ctx, q.Creator()) },
 	})
 
 	ta.GraphQLClient.BuildSchema()
