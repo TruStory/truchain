@@ -53,8 +53,11 @@ func DefaultMsgParams() MsgParams {
 	return MsgParams{
 		MinArgumentLength: 10,
 		MaxArgumentLength: 1000,
-		MinPeriod:         3 * 24 * time.Hour,  // 3 days
-		MaxPeriod:         90 * 24 * time.Hour, // 90 days
+		// MinPeriod:         3 * 24 * time.Hour,  // 3 days
+		// MaxPeriod:         90 * 24 * time.Hour, // 90 days
+		// TODO [shanev] revert for https://github.com/TruStory/truchain/issues/253
+		MinPeriod: 1 * time.Hour,
+		MaxPeriod: 6 * time.Hour,
 	}
 }
 

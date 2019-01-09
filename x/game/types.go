@@ -58,9 +58,13 @@ type Params struct {
 func DefaultParams() Params {
 	return Params{
 		ChallengeToBackingRatio: sdk.NewDecWithPrec(33, 2), // 33%
-		MinChallengeStake:       sdk.NewInt(10),
-		Expires:                 10 * 24 * time.Hour,
-		VotingPeriod:            1 * 24 * time.Hour,
-		VoteQuorum:              7,
+		MinChallengeStake:       sdk.NewInt(10000),
+		// Expires:                 10 * 24 * time.Hour,
+		// VotingPeriod:            1 * 24 * time.Hour,
+		// VoteQuorum:              7,
+		// TODO [shanev] revert for https://github.com/TruStory/truchain/issues/253
+		Expires:      1 * 24 * time.Hour,
+		VotingPeriod: 6 * time.Hour,
+		VoteQuorum:   3,
 	}
 }
