@@ -56,22 +56,16 @@ func (ta *TruAPI) RegisterResolvers() {
 		return users.User{}
 	}
 
-	// getBacking := func(ctx context.Context, storyID int64) backing.Backing {
-	// 	// spew.Dump("DEBUG", ctx.Value)
-	// 	// res := ta.usersResolver(ctx, users.QueryUsersByAddressesParams{Addresses: []string{addr.String()}})
-	// 	// if len(res) > 0 {
-	// 	// 	return res[0]
-	// 	// }
-
-	// 	return backing.Backing{}
-	// }
-
 	getBackings := func(ctx context.Context, storyID int64) []backing.Backing {
 		return ta.backingsResolver(ctx, app.QueryByIDParams{ID: storyID})
 	}
 
 	getChallenges := func(ctx context.Context, gameID int64) []challenge.Challenge {
 		return ta.challengesResolver(ctx, app.QueryByIDParams{ID: gameID})
+	}
+
+	getVotes := func(ctx context.Context, gameID int64) []vote.TokenVote {
+		return ta.votesResolver(ctx, app.QueryByIDParams{ID: gameID})
 	}
 
 	ta.GraphQLClient.RegisterQueryResolver("backing", ta.backingResolver)
@@ -129,6 +123,7 @@ func (ta *TruAPI) RegisterResolvers() {
 		"argument":     func(ctx context.Context, q story.Story) string { return q.Argument },
 		"evidence":     func(ctx context.Context, q story.Story) []story.Evidence { return q.Evidence },
 		"game":         ta.gameResolver,
+		"votes":        func(ctx context.Context, q story.Story) []vote.TokenVote { return getVotes(ctx, q.GameID) },
 	})
 
 	ta.GraphQLClient.RegisterObjectResolver("TwitterProfile", users.TwitterProfile{}, map[string]interface{}{

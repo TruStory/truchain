@@ -292,3 +292,22 @@ func (ta *TruAPI) voteResolver(
 
 	return *tokenVote
 }
+
+func (ta *TruAPI) votesResolver(
+	_ context.Context, q app.QueryByIDParams) []vote.TokenVote {
+
+	res := ta.RunQuery("votes/gameID", q)
+
+	if res.Code != 0 {
+		fmt.Println("Resolver err: ", res)
+		return []vote.TokenVote{}
+	}
+
+	tokenVotes := new([]vote.TokenVote)
+	err := json.Unmarshal(res.Value, tokenVotes)
+	if err != nil {
+		panic(err)
+	}
+
+	return *tokenVotes
+}
