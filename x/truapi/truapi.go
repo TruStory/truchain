@@ -67,9 +67,11 @@ func (ta *TruAPI) RegisterResolvers() {
 	// }
 
 	getBackings := func(ctx context.Context, storyID int64) []backing.Backing {
-		res := ta.backingsResolver(ctx, app.QueryByIDParams{ID: storyID})
+		return ta.backingsResolver(ctx, app.QueryByIDParams{ID: storyID})
+	}
 
-		return res
+	getChallenges := func(ctx context.Context, gameID int64) []challenge.Challenge {
+		return ta.challengesResolver(ctx, app.QueryByIDParams{ID: gameID})
 	}
 
 	ta.GraphQLClient.RegisterQueryResolver("backing", ta.backingResolver)
@@ -119,6 +121,7 @@ func (ta *TruAPI) RegisterResolvers() {
 	ta.GraphQLClient.RegisterObjectResolver("Story", story.Story{}, map[string]interface{}{
 		"id":           func(_ context.Context, q story.Story) int64 { return q.ID },
 		"backings":     func(ctx context.Context, q story.Story) []backing.Backing { return getBackings(ctx, q.ID) },
+		"challenges":   func(ctx context.Context, q story.Story) []challenge.Challenge { return getChallenges(ctx, q.GameID) },
 		"backingTotal": ta.backingTotalResolver,
 		"category":     ta.storyCategoryResolver,
 		"creator":      func(ctx context.Context, q story.Story) users.User { return getUser(ctx, q.Creator) },
