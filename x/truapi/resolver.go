@@ -165,6 +165,25 @@ func (ta *TruAPI) challengeResolver(
 	return *challenge
 }
 
+func (ta *TruAPI) challengesResolver(
+	_ context.Context, q app.QueryByIDParams) []challenge.Challenge {
+
+	res := ta.RunQuery("challenges/gameID", q)
+
+	if res.Code != 0 {
+		fmt.Println("Resolver err: ", res)
+		return []challenge.Challenge{}
+	}
+
+	challenges := new([]challenge.Challenge)
+	err := json.Unmarshal(res.Value, challenges)
+	if err != nil {
+		panic(err)
+	}
+
+	return *challenges
+}
+
 func (ta *TruAPI) challengeThresholdResolver(_ context.Context, q game.Game) sdk.Coin {
 	res := ta.RunQuery("games/challengeThresholdByGameID", app.QueryByIDParams{ID: q.ID})
 
