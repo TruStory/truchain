@@ -93,7 +93,7 @@ func (k Keeper) GetCategory(ctx sdk.Context, id int64) (cat Category, err sdk.Er
 	return
 }
 
-// GetAllCategories gets the category with the given id from the key-value store
+// GetAllCategories gets all categories from the key-value store
 func (k Keeper) GetAllCategories(ctx sdk.Context) (cats []Category, err sdk.Error) {
 	cat := Category{}
 	err = k.Each(ctx, func(val []byte) bool {

@@ -6,7 +6,10 @@ import (
 	"net/url"
 	"os"
 	"path/filepath"
+	"strings"
 	"time"
+
+	"github.com/TruStory/truchain/x/category"
 
 	"github.com/cosmos/cosmos-sdk/x/bank"
 	"github.com/davecgh/go-spew/spew"
@@ -41,7 +44,7 @@ func createUser(
 	_, pubKey, addr := keyPubAddr()
 	bacc := auth.NewBaseAccountWithAddress(addr)
 
-	spew.Dump("DEBUG -- CREATOR ADDRESS", addr)
+	spew.Dump("[DEBUG] CREATOR ADDRESS", addr)
 
 	key, err := chttp.StdKey("ed25519", pubKey.Bytes())
 	if err != nil {
@@ -70,26 +73,32 @@ func createUser(
 func createStory(
 	ctx sdk.Context,
 	sk story.WriteKeeper,
+	ck category.ReadKeeper,
 	creator sdk.AccAddress,
 	claim string,
+	catSlug string,
 	source string,
-	evidence string,
 	argument string) int64 {
 
-	catID := int64(1)
+	categories, _ := ck.GetAllCategories(ctx)
+
+	var catID int64
+	for _, category := range categories {
+		slug := strings.ToLower(category.Slug)
+		if slug == catSlug {
+			catID = category.ID
+		}
+	}
+
 	storyType := story.Default
 	sourceURL, _ := url.Parse(source)
 
 	// fake a block time
 	ctx = ctx.WithBlockHeader(abci.Header{Time: time.Now().UTC()})
 
-	url, _ := url.Parse(evidence)
-	e := story.Evidence{
-		Creator:   creator,
-		URL:       *url,
-		Timestamp: tru.NewTimestamp(ctx.BlockHeader()),
-	}
-	evidenceURLs := []story.Evidence{e}
+	evidenceURLs := []story.Evidence{}
+
+	spew.Dump("[DEBUG] ADDING STORY", claim, catID)
 
 	storyID, _ := sk.Create(ctx, argument, claim, catID, creator, evidenceURLs, *sourceURL, storyType)
 
@@ -101,6 +110,7 @@ func loadTestDB(
 	storyKeeper story.WriteKeeper,
 	accountKeeper auth.AccountKeeper,
 	backingKeeper backing.WriteKeeper,
+	categoryKeeper category.ReadKeeper,
 	challengeKeeper challenge.WriteKeeper,
 	voteKeeper vote.WriteKeeper,
 	gameKeeper game.WriteKeeper,
@@ -122,8 +132,12 @@ func loadTestDB(
 
 	addr := createUser(ctx, accountKeeper)
 
-	for _, record := range records {
-		createStory(ctx, storyKeeper, addr, record[0], record[1], record[2], record[3])
+	for _, record := range records[1:] {
+		claim := record[0]
+		catSlug := record[1]
+		source := record[2]
+		argument := record[3]
+		createStory(ctx, storyKeeper, categoryKeeper, addr, claim, catSlug, source, argument)
 	}
 
 	// get the 1st story
