@@ -3,6 +3,7 @@ package story
 import (
 	"fmt"
 	"net/url"
+	"sort"
 
 	app "github.com/TruStory/truchain/types"
 	"github.com/TruStory/truchain/x/category"
@@ -254,7 +255,7 @@ func (k Keeper) Stories(ctx sdk.Context) (stories []Story) {
 	searchPrefix := []byte(searchKey)
 
 	// setup iterator
-	iter := sdk.KVStoreReversePrefixIterator(store, searchPrefix)
+	iter := sdk.KVStorePrefixIterator(store, searchPrefix)
 	defer iter.Close()
 
 	// iterates through keyspace to find all stories
@@ -264,6 +265,11 @@ func (k Keeper) Stories(ctx sdk.Context) (stories []Story) {
 			iter.Value(), &story)
 		stories = append(stories, story)
 	}
+
+	// sort in reverse chronological order
+	sort.Slice(stories, func(i, j int) bool {
+		return stories[i].ID > stories[j].ID
+	})
 
 	return stories
 }
