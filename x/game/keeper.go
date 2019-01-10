@@ -91,13 +91,13 @@ func (k Keeper) Create(
 
 	// create new game type
 	game := Game{
-		ID:            k.GetNextID(ctx),
-		StoryID:       storyID,
-		Creator:       creator,
-		ExpiresTime:   ctx.BlockHeader().Time.Add(params.Expires),
-		EndTime:       time.Time{},
-		ChallengePool: emptyPool,
-		Timestamp:     app.NewTimestamp(ctx.BlockHeader()),
+		ID:                  k.GetNextID(ctx),
+		StoryID:             storyID,
+		Creator:             creator,
+		ExpiresTime:         ctx.BlockHeader().Time.Add(params.Expires),
+		VotingPeriodEndTime: time.Time{},
+		ChallengePool:       emptyPool,
+		Timestamp:           app.NewTimestamp(ctx.BlockHeader()),
 	}
 
 	// push game id onto queue that will get checked
@@ -194,7 +194,7 @@ func (k Keeper) start(ctx sdk.Context, game *Game) (err sdk.Error) {
 	}
 
 	// set end time = block time + voting period
-	game.EndTime = ctx.BlockHeader().Time.Add(DefaultParams().VotingPeriod)
+	game.VotingPeriodEndTime = ctx.BlockHeader().Time.Add(DefaultParams().VotingPeriod)
 	game.Started = true
 
 	// push game id onto active game queue that will get checked on each tick
@@ -212,14 +212,14 @@ func (k Keeper) start(ctx sdk.Context, game *Game) (err sdk.Error) {
 func (k Keeper) update(ctx sdk.Context, game Game) {
 
 	newGame := Game{
-		ID:            game.ID,
-		StoryID:       game.StoryID,
-		Creator:       game.Creator,
-		ExpiresTime:   game.ExpiresTime,
-		EndTime:       game.EndTime,
-		ChallengePool: game.ChallengePool,
-		Started:       game.Started,
-		Timestamp:     game.Timestamp,
+		ID:                  game.ID,
+		StoryID:             game.StoryID,
+		Creator:             game.Creator,
+		ExpiresTime:         game.ExpiresTime,
+		VotingPeriodEndTime: game.VotingPeriodEndTime,
+		ChallengePool:       game.ChallengePool,
+		Started:             game.Started,
+		Timestamp:           game.Timestamp,
 	}
 
 	k.set(ctx, newGame)
