@@ -52,7 +52,7 @@ func (msg CreateChallengeMsg) ValidateBasic() sdk.Error {
 	if msg.Amount.IsZero() == true {
 		return sdk.ErrInsufficientFunds("Invalid challenge amount" + msg.Amount.String())
 	}
-	if len := len(msg.Argument); len > 0 && (len < params.MinArgumentLength || len > params.MaxArgumentLength) {
+	if len := len([]rune(msg.Argument)); len > 0 && (len < params.MinArgumentLength || len > params.MaxArgumentLength) {
 		return app.ErrInvalidArgumentMsg()
 	}
 	if len(msg.Creator) == 0 {
