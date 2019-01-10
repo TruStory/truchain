@@ -56,7 +56,7 @@ func createUser(
 		panic(err)
 	}
 
-	coins, _ := sdk.ParseCoins("5000000trusteak, 3000000btc, 1000000shitcoin")
+	coins, _ := sdk.ParseCoins("50000000trusteak, 30000000btc, 10000000shitcoin")
 
 	err = bacc.SetCoins(coins)
 	if err != nil {
@@ -147,7 +147,7 @@ func loadTestDB(
 	spew.Dump("DEBUG", coins)
 
 	// back it
-	amount, _ := sdk.ParseCoin("1000trusteak")
+	amount, _ := sdk.ParseCoin("100000trusteak")
 	argument := "this is an argument"
 	duration := backing.DefaultMsgParams().MinPeriod
 	testURL, _ := url.Parse("http://www.trustory.io")
@@ -165,15 +165,19 @@ func loadTestDB(
 	ctx = ctx.WithBlockHeader(abci.Header{Time: time.Now().UTC()})
 
 	// challenge it
-	amount, _ = sdk.ParseCoin("1000trusteak")
-	_, err = challengeKeeper.Create(ctx, story.ID, amount, argument, addr, evidence)
+	amount, _ = sdk.ParseCoin("200000trusteak")
+	challengeID, err := challengeKeeper.Create(ctx, story.ID, amount, argument, addr, evidence)
 	if err != nil {
 		panic(err)
 	}
+	challenge, err := challengeKeeper.Challenge(ctx, challengeID)
+	spew.Dump("DEBUG", challenge, err)
 
 	// vote on it
-	_, err = voteKeeper.Create(ctx, story.ID, amount, true, argument, addr, evidence)
+	voteID, err := voteKeeper.Create(ctx, story.ID, amount, true, argument, addr, evidence)
 	if err != nil {
 		panic(err)
 	}
+	vote, err := voteKeeper.TokenVote(ctx, voteID)
+	spew.Dump("DEBUG", vote, err)
 }
