@@ -48,10 +48,10 @@ func (msg CreateCategoryMsg) ValidateBasic() sdk.Error {
 	if len(msg.Title) < params.MinTitleLen || len(msg.Title) > params.MaxTitleLen {
 		return ErrInvalidCategoryMsg("Invalid title: " + msg.Title)
 	}
-	if len(msg.Slug) < params.MinSlugLen || len(msg.Slug) > params.MaxSlugLen {
+	if len([]rune(msg.Slug)) < params.MinSlugLen || len(msg.Slug) > params.MaxSlugLen {
 		return ErrInvalidCategoryMsg("Invalid slug: " + msg.Slug)
 	}
-	if len(msg.Description) > params.MaxDescLen {
+	if len([]rune(msg.Description)) > params.MaxDescLen {
 		return ErrInvalidCategoryMsg("Invalid description: " + msg.Description)
 	}
 	return nil
