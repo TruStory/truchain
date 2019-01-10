@@ -125,14 +125,14 @@ func TestFeedWithCategory(t *testing.T) {
 func TestFeedTrending(t *testing.T) {
 	ctx, sk, ck := mockDB()
 
-	numStories := 5
+	numStories := 10
 	for i := 0; i < numStories; i++ {
 		createFakeStory(ctx, sk, ck)
 	}
 
 	stories := sk.Stories(ctx)
 
-	assert.Equal(t, 5, len(stories))
-	assert.Equal(t, int64(5), stories[0].ID)
-	assert.Equal(t, int64(1), stories[4].ID)
+	assert.Equal(t, 10, len(stories))
+	assert.Equal(t, int64(10), stories[0].ID)
+	assert.Equal(t, int64(1), stories[9].ID)
 }
