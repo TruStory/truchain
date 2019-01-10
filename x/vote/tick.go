@@ -44,7 +44,7 @@ func (k Keeper) checkGames(ctx sdk.Context, gameQueue queue.Queue) sdk.Error {
 	}
 
 	// handle expired games
-	if game.IsExpired(blockTime, quorum) {
+	if game.IsExpired(blockTime) || game.IsVotingExpired(blockTime, quorum) {
 		// remove from queue
 		gameQueue.Pop()
 
@@ -66,7 +66,7 @@ func (k Keeper) checkGames(ctx sdk.Context, gameQueue queue.Queue) sdk.Error {
 
 	// terminate recursion on finding the first unfinished game
 	// we only care about processing finished games
-	if !game.IsFinished(blockTime, quorum) {
+	if !game.IsVotingFinished(blockTime, quorum) {
 		return nil
 	}
 

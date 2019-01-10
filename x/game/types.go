@@ -21,28 +21,39 @@ import (
 
 // Game defines a validation game on a story
 type Game struct {
-	ID            int64          `json:"id"`
-	StoryID       int64          `json:"story_id"`
-	Creator       sdk.AccAddress `json:"creator"`
-	ExpiresTime   time.Time      `json:"expires_time,omitempty"`
-	EndTime       time.Time      `json:"end_time,omitempty"`
-	ChallengePool sdk.Coin       `json:"challenge_pool,omitempty"`
-	Started       bool           `json:"started,omitempty"`
-	Timestamp     app.Timestamp  `json:"timestamp"`
+	ID                  int64          `json:"id"`
+	StoryID             int64          `json:"story_id"`
+	Creator             sdk.AccAddress `json:"creator"`
+	ExpiresTime         time.Time      `json:"expires_time,omitempty"`
+	VotingPeriodEndTime time.Time      `json:"voting_period_end_time,omitempty"`
+	ChallengePool       sdk.Coin       `json:"challenge_pool,omitempty"`
+	Started             bool           `json:"started,omitempty"`
+	Timestamp           app.Timestamp  `json:"timestamp"`
 }
 
-// IsExpired returns true if a game has expired
-// 1. passed the voting period (`EndTime` > block time)
+// IsExpired returns true if:
+// 1. overall game period has expired
+// 2. game doesn't even start
+func (g Game) IsExpired(blockTime time.Time) bool {
+	return blockTime.After(g.ExpiresTime) && !g.Started
+}
+
+// IsVotingExpired returns true if:
+// 1. passed the voting period (`VotingPeriodEndTime` > block time)
 // 2. didn't meet the minimum voter quorum
-func (g Game) IsExpired(blockTime time.Time, quorum int) bool {
-	return g.EndTime.After(blockTime) && (quorum < DefaultParams().VoteQuorum)
+// 3. game has started
+func (g Game) IsVotingExpired(blockTime time.Time, quorum int) bool {
+	return blockTime.After(g.VotingPeriodEndTime) &&
+		(quorum < DefaultParams().VoteQuorum) && g.Started
 }
 
-// IsFinished returns true if a game is finished
-// 1. passed the voting period (`EndTime` > block time)
+// IsVotingFinished returns true if:
+// 1. passed the voting period (`VotingPeriodEndTime` > block time)
 // 2. met the minimum voter quorum
-func (g Game) IsFinished(blockTime time.Time, quorum int) bool {
-	return g.EndTime.After(blockTime) && (quorum >= DefaultParams().VoteQuorum)
+// 3. game has started
+func (g Game) IsVotingFinished(blockTime time.Time, quorum int) bool {
+	return blockTime.After(g.VotingPeriodEndTime) &&
+		(quorum >= DefaultParams().VoteQuorum) && g.Started
 }
 
 // Params holds default parameters for a game
