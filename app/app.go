@@ -13,6 +13,7 @@ import (
 	"github.com/TruStory/truchain/x/category"
 	"github.com/TruStory/truchain/x/challenge"
 	"github.com/TruStory/truchain/x/game"
+	clientParams "github.com/TruStory/truchain/x/params"
 	"github.com/TruStory/truchain/x/story"
 	"github.com/TruStory/truchain/x/truapi"
 	"github.com/TruStory/truchain/x/users"
@@ -182,7 +183,8 @@ func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *T
 		AddRoute(game.QueryPath, game.NewQuerier(app.gameKeeper, app.backingKeeper)).
 		AddRoute(backing.QueryPath, backing.NewQuerier(app.backingKeeper)).
 		AddRoute(challenge.QueryPath, challenge.NewQuerier(app.challengeKeeper)).
-		AddRoute(vote.QueryPath, vote.NewQuerier(app.voteKeeper))
+		AddRoute(vote.QueryPath, vote.NewQuerier(app.voteKeeper)).
+		AddRoute(clientParams.QueryPath, clientParams.NewQuerier())
 
 	// perform initialization logic
 	app.SetInitChainer(app.initChainer)
