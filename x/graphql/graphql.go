@@ -3,6 +3,9 @@ package graphql
 import (
 	"context"
 	"encoding/json"
+	"io/ioutil"
+	"os"
+	"path/filepath"
 	"strings"
 	"sync"
 
@@ -12,6 +15,8 @@ import (
 	"github.com/samsarahq/thunder/graphql/introspection"
 	builder "github.com/samsarahq/thunder/graphql/schemabuilder"
 	"github.com/samsarahq/thunder/reactive"
+	"github.com/spf13/viper"
+	"github.com/tendermint/tmlibs/cli"
 )
 
 // Request represents the JSON body of a GraphQL query request
@@ -70,6 +75,25 @@ func (c *Client) BuildSchema() {
 	introspection.AddIntrospectionToSchema(builtSchema)
 	c.Schema = builtSchema
 	c.Built = true
+}
+
+// GenerateSchema writes the GraphQL schema to a file
+func (c *Client) GenerateSchema() {
+	valueJSON, err := introspection.ComputeSchemaJSON(*c.pendingSchema)
+	if err != nil {
+		panic(err)
+	}
+
+	rootdir := viper.GetString(cli.HomeFlag)
+	if rootdir == "" {
+		rootdir = os.ExpandEnv("$HOME/.truchaind")
+	}
+
+	path := filepath.Join(rootdir, "graphql-schema.json")
+	err = ioutil.WriteFile(path, valueJSON, 0644)
+	if err != nil {
+		panic(err)
+	}
 }
 
 func (c *Client) runQuery(withCtx context.Context, query *thunder.Query) chttp.JSONResponse {

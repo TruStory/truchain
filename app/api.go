@@ -49,6 +49,7 @@ func (app *TruChain) startAPI() {
 
 	app.api.RegisterResolvers()
 	app.api.RegisterRoutes()
+	app.api.GraphQLClient.GenerateSchema()
 	log.Fatal(app.api.ListenAndServe(params.Hostname + ":" + params.Portname))
 }
 
