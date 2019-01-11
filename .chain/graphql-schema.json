@@ -1016,6 +1016,22 @@
             "deprecationReason": "",
             "description": "",
             "isDeprecated": false,
+            "name": "params",
+            "type": {
+              "kind": "NON_NULL",
+              "name": "",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "Params",
+                "ofType": null
+              }
+            }
+          },
+          {
+            "args": [],
+            "deprecationReason": "",
+            "description": "",
+            "isDeprecated": false,
             "name": "stories",
             "type": {
               "kind": "NON_NULL",

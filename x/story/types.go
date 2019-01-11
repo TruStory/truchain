@@ -95,7 +95,7 @@ func DefaultMsgParams() MsgParams {
 		MinStoryLength:    25,
 		MaxStoryLength:    350,
 		MinArgumentLength: 10,
-		MaxArgumentLength: 1000,
+		MaxArgumentLength: 3000,
 		MinEvidenceCount:  0,
 		MaxEvidenceCount:  10,
 	}

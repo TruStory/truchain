@@ -107,6 +107,8 @@ func (ta *TruAPI) RegisterResolvers() {
 		"url":     func(ctx context.Context, q story.Evidence) string { return q.URL.String() },
 	})
 
+	ta.GraphQLClient.RegisterQueryResolver("params", ta.paramsResolver)
+
 	ta.GraphQLClient.RegisterObjectResolver("Game", game.Game{}, map[string]interface{}{
 		"id":                 func(_ context.Context, q game.Game) int64 { return q.ID },
 		"creator":            func(ctx context.Context, q game.Game) users.User { return getUser(ctx, q.Creator) },

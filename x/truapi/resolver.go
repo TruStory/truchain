@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"math/rand"
 
+	"github.com/TruStory/truchain/x/params"
 	"github.com/TruStory/truchain/x/vote"
 
 	"github.com/TruStory/truchain/x/challenge"
@@ -218,6 +219,23 @@ func (ta *TruAPI) gameResolver(_ context.Context, q story.Story) game.Game {
 	}
 
 	return *g
+}
+
+func (ta *TruAPI) paramsResolver(_ context.Context) params.Params {
+	res := ta.RunQuery("params", nil)
+
+	if res.Code != 0 {
+		fmt.Println("Resolver err: ", res)
+		return params.Params{}
+	}
+
+	p := new(params.Params)
+	err := json.Unmarshal(res.Value, p)
+	if err != nil {
+		panic(err)
+	}
+
+	return *p
 }
 
 func (ta *TruAPI) storyCategoryResolver(ctx context.Context, q story.Story) category.Category {
