@@ -3,6 +3,7 @@ package app
 import (
 	"bufio"
 	"encoding/csv"
+	"fmt"
 	"net/url"
 	"os"
 	"path/filepath"
@@ -12,7 +13,6 @@ import (
 	"github.com/TruStory/truchain/x/category"
 
 	"github.com/cosmos/cosmos-sdk/x/bank"
-	"github.com/davecgh/go-spew/spew"
 
 	tru "github.com/TruStory/truchain/types"
 	"github.com/TruStory/truchain/x/backing"
@@ -41,10 +41,12 @@ func createUser(
 	ctx sdk.Context,
 	accountKeeper auth.AccountKeeper) sdk.AccAddress {
 
+	logger := ctx.Logger().With("module", "app")
+
 	_, pubKey, addr := keyPubAddr()
 	bacc := auth.NewBaseAccountWithAddress(addr)
 
-	spew.Dump("[DEBUG] CREATOR ADDRESS", addr)
+	logger.Info("Created user " + addr.String())
 
 	key, err := chttp.StdKey("ed25519", pubKey.Bytes())
 	if err != nil {
@@ -80,6 +82,8 @@ func createStory(
 	source string,
 	argument string) int64 {
 
+	logger := ctx.Logger().With("module", "app")
+
 	categories, _ := ck.GetAllCategories(ctx)
 
 	var catID int64
@@ -98,7 +102,7 @@ func createStory(
 
 	evidenceURLs := []story.Evidence{}
 
-	spew.Dump("[DEBUG] ADDING STORY", claim, catID)
+	logger.Info(fmt.Sprintf("Adding story `%s` to category %d", claim, catID))
 
 	storyID, _ := sk.Create(ctx, argument, claim, catID, creator, evidenceURLs, *sourceURL, storyType)
 
@@ -145,9 +149,6 @@ func loadTestDB(
 	// get the 1st story
 	story, _ := storyKeeper.Story(ctx, 1)
 
-	coins := bankKeeper.GetCoins(ctx, addr1)
-	spew.Dump("DEBUG", coins)
-
 	// back it
 	amount, _ := sdk.ParseCoin("100000trusteak")
 	argument := "this is an argument"
@@ -160,26 +161,19 @@ func loadTestDB(
 		panic(err)
 	}
 
-	coins = bankKeeper.GetCoins(ctx, addr1)
-	spew.Dump("DEBUG", coins)
-
 	// fake a block time
 	ctx = ctx.WithBlockHeader(abci.Header{Time: time.Now().UTC()})
 
 	// challenge it
 	amount, _ = sdk.ParseCoin("200000trusteak")
-	challengeID, err := challengeKeeper.Create(ctx, story.ID, amount, argument, addr2, evidence)
+	_, err = challengeKeeper.Create(ctx, story.ID, amount, argument, addr2, evidence)
 	if err != nil {
 		panic(err)
 	}
-	challenge, err := challengeKeeper.Challenge(ctx, challengeID)
-	spew.Dump("DEBUG", challenge, err)
 
 	// vote on it
-	voteID, err := voteKeeper.Create(ctx, story.ID, amount, true, argument, addr3, evidence)
+	_, err = voteKeeper.Create(ctx, story.ID, amount, true, argument, addr3, evidence)
 	if err != nil {
 		panic(err)
 	}
-	vote, err := voteKeeper.TokenVote(ctx, voteID)
-	spew.Dump("DEBUG", vote, err)
 }
