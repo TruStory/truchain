@@ -70,8 +70,11 @@ func DefaultParams() Params {
 	return Params{
 		ChallengeToBackingRatio: sdk.NewDecWithPrec(33, 2), // 33%
 		MinChallengeStake:       sdk.NewInt(10),
-		Expires:                 10 * 24 * time.Hour,
-		VotingPeriod:            1 * 24 * time.Hour,
-		VoteQuorum:              7,
+		// Expires:                 10 * 24 * time.Hour,
+		// VotingPeriod:            1 * 24 * time.Hour,
+		// VoteQuorum:              7,
+		Expires:      1 * 24 * time.Hour,
+		VotingPeriod: 3 * time.Hour,
+		VoteQuorum:   3,
 	}
 }
