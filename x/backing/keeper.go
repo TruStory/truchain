@@ -1,6 +1,7 @@
 package backing
 
 import (
+	"fmt"
 	"net/url"
 	"time"
 
@@ -94,6 +95,8 @@ func (k Keeper) Create(
 	duration time.Duration,
 	evidence []url.URL) (id int64, err sdk.Error) {
 
+	logger := ctx.Logger().With("module", "x/backing")
+
 	// check if user has enough cat coins or trustake to back
 	trustake := sdk.NewCoin(params.StakeDenom, amount.Amount)
 	if !k.bankKeeper.HasCoins(ctx, creator, sdk.Coins{amount}) &&
@@ -166,6 +169,9 @@ func (k Keeper) Create(
 
 	// add backing <-> story mapping
 	k.backingsList.Append(ctx, k, storyID, creator, backing.ID())
+
+	logger.Info(fmt.Sprintf(
+		"Backed story %d by user %s", storyID, creator.String()))
 
 	return backing.ID(), nil
 }

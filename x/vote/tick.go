@@ -1,6 +1,8 @@
 package vote
 
 import (
+	"fmt"
+
 	app "github.com/TruStory/truchain/types"
 	queue "github.com/cosmos/cosmos-sdk/store"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -112,6 +114,9 @@ func (k Keeper) quorum(ctx sdk.Context, storyID int64) (total int, err sdk.Error
 }
 
 func (k Keeper) returnFunds(ctx sdk.Context, gameID int64) sdk.Error {
+
+	logger := ctx.Logger().With("module", "x/vote")
+
 	// get challenges
 	challenges, err := k.challengeKeeper.ChallengesByGameID(ctx, gameID)
 	if err != nil {
@@ -141,6 +146,9 @@ func (k Keeper) returnFunds(ctx sdk.Context, gameID int64) sdk.Error {
 			return err
 		}
 	}
+
+	logger.Info(fmt.Sprintf(
+		"Returned funds for %d users for game %d", len(votes), gameID))
 
 	return nil
 }

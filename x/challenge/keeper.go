@@ -1,6 +1,7 @@
 package challenge
 
 import (
+	"fmt"
 	"net/url"
 
 	"github.com/cosmos/cosmos-sdk/x/bank"
@@ -72,6 +73,8 @@ func NewKeeper(
 func (k Keeper) Create(
 	ctx sdk.Context, storyID int64, amount sdk.Coin, argument string,
 	creator sdk.AccAddress, evidence []url.URL) (challengeID int64, err sdk.Error) {
+
+	logger := ctx.Logger().With("module", "x/challenge")
 
 	// check is user has the coins they are staking
 	if !k.bankKeeper.HasCoins(ctx, creator, sdk.Coins{amount}) {
@@ -149,6 +152,9 @@ func (k Keeper) Create(
 	if err != nil {
 		return 0, err
 	}
+
+	logger.Info(fmt.Sprintf(
+		"Challenged story %d with %s by %s", storyID, catCoin.String(), creator.String()))
 
 	return challenge.ID(), nil
 }

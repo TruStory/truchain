@@ -1,6 +1,7 @@
 package game
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/TruStory/truchain/x/backing"
@@ -131,6 +132,8 @@ func (k Keeper) Game(ctx sdk.Context, id int64) (game Game, err sdk.Error) {
 func (k Keeper) RegisterChallenge(
 	ctx sdk.Context, gameID int64, amount sdk.Coin) (err sdk.Error) {
 
+	logger := ctx.Logger().With("module", "x/game")
+
 	game, err := k.Game(ctx, gameID)
 	if err != nil {
 		return err
@@ -151,6 +154,8 @@ func (k Keeper) RegisterChallenge(
 	// start game if challenge pool is greater than OR equal to challenge threshold
 	if game.ChallengePool.IsGTE(threshold) {
 		err = k.start(ctx, &game)
+		logger.Info(fmt.Sprintf(
+			"Challenge threshold met, game started for story %d", game.StoryID))
 	}
 	if err != nil {
 		return err

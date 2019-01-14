@@ -1,6 +1,7 @@
 package vote
 
 import (
+	"fmt"
 	"net/url"
 
 	"github.com/TruStory/truchain/x/backing"
@@ -93,6 +94,8 @@ func (k Keeper) Create(
 	choice bool, argument string, creator sdk.AccAddress,
 	evidence []url.URL) (int64, sdk.Error) {
 
+	logger := ctx.Logger().With("module", "x/vote")
+
 	// get the story
 	story, err := k.storyKeeper.Story(ctx, storyID)
 	if err != nil {
@@ -138,6 +141,9 @@ func (k Keeper) Create(
 
 	// persist game <-> tokenVote association
 	k.voterList.Append(ctx, k, story.GameID, creator, vote.ID)
+
+	logger.Info(fmt.Sprintf(
+		"Voted on story %d with %s by %s", storyID, amount.String(), creator.String()))
 
 	return vote.ID, nil
 }
