@@ -10,6 +10,7 @@ import (
 	"github.com/TruStory/truchain/x/category"
 	"github.com/TruStory/truchain/x/challenge"
 	"github.com/TruStory/truchain/x/chttp"
+	"github.com/TruStory/truchain/x/db"
 	"github.com/TruStory/truchain/x/game"
 	"github.com/TruStory/truchain/x/graphql"
 	"github.com/TruStory/truchain/x/story"
@@ -24,6 +25,7 @@ import (
 type TruAPI struct {
 	*chttp.API
 	GraphQLClient *graphql.Client
+	DBClient      *db.Client
 }
 
 // NewTruAPI returns a `TruAPI` instance populated with the existing app and a new GraphQL client
@@ -31,9 +33,15 @@ func NewTruAPI(aa *chttp.App) *TruAPI {
 	ta := TruAPI{
 		API:           chttp.NewAPI(aa, supported),
 		GraphQLClient: graphql.NewGraphQLClient(),
+		DBClient:      db.NewDBClient(),
 	}
 
 	return &ta
+}
+
+// RegisterModels registers types for DB models
+func (ta *TruAPI) RegisterModels() {
+	ta.DBClient.RegisterModel(users.TwitterProfile{})
 }
 
 // RegisterRoutes applies the TruStory API routes to the `chttp.API` router
@@ -133,7 +141,7 @@ func (ta *TruAPI) RegisterResolvers() {
 	})
 
 	ta.GraphQLClient.RegisterObjectResolver("TwitterProfile", users.TwitterProfile{}, map[string]interface{}{
-		"id": func(_ context.Context, q users.TwitterProfile) string { return q.ID },
+		"id": func(_ context.Context, q users.TwitterProfile) string { return string(q.ID) },
 	})
 
 	ta.GraphQLClient.RegisterQueryResolver("users", ta.usersResolver)

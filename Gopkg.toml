@@ -23,6 +23,10 @@
   name = "github.com/cosmos/cosmos-sdk"
   version = "=v0.26.1-rc1"
 
+[[constraint]]
+  name = "github.com/go-pg/pg"
+  version = "=v7.1.6"
+
 [[override]]
   name = "github.com/tendermint/iavl"
   version = "=v0.11.1"
