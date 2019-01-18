@@ -131,9 +131,9 @@ func distributeRewardsRejected(
 		}
 	}
 
-	// make sure reward pool is empty
-	if pool.IsPositive() {
-		return ErrNonEmptyRewardPool(pool)
+	err = checkForEmptyPool(pool)
+	if err != nil {
+		return err
 	}
 
 	return nil
