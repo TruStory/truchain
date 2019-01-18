@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"math/rand"
 
 	"github.com/TruStory/truchain/x/params"
 	"github.com/TruStory/truchain/x/vote"
@@ -260,18 +259,18 @@ func (ta *TruAPI) storyResolver(_ context.Context, q story.QueryStoryByIDParams)
 	return *s
 }
 
-// TODO: [shanev/truted] Handle this when working on user profiles
-// https://github.com/TruStory/truchain/issues/196
 func (ta *TruAPI) twitterProfileResolver(ctx context.Context, q users.User) users.TwitterProfile {
 	addr := q.Address
-	fmt.Println("Mocking ('fetching') Twitter profile for address: " + addr)
-	return users.TwitterProfile{
-		ID:        "1234567890123456789",
-		Username:  "someone",
-		FullName:  "Some Person",
-		Address:   addr,
-		AvatarURI: fmt.Sprintf("https://randomuser.me/api/portraits/thumb/men/%d.jpg", rand.Intn(50)+1),
+
+	twitterProfile := &users.TwitterProfile{Address: addr}
+	err := ta.DBClient.Find(&twitterProfile)
+	if err != nil {
+		panic(err)
 	}
+
+	fmt.Println("Fetched Twitter profile: " + twitterProfile.String())
+
+	return *twitterProfile
 }
 
 func (ta *TruAPI) usersResolver(ctx context.Context, q users.QueryUsersByAddressesParams) []users.User {

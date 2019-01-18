@@ -1,6 +1,8 @@
 package users
 
 import (
+	"fmt"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth"
 	tcmn "github.com/tendermint/tendermint/libs/common"
@@ -28,9 +30,15 @@ func NewUser(acc auth.Account) User {
 
 // TwitterProfile is the Twitter profile associated with the account with address `Address`
 type TwitterProfile struct {
-	ID        string `json:"id"`
+	ID        int64  `json:"id"`
 	Address   string `json:"address"`
 	Username  string `json:"username"`
 	FullName  string `json:"full_name"`
 	AvatarURI string `json:"avatar_uri"`
+}
+
+func (t TwitterProfile) String() string {
+	return fmt.Sprintf(
+		"Twitter Profile<%d %s %s %s %s>",
+		t.ID, t.Address, t.Username, t.FullName, t.AvatarURI)
 }
