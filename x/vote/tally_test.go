@@ -322,3 +322,9 @@ func TestDistributeRewardsRejected(t *testing.T) {
 	coins = k.bankKeeper.GetCoins(ctx, losingVoter2.Creator())
 	assert.Equal(t, "1000", coins.AmountOf("trudex").String())
 }
+
+func TestCheckForEmptyPool(t *testing.T) {
+	pool, _ := sdk.ParseCoin("1usecase")
+	err := checkForEmptyPool(pool)
+	assert.Nil(t, err)
+}
