@@ -8,7 +8,7 @@ import (
 	"strconv"
 
 	"github.com/TruStory/truchain/x/chttp"
-	"github.com/TruStory/truchain/x/users"
+	"github.com/TruStory/truchain/x/db"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	tcmn "github.com/tendermint/tendermint/libs/common"
 )
@@ -60,7 +60,7 @@ func (ta *TruAPI) HandleRegistration(r *http.Request) chttp.Response {
 		return chttp.SimpleErrorResponse(400, err)
 	}
 
-	twitterProfile := &users.TwitterProfile{
+	twitterProfile := &db.TwitterProfile{
 		ID:        twitterID,
 		Address:   addr.String(),
 		Username:  rr.Username,
