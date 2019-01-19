@@ -23,7 +23,9 @@ func (c *Client) Find(model interface{}) error {
 // NewDBClient creates a Postgres client
 func NewDBClient() *Client {
 	db := pg.Connect(&pg.Options{
-		User: "blockshane",
+		User:     "blockshane",
+		Password: "",
+		Database: "trudb",
 	})
 
 	return &Client{db}
