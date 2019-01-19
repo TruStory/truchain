@@ -13,7 +13,8 @@ type Datastore interface {
 	TwitterProfileByAddress(addr string) (TwitterProfile, error)
 }
 
-// Client is a Postgres client
+// Client is a Postgres client.
+// It wraps a pool of Postgres DB connections.
 type Client struct {
 	*pg.DB
 }
@@ -29,13 +30,14 @@ func NewDBClient() *Client {
 	return &Client{db}
 }
 
-// Add implements `Datastore`
-// It adds a model as a database row
+// Add implements `Datastore`.
+// It adds a model as a database row.
 func (c *Client) Add(model interface{}) error {
 	return c.Insert(model)
 }
 
-// RegisterModel creates a table for a type
+// RegisterModel creates a table for a type.
+// A table is automatically created based on the passed in struct fields.
 func (c *Client) RegisterModel(model interface{}) error {
 	err := c.DropTable(model, &orm.DropTableOptions{
 		IfExists: true,

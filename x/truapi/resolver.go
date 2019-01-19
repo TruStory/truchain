@@ -266,8 +266,8 @@ func (ta *TruAPI) twitterProfileResolver(ctx context.Context, q users.User) db.T
 
 	twitterProfile, err := ta.DBClient.TwitterProfileByAddress(addr)
 	if err != nil {
-		// panic(err)
-		fmt.Println(err)
+		panic(err)
+		// fmt.Println(err)
 	}
 
 	fmt.Println("Fetched Twitter profile: " + twitterProfile.String())
