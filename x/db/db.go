@@ -5,19 +5,17 @@ import (
 	"github.com/go-pg/pg/orm"
 )
 
+// Datastore defines all operations on the DB
+// This interface can be mocked out for tests, etc.
+type Datastore interface {
+	Add(model interface{}) error
+	RegisterModel(model interface{}) error
+	TwitterProfileByAddress(addr string) (TwitterProfile, error)
+}
+
 // Client is a Postgres client
 type Client struct {
 	*pg.DB
-}
-
-// Add adds a model as a database row
-func (c *Client) Add(model interface{}) error {
-	return c.Insert(model)
-}
-
-// Find finds and populates the given model
-func (c *Client) Find(model interface{}) error {
-	return c.Select(model)
 }
 
 // NewDBClient creates a Postgres client
@@ -31,8 +29,22 @@ func NewDBClient() *Client {
 	return &Client{db}
 }
 
+// Add implements `Datastore`
+// It adds a model as a database row
+func (c *Client) Add(model interface{}) error {
+	return c.Insert(model)
+}
+
 // RegisterModel creates a table for a type
 func (c *Client) RegisterModel(model interface{}) error {
+	err := c.DropTable(model, &orm.DropTableOptions{
+		IfExists: true,
+		Cascade:  true,
+	})
+	if err != nil {
+		panic(err)
+	}
+
 	return c.CreateTable(model, &orm.CreateTableOptions{
 		Temp: false,
 	})

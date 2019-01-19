@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"github.com/TruStory/truchain/x/db"
 	"github.com/TruStory/truchain/x/params"
 	"github.com/TruStory/truchain/x/vote"
 
@@ -259,18 +260,19 @@ func (ta *TruAPI) storyResolver(_ context.Context, q story.QueryStoryByIDParams)
 	return *s
 }
 
-func (ta *TruAPI) twitterProfileResolver(ctx context.Context, q users.User) users.TwitterProfile {
+func (ta *TruAPI) twitterProfileResolver(ctx context.Context, q users.User) db.TwitterProfile {
 	addr := q.Address
+	fmt.Println("Fetching profile for " + addr)
 
-	twitterProfile := &users.TwitterProfile{Address: addr}
-	err := ta.DBClient.Find(&twitterProfile)
+	twitterProfile, err := ta.DBClient.TwitterProfileByAddress(addr)
 	if err != nil {
-		panic(err)
+		// panic(err)
+		fmt.Println(err)
 	}
 
 	fmt.Println("Fetched Twitter profile: " + twitterProfile.String())
 
-	return *twitterProfile
+	return twitterProfile
 }
 
 func (ta *TruAPI) usersResolver(ctx context.Context, q users.QueryUsersByAddressesParams) []users.User {
