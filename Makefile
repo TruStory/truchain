@@ -26,6 +26,9 @@ build_cli:
 build_daemon:
 	go build -o bin/truchaind cmd/truchaind/main.go
 
+debug:
+	bin/truchaind --home $(CHAIN_DIR) --log_level "app:info,x/backing:info,x/challenge:info,x/game:info,x/users:info,x/vote:info,*:error" start
+
 run_daemon:
 	bin/truchaind --home $(CHAIN_DIR) start
 
