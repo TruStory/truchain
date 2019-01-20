@@ -1,8 +1,11 @@
 package db
 
 import (
+	"os"
+
 	"github.com/go-pg/pg"
 	"github.com/go-pg/pg/orm"
+	"github.com/joho/godotenv"
 )
 
 // Datastore defines all operations on the DB
@@ -21,10 +24,29 @@ type Client struct {
 
 // NewDBClient creates a Postgres client
 func NewDBClient() *Client {
+	// db := pg.Connect(&pg.Options{
+	// 	User:     "blockshane",
+	// 	Password: "",
+	// 	Database: "trudb",
+	// })
+
+	// db := pg.Connect(&pg.Options{
+	// 	Addr:     "localhost:5432",
+	// 	User:     "blockshane",
+	// 	Password: "",
+	// 	Database: "trudb",
+	// })
+
+	err := godotenv.Load()
+	if err != nil {
+		panic("Error loading .env file")
+	}
+
 	db := pg.Connect(&pg.Options{
-		User:     "blockshane",
-		Password: "",
-		Database: "trudb",
+		Addr:     os.Getenv("PG_ADDR"),
+		User:     os.Getenv("PG_USER"),
+		Password: os.Getenv("PG_USER_PW"),
+		Database: os.Getenv("PG_DB_NAME"),
 	})
 
 	return &Client{db}
