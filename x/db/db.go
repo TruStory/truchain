@@ -29,19 +29,6 @@ type Client struct {
 
 // NewDBClient creates a Postgres client
 func NewDBClient() *Client {
-	// db := pg.Connect(&pg.Options{
-	// 	User:     "blockshane",
-	// 	Password: "",
-	// 	Database: "trudb",
-	// })
-
-	// db := pg.Connect(&pg.Options{
-	// 	Addr:     "localhost:5432",
-	// 	User:     "blockshane",
-	// 	Password: "",
-	// 	Database: "trudb",
-	// })
-
 	err := godotenv.Load()
 	if err != nil {
 		panic("Error loading .env file")
@@ -66,15 +53,8 @@ func (c *Client) Add(model interface{}) error {
 // RegisterModel creates a table for a type.
 // A table is automatically created based on the passed in struct fields.
 func (c *Client) RegisterModel(model interface{}) error {
-	err := c.DropTable(model, &orm.DropTableOptions{
-		IfExists: true,
-		Cascade:  true,
-	})
-	if err != nil {
-		panic(err)
-	}
-
 	return c.CreateTable(model, &orm.CreateTableOptions{
-		Temp: false,
+		Temp:        false,
+		IfNotExists: true,
 	})
 }

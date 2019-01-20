@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"math/rand"
 
 	"github.com/TruStory/truchain/x/db"
 	"github.com/TruStory/truchain/x/params"
@@ -260,17 +261,21 @@ func (ta *TruAPI) storyResolver(_ context.Context, q story.QueryStoryByIDParams)
 	return *s
 }
 
-func (ta *TruAPI) twitterProfileResolver(ctx context.Context, q users.User) db.TwitterProfile {
-	addr := q.Address
-	fmt.Println("Fetching profile for " + addr)
+func (ta *TruAPI) twitterProfileResolver(
+	ctx context.Context, q users.User) db.TwitterProfile {
 
+	addr := q.Address
 	twitterProfile, err := ta.DBClient.TwitterProfileByAddress(addr)
 	if err != nil {
-		panic(err)
-		// fmt.Println(err)
+		fmt.Println("Twitter profile not found. Returning mock data.")
+		return db.TwitterProfile{
+			ID:        1234,
+			Username:  "someone",
+			FullName:  "Some Person",
+			Address:   addr,
+			AvatarURI: fmt.Sprintf("https://randomuser.me/api/portraits/thumb/women/%d.jpg", rand.Intn(50)+1),
+		}
 	}
-
-	fmt.Println("Fetched Twitter profile: " + twitterProfile.String())
 
 	return twitterProfile
 }
