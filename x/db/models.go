@@ -2,6 +2,11 @@ package db
 
 import "fmt"
 
+// Queries read from the database
+type Queries interface {
+	TwitterProfileByAddress(addr string) (TwitterProfile, error)
+}
+
 // TwitterProfile is the Twitter profile associated with an account
 type TwitterProfile struct {
 	ID        int64  `json:"id"`
