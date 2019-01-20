@@ -55,7 +55,10 @@ set_seed_data:
 	mkdir -p $(HOME)/.truchaind
 	cp $(CHAIN_DIR)/bootstrap.csv $(HOME)/.truchaind/bootstrap.csv
 
-test: set_registrar set_seed_data go_test
+set_env_vars:
+	cp .env.example app/.env
+
+test: set_registrar set_seed_data set_env_vars go_test
 
 test_cover:
 	go test $(PACKAGES) -v -timeout 30m -race -covermode=atomic
