@@ -24,7 +24,7 @@ type Mutations interface {
 
 ### Create a new table
 
-Call `RegisterModel(model interface{})` in `TruAPI.RegisterModels()` where `model` is a struct with all the fields for the table. A table will automatically
+Call `RegisterModel(model interface{})` in `TruAPI.RegisterModels()`. `model` is a struct with all the fields for the table. A table will automatically
 be created based on the struct fields. Go fields will be automatically translated to
 Postgres data types.
 
