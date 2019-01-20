@@ -39,7 +39,7 @@ func NewTruAPI(aa *chttp.App) *TruAPI {
 	return &ta
 }
 
-// RegisterModels registers types for DB models
+// RegisterModels registers types for off-chain DB models
 func (ta *TruAPI) RegisterModels() {
 	err := ta.DBClient.RegisterModel(&db.TwitterProfile{})
 	if err != nil {

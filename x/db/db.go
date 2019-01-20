@@ -11,9 +11,14 @@ import (
 // Datastore defines all operations on the DB
 // This interface can be mocked out for tests, etc.
 type Datastore interface {
+	Mutations
+	Queries
+}
+
+// Mutations write to the database
+type Mutations interface {
 	Add(model interface{}) error
 	RegisterModel(model interface{}) error
-	TwitterProfileByAddress(addr string) (TwitterProfile, error)
 }
 
 // Client is a Postgres client.

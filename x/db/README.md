@@ -2,6 +2,26 @@
 
 This module wraps a Postgres database.
 
+The database is accessed via an interface that defines reads and writes:
+
+```go
+type Datastore interface {
+	Mutations
+	Queries
+}
+```
+
+## Mutations
+
+Writes conform to the interface:
+
+```go
+type Mutations interface {
+	Add(model interface{}) error
+	RegisterModel(model interface{}) error
+}
+```
+
 ### Create a new table
 
 Call `RegisterModel(model interface{})` in `TruAPI.RegisterModels()` where `model` is a struct with all the fields for the table. A table will automatically
@@ -12,14 +32,12 @@ Postgres data types.
 
 Call `Add(model interface{})` with the data type you want to persist. An auto-incrementing `ID` primary key will automatically be created.
 
-### Queries
+## Queries
 
-Add queries to the `Datastore` interface:
+Add queries to the `Queries` interface:
 
 ```go
-type Datastore interface {
-	Add(model interface{}) error
-	RegisterModel(model interface{}) error
+type Queries interface {
 	TwitterProfileByAddress(addr string) (TwitterProfile, error)
 }
 ```
@@ -42,7 +60,7 @@ The GraphQL client is agnostic of data source. Resolvers can access data on the 
 
 That's all folks! Easy peasy.
 
-### Notes
+## Notes
 
 Database tables are only created in the genesis block. If you add new tables, the chain has to be restarted, or a migration needs to be created that registers models at a later time.
 

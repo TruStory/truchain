@@ -220,6 +220,12 @@ func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *T
 	// build HTTP api
 	app.api = app.makeAPI()
 
+	// err = godotenv.Load()
+	// if err != nil {
+	// 	spew.Dump(err)
+	// 	panic("Error loading .env file")
+	// }
+
 	return app
 }
 
