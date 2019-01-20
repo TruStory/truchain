@@ -73,6 +73,4 @@ That's all folks! Easy peasy.
 
 ## Notes
 
-Database tables are only created in the genesis block. If you add new tables, the chain has to be restarted, or a migration needs to be created that registers models at a later time.
-
 Refer to [https://github.com/go-pg/pg](https://github.com/go-pg/pg) for advanced features.
