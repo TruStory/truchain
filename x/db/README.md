@@ -11,6 +11,17 @@ type Datastore interface {
 }
 ```
 
+## Configuration
+
+Create a `.env` with the following variables:
+
+```
+PG_ADDR=localhost:5432
+PG_USER=user
+PG_USER_PW=pw
+PG_DB_NAME=trudb
+```
+
 ## Mutations
 
 Writes conform to the interface:

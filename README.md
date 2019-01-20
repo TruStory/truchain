@@ -1,6 +1,6 @@
 # TruChain
 
-### Installation
+## Installation
 
 1. Install `go` by following the [official docs](https://golang.org/doc/install). Remember to set your `$GOPATH`, `$GOBIN`, and `$PATH` environment variables.
 
@@ -17,7 +17,19 @@ git clone https://github.com/TruStory/truchain.git`
 cd truchain && git checkout master`
 ```
 
-### Running
+3. Setup and configure Postgres for off-chain storage
+
+On macOS: 
+
+```
+brew update
+brew install postgresql
+brew services start postgresql
+```
+
+See the db module [README](x/db/README.md) for configuring environment variables.
+
+## Running
 
 1. Install dependencies
 
@@ -63,7 +75,7 @@ Open the `genesis.json` file and in the "validators" section overwrite the "addr
 
 You can wipe the chain, build, and start using the alias `make bwr`.
 
-### Architecture
+## Architecture
 
 TruChain is dapp chain built with the [Cosmos SDK](https://cosmos.network/sdk) that runs on the [Cosmos Network](https://cosmos.network).
 
@@ -112,7 +124,7 @@ Each main feature of TruChain is implemented as a separate module that lives und
 
 Each module has it's own [README](x/README.md).
 
-#### Key-Value Stores
+### Key-Value Stores
 
 Because the current Cosmos SDK data store is built on key-value storage, database operations are more explicit than a relational or even NoSQL database. Lists and queues must be made for data that needs to be retrieved.
 
@@ -122,10 +134,10 @@ Each module provides a `ReadKeeper`, `WriteKeeper`, and `ReadWriteKeeper`. Other
 
 All data in stores are binary encoded using [Amino](https://github.com/tendermint/go-amino) for efficient storage in a Merkle tree. Keepers handle marshalling and umarshalling data between its binary encoding and Go data type.
 
-### Recipes
+## Recipes
 
 For step-by-step instructions for common tasks like adding a new message type or query, see [./dev/RECIPES.md](./dev/RECIPES.md).
 
-### Testing
+## Testing
 
 `make test`
