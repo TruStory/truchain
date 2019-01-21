@@ -8,12 +8,6 @@ import (
 	"github.com/go-pg/pg/orm"
 )
 
-// GenericMutations write to the database
-type GenericMutations interface {
-	Add(model interface{}) error
-	RegisterModel(model interface{}) error
-}
-
 // Client is a Postgres client.
 // It wraps a pool of Postgres DB connections.
 type Client struct {
@@ -30,6 +24,12 @@ func NewDBClient() *Client {
 	})
 
 	return &Client{db}
+}
+
+// GenericMutations write to the database
+type GenericMutations interface {
+	Add(model interface{}) error
+	RegisterModel(model interface{}) error
 }
 
 // Add implements `Datastore`.
