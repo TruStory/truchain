@@ -1,11 +1,11 @@
 package db
 
 import (
+	"fmt"
 	"os"
 
 	"github.com/go-pg/pg"
 	"github.com/go-pg/pg/orm"
-	"github.com/joho/godotenv"
 )
 
 // Datastore defines all operations on the DB
@@ -29,11 +29,6 @@ type Client struct {
 
 // NewDBClient creates a Postgres client
 func NewDBClient() *Client {
-	err := godotenv.Load()
-	if err != nil {
-		panic("Error loading .env file")
-	}
-
 	db := pg.Connect(&pg.Options{
 		Addr:     os.Getenv("PG_ADDR"),
 		User:     os.Getenv("PG_USER"),
@@ -53,6 +48,7 @@ func (c *Client) Add(model interface{}) error {
 // RegisterModel creates a table for a type.
 // A table is automatically created based on the passed in struct fields.
 func (c *Client) RegisterModel(model interface{}) error {
+	fmt.Printf("Registered model %v\n", model)
 	return c.CreateTable(model, &orm.CreateTableOptions{
 		Temp:        false,
 		IfNotExists: true,
