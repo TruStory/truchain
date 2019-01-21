@@ -8,15 +8,8 @@ import (
 	"github.com/go-pg/pg/orm"
 )
 
-// Datastore defines all operations on the DB
-// This interface can be mocked out for tests, etc.
-type Datastore interface {
-	Mutations
-	Queries
-}
-
-// Mutations write to the database
-type Mutations interface {
+// GenericMutations write to the database
+type GenericMutations interface {
 	Add(model interface{}) error
 	RegisterModel(model interface{}) error
 }

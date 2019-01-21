@@ -2,6 +2,19 @@ package db
 
 import "fmt"
 
+// Datastore defines all operations on the DB
+// This interface can be mocked out for tests, etc.
+type Datastore interface {
+	Mutations
+	Queries
+}
+
+// Mutations write to the database
+type Mutations interface {
+	GenericMutations
+	UpsertTwitterProfile(profile *TwitterProfile) error
+}
+
 // Queries read from the database
 type Queries interface {
 	TwitterProfileByAddress(addr string) (TwitterProfile, error)
@@ -23,7 +36,7 @@ func (t TwitterProfile) String() string {
 }
 
 // TwitterProfileByAddress implements `Datastore`
-// It finds and populates the given model by address
+// Finds a Twitter profile by the given address
 func (c *Client) TwitterProfileByAddress(addr string) (TwitterProfile, error) {
 	twitterProfile := new(TwitterProfile)
 	err := c.Model(twitterProfile).Where("address = ?", addr).Select()
@@ -32,4 +45,18 @@ func (c *Client) TwitterProfileByAddress(addr string) (TwitterProfile, error) {
 	}
 
 	return *twitterProfile, nil
+}
+
+// UpsertTwitterProfile implements `Datastore`.
+// Updates an existing Twitter profile or creates a new one.
+func (c *Client) UpsertTwitterProfile(profile *TwitterProfile) error {
+	_, err := c.Model(profile).
+		OnConflict("(id) DO UPDATE").
+		Set("address = EXCLUDED.address, username = EXCLUDED.username, full_name = EXCLUDED.full_name, avatar_uri = EXCLUDED.avatar_uri").
+		Insert()
+	if err != nil {
+		panic(err)
+	}
+
+	return nil
 }

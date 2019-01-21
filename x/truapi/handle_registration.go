@@ -68,7 +68,7 @@ func (ta *TruAPI) HandleRegistration(r *http.Request) chttp.Response {
 		AvatarURI: rr.AvatarURI,
 	}
 
-	err = ta.DBClient.Add(twitterProfile)
+	err = ta.DBClient.UpsertTwitterProfile(twitterProfile)
 	if err != nil {
 		return chttp.SimpleErrorResponse(400, err)
 	}
