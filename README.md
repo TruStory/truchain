@@ -8,13 +8,13 @@
 2. Now let's install truchain.
 
 ``` bash
-mkdir -p $GOPATH/src/github.com/trustory`
+mkdir -p $GOPATH/src/github.com/trustory
 
-cd $GOPATH/src/github.com/trustory`
+cd $GOPATH/src/github.com/trustory
 
-git clone https://github.com/TruStory/truchain.git`
+git clone https://github.com/TruStory/truchain.git
 
-cd truchain && git checkout master`
+cd truchain && git checkout master
 ```
 
 3. Setup and configure Postgres for off-chain storage
