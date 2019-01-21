@@ -22,6 +22,8 @@ PG_USER_PW=pw
 PG_DB_NAME=trudb
 ```
 
+`.env` lives in the default chain config path, `.chain` locally, and `~/.truchaind` on AWS.
+
 ## Mutations
 
 Writes conform to the interface:
