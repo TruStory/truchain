@@ -28,14 +28,14 @@ func NewDBClient() *Client {
 
 // GenericMutations write to the database
 type GenericMutations interface {
-	Add(model interface{}) error
+	Add(model ...interface{}) error
 	RegisterModel(model interface{}) error
+	Remove(model interface{}) error
 }
 
-// Add implements `Datastore`.
-// It adds a model as a database row.
-func (c *Client) Add(model interface{}) error {
-	return c.Insert(model)
+// Add adds any number of models as a database rows
+func (c *Client) Add(model ...interface{}) error {
+	return c.Insert(model...)
 }
 
 // RegisterModel creates a table for a type.
@@ -48,10 +48,23 @@ func (c *Client) RegisterModel(model interface{}) error {
 	})
 }
 
+// Remove deletes a models from a table
+func (c *Client) Remove(model interface{}) error {
+	return c.Delete(model)
+}
+
 // GenericQueries are generic reads for models
 type GenericQueries interface {
+	Count(model interface{}) (int, error)
 	Find(model interface{}) error
 	FindAll(models interface{}) error
+}
+
+// Count returns the count of the model
+func (c *Client) Count(model interface{}) (count int, err error) {
+	count, err = c.Model(model).Count()
+
+	return
 }
 
 // Find selects a single model by primary key
