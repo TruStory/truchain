@@ -47,3 +47,19 @@ func (c *Client) RegisterModel(model interface{}) error {
 		IfNotExists: true,
 	})
 }
+
+// GenericQueries are generic reads for models
+type GenericQueries interface {
+	Find(model interface{}) error
+	FindAll(models interface{}) error
+}
+
+// Find selects a single model by primary key
+func (c *Client) Find(model interface{}) error {
+	return c.Select(model)
+}
+
+// FindAll selects all models
+func (c *Client) FindAll(models interface{}) error {
+	return c.Model(models).Select()
+}
