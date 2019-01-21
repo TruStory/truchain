@@ -54,9 +54,6 @@ func (c *Client) UpsertTwitterProfile(profile *TwitterProfile) error {
 		OnConflict("(id) DO UPDATE").
 		Set("address = EXCLUDED.address, username = EXCLUDED.username, full_name = EXCLUDED.full_name, avatar_uri = EXCLUDED.avatar_uri").
 		Insert()
-	if err != nil {
-		panic(err)
-	}
 
-	return nil
+	return err
 }
