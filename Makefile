@@ -56,7 +56,9 @@ set_seed_data:
 	cp $(CHAIN_DIR)/bootstrap.csv $(HOME)/.truchaind/bootstrap.csv
 
 set_env_vars:
-	cp .env.example app/.env
+	mkdir -p $(HOME)/.truchaind
+	cp .env.example $(CHAIN_DIR)/.env
+	cp .env.example $(HOME)/.truchaind/.env
 
 test: set_registrar set_seed_data set_env_vars go_test
 
