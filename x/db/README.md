@@ -32,7 +32,7 @@ Create a `.env` with the following variables for local setup:
 
 ```
 PG_ADDR=localhost:5432
-PG_USER=postgres
+PG_USER=[your local machine user from `whoami`]
 PG_USER_PW=
 PG_DB_NAME=trudb
 ```
