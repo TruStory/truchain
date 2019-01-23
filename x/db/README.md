@@ -15,7 +15,7 @@ type Datastore interface {
 
 On macOS: 
 
-```
+```sh
 # install postgres
 brew update
 brew install postgresql
@@ -30,7 +30,7 @@ createdb trudb
 
 Create a `.env` with the following variables for local setup:
 
-```
+```toml
 PG_ADDR=localhost:5432
 PG_USER=[your local machine user from `whoami`]
 PG_USER_PW=
