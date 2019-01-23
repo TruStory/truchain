@@ -19,15 +19,8 @@ cd truchain && git checkout master
 
 3. Setup and configure Postgres for off-chain storage
 
-On macOS: 
+See the db module [README](x/db/README.md).
 
-```
-brew update
-brew install postgresql
-brew services start postgresql
-```
-
-See the db module [README](x/db/README.md) for configuring environment variables.
 
 ## Running
 

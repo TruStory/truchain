@@ -11,18 +11,33 @@ type Datastore interface {
 }
 ```
 
-## Configuration
+## Installation and Setup
 
-Create a `.env` with the following variables:
+On macOS: 
+
+```
+# install postgres
+brew update
+brew install postgresql
+
+# start postgres on launch
+brew services start postgresql
+
+# create a test database
+createdb trudb
+```
+
+
+Create a `.env` with the following variables for local setup:
 
 ```
 PG_ADDR=localhost:5432
-PG_USER=user
-PG_USER_PW=pw
+PG_USER=postgres
+PG_USER_PW=
 PG_DB_NAME=trudb
 ```
 
-`.env` lives in the default chain config path, `.chain` locally, and `~/.truchaind` on AWS.
+Copy `.env` to the default chain config path, `.chain` locally, and `~/.truchaind` on AWS.
 
 ## Mutations
 
