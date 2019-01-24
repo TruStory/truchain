@@ -163,8 +163,8 @@ func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *T
 		app.keyGame, app.keyPendingGameQueue, app.keyGameQueue, app.storyKeeper,
 		app.backingKeeper, app.coinKeeper, codec)
 	app.challengeKeeper = challenge.NewKeeper(
-		app.keyChallenge, app.keyPendingGameQueue, app.coinKeeper,
-		app.gameKeeper, app.storyKeeper, codec)
+		app.keyChallenge, app.keyPendingGameQueue, app.backingKeeper,
+		app.coinKeeper, app.gameKeeper, app.storyKeeper, codec)
 	app.voteKeeper = vote.NewKeeper(
 		app.keyVote, app.keyGameQueue, app.accountKeeper, app.backingKeeper,
 		app.challengeKeeper, app.storyKeeper, app.gameKeeper, app.coinKeeper, codec)

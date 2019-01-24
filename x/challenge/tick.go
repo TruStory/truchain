@@ -38,6 +38,8 @@ func (k Keeper) checkPendingQueue(ctx sdk.Context, pendingQueue queue.Queue) sdk
 
 	if game.IsExpired(ctx.BlockHeader().Time) {
 		pendingQueue.Pop()
+		fmt.Printf("Removed expired game %d from pending queue\n", gameID)
+
 		k.returnFunds(ctx, gameID)
 
 		// check next game in pending queue

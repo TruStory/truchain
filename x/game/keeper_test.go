@@ -27,7 +27,7 @@ func TestRegisterChallengeNoBackersMeetMinChallenge(t *testing.T) {
 	gameID, _ := k.Create(ctx, storyID, creator)
 
 	amount, _ := sdk.ParseCoin("50trudex")
-	err := k.RegisterChallenge(ctx, gameID, amount)
+	err := k.AddChallengePool(ctx, gameID, amount)
 	assert.Nil(t, err)
 
 	game, _ := k.Game(ctx, gameID)
@@ -41,7 +41,7 @@ func TestRegisterChallengeNoBackersNotMeetMinChallenge(t *testing.T) {
 	gameID, _ := k.Create(ctx, storyID, creator)
 
 	amount, _ := sdk.ParseCoin("5trudex")
-	err := k.RegisterChallenge(ctx, gameID, amount)
+	err := k.AddChallengePool(ctx, gameID, amount)
 	assert.Nil(t, err)
 
 	game, _ := k.Game(ctx, gameID)
@@ -63,7 +63,7 @@ func TestRegisterChallengeHaveBackersMeetThreshold(t *testing.T) {
 
 	// challenge with 33trudex (33% of total backings)
 	amount, _ = sdk.ParseCoin("33trudex")
-	err := k.RegisterChallenge(ctx, gameID, amount)
+	err := k.AddChallengePool(ctx, gameID, amount)
 	assert.Nil(t, err)
 }
 
@@ -82,7 +82,7 @@ func TestRegisterChallengeHaveBackersNotMeetThreshold(t *testing.T) {
 
 	// challenge with 32trudex (32% of total backings)
 	amount, _ = sdk.ParseCoin("32trudex")
-	err := k.RegisterChallenge(ctx, gameID, amount)
+	err := k.AddChallengePool(ctx, gameID, amount)
 	assert.Nil(t, err)
 }
 
