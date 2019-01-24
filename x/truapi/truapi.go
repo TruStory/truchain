@@ -111,6 +111,7 @@ func (ta *TruAPI) RegisterResolvers() {
 	ta.GraphQLClient.RegisterObjectResolver("Coin", sdk.Coin{}, map[string]interface{}{
 		"amount": func(_ context.Context, q sdk.Coin) string { return q.Amount.String() },
 		"denom":  func(_ context.Context, q sdk.Coin) string { return q.Denom },
+		"unit":   func(_ context.Context, q sdk.Coin) string { return "preethi" },
 	})
 
 	ta.GraphQLClient.RegisterObjectResolver("Evidence", story.Evidence{}, map[string]interface{}{
