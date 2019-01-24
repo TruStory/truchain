@@ -95,7 +95,7 @@ func (k Keeper) Create(
 	duration time.Duration,
 	evidence []url.URL) (id int64, err sdk.Error) {
 
-	logger := ctx.Logger().With("module", "x/backing")
+	logger := ctx.Logger().With("module", "backing")
 
 	// check if user has enough cat coins or trustake to back
 	trustake := sdk.NewCoin(params.StakeDenom, amount.Amount)

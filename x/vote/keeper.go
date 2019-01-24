@@ -94,7 +94,7 @@ func (k Keeper) Create(
 	choice bool, argument string, creator sdk.AccAddress,
 	evidence []url.URL) (int64, sdk.Error) {
 
-	logger := ctx.Logger().With("module", "x/vote")
+	logger := ctx.Logger().With("module", "vote")
 
 	// get the story
 	story, err := k.storyKeeper.Story(ctx, storyID)

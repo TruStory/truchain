@@ -110,7 +110,7 @@ func distributeRewards(
 	ctx sdk.Context, bankKeeper bank.Keeper, rewardPool sdk.Coin, votes poll, confirmed bool) (
 	err sdk.Error) {
 
-	logger := ctx.Logger().With("module", "x/vote")
+	logger := ctx.Logger().With("module", "vote")
 
 	if confirmed {
 		err = distributeRewardsConfirmed(

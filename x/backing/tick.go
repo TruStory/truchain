@@ -54,7 +54,7 @@ func processBacking(ctx sdk.Context, k Keeper) sdk.Error {
 // distributeEarnings adds coins from the backing to the user.
 // Earnings is the original amount (principal) + interest.
 func distributeEarnings(ctx sdk.Context, k Keeper, backing Backing) sdk.Error {
-	logger := ctx.Logger().With("module", "x/backing")
+	logger := ctx.Logger().With("module", "backing")
 
 	// give the principal back to the user in category coins
 	_, _, err := k.bankKeeper.AddCoins(ctx, backing.Creator(), sdk.Coins{backing.Amount()})
