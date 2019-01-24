@@ -10,7 +10,7 @@ import (
 
 // NewResponseEndBlock is called at the end of every block tick
 func (k Keeper) NewResponseEndBlock(ctx sdk.Context) sdk.Tags {
-	store := ctx.KVStore(k.activeGamesQueueKey)
+	store := ctx.KVStore(k.gameQueueKey)
 	q := queue.NewQueue(k.GetCodec(), store)
 
 	err := k.checkGames(ctx, q)

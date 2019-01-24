@@ -47,7 +47,7 @@ type WriteKeeper interface {
 type Keeper struct {
 	app.Keeper
 
-	activeGamesQueueKey sdk.StoreKey
+	gameQueueKey sdk.StoreKey
 
 	accountKeeper   auth.AccountKeeper
 	backingKeeper   backing.WriteKeeper
@@ -62,7 +62,7 @@ type Keeper struct {
 // NewKeeper creates a new keeper with write and read access
 func NewKeeper(
 	storeKey sdk.StoreKey,
-	activeGamesQueueKey sdk.StoreKey,
+	gameQueueKey sdk.StoreKey,
 	accountKeeper auth.AccountKeeper,
 	backingKeeper backing.WriteKeeper,
 	challengeKeeper challenge.WriteKeeper,
@@ -73,7 +73,7 @@ func NewKeeper(
 
 	return Keeper{
 		app.NewKeeper(codec, storeKey),
-		activeGamesQueueKey,
+		gameQueueKey,
 		accountKeeper,
 		backingKeeper,
 		challengeKeeper,

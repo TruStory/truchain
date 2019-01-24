@@ -50,18 +50,18 @@ type TruChain struct {
 	codec *codec.Codec
 
 	// keys to access the multistore
-	keyAccount         *sdk.KVStoreKey
-	keyBacking         *sdk.KVStoreKey
-	keyCategory        *sdk.KVStoreKey
-	keyChallenge       *sdk.KVStoreKey
-	keyFee             *sdk.KVStoreKey
-	keyGame            *sdk.KVStoreKey
-	keyGameQueue       *sdk.KVStoreKey
-	keyGameQueueActive *sdk.KVStoreKey
-	keyIBC             *sdk.KVStoreKey
-	keyMain            *sdk.KVStoreKey
-	keyStory           *sdk.KVStoreKey
-	keyVote            *sdk.KVStoreKey
+	keyAccount          *sdk.KVStoreKey
+	keyBacking          *sdk.KVStoreKey
+	keyCategory         *sdk.KVStoreKey
+	keyChallenge        *sdk.KVStoreKey
+	keyFee              *sdk.KVStoreKey
+	keyGame             *sdk.KVStoreKey
+	keyPendingGameQueue *sdk.KVStoreKey
+	keyGameQueue        *sdk.KVStoreKey
+	keyIBC              *sdk.KVStoreKey
+	keyMain             *sdk.KVStoreKey
+	keyStory            *sdk.KVStoreKey
+	keyVote             *sdk.KVStoreKey
 
 	// manage getting and setting accounts
 	accountKeeper       auth.AccountKeeper
@@ -120,26 +120,26 @@ func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *T
 
 	// create your application type
 	var app = &TruChain{
-		categories:         categories,
-		codec:              codec,
-		BaseApp:            bam.NewBaseApp(params.AppName, logger, db, auth.DefaultTxDecoder(codec), options...),
-		keyMain:            sdk.NewKVStoreKey("main"),
-		keyAccount:         sdk.NewKVStoreKey("acc"),
-		keyIBC:             sdk.NewKVStoreKey("ibc"),
-		keyStory:           sdk.NewKVStoreKey("stories"),
-		keyCategory:        sdk.NewKVStoreKey("categories"),
-		keyBacking:         sdk.NewKVStoreKey("backings"),
-		keyChallenge:       sdk.NewKVStoreKey("challenges"),
-		keyFee:             sdk.NewKVStoreKey("collectedFees"),
-		keyGame:            sdk.NewKVStoreKey("game"),
-		keyGameQueue:       sdk.NewKVStoreKey("gameQueue"),
-		keyGameQueueActive: sdk.NewKVStoreKey("activeGameQueue"),
-		keyVote:            sdk.NewKVStoreKey("vote"),
-		api:                nil,
-		apiStarted:         false,
-		blockCtx:           nil,
-		blockHeader:        abci.Header{},
-		registrarKey:       loadRegistrarKey(),
+		categories:          categories,
+		codec:               codec,
+		BaseApp:             bam.NewBaseApp(params.AppName, logger, db, auth.DefaultTxDecoder(codec), options...),
+		keyMain:             sdk.NewKVStoreKey("main"),
+		keyAccount:          sdk.NewKVStoreKey("acc"),
+		keyIBC:              sdk.NewKVStoreKey("ibc"),
+		keyStory:            sdk.NewKVStoreKey("stories"),
+		keyCategory:         sdk.NewKVStoreKey("categories"),
+		keyBacking:          sdk.NewKVStoreKey("backings"),
+		keyChallenge:        sdk.NewKVStoreKey("challenges"),
+		keyFee:              sdk.NewKVStoreKey("collectedFees"),
+		keyGame:             sdk.NewKVStoreKey("game"),
+		keyPendingGameQueue: sdk.NewKVStoreKey("pendingGameQueue"),
+		keyGameQueue:        sdk.NewKVStoreKey("gameQueue"),
+		keyVote:             sdk.NewKVStoreKey("vote"),
+		api:                 nil,
+		apiStarted:          false,
+		blockCtx:            nil,
+		blockHeader:         abci.Header{},
+		registrarKey:        loadRegistrarKey(),
 	}
 
 	// define and attach the mappers and keepers
@@ -160,13 +160,13 @@ func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *T
 		app.keyBacking, app.storyKeeper, app.coinKeeper,
 		app.categoryKeeper, codec)
 	app.gameKeeper = game.NewKeeper(
-		app.keyGame, app.keyGameQueue, app.keyGameQueueActive, app.storyKeeper,
+		app.keyGame, app.keyPendingGameQueue, app.keyGameQueue, app.storyKeeper,
 		app.backingKeeper, app.coinKeeper, codec)
 	app.challengeKeeper = challenge.NewKeeper(
-		app.keyChallenge, app.coinKeeper, app.gameKeeper,
-		app.storyKeeper, codec)
+		app.keyChallenge, app.keyPendingGameQueue, app.coinKeeper,
+		app.gameKeeper, app.storyKeeper, codec)
 	app.voteKeeper = vote.NewKeeper(
-		app.keyVote, app.keyGameQueueActive, app.accountKeeper, app.backingKeeper,
+		app.keyVote, app.keyGameQueue, app.accountKeeper, app.backingKeeper,
 		app.challengeKeeper, app.storyKeeper, app.gameKeeper, app.coinKeeper, codec)
 
 	// register message routes for modifying state
@@ -210,8 +210,8 @@ func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *T
 		app.keyChallenge,
 		app.keyFee,
 		app.keyGame,
+		app.keyPendingGameQueue,
 		app.keyGameQueue,
-		app.keyGameQueueActive,
 		app.keyIBC,
 		app.keyMain,
 		app.keyStory,
@@ -301,6 +301,7 @@ func (app *TruChain) BeginBlocker(ctx sdk.Context, req abci.RequestBeginBlock) a
 // application.
 func (app *TruChain) EndBlocker(ctx sdk.Context, _ abci.RequestEndBlock) abci.ResponseEndBlock {
 	app.backingKeeper.NewResponseEndBlock(ctx)
+	app.challengeKeeper.NewResponseEndBlock(ctx)
 	app.voteKeeper.NewResponseEndBlock(ctx)
 
 	return abci.ResponseEndBlock{}
