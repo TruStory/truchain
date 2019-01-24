@@ -3,6 +3,30 @@
 
 [[projects]]
   branch = "master"
+  digest = "1:754389e58397bad71fa776c5c930af08a96ec497b3269a9b9bcdfe5c5f3a560a"
+  name = "github.com/TruStory/truchain"
+  packages = [
+    "app",
+    "parameters",
+    "types",
+    "x/backing",
+    "x/category",
+    "x/challenge",
+    "x/chttp",
+    "x/db",
+    "x/game",
+    "x/graphql",
+    "x/params",
+    "x/story",
+    "x/truapi",
+    "x/users",
+    "x/vote",
+  ]
+  pruneopts = "UT"
+  revision = "ced6fb8b1b75e7b57ad34c43d19ea4120880901f"
+
+[[projects]]
+  branch = "master"
   digest = "1:7736fc6da04620727f8f3aa2ced8d77be8e074a302820937aa5993848c769b27"
   name = "github.com/ZondaX/hid-go"
   packages = ["."]
@@ -295,12 +319,9 @@
   revision = "c42d9e0ca023e2198120196f842701bb4c55d7b9"
 
 [[projects]]
-  digest = "1:1f4b55d7c57681ad91b7ce3ac7c8e7b139e6dd2f477c5f87e6a7749d298645dc"
+  digest = "1:ecd9aa82687cf31d1585d4ac61d0ba180e42e8a6182b85bd785fcca8dfeefc1b"
   name = "github.com/joho/godotenv"
-  packages = [
-    ".",
-    "autoload",
-  ]
+  packages = ["."]
   pruneopts = "UT"
   revision = "23d116af351c84513e1946b527c88823e476be13"
   version = "v1.3.0"
@@ -792,6 +813,21 @@
   analyzer-name = "dep"
   analyzer-version = 1
   input-imports = [
+    "github.com/TruStory/truchain/app",
+    "github.com/TruStory/truchain/parameters",
+    "github.com/TruStory/truchain/types",
+    "github.com/TruStory/truchain/x/backing",
+    "github.com/TruStory/truchain/x/category",
+    "github.com/TruStory/truchain/x/challenge",
+    "github.com/TruStory/truchain/x/chttp",
+    "github.com/TruStory/truchain/x/db",
+    "github.com/TruStory/truchain/x/game",
+    "github.com/TruStory/truchain/x/graphql",
+    "github.com/TruStory/truchain/x/params",
+    "github.com/TruStory/truchain/x/story",
+    "github.com/TruStory/truchain/x/truapi",
+    "github.com/TruStory/truchain/x/users",
+    "github.com/TruStory/truchain/x/vote",
     "github.com/cosmos/cosmos-sdk/baseapp",
     "github.com/cosmos/cosmos-sdk/client",
     "github.com/cosmos/cosmos-sdk/client/keys",
@@ -813,7 +849,7 @@
     "github.com/go-pg/pg",
     "github.com/go-pg/pg/orm",
     "github.com/gorilla/mux",
-    "github.com/joho/godotenv/autoload",
+    "github.com/joho/godotenv",
     "github.com/oklog/ulid",
     "github.com/samsarahq/thunder/batch",
     "github.com/samsarahq/thunder/graphql",
