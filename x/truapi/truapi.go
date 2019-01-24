@@ -55,7 +55,7 @@ func (ta *TruAPI) RegisterRoutes() {
 	ta.HandleFunc("/ping", ta.HandlePing)
 	ta.HandleFunc("/graphql", ta.HandleGraphQL)
 	ta.HandleFunc("/presigned", ta.HandlePresigned)
-	// ta.HandleFunc("/register", ta.HandleRegistration)
+	ta.HandleFunc("/register", ta.HandleRegistration)
 }
 
 // RegisterResolvers builds the app's GraphQL schema from resolvers (declared in `resolver.go`)
