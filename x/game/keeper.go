@@ -37,18 +37,22 @@ type WriteKeeper interface {
 type Keeper struct {
 	app.Keeper
 
-	queueKey       sdk.StoreKey // queue of unexpired active
-	activeQueueKey sdk.StoreKey // queue of started games
-	storyKeeper    story.WriteKeeper
-	backingKeeper  backing.WriteKeeper
-	bankKeeper     bank.Keeper
+	// waiting to meet challenge threshold
+	pendingQueueKey sdk.StoreKey
+
+	// threshold met, voting starting..
+	queueKey sdk.StoreKey
+
+	storyKeeper   story.WriteKeeper
+	backingKeeper backing.WriteKeeper
+	bankKeeper    bank.Keeper
 }
 
 // NewKeeper creates a new keeper with write and read access
 func NewKeeper(
 	storeKey sdk.StoreKey,
+	pendingQueueKey sdk.StoreKey,
 	queueKey sdk.StoreKey,
-	activeQueueKey sdk.StoreKey,
 	storyKeeper story.WriteKeeper,
 	backingKeeper backing.WriteKeeper,
 	bankKeeper bank.Keeper,
@@ -56,8 +60,8 @@ func NewKeeper(
 
 	return Keeper{
 		app.NewKeeper(codec, storeKey),
+		pendingQueueKey,
 		queueKey,
-		activeQueueKey,
 		storyKeeper,
 		backingKeeper,
 		bankKeeper,
@@ -103,8 +107,7 @@ func (k Keeper) Create(
 
 	// push game id onto queue that will get checked
 	// on each block tick for expired games
-	q := queue.NewQueue(k.GetCodec(), k.GetStore(ctx))
-	q.Push(game.ID)
+	k.pendingQueue(ctx).Push(game.ID)
 
 	// set game in KVStore
 	k.set(ctx, game)
@@ -183,6 +186,16 @@ func (k Keeper) ChallengeThreshold(totalBackingAmount sdk.Coin) sdk.Coin {
 
 // ============================================================================
 
+func (k Keeper) pendingQueue(ctx sdk.Context) queue.Queue {
+	pendingQueueStore := ctx.KVStore(k.pendingQueueKey)
+	return queue.NewQueue(k.GetCodec(), pendingQueueStore)
+}
+
+func (k Keeper) queue(ctx sdk.Context) queue.Queue {
+	queueStore := ctx.KVStore(k.queueKey)
+	return queue.NewQueue(k.GetCodec(), queueStore)
+}
+
 // set saves the `Game` in the KVStore
 func (k Keeper) set(ctx sdk.Context, game Game) {
 	store := k.GetStore(ctx)
@@ -201,15 +214,40 @@ func (k Keeper) start(ctx sdk.Context, game *Game) (err sdk.Error) {
 	// set end time = block time + voting period
 	game.VotingEndTime = ctx.BlockHeader().Time.Add(DefaultParams().VotingPeriod)
 
-	// push game id onto active game queue that will get checked on each tick
-	activeQueueStore := ctx.KVStore(k.activeQueueKey)
-	q := queue.NewQueue(k.GetCodec(), activeQueueStore)
-	q.Push(game.ID)
-
 	// update existing game in KVStore
 	k.set(ctx, *game)
 
+	// promote game from pending game queue to game queue
+	k.switchQueue(ctx, game.ID)
+
 	return
+}
+
+func (k Keeper) switchQueue(ctx sdk.Context, gameID int64) {
+	// push game id onto game queue that will get checked on each tick
+	k.queue(ctx).Push(gameID)
+
+	// find index of game id to delete in pending queue
+	pendingList := k.pendingQueue(ctx).List
+	var indexToDelete uint64
+	pendingList.Iterate(&gameID, func(index uint64) bool {
+		var tempGameID int64
+		err := pendingList.Get(index, &tempGameID)
+		if err != nil {
+			panic(err)
+		}
+
+		if tempGameID == gameID {
+			indexToDelete = index
+
+			return true
+		}
+
+		return false
+	})
+
+	// remove game id from pending queue
+	pendingList.Delete(indexToDelete)
 }
 
 // update updates the `Game` object

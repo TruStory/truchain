@@ -1,100 +1,13 @@
 package vote
 
 import (
-	"crypto/rand"
 	"testing"
-	"time"
 
 	"github.com/TruStory/truchain/x/backing"
 	"github.com/TruStory/truchain/x/challenge"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/cosmos/cosmos-sdk/x/bank"
 	"github.com/stretchr/testify/assert"
 )
-
-func fakeFundedCreator(ctx sdk.Context, k bank.Keeper) sdk.AccAddress {
-	bz := make([]byte, 4)
-	rand.Read(bz)
-	creator := sdk.AccAddress(bz)
-
-	// give user some category coins
-	amount := sdk.NewCoin("trudex", sdk.NewInt(2000))
-	k.AddCoins(ctx, creator, sdk.Coins{amount})
-
-	return creator
-}
-
-func fakeValidationGame() (ctx sdk.Context, votes poll, k Keeper) {
-
-	ctx, k, ck := mockDB()
-
-	storyID := createFakeStory(ctx, k.storyKeeper, ck)
-	amount := sdk.NewCoin("trudex", sdk.NewInt(1000))
-	trustake := sdk.NewCoin("trusteak", sdk.NewInt(1000))
-	argument := "test argument"
-
-	creator1 := fakeFundedCreator(ctx, k.bankKeeper)
-	// remove cat coins to simulate backing conversion from trusteak
-	k.bankKeeper.SubtractCoins(ctx, creator1, sdk.Coins{amount})
-	// add trustake
-	k.bankKeeper.AddCoins(ctx, creator1, sdk.Coins{trustake})
-
-	creator2 := fakeFundedCreator(ctx, k.bankKeeper)
-	creator3 := fakeFundedCreator(ctx, k.bankKeeper)
-	creator4 := fakeFundedCreator(ctx, k.bankKeeper)
-	creator5 := fakeFundedCreator(ctx, k.bankKeeper)
-	creator6 := fakeFundedCreator(ctx, k.bankKeeper)
-	creator7 := fakeFundedCreator(ctx, k.bankKeeper)
-	creator8 := fakeFundedCreator(ctx, k.bankKeeper)
-	creator9 := fakeFundedCreator(ctx, k.bankKeeper)
-
-	// fake backings
-	duration := 1 * time.Hour
-	b1id, _ := k.backingKeeper.Create(ctx, storyID, trustake, argument, creator1, duration)
-	b2id, _ := k.backingKeeper.Create(ctx, storyID, amount, argument, creator2, duration)
-	b3id, _ := k.backingKeeper.Create(ctx, storyID, amount, argument, creator3, duration)
-	b4id, _ := k.backingKeeper.Create(ctx, storyID, amount, argument, creator4, duration)
-
-	// fake challenges
-	c1id, _ := k.challengeKeeper.Create(ctx, storyID, amount, argument, creator5)
-	c2id, _ := k.challengeKeeper.Create(ctx, storyID, amount, argument, creator6)
-
-	// fake votes
-	v1id, _ := k.Create(ctx, storyID, amount, true, argument, creator7)
-	v2id, _ := k.Create(ctx, storyID, amount, true, argument, creator8)
-	v3id, _ := k.Create(ctx, storyID, amount, false, argument, creator9)
-
-	b1, _ := k.backingKeeper.Backing(ctx, b1id)
-	// fake an interest
-	b1.Interest = sdk.NewCoin("trudex", sdk.NewInt(500))
-	k.backingKeeper.Update(ctx, b1)
-
-	b2, _ := k.backingKeeper.Backing(ctx, b2id)
-	b2.Interest = sdk.NewCoin("trudex", sdk.NewInt(500))
-	k.backingKeeper.Update(ctx, b2)
-
-	b3, _ := k.backingKeeper.Backing(ctx, b3id)
-	b3.Interest = sdk.NewCoin("trudex", sdk.NewInt(500))
-	k.backingKeeper.Update(ctx, b3)
-
-	b4, _ := k.backingKeeper.Backing(ctx, b4id)
-	b4.Interest = sdk.NewCoin("trudex", sdk.NewInt(500))
-	k.backingKeeper.Update(ctx, b4)
-	// change last backing vote to FALSE
-	k.backingKeeper.ToggleVote(ctx, b4.ID())
-
-	c1, _ := k.challengeKeeper.Challenge(ctx, c1id)
-	c2, _ := k.challengeKeeper.Challenge(ctx, c2id)
-
-	v1, _ := k.TokenVote(ctx, v1id)
-	v2, _ := k.TokenVote(ctx, v2id)
-	v3, _ := k.TokenVote(ctx, v3id)
-
-	votes.trueVotes = append(votes.trueVotes, b1, b2, b3, v1, v2)
-	votes.falseVotes = append(votes.falseVotes, b4, c1, c2, v3)
-
-	return
-}
 
 func TestProcessGame(t *testing.T) {
 	ctx, _, k := fakeValidationGame()
