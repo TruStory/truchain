@@ -24,36 +24,31 @@ type Game struct {
 	ID                  int64          `json:"id"`
 	StoryID             int64          `json:"story_id"`
 	Creator             sdk.AccAddress `json:"creator"`
-	ExpiresTime         time.Time      `json:"expires_time,omitempty"`
-	VotingPeriodEndTime time.Time      `json:"voting_period_end_time,omitempty"`
 	ChallengePool       sdk.Coin       `json:"challenge_pool,omitempty"`
-	Started             bool           `json:"started,omitempty"`
+	ChallengeExpireTime time.Time      `json:"challenge_expire_time,omitempty"`
+	VotingEndTime       time.Time      `json:"voting_end_time,omitempty"`
 	Timestamp           app.Timestamp  `json:"timestamp"`
 }
 
-// IsExpired returns true if:
-// 1. overall game period has expired
-// 2. game doesn't even start
+// IsExpired if challenge threshold not met in a certain time
 func (g Game) IsExpired(blockTime time.Time) bool {
-	return blockTime.After(g.ExpiresTime) && !g.Started
+	return blockTime.After(g.ChallengeExpireTime)
 }
 
 // IsVotingExpired returns true if:
 // 1. passed the voting period (`VotingPeriodEndTime` > block time)
 // 2. didn't meet the minimum voter quorum
-// 3. game has started
 func (g Game) IsVotingExpired(blockTime time.Time, quorum int) bool {
-	return blockTime.After(g.VotingPeriodEndTime) &&
-		(quorum < DefaultParams().VoteQuorum) && g.Started
+	return blockTime.After(g.VotingEndTime) &&
+		(quorum < DefaultParams().VoteQuorum)
 }
 
 // IsVotingFinished returns true if:
 // 1. passed the voting period (`VotingPeriodEndTime` > block time)
 // 2. met the minimum voter quorum
-// 3. game has started
 func (g Game) IsVotingFinished(blockTime time.Time, quorum int) bool {
-	return blockTime.After(g.VotingPeriodEndTime) &&
-		(quorum >= DefaultParams().VoteQuorum) && g.Started
+	return blockTime.After(g.VotingEndTime) &&
+		(quorum >= DefaultParams().VoteQuorum)
 }
 
 // Params holds default parameters for a game
