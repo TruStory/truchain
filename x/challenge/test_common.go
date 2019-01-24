@@ -2,7 +2,6 @@ package challenge
 
 import (
 	"crypto/rand"
-	"fmt"
 	"net/url"
 	"time"
 
@@ -45,8 +44,11 @@ func mockDB() (sdk.Context, Keeper, story.Keeper, c.Keeper, bank.Keeper) {
 	ms.MountStoreWithDB(backingKey, sdk.StoreTypeIAVL, db)
 	ms.LoadLatestVersion()
 
+	// fake block time in the future
+	// needed to test expiring games and other timing scenarios
 	header := abci.Header{Time: time.Now().Add(50 * 24 * time.Hour)}
 	ctx := sdk.NewContext(ms, header, false, log.NewNopLogger())
+	// ctx := sdk.NewContext(ms, abci.Header{}, false, log.NewNopLogger())
 
 	codec := amino.NewCodec()
 	cryptoAmino.RegisterAmino(codec)
@@ -104,9 +106,6 @@ func fakeFundedCreator(ctx sdk.Context, k bank.Keeper) sdk.AccAddress {
 func fakePendingGameQueue() (ctx sdk.Context, k Keeper) {
 	ctx, k, storyKeeper, catKeeper, _ := mockDB()
 
-	q := k.pendingGameQueue(ctx)
-	fmt.Printf("pending game queue len %d\n", q.List.Len())
-
 	storyID := createFakeStory(ctx, storyKeeper, catKeeper)
 	amount := sdk.NewCoin("trudex", sdk.NewInt(1000))
 	trustake := sdk.NewCoin("trusteak", sdk.NewInt(1000))
@@ -134,9 +133,6 @@ func fakePendingGameQueue() (ctx sdk.Context, k Keeper) {
 	challengeAmount := sdk.NewCoin("trudex", sdk.NewInt(10))
 	k.Create(ctx, storyID, challengeAmount, argument, creator1, evidence)
 	k.Create(ctx, storyID, challengeAmount, argument, creator2, evidence)
-
-	q = k.pendingGameQueue(ctx)
-	fmt.Printf("pending game queue len %d\n", q.List.Len())
 
 	return
 }

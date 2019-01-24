@@ -121,3 +121,26 @@ func Test_challengeThresholdWithBacking(t *testing.T) {
 
 	assert.Equal(t, "33trudex", amt.String())
 }
+
+func Test_start(t *testing.T) {
+	ctx, k, categoryKeeper := mockDB()
+
+	storyID := createFakeStory(ctx, k.storyKeeper, categoryKeeper)
+	gameID, _ := k.Create(ctx, storyID, creator)
+	amount, _ := sdk.ParseCoin("100trudex")
+	argument := "cool story brew"
+
+	// back story with 100trudex
+	k.bankKeeper.AddCoins(ctx, creator, sdk.Coins{amount})
+	duration := 30 * 24 * time.Hour
+	k.backingKeeper.Create(ctx, storyID, amount, argument, creator, duration, evidence())
+
+	// challenge with 33trudex (33% of total backings)
+	amount, _ = sdk.ParseCoin("33trudex")
+	err := k.AddChallengePool(ctx, gameID, amount)
+	assert.Nil(t, err)
+
+	// create fake game & queue
+	assert.Equal(t, uint64(1), k.pendingQueue(ctx).List.Len())
+	assert.Equal(t, uint64(1), k.queue(ctx).List.Len())
+}

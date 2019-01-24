@@ -36,9 +36,18 @@ func (k Keeper) checkPendingQueue(ctx sdk.Context, pendingQueue queue.Queue) sdk
 		return err
 	}
 
+	// fmt.Println("Current block time: " +
+	// 	ctx.BlockHeader().Time.Format(time.RFC3339))
+
+	// fmt.Println("Game challenge expires time: " +
+	// 	game.ChallengeExpireTime.Format(time.RFC3339))
+
 	if game.IsExpired(ctx.BlockHeader().Time) {
+		fmt.Printf("Pending queue len %d\n", pendingQueue.List.Len())
+
 		pendingQueue.Pop()
-		fmt.Printf("Removed expired game %d from pending queue\n", gameID)
+		fmt.Printf("Removed expired game %d from pending queue, len %d\n",
+			gameID, pendingQueue.List.Len())
 
 		k.returnFunds(ctx, gameID)
 
