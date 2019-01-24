@@ -32,7 +32,6 @@ func TestRegisterChallengeNoBackersMeetMinChallenge(t *testing.T) {
 
 	game, _ := k.Game(ctx, gameID)
 	assert.Equal(t, sdk.NewInt(50), game.ChallengePool.Amount)
-	assert.Equal(t, true, game.Started)
 }
 
 func TestRegisterChallengeNoBackersNotMeetMinChallenge(t *testing.T) {
@@ -47,7 +46,6 @@ func TestRegisterChallengeNoBackersNotMeetMinChallenge(t *testing.T) {
 
 	game, _ := k.Game(ctx, gameID)
 	assert.Equal(t, sdk.NewInt(5), game.ChallengePool.Amount)
-	assert.Equal(t, false, game.Started)
 }
 
 func TestRegisterChallengeHaveBackersMeetThreshold(t *testing.T) {
@@ -67,9 +65,6 @@ func TestRegisterChallengeHaveBackersMeetThreshold(t *testing.T) {
 	amount, _ = sdk.ParseCoin("33trudex")
 	err := k.RegisterChallenge(ctx, gameID, amount)
 	assert.Nil(t, err)
-
-	game, _ := k.Game(ctx, gameID)
-	assert.Equal(t, true, game.Started)
 }
 
 func TestRegisterChallengeHaveBackersNotMeetThreshold(t *testing.T) {
@@ -89,9 +84,6 @@ func TestRegisterChallengeHaveBackersNotMeetThreshold(t *testing.T) {
 	amount, _ = sdk.ParseCoin("32trudex")
 	err := k.RegisterChallenge(ctx, gameID, amount)
 	assert.Nil(t, err)
-
-	game, _ := k.Game(ctx, gameID)
-	assert.Equal(t, false, game.Started)
 }
 
 func TestSetGame(t *testing.T) {

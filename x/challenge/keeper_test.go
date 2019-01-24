@@ -164,7 +164,6 @@ func TestNewChallenge_MultipleChallengers(t *testing.T) {
 	game, _ := k.gameKeeper.Game(ctx, story.GameID)
 
 	assert.True(t, game.ChallengePool.IsEqual(challengeAmount.Plus(amount)))
-	assert.True(t, game.Started)
 }
 
 func TestNewChallenge_ErrIncorrectCategoryCoin(t *testing.T) {
