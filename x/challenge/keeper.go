@@ -3,6 +3,8 @@ package challenge
 import (
 	"fmt"
 
+	"github.com/TruStory/truchain/x/backing"
+
 	"github.com/cosmos/cosmos-sdk/x/bank"
 
 	params "github.com/TruStory/truchain/parameters"
@@ -45,12 +47,13 @@ type WriteKeeper interface {
 type Keeper struct {
 	app.Keeper
 
-	// waiting to meet challenge threshold
+	// queue of games waiting to meet challenge threshold
 	pendingGameQueueKey sdk.StoreKey
 
-	bankKeeper  bank.Keeper
-	gameKeeper  game.WriteKeeper
-	storyKeeper story.WriteKeeper
+	backingKeeper backing.ReadKeeper
+	bankKeeper    bank.Keeper
+	gameKeeper    game.WriteKeeper
+	storyKeeper   story.WriteKeeper
 
 	challengeList app.UserList // challenge <-> game mappings
 }
@@ -59,6 +62,7 @@ type Keeper struct {
 func NewKeeper(
 	storeKey sdk.StoreKey,
 	pendingGameQueueKey sdk.StoreKey,
+	backingKeeper backing.ReadKeeper,
 	bankKeeper bank.Keeper,
 	gameKeeper game.WriteKeeper,
 	storyKeeper story.WriteKeeper,
@@ -67,6 +71,7 @@ func NewKeeper(
 	return Keeper{
 		app.NewKeeper(codec, storeKey),
 		pendingGameQueueKey,
+		backingKeeper,
 		bankKeeper,
 		gameKeeper,
 		storyKeeper,
@@ -153,14 +158,15 @@ func (k Keeper) Create(
 		return 0, err
 	}
 
-	// update game threshold
-	err = k.gameKeeper.RegisterChallenge(ctx, gameID, catCoin)
+	// add another amount to the challenge pool
+	err = k.gameKeeper.AddChallengePool(ctx, gameID, catCoin)
 	if err != nil {
 		return 0, err
 	}
 
-	logger.Info(fmt.Sprintf(
-		"Challenged story %d with %s by %s", storyID, catCoin.String(), creator.String()))
+	msg := fmt.Sprintf("Challenged story %d with %s by %s",
+		storyID, catCoin.String(), creator.String())
+	logger.Info(msg)
 
 	return challenge.ID(), nil
 }
