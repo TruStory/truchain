@@ -29,7 +29,7 @@ type WriteKeeper interface {
 
 	Create(ctx sdk.Context, storyID int64, creator sdk.AccAddress) (
 		int64, sdk.Error)
-	RegisterChallenge(
+	AddChallengePool(
 		ctx sdk.Context, gameID int64, amount sdk.Coin) (err sdk.Error)
 }
 
@@ -108,6 +108,8 @@ func (k Keeper) Create(
 	// push game id onto queue that will get checked
 	// on each block tick for expired games
 	k.pendingQueue(ctx).Push(game.ID)
+	fmt.Printf("Added game %d to pending game queue, len %d\n",
+		game.ID, k.pendingQueue(ctx).List.Len())
 
 	// set game in KVStore
 	k.set(ctx, game)
@@ -131,8 +133,8 @@ func (k Keeper) Game(ctx sdk.Context, id int64) (game Game, err sdk.Error) {
 	return
 }
 
-// RegisterChallenge updates threshold pool and starts game if possible
-func (k Keeper) RegisterChallenge(
+// AddChallengePool updates challenge pool and starts game if possible
+func (k Keeper) AddChallengePool(
 	ctx sdk.Context, gameID int64, amount sdk.Coin) (err sdk.Error) {
 
 	logger := ctx.Logger().With("module", "game")
@@ -142,9 +144,11 @@ func (k Keeper) RegisterChallenge(
 		return err
 	}
 
-	// add amount to threshold pool
+	// add amount to challenge pool
 	game.ChallengePool = game.ChallengePool.Plus(amount)
 	k.update(ctx, game)
+
+	fmt.Printf("Added %s to challenge pool for game %d\n", amount.String(), game.ID)
 
 	// get the total of all backings on story
 	totalBackingAmount, err := k.backingKeeper.TotalBackingAmount(ctx, game.StoryID)
@@ -157,11 +161,12 @@ func (k Keeper) RegisterChallenge(
 	// start game if challenge pool is greater than OR equal to challenge threshold
 	if game.ChallengePool.IsGTE(threshold) {
 		err = k.start(ctx, &game)
-		logger.Info(fmt.Sprintf(
-			"Challenge threshold met, game started for story %d", game.StoryID))
-	}
-	if err != nil {
-		return err
+		if err != nil {
+			return err
+		}
+
+		msg := "Challenge threshold met, game started for story %d"
+		logger.Info(fmt.Sprintf(msg, game.StoryID))
 	}
 
 	return nil
@@ -226,6 +231,7 @@ func (k Keeper) start(ctx sdk.Context, game *Game) (err sdk.Error) {
 func (k Keeper) switchQueue(ctx sdk.Context, gameID int64) {
 	// push game id onto game queue that will get checked on each tick
 	k.queue(ctx).Push(gameID)
+	fmt.Printf("Pushed to game %d queue\n", gameID)
 
 	// find index of game id to delete in pending queue
 	pendingList := k.pendingQueue(ctx).List
@@ -248,6 +254,7 @@ func (k Keeper) switchQueue(ctx sdk.Context, gameID int64) {
 
 	// remove game id from pending queue
 	pendingList.Delete(indexToDelete)
+	fmt.Printf("Removed game id %d from pending queue\n", gameID)
 }
 
 // update updates the `Game` object
