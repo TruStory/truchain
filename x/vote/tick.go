@@ -114,8 +114,7 @@ func (k Keeper) quorum(ctx sdk.Context, storyID int64) (total int, err sdk.Error
 }
 
 func (k Keeper) returnFunds(ctx sdk.Context, gameID int64) sdk.Error {
-
-	logger := ctx.Logger().With("module", "x/vote")
+	logger := ctx.Logger().With("module", "vote")
 
 	// get challenges
 	challenges, err := k.challengeKeeper.ChallengesByGameID(ctx, gameID)

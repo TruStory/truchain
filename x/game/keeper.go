@@ -132,7 +132,7 @@ func (k Keeper) Game(ctx sdk.Context, id int64) (game Game, err sdk.Error) {
 func (k Keeper) RegisterChallenge(
 	ctx sdk.Context, gameID int64, amount sdk.Coin) (err sdk.Error) {
 
-	logger := ctx.Logger().With("module", "x/game")
+	logger := ctx.Logger().With("module", "game")
 
 	game, err := k.Game(ctx, gameID)
 	if err != nil {
