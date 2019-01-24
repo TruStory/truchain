@@ -133,6 +133,8 @@ func (k Keeper) Create(
 	source url.URL,
 	storyType Type) (int64, sdk.Error) {
 
+	logger := ctx.Logger().With("module", "story")
+
 	_, err := k.categoryKeeper.GetCategory(ctx, categoryID)
 	if err != nil {
 		return 0, category.ErrInvalidCategory(categoryID)
@@ -156,6 +158,8 @@ func (k Keeper) Create(
 	k.setStory(ctx, story)
 	k.appendStoriesList(
 		ctx, storyIDsByCategoryKey(k, categoryID, story.Timestamp, false), story)
+
+	logger.Info(fmt.Sprintf("Created story %d: %s", story.ID, body))
 
 	return story.ID, nil
 }
