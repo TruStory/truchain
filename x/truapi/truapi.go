@@ -52,9 +52,10 @@ func (ta *TruAPI) RegisterRoutes() {
 	ta.Use(chttp.JSONResponseMiddleware)
 	http.Handle("/graphql", thunder.Handler(ta.GraphQLClient.Schema))
 	http.Handle("/graphiql/", http.StripPrefix("/graphiql/", graphiql.Handler()))
+	ta.HandleFunc("/ping", ta.HandlePing)
 	ta.HandleFunc("/graphql", ta.HandleGraphQL)
 	ta.HandleFunc("/presigned", ta.HandlePresigned)
-	ta.HandleFunc("/register", ta.HandleRegistration)
+	// ta.HandleFunc("/register", ta.HandleRegistration)
 }
 
 // RegisterResolvers builds the app's GraphQL schema from resolvers (declared in `resolver.go`)
