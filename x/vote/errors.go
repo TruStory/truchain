@@ -18,6 +18,7 @@ const (
 	CodeUnknownVote        sdk.CodeType = 1204
 	CodeInvalidVote        sdk.CodeType = 1205
 	CodeRewardPoolNotEmpty sdk.CodeType = 1206
+	CodeGameOver           sdk.CodeType = 1207
 )
 
 // ErrNotFound creates an error when the searched entity is not found
@@ -45,6 +46,15 @@ func ErrGameNotStarted(storyID int64) sdk.Error {
 		DefaultCodespace,
 		CodeGameNotStarted,
 		"Validation game not started for story: "+
+			fmt.Sprintf("%d", storyID))
+}
+
+// ErrGameOver throws when voting has ended
+func ErrGameOver(storyID int64) sdk.Error {
+	return sdk.NewError(
+		DefaultCodespace,
+		CodeGameOver,
+		"Validation game is over for story: "+
 			fmt.Sprintf("%d", storyID))
 }
 
