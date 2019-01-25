@@ -20,7 +20,7 @@ func Test_checkGames(t *testing.T) {
 
 	qStore := ctx.KVStore(k.gameQueueKey)
 	q := store.NewQueue(k.GetCodec(), qStore)
-	err := k.checkGames(ctx, q)
+	err := k.filterGameQueue(ctx, q)
 	assert.Nil(t, err)
 }
 

@@ -10,10 +10,7 @@ import (
 
 // NewResponseEndBlock is called at the end of every block tick
 func (k Keeper) NewResponseEndBlock(ctx sdk.Context) sdk.Tags {
-	store := ctx.KVStore(k.gameQueueKey)
-	q := queue.NewQueue(k.GetCodec(), store)
-
-	err := k.checkGames(ctx, q)
+	err := k.filterGameQueue(ctx, k.gameQueue(ctx))
 	if err != nil {
 		panic(err)
 	}
@@ -23,9 +20,9 @@ func (k Keeper) NewResponseEndBlock(ctx sdk.Context) sdk.Tags {
 
 // ============================================================================
 
-// checkGames checks to see if a validation game has ended, then processes
+// filterGameQueue checks to see if a validation game has ended, then processes
 // that game. It calls itself recursively until all games have been processed.
-func (k Keeper) checkGames(ctx sdk.Context, gameQueue queue.Queue) sdk.Error {
+func (k Keeper) filterGameQueue(ctx sdk.Context, gameQueue queue.Queue) sdk.Error {
 	if gameQueue.IsEmpty() {
 		return nil
 	}
@@ -66,7 +63,7 @@ func (k Keeper) checkGames(ctx sdk.Context, gameQueue queue.Queue) sdk.Error {
 		}
 
 		// process next game
-		return k.checkGames(ctx, gameQueue)
+		return k.filterGameQueue(ctx, gameQueue)
 	}
 
 	// Terminate recursion on finding the first unfinished game,
@@ -87,7 +84,7 @@ func (k Keeper) checkGames(ctx sdk.Context, gameQueue queue.Queue) sdk.Error {
 	}
 
 	// check next game
-	return k.checkGames(ctx, gameQueue)
+	return k.filterGameQueue(ctx, gameQueue)
 }
 
 // quorum returns the total count of backings, challenges, votes

@@ -11,6 +11,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/bank"
 
 	app "github.com/TruStory/truchain/types"
+	queue "github.com/cosmos/cosmos-sdk/store"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	amino "github.com/tendermint/go-amino"
 )
@@ -226,6 +227,11 @@ func (k Keeper) Tally(
 }
 
 // ============================================================================
+
+func (k Keeper) gameQueue(ctx sdk.Context) queue.Queue {
+	store := ctx.KVStore(k.gameQueueKey)
+	return queue.NewQueue(k.GetCodec(), store)
+}
 
 // saves a `Vote` in the KVStore
 func (k Keeper) set(ctx sdk.Context, vote TokenVote) {
