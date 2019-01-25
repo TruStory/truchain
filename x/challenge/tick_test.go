@@ -20,7 +20,7 @@ func Test_pendingGameQueue(t *testing.T) {
 	q := k.pendingGameQueue(ctx)
 	assert.Equal(t, uint64(1), q.List.Len())
 
-	err := k.checkPendingQueue(ctx, q)
+	err := k.filterPendingGameQueue(ctx, q)
 	assert.Nil(t, err)
 }
 
@@ -36,7 +36,7 @@ func Test_removingExpiredGameFromPendingGameQueue(t *testing.T) {
 	game.ChallengeExpireTime = expireTime
 	k.gameKeeper.Update(ctx, game)
 
-	err := k.checkPendingQueue(ctx, q)
+	err := k.filterPendingGameQueue(ctx, q)
 	assert.Nil(t, err)
 
 	// NOTE: popping/deleting an item from a Cosmos queue

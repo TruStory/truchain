@@ -9,8 +9,7 @@ import (
 
 // NewResponseEndBlock is called at the end of every block tick
 func (k Keeper) NewResponseEndBlock(ctx sdk.Context) sdk.Tags {
-	pendingGameQueue := k.pendingGameQueue(ctx)
-	err := k.checkPendingQueue(ctx, pendingGameQueue)
+	err := k.filterPendingGameQueue(ctx, k.pendingGameQueue(ctx))
 	if err != nil {
 		panic(err)
 	}
@@ -20,8 +19,10 @@ func (k Keeper) NewResponseEndBlock(ctx sdk.Context) sdk.Tags {
 
 // ============================================================================
 
-// checkPendingQueue checks to see if a pending voting game has expired
-func (k Keeper) checkPendingQueue(ctx sdk.Context, pendingQueue queue.Queue) sdk.Error {
+// filterPendingGameQueue checks to see if a pending voting game has expired
+func (k Keeper) filterPendingGameQueue(ctx sdk.Context, pendingQueue queue.Queue) sdk.Error {
+	logger := ctx.Logger().With("module", "challenge")
+
 	if pendingQueue.IsEmpty() {
 		return nil
 	}
@@ -36,23 +37,15 @@ func (k Keeper) checkPendingQueue(ctx sdk.Context, pendingQueue queue.Queue) sdk
 		return err
 	}
 
-	// fmt.Println("Current block time: " +
-	// 	ctx.BlockHeader().Time.Format(time.RFC3339))
-
-	// fmt.Println("Game challenge expires time: " +
-	// 	game.ChallengeExpireTime.Format(time.RFC3339))
-
 	if game.IsExpired(ctx.BlockHeader().Time) {
-		fmt.Printf("Pending queue len %d\n", pendingQueue.List.Len())
-
 		pendingQueue.Pop()
-		fmt.Printf("Removed expired game %d from pending queue, len %d\n",
-			gameID, pendingQueue.List.Len())
+		msg := "Removed expired game %d from pending queue, len %d\n"
+		logger.Info(fmt.Sprintf(msg, gameID, pendingQueue.List.Len()))
 
 		k.returnFunds(ctx, gameID)
 
 		// check next game in pending queue
-		return k.checkPendingQueue(ctx, pendingQueue)
+		return k.filterPendingGameQueue(ctx, pendingQueue)
 	}
 
 	// done handling all expired games
@@ -61,7 +54,7 @@ func (k Keeper) checkPendingQueue(ctx sdk.Context, pendingQueue queue.Queue) sdk
 }
 
 func (k Keeper) returnFunds(ctx sdk.Context, gameID int64) sdk.Error {
-	logger := ctx.Logger().With("module", "x/game")
+	logger := ctx.Logger().With("module", "challenge")
 
 	// get challenges
 	challenges, err := k.ChallengesByGameID(ctx, gameID)
