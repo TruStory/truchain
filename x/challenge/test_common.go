@@ -45,10 +45,8 @@ func mockDB() (sdk.Context, Keeper, story.Keeper, c.Keeper, bank.Keeper) {
 	ms.LoadLatestVersion()
 
 	// fake block time in the future
-	// needed to test expiring games and other timing scenarios
 	header := abci.Header{Time: time.Now().Add(50 * 24 * time.Hour)}
 	ctx := sdk.NewContext(ms, header, false, log.NewNopLogger())
-	// ctx := sdk.NewContext(ms, abci.Header{}, false, log.NewNopLogger())
 
 	codec := amino.NewCodec()
 	cryptoAmino.RegisterAmino(codec)

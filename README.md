@@ -68,7 +68,7 @@ Open the `genesis.json` file and in the "validators" section overwrite the "addr
 
 5. Start blockchain
 
-`make run_daemon`
+`make run_daemon` (or `make debug` for debug logging)
 
 You can wipe the chain, build, and start using the alias `make bwr`.
 
@@ -121,7 +121,7 @@ Each main feature of TruChain is implemented as a separate module that lives und
 
 Each module has it's own [README](x/README.md).
 
-### Key-Value Stores
+### On-chain Data Store
 
 Because the current Cosmos SDK data store is built on key-value storage, database operations are more explicit than a relational or even NoSQL database. Lists and queues must be made for data that needs to be retrieved.
 
@@ -130,6 +130,26 @@ Keepers handle all reads and writes from key-value storage. There's a separate k
 Each module provides a `ReadKeeper`, `WriteKeeper`, and `ReadWriteKeeper`. Other modules should get passed the appropriate keeper for it's needs. For example, if a module doesn't need to create categories, but only read them, it should get passed a category `ReadKeeper`.
 
 All data in stores are binary encoded using [Amino](https://github.com/tendermint/go-amino) for efficient storage in a Merkle tree. Keepers handle marshalling and umarshalling data between its binary encoding and Go data type.
+
+### Time-bound queues
+
+Most chain operations are executed based on queues that are checked after each new block is generated:
+
+1. Backing queue
+
+Handles the lifecycle of backings, calculating interest, and distributing funds after backing periods expire.
+
+2. Pending game queue
+
+Handles the lifecycle of challenges. Games in this queue have been challenged but haven't met the threshold required for voting to begin. After the threshold is met, games in this queue are promoted to the game queue.
+
+3. Game queue
+
+Handles the lifecycle of voting on a story (validation game). Upon completion of a game, funds are distributed to winners, and removed from losers.
+
+## Recipes
+
+For step-by-step instructions for common tasks like adding a new message type or query, see [./dev/RECIPES.md](./dev/RECIPES.md).
 
 ## Testing
 
