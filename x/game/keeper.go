@@ -253,37 +253,43 @@ func (k Keeper) start(ctx sdk.Context, game *Game) (err sdk.Error) {
 	return
 }
 
+// promote game from pending game queue to game queue
 func (k Keeper) updateGameQueues(ctx sdk.Context, gameID int64) {
+	k.updatePendingGameQueue(ctx, gameID)
+	k.updateGameQueue(ctx, gameID)
+}
+
+func (k Keeper) updatePendingGameQueue(ctx sdk.Context, gameID int64) {
 	logger := ctx.Logger().With("module", "game")
 
-	// push game id onto game queue that will get checked on each tick
-	k.queue(ctx).Push(gameID)
-
-	msg := "Pushed game %d to game queue"
-	logger.Info(fmt.Sprintf(msg, gameID))
+	// create new pending game queue, deleting gameID
+	pendingGameQueueStore := ctx.KVStore(k.pendingQueueKey)
+	newPendingGameQueue := queue.NewQueue(k.GetCodec(), pendingGameQueueStore)
 
 	// find index of game id to delete in pending queue
 	pendingList := k.pendingQueue(ctx).List
-	var indexToDelete uint64
 	pendingList.Iterate(&gameID, func(index uint64) bool {
 		var tempGameID int64
 		err := pendingList.Get(index, &tempGameID)
 		if err != nil {
 			panic(err)
 		}
-
-		if tempGameID == gameID {
-			indexToDelete = index
-
-			return true
+		// push new game id
+		if tempGameID != gameID {
+			newPendingGameQueue.Push(tempGameID)
 		}
-
 		return false
 	})
 
-	// remove game id from pending queue
-	pendingList.Delete(indexToDelete)
+	msg := "Created new pending game queue, removing game %d"
+	logger.Info(fmt.Sprintf(msg, gameID))
+}
 
-	msg = "Removed game id %d from pending game queue"
+func (k Keeper) updateGameQueue(ctx sdk.Context, gameID int64) {
+	logger := ctx.Logger().With("module", "game")
+
+	// push game id onto game queue that will get checked on each tick
+	k.queue(ctx).Push(gameID)
+	msg := "Pushed game %d to game queue"
 	logger.Info(fmt.Sprintf(msg, gameID))
 }
