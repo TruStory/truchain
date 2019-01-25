@@ -556,6 +556,61 @@
             "deprecationReason": "",
             "description": "",
             "isDeprecated": false,
+            "name": "creator",
+            "type": {
+              "kind": "NON_NULL",
+              "name": "",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "User",
+                "ofType": null
+              }
+            }
+          },
+          {
+            "args": [],
+            "deprecationReason": "",
+            "description": "",
+            "isDeprecated": false,
+            "name": "timestamp",
+            "type": {
+              "kind": "OBJECT",
+              "name": "Int",
+              "ofType": null
+            }
+          }
+        ],
+        "inputFields": [],
+        "interfaces": [],
+        "kind": "OBJECT",
+        "name": "Dec",
+        "possibleTypes": []
+      },
+      {
+        "description": "",
+        "enumValues": [],
+        "fields": [
+          {
+            "args": [],
+            "deprecationReason": "",
+            "description": "",
+            "isDeprecated": false,
+            "name": "challengeExpireTime",
+            "type": {
+              "kind": "NON_NULL",
+              "name": "",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Time",
+                "ofType": null
+              }
+            }
+          },
+          {
+            "args": [],
+            "deprecationReason": "",
+            "description": "",
+            "isDeprecated": false,
             "name": "challengePool",
             "type": {
               "kind": "NON_NULL",
@@ -652,22 +707,6 @@
             "deprecationReason": "",
             "description": "",
             "isDeprecated": false,
-            "name": "started",
-            "type": {
-              "kind": "NON_NULL",
-              "name": "",
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "bool",
-                "ofType": null
-              }
-            }
-          },
-          {
-            "args": [],
-            "deprecationReason": "",
-            "description": "",
-            "isDeprecated": false,
             "name": "storyID",
             "type": {
               "kind": "NON_NULL",
@@ -691,6 +730,22 @@
               "ofType": {
                 "kind": "OBJECT",
                 "name": "Timestamp",
+                "ofType": null
+              }
+            }
+          },
+          {
+            "args": [],
+            "deprecationReason": "",
+            "description": "",
+            "isDeprecated": false,
+            "name": "votingEndTime",
+            "type": {
+              "kind": "NON_NULL",
+              "name": "",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Time",
                 "ofType": null
               }
             }
@@ -760,6 +815,8 @@
               "ofType": {
                 "kind": "OBJECT",
                 "name": "Dec",
+<<<<<<< HEAD
+=======
                 "ofType": null
               }
             }
@@ -776,6 +833,28 @@
               "ofType": {
                 "kind": "OBJECT",
                 "name": "Dec",
+>>>>>>> Better logging
+                "ofType": null
+              }
+            }
+          },
+          {
+            "args": [],
+            "deprecationReason": "",
+            "description": "",
+            "isDeprecated": false,
+<<<<<<< HEAD
+            "name": "minInterestRate",
+=======
+            "name": "periodWeight",
+>>>>>>> Better logging
+            "type": {
+              "kind": "NON_NULL",
+              "name": "",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "Dec",
+<<<<<<< HEAD
                 "ofType": null
               }
             }
@@ -792,6 +871,8 @@
               "ofType": {
                 "kind": "OBJECT",
                 "name": "Dec",
+=======
+>>>>>>> Better logging
                 "ofType": null
               }
             }
