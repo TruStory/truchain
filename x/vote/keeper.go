@@ -104,6 +104,15 @@ func (k Keeper) Create(
 		return 0, ErrGameNotStarted(storyID)
 	}
 
+	// make sure voting period isn't over
+	game, err := k.gameKeeper.Game(ctx, story.GameID)
+	if err != nil {
+		return 0, err
+	}
+	if ctx.BlockHeader().Time.After(game.VotingEndTime) {
+		return 0, ErrGameOver(storyID)
+	}
+
 	// check if this voter has already cast a vote
 	if k.voterList.Includes(ctx, k, story.GameID, creator) {
 		return 0, ErrDuplicateVoteForGame(story.GameID, creator)

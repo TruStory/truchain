@@ -26,8 +26,8 @@ func mockDB() (sdk.Context, Keeper, c.Keeper) {
 	catKey := sdk.NewKVStoreKey("categories")
 	challengeKey := sdk.NewKVStoreKey("challenges")
 	gameKey := sdk.NewKVStoreKey("games")
+	pendingGameQueueKey := sdk.NewKVStoreKey("pendingGameQueue")
 	gameQueueKey := sdk.NewKVStoreKey("gameQueue")
-	activeGameQueueKey := sdk.NewKVStoreKey("activeGameQueue")
 	backingKey := sdk.NewKVStoreKey("backings")
 
 	ms := store.NewCommitMultiStore(db)
@@ -36,8 +36,8 @@ func mockDB() (sdk.Context, Keeper, c.Keeper) {
 	ms.MountStoreWithDB(catKey, sdk.StoreTypeIAVL, db)
 	ms.MountStoreWithDB(challengeKey, sdk.StoreTypeIAVL, db)
 	ms.MountStoreWithDB(gameKey, sdk.StoreTypeIAVL, db)
+	ms.MountStoreWithDB(pendingGameQueueKey, sdk.StoreTypeIAVL, db)
 	ms.MountStoreWithDB(gameQueueKey, sdk.StoreTypeIAVL, db)
-	ms.MountStoreWithDB(activeGameQueueKey, sdk.StoreTypeIAVL, db)
 	ms.MountStoreWithDB(backingKey, sdk.StoreTypeIAVL, db)
 	ms.LoadLatestVersion()
 
@@ -55,7 +55,7 @@ func mockDB() (sdk.Context, Keeper, c.Keeper) {
 	sk := story.NewKeeper(storyKey, ck, codec)
 	backingKeeper := backing.NewKeeper(backingKey, sk, bankKeeper, ck, codec)
 
-	k := NewKeeper(gameKey, gameQueueKey, activeGameQueueKey, sk, backingKeeper, bankKeeper, codec)
+	k := NewKeeper(gameKey, pendingGameQueueKey, gameQueueKey, sk, backingKeeper, bankKeeper, codec)
 
 	return ctx, k, ck
 }

@@ -250,7 +250,7 @@ func (k Keeper) start(ctx sdk.Context, game *Game) (err sdk.Error) {
 func (k Keeper) updateGameQueues(ctx sdk.Context, gameID int64) {
 	// push game id onto game queue that will get checked on each tick
 	k.queue(ctx).Push(gameID)
-	fmt.Printf("Pushed to game %d queue\n", gameID)
+	fmt.Printf("Pushed game %d to game queue\n", gameID)
 
 	// find index of game id to delete in pending queue
 	pendingList := k.pendingQueue(ctx).List
