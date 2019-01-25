@@ -4,6 +4,7 @@ import (
 	"context"
 	"net/http"
 	"net/url"
+	"time"
 
 	app "github.com/TruStory/truchain/types"
 	"github.com/TruStory/truchain/x/backing"
@@ -124,6 +125,12 @@ func (ta *TruAPI) RegisterResolvers() {
 		"creator":            func(ctx context.Context, q game.Game) users.User { return getUser(ctx, q.Creator) },
 		"challengePool":      func(_ context.Context, q game.Game) sdk.Coin { return q.ChallengePool },
 		"challengeThreshold": ta.challengeThresholdResolver,
+
+		// Deprecated: remove in favor of the auto-resolving field `challengeExpireTime`
+		"expiresTime": func(_ context.Context, q game.Game) time.Time { return q.ChallengeExpireTime },
+
+		// Deprecated: remove in favor of the auto-resolving field `votingEndTime`
+		"votingPeriodEndTime": func(_ context.Context, q game.Game) time.Time { return q.VotingEndTime },
 	})
 
 	ta.GraphQLClient.RegisterQueryResolver("stories", ta.allStoriesResolver)
