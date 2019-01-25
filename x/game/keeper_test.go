@@ -140,7 +140,7 @@ func Test_start(t *testing.T) {
 	err := k.AddChallengePool(ctx, gameID, amount)
 	assert.Nil(t, err)
 
-	// create fake game & queue
+	// test queue sizes
 	assert.Equal(t, uint64(1), k.pendingQueue(ctx).List.Len())
 	assert.Equal(t, uint64(1), k.queue(ctx).List.Len())
 }
