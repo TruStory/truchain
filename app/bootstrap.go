@@ -3,7 +3,6 @@ package app
 import (
 	"bufio"
 	"encoding/csv"
-	"fmt"
 	"net/url"
 	"os"
 	"path/filepath"
@@ -82,8 +81,6 @@ func createStory(
 	source string,
 	argument string) int64 {
 
-	logger := ctx.Logger().With("module", "app")
-
 	categories, _ := ck.GetAllCategories(ctx)
 
 	var catID int64
@@ -100,9 +97,8 @@ func createStory(
 	// fake a block time
 	ctx = ctx.WithBlockHeader(abci.Header{Time: time.Now().UTC()})
 
-	logger.Info(fmt.Sprintf("Adding story `%s` to category %d", claim, catID))
-
-	storyID, _ := sk.Create(ctx, argument, claim, catID, creator, *sourceURL, storyType)
+	evidenceURLs := []story.Evidence{}
+	storyID, _ := sk.Create(ctx, argument, claim, catID, creator, evidenceURLs, *sourceURL, storyType)
 
 	return storyID
 }
