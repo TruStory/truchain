@@ -1,7 +1,6 @@
 package backing
 
 import (
-	"fmt"
 	"testing"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -41,8 +40,7 @@ func TestQueue(t *testing.T) {
 	bankKeeper.AddCoins(ctx, creator2, sdk.Coins{amount})
 
 	// create backings
-	backingID, _ := bk.Create(ctx, storyID, amount, argument, creator1, duration)
-	fmt.Println(backingID)
+	backingID, _ := bk.Create(ctx, storyID, amount, argument, creator1, duration, evidence)
 	_, err := bk.Backing(ctx, backingID)
 	assert.Nil(t, err)
 
