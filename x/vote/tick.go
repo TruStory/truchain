@@ -26,10 +26,13 @@ func (k Keeper) NewResponseEndBlock(ctx sdk.Context) sdk.Tags {
 // checkGames checks to see if a validation game has ended, then processes
 // that game. It calls itself recursively until all games have been processed.
 func (k Keeper) checkGames(ctx sdk.Context, gameQueue queue.Queue) sdk.Error {
-	// check the head of the queue
+	if gameQueue.IsEmpty() {
+		return nil
+	}
+
 	var gameID int64
 	if err := gameQueue.Peek(&gameID); err != nil {
-		return nil
+		panic(err)
 	}
 
 	// retrieve the game
@@ -45,8 +48,8 @@ func (k Keeper) checkGames(ctx sdk.Context, gameQueue queue.Queue) sdk.Error {
 		return err
 	}
 
-	// handle expired games
-	if game.IsExpired(blockTime) || game.IsVotingExpired(blockTime, quorum) {
+	// handle expired voting periods
+	if game.IsVotingExpired(blockTime, quorum) {
 		// remove from queue
 		gameQueue.Pop()
 
@@ -66,8 +69,9 @@ func (k Keeper) checkGames(ctx sdk.Context, gameQueue queue.Queue) sdk.Error {
 		return k.checkGames(ctx, gameQueue)
 	}
 
-	// terminate recursion on finding the first unfinished game
-	// we only care about processing finished games
+	// Terminate recursion on finding the first unfinished game,
+	// because it means all the ones behind it in the queue
+	// are also unfinished.
 	if !game.IsVotingFinished(blockTime, quorum) {
 		return nil
 	}

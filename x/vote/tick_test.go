@@ -24,46 +24,46 @@ func Test_checkGames(t *testing.T) {
 	assert.Nil(t, err)
 }
 
-// func Test_quorum(t *testing.T) {
-// 	ctx, votes, k := fakeValidationGame()
+func Test_quorum(t *testing.T) {
+	ctx, votes, k := fakeValidationGame()
 
-// 	// get the gameID
-// 	qStore := ctx.KVStore(k.gameQueueKey)
-// 	q := store.NewQueue(k.GetCodec(), qStore)
-// 	var gameID int64
-// 	q.Peek(&gameID)
+	// get the gameID
+	qStore := ctx.KVStore(k.gameQueueKey)
+	q := store.NewQueue(k.GetCodec(), qStore)
+	var gameID int64
+	q.Peek(&gameID)
 
-// 	// retrieve the game
-// 	game, _ := k.gameKeeper.Game(ctx, gameID)
+	// retrieve the game
+	game, _ := k.gameKeeper.Game(ctx, gameID)
 
-// 	story, _ := k.storyKeeper.Story(ctx, game.StoryID)
+	story, _ := k.storyKeeper.Story(ctx, game.StoryID)
 
-// 	totalBCV, _ := k.quorum(ctx, story.ID)
+	totalBCV, _ := k.quorum(ctx, story.ID)
 
-// 	assert.Equal(t, len(votes.falseVotes)+len(votes.trueVotes), totalBCV)
-// }
+	assert.Equal(t, len(votes.falseVotes)+len(votes.trueVotes), totalBCV)
+}
 
-// func Test_returnFunds(t *testing.T) {
-// 	ctx, votes, k := fakeValidationGame()
+func Test_returnFunds(t *testing.T) {
+	ctx, votes, k := fakeValidationGame()
 
-// 	// get the gameID
-// 	qStore := ctx.KVStore(k.gameQueueKey)
-// 	q := store.NewQueue(k.GetCodec(), qStore)
-// 	var gameID int64
-// 	q.Peek(&gameID)
+	// get the gameID
+	qStore := ctx.KVStore(k.gameQueueKey)
+	q := store.NewQueue(k.GetCodec(), qStore)
+	var gameID int64
+	q.Peek(&gameID)
 
-// 	vote := votes.falseVotes[1]
+	vote := votes.falseVotes[1]
 
-// 	initialBalance := k.bankKeeper.GetCoins(ctx, vote.Creator())
-// 	assert.Equal(t, "1000trudex", initialBalance.String())
+	initialBalance := k.bankKeeper.GetCoins(ctx, vote.Creator())
+	assert.Equal(t, "1000trudex", initialBalance.String())
 
-// 	err := k.returnFunds(ctx, gameID)
-// 	assert.Nil(t, err)
+	err := k.returnFunds(ctx, gameID)
+	assert.Nil(t, err)
 
-// 	// no, not the sneaker
-// 	// FYI - Steve Jobs used to wear NB
-// 	expectedNewBalance := sdk.Coins{vote.Amount()}.Plus(initialBalance)
-// 	actualNewBalance := k.bankKeeper.GetCoins(ctx, vote.Creator())
+	// no, not the sneaker
+	// FYI - Steve Jobs used to wear NB
+	expectedNewBalance := sdk.Coins{vote.Amount()}.Plus(initialBalance)
+	actualNewBalance := k.bankKeeper.GetCoins(ctx, vote.Creator())
 
-// 	assert.Equal(t, expectedNewBalance, actualNewBalance)
-// }
+	assert.Equal(t, expectedNewBalance, actualNewBalance)
+}
