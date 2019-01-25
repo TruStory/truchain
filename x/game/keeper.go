@@ -111,7 +111,7 @@ func (k Keeper) Create(
 	// push game id onto queue that will get checked
 	// on each block tick for expired games
 	k.pendingQueue(ctx).Push(game.ID)
-	msg := "Added game %d to pending game queue, len %d\n"
+	msg := "Added game %d to pending game queue, len %d"
 	logger.Info(fmt.Sprintf(msg, game.ID, k.pendingQueue(ctx).List.Len()))
 
 	// set game in KVStore
@@ -151,7 +151,7 @@ func (k Keeper) AddChallengePool(
 	game.ChallengePool = game.ChallengePool.Plus(amount)
 	k.Update(ctx, game)
 
-	msg := "Added %s to challenge pool for game %d\n"
+	msg := "Added %s to challenge pool for game %d"
 	logger.Info(fmt.Sprintf(msg, amount.String(), game.ID))
 
 	// get the total of all backings on story
@@ -233,7 +233,7 @@ func (k Keeper) set(ctx sdk.Context, game Game) {
 func (k Keeper) start(ctx sdk.Context, game *Game) (err sdk.Error) {
 	logger := ctx.Logger().With("module", "game")
 
-	msg := "Challenge threshold met for game %d\n"
+	msg := "Challenge threshold met for game %d"
 	logger.Info(fmt.Sprintf(msg, game.ID))
 
 	err = k.storyKeeper.StartGame(ctx, game.StoryID)
@@ -259,7 +259,7 @@ func (k Keeper) updateGameQueues(ctx sdk.Context, gameID int64) {
 	// push game id onto game queue that will get checked on each tick
 	k.queue(ctx).Push(gameID)
 
-	msg := "Pushed game %d to game queue\n"
+	msg := "Pushed game %d to game queue"
 	logger.Info(fmt.Sprintf(msg, gameID))
 
 	// find index of game id to delete in pending queue
@@ -284,6 +284,6 @@ func (k Keeper) updateGameQueues(ctx sdk.Context, gameID int64) {
 	// remove game id from pending queue
 	pendingList.Delete(indexToDelete)
 
-	msg = "Removed game id %d from pending game queue\n"
+	msg = "Removed game id %d from pending game queue"
 	logger.Info(fmt.Sprintf(msg, gameID))
 }
