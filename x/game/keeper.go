@@ -10,7 +10,7 @@ import (
 
 	app "github.com/TruStory/truchain/types"
 	"github.com/TruStory/truchain/x/story"
-	queue "github.com/cosmos/cosmos-sdk/store"
+	list "github.com/cosmos/cosmos-sdk/store"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	amino "github.com/tendermint/go-amino"
 )
@@ -39,7 +39,7 @@ type Keeper struct {
 	app.Keeper
 
 	// waiting to meet challenge threshold
-	pendingQueueKey sdk.StoreKey
+	pendingListKey sdk.StoreKey
 
 	// threshold met, voting starting..
 	queueKey sdk.StoreKey
@@ -52,7 +52,7 @@ type Keeper struct {
 // NewKeeper creates a new keeper with write and read access
 func NewKeeper(
 	storeKey sdk.StoreKey,
-	pendingQueueKey sdk.StoreKey,
+	pendingListKey sdk.StoreKey,
 	queueKey sdk.StoreKey,
 	storyKeeper story.WriteKeeper,
 	backingKeeper backing.WriteKeeper,
@@ -61,7 +61,7 @@ func NewKeeper(
 
 	return Keeper{
 		app.NewKeeper(codec, storeKey),
-		pendingQueueKey,
+		pendingListKey,
 		queueKey,
 		storyKeeper,
 		backingKeeper,
@@ -110,9 +110,9 @@ func (k Keeper) Create(
 
 	// push game id onto queue that will get checked
 	// on each block tick for expired games
-	k.pendingQueue(ctx).Push(game.ID)
-	msg := "Added game %d to pending game queue, len %d"
-	logger.Info(fmt.Sprintf(msg, game.ID, k.pendingQueue(ctx).List.Len()))
+	k.pendingList(ctx).Push(game.ID)
+	msg := "Added game %d to pending game list, len %d"
+	logger.Info(fmt.Sprintf(msg, game.ID, k.pendingList(ctx).Len()))
 
 	// set game in KVStore
 	k.set(ctx, game)
@@ -211,14 +211,14 @@ func (k Keeper) Update(ctx sdk.Context, game Game) {
 
 // ============================================================================
 
-func (k Keeper) pendingQueue(ctx sdk.Context) queue.Queue {
-	pendingQueueStore := ctx.KVStore(k.pendingQueueKey)
-	return queue.NewQueue(k.GetCodec(), pendingQueueStore)
+func (k Keeper) pendingList(ctx sdk.Context) list.List {
+	pendingListStore := ctx.KVStore(k.pendingListKey)
+	return list.NewList(k.GetCodec(), pendingListStore)
 }
 
-func (k Keeper) queue(ctx sdk.Context) queue.Queue {
+func (k Keeper) queue(ctx sdk.Context) list.Queue {
 	queueStore := ctx.KVStore(k.queueKey)
-	return queue.NewQueue(k.GetCodec(), queueStore)
+	return list.NewQueue(k.GetCodec(), queueStore)
 }
 
 // set saves the `Game` in the KVStore
@@ -247,45 +247,39 @@ func (k Keeper) start(ctx sdk.Context, game *Game) (err sdk.Error) {
 	// update existing game in KVStore
 	k.set(ctx, *game)
 
-	// promote game from pending game queue to game queue
-	k.updateGameQueues(ctx, game.ID)
+	// promote game from pending game list to game queue
+	k.removePendingGameList(ctx, game.ID)
+	k.pushGameQueue(ctx, game.ID)
 
 	return
 }
 
-// promote game from pending game queue to game queue
-func (k Keeper) updateGameQueues(ctx sdk.Context, gameID int64) {
-	k.updatePendingGameQueue(ctx, gameID)
-	k.updateGameQueue(ctx, gameID)
-}
-
-func (k Keeper) updatePendingGameQueue(ctx sdk.Context, gameID int64) {
+func (k Keeper) removePendingGameList(ctx sdk.Context, gameID int64) {
 	logger := ctx.Logger().With("module", "game")
 
-	// create new pending game queue, deleting gameID
-	pendingGameQueueStore := ctx.KVStore(k.pendingQueueKey)
-	newPendingGameQueue := queue.NewQueue(k.GetCodec(), pendingGameQueueStore)
+	pendingList := k.pendingList(ctx)
 
 	// find index of game id to delete in pending queue
-	pendingList := k.pendingQueue(ctx).List
-	pendingList.Iterate(&gameID, func(index uint64) bool {
+	var ID int64
+	var indexToDelete uint64
+	pendingList.Iterate(&ID, func(index uint64) bool {
 		var tempGameID int64
 		err := pendingList.Get(index, &tempGameID)
 		if err != nil {
 			panic(err)
 		}
-		// push new game id
-		if tempGameID != gameID {
-			newPendingGameQueue.Push(tempGameID)
+		if tempGameID == ID {
+			indexToDelete = index
+			return true
 		}
 		return false
 	})
 
-	msg := "Created new pending game queue, removing game %d"
-	logger.Info(fmt.Sprintf(msg, gameID))
+	pendingList.Delete(indexToDelete)
+	logger.Info(fmt.Sprintf("Removed pending game %d", gameID))
 }
 
-func (k Keeper) updateGameQueue(ctx sdk.Context, gameID int64) {
+func (k Keeper) pushGameQueue(ctx sdk.Context, gameID int64) {
 	logger := ctx.Logger().With("module", "game")
 
 	// push game id onto game queue that will get checked on each tick

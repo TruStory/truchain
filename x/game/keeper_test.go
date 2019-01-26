@@ -141,6 +141,6 @@ func Test_start(t *testing.T) {
 	assert.Nil(t, err)
 
 	// test queue sizes
-	assert.Equal(t, uint64(1), k.pendingQueue(ctx).List.Len())
+	assert.Equal(t, uint64(1), k.pendingList(ctx).Len())
 	assert.Equal(t, uint64(1), k.queue(ctx).List.Len())
 }
