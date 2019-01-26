@@ -268,7 +268,7 @@ func (k Keeper) removePendingGameList(ctx sdk.Context, gameID int64) {
 		if err != nil {
 			panic(err)
 		}
-		if tempGameID == ID {
+		if tempGameID == gameID {
 			indexToDelete = index
 			return true
 		}
