@@ -2,6 +2,7 @@
 bin/*
 
 # Testing
+coverage.txt
 mytestnet/*
 report.html
 .pid
