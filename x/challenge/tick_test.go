@@ -14,7 +14,7 @@ func TestNewResponseEndBlock(t *testing.T) {
 	assert.Equal(t, sdk.Tags{}, tags)
 }
 
-func Test_pendingGameList(t *testing.T) {
+func Test_filterExpiredGames(t *testing.T) {
 	ctx, k := fakePendingGameQueue()
 
 	q := k.pendingGameList(ctx)
@@ -39,8 +39,15 @@ func Test_removingExpiredGameFromPendingGameQueue(t *testing.T) {
 	err := k.filterExpiredGames(ctx, q)
 	assert.Nil(t, err)
 
-	// NOTE: popping/deleting an item from a Cosmos queue
+	// NOTE: deleting an item from a Cosmos sdk.List type
 	// DOES NOT change the result of Len(). So we cannot test
 	// if the length of a queue went down after an item is removed.
-	// assert.Equal(t, uint64(0), q.List.Len())
+	// In this case, it is still 1.
+	assert.Equal(t, uint64(1), q.Len())
+
+	// but if we iterate the list, we should find nothing..
+	q.Iterate(game.ID, func(index uint64) bool {
+		assert.Fail(t, "should not find any games")
+		return false
+	})
 }
