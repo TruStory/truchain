@@ -75,3 +75,4 @@ update_deps:
 	@dep ensure -v
 
 .PHONY: benchmark buidl build check dep_graph test test_cover update_deps
+
