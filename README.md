@@ -131,17 +131,17 @@ Each module provides a `ReadKeeper`, `WriteKeeper`, and `ReadWriteKeeper`. Other
 
 All data in stores are binary encoded using [Amino](https://github.com/tendermint/go-amino) for efficient storage in a Merkle tree. Keepers handle marshalling and umarshalling data between its binary encoding and Go data type.
 
-### Time-bound queues
+### Reactive Architecture
 
-Most chain operations are executed based on queues that are checked after each new block is generated:
+Most chain operations are executed based on changes to data. Lists and queues are checked every time a new block is produced:
 
 1. Backing queue
 
 Handles the lifecycle of backings, calculating interest, and distributing funds after backing periods expire.
 
-2. Pending game queue
+2. Pending game list
 
-Handles the lifecycle of challenges. Games in this queue have been challenged but haven't met the threshold required for voting to begin. After the threshold is met, games in this queue are promoted to the game queue.
+Handles the lifecycle of challenges. Games in this list have been challenged but haven't met the threshold required for voting to begin. After the threshold is met, games in this list are promoted to the game queue.
 
 3. Game queue
 
