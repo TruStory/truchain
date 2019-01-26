@@ -11,7 +11,7 @@ import (
 	app "github.com/TruStory/truchain/types"
 	"github.com/TruStory/truchain/x/game"
 	"github.com/TruStory/truchain/x/story"
-	queue "github.com/cosmos/cosmos-sdk/store"
+	list "github.com/cosmos/cosmos-sdk/store"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	amino "github.com/tendermint/go-amino"
 )
@@ -47,8 +47,8 @@ type WriteKeeper interface {
 type Keeper struct {
 	app.Keeper
 
-	// queue of games waiting to meet challenge threshold
-	pendingGameQueueKey sdk.StoreKey
+	// list of games waiting to meet challenge threshold
+	pendingGameListKey sdk.StoreKey
 
 	backingKeeper backing.ReadKeeper
 	bankKeeper    bank.Keeper
@@ -61,7 +61,7 @@ type Keeper struct {
 // NewKeeper creates a new keeper with write and read access
 func NewKeeper(
 	storeKey sdk.StoreKey,
-	pendingGameQueueKey sdk.StoreKey,
+	pendingGameListKey sdk.StoreKey,
 	backingKeeper backing.ReadKeeper,
 	bankKeeper bank.Keeper,
 	gameKeeper game.WriteKeeper,
@@ -70,7 +70,7 @@ func NewKeeper(
 
 	return Keeper{
 		app.NewKeeper(codec, storeKey),
-		pendingGameQueueKey,
+		pendingGameListKey,
 		backingKeeper,
 		bankKeeper,
 		gameKeeper,
@@ -245,7 +245,8 @@ func (k Keeper) Tally(
 
 // ============================================================================
 
-func (k Keeper) pendingGameQueue(ctx sdk.Context) queue.Queue {
-	pendingGameQueueStore := ctx.KVStore(k.pendingGameQueueKey)
-	return queue.NewQueue(k.GetCodec(), pendingGameQueueStore)
+func (k Keeper) pendingGameList(ctx sdk.Context) list.List {
+	return list.NewList(
+		k.GetCodec(),
+		ctx.KVStore(k.pendingGameListKey))
 }
