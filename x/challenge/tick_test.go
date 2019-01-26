@@ -24,7 +24,7 @@ func Test_filterExpiredGames(t *testing.T) {
 	assert.Nil(t, err)
 }
 
-func Test_removingExpiredGameFromPendingGameQueue(t *testing.T) {
+func Test_removingExpiredGameFromPendingGameList(t *testing.T) {
 	ctx, k := fakePendingGameQueue()
 	q := k.pendingGameList(ctx)
 

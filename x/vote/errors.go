@@ -49,15 +49,6 @@ func ErrGameNotStarted(storyID int64) sdk.Error {
 			fmt.Sprintf("%d", storyID))
 }
 
-// ErrGameOver throws when voting has ended
-func ErrGameOver(storyID int64) sdk.Error {
-	return sdk.NewError(
-		DefaultCodespace,
-		CodeGameOver,
-		"Validation game is over for story: "+
-			fmt.Sprintf("%d", storyID))
-}
-
 // ErrInvalidVote returns an unknown Vote type error
 func ErrInvalidVote(vote interface{}, msg ...string) sdk.Error {
 	if mType := reflect.TypeOf(vote); mType != nil {
