@@ -147,10 +147,6 @@ Handles the lifecycle of challenges. Games in this list have been challenged but
 
 Handles the lifecycle of voting on a story (validation game). Upon completion of a game, funds are distributed to winners, and removed from losers.
 
-## Recipes
-
-For step-by-step instructions for common tasks like adding a new message type or query, see [./dev/RECIPES.md](./dev/RECIPES.md).
-
 ## Testing
 
 `make test`
