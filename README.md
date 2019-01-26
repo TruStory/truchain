@@ -127,10 +127,6 @@ Each module provides a `ReadKeeper`, `WriteKeeper`, and `ReadWriteKeeper`. Other
 
 All data in stores are binary encoded using [Amino](https://github.com/tendermint/go-amino) for efficient storage in a Merkle tree. Keepers handle marshalling and umarshalling data between its binary encoding and Go data type.
 
-## Recipes
-
-For step-by-step instructions for common tasks like adding a new message type or query, see [./dev/RECIPES.md](./dev/RECIPES.md).
-
 ## Testing
 
 `make test`
