@@ -17,18 +17,18 @@ func TestNewResponseEndBlock(t *testing.T) {
 func Test_pendingGameQueue(t *testing.T) {
 	ctx, k := fakePendingGameQueue()
 
-	q := k.pendingGameQueue(ctx)
-	assert.Equal(t, uint64(1), q.List.Len())
+	q := k.pendingGameList(ctx)
+	assert.Equal(t, uint64(1), q.Len())
 
-	err := k.filterPendingGameQueue(ctx, q)
+	err := k.filterExpiredGames(ctx, q)
 	assert.Nil(t, err)
 }
 
 func Test_removingExpiredGameFromPendingGameQueue(t *testing.T) {
 	ctx, k := fakePendingGameQueue()
-	q := k.pendingGameQueue(ctx)
+	q := k.pendingGameList(ctx)
 
-	assert.Equal(t, uint64(1), q.List.Len())
+	assert.Equal(t, uint64(1), q.Len())
 
 	// modify challenged expired time in game
 	game, _ := k.gameKeeper.Game(ctx, 1)
@@ -36,7 +36,7 @@ func Test_removingExpiredGameFromPendingGameQueue(t *testing.T) {
 	game.ChallengeExpireTime = expireTime
 	k.gameKeeper.Update(ctx, game)
 
-	err := k.filterPendingGameQueue(ctx, q)
+	err := k.filterExpiredGames(ctx, q)
 	assert.Nil(t, err)
 
 	// NOTE: popping/deleting an item from a Cosmos queue
