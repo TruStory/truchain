@@ -14,7 +14,7 @@ func TestNewResponseEndBlock(t *testing.T) {
 	assert.Equal(t, sdk.Tags{}, tags)
 }
 
-func Test_pendingGameQueue(t *testing.T) {
+func Test_pendingGameList(t *testing.T) {
 	ctx, k := fakePendingGameQueue()
 
 	q := k.pendingGameList(ctx)
