@@ -69,7 +69,12 @@ jobs:
           name: Run unit tests
           command: |
             export PATH="$GOBIN:$PATH"
-            make test
+            make test_cover
+      - run:
+          name: Upload coverage report
+          command: |
+            export PATH="$GOBIN:$PATH"
+            bash <(curl -s https://codecov.io/bash)
 
 workflows:
   version: 2
@@ -80,5 +85,6 @@ workflows:
           requires:
             - setup_dependencies
       - test_unit:
+          context: truchain-context
           requires:
             - setup_dependencies
