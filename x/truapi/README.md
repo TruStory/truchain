@@ -1,4 +1,5 @@
-# Recipes
+# TruAPI
+
 This file contains step-by-step instructions for extending the server in a few of the most common ways; namely, supporting new messages, queries, and GraphQL resolvers.
 
 ## To support a new message
