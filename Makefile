@@ -62,7 +62,7 @@ set_env_vars:
 
 test: set_registrar set_seed_data set_env_vars go_test
 
-test_cover:
+test_cover: set_registrar set_seed_data set_env_vars
 	@go test $(PACKAGES) -v -timeout 30m -race -coverprofile=coverage.txt -covermode=atomic
 
 update_deps:
