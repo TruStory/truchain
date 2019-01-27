@@ -1,8 +1,6 @@
 package backing
 
 import (
-	"net/url"
-
 	app "github.com/TruStory/truchain/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
@@ -32,8 +30,7 @@ func handleBackStoryMsg(ctx sdk.Context, k WriteKeeper, msg BackStoryMsg) sdk.Re
 		msg.Amount,
 		msg.Argument,
 		msg.Creator,
-		msg.Duration,
-		[]url.URL{})
+		msg.Duration)
 	if err != nil {
 		return err.Result()
 	}

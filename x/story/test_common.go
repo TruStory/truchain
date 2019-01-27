@@ -48,10 +48,9 @@ func createFakeStory(ctx sdk.Context, sk Keeper, ck c.WriteKeeper) int64 {
 	creator := sdk.AccAddress([]byte{1, 2})
 	storyType := Default
 	source := url.URL{}
-	evidence := []Evidence{}
 	argument := "I am an argument"
 
-	storyID, _ := sk.Create(ctx, argument, body, cat.ID, creator, evidence, source, storyType)
+	storyID, _ := sk.Create(ctx, argument, body, cat.ID, creator, source, storyType)
 
 	return storyID
 }

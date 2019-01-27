@@ -2,7 +2,6 @@ package vote
 
 import (
 	"encoding/json"
-	"net/url"
 	"testing"
 
 	"github.com/TruStory/truchain/types"
@@ -24,7 +23,7 @@ func TestCreateVoteMsg(t *testing.T) {
 	k.bankKeeper.AddCoins(ctx, creator, sdk.Coins{amount.Plus(amount)})
 
 	argument := "test argument"
-	_, err := k.challengeKeeper.Create(ctx, storyID, amount, argument, creator, []url.URL{})
+	_, err := k.challengeKeeper.Create(ctx, storyID, amount, argument, creator)
 	assert.Nil(t, err)
 
 	msg := NewCreateVoteMsg(storyID, amount, "valid comment", creator, true)

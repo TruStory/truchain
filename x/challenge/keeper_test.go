@@ -2,7 +2,6 @@ package challenge
 
 import (
 	"fmt"
-	"net/url"
 	"testing"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -23,13 +22,11 @@ func TestNewGetChallenge(t *testing.T) {
 	amount := sdk.NewCoin("trudex", sdk.NewInt(15))
 	argument := "test argument is long enough"
 	creator := sdk.AccAddress([]byte{1, 2})
-	cnn, _ := url.Parse("http://www.cnn.com")
-	evidence := []url.URL{*cnn}
 
 	// give user some funds
 	bankKeeper.AddCoins(ctx, creator, sdk.Coins{amount})
 
-	id, err := k.Create(ctx, storyID, amount, argument, creator, evidence)
+	id, err := k.Create(ctx, storyID, amount, argument, creator)
 	assert.Nil(t, err)
 
 	challenge, err := k.Challenge(ctx, id)
@@ -45,13 +42,11 @@ func TestNewGetChallengeUsingTruStake(t *testing.T) {
 	amount := sdk.NewCoin("trusteak", sdk.NewInt(15))
 	argument := "test argument is long enough"
 	creator := sdk.AccAddress([]byte{1, 2})
-	cnn, _ := url.Parse("http://www.cnn.com")
-	evidence := []url.URL{*cnn}
 
 	// give user some funds
 	bankKeeper.AddCoins(ctx, creator, sdk.Coins{amount})
 
-	id, err := k.Create(ctx, storyID, amount, argument, creator, evidence)
+	id, err := k.Create(ctx, storyID, amount, argument, creator)
 	assert.Nil(t, err)
 
 	challenge, err := k.Challenge(ctx, id)
@@ -67,8 +62,6 @@ func TestChallengesByGameID(t *testing.T) {
 	storyID := createFakeStory(ctx, sk, ck)
 	amount := sdk.NewCoin("trudex", sdk.NewInt(15))
 	argument := "test argument is long enough"
-	cnn, _ := url.Parse("http://www.cnn.com")
-	evidence := []url.URL{*cnn}
 
 	creator := sdk.AccAddress([]byte{1, 2})
 	bankKeeper.AddCoins(ctx, creator, sdk.Coins{amount})
@@ -76,8 +69,8 @@ func TestChallengesByGameID(t *testing.T) {
 	creator2 := sdk.AccAddress([]byte{3, 4})
 	bankKeeper.AddCoins(ctx, creator2, sdk.Coins{amount})
 
-	k.Create(ctx, storyID, amount, argument, creator, evidence)
-	k.Create(ctx, storyID, amount, argument, creator2, evidence)
+	k.Create(ctx, storyID, amount, argument, creator)
+	k.Create(ctx, storyID, amount, argument, creator2)
 
 	story, _ := sk.Story(ctx, storyID)
 	challenges, _ := k.ChallengesByGameID(ctx, story.GameID)
@@ -90,13 +83,11 @@ func TestChallengesByStoryIDAndCreator(t *testing.T) {
 	storyID := createFakeStory(ctx, sk, ck)
 	amount := sdk.NewCoin("trudex", sdk.NewInt(15))
 	argument := "test argument is long enough"
-	cnn, _ := url.Parse("http://www.cnn.com")
-	evidence := []url.URL{*cnn}
 
 	creator := sdk.AccAddress([]byte{1, 2})
 	bankKeeper.AddCoins(ctx, creator, sdk.Coins{amount})
 
-	k.Create(ctx, storyID, amount, argument, creator, evidence)
+	k.Create(ctx, storyID, amount, argument, creator)
 
 	challenge, _ := k.ChallengeByStoryIDAndCreator(ctx, storyID, creator)
 	assert.Equal(t, int64(1), challenge.ID())
@@ -108,8 +99,6 @@ func TestTally(t *testing.T) {
 	storyID := createFakeStory(ctx, sk, ck)
 	amount := sdk.NewCoin("trudex", sdk.NewInt(15))
 	argument := "test argument is long enough"
-	cnn, _ := url.Parse("http://www.cnn.com")
-	evidence := []url.URL{*cnn}
 
 	creator := sdk.AccAddress([]byte{1, 2})
 	bankKeeper.AddCoins(ctx, creator, sdk.Coins{amount})
@@ -117,8 +106,8 @@ func TestTally(t *testing.T) {
 	creator2 := sdk.AccAddress([]byte{3, 4})
 	bankKeeper.AddCoins(ctx, creator2, sdk.Coins{amount})
 
-	k.Create(ctx, storyID, amount, argument, creator, evidence)
-	k.Create(ctx, storyID, amount, argument, creator2, evidence)
+	k.Create(ctx, storyID, amount, argument, creator)
+	k.Create(ctx, storyID, amount, argument, creator2)
 
 	falseVotes, _ := k.Tally(ctx, storyID)
 
@@ -132,18 +121,16 @@ func TestNewChallenge_Duplicate(t *testing.T) {
 	amount := sdk.NewCoin("trudex", sdk.NewInt(50))
 	argument := "test argument is long enough"
 	creator := sdk.AccAddress([]byte{1, 2})
-	cnn, _ := url.Parse("http://www.cnn.com")
-	evidence := []url.URL{*cnn}
 
 	// give user some funds
 	bankKeeper.AddCoins(ctx, creator, sdk.Coins{amount})
 
 	challengeAmount, _ := sdk.ParseCoin("10trudex")
 
-	_, err := k.Create(ctx, storyID, challengeAmount, argument, creator, evidence)
+	_, err := k.Create(ctx, storyID, challengeAmount, argument, creator)
 	assert.Nil(t, err)
 
-	_, err = k.Create(ctx, storyID, challengeAmount, argument, creator, evidence)
+	_, err = k.Create(ctx, storyID, challengeAmount, argument, creator)
 	assert.NotNil(t, err)
 	assert.Equal(t, ErrDuplicateChallenge(5, creator).Code(), err.Code())
 }
@@ -156,8 +143,6 @@ func TestNewChallenge_MultipleChallengers(t *testing.T) {
 	argument := "test argument is long enough"
 	creator1 := sdk.AccAddress([]byte{1, 2})
 	creator2 := sdk.AccAddress([]byte{3, 4})
-	cnn, _ := url.Parse("http://www.cnn.com")
-	evidence := []url.URL{*cnn}
 
 	// give user some funds
 	bankKeeper.AddCoins(ctx, creator1, sdk.Coins{amount})
@@ -165,12 +150,12 @@ func TestNewChallenge_MultipleChallengers(t *testing.T) {
 
 	challengeAmount, _ := sdk.ParseCoin("10trudex")
 
-	id, err := k.Create(ctx, storyID, challengeAmount, argument, creator1, evidence)
+	id, err := k.Create(ctx, storyID, challengeAmount, argument, creator1)
 	assert.Nil(t, err)
 
 	challenge, _ := k.Challenge(ctx, id)
 
-	_, err = k.Create(ctx, challenge.ID(), amount, argument, creator2, evidence)
+	_, err = k.Create(ctx, challenge.ID(), amount, argument, creator2)
 	assert.Nil(t, err)
 	assert.False(t, bankKeeper.HasCoins(ctx, creator2, sdk.Coins{amount}))
 
@@ -189,9 +174,7 @@ func TestNewChallenge_ErrIncorrectCategoryCoin(t *testing.T) {
 	amount := sdk.NewCoin("testcoin", sdk.NewInt(15))
 	argument := "test argument"
 	creator := sdk.AccAddress([]byte{1, 2})
-	cnn, _ := url.Parse("http://www.cnn.com")
-	evidence := []url.URL{*cnn}
 
-	_, err := k.Create(ctx, storyID, amount, argument, creator, evidence)
+	_, err := k.Create(ctx, storyID, amount, argument, creator)
 	assert.NotNil(t, err)
 }

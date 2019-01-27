@@ -37,10 +37,9 @@ func TestAddGetStory(t *testing.T) {
 	creator := sdk.AccAddress([]byte{3, 4})
 	kind := Default
 	source := url.URL{}
-	evidence := []Evidence{}
 	argument := "I am an argument"
 
-	storyID, _ = sk.Create(ctx, argument, body, int64(1), creator, evidence, source, kind)
+	storyID, _ = sk.Create(ctx, argument, body, int64(1), creator, source, kind)
 	assert.Equal(t, int64(2), storyID, "Story ID did not increment properly")
 
 	coinName, _ := sk.CategoryDenom(ctx, storyID)

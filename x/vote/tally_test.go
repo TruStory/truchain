@@ -2,7 +2,6 @@ package vote
 
 import (
 	"crypto/rand"
-	"net/url"
 	"testing"
 	"time"
 
@@ -33,8 +32,6 @@ func fakeValidationGame() (ctx sdk.Context, votes poll, k Keeper) {
 	amount := sdk.NewCoin("trudex", sdk.NewInt(1000))
 	trustake := sdk.NewCoin("trusteak", sdk.NewInt(1000))
 	argument := "test argument"
-	testURL, _ := url.Parse("http://www.trustory.io")
-	evidence := []url.URL{*testURL}
 
 	creator1 := fakeFundedCreator(ctx, k.bankKeeper)
 	// remove cat coins to simulate backing conversion from trusteak
@@ -53,19 +50,19 @@ func fakeValidationGame() (ctx sdk.Context, votes poll, k Keeper) {
 
 	// fake backings
 	duration := 1 * time.Hour
-	b1id, _ := k.backingKeeper.Create(ctx, storyID, trustake, argument, creator1, duration, evidence)
-	b2id, _ := k.backingKeeper.Create(ctx, storyID, amount, argument, creator2, duration, evidence)
-	b3id, _ := k.backingKeeper.Create(ctx, storyID, amount, argument, creator3, duration, evidence)
-	b4id, _ := k.backingKeeper.Create(ctx, storyID, amount, argument, creator4, duration, evidence)
+	b1id, _ := k.backingKeeper.Create(ctx, storyID, trustake, argument, creator1, duration)
+	b2id, _ := k.backingKeeper.Create(ctx, storyID, amount, argument, creator2, duration)
+	b3id, _ := k.backingKeeper.Create(ctx, storyID, amount, argument, creator3, duration)
+	b4id, _ := k.backingKeeper.Create(ctx, storyID, amount, argument, creator4, duration)
 
 	// fake challenges
-	c1id, _ := k.challengeKeeper.Create(ctx, storyID, amount, argument, creator5, evidence)
-	c2id, _ := k.challengeKeeper.Create(ctx, storyID, amount, argument, creator6, evidence)
+	c1id, _ := k.challengeKeeper.Create(ctx, storyID, amount, argument, creator5)
+	c2id, _ := k.challengeKeeper.Create(ctx, storyID, amount, argument, creator6)
 
 	// fake votes
-	v1id, _ := k.Create(ctx, storyID, amount, true, argument, creator7, evidence)
-	v2id, _ := k.Create(ctx, storyID, amount, true, argument, creator8, evidence)
-	v3id, _ := k.Create(ctx, storyID, amount, false, argument, creator9, evidence)
+	v1id, _ := k.Create(ctx, storyID, amount, true, argument, creator7)
+	v2id, _ := k.Create(ctx, storyID, amount, true, argument, creator8)
+	v3id, _ := k.Create(ctx, storyID, amount, false, argument, creator9)
 
 	b1, _ := k.backingKeeper.Backing(ctx, b1id)
 	// fake an interest
