@@ -8,9 +8,11 @@
 2. Now let's install truchain.
 
 ``` bash
-mkdir -p $GOPATH/src/github.com/trustory
+# Go dependencies are case-sensitive.
+# The directory name must have the characters T and S in capital to match the name of this repo.
+mkdir -p $GOPATH/src/github.com/TruStory
 
-cd $GOPATH/src/github.com/trustory
+cd $GOPATH/src/github.com/TruStory
 
 git clone https://github.com/TruStory/truchain.git
 
