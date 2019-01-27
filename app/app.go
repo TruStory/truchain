@@ -109,6 +109,8 @@ func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *T
 		"funds":       "Funds & Fundraising",
 		"glossary":    "Glossary",
 		"gov":         "Governance",
+		"meme":        "Memes",
+		"random":      "Random",
 		"regulation":  "Regulation",
 		"scams":       "Scams",
 		"scalability": "Scalability",
