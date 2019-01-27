@@ -130,3 +130,7 @@ All data in stores are binary encoded using [Amino](https://github.com/tendermin
 ## Testing
 
 `make test`
+
+## Generate Documentation
+
+`make doc`
