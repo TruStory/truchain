@@ -13,7 +13,6 @@ const (
 	CodeInvalidStoryBody            sdk.CodeType = 701
 	CodeInvalidStoryID              sdk.CodeType = 702
 	CodeStoryNotFound               sdk.CodeType = 703
-	CodeInvalidEvidenceURL          sdk.CodeType = 704
 	CodeInvalidStoryType            sdk.CodeType = 706
 	CodeStoriesWithCategoryNotFound sdk.CodeType = 707
 	CodeInvalidSourceURL            sdk.CodeType = 708
@@ -39,11 +38,6 @@ func ErrInvalidStoryID(id int64) sdk.Error {
 func ErrInvalidStoryType(msg string) sdk.Error {
 	return sdk.NewError(DefaultCodespace, CodeInvalidStoryType, "Invalid story type: "+msg)
 
-}
-
-// ErrInvalidEvidenceURL throws an error when a URL in invalid
-func ErrInvalidEvidenceURL(url string) sdk.Error {
-	return sdk.NewError(DefaultCodespace, CodeInvalidEvidenceURL, "Invalid evidence URL: "+url)
 }
 
 // ErrInvalidSourceURL throws an error when a URL in invalid

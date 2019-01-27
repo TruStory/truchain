@@ -34,17 +34,13 @@ func (v TokenVote) VoteChoice() bool {
 type MsgParams struct {
 	MinArgumentLength int // min number of chars for argument
 	MaxArgumentLength int // max number of chars for argument
-	MinEvidenceCount  int // min number of evidence URLs
-	MaxEvidenceCount  int // max number of evidence URLs
 }
 
 // DefaultMsgParams creates a new MsgParams type with defaults
 func DefaultMsgParams() MsgParams {
 	return MsgParams{
 		MinArgumentLength: 10,
-		MaxArgumentLength: 1000,
-		MinEvidenceCount:  0,
-		MaxEvidenceCount:  10,
+		MaxArgumentLength: 3000,
 	}
 }
 
