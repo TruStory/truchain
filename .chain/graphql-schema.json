@@ -533,70 +533,18 @@
             "deprecationReason": "",
             "description": "",
             "isDeprecated": false,
-            "name": "creator",
+            "name": "int",
             "type": {
-              "kind": "NON_NULL",
-              "name": "",
-              "ofType": {
-                "kind": "OBJECT",
-                "name": "User",
-                "ofType": null
-              }
-            }
-          },
-          {
-            "args": [],
-            "deprecationReason": "",
-            "description": "",
-            "isDeprecated": false,
-            "name": "timestamp",
-            "type": {
-              "kind": "NON_NULL",
-              "name": "",
-              "ofType": {
-                "kind": "OBJECT",
-                "name": "Timestamp",
-                "ofType": null
-              }
-            }
-          },
-          {
-            "args": [],
-            "deprecationReason": "",
-            "description": "",
-            "isDeprecated": false,
-            "name": "uRL",
-            "type": {
-              "kind": "NON_NULL",
-              "name": "",
-              "ofType": {
-                "kind": "OBJECT",
-                "name": "URL",
-                "ofType": null
-              }
-            }
-          },
-          {
-            "args": [],
-            "deprecationReason": "",
-            "description": "",
-            "isDeprecated": false,
-            "name": "url",
-            "type": {
-              "kind": "NON_NULL",
-              "name": "",
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "string",
-                "ofType": null
-              }
+              "kind": "OBJECT",
+              "name": "Int",
+              "ofType": null
             }
           }
         ],
         "inputFields": [],
         "interfaces": [],
         "kind": "OBJECT",
-        "name": "Evidence",
+        "name": "Dec",
         "possibleTypes": []
       },
       {
@@ -789,45 +737,61 @@
             "deprecationReason": "",
             "description": "",
             "isDeprecated": false,
-            "name": "backingMaxDuration",
-            "type": {
-              "kind": "NON_NULL",
-              "name": "",
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "int64",
-                "ofType": null
-              }
-            }
-          },
-          {
-            "args": [],
-            "deprecationReason": "",
-            "description": "",
-            "isDeprecated": false,
-            "name": "backingMinDuration",
-            "type": {
-              "kind": "NON_NULL",
-              "name": "",
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "int64",
-                "ofType": null
-              }
-            }
-          },
-          {
-            "args": [],
-            "deprecationReason": "",
-            "description": "",
-            "isDeprecated": false,
-            "name": "challengeMinStake",
+            "name": "amountWeight",
             "type": {
               "kind": "NON_NULL",
               "name": "",
               "ofType": {
                 "kind": "OBJECT",
-                "name": "Int",
+                "name": "Dec",
+                "ofType": null
+              }
+            }
+          },
+          {
+            "args": [],
+            "deprecationReason": "",
+            "description": "",
+            "isDeprecated": false,
+            "name": "maxInterestRate",
+            "type": {
+              "kind": "NON_NULL",
+              "name": "",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "Dec",
+                "ofType": null
+              }
+            }
+          },
+          {
+            "args": [],
+            "deprecationReason": "",
+            "description": "",
+            "isDeprecated": false,
+            "name": "minInterestRate",
+            "type": {
+              "kind": "NON_NULL",
+              "name": "",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "Dec",
+                "ofType": null
+              }
+            }
+          },
+          {
+            "args": [],
+            "deprecationReason": "",
+            "description": "",
+            "isDeprecated": false,
+            "name": "periodWeight",
+            "type": {
+              "kind": "NON_NULL",
+              "name": "",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "Dec",
                 "ofType": null
               }
             }
@@ -1323,7 +1287,7 @@
                   "name": "",
                   "ofType": {
                     "kind": "OBJECT",
-                    "name": "Evidence",
+                    "name": "URL",
                     "ofType": null
                   }
                 }
