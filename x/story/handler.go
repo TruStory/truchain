@@ -40,7 +40,6 @@ func handleSubmitStoryMsg(ctx sdk.Context, k WriteKeeper, msg SubmitStoryMsg) sd
 		msg.Body,
 		msg.CategoryID,
 		msg.Creator,
-		[]Evidence{},
 		*sourceURL,
 		msg.StoryType)
 	if err != nil {

@@ -100,11 +100,9 @@ func createStory(
 	// fake a block time
 	ctx = ctx.WithBlockHeader(abci.Header{Time: time.Now().UTC()})
 
-	evidenceURLs := []story.Evidence{}
-
 	logger.Info(fmt.Sprintf("Adding story `%s` to category %d", claim, catID))
 
-	storyID, _ := sk.Create(ctx, argument, claim, catID, creator, evidenceURLs, *sourceURL, storyType)
+	storyID, _ := sk.Create(ctx, argument, claim, catID, creator, *sourceURL, storyType)
 
 	return storyID
 }
@@ -153,10 +151,8 @@ func loadTestDB(
 	amount, _ := sdk.ParseCoin("100000trusteak")
 	argument := "this is an argument"
 	duration := backing.DefaultMsgParams().MinPeriod
-	testURL, _ := url.Parse("http://www.trustory.io")
-	evidence := []url.URL{*testURL}
 
-	_, err = backingKeeper.Create(ctx, story.ID, amount, argument, addr1, duration, evidence)
+	_, err = backingKeeper.Create(ctx, story.ID, amount, argument, addr1, duration)
 	if err != nil {
 		panic(err)
 	}
@@ -166,13 +162,13 @@ func loadTestDB(
 
 	// challenge it
 	amount, _ = sdk.ParseCoin("200000trusteak")
-	_, err = challengeKeeper.Create(ctx, story.ID, amount, argument, addr2, evidence)
+	_, err = challengeKeeper.Create(ctx, story.ID, amount, argument, addr2)
 	if err != nil {
 		panic(err)
 	}
 
 	// vote on it
-	_, err = voteKeeper.Create(ctx, story.ID, amount, true, argument, addr3, evidence)
+	_, err = voteKeeper.Create(ctx, story.ID, amount, true, argument, addr3)
 	if err != nil {
 		panic(err)
 	}

@@ -2,7 +2,6 @@ package challenge
 
 import (
 	"fmt"
-	"net/url"
 
 	"github.com/cosmos/cosmos-sdk/x/bank"
 
@@ -38,7 +37,7 @@ type WriteKeeper interface {
 
 	Create(
 		ctx sdk.Context, storyID int64, amount sdk.Coin, argument string,
-		creator sdk.AccAddress, evidence []url.URL) (int64, sdk.Error)
+		creator sdk.AccAddress) (int64, sdk.Error)
 }
 
 // Keeper data type storing keys to the key-value store
@@ -72,7 +71,7 @@ func NewKeeper(
 // Create adds a new challenge on a story in the KVStore
 func (k Keeper) Create(
 	ctx sdk.Context, storyID int64, amount sdk.Coin, argument string,
-	creator sdk.AccAddress, evidence []url.URL) (challengeID int64, err sdk.Error) {
+	creator sdk.AccAddress) (challengeID int64, err sdk.Error) {
 
 	logger := ctx.Logger().With("module", "challenge")
 
@@ -120,7 +119,6 @@ func (k Keeper) Create(
 		Amount:    catCoin,
 		Argument:  argument,
 		Creator:   creator,
-		Evidence:  evidence,
 		Vote:      false,
 		Timestamp: app.NewTimestamp(ctx.BlockHeader()),
 	}

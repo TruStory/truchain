@@ -82,10 +82,11 @@ func (ta *TruAPI) RegisterResolvers() {
 
 	ta.GraphQLClient.RegisterQueryResolver("backing", ta.backingResolver)
 	ta.GraphQLClient.RegisterObjectResolver("Backing", backing.Backing{}, map[string]interface{}{
-		"amount":    func(ctx context.Context, q backing.Backing) sdk.Coin { return q.Amount() },
-		"argument":  func(ctx context.Context, q backing.Backing) string { return q.Argument },
-		"interest":  func(ctx context.Context, q backing.Backing) sdk.Coin { return q.Interest },
-		"evidence":  func(ctx context.Context, q backing.Backing) []url.URL { return q.Evidence },
+		"amount":   func(ctx context.Context, q backing.Backing) sdk.Coin { return q.Amount() },
+		"argument": func(ctx context.Context, q backing.Backing) string { return q.Argument },
+		"interest": func(ctx context.Context, q backing.Backing) sdk.Coin { return q.Interest },
+		// Deprecated: now part of argument
+		"evidence":  func(ctx context.Context, q backing.Backing) []url.URL { return []url.URL{} },
 		"vote":      func(ctx context.Context, q backing.Backing) bool { return q.VoteChoice() },
 		"creator":   func(ctx context.Context, q backing.Backing) users.User { return getUser(ctx, q.Creator()) },
 		"timestamp": func(ctx context.Context, q backing.Backing) app.Timestamp { return q.Timestamp },
@@ -101,9 +102,10 @@ func (ta *TruAPI) RegisterResolvers() {
 
 	ta.GraphQLClient.RegisterQueryResolver("challenge", ta.challengeResolver)
 	ta.GraphQLClient.RegisterObjectResolver("Challenge", challenge.Challenge{}, map[string]interface{}{
-		"amount":    func(ctx context.Context, q challenge.Challenge) sdk.Coin { return q.Amount() },
-		"argument":  func(ctx context.Context, q challenge.Challenge) string { return q.Argument },
-		"evidence":  func(ctx context.Context, q challenge.Challenge) []url.URL { return q.Evidence },
+		"amount":   func(ctx context.Context, q challenge.Challenge) sdk.Coin { return q.Amount() },
+		"argument": func(ctx context.Context, q challenge.Challenge) string { return q.Argument },
+		// Deprecated: now part of argument
+		"evidence":  func(ctx context.Context, q challenge.Challenge) []url.URL { return []url.URL{} },
 		"vote":      func(ctx context.Context, q challenge.Challenge) bool { return q.VoteChoice() },
 		"creator":   func(ctx context.Context, q challenge.Challenge) users.User { return getUser(ctx, q.Creator()) },
 		"timestamp": func(ctx context.Context, q challenge.Challenge) app.Timestamp { return q.Timestamp },
@@ -113,11 +115,6 @@ func (ta *TruAPI) RegisterResolvers() {
 		"amount": func(_ context.Context, q sdk.Coin) string { return q.Amount.String() },
 		"denom":  func(_ context.Context, q sdk.Coin) string { return q.Denom },
 		"unit":   func(_ context.Context, q sdk.Coin) string { return "preethi" },
-	})
-
-	ta.GraphQLClient.RegisterObjectResolver("Evidence", story.Evidence{}, map[string]interface{}{
-		"creator": func(ctx context.Context, q story.Evidence) users.User { return getUser(ctx, q.Creator) },
-		"url":     func(ctx context.Context, q story.Evidence) string { return q.URL.String() },
 	})
 
 	ta.GraphQLClient.RegisterQueryResolver("params", ta.paramsResolver)
@@ -140,9 +137,10 @@ func (ta *TruAPI) RegisterResolvers() {
 		"creator":      func(ctx context.Context, q story.Story) users.User { return getUser(ctx, q.Creator) },
 		"source":       func(ctx context.Context, q story.Story) string { return q.Source.String() },
 		"argument":     func(ctx context.Context, q story.Story) string { return q.Argument },
-		"evidence":     func(ctx context.Context, q story.Story) []story.Evidence { return q.Evidence },
-		"game":         ta.gameResolver,
-		"votes":        func(ctx context.Context, q story.Story) []vote.TokenVote { return getVotes(ctx, q.GameID) },
+		// Deprecated: now part of argument
+		"evidence": func(ctx context.Context, q story.Story) []url.URL { return []url.URL{} },
+		"game":     ta.gameResolver,
+		"votes":    func(ctx context.Context, q story.Story) []vote.TokenVote { return getVotes(ctx, q.GameID) },
 	})
 
 	ta.GraphQLClient.RegisterObjectResolver("TwitterProfile", db.TwitterProfile{}, map[string]interface{}{
@@ -163,9 +161,10 @@ func (ta *TruAPI) RegisterResolvers() {
 
 	ta.GraphQLClient.RegisterQueryResolver("vote", ta.voteResolver)
 	ta.GraphQLClient.RegisterObjectResolver("Vote", vote.TokenVote{}, map[string]interface{}{
-		"amount":    func(ctx context.Context, q vote.TokenVote) sdk.Coin { return q.Amount() },
-		"argument":  func(ctx context.Context, q vote.TokenVote) string { return q.Argument },
-		"evidence":  func(ctx context.Context, q vote.TokenVote) []url.URL { return q.Evidence },
+		"amount":   func(ctx context.Context, q vote.TokenVote) sdk.Coin { return q.Amount() },
+		"argument": func(ctx context.Context, q vote.TokenVote) string { return q.Argument },
+		// Deprecated: now part of argument
+		"evidence":  func(ctx context.Context, q vote.TokenVote) []url.URL { return []url.URL{} },
 		"vote":      func(ctx context.Context, q vote.TokenVote) bool { return q.VoteChoice() },
 		"creator":   func(ctx context.Context, q vote.TokenVote) users.User { return getUser(ctx, q.Creator()) },
 		"timestamp": func(ctx context.Context, q vote.TokenVote) app.Timestamp { return q.Timestamp },

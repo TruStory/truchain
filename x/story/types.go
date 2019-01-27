@@ -7,13 +7,6 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
-// Evidence for a story
-type Evidence struct {
-	Creator   sdk.AccAddress `json:"creator"`
-	URL       url.URL        `json:"url"`
-	Timestamp app.Timestamp  `json:"timestamp"`
-}
-
 // ============================================================================
 
 // State is a type that defines a story state
@@ -70,7 +63,6 @@ type Story struct {
 	Body       string         `json:"body"`
 	CategoryID int64          `json:"category_id"`
 	Creator    sdk.AccAddress `json:"creator"`
-	Evidence   []Evidence     `json:"evidence,omitempty"`
 	Flagged    bool           `json:"flagged,omitempty"`
 	GameID     int64          `json:"game_id,omitempty"`
 	Source     url.URL        `json:"source,omitempty"`
@@ -85,8 +77,6 @@ type MsgParams struct {
 	MaxStoryLength    int // max number of chars for story body
 	MinArgumentLength int // min number of chars for argument
 	MaxArgumentLength int // max number of chars for argument
-	MinEvidenceCount  int // min number of evidence URLs
-	MaxEvidenceCount  int // max number of evidence URLs
 }
 
 // DefaultMsgParams creates a new MsgParams type with defaults
@@ -96,7 +86,5 @@ func DefaultMsgParams() MsgParams {
 		MaxStoryLength:    350,
 		MinArgumentLength: 10,
 		MaxArgumentLength: 3000,
-		MinEvidenceCount:  0,
-		MaxEvidenceCount:  10,
 	}
 }

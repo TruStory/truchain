@@ -1,7 +1,6 @@
 package vote
 
 import (
-	"net/url"
 	"testing"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -15,17 +14,15 @@ func TestCreateGetVote(t *testing.T) {
 	amount := sdk.NewCoin("trudex", sdk.NewInt(15))
 	comment := "test comment is long enough"
 	creator := sdk.AccAddress([]byte{1, 2})
-	cnn, _ := url.Parse("http://www.cnn.com")
-	evidence := []url.URL{*cnn}
 
 	// give user some funds
 	k.bankKeeper.AddCoins(ctx, creator, sdk.Coins{amount.Plus(amount)})
 
 	argument := "test argument"
-	_, err := k.challengeKeeper.Create(ctx, storyID, amount, argument, creator, evidence)
+	_, err := k.challengeKeeper.Create(ctx, storyID, amount, argument, creator)
 	assert.Nil(t, err)
 
-	voteID, err := k.Create(ctx, storyID, amount, true, comment, creator, evidence)
+	voteID, err := k.Create(ctx, storyID, amount, true, comment, creator)
 	assert.Nil(t, err)
 
 	vote, _ := k.TokenVote(ctx, voteID)
@@ -40,21 +37,19 @@ func TestGetVotesByGameID(t *testing.T) {
 	comment := "test comment is long enough"
 	creator := sdk.AccAddress([]byte{1, 2})
 	creator2 := sdk.AccAddress([]byte{3, 4})
-	cnn, _ := url.Parse("http://www.cnn.com")
-	evidence := []url.URL{*cnn}
 
 	// give user some funds
 	k.bankKeeper.AddCoins(ctx, creator, sdk.Coins{amount.Plus(amount)})
 	k.bankKeeper.AddCoins(ctx, creator2, sdk.Coins{amount})
 
 	argument := "test argument"
-	_, err := k.challengeKeeper.Create(ctx, storyID, amount, argument, creator, evidence)
+	_, err := k.challengeKeeper.Create(ctx, storyID, amount, argument, creator)
 	assert.Nil(t, err)
 
-	_, err = k.Create(ctx, storyID, amount, true, comment, creator, evidence)
+	_, err = k.Create(ctx, storyID, amount, true, comment, creator)
 	assert.Nil(t, err)
 
-	_, err = k.Create(ctx, storyID, amount, true, comment, creator2, evidence)
+	_, err = k.Create(ctx, storyID, amount, true, comment, creator2)
 	assert.Nil(t, err)
 
 	story, _ := k.storyKeeper.Story(ctx, storyID)
@@ -70,17 +65,15 @@ func TestGetVotesByStoryIDAndCreator(t *testing.T) {
 	amount := sdk.NewCoin("trudex", sdk.NewInt(15))
 	comment := "test comment is long enough"
 	creator := sdk.AccAddress([]byte{1, 2})
-	cnn, _ := url.Parse("http://www.cnn.com")
-	evidence := []url.URL{*cnn}
 
 	// give user some funds
 	k.bankKeeper.AddCoins(ctx, creator, sdk.Coins{amount.Plus(amount)})
 
 	argument := "test argument"
-	_, err := k.challengeKeeper.Create(ctx, storyID, amount, argument, creator, evidence)
+	_, err := k.challengeKeeper.Create(ctx, storyID, amount, argument, creator)
 	assert.Nil(t, err)
 
-	_, err = k.Create(ctx, storyID, amount, true, comment, creator, evidence)
+	_, err = k.Create(ctx, storyID, amount, true, comment, creator)
 	assert.Nil(t, err)
 
 	vote, _ := k.TokenVotesByStoryIDAndCreator(ctx, storyID, creator)
@@ -94,12 +87,10 @@ func TestCreateVote_ErrGameNotStarted(t *testing.T) {
 	amount := sdk.NewCoin("trudex", sdk.NewInt(15))
 	comment := "test comment is long enough"
 	creator := sdk.AccAddress([]byte{1, 2})
-	cnn, _ := url.Parse("http://www.cnn.com")
-	evidence := []url.URL{*cnn}
 
 	vote := true
 
-	_, err := k.Create(ctx, storyID, amount, vote, comment, creator, evidence)
+	_, err := k.Create(ctx, storyID, amount, vote, comment, creator)
 	assert.NotNil(t, err)
 	assert.Equal(t, ErrGameNotStarted(storyID).Code(), err.Code())
 }

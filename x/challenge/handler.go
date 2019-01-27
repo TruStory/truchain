@@ -1,8 +1,6 @@
 package challenge
 
 import (
-	"net/url"
-
 	app "github.com/TruStory/truchain/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
@@ -30,7 +28,7 @@ func handleCreateChallengeMsg(
 	}
 
 	id, err := k.Create(
-		ctx, msg.StoryID, msg.Amount, msg.Argument, msg.Creator, []url.URL{})
+		ctx, msg.StoryID, msg.Amount, msg.Argument, msg.Creator)
 	if err != nil {
 		return err.Result()
 	}

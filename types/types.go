@@ -1,7 +1,6 @@
 package types
 
 import (
-	"net/url"
 	"time"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -50,7 +49,6 @@ type Vote struct {
 	Amount    sdk.Coin       `json:"amount"`
 	Argument  string         `json:"argument,omitempty"`
 	Creator   sdk.AccAddress `json:"creator"`
-	Evidence  []url.URL      `json:"evidence,omitempty"`
 	Vote      bool           `json:"vote"`
 	Timestamp Timestamp      `json:"timestamp"`
 }
@@ -59,5 +57,5 @@ type Vote struct {
 func NewVote(
 	id int64, amount sdk.Coin, creator sdk.AccAddress, vote bool, timestamp Timestamp) Vote {
 
-	return Vote{id, amount, "", creator, nil, vote, timestamp}
+	return Vote{id, amount, "", creator, vote, timestamp}
 }
