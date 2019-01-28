@@ -29,7 +29,7 @@ type WriteKeeper interface {
 
 	Create(ctx sdk.Context, storyID int64, creator sdk.AccAddress) (
 		int64, sdk.Error)
-	AddChallengePool(
+	AddToChallengePool(
 		ctx sdk.Context, gameID int64, amount sdk.Coin) (err sdk.Error)
 	Update(ctx sdk.Context, game Game)
 }
@@ -136,8 +136,8 @@ func (k Keeper) Game(ctx sdk.Context, id int64) (game Game, err sdk.Error) {
 	return
 }
 
-// AddChallengePool updates challenge pool and starts game if possible
-func (k Keeper) AddChallengePool(
+// AddToChallengePool updates challenge pool and starts game if possible
+func (k Keeper) AddToChallengePool(
 	ctx sdk.Context, gameID int64, amount sdk.Coin) (err sdk.Error) {
 
 	logger := ctx.Logger().With("module", "game")

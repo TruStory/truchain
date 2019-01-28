@@ -161,7 +161,7 @@ func (k Keeper) Create(
 	}
 
 	// add another amount to the challenge pool
-	err = k.gameKeeper.AddChallengePool(ctx, gameID, catCoin)
+	err = k.gameKeeper.AddToChallengePool(ctx, gameID, catCoin)
 	if err != nil {
 		return 0, err
 	}
