@@ -57,7 +57,7 @@ func createUser(
 		panic(err)
 	}
 
-	coins, _ := sdk.ParseCoins("50000000trusteak, 30000000btc, 10000000shitcoin")
+	coins, _ := sdk.ParseCoins("500000000000000000trusteak, 300000000000000000btc, 100000000000000000shitcoin")
 
 	err = bacc.SetCoins(coins)
 	if err != nil {
@@ -143,7 +143,7 @@ func loadTestDB(
 	story, _ := storyKeeper.Story(ctx, 1)
 
 	// back it
-	amount, _ := sdk.ParseCoin("100000trusteak")
+	amount, _ := sdk.ParseCoin("1000000000000000trusteak")
 	argument := "this is an argument"
 	duration := backing.DefaultMsgParams().MinPeriod
 
@@ -156,7 +156,7 @@ func loadTestDB(
 	ctx = ctx.WithBlockHeader(abci.Header{Time: time.Now().UTC()})
 
 	// challenge it
-	amount, _ = sdk.ParseCoin("200000trusteak")
+	amount, _ = sdk.ParseCoin("2000000000000000trusteak")
 	_, err = challengeKeeper.Create(ctx, story.ID, amount, argument, addr2)
 	if err != nil {
 		panic(err)
