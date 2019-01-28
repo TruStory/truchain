@@ -24,7 +24,7 @@ const (
 // InitialCoins is an `sdk.Coins` representing the balance a new user is granted upon registration
 // TODO: Update with actual user initial coins [notduncansmith]
 var InitialCoins = sdk.Coins{
-	sdk.Coin{Amount: sdk.NewInt(123456), Denom: StakeDenom},
+	sdk.Coin{Amount: sdk.NewInt(10000000000000), Denom: StakeDenom},
 }
 
 // RegistrationFee is an `auth.StdFee` representing the coin and gas cost of registering a new account
