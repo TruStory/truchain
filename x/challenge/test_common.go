@@ -108,8 +108,6 @@ func fakePendingGameQueue() (ctx sdk.Context, k Keeper) {
 	amount := sdk.NewCoin("trudex", sdk.NewInt(1000))
 	trustake := sdk.NewCoin("trusteak", sdk.NewInt(1000))
 	argument := "test argument"
-	testURL, _ := url.Parse("http://www.trustory.io")
-	evidence := []url.URL{*testURL}
 
 	creator1 := fakeFundedCreator(ctx, k.bankKeeper)
 	creator2 := fakeFundedCreator(ctx, k.bankKeeper)
@@ -122,15 +120,15 @@ func fakePendingGameQueue() (ctx sdk.Context, k Keeper) {
 	// need to type assert for testing
 	// because the backing keeper inside the challenge keeper is read-only
 	bk, _ := k.backingKeeper.(backing.WriteKeeper)
-	bk.Create(ctx, storyID, trustake, argument, creator1, duration, evidence)
-	bk.Create(ctx, storyID, amount, argument, creator2, duration, evidence)
-	bk.Create(ctx, storyID, amount, argument, creator3, duration, evidence)
-	bk.Create(ctx, storyID, amount, argument, creator4, duration, evidence)
+	bk.Create(ctx, storyID, trustake, argument, creator1, duration)
+	bk.Create(ctx, storyID, amount, argument, creator2, duration)
+	bk.Create(ctx, storyID, amount, argument, creator3, duration)
+	bk.Create(ctx, storyID, amount, argument, creator4, duration)
 
 	// fake challenges
 	challengeAmount := sdk.NewCoin("trudex", sdk.NewInt(10))
-	k.Create(ctx, storyID, challengeAmount, argument, creator1, evidence)
-	k.Create(ctx, storyID, challengeAmount, argument, creator2, evidence)
+	k.Create(ctx, storyID, challengeAmount, argument, creator1)
+	k.Create(ctx, storyID, challengeAmount, argument, creator2)
 
 	return
 }
