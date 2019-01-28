@@ -24,6 +24,7 @@ node_modules/
 ./registrar.key
 .env
 
+
 # These stay ignored until we switch to modules
 go.mod
 go.sum

@@ -3,7 +3,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:754389e58397bad71fa776c5c930af08a96ec497b3269a9b9bcdfe5c5f3a560a"
+  digest = "1:49527d9b9aac31ed790510b5f49433f47d5a651f7ff5b0544a34f36caab3dfef"
   name = "github.com/TruStory/truchain"
   packages = [
     "app",
@@ -23,7 +23,7 @@
     "x/vote",
   ]
   pruneopts = "UT"
-  revision = "ced6fb8b1b75e7b57ad34c43d19ea4120880901f"
+  revision = "19f6cce6ebe9743eff5ec714eda7ccc24cf7086e"
 
 [[projects]]
   branch = "master"
