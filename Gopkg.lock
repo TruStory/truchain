@@ -3,30 +3,6 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:754389e58397bad71fa776c5c930af08a96ec497b3269a9b9bcdfe5c5f3a560a"
-  name = "github.com/TruStory/truchain"
-  packages = [
-    "app",
-    "parameters",
-    "types",
-    "x/backing",
-    "x/category",
-    "x/challenge",
-    "x/chttp",
-    "x/db",
-    "x/game",
-    "x/graphql",
-    "x/params",
-    "x/story",
-    "x/truapi",
-    "x/users",
-    "x/vote",
-  ]
-  pruneopts = "UT"
-  revision = "ced6fb8b1b75e7b57ad34c43d19ea4120880901f"
-
-[[projects]]
-  branch = "master"
   digest = "1:7736fc6da04620727f8f3aa2ced8d77be8e074a302820937aa5993848c769b27"
   name = "github.com/ZondaX/hid-go"
   packages = ["."]
@@ -813,21 +789,6 @@
   analyzer-name = "dep"
   analyzer-version = 1
   input-imports = [
-    "github.com/TruStory/truchain/app",
-    "github.com/TruStory/truchain/parameters",
-    "github.com/TruStory/truchain/types",
-    "github.com/TruStory/truchain/x/backing",
-    "github.com/TruStory/truchain/x/category",
-    "github.com/TruStory/truchain/x/challenge",
-    "github.com/TruStory/truchain/x/chttp",
-    "github.com/TruStory/truchain/x/db",
-    "github.com/TruStory/truchain/x/game",
-    "github.com/TruStory/truchain/x/graphql",
-    "github.com/TruStory/truchain/x/params",
-    "github.com/TruStory/truchain/x/story",
-    "github.com/TruStory/truchain/x/truapi",
-    "github.com/TruStory/truchain/x/users",
-    "github.com/TruStory/truchain/x/vote",
     "github.com/cosmos/cosmos-sdk/baseapp",
     "github.com/cosmos/cosmos-sdk/client",
     "github.com/cosmos/cosmos-sdk/client/keys",
