@@ -97,8 +97,7 @@ func createStory(
 	// fake a block time
 	ctx = ctx.WithBlockHeader(abci.Header{Time: time.Now().UTC()})
 
-	evidenceURLs := []story.Evidence{}
-	storyID, _ := sk.Create(ctx, argument, claim, catID, creator, evidenceURLs, *sourceURL, storyType)
+	storyID, _ := sk.Create(ctx, argument, claim, catID, creator, *sourceURL, storyType)
 
 	return storyID
 }

@@ -133,7 +133,7 @@ func Test_start(t *testing.T) {
 	// back story with 100trudex
 	k.bankKeeper.AddCoins(ctx, creator, sdk.Coins{amount})
 	duration := 30 * 24 * time.Hour
-	k.backingKeeper.Create(ctx, storyID, amount, argument, creator, duration, evidence())
+	k.backingKeeper.Create(ctx, storyID, amount, argument, creator, duration)
 
 	// challenge with 33trudex (33% of total backings)
 	amount, _ = sdk.ParseCoin("33trudex")
