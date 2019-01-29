@@ -27,9 +27,6 @@ var InitialCredAmount = sdk.NewInt(100000000000)
 // InitialTruStake is an `sdk.Coins` representing the balance a new user is granted upon registration
 var InitialTruStake = sdk.Coin{Amount: sdk.NewInt(10000000000000), Denom: StakeDenom}
 
-// ColdStartAmount is a negligible amount to fix the cold start problem
-var ColdStartAmount = sdk.NewInt(10)
-
 // RegistrationFee is an `auth.StdFee` representing the coin and gas cost of registering a new account
 // TODO: Use more accurate gas estimate [notduncansmith]
 var RegistrationFee = auth.StdFee{
