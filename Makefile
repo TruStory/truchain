@@ -18,6 +18,8 @@ build: build_cli build_daemon
 
 br: build_daemon run_daemon
 
+bwd: build_daemon wipe_chain debug
+
 bwr: build_daemon wipe_chain run_daemon
 
 build_cli:
