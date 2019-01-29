@@ -149,6 +149,6 @@ func (app *TruChain) signedRegistrationTx(addr []byte, k tcmn.HexBytes, algo str
 		}},
 		Memo: registrationMemo,
 	}
-
+	
 	return tx, nil
 }

@@ -26,6 +26,10 @@ build_cli:
 build_daemon:
 	go build -o bin/truchaind cmd/truchaind/main.go
 
+doc:
+	@echo "--> Wait a few seconds and visit http://localhost:6060/pkg/github.com/TruStory/truchain/"
+	godoc -http=:6060
+
 debug:
 	bin/truchaind --home $(CHAIN_DIR) --log_level "app:info,story:info,backing:info,challenge:info,game:info,users:info,vote:info,*:error" start
 
@@ -62,8 +66,8 @@ set_env_vars:
 
 test: set_registrar set_seed_data set_env_vars go_test
 
-test_cover:
-	go test $(PACKAGES) -v -timeout 30m -race -covermode=atomic
+test_cover: set_registrar set_seed_data set_env_vars
+	@go test $(PACKAGES) -v -timeout 30m -race -coverprofile=coverage.txt -covermode=atomic
 
 update_deps:
 	@echo "--> Running dep ensure"
