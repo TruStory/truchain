@@ -49,13 +49,9 @@ This creates:
 
 `truchaind` will initially run as a single Cosmos node, but eventually as a zone of many nodes. It includes an HTTP server which handles all API requests.
 
-3. Create registrar key
+3. Registrar key
 
-Create a file in the root of this project named `registrar.key` containing the upper-case-hex encoding of a secp256k1 private key. Example:
-
-```
-6D5A20923CB334E4950C32C344842FE0DCBAC559FB04AE97D64B49ACC81BC1FB
-```
+The upper-case-hex encoding of the secp256k1 private key is located in `.chain/`
 
 This is the private key to the account added in step 3b.
 
@@ -72,6 +68,26 @@ Open the `genesis.json` file and in the "validators" section overwrite the "addr
 `make run_daemon` (or `make debug` for debug logging)
 
 You can wipe the chain, build, and start using the alias `make bwr`.
+
+## GraphQL Queries
+You can reach your client at `http://localhost:3030/graphiql/`
+
+Sample query:
+```
+query StoriesQuery {
+  stories {
+    body
+    creator {
+      address
+    }
+    argument
+    source
+    game {
+      votingEndTime
+    }
+  }
+}
+```
 
 ## Architecture
 
@@ -151,6 +167,8 @@ Handles the lifecycle of voting on a story (validation game). Upon completion of
 ## Testing
 
 `make test`
+
+If you run the tests your `./chain/.env` will be replaced. Make sure to replace it before running the client again.
 
 ## Generate Documentation
 
