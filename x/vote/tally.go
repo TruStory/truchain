@@ -1,6 +1,7 @@
 package vote
 
 import (
+	params "github.com/TruStory/truchain/parameters"
 	app "github.com/TruStory/truchain/types"
 	"github.com/TruStory/truchain/x/game"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -17,7 +18,7 @@ func processGame(ctx sdk.Context, k Keeper, game game.Game) sdk.Error {
 	}
 
 	// check if story was confirmed
-	confirmed, err := confirmStory(ctx, k.accountKeeper, votes)
+	confirmed, err := confirmStory(ctx, k.accountKeeper, k.bankKeeper, votes)
 	if err != nil {
 		return err
 	}
@@ -130,17 +131,17 @@ func distributeRewards(
 
 // determine if a story is confirmed or rejected
 func confirmStory(
-	ctx sdk.Context, accountKeeper auth.AccountKeeper, votes poll) (
+	ctx sdk.Context, accountKeeper auth.AccountKeeper, bankKeeper bank.Keeper, votes poll) (
 	confirmed bool, err sdk.Error) {
 
 	// calculate weighted true votes
-	trueWeight, err := weightedVote(ctx, accountKeeper, votes.trueVotes)
+	trueWeight, err := weightedVote(ctx, accountKeeper, bankKeeper, votes.trueVotes)
 	if err != nil {
 		return confirmed, err
 	}
 
 	// calculate weighted false votes
-	falseWeight, err := weightedVote(ctx, accountKeeper, votes.falseVotes)
+	falseWeight, err := weightedVote(ctx, accountKeeper, bankKeeper, votes.falseVotes)
 	if err != nil {
 		return confirmed, err
 	}
@@ -162,7 +163,7 @@ func confirmStory(
 
 // calculate weighted vote based on user's total category coin balance
 func weightedVote(
-	ctx sdk.Context, accountKeeper auth.AccountKeeper, votes []app.Voter) (
+	ctx sdk.Context, accountKeeper auth.AccountKeeper, bankKeeper bank.Keeper, votes []app.Voter) (
 	weightedAmount sdk.Int, err sdk.Error) {
 
 	weightedAmount = sdk.ZeroInt()
@@ -178,10 +179,24 @@ func weightedVote(
 		user := accountKeeper.GetAccount(ctx, v.Creator())
 
 		// get user's total amount of category coins for story category
-		categoryCoins := user.GetCoins().AmountOf(v.Amount().Denom)
+		totalCategoryCoinAmount := sdk.ZeroInt()
+		coins := user.GetCoins()
+		if coins.IsValid() {
+			totalCategoryCoinAmount = coins.AmountOf(v.Amount().Denom)
+		}
+
+		// add a negligible min cred to solve the cold-start problem
+		if totalCategoryCoinAmount.IsZero() {
+			coldStartCoin := sdk.NewCoin(v.Amount().Denom, params.ColdStartAmount)
+			_, _, err := bankKeeper.AddCoins(ctx, user.GetAddress(), sdk.Coins{coldStartCoin})
+			if err != nil {
+				return weightedAmount, err
+			}
+			totalCategoryCoinAmount = coldStartCoin.Amount
+		}
 
 		// total up the amount of category coins all voters have
-		weightedAmount = weightedAmount.Add(categoryCoins)
+		weightedAmount = weightedAmount.Add(totalCategoryCoinAmount)
 	}
 
 	return weightedAmount, nil
