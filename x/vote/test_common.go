@@ -37,6 +37,7 @@ func mockDB() (sdk.Context, Keeper, c.Keeper) {
 	gameQueueKey := sdk.NewKVStoreKey("gameQueue")
 	voteKey := sdk.NewKVStoreKey("vote")
 	backingKey := sdk.NewKVStoreKey("backing")
+	backingListKey := sdk.NewKVStoreKey("backingList")
 
 	ms := store.NewCommitMultiStore(db)
 	ms.MountStoreWithDB(accKey, sdk.StoreTypeIAVL, db)
@@ -48,6 +49,7 @@ func mockDB() (sdk.Context, Keeper, c.Keeper) {
 	ms.MountStoreWithDB(gameQueueKey, sdk.StoreTypeIAVL, db)
 	ms.MountStoreWithDB(voteKey, sdk.StoreTypeIAVL, db)
 	ms.MountStoreWithDB(backingKey, sdk.StoreTypeIAVL, db)
+	ms.MountStoreWithDB(backingListKey, sdk.StoreTypeIAVL, db)
 	ms.LoadLatestVersion()
 
 	header := abci.Header{Time: time.Now().Add(50 * 24 * time.Hour)}
@@ -62,7 +64,7 @@ func mockDB() (sdk.Context, Keeper, c.Keeper) {
 	bankKeeper := bank.NewBaseKeeper(am)
 	ck := c.NewKeeper(catKey, codec)
 	sk := story.NewKeeper(storyKey, ck, codec)
-	backingKeeper := backing.NewKeeper(backingKey, sk, bankKeeper, ck, codec)
+	backingKeeper := backing.NewKeeper(backingKey, backingListKey, sk, bankKeeper, ck, codec)
 	gameKeeper := game.NewKeeper(gameKey, pendingGameListKey, gameQueueKey, sk, backingKeeper, bankKeeper, codec)
 	challengeKeeper := challenge.NewKeeper(challengeKey, pendingGameListKey, backingKeeper, bankKeeper, gameKeeper, sk, codec)
 

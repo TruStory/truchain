@@ -45,7 +45,7 @@ func TestDistributeRewards(t *testing.T) {
 
 	pool := sdk.NewCoin("trudex", sdk.NewInt(35))
 
-	err := distributeRewards(ctx, k.bankKeeper, pool, votes, true)
+	err := distributeRewards(ctx, k.backingKeeper, k.bankKeeper, pool, votes, true)
 	assert.Nil(t, err)
 }
 
@@ -191,7 +191,8 @@ func TestDistributeRewardsRejected(t *testing.T) {
 	pool := sdk.NewCoin("trudex", sdk.ZeroInt())
 	rejectedPool(ctx, votes, &pool)
 
-	err := distributeRewardsRejected(ctx, k.bankKeeper, votes.falseVotes, pool)
+	err := distributeRewardsRejected(
+		ctx, k.backingKeeper, k.bankKeeper, votes.falseVotes, pool)
 	assert.Nil(t, err)
 
 	coins := sdk.Coins{}

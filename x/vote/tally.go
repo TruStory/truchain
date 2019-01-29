@@ -2,6 +2,7 @@ package vote
 
 import (
 	app "github.com/TruStory/truchain/types"
+	"github.com/TruStory/truchain/x/backing"
 	"github.com/TruStory/truchain/x/game"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth"
@@ -30,7 +31,7 @@ func processGame(ctx sdk.Context, k Keeper, game game.Game) sdk.Error {
 
 	// distribute rewards
 	err = distributeRewards(
-		ctx, k.bankKeeper, rewardPool, votes, confirmed)
+		ctx, k.backingKeeper, k.bankKeeper, rewardPool, votes, confirmed)
 	if err != nil {
 		return err
 	}
@@ -107,7 +108,12 @@ func rewardPool(
 }
 
 func distributeRewards(
-	ctx sdk.Context, bankKeeper bank.Keeper, rewardPool sdk.Coin, votes poll, confirmed bool) (
+	ctx sdk.Context,
+	backingKeeper backing.WriteKeeper,
+	bankKeeper bank.Keeper,
+	rewardPool sdk.Coin,
+	votes poll,
+	confirmed bool) (
 	err sdk.Error) {
 
 	logger := ctx.Logger().With("module", "vote")
@@ -117,7 +123,11 @@ func distributeRewards(
 			ctx, bankKeeper, votes, rewardPool)
 	} else {
 		err = distributeRewardsRejected(
-			ctx, bankKeeper, votes.falseVotes, rewardPool)
+			ctx,
+			backingKeeper,
+			bankKeeper,
+			votes.falseVotes,
+			rewardPool)
 	}
 	if err != nil {
 		return
