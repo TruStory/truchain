@@ -90,3 +90,8 @@ func (b Backing) Creator() sdk.AccAddress {
 func (b Backing) VoteChoice() bool {
 	return b.Vote.Vote
 }
+
+// IsExpired is true if a backing has expired
+func (b Backing) IsExpired(blockTime time.Time) bool {
+	return blockTime.After(b.Expires)
+}

@@ -19,7 +19,7 @@ func TestNewResponseEndBlock(t *testing.T) {
 func Test_processEarnings_QueueEmpty(t *testing.T) {
 	ctx, bk, _, _, _, _ := mockDB()
 
-	err := processBacking(ctx, bk)
+	err := bk.processExpiredBackings(ctx)
 	assert.Nil(t, err)
 }
 
@@ -35,7 +35,7 @@ func Test_processEarnings_UnexpiredBackings(t *testing.T) {
 	bk.Create(ctx, storyID, amount, argument, creator, duration)
 	bk.Create(ctx, storyID, amount, argument, creator, duration)
 
-	err := processBacking(ctx, bk)
+	err := bk.processExpiredBackings(ctx)
 	assert.Nil(t, err)
 }
 
@@ -53,8 +53,7 @@ func Test_processEarnings_ExpiredBackings(t *testing.T) {
 	bk.Create(ctx, storyID, amount, argument, creator, duration)
 	bk.Create(ctx, storyID, amount, argument, creator, duration)
 
-	// process each backing recursively until queue is empty
-	err := processBacking(ctx, bk)
+	err := bk.processExpiredBackings(ctx)
 	assert.Nil(t, err)
 }
 
@@ -88,6 +87,6 @@ func Test_distributeEarnings(t *testing.T) {
 		duration,
 	}
 
-	err := distributeEarnings(ctx, bk, backing)
+	err := bk.distributeEarnings(ctx, backing)
 	assert.Nil(t, err)
 }

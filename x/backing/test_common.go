@@ -32,6 +32,7 @@ func mockDB() (
 	storyKey := sdk.NewKVStoreKey("stories")
 	catKey := sdk.NewKVStoreKey("categories")
 	backingKey := sdk.NewKVStoreKey("backings")
+	backingListKey := sdk.NewKVStoreKey("backingList")
 	challengeKey := sdk.NewKVStoreKey("challenges")
 
 	ms := store.NewCommitMultiStore(db)
@@ -39,6 +40,7 @@ func mockDB() (
 	ms.MountStoreWithDB(storyKey, sdk.StoreTypeIAVL, db)
 	ms.MountStoreWithDB(catKey, sdk.StoreTypeIAVL, db)
 	ms.MountStoreWithDB(backingKey, sdk.StoreTypeIAVL, db)
+	ms.MountStoreWithDB(backingListKey, sdk.StoreTypeIAVL, db)
 	ms.MountStoreWithDB(challengeKey, sdk.StoreTypeIAVL, db)
 	ms.LoadLatestVersion()
 
@@ -54,7 +56,7 @@ func mockDB() (
 	am := auth.NewAccountKeeper(codec, accKey, auth.ProtoBaseAccount)
 	bankKeeper := bank.NewBaseKeeper(am)
 	sk := story.NewKeeper(storyKey, ck, codec)
-	bk := NewKeeper(backingKey, sk, bankKeeper, ck, codec)
+	bk := NewKeeper(backingKey, backingListKey, sk, bankKeeper, ck, codec)
 
 	return ctx, bk, sk, ck, bankKeeper, am
 }

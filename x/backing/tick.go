@@ -8,7 +8,7 @@ import (
 
 // NewResponseEndBlock is called at the end of every block tick
 func (k Keeper) NewResponseEndBlock(ctx sdk.Context) sdk.Tags {
-	err := processBacking(ctx, k)
+	err := k.processExpiredBackings(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -18,42 +18,50 @@ func (k Keeper) NewResponseEndBlock(ctx sdk.Context) sdk.Tags {
 
 // ============================================================================
 
-// processBacking checks each backing to see if it has expired. It calls itself
-// recursively until all backings have been processed.
-func processBacking(ctx sdk.Context, k Keeper) sdk.Error {
-	// check if the backing queue is empty
-	backing, err := k.QueueHead(ctx)
-	if err != nil {
-		if err.Code() == ErrQueueEmpty().Code() {
-			return nil
+// processExpiredBackings checks to see if backings have expired
+func (k Keeper) processExpiredBackings(ctx sdk.Context) sdk.Error {
+	logger := ctx.Logger().With("module", "backing")
+
+	// find all expired backings
+	var backingID int64
+	var indicesToDelete []uint64
+	backingList := k.backingList(ctx)
+	backingList.Iterate(&backingID, func(index uint64) bool {
+		var tempBackingID int64
+		err := backingList.Get(index, &tempBackingID)
+		if err != nil {
+			panic(err)
 		}
-		return err
+
+		backing, err := k.Backing(ctx, tempBackingID)
+		if err != nil {
+			panic(err)
+		}
+
+		if backing.IsExpired(ctx.BlockHeader().Time) {
+			indicesToDelete = append(indicesToDelete, index)
+
+			// distribute earnings from expired backings
+			err := k.distributeEarnings(ctx, backing)
+			if err != nil {
+				panic(err)
+			}
+		}
+		return false
+	})
+
+	for _, v := range indicesToDelete {
+		backingList.Delete(v)
+		msg := "Removed expired backing %d from backing list"
+		logger.Info(fmt.Sprintf(msg, backingID))
 	}
 
-	// check if backing has expired
-	if ctx.BlockHeader().Time.Before(backing.Expires) {
-		// no more expired backings left in queue
-		// terminate recursion
-		return nil
-	}
-
-	// remove expired backing from the queue
-	if _, err = k.QueuePop(ctx); err != nil {
-		return err
-	}
-
-	// distribute earnings to the backing creator
-	if err = distributeEarnings(ctx, k, backing); err != nil {
-		return err
-	}
-
-	// process next in queue
-	return processBacking(ctx, k)
+	return nil
 }
 
 // distributeEarnings adds coins from the backing to the user.
 // Earnings is the original amount (principal) + interest.
-func distributeEarnings(ctx sdk.Context, k Keeper, backing Backing) sdk.Error {
+func (k Keeper) distributeEarnings(ctx sdk.Context, backing Backing) sdk.Error {
 	logger := ctx.Logger().With("module", "backing")
 
 	// give the principal back to the user in category coins
