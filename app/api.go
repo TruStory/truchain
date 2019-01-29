@@ -122,7 +122,12 @@ func GenerateAddress() []byte {
 }
 
 func (app *TruChain) signedRegistrationTx(addr []byte, k tcmn.HexBytes, algo string) (auth.StdTx, error) {
-	msg := users.RegisterKeyMsg{Address: addr, PubKey: k, PubKeyAlgo: algo, Coins: params.InitialCoins}
+	msg := users.RegisterKeyMsg{
+		Address:    addr,
+		PubKey:     k,
+		PubKeyAlgo: algo,
+		Coins:      app.initialCoins(),
+	}
 	chainID := app.blockHeader.ChainID
 	registrarAcc := app.accountKeeper.GetAccount(*(app.blockCtx), []byte(types.RegistrarAccAddress))
 	registrarNum := registrarAcc.GetAccountNumber()
@@ -151,4 +156,14 @@ func (app *TruChain) signedRegistrationTx(addr []byte, k tcmn.HexBytes, algo str
 	}
 
 	return tx, nil
+}
+
+func (app *TruChain) initialCoins() sdk.Coins {
+	var coins []sdk.Coin
+	for k := range app.categories {
+		coin := sdk.NewCoin(k, params.InitialCredAmount)
+		coins = append(coins, coin)
+	}
+
+	return append(coins, params.InitialTruStake)
 }

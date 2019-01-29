@@ -21,11 +21,11 @@ const (
 	Portname = "1337"
 )
 
-// InitialCoins is an `sdk.Coins` representing the balance a new user is granted upon registration
-// TODO: Update with actual user initial coins [notduncansmith]
-var InitialCoins = sdk.Coins{
-	sdk.Coin{Amount: sdk.NewInt(10000000000000), Denom: StakeDenom},
-}
+// InitialCredAmount is the initial amount of cred for categories
+var InitialCredAmount = sdk.NewInt(100000000000)
+
+// InitialTruStake is an `sdk.Coins` representing the balance a new user is granted upon registration
+var InitialTruStake = sdk.Coin{Amount: sdk.NewInt(10000000000000), Denom: StakeDenom}
 
 // RegistrationFee is an `auth.StdFee` representing the coin and gas cost of registering a new account
 // TODO: Use more accurate gas estimate [notduncansmith]
