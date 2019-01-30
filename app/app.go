@@ -208,6 +208,7 @@ func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *T
 	app.MountStoresIAVL(
 		app.keyAccount,
 		app.keyBacking,
+		app.keyBackingList,
 		app.keyCategory,
 		app.keyChallenge,
 		app.keyFee,
