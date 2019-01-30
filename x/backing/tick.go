@@ -8,7 +8,7 @@ import (
 
 // NewResponseEndBlock is called at the end of every block tick
 func (k Keeper) NewResponseEndBlock(ctx sdk.Context) sdk.Tags {
-	err := k.processExpiredBackings(ctx)
+	err := k.processMaturedBackings(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -18,11 +18,11 @@ func (k Keeper) NewResponseEndBlock(ctx sdk.Context) sdk.Tags {
 
 // ============================================================================
 
-// processExpiredBackings checks to see if backings have expired
-func (k Keeper) processExpiredBackings(ctx sdk.Context) sdk.Error {
+// processMaturedBackings checks to see if backings have matured
+func (k Keeper) processMaturedBackings(ctx sdk.Context) sdk.Error {
 	logger := ctx.Logger().With("module", "backing")
 
-	// find all expired backings
+	// find all matured backings
 	var backingID int64
 	var indicesToDelete []uint64
 	backingList := k.backingList(ctx)
@@ -38,10 +38,10 @@ func (k Keeper) processExpiredBackings(ctx sdk.Context) sdk.Error {
 			panic(err)
 		}
 
-		if backing.IsExpired(ctx.BlockHeader().Time) {
+		if backing.HasMatured(ctx.BlockHeader().Time) {
 			indicesToDelete = append(indicesToDelete, index)
 
-			// distribute earnings from expired backings
+			// distribute earnings from matured backings
 			err := k.distributeEarnings(ctx, backing)
 			if err != nil {
 				panic(err)
@@ -52,7 +52,7 @@ func (k Keeper) processExpiredBackings(ctx sdk.Context) sdk.Error {
 
 	for _, v := range indicesToDelete {
 		backingList.Delete(v)
-		msg := "Removed expired backing %d from backing list"
+		msg := "Removed matured backing %d from backing list"
 		logger.Info(fmt.Sprintf(msg, backingID))
 	}
 
