@@ -1,6 +1,7 @@
 package category
 
 import (
+	"fmt"
 	"sort"
 
 	app "github.com/TruStory/truchain/types"
@@ -112,4 +113,11 @@ func (k Keeper) setCategory(ctx sdk.Context, cat Category) {
 	store.Set(
 		k.GetIDKey(cat.ID),
 		k.GetCodec().MustMarshalBinaryLengthPrefixed(cat))
+}
+
+// ExportState returns the state for a given context
+func ExportState() {
+	fmt.Println("Category State")
+	category := Category{}
+	fmt.Printf("%+v\n", category)
 }

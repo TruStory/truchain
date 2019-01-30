@@ -1,9 +1,14 @@
 package story
 
 import (
+	"encoding/json"
 	"fmt"
+	"log"
 	"net/url"
+	"os"
+	"path/filepath"
 	"sort"
+	"strconv"
 
 	app "github.com/TruStory/truchain/types"
 	"github.com/TruStory/truchain/x/category"
@@ -24,8 +29,10 @@ type ReadKeeper interface {
 		ctx sdk.Context,
 		catID int64) (stories []Story, err sdk.Error)
 	Stories(ctx sdk.Context) (stories []Story)
+	StoriesNoSort(ctx sdk.Context) (stories []Story)
 	StoriesByCategoryID(ctx sdk.Context, catID int64) (stories []Story, err sdk.Error)
 	Story(ctx sdk.Context, storyID int64) (Story, sdk.Error)
+	ExportState(ctx sdk.Context, dnh string, bh int64)
 }
 
 // WriteKeeper defines a module interface that facilities read/write access
@@ -275,6 +282,30 @@ func (k Keeper) Stories(ctx sdk.Context) (stories []Story) {
 	return stories
 }
 
+// StoriesNoSort returns all stories in the order they appear in the store with no sorting of any kind
+func (k Keeper) StoriesNoSort(ctx sdk.Context) (stories []Story) {
+	// get store
+	store := k.GetStore(ctx)
+
+	// builds prefix "stories:id:"
+	searchKey := fmt.Sprintf("%s:id:", k.GetStoreKey().Name())
+	searchPrefix := []byte(searchKey)
+
+	// setup iterator
+	iter := sdk.KVStorePrefixIterator(store, searchPrefix)
+	defer iter.Close()
+
+	// iterates through keyspace to find all stories
+	for ; iter.Valid(); iter.Next() {
+		var story Story
+		k.GetCodec().MustUnmarshalBinaryLengthPrefixed(
+			iter.Value(), &story)
+		stories = append(stories, story)
+	}
+
+	return stories
+}
+
 // UpdateStory updates an existing story in the store
 func (k Keeper) UpdateStory(ctx sdk.Context, story Story) {
 	newStory := Story{
@@ -292,6 +323,39 @@ func (k Keeper) UpdateStory(ctx sdk.Context, story Story) {
 	}
 
 	k.setStory(ctx, newStory)
+}
+
+// // ExportState returns the state for a given context
+// func ExportState(ctx sdk.Context) {
+// 	fmt.Println("Story State")
+// 	sk := Keeper{}
+// 	stories := sk.Stories(ctx)
+// 	fmt.Printf("%+v\n", stories)
+
+// }
+
+// ExportState creates a .json file with the current state of stories for the given context
+// The file is save in $HOME/.truchaind/block_height/story.json where block_height represents the
+// block height at exectution time, ex: $HOME/.truchaind/1345/story.json
+func (k Keeper) ExportState(ctx sdk.Context, dnh string, bh int64) {
+
+	// st := Story{}
+	// fmt.Printf("%+v\n", st)
+	stories := k.StoriesNoSort(ctx)
+	b, _ := json.MarshalIndent(stories, "", " ")
+	path := filepath.Join(dnh, strconv.FormatInt(bh, 10))
+	if _, err := os.Stat(path); os.IsNotExist(err) {
+		os.Mkdir(path, 0700)
+	}
+	fp := filepath.Join(path, "story.json")
+	f, err := os.OpenFile(fp, os.O_CREATE|os.O_RDWR|os.O_APPEND, 0660)
+	if err != nil {
+		log.Fatal(err)
+	}
+	if _, err := f.Write(b); err != nil {
+		log.Fatal(err)
+	}
+
 }
 
 // ============================================================================

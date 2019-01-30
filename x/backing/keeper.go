@@ -416,6 +416,13 @@ func getInterest(
 	return coin
 }
 
+// ExportState returns the state for a given context
+func ExportState() {
+	fmt.Println("Backing State")
+	backing := Backing{}
+	fmt.Printf("%+v\n", backing)
+}
+
 func (k Keeper) backingList(ctx sdk.Context) list.List {
 	store := ctx.KVStore(k.backingListKey)
 	return list.NewList(k.GetCodec(), store)

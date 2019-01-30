@@ -252,3 +252,8 @@ func (k Keeper) pendingGameList(ctx sdk.Context) list.List {
 		k.GetCodec(),
 		ctx.KVStore(k.pendingGameListKey))
 }
+
+// ExportState returns the state for a given context
+func ExportState() {
+	fmt.Println("Challenge State")
+}

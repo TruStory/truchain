@@ -231,3 +231,8 @@ func (k Keeper) set(ctx sdk.Context, vote TokenVote) {
 		k.GetIDKey(vote.ID()),
 		k.GetCodec().MustMarshalBinaryLengthPrefixed(vote))
 }
+
+// ExportState returns the state for a given context
+func ExportState() {
+	fmt.Println("Vote State")
+}

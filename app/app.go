@@ -3,6 +3,7 @@ package app
 import (
 	"encoding/hex"
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -327,6 +328,10 @@ func (app *TruChain) ExportAppStateAndValidators() (appState json.RawMessage, va
 	}
 
 	app.accountKeeper.IterateAccounts(ctx, appendAccountsFn)
+
+	// Export current db state to .json file
+	app.storyKeeper.ExportState(ctx, DefaultNodeHome, app.LastBlockHeight())
+	fmt.Print(app.LastBlockHeight())
 
 	genState := types.GenesisState{Accounts: accounts}
 	appState, err = codec.MarshalJSONIndent(app.codec, genState)

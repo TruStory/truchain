@@ -287,3 +287,8 @@ func (k Keeper) pushGameQueue(ctx sdk.Context, gameID int64) {
 	msg := "Pushed game %d to game queue"
 	logger.Info(fmt.Sprintf(msg, gameID))
 }
+
+// ExportState returns the state for a given context
+func ExportState() {
+	fmt.Println("Game State")
+}

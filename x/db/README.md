@@ -37,7 +37,7 @@ PG_USER_PW=
 PG_DB_NAME=trudb
 ```
 
-Copy `.env` to the default chain config path, `.chain` locally, and `~/.truchaind` on AWS.
+Copy `.env` to the default chain config path, `.chain` locally and `~/.truchaind`.
 
 ## Mutations
 
