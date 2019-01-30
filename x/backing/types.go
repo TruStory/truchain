@@ -91,7 +91,7 @@ func (b Backing) VoteChoice() bool {
 	return b.Vote.Vote
 }
 
-// HasMatured is true if a backing has expired
+// HasMatured is true if a backing has matured
 func (b Backing) HasMatured(blockTime time.Time) bool {
 	return blockTime.After(b.MaturesTime)
 }
