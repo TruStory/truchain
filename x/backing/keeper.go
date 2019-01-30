@@ -60,7 +60,7 @@ type WriteKeeper interface {
 type Keeper struct {
 	app.Keeper
 
-	backingListKey sdk.StoreKey // list of unexpired backings
+	backingListKey sdk.StoreKey // list of unmatured backings
 
 	storyKeeper    story.WriteKeeper // read-write access to story store
 	bankKeeper     bank.Keeper       // read-write access coin store

@@ -23,7 +23,7 @@ func Test_processEarnings_QueueEmpty(t *testing.T) {
 	assert.Nil(t, err)
 }
 
-func Test_processEarnings_UnexpiredBackings(t *testing.T) {
+func Test_processEarnings_UnmaturedBackings(t *testing.T) {
 	ctx, bk, sk, ck, bankKeeper, _ := mockDB()
 	storyID := createFakeStory(ctx, sk, ck)
 	amount, _ := sdk.ParseCoin("5trudex")
@@ -39,7 +39,7 @@ func Test_processEarnings_UnexpiredBackings(t *testing.T) {
 	assert.Nil(t, err)
 }
 
-func Test_processEarnings_ExpiredBackings(t *testing.T) {
+func Test_processEarnings_MaturedBackings(t *testing.T) {
 	ctx, bk, sk, ck, bankKeeper, _ := mockDB()
 	storyID := createFakeStory(ctx, sk, ck)
 	amount, _ := sdk.ParseCoin("5trudex")

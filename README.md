@@ -158,9 +158,9 @@ All data in stores are binary encoded using [Amino](https://github.com/tendermin
 
 Most chain operations are executed based on changes to data. Lists and queues are checked every time a new block is produced:
 
-1. Backing queue
+1. Backing list
 
-Handles the lifecycle of backings, calculating interest, and distributing funds after backing periods expire.
+Handles the lifecycle of backings, distributing funds after backings mature.
 
 2. Pending game list
 
