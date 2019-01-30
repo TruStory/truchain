@@ -89,13 +89,13 @@
             "deprecationReason": "",
             "description": "",
             "isDeprecated": false,
-            "name": "expires",
+            "name": "interest",
             "type": {
               "kind": "NON_NULL",
               "name": "",
               "ofType": {
-                "kind": "SCALAR",
-                "name": "Time",
+                "kind": "OBJECT",
+                "name": "Coin",
                 "ofType": null
               }
             }
@@ -105,13 +105,13 @@
             "deprecationReason": "",
             "description": "",
             "isDeprecated": false,
-            "name": "interest",
+            "name": "maturesTime",
             "type": {
               "kind": "NON_NULL",
               "name": "",
               "ofType": {
-                "kind": "OBJECT",
-                "name": "Coin",
+                "kind": "SCALAR",
+                "name": "Time",
                 "ofType": null
               }
             }
