@@ -252,7 +252,7 @@ func (k Keeper) BackingByStoryIDAndCreator(
 // RemoveFromList removes a backing from the backing list
 func (k Keeper) RemoveFromList(ctx sdk.Context, backingID int64) sdk.Error {
 	var ID int64
-	var indeToDelete uint64
+	var indexToDelete uint64
 	var found bool
 	backingList := k.backingList(ctx)
 	backingList.Iterate(&ID, func(index uint64) bool {
@@ -262,7 +262,7 @@ func (k Keeper) RemoveFromList(ctx sdk.Context, backingID int64) sdk.Error {
 			panic(err)
 		}
 		if tempBackingID == backingID {
-			indeToDelete = index
+			indexToDelete = index
 			found = true
 			return true
 		}
@@ -273,7 +273,7 @@ func (k Keeper) RemoveFromList(ctx sdk.Context, backingID int64) sdk.Error {
 		return ErrNotFound(backingID)
 	}
 
-	backingList.Delete(indeToDelete)
+	backingList.Delete(indexToDelete)
 
 	return nil
 }
