@@ -64,11 +64,11 @@ func DefaultMsgParams() MsgParams {
 type Backing struct {
 	app.Vote `json:"vote"`
 
-	StoryID  int64         `json:"story_id"`
-	Interest sdk.Coin      `json:"interest"`
-	Expires  time.Time     `json:"expires"`
-	Params   Params        `json:"params"`
-	Period   time.Duration `json:"period"`
+	StoryID     int64         `json:"story_id"`
+	Interest    sdk.Coin      `json:"interest"`
+	MaturesTime time.Time     `json:"matures_time"`
+	Params      Params        `json:"params"`
+	Period      time.Duration `json:"period"`
 }
 
 // ID implements `Voter`
@@ -91,7 +91,7 @@ func (b Backing) VoteChoice() bool {
 	return b.Vote.Vote
 }
 
-// IsExpired is true if a backing has expired
-func (b Backing) IsExpired(blockTime time.Time) bool {
-	return blockTime.After(b.Expires)
+// HasMatured is true if a backing has expired
+func (b Backing) HasMatured(blockTime time.Time) bool {
+	return blockTime.After(b.MaturesTime)
 }

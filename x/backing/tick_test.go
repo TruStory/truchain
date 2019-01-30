@@ -19,7 +19,7 @@ func TestNewResponseEndBlock(t *testing.T) {
 func Test_processEarnings_QueueEmpty(t *testing.T) {
 	ctx, bk, _, _, _, _ := mockDB()
 
-	err := bk.processExpiredBackings(ctx)
+	err := bk.processMaturedBackings(ctx)
 	assert.Nil(t, err)
 }
 
@@ -35,7 +35,7 @@ func Test_processEarnings_UnexpiredBackings(t *testing.T) {
 	bk.Create(ctx, storyID, amount, argument, creator, duration)
 	bk.Create(ctx, storyID, amount, argument, creator, duration)
 
-	err := bk.processExpiredBackings(ctx)
+	err := bk.processMaturedBackings(ctx)
 	assert.Nil(t, err)
 }
 
@@ -53,7 +53,7 @@ func Test_processEarnings_ExpiredBackings(t *testing.T) {
 	bk.Create(ctx, storyID, amount, argument, creator, duration)
 	bk.Create(ctx, storyID, amount, argument, creator, duration)
 
-	err := bk.processExpiredBackings(ctx)
+	err := bk.processMaturedBackings(ctx)
 	assert.Nil(t, err)
 }
 
@@ -62,7 +62,7 @@ func Test_distributeEarnings(t *testing.T) {
 
 	principal, _ := sdk.ParseCoin("5trudex")
 	interest, _ := sdk.ParseCoin("2trudex")
-	expires := time.Now().Add(24 * time.Hour)
+	matures := time.Now().Add(24 * time.Hour)
 	params := DefaultParams()
 	duration := 24 * time.Hour
 	creator := sdk.AccAddress([]byte{1, 2})
@@ -82,7 +82,7 @@ func Test_distributeEarnings(t *testing.T) {
 		vote,
 		int64(5),
 		interest,
-		expires,
+		matures,
 		params,
 		duration,
 	}

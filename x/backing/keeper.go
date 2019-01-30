@@ -156,12 +156,12 @@ func (k Keeper) Create(
 
 	// create new backing type with embedded vote
 	backing := Backing{
-		Vote:     vote,
-		StoryID:  storyID,
-		Interest: interest,
-		Expires:  time.Now().Add(duration),
-		Params:   params,
-		Period:   duration,
+		Vote:        vote,
+		StoryID:     storyID,
+		Interest:    interest,
+		MaturesTime: time.Now().Add(duration),
+		Params:      params,
+		Period:      duration,
 	}
 
 	// store backing
@@ -182,12 +182,12 @@ func (k Keeper) Create(
 // Update updates an existing backing
 func (k Keeper) Update(ctx sdk.Context, backing Backing) {
 	newBacking := Backing{
-		Vote:     backing.Vote,
-		StoryID:  backing.StoryID,
-		Interest: backing.Interest,
-		Expires:  backing.Expires,
-		Params:   backing.Params,
-		Period:   backing.Period,
+		Vote:        backing.Vote,
+		StoryID:     backing.StoryID,
+		Interest:    backing.Interest,
+		MaturesTime: backing.MaturesTime,
+		Params:      backing.Params,
+		Period:      backing.Period,
 	}
 
 	k.setBacking(ctx, newBacking)
@@ -333,7 +333,7 @@ func (k Keeper) TotalBackingAmount(ctx sdk.Context, storyID int64) (
 // ============================================================================
 
 // getPrincipal calculates the principal, the amount the user gets back
-// after the backing expires/matures. Returns a coin.
+// after the backing matures. Returns a coin.
 func (k Keeper) getPrincipal(
 	ctx sdk.Context,
 	denom string,
