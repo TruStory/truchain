@@ -167,5 +167,14 @@ func (app *TruChain) initialCoins() sdk.Coins {
 
 	coins = append(coins, params.InitialTruStake)
 
-	return coins.Sort()
+	// coins need to be sorted by denom to be valid
+	coins.Sort()
+
+	// yes we should panic if coins aren't valid
+	// as it undermines the whole chain
+	if !coins.IsValid() {
+		panic("Initial coins are not valid.")
+	}
+
+	return coins
 }
