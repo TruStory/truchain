@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"math/rand"
+	"sort"
 
 	"github.com/TruStory/truchain/x/db"
 	"github.com/TruStory/truchain/x/params"
@@ -37,6 +38,11 @@ func (ta *TruAPI) allCategoriesResolver(ctx context.Context, q struct{}) []categ
 	if err != nil {
 		panic(err)
 	}
+
+	// sort in alphabetical order
+	sort.Slice(*cs, func(i, j int) bool {
+		return (*cs)[j].Title > (*cs)[i].Title
+	})
 
 	return *cs
 }
