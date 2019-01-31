@@ -159,11 +159,13 @@ func (app *TruChain) signedRegistrationTx(addr []byte, k tcmn.HexBytes, algo str
 }
 
 func (app *TruChain) initialCoins() sdk.Coins {
-	var coins []sdk.Coin
+	coins := sdk.Coins{}
 	for k := range app.categories {
 		coin := sdk.NewCoin(k, params.InitialCredAmount)
 		coins = append(coins, coin)
 	}
 
-	return append(coins, params.InitialTruStake)
+	coins = append(coins, params.InitialTruStake)
+
+	return coins.Sort()
 }
