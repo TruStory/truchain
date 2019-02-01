@@ -3,6 +3,7 @@ package backing
 import (
 	"fmt"
 
+	list "github.com/cosmos/cosmos-sdk/store"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
@@ -47,7 +48,14 @@ func (k Keeper) processMaturedBackings(ctx sdk.Context) sdk.Error {
 
 		// game is going on...
 		if gameID > 0 {
-
+			gameFoundInPendingGameList := k.isGameInList(k.pendingGameList(ctx), gameID)
+			gameFoundInGameQueue := k.isGameInList(k.gameQueue(ctx).List, gameID)
+			if gameFoundInPendingGameList || gameFoundInGameQueue {
+				// backing is in challenged or voting phase
+				// pause and not let mature
+				// skip iteration
+				return false
+			}
 		}
 
 		if backing.HasMatured(ctx.BlockHeader().Time) {
@@ -69,6 +77,20 @@ func (k Keeper) processMaturedBackings(ctx sdk.Context) sdk.Error {
 	}
 
 	return nil
+}
+
+func (k Keeper) isGameInList(gameList list.List, gameID int64) bool {
+	var found bool
+	var ID int64
+	gameList.Iterate(&ID, func(uint64) bool {
+		if ID == gameID {
+			found = true
+			return true
+		}
+		return false
+	})
+
+	return found
 }
 
 // distributeEarnings adds coins from the backing to the user.
