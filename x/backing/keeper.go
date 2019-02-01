@@ -436,3 +436,14 @@ func (k Keeper) backingList(ctx sdk.Context) list.List {
 	store := ctx.KVStore(k.backingListKey)
 	return list.NewList(k.GetCodec(), store)
 }
+
+func (k Keeper) pendingGameList(ctx sdk.Context) list.List {
+	return list.NewList(
+		k.GetCodec(),
+		ctx.KVStore(k.pendingGameListKey))
+}
+
+func (k Keeper) gameQueue(ctx sdk.Context) list.Queue {
+	store := ctx.KVStore(k.gameQueueKey)
+	return list.NewQueue(k.GetCodec(), store)
+}
