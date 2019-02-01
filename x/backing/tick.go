@@ -39,23 +39,10 @@ func (k Keeper) processMaturedBackings(ctx sdk.Context) sdk.Error {
 			panic(err)
 		}
 
-		story, err := k.storyKeeper.Story(ctx, backing.StoryID)
-		if err != nil {
-			panic(err)
-		}
-
-		gameID := story.GameID
-
-		// check if game is going on...
-		if gameID > 0 {
-			gameFoundInPendingGameList := k.isGameInList(k.pendingGameList(ctx), gameID)
-			gameFoundInGameQueue := k.isGameInList(k.gameQueue(ctx).List, gameID)
-			if gameFoundInPendingGameList || gameFoundInGameQueue {
-				// backing is in challenged or voting phase
-				// pause and not let mature
-				// skip iteration
-				return false
-			}
+		if k.isGameInSession(ctx, backing.StoryID) {
+			// skip maturing it
+			// process next one
+			return false
 		}
 
 		if backing.HasMatured(ctx.BlockHeader().Time) {
@@ -77,6 +64,27 @@ func (k Keeper) processMaturedBackings(ctx sdk.Context) sdk.Error {
 	}
 
 	return nil
+}
+
+func (k Keeper) isGameInSession(ctx sdk.Context, storyID int64) bool {
+	story, err := k.storyKeeper.Story(ctx, storyID)
+	if err != nil {
+		panic(err)
+	}
+
+	gameID := story.GameID
+
+	// check if game is going on...
+	if gameID > 0 {
+		gameFoundInPendingGameList := k.isGameInList(k.pendingGameList(ctx), gameID)
+		gameFoundInGameQueue := k.isGameInList(k.gameQueue(ctx).List, gameID)
+		if gameFoundInPendingGameList || gameFoundInGameQueue {
+			// backing is in challenged or voting phase
+			return true
+		}
+	}
+
+	return false
 }
 
 func (k Keeper) isGameInList(gameList list.List, gameID int64) bool {
