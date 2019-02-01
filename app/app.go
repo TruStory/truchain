@@ -159,8 +159,9 @@ func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *T
 	app.storyKeeper = story.NewKeeper(
 		app.keyStory, app.categoryKeeper, app.codec)
 	app.backingKeeper = backing.NewKeeper(
-		app.keyBacking, app.keyBackingList, app.storyKeeper,
-		app.coinKeeper, app.categoryKeeper, codec)
+		app.keyBacking, app.keyBackingList, app.keyPendingGameList,
+		app.keyGameQueue, app.storyKeeper, app.coinKeeper,
+		app.categoryKeeper, codec)
 	app.gameKeeper = game.NewKeeper(
 		app.keyGame, app.keyPendingGameList, app.keyGameQueue, app.storyKeeper,
 		app.backingKeeper, app.coinKeeper, codec)
