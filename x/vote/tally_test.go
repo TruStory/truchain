@@ -239,3 +239,8 @@ func TestCheckForEmptyPool(t *testing.T) {
 	err := checkForEmptyPool(pool)
 	assert.Nil(t, err)
 }
+
+func Test_voterRewardAmount(t *testing.T) {
+	pool, _ := sdk.ParseCoin("1usecase")
+	assert.Equal(t, sdk.NewInt(0), voterRewardAmount(pool, 0))
+}
