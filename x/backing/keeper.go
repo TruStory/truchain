@@ -60,7 +60,12 @@ type WriteKeeper interface {
 type Keeper struct {
 	app.Keeper
 
-	backingListKey sdk.StoreKey // list of unmatured backings
+	// list of unmatured backings
+	backingListKey sdk.StoreKey
+	// list of games in the challenged state
+	pendingGameListKey sdk.StoreKey
+	// queue of games in the voting state
+	gameQueueKey sdk.StoreKey
 
 	storyKeeper    story.WriteKeeper // read-write access to story store
 	bankKeeper     bank.Keeper       // read-write access coin store
@@ -73,6 +78,8 @@ type Keeper struct {
 func NewKeeper(
 	storeKey sdk.StoreKey,
 	backingListKey sdk.StoreKey,
+	pendingGameListKey sdk.StoreKey,
+	gameQueueKey sdk.StoreKey,
 	storyKeeper story.WriteKeeper,
 	bankKeeper bank.Keeper,
 	categoryKeeper cat.ReadKeeper,
@@ -81,6 +88,8 @@ func NewKeeper(
 	return Keeper{
 		app.NewKeeper(codec, storeKey),
 		backingListKey,
+		pendingGameListKey,
+		gameQueueKey,
 		storyKeeper,
 		bankKeeper,
 		categoryKeeper,

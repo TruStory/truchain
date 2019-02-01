@@ -38,6 +38,18 @@ func (k Keeper) processMaturedBackings(ctx sdk.Context) sdk.Error {
 			panic(err)
 		}
 
+		story, err := k.storyKeeper.Story(ctx, backing.StoryID)
+		if err != nil {
+			panic(err)
+		}
+
+		gameID := story.GameID
+
+		// game is going on...
+		if gameID > 0 {
+
+		}
+
 		if backing.HasMatured(ctx.BlockHeader().Time) {
 			indicesToDelete = append(indicesToDelete, index)
 
