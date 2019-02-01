@@ -46,7 +46,7 @@ func (k Keeper) processMaturedBackings(ctx sdk.Context) sdk.Error {
 
 		gameID := story.GameID
 
-		// game is going on...
+		// check if game is going on...
 		if gameID > 0 {
 			gameFoundInPendingGameList := k.isGameInList(k.pendingGameList(ctx), gameID)
 			gameFoundInGameQueue := k.isGameInList(k.gameQueue(ctx).List, gameID)
