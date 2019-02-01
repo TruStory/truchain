@@ -125,6 +125,11 @@ func voterCount(winners []app.Voter) (voterCount int64) {
 }
 
 func voterRewardAmount(pool sdk.Coin, voterCount int64) sdk.Int {
+	// check for no token voters
+	// prevent division by zero errors
+	if voterCount == 0 {
+		return sdk.NewInt(0)
+	}
 
 	poolDec := sdk.NewDecFromInt(pool.Amount)
 	voterCountInt := sdk.NewInt(voterCount)
