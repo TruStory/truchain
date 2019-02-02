@@ -153,22 +153,54 @@ func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *T
 	app.feeCollectionKeeper = auth.NewFeeCollectionKeeper(app.codec, app.keyFee)
 
 	// wire up keepers
-	app.categoryKeeper = category.NewKeeper(app.keyCategory, codec)
+	app.categoryKeeper = category.NewKeeper(
+		app.keyCategory,
+		codec,
+	)
 	app.storyKeeper = story.NewKeeper(
-		app.keyStory, app.categoryKeeper, app.codec)
+		app.keyStory,
+		app.categoryKeeper,
+		app.codec,
+	)
 	app.backingKeeper = backing.NewKeeper(
-		app.keyBacking, app.keyBackingList, app.keyPendingGameList,
-		app.keyGameQueue, app.storyKeeper, app.coinKeeper,
-		app.categoryKeeper, codec)
+		app.keyBacking,
+		app.keyBackingList,
+		app.keyPendingGameList,
+		app.keyGameQueue,
+		app.storyKeeper,
+		app.coinKeeper,
+		app.categoryKeeper,
+		codec,
+	)
 	app.gameKeeper = game.NewKeeper(
-		app.keyGame, app.keyPendingGameList, app.keyGameQueue, app.storyKeeper,
-		app.backingKeeper, app.coinKeeper, codec)
+		app.keyGame,
+		app.keyPendingGameList,
+		app.keyGameQueue,
+		app.storyKeeper,
+		app.backingKeeper,
+		app.coinKeeper,
+		codec,
+	)
 	app.challengeKeeper = challenge.NewKeeper(
-		app.keyChallenge, app.keyPendingGameList, app.backingKeeper,
-		app.coinKeeper, app.gameKeeper, app.storyKeeper, codec)
+		app.keyChallenge,
+		app.keyPendingGameList,
+		app.backingKeeper,
+		app.coinKeeper,
+		app.gameKeeper,
+		app.storyKeeper,
+		codec,
+	)
 	app.voteKeeper = vote.NewKeeper(
-		app.keyVote, app.keyGameQueue, app.accountKeeper, app.backingKeeper,
-		app.challengeKeeper, app.storyKeeper, app.gameKeeper, app.coinKeeper, codec)
+		app.keyVote,
+		app.keyGameQueue,
+		app.accountKeeper,
+		app.backingKeeper,
+		app.challengeKeeper,
+		app.storyKeeper,
+		app.gameKeeper,
+		app.coinKeeper,
+		codec,
+	)
 
 	// register message routes for modifying state
 	app.Router().
