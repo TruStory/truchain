@@ -31,6 +31,9 @@ type ReadKeeper interface {
 		ctx sdk.Context,
 		storyID int64,
 		creator sdk.AccAddress) (vote TokenVote, err sdk.Error)
+
+	TotalVoteAmountByGameID(ctx sdk.Context, gameID int64) (
+		totalCoin sdk.Coin, err sdk.Error)
 }
 
 // WriteKeeper defines a module interface that facilities write only access to truchain data
@@ -215,6 +218,34 @@ func (k Keeper) Tally(
 	})
 
 	return
+}
+
+// TotalVoteAmountByGameID returns the total of all votes for a game
+func (k Keeper) TotalVoteAmountByGameID(ctx sdk.Context, gameID int64) (
+	totalCoin sdk.Coin, err sdk.Error) {
+
+	totalAmount := sdk.ZeroInt()
+
+	votes, err := k.TokenVotesByGameID(ctx, gameID)
+	if err != nil {
+		return
+	}
+
+	for _, tokenVote := range votes {
+		totalAmount = totalAmount.Add(tokenVote.Amount().Amount)
+	}
+
+	game, err := k.gameKeeper.Game(ctx, gameID)
+	if err != nil {
+		return
+	}
+
+	denom, err := k.storyKeeper.CategoryDenom(ctx, game.StoryID)
+	if err != nil {
+		return
+	}
+
+	return sdk.NewCoin(denom, totalAmount), nil
 }
 
 // ============================================================================

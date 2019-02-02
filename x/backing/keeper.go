@@ -322,7 +322,6 @@ func (k Keeper) TotalBackingAmount(ctx sdk.Context, storyID int64) (
 			return err
 		}
 
-		// totalAmount = totalAmount.Add(backing.Amount().Amount)
 		totalAmount = totalAmount.Add(backing.Amount().Amount)
 
 		return nil
