@@ -129,6 +129,7 @@ func (ta *TruAPI) RegisterResolvers() {
 		"creator":            func(ctx context.Context, q game.Game) users.User { return getUser(ctx, q.Creator) },
 		"challengePool":      func(_ context.Context, q game.Game) sdk.Coin { return q.ChallengePool },
 		"challengeThreshold": ta.challengeThresholdResolver,
+		"totalVoteAmount":    ta.votesTotalAmountResolver,
 
 		// Deprecated: remove in favor of the auto-resolving field `challengeExpireTime`
 		"expiresTime": func(_ context.Context, q game.Game) time.Time { return q.ChallengeExpireTime },

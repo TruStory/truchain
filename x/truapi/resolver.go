@@ -342,21 +342,20 @@ func (ta *TruAPI) votesResolver(
 	return *tokenVotes
 }
 
-func (ta *TruAPI) votesTotalAmountResolver(
-	_ context.Context, q app.QueryByIDParams) sdk.Coin {
-
-	res := ta.RunQuery("votes/gameID", q)
+func (ta *TruAPI) votesTotalAmountResolver(_ context.Context, q game.Game) sdk.Coin {
+	res := ta.RunQuery(
+		"votes/totalVoteAmountByGameID", app.QueryByIDParams{ID: q.ID})
 
 	if res.Code != 0 {
 		fmt.Println("Resolver err: ", res)
-		return []vote.TokenVote{}
+		return sdk.Coin{}
 	}
 
-	tokenVotes := new([]vote.TokenVote)
-	err := json.Unmarshal(res.Value, tokenVotes)
+	amount := new(sdk.Coin)
+	err := json.Unmarshal(res.Value, amount)
 	if err != nil {
 		panic(err)
 	}
 
-	return *tokenVotes
+	return *amount
 }
