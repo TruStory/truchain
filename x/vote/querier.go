@@ -8,9 +8,10 @@ import (
 
 // query endpoints supported by the truchain Querier
 const (
-	QueryPath                = "votes"
-	QueryByGameID            = "gameID"
-	QueryByStoryIDAndCreator = "storyIDAndCreator"
+	QueryPath                    = "votes"
+	QueryByGameID                = "gameID"
+	QueryByStoryIDAndCreator     = "storyIDAndCreator"
+	QueryTotalVoteAmountByGameID = "totalVoteAmountByGameID"
 )
 
 // NewQuerier returns a function that handles queries on the KVStore
@@ -21,6 +22,8 @@ func NewQuerier(k ReadKeeper) sdk.Querier {
 			return queryByGameID(ctx, req, k)
 		case QueryByStoryIDAndCreator:
 			return queryByStoryIDAndCreator(ctx, req, k)
+		case QueryTotalVoteAmountByGameID:
+			return queryTotalVoteAmountByGameID(ctx, req, k)
 		default:
 			return nil, sdk.ErrUnknownRequest("Unknown query endpoint")
 		}
@@ -73,4 +76,24 @@ func queryByStoryIDAndCreator(
 	}
 
 	return app.MustMarshal(tokenVote), nil
+}
+
+func queryTotalVoteAmountByGameID(
+	ctx sdk.Context,
+	req abci.RequestQuery,
+	k ReadKeeper) (res []byte, sdkErr sdk.Error) {
+
+	params := app.QueryByIDParams{}
+
+	sdkErr = app.UnmarshalQueryParams(req, &params)
+	if sdkErr != nil {
+		return
+	}
+
+	amount, sdkErr := k.TotalVoteAmountByGameID(ctx, params.ID)
+	if sdkErr != nil {
+		return
+	}
+
+	return app.MustMarshal(amount), nil
 }
