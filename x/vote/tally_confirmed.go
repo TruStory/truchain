@@ -105,10 +105,11 @@ func distributeRewardsConfirmed(
 		}
 	}
 
-	err = checkForEmptyPool(pool)
-	if err != nil {
-		return err
-	}
+	// TODO [shanev]: Remove after fixing https://github.com/TruStory/truchain/issues/314
+	// err = checkForEmptyPool(pool)
+	// if err != nil {
+	// 	return err
+	// }
 
 	return nil
 }
