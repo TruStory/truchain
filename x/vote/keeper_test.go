@@ -80,6 +80,35 @@ func TestGetVotesByStoryIDAndCreator(t *testing.T) {
 	assert.Equal(t, int64(1), vote.ID())
 }
 
+func TestTotalVoteAmountByGameID(t *testing.T) {
+	ctx, k, ck := mockDB()
+
+	storyID := createFakeStory(ctx, k.storyKeeper, ck)
+	amount := sdk.NewCoin("trudex", sdk.NewInt(15))
+	comment := "test comment is long enough"
+	creator := sdk.AccAddress([]byte{1, 2})
+	creator1 := sdk.AccAddress([]byte{2, 3})
+
+	// give user some funds
+	k.bankKeeper.AddCoins(ctx, creator, sdk.Coins{amount.Plus(amount)})
+	k.bankKeeper.AddCoins(ctx, creator1, sdk.Coins{amount.Plus(amount)})
+
+	argument := "test argument"
+	_, err := k.challengeKeeper.Create(ctx, storyID, amount, argument, creator)
+	assert.Nil(t, err)
+
+	// create votes
+	_, err = k.Create(ctx, storyID, amount, true, comment, creator)
+	assert.Nil(t, err)
+	_, err = k.Create(ctx, storyID, amount, true, comment, creator1)
+	assert.Nil(t, err)
+
+	story, _ := k.storyKeeper.Story(ctx, storyID)
+
+	totalAmount, _ := k.TotalVoteAmountByGameID(ctx, story.GameID)
+	assert.Equal(t, "30trudex", totalAmount.String())
+}
+
 func TestCreateVote_ErrGameNotStarted(t *testing.T) {
 	ctx, k, ck := mockDB()
 
