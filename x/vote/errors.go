@@ -36,7 +36,7 @@ func ErrDuplicateVoteForGame(
 	return sdk.NewError(
 		DefaultCodespace,
 		CodeDuplicate,
-		"Vote with for game "+fmt.Sprintf("%d", gameID)+" has already been cast by user "+user.String())
+		"Vote for game "+fmt.Sprintf("%d", gameID)+" has already been cast by user "+user.String())
 }
 
 // ErrGameNotStarted is thrown when a vote is attempted on a story
