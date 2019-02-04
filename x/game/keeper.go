@@ -21,6 +21,8 @@ type ReadKeeper interface {
 
 	ChallengeThreshold(totalBackingAmount sdk.Coin) sdk.Coin
 	Game(ctx sdk.Context, id int64) (game Game, err sdk.Error)
+	ExportState(ctx sdk.Context, dnh string, bh int64)
+	Games(ctx sdk.Context) (games []Game)
 }
 
 // WriteKeeper defines a module interface that facilities write only access to truchain data
@@ -209,6 +211,38 @@ func (k Keeper) Update(ctx sdk.Context, game Game) {
 	k.set(ctx, newGame)
 }
 
+// Games returns all games in the order they appear in the store
+func (k Keeper) Games(ctx sdk.Context) (games []Game) {
+	// get store
+	store := k.GetStore(ctx)
+
+	// builds prefix "games:id"
+	searchKey := fmt.Sprintf("%s:id", k.GetStoreKey().Name())
+	searchPrefix := []byte(searchKey)
+
+	// setup Iterator
+	iter := sdk.KVStorePrefixIterator(store, searchPrefix)
+	defer iter.Close()
+
+	// iterates through keyspace to find all games
+	for ; iter.Valid(); iter.Next() {
+		var game Game
+		k.GetCodec().MustUnmarshalBinaryLengthPrefixed(
+			iter.Value(), &game)
+		games = append(games, game)
+	}
+
+	return games
+}
+
+// ExportState returns the state for a given context
+func (k Keeper) ExportState(ctx sdk.Context, dnh string, bh int64) {
+	games := k.Games(ctx)
+
+	app.WriteJSONtoNodeHome(games, dnh, bh, fmt.Sprintf("%s.json", k.GetStoreKey().Name()))
+
+}
+
 // ============================================================================
 
 func (k Keeper) pendingList(ctx sdk.Context) list.List {
@@ -286,9 +320,4 @@ func (k Keeper) pushGameQueue(ctx sdk.Context, gameID int64) {
 	k.queue(ctx).Push(gameID)
 	msg := "Pushed game %d to game queue"
 	logger.Info(fmt.Sprintf(msg, gameID))
-}
-
-// ExportState returns the state for a given context
-func ExportState() {
-	fmt.Println("Game State")
 }

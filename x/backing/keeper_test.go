@@ -121,6 +121,26 @@ func TestTally(t *testing.T) {
 	assert.Equal(t, 2, len(yes))
 }
 
+func TestBackings(t *testing.T) {
+	ctx, k, sk, ck, bankKeeper, _ := mockDB()
+	storyID := createFakeStory(ctx, sk, ck)
+
+	amount, _ := sdk.ParseCoin("5trudex")
+	argument := "cool story brew"
+	duration := DefaultMsgParams().MinPeriod
+
+	creator := sdk.AccAddress([]byte{1, 2})
+	bankKeeper.AddCoins(ctx, creator, sdk.Coins{amount})
+	k.Create(ctx, storyID, amount, argument, creator, duration)
+
+	creator2 := sdk.AccAddress([]byte{2, 3})
+	bankKeeper.AddCoins(ctx, creator2, sdk.Coins{amount})
+	k.Create(ctx, storyID, amount, argument, creator2, duration)
+
+	backings := k.Backings(ctx)
+	assert.NotNil(t, backings)
+}
+
 func TestTotalBacking(t *testing.T) {
 	ctx, k, sk, ck, bankKeeper, _ := mockDB()
 	storyID := createFakeStory(ctx, sk, ck)

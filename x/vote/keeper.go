@@ -31,6 +31,7 @@ type ReadKeeper interface {
 		ctx sdk.Context,
 		storyID int64,
 		creator sdk.AccAddress) (vote TokenVote, err sdk.Error)
+	Votes(ctx sdk.Context) (votes []TokenVote)
 }
 
 // WriteKeeper defines a module interface that facilities write only access to truchain data
@@ -215,6 +216,30 @@ func (k Keeper) Tally(
 	})
 
 	return
+}
+
+// Votes ...
+func (k Keeper) Votes(ctx sdk.Context) (votes []TokenVote) {
+	// get store
+	store := k.GetStore(ctx)
+
+	// builds prefix "games:id"
+	searchKey := fmt.Sprintf("%s:id", k.GetStoreKey().Name())
+	searchPrefix := []byte(searchKey)
+
+	// setup Iterator
+	iter := sdk.KVStorePrefixIterator(store, searchPrefix)
+	defer iter.Close()
+
+	// iterates through keyspace to find all games
+	for ; iter.Valid(); iter.Next() {
+		var vote TokenVote
+		k.GetCodec().MustUnmarshalBinaryLengthPrefixed(
+			iter.Value(), &vote)
+		votes = append(votes, vote)
+	}
+
+	return votes
 }
 
 // ============================================================================

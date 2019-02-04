@@ -15,6 +15,7 @@ type ReadKeeper interface {
 
 	GetCategory(ctx sdk.Context, id int64) (Category, sdk.Error)
 	GetAllCategories(ctx sdk.Context) ([]Category, sdk.Error)
+	ExportState(ctx sdk.Context, dnh string, bh int64)
 }
 
 // WriteKeeper defines a module interface that facilities write only access
@@ -105,6 +106,14 @@ func (k Keeper) GetAllCategories(ctx sdk.Context) (cats []Category, err sdk.Erro
 	return
 }
 
+// ExportState gets all the current categories and calls app.WriteJSONtoNodeHome() to write data to file.
+func (k Keeper) ExportState(ctx sdk.Context, dnh string, bh int64) {
+
+	categories, _ := k.GetAllCategories(ctx)
+	app.WriteJSONtoNodeHome(categories, dnh, bh, fmt.Sprintf("%s.json", k.GetStoreKey().Name()))
+
+}
+
 // ============================================================================
 
 // setCategory saves a `Category` type to the KVStore
@@ -113,11 +122,4 @@ func (k Keeper) setCategory(ctx sdk.Context, cat Category) {
 	store.Set(
 		k.GetIDKey(cat.ID),
 		k.GetCodec().MustMarshalBinaryLengthPrefixed(cat))
-}
-
-// ExportState returns the state for a given context
-func ExportState() {
-	fmt.Println("Category State")
-	category := Category{}
-	fmt.Printf("%+v\n", category)
 }

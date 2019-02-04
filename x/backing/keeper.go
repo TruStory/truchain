@@ -33,6 +33,9 @@ type ReadKeeper interface {
 
 	TotalBackingAmount(
 		ctx sdk.Context, storyID int64) (totalAmount sdk.Coin, err sdk.Error)
+	ExportState(ctx sdk.Context)
+	Backings(ctx sdk.Context) (backings []Backing)
+	BackList(ctx sdk.Context) (unexpiredBackings []Backing)
 }
 
 // WriteKeeper defines a module interface that facilities write only access
@@ -337,6 +340,65 @@ func (k Keeper) TotalBackingAmount(ctx sdk.Context, storyID int64) (
 	}
 
 	return sdk.NewCoin(denom, totalAmount), nil
+}
+
+// Backings iterates over all backings
+func (k Keeper) Backings(ctx sdk.Context) (backings []Backing) {
+
+	store := k.GetStore(ctx)
+	// builds prefix "backing:id"
+	searchKey := fmt.Sprintf("%s:id", k.GetStoreKey().Name())
+	searchPrefix := []byte(searchKey)
+
+	// setup Iterator
+	iter := sdk.KVStorePrefixIterator(store, searchPrefix)
+	defer iter.Close()
+
+	// iterates through keyspace to find all backings
+	for ; iter.Valid(); iter.Next() {
+		var backing Backing
+		k.GetCodec().MustUnmarshalBinaryLengthPrefixed(
+			iter.Value(), &backing)
+		backings = append(backings, backing)
+	}
+
+	return backings
+}
+
+// ExportState gets all the current categories and calls app.WriteJSONtoNodeHome() to write data to file.
+func (k Keeper) ExportState(ctx sdk.Context) {
+	fmt.Println("Backing")
+
+}
+
+// BackList gets all the backings that are not expired
+func (k Keeper) BackList(ctx sdk.Context) (unexpiredBackings []Backing) {
+	store := k.GetStore(ctx)
+	// builds prefix "games:id"
+	searchKey := fmt.Sprintf("%s:unexpired", k.GetStoreKey().Name())
+	searchPrefix := []byte(searchKey)
+
+	// setup Iterator
+	iter := sdk.KVStorePrefixIterator(store, searchPrefix)
+	defer iter.Close()
+
+	// iterates through keyspace to find all games
+	for ; iter.Valid(); iter.Next() {
+		var backing Backing
+		k.GetCodec().MustUnmarshalBinaryLengthPrefixed(
+			iter.Value(), &backing)
+		unexpiredBackings = append(unexpiredBackings, backing)
+	}
+
+	l := k.storyKeeper.IterateStories(ctx)
+	for _, num := range l {
+		fmt.Printf("%+v\n", num)
+		b, _ := k.BackingsByStoryID(ctx, num)
+		fmt.Printf("%+v\n", b)
+	}
+	// "stories:id:[StoryID]:backings:user:[AccAddress]"
+
+	return unexpiredBackings
 }
 
 // ============================================================================

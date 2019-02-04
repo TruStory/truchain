@@ -75,6 +75,13 @@ You can also start with:
 
 This will utilize the `./truchaind` directory for data store.
 
+## Export State
+To export the current state of the application to a JSON file:
+
+```bash
+$ bin/truchaind > filname.json
+```
+
 ## GraphQL Queries
 You can reach your client at `http://localhost:3030/graphiql/`
 

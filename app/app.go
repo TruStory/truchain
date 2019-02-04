@@ -2,8 +2,6 @@ package app
 
 import (
 	"encoding/hex"
-	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -32,7 +30,6 @@ import (
 	cmn "github.com/tendermint/tendermint/libs/common"
 	dbm "github.com/tendermint/tendermint/libs/db"
 	"github.com/tendermint/tendermint/libs/log"
-	tmtypes "github.com/tendermint/tendermint/types"
 	"github.com/tendermint/tmlibs/cli"
 )
 
@@ -312,37 +309,39 @@ func (app *TruChain) EndBlocker(ctx sdk.Context, _ abci.RequestEndBlock) abci.Re
 	return abci.ResponseEndBlock{}
 }
 
-// ExportAppStateAndValidators implements custom application logic that exposes
-// various parts of the application's state and set of validators. An error is
-// returned if any step getting the state or set of validators fails.
-func (app *TruChain) ExportAppStateAndValidators() (appState json.RawMessage, validators []tmtypes.GenesisValidator, err error) {
-	ctx := app.NewContext(true, abci.Header{})
-	accounts := []*types.GenesisAccount{}
+// // ExportAppStateAndValidators implements custom application logic that exposes
+// // various parts of the application's state and set of validators. An error is
+// // returned if any step getting the state or set of validators fails.
+// func (app *TruChain) ExportAppStateAndValidators() (appState json.RawMessage, validators []tmtypes.GenesisValidator, err error) {
+// 	ctx := app.NewContext(true, abci.Header{})
+// 	accounts := []*types.GenesisAccount{}
 
-	appendAccountsFn := func(acc auth.Account) bool {
-		account := &types.GenesisAccount{
-			Address: acc.GetAddress(),
-			Coins:   acc.GetCoins(),
-		}
+// 	appendAccountsFn := func(acc auth.Account) bool {
+// 		account := &types.GenesisAccount{
+// 			Address: acc.GetAddress(),
+// 			Coins:   acc.GetCoins(),
+// 		}
 
-		accounts = append(accounts, account)
-		return false
-	}
+// 		accounts = append(accounts, account)
+// 		return false
+// 	}
 
-	app.accountKeeper.IterateAccounts(ctx, appendAccountsFn)
+// 	app.accountKeeper.IterateAccounts(ctx, appendAccountsFn)
 
-	// Export current db state to .json file
-	app.storyKeeper.ExportState(ctx, DefaultNodeHome, app.LastBlockHeight())
-	fmt.Print(app.LastBlockHeight())
+// 	// Export current state to each Keeper
+// 	app.storyKeeper.ExportState(ctx, DefaultNodeHome, app.LastBlockHeight())
+// 	app.categoryKeeper.ExportState(ctx, DefaultNodeHome, app.LastBlockHeight())
+// 	app.challengeKeeper.ExportState(ctx, DefaultNodeHome, app.LastBlockHeight())
+// 	app.gameKeeper.ExportState(ctx, DefaultNodeHome, app.LastBlockHeight())
 
-	genState := types.GenesisState{Accounts: accounts}
-	appState, err = codec.MarshalJSONIndent(app.codec, genState)
-	if err != nil {
-		return nil, nil, err
-	}
+// 	genState := types.GenesisState{Accounts: accounts}
+// 	appState, err = codec.MarshalJSONIndent(app.codec, genState)
+// 	if err != nil {
+// 		return nil, nil, err
+// 	}
 
-	return appState, validators, err
-}
+// 	return appState, validators, err
+// }
 
 func loadRegistrarKey() secp256k1.PrivKeySecp256k1 {
 	rootdir := viper.GetString(cli.HomeFlag)

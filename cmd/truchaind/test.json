@@ -1,0 +1,585 @@
+1
+[{Vote:{ID:1 Amount:100000regulation Argument:this is an argument Creator:B269349E6BBC046FDC529E13140BEE93AEC3058D Vote:true Timestamp:{CreatedBlock:1 CreatedTime:2018-11-29 02:28:27.057819 +0000 UTC UpdatedBlock:1 UpdatedTime:2018-11-29 02:28:27.057819 +0000 UTC}} StoryID:1 Interest:93regulation Expires:2019-01-30 21:37:42.613428 +0000 UTC Params:{AmountWeight:+3330000000 PeriodWeight:+6670000000 MinInterestRate:+0 MaxInterestRate:+1000000000} Period:1h0m0s}]
+10
+[]
+2
+[]
+3
+[]
+4
+[]
+5
+[]
+6
+[]
+7
+[]
+8
+[]
+9
+[]
+{
+  "genesis_time": "2018-11-29T02:28:27.057819Z",
+  "chain_id": "test-chain-JHrAIn",
+  "consensus_params": {
+    "block_size": {
+      "max_bytes": "22020096",
+      "max_gas": "-1"
+    },
+    "evidence": {
+      "max_age": "100000"
+    },
+    "validator": {
+      "pub_key_types": [
+        "ed25519"
+      ]
+    }
+  },
+  "app_hash": "",
+  "app_state": {
+    "accounts": [
+      {
+        "address": "cosmos1qtkv02t2h3euv8de06xes4swg0k6w0mr4zprek",
+        "coins": [
+          {
+            "denom": "btc",
+            "amount": "30000000"
+          },
+          {
+            "denom": "regulation",
+            "amount": "200000"
+          },
+          {
+            "denom": "shitcoin",
+            "amount": "10000000"
+          },
+          {
+            "denom": "trusteak",
+            "amount": "50000000"
+          }
+        ]
+      },
+      {
+        "address": "cosmos1rn7fh2xy7kecvgcarwa4kqhme86r7ymznn8t8z",
+        "coins": [
+          {
+            "denom": "btc",
+            "amount": "30000000"
+          },
+          {
+            "denom": "shitcoin",
+            "amount": "10000000"
+          },
+          {
+            "denom": "trusteak",
+            "amount": "49800000"
+          }
+        ]
+      },
+      {
+        "address": "cosmos18rsxqvckda8945hvsupcu99fu7dw3ke0kwf3e0",
+        "coins": [
+          {
+            "denom": "mycoin",
+            "amount": "9007199254740992"
+          }
+        ]
+      },
+      {
+        "address": "cosmos1w3e82cmgv95kuctrvdex2emfwd68yctjpzp3mr",
+        "coins": [
+          {
+            "denom": "trusteak",
+            "amount": "123456"
+          }
+        ]
+      },
+      {
+        "address": "cosmos1kf5nf8nthszxlhzjncf3gzlwjwhvxpvd2zrpsn",
+        "coins": [
+          {
+            "denom": "btc",
+            "amount": "30000000"
+          },
+          {
+            "denom": "regulation",
+            "amount": "100093"
+          },
+          {
+            "denom": "shitcoin",
+            "amount": "10000000"
+          },
+          {
+            "denom": "trusteak",
+            "amount": "49900000"
+          }
+        ]
+      }
+    ],
+    "stories": [
+      {
+        "id": "1",
+        "arguments": "As of October 2018, the US market has 933 blockchain start-ups that have raised $4,487 M, while China has only 61 companies that have raised $1,512 M. However, companies headquartered in China have a higher average valuation ($115.2 M) than companies in the US ($12.6 M). In terms of total raised funding, the Chinese companies also receive more money than companies in other countries. On average, the Chinese blockchain start-ups have raised $24.79 M, while the number is $4.81 M for US companies.",
+        "body": "The Chinese government is doing more than the US government to support national efforts at blockchain development, measured by level of government funding and number of patents granted.",
+        "category_id": "11",
+        "creator": "cosmos1kf5nf8nthszxlhzjncf3gzlwjwhvxpvd2zrpsn",
+        "source": {
+          "Scheme": "https",
+          "Opaque": "",
+          "User": null,
+          "Host": "www.bizjournals.com",
+          "Path": "/washington/news/2018/06/15/the-feds-are-finally-getting-serious-about.html",
+          "RawPath": "",
+          "ForceQuery": false,
+          "RawQuery": "",
+          "Fragment": ""
+        },
+        "state": 2,
+        "type": "0",
+        "timestamp": {
+          "created_time": "2019-01-30T20:37:42.611886Z",
+          "updated_block": "28",
+          "updated_time": "2019-01-31T01:48:31.783729Z"
+        }
+      },
+      {
+        "id": "10",
+        "arguments": "The claim is that the Venezuelan government converted old people’s pension money into Petro’s without their permission. Read deeper into the article. There’s a link (https://www.caracaschronicles.com/2018/12/12/government-paying-old-age-pensions-in-petros-without-peoples-consent/) to a primary source. The primary source then gives a detailed walk-through of what elder citizens in Venezuela saw when they tried to access their pension money, including screenshots and shows how the government was paying people’s pensions in Petros (Venezuela’s cryptocurrency), without their consent. ",
+        "body": "Venezuela forcibly converts pensions into Petro",
+        "category_id": "11",
+        "creator": "cosmos1kf5nf8nthszxlhzjncf3gzlwjwhvxpvd2zrpsn",
+        "source": {
+          "Scheme": "https",
+          "Opaque": "",
+          "User": null,
+          "Host": "bitcoinerx.com",
+          "Path": "/altcoin/venezuela-forcibly-converts-pensions-into-petro/",
+          "RawPath": "",
+          "ForceQuery": false,
+          "RawQuery": "",
+          "Fragment": ""
+        },
+        "state": 0,
+        "type": "0",
+        "timestamp": {
+          "created_time": "2019-01-30T20:37:42.613087Z",
+          "updated_time": "2019-01-30T20:37:42.613087Z"
+        }
+      },
+      {
+        "id": "2",
+        "arguments": "On 6/17/2017, Vinny responds 2 to a “@civickey is on ETH now?” tweet stating “Temporary, until RSK is ready”",
+        "body": "Vinny stated in 2017 that the CVC token, initially issued on Ethereum, was a temporary placeholder until the launch of Rootstock, a smart contract platform implemented as a Bitcoin sidechain",
+        "category_id": "5",
+        "creator": "cosmos1kf5nf8nthszxlhzjncf3gzlwjwhvxpvd2zrpsn",
+        "source": {
+          "Scheme": "https",
+          "Opaque": "",
+          "User": null,
+          "Host": "www.theblockcrypto.com",
+          "Path": "/2018/12/21/civics-token-illustrates-why-companies-masquerading-tokens-will-fail/",
+          "RawPath": "",
+          "ForceQuery": false,
+          "RawQuery": "",
+          "Fragment": ""
+        },
+        "state": 0,
+        "type": "0",
+        "timestamp": {
+          "created_time": "2019-01-30T20:37:42.612043Z",
+          "updated_time": "2019-01-30T20:37:42.612043Z"
+        }
+      },
+      {
+        "id": "3",
+        "arguments": "Article links to actual bounties.network site here where volunteers post their clean-up submission. Each volunteer has a crypto-address, email and date submitted: https://explorer.bounties.network/bounty/1511. I emailed several volunteers directly to inquire if they actually got paid in ETH. Two people responded (note: names omitted for their privacy, but contact information is publicly available in the above bounties.network link). Here is one response confirming it.",
+        "body": "Manila residents were paid in Ethereum for cleaning up a heavily polluted beach in the capital city of Philippines’ Polluted Beaches.",
+        "category_id": "5",
+        "creator": "cosmos1kf5nf8nthszxlhzjncf3gzlwjwhvxpvd2zrpsn",
+        "source": {
+          "Scheme": "https",
+          "Opaque": "",
+          "User": null,
+          "Host": "www.ccn.com",
+          "Path": "/manila-residents-paid-in-ethereum-for-cleaning-up-philippines-polluted-beaches/",
+          "RawPath": "",
+          "ForceQuery": false,
+          "RawQuery": "",
+          "Fragment": ""
+        },
+        "state": 0,
+        "type": "0",
+        "timestamp": {
+          "created_time": "2019-01-30T20:37:42.612166Z",
+          "updated_time": "2019-01-30T20:37:42.612166Z"
+        }
+      },
+      {
+        "id": "4",
+        "arguments": "This is a well known fact about consensus protocols. The best way to prove this is to show various academic papers which state this fact as well. Below are 5 example academic papers which mention safety and liveness as core requirements for a consensus protocol. Practical Byzantine Fault Tolerance (page 2). The latest gossip on BFT consensus 1 (page 4). Tendermint: Byzantine Fault Tolerance in the Age of Blockchains 1 (page 6). Consensus in the Presence of Partial Synchrony 1 (pg 290). Snowflake to Avalanche: A Novel Metastable Consensus Protocol Family for Cryptocurrencies 2(page 2)",
+        "body": "A Byzantine fault-tolerant consensus protocol must guarantee two properties even in the face of Byzantine failures: Safety and Liveness. Safety is a guarantee that nodes agree on the total order of the transaction log. Liveness is a guarantee that nodes will eventually decides on some output value. Liveness is important because it’s the only way that the network can continue to be useful (i.e. process transactions).",
+        "category_id": "3",
+        "creator": "cosmos1kf5nf8nthszxlhzjncf3gzlwjwhvxpvd2zrpsn",
+        "source": {
+          "Scheme": "https",
+          "Opaque": "",
+          "User": null,
+          "Host": "medium.com",
+          "Path": "/s/story/lets-take-a-crack-at-understanding-distributed-consensus-dad23d0dc95",
+          "RawPath": "",
+          "ForceQuery": false,
+          "RawQuery": "",
+          "Fragment": ""
+        },
+        "state": 0,
+        "type": "0",
+        "timestamp": {
+          "created_time": "2019-01-30T20:37:42.612285Z",
+          "updated_time": "2019-01-30T20:37:42.612285Z"
+        }
+      },
+      {
+        "id": "5",
+        "arguments": "“After the successful development of the legal digital currency prototype, the People’s Bank of China Digital Money Research Institute is being deployed in many places across the country, and through the integration with research and development institutions and industries, to achieve the development of financial technology research results.” The People’s Bank of China’s Digital Money Institute settled in Pengcheng and is closely related to the support of the Shenzhen Municipal Government. The Shenzhen Municipal Government has previously stated that Shenzhen is expected to be the first city to test the legal digital currency, and provide systematic preparation for this, including: advance layout research, strive for pilot projects, strive for digital currency promotion pilot qualifications, and cooperate with the establishment of digital currency.",
+        "body": "The Chinese government is going to launch a digital currency",
+        "category_id": "11",
+        "creator": "cosmos1kf5nf8nthszxlhzjncf3gzlwjwhvxpvd2zrpsn",
+        "source": {
+          "Scheme": "http",
+          "Opaque": "",
+          "User": null,
+          "Host": "news.cnstock.com",
+          "Path": "/news,yw-201809-4268560.htm",
+          "RawPath": "",
+          "ForceQuery": false,
+          "RawQuery": "",
+          "Fragment": ""
+        },
+        "state": 0,
+        "type": "0",
+        "timestamp": {
+          "created_time": "2019-01-30T20:37:42.612412Z",
+          "updated_time": "2019-01-30T20:37:42.612412Z"
+        }
+      },
+      {
+        "id": "6",
+        "arguments": "Monero has a total supply of 18.4 million coins. Going to CoinStats, that circulating supply as of today (12/20/2018 at 3:48 pm) is 16,660,078 coins. This is would imply 90.54% of the total supply is already circulating.",
+        "body": "90% of Monero is already mined",
+        "category_id": "2",
+        "creator": "cosmos1kf5nf8nthszxlhzjncf3gzlwjwhvxpvd2zrpsn",
+        "source": {
+          "Scheme": "https",
+          "Opaque": "",
+          "User": null,
+          "Host": "www.ccn.com",
+          "Path": "/over-90-of-moneros-block-reward-has-been-mined/",
+          "RawPath": "",
+          "ForceQuery": false,
+          "RawQuery": "",
+          "Fragment": ""
+        },
+        "state": 0,
+        "type": "0",
+        "timestamp": {
+          "created_time": "2019-01-30T20:37:42.612541Z",
+          "updated_time": "2019-01-30T20:37:42.612541Z"
+        }
+      },
+      {
+        "id": "7",
+        "arguments": "As of October 2018, the US market has 933 blockchain start-ups that have raised $4,487 M, while China has only 61 companies that have raised $1,512 M. However, companies headquartered in China have a higher average valuation ($115.2 M) than companies in the US ($12.6 M). In terms of total raised funding, the Chinese companies also receive more money than companies in other countries. On average, the Chinese blockchain start-ups have raised $24.79 M, while the number is $4.81 M for US companies.",
+        "body": "Both the US and China have invested large amounts of money into blockchain projects. The USA has a larger quantity of crypto projects which receive less funding on a per project basis, while China has fewer projects overall, but relatively high levels of funding on a per project basis.",
+        "category_id": "6",
+        "creator": "cosmos1kf5nf8nthszxlhzjncf3gzlwjwhvxpvd2zrpsn",
+        "source": {
+          "Scheme": "https",
+          "Opaque": "",
+          "User": null,
+          "Host": "public.tableau.com",
+          "Path": "/profile/fan.wen5373",
+          "RawPath": "",
+          "ForceQuery": false,
+          "RawQuery": "",
+          "Fragment": "!/vizhome/Blockchain_Companies/MapofFunding"
+        },
+        "state": 0,
+        "type": "0",
+        "timestamp": {
+          "created_time": "2019-01-30T20:37:42.612651Z",
+          "updated_time": "2019-01-30T20:37:42.612651Z"
+        }
+      },
+      {
+        "id": "8",
+        "arguments": "The source provides no verifiable evidence to the reader aside from the assertion that Bloomberg did in fact review some bank statements for Tether. The title used by CoinDesk is completely misleading. The bank statements that were supposedly reviewed were non-consecutive months, which would not pass any audit requirements I have ever heard of in my life (possibly why their auditor dissolved their relationship in January 2017 and they have not found a new one). Also, one of the statements mentioned was from 15 months ago (September 2017). According to the article Tether currently claims to have $1.8 billion in cash reserves for tokens in circulation. Nothing in the article suggests Bloomberg was able to verify their current cash reserves.",
+        "body": "Bank statements reviewed by Bloomberg News suggest Tether has fiat funds to back stablecoin",
+        "category_id": "11",
+        "creator": "cosmos1kf5nf8nthszxlhzjncf3gzlwjwhvxpvd2zrpsn",
+        "source": {
+          "Scheme": "https",
+          "Opaque": "",
+          "User": null,
+          "Host": "www.bloomberg.com",
+          "Path": "/news/articles/2018-12-18/pros-are-ditching-bitcoin-market-as-interest-ebbs-jpmorgan-says",
+          "RawPath": "",
+          "ForceQuery": false,
+          "RawQuery": "srnd=cryptocurrencies",
+          "Fragment": ""
+        },
+        "state": 0,
+        "type": "0",
+        "timestamp": {
+          "created_time": "2019-01-30T20:37:42.612769Z",
+          "updated_time": "2019-01-30T20:37:42.612769Z"
+        }
+      },
+      {
+        "id": "9",
+        "arguments": "One way to disprove this claim is by showing that there are more than two known reductions in the total mined supply of Bitcoin. This post 2 shows that there are at least 8 ways in which the mined supply of Bitcoin was reduced. If we can prove that at least 2 events (excluding to the Block 124724 event) from the post are true, then the claim is falsified. I pick two events: 1) Block 501726 had no transaction outputs (except a 0-value commitment), losing the entire 12.5 BTC subsidy. 2) Block 526591 didn’t claim half of the block reward, losing 6.25 BTC. Again, using blockchain.com, we can see that Block 501726 claimed 0 BTC. Block 526591 claimed 6.25 BTC, which is half of the next block’s reward of 12.5 BTC. These prove that in addition to the Block 124724 event, there are at least two more events where Bitcoin’s mined supply was reduced. ",
+        "body": "This is one of two only known reductions in the total mined supply of Bitcoin",
+        "category_id": "2",
+        "creator": "cosmos1kf5nf8nthszxlhzjncf3gzlwjwhvxpvd2zrpsn",
+        "source": {
+          "Scheme": "https",
+          "Opaque": "",
+          "User": null,
+          "Host": "en.bitcoin.it",
+          "Path": "/wiki/Controlled_supply",
+          "RawPath": "",
+          "ForceQuery": false,
+          "RawQuery": "",
+          "Fragment": ""
+        },
+        "state": 0,
+        "type": "0",
+        "timestamp": {
+          "created_time": "2019-01-30T20:37:42.61294Z",
+          "updated_time": "2019-01-30T20:37:42.61294Z"
+        }
+      }
+    ],
+    "categories": [
+      {
+        "id": "1",
+        "creator": "cosmos18rsxqvckda8945hvsupcu99fu7dw3ke0kwf3e0",
+        "name": "Enterprise Blockchains",
+        "slug": "boring",
+        "timestamp": {}
+      },
+      {
+        "id": "10",
+        "creator": "cosmos18rsxqvckda8945hvsupcu99fu7dw3ke0kwf3e0",
+        "name": "Random",
+        "slug": "random",
+        "timestamp": {}
+      },
+      {
+        "id": "11",
+        "creator": "cosmos18rsxqvckda8945hvsupcu99fu7dw3ke0kwf3e0",
+        "name": "Regulation",
+        "slug": "regulation",
+        "timestamp": {}
+      },
+      {
+        "id": "12",
+        "creator": "cosmos18rsxqvckda8945hvsupcu99fu7dw3ke0kwf3e0",
+        "name": "Scalability",
+        "slug": "scalability",
+        "timestamp": {}
+      },
+      {
+        "id": "13",
+        "creator": "cosmos18rsxqvckda8945hvsupcu99fu7dw3ke0kwf3e0",
+        "name": "Scams",
+        "slug": "scams",
+        "timestamp": {}
+      },
+      {
+        "id": "14",
+        "creator": "cosmos18rsxqvckda8945hvsupcu99fu7dw3ke0kwf3e0",
+        "name": "Token Economics",
+        "slug": "token",
+        "timestamp": {}
+      },
+      {
+        "id": "15",
+        "creator": "cosmos18rsxqvckda8945hvsupcu99fu7dw3ke0kwf3e0",
+        "name": "Use Cases",
+        "slug": "usecases",
+        "timestamp": {}
+      },
+      {
+        "id": "2",
+        "creator": "cosmos18rsxqvckda8945hvsupcu99fu7dw3ke0kwf3e0",
+        "name": "Bitcoin",
+        "slug": "btc",
+        "timestamp": {}
+      },
+      {
+        "id": "3",
+        "creator": "cosmos18rsxqvckda8945hvsupcu99fu7dw3ke0kwf3e0",
+        "name": "Consensus Protocols",
+        "slug": "consensus",
+        "timestamp": {}
+      },
+      {
+        "id": "4",
+        "creator": "cosmos18rsxqvckda8945hvsupcu99fu7dw3ke0kwf3e0",
+        "name": "ELI5 for Crypto",
+        "slug": "eli5",
+        "timestamp": {}
+      },
+      {
+        "id": "5",
+        "creator": "cosmos18rsxqvckda8945hvsupcu99fu7dw3ke0kwf3e0",
+        "name": "Ethereum",
+        "slug": "eth",
+        "timestamp": {}
+      },
+      {
+        "id": "6",
+        "creator": "cosmos18rsxqvckda8945hvsupcu99fu7dw3ke0kwf3e0",
+        "name": "Funds \u0026 Fundraising",
+        "slug": "funds",
+        "timestamp": {}
+      },
+      {
+        "id": "7",
+        "creator": "cosmos18rsxqvckda8945hvsupcu99fu7dw3ke0kwf3e0",
+        "name": "Glossary",
+        "slug": "glossary",
+        "timestamp": {}
+      },
+      {
+        "id": "8",
+        "creator": "cosmos18rsxqvckda8945hvsupcu99fu7dw3ke0kwf3e0",
+        "name": "Governance",
+        "slug": "gov",
+        "timestamp": {}
+      },
+      {
+        "id": "9",
+        "creator": "cosmos18rsxqvckda8945hvsupcu99fu7dw3ke0kwf3e0",
+        "name": "Memes",
+        "slug": "meme",
+        "timestamp": {}
+      }
+    ],
+    "challenges": [
+      {
+        "vote": {
+          "id": "1",
+          "amount": {
+            "denom": "regulation",
+            "amount": "200000"
+          },
+          "argument": "this is an argument",
+          "creator": "cosmos1rn7fh2xy7kecvgcarwa4kqhme86r7ymznn8t8z",
+          "vote": false,
+          "timestamp": {
+            "created_time": "2019-01-30T20:37:42.613536Z",
+            "updated_time": "2019-01-30T20:37:42.613536Z"
+          }
+        }
+      }
+    ],
+    "games": [
+      {
+        "id": "1",
+        "story_id": "1",
+        "creator": "cosmos1rn7fh2xy7kecvgcarwa4kqhme86r7ymznn8t8z",
+        "challenge_pool": {
+          "denom": "regulation",
+          "amount": "200000"
+        },
+        "challenge_expire_time": "2019-01-31T20:37:42.613536Z",
+        "voting_end_time": "2019-01-30T23:37:42.613536Z",
+        "timestamp": {
+          "created_time": "2019-01-30T20:37:42.613536Z",
+          "updated_time": "2019-01-30T20:37:42.613536Z"
+        }
+      }
+    ],
+    "backings": {
+      "backing": [
+        {
+          "vote": {
+            "id": "1",
+            "amount": {
+              "denom": "regulation",
+              "amount": "100000"
+            },
+            "argument": "this is an argument",
+            "creator": "cosmos1kf5nf8nthszxlhzjncf3gzlwjwhvxpvd2zrpsn",
+            "vote": true,
+            "timestamp": {
+              "created_block": "1",
+              "created_time": "2018-11-29T02:28:27.057819Z",
+              "updated_block": "1",
+              "updated_time": "2018-11-29T02:28:27.057819Z"
+            }
+          },
+          "story_id": "1",
+          "interest": {
+            "denom": "regulation",
+            "amount": "93"
+          },
+          "expires": "2019-01-30T21:37:42.613428Z",
+          "params": {
+            "AmountWeight": "0.3330000000",
+            "PeriodWeight": "0.6670000000",
+            "MinInterestRate": "0.0000000000",
+            "MaxInterestRate": "0.1000000000"
+          },
+          "period": "3600000000000"
+        }
+      ],
+      "unexpired": [
+        {
+          "vote": {
+            "id": "0",
+            "amount": {
+              "denom": "",
+              "amount": "0"
+            },
+            "creator": "cosmos1550dq7",
+            "vote": false,
+            "timestamp": {}
+          },
+          "story_id": "0",
+          "interest": {
+            "denom": "",
+            "amount": "0"
+          },
+          "expires": "1970-01-01T00:00:00Z",
+          "params": {
+            "AmountWeight": "0",
+            "PeriodWeight": "0",
+            "MinInterestRate": "0",
+            "MaxInterestRate": "0"
+          },
+          "period": "0"
+        }
+      ]
+    },
+    "votes": [
+      {
+        "vote": {
+          "id": "1",
+          "amount": {
+            "denom": "trusteak",
+            "amount": "200000"
+          },
+          "argument": "this is an argument",
+          "creator": "cosmos1qtkv02t2h3euv8de06xes4swg0k6w0mr4zprek",
+          "vote": true,
+          "timestamp": {
+            "created_time": "2019-01-30T20:37:42.613536Z",
+            "updated_time": "2019-01-30T20:37:42.613536Z"
+          }
+        }
+      }
+    ]
+  }
+}

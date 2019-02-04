@@ -32,6 +32,8 @@ type ReadKeeper interface {
 		creator sdk.AccAddress) (challenge Challenge, err sdk.Error)
 
 	Tally(ctx sdk.Context, gameID int64) (falseVotes []Challenge, err sdk.Error)
+	Challenges(ctx sdk.Context) (challenges []Challenge)
+	ExportState(ctx sdk.Context, dnh string, bh int64)
 }
 
 // WriteKeeper defines a module interface that facilities write only access to truchain data
@@ -245,15 +247,45 @@ func (k Keeper) Tally(
 	return
 }
 
+// Challenges returns all challenges in the order they appear in the store
+func (k Keeper) Challenges(ctx sdk.Context) (challenges []Challenge) {
+
+	// get store
+	store := k.GetStore(ctx)
+
+	// builds prefix "challenges:id"
+	searchKey := fmt.Sprintf("%s:id", k.GetStoreKey().Name())
+	searchPrefix := []byte(searchKey)
+
+	// setup Iterator
+	iter := sdk.KVStorePrefixIterator(store, searchPrefix)
+	defer iter.Close()
+
+	// iterates through keyspace to find all challenges
+	for ; iter.Valid(); iter.Next() {
+		var challenge Challenge
+
+		k.GetCodec().MustUnmarshalBinaryLengthPrefixed(
+			iter.Value(), &challenge)
+
+		challenges = append(challenges, challenge)
+
+	}
+
+	return challenges
+}
+
+// ExportState gets all the current challenges and calls app.WriteJSONtoNodeHome() to write data to file.
+func (k Keeper) ExportState(ctx sdk.Context, dnh string, bh int64) {
+	challenges := k.Challenges(ctx)
+	app.WriteJSONtoNodeHome(challenges, dnh, bh, fmt.Sprintf("%s.json", k.GetStoreKey().Name()))
+
+}
+
 // ============================================================================
 
 func (k Keeper) pendingGameList(ctx sdk.Context) list.List {
 	return list.NewList(
 		k.GetCodec(),
 		ctx.KVStore(k.pendingGameListKey))
-}
-
-// ExportState returns the state for a given context
-func ExportState() {
-	fmt.Println("Challenge State")
 }

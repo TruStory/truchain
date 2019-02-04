@@ -131,6 +131,16 @@ func newApp(logger log.Logger, db dbm.DB, _ io.Writer) abci.Application {
 }
 
 func exportAppStateAndTMValidators(logger log.Logger, db dbm.DB, _ io.Writer) (json.RawMessage, []tmtypes.GenesisValidator, error) {
+	// handle the case for height !=1
+	// if height != -1 {
+	// 	gApp := app.NewGaiaApp(logger, db, traceStore, false)
+	// 	err := gApp.LoadHeight(height)
+	// 	if err != nil {
+	// 		return nil, nil, err
+	// 	}
+	// 	return gApp.ExportAppStateAndValidators(forZeroHeight)
+	// }
+
 	bapp := app.NewTruChain(logger, db)
 	return bapp.ExportAppStateAndValidators()
 }

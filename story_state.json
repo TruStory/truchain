@@ -1,0 +1,23 @@
+{
+ "id": 0,
+ "body": "",
+ "category_id": 0,
+ "creator": "cosmos1550dq7",
+ "source": {
+  "Scheme": "",
+  "Opaque": "",
+  "User": null,
+  "Host": "",
+  "Path": "",
+  "RawPath": "",
+  "ForceQuery": false,
+  "RawQuery": "",
+  "Fragment": ""
+ },
+ "state": 0,
+ "type": 0,
+ "timestamp": {
+  "created_time": "0001-01-01T00:00:00Z",
+  "updated_time": "0001-01-01T00:00:00Z"
+ }
+}

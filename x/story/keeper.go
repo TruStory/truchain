@@ -1,14 +1,9 @@
 package story
 
 import (
-	"encoding/json"
 	"fmt"
-	"log"
 	"net/url"
-	"os"
-	"path/filepath"
 	"sort"
-	"strconv"
 
 	app "github.com/TruStory/truchain/types"
 	"github.com/TruStory/truchain/x/category"
@@ -33,6 +28,7 @@ type ReadKeeper interface {
 	StoriesByCategoryID(ctx sdk.Context, catID int64) (stories []Story, err sdk.Error)
 	Story(ctx sdk.Context, storyID int64) (Story, sdk.Error)
 	ExportState(ctx sdk.Context, dnh string, bh int64)
+	IterateStories(ctx sdk.Context) (storiesID []int64)
 }
 
 // WriteKeeper defines a module interface that facilities read/write access
@@ -51,6 +47,7 @@ type WriteKeeper interface {
 	EndGame(ctx sdk.Context, storyID int64, confirmed bool) sdk.Error
 	ExpireGame(ctx sdk.Context, storyID int64) sdk.Error
 	UpdateStory(ctx sdk.Context, story Story)
+	// IterateStories(ctx sdk.Context) (storiesID []int64)
 }
 
 // Keeper data type storing keys to the key-value store
@@ -325,37 +322,37 @@ func (k Keeper) UpdateStory(ctx sdk.Context, story Story) {
 	k.setStory(ctx, newStory)
 }
 
-// // ExportState returns the state for a given context
-// func ExportState(ctx sdk.Context) {
-// 	fmt.Println("Story State")
-// 	sk := Keeper{}
-// 	stories := sk.Stories(ctx)
-// 	fmt.Printf("%+v\n", stories)
+// IterateStories returns the IDs of all the stories in the store
+func (k Keeper) IterateStories(ctx sdk.Context) (storiesID []int64) {
+	// get store
+	store := k.GetStore(ctx)
 
-// }
+	// builds prefix "stories:id:"
+	searchKey := fmt.Sprintf("%s:id:", k.GetStoreKey().Name())
+	searchPrefix := []byte(searchKey)
 
-// ExportState creates a .json file with the current state of stories for the given context
-// The file is save in $HOME/.truchaind/block_height/story.json where block_height represents the
-// block height at exectution time, ex: $HOME/.truchaind/1345/story.json
+	// setup iterator
+	iter := sdk.KVStorePrefixIterator(store, searchPrefix)
+	defer iter.Close()
+
+	// iterates through keyspace to find all stories
+	for ; iter.Valid(); iter.Next() {
+		var story Story
+		k.GetCodec().MustUnmarshalBinaryLengthPrefixed(
+			iter.Value(), &story)
+		storiesID = append(storiesID, story.ID)
+	}
+
+	return storiesID
+}
+
+// ExportState gets all the current stories and calls app.WriteJSONtoNodeHome() to write data to file.
 func (k Keeper) ExportState(ctx sdk.Context, dnh string, bh int64) {
 
 	// st := Story{}
 	// fmt.Printf("%+v\n", st)
 	stories := k.StoriesNoSort(ctx)
-	b, _ := json.MarshalIndent(stories, "", " ")
-	path := filepath.Join(dnh, strconv.FormatInt(bh, 10))
-	if _, err := os.Stat(path); os.IsNotExist(err) {
-		os.Mkdir(path, 0700)
-	}
-	fp := filepath.Join(path, "story.json")
-	f, err := os.OpenFile(fp, os.O_CREATE|os.O_RDWR|os.O_APPEND, 0660)
-	if err != nil {
-		log.Fatal(err)
-	}
-	if _, err := f.Write(b); err != nil {
-		log.Fatal(err)
-	}
-
+	app.WriteJSONtoNodeHome(stories, dnh, bh, fmt.Sprintf("%s.json", k.GetStoreKey().Name()))
 }
 
 // ============================================================================
@@ -427,3 +424,13 @@ func (k Keeper) storyIDsByCategoryID(
 
 	return storyIDs, nil
 }
+
+// func (k Keeper) decodeStory(bz []byte) (st Story) {
+
+// 	// err := k.GetCodec().UnmarshalBinaryBare(bz, &st)
+
+// 	// if err != nil {
+// 	// 	panic(err)
+// 	// }
+// 	// return
+// }
