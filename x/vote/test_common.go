@@ -131,16 +131,11 @@ func fakeValidationGame() (ctx sdk.Context, votes poll, k Keeper) {
 	ctx, k, ck := mockDB()
 
 	storyID := createFakeStory(ctx, k.storyKeeper, ck)
-	amount := sdk.NewCoin("trudex", sdk.NewInt(1000000000000))
-	trustake := sdk.NewCoin("trusteak", sdk.NewInt(1000000000000))
+	amount := sdk.NewCoin(params.StakeDenom, sdk.NewInt(1000000000000))
 	argument := "test argument"
 
+	// each of these creators start with 2000trusteak
 	creator1 := fakeFundedCreator(ctx, k.bankKeeper)
-	// remove cat coins to simulate backing conversion from trusteak
-	k.bankKeeper.SubtractCoins(ctx, creator1, sdk.Coins{amount})
-	// add trustake
-	k.bankKeeper.AddCoins(ctx, creator1, sdk.Coins{trustake})
-
 	creator2 := fakeFundedCreator(ctx, k.bankKeeper)
 	creator3 := fakeFundedCreator(ctx, k.bankKeeper)
 	creator4 := fakeFundedCreator(ctx, k.bankKeeper)
@@ -152,7 +147,7 @@ func fakeValidationGame() (ctx sdk.Context, votes poll, k Keeper) {
 
 	// fake backings
 	duration := 1 * time.Hour
-	b1id, _ := k.backingKeeper.Create(ctx, storyID, trustake, argument, creator1, duration)
+	b1id, _ := k.backingKeeper.Create(ctx, storyID, amount, argument, creator1, duration)
 	b2id, _ := k.backingKeeper.Create(ctx, storyID, amount, argument, creator2, duration)
 	b3id, _ := k.backingKeeper.Create(ctx, storyID, amount, argument, creator3, duration)
 	b4id, _ := k.backingKeeper.Create(ctx, storyID, amount, argument, creator4, duration)
@@ -168,7 +163,7 @@ func fakeValidationGame() (ctx sdk.Context, votes poll, k Keeper) {
 
 	b1, _ := k.backingKeeper.Backing(ctx, b1id)
 	// fake an interest
-	b1.Interest = sdk.NewCoin("trudex", sdk.NewInt(500000000000))
+	b1.Interest = sdk.NewCoin(params.StakeDenom, sdk.NewInt(500000000000))
 	k.backingKeeper.Update(ctx, b1)
 
 	b2, _ := k.backingKeeper.Backing(ctx, b2id)
