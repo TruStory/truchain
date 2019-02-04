@@ -159,6 +159,10 @@ func confirmStory(
 	// calculate what percent of the total weight is true votes
 	totalWeight := trueWeight.Add(falseWeight)
 	trueWeightDec := sdk.NewDecFromInt(trueWeight)
+	if totalWeight.IsZero() {
+		// TODO: handle this better
+		panic("Cannot be zero")
+	}
 	truePercentOfTotal := trueWeightDec.QuoInt(totalWeight)
 
 	// majority weight wins
@@ -193,6 +197,11 @@ func weightedVote(
 		if coins.IsValid() {
 			categoryDenom := v.Amount().Denom
 			credBalance = coins.AmountOf(categoryDenom)
+		} else {
+			// fix cold-start problem by adding 1 preethi
+			// when there is a 0 cred balance so the vote
+			// is counted
+			credBalance.Add(sdk.NewInt(1))
 		}
 
 		weightedAmount = weightedAmount.Add(credBalance)
