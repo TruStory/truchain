@@ -187,20 +187,15 @@ func weightedVote(
 
 		user := accountKeeper.GetAccount(ctx, v.Creator())
 
-		// get user's category coin balance
-		categoryCoinBalance := sdk.ZeroInt()
+		// get user's cred balance
+		credBalance := sdk.ZeroInt()
 		coins := user.GetCoins()
 		if coins.IsValid() {
 			categoryDenom := v.Amount().Denom
-			categoryCoinBalance = coins.AmountOf(categoryDenom)
+			credBalance = coins.AmountOf(categoryDenom)
 		}
 
-		// get user's BCV stake
-		stake := v.Amount().Amount
-
-		// weight = balance + stake
-		voteWeight := categoryCoinBalance.Add(stake)
-		weightedAmount = weightedAmount.Add(voteWeight)
+		weightedAmount = weightedAmount.Add(credBalance)
 	}
 
 	return weightedAmount, nil
@@ -209,7 +204,7 @@ func weightedVote(
 // Make sure reward pool is empty (<= 1 coin)
 // Makes up for rounding error during division
 func checkForEmptyPool(pool sdk.Coin) sdk.Error {
-	oneCoin := sdk.NewCoin(pool.Denom, sdk.OneInt())
+	oneCoin := sdk.NewCoin(params.StakeDenom, sdk.OneInt())
 	if !(pool.IsLT(oneCoin) || pool.IsEqual(oneCoin)) {
 		return ErrNonEmptyRewardPool(pool)
 	}
