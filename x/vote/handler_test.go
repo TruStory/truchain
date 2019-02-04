@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"testing"
 
+	params "github.com/TruStory/truchain/parameters"
 	"github.com/TruStory/truchain/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/stretchr/testify/assert"
@@ -16,7 +17,7 @@ func TestCreateVoteMsg(t *testing.T) {
 	assert.NotNil(t, h)
 
 	storyID := createFakeStory(ctx, k.storyKeeper, ck)
-	amount := sdk.NewCoin("trudex", sdk.NewInt(15000000000))
+	amount := sdk.NewCoin(params.StakeDenom, sdk.NewInt(15000000000))
 	creator := sdk.AccAddress([]byte{1, 2})
 
 	// give user some funds

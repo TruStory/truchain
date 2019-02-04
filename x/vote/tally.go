@@ -1,6 +1,7 @@
 package vote
 
 import (
+	params "github.com/TruStory/truchain/parameters"
 	app "github.com/TruStory/truchain/types"
 	"github.com/TruStory/truchain/x/backing"
 	"github.com/TruStory/truchain/x/game"
@@ -93,7 +94,7 @@ func rewardPool(
 	if !ok {
 		return pool, ErrInvalidVote(v, "Initializing reward pool")
 	}
-	pool = sdk.NewCoin(v.Amount().Denom, sdk.ZeroInt())
+	pool = sdk.NewCoin(params.StakeDenom, sdk.ZeroInt())
 
 	if confirmed {
 		err = confirmedPool(ctx, votes.falseVotes, &pool)

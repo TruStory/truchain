@@ -11,6 +11,7 @@ import (
 
 	"github.com/TruStory/truchain/x/game"
 
+	params "github.com/TruStory/truchain/parameters"
 	c "github.com/TruStory/truchain/x/category"
 	"github.com/TruStory/truchain/x/story"
 	"github.com/cosmos/cosmos-sdk/store"
@@ -119,8 +120,7 @@ func fakeFundedCreator(ctx sdk.Context, k bank.Keeper) sdk.AccAddress {
 	rand.Read(bz)
 	creator := sdk.AccAddress(bz)
 
-	// give user some category coins
-	amount := sdk.NewCoin("trudex", sdk.NewInt(2000000000000))
+	amount := sdk.NewCoin(params.StakeDenom, sdk.NewInt(2000000000000))
 	k.AddCoins(ctx, creator, sdk.Coins{amount})
 
 	return creator
