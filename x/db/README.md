@@ -27,6 +27,18 @@ brew services start postgresql
 createdb trudb
 ```
 
+With Docker:
+
+```sh
+# Starts a new container in the background and creates `trudb` database
+docker run --name trudb \
+-e POSTGRES_DB=trudb \
+-e POSTGRES_USER=postgres \
+-e POSTGRES_PASSWORD=postgres \
+-p 5432:5432 \
+-d postgres:11.1
+```
+
 
 Create a `.env` with the following variables for local setup:
 
