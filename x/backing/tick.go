@@ -106,13 +106,13 @@ func (k Keeper) isGameInList(gameList list.List, gameID int64) bool {
 func (k Keeper) distributeEarnings(ctx sdk.Context, backing Backing) sdk.Error {
 	logger := ctx.Logger().With("module", "backing")
 
-	// give the principal back to the user in category coins
+	// give the principal back to the user (in trustake)
 	_, _, err := k.bankKeeper.AddCoins(ctx, backing.Creator(), sdk.Coins{backing.Amount()})
 	if err != nil {
 		return err
 	}
 
-	// give the interest earned to the user in category coins
+	// give the interest earned to the user (in cred)
 	_, _, err = k.bankKeeper.AddCoins(ctx, backing.Creator(), sdk.Coins{backing.Interest})
 	if err != nil {
 		return err
