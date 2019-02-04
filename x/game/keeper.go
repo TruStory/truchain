@@ -8,6 +8,7 @@ import (
 
 	"github.com/cosmos/cosmos-sdk/x/bank"
 
+	params "github.com/TruStory/truchain/parameters"
 	app "github.com/TruStory/truchain/types"
 	"github.com/TruStory/truchain/x/story"
 	list "github.com/cosmos/cosmos-sdk/store"
@@ -88,23 +89,14 @@ func (k Keeper) Create(
 		return 0, ErrExists(storyID)
 	}
 
-	// create an initial empty challenge pool
-	coinName, err := k.storyKeeper.CategoryDenom(ctx, storyID)
-	if err != nil {
-		return 0, err
-	}
-
-	params := DefaultParams()
-	emptyPool := sdk.NewCoin(coinName, sdk.ZeroInt())
-
 	// create new game type
 	game := Game{
 		ID:                  k.GetNextID(ctx),
 		StoryID:             storyID,
 		Creator:             creator,
-		ChallengeExpireTime: ctx.BlockHeader().Time.Add(params.Expires),
+		ChallengeExpireTime: ctx.BlockHeader().Time.Add(DefaultParams().Expires),
 		VotingEndTime:       time.Time{},
-		ChallengePool:       emptyPool,
+		ChallengePool:       sdk.NewCoin(params.StakeDenom, sdk.ZeroInt()),
 		Timestamp:           app.NewTimestamp(ctx.BlockHeader()),
 	}
 

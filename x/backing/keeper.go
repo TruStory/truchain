@@ -318,12 +318,7 @@ func (k Keeper) TotalBackingAmount(ctx sdk.Context, storyID int64) (
 		return
 	}
 
-	denom, err := k.storyKeeper.CategoryDenom(ctx, storyID)
-	if err != nil {
-		return
-	}
-
-	return sdk.NewCoin(denom, totalAmount), nil
+	return sdk.NewCoin(params.StakeDenom, totalAmount), nil
 }
 
 // ============================================================================

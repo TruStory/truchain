@@ -90,21 +90,16 @@ func (k Keeper) Create(
 
 	logger := ctx.Logger().With("module", "challenge")
 
-	// check is user has the coins they are staking
+	if amount.Denom != params.StakeDenom {
+		return 0, sdk.ErrInvalidCoins("Invalid backing token.")
+	}
+
 	if !k.bankKeeper.HasCoins(ctx, creator, sdk.Coins{amount}) {
-		return 0, sdk.ErrInsufficientFunds("Insufficient funds for challenging story.")
+		return 0, sdk.ErrInsufficientFunds("Insufficient funds for challenge.")
 	}
-
-	// get category coin name
-	coinName, err := k.storyKeeper.CategoryDenom(ctx, storyID)
-	if err != nil {
-		return
-	}
-
-	catCoin := app.NewCategoryCoin(coinName, amount)
 
 	// check if challenge amount is greater than minimum stake
-	if catCoin.Amount.LT(game.DefaultParams().MinChallengeStake) {
+	if amount.Amount.LT(game.DefaultParams().MinChallengeStake) {
 		return 0, sdk.ErrInsufficientFunds("Does not meet minimum stake amount.")
 	}
 
@@ -131,7 +126,7 @@ func (k Keeper) Create(
 	// create implicit false vote
 	vote := app.Vote{
 		ID:        k.GetNextID(ctx),
-		Amount:    catCoin,
+		Amount:    amount,
 		Argument:  argument,
 		Creator:   creator,
 		Vote:      false,
@@ -149,25 +144,20 @@ func (k Keeper) Create(
 	// persist challenge <-> game mapping
 	k.challengeList.Append(ctx, k, gameID, creator, challenge.ID())
 
-	// convert from trustake if needed
-	if amount.Denom == params.StakeDenom {
-		err = app.SwapCoin(ctx, k.bankKeeper, amount, catCoin, creator)
-	}
-
 	// deduct challenge amount from user
-	_, _, err = k.bankKeeper.SubtractCoins(ctx, creator, sdk.Coins{catCoin})
+	_, _, err = k.bankKeeper.SubtractCoins(ctx, creator, sdk.Coins{amount})
 	if err != nil {
 		return 0, err
 	}
 
 	// add another amount to the challenge pool
-	err = k.gameKeeper.AddToChallengePool(ctx, gameID, catCoin)
+	err = k.gameKeeper.AddToChallengePool(ctx, gameID, amount)
 	if err != nil {
 		return 0, err
 	}
 
 	msg := fmt.Sprintf("Challenged story %d with %s by %s",
-		storyID, catCoin.String(), creator.String())
+		storyID, amount.String(), creator.String())
 	logger.Info(msg)
 
 	return challenge.ID(), nil

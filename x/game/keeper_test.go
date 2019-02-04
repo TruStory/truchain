@@ -4,6 +4,7 @@ import (
 	"testing"
 	"time"
 
+	params "github.com/TruStory/truchain/parameters"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/stretchr/testify/assert"
 )
@@ -26,12 +27,12 @@ func TestRegisterChallengeNoBackersMeetMinChallenge(t *testing.T) {
 	storyID := createFakeStory(ctx, k.storyKeeper, categoryKeeper)
 	gameID, _ := k.Create(ctx, storyID, creator)
 
-	amount, _ := sdk.ParseCoin("50trudex")
+	amount := sdk.NewCoin(params.StakeDenom, sdk.NewInt(5000000))
 	err := k.AddToChallengePool(ctx, gameID, amount)
 	assert.Nil(t, err)
 
 	game, _ := k.Game(ctx, gameID)
-	assert.Equal(t, sdk.NewInt(50), game.ChallengePool.Amount)
+	assert.Equal(t, sdk.NewInt(5000000), game.ChallengePool.Amount)
 }
 
 func TestRegisterChallengeNoBackersNotMeetMinChallenge(t *testing.T) {
@@ -40,12 +41,12 @@ func TestRegisterChallengeNoBackersNotMeetMinChallenge(t *testing.T) {
 	storyID := createFakeStory(ctx, k.storyKeeper, categoryKeeper)
 	gameID, _ := k.Create(ctx, storyID, creator)
 
-	amount, _ := sdk.ParseCoin("5trudex")
+	amount := sdk.NewCoin(params.StakeDenom, sdk.NewInt(5000000))
 	err := k.AddToChallengePool(ctx, gameID, amount)
 	assert.Nil(t, err)
 
 	game, _ := k.Game(ctx, gameID)
-	assert.Equal(t, sdk.NewInt(5), game.ChallengePool.Amount)
+	assert.Equal(t, sdk.NewInt(5000000), game.ChallengePool.Amount)
 }
 
 func TestRegisterChallengeHaveBackersMeetThreshold(t *testing.T) {
@@ -53,16 +54,16 @@ func TestRegisterChallengeHaveBackersMeetThreshold(t *testing.T) {
 
 	storyID := createFakeStory(ctx, k.storyKeeper, categoryKeeper)
 	gameID, _ := k.Create(ctx, storyID, creator)
-	amount, _ := sdk.ParseCoin("100trudex")
+	amount := sdk.NewCoin(params.StakeDenom, sdk.NewInt(100))
 	argument := "cool story brew"
 
-	// back story with 100trudex
+	// back story with 100trusteak
 	k.bankKeeper.AddCoins(ctx, creator, sdk.Coins{amount})
 	duration := 30 * 24 * time.Hour
 	k.backingKeeper.Create(ctx, storyID, amount, argument, creator, duration)
 
-	// challenge with 33trudex (33% of total backings)
-	amount, _ = sdk.ParseCoin("33trudex")
+	// challenge with 33trusteak (33% of total backings)
+	amount, _ = sdk.ParseCoin("33trusteak")
 	err := k.AddToChallengePool(ctx, gameID, amount)
 	assert.Nil(t, err)
 }
@@ -72,16 +73,16 @@ func TestRegisterChallengeHaveBackersNotMeetThreshold(t *testing.T) {
 
 	storyID := createFakeStory(ctx, k.storyKeeper, categoryKeeper)
 	gameID, _ := k.Create(ctx, storyID, creator)
-	amount, _ := sdk.ParseCoin("100trudex")
+	amount := sdk.NewCoin(params.StakeDenom, sdk.NewInt(100))
 	argument := "cool story brew"
 
-	// back story with 100trudex
+	// back story with 100trusteak
 	k.bankKeeper.AddCoins(ctx, creator, sdk.Coins{amount})
 	duration := 30 * 24 * time.Hour
 	k.backingKeeper.Create(ctx, storyID, amount, argument, creator, duration)
 
-	// challenge with 32trudex (32% of total backings)
-	amount, _ = sdk.ParseCoin("32trudex")
+	// challenge with 32truteak (32% of total backings)
+	amount = sdk.NewCoin(params.StakeDenom, sdk.NewInt(32))
 	err := k.AddToChallengePool(ctx, gameID, amount)
 	assert.Nil(t, err)
 }
@@ -99,9 +100,9 @@ func TestSetGame(t *testing.T) {
 
 func Test_challengeThresholdNoBacking(t *testing.T) {
 	_, k, _ := mockDB()
-	amt := k.ChallengeThreshold(sdk.NewCoin("trudex", sdk.ZeroInt()))
+	amt := k.ChallengeThreshold(sdk.NewCoin(params.StakeDenom, sdk.ZeroInt()))
 
-	assert.Equal(t, "10000000000trudex", amt.String())
+	assert.Equal(t, "10000000000trusteak", amt.String())
 }
 
 // challenge threshold should not go below min challenge stake
@@ -110,16 +111,16 @@ func Test_challengeThresholdNoBacking(t *testing.T) {
 // then instead
 func Test_challengeThresholdWithSmallBacking(t *testing.T) {
 	_, k, _ := mockDB()
-	amt := k.ChallengeThreshold(sdk.NewCoin("trudex", sdk.NewInt(21000000000)))
+	amt := k.ChallengeThreshold(sdk.NewCoin(params.StakeDenom, sdk.NewInt(21000000000)))
 
-	assert.Equal(t, "10000000000trudex", amt.String())
+	assert.Equal(t, "10000000000trusteak", amt.String())
 }
 
 func Test_challengeThresholdWithBacking(t *testing.T) {
 	_, k, _ := mockDB()
-	amt := k.ChallengeThreshold(sdk.NewCoin("trudex", sdk.NewInt(100000000000)))
+	amt := k.ChallengeThreshold(sdk.NewCoin(params.StakeDenom, sdk.NewInt(100000000000)))
 
-	assert.Equal(t, "33000000000trudex", amt.String())
+	assert.Equal(t, "33000000000trusteak", amt.String())
 }
 
 func Test_start(t *testing.T) {
@@ -127,16 +128,16 @@ func Test_start(t *testing.T) {
 
 	storyID := createFakeStory(ctx, k.storyKeeper, categoryKeeper)
 	gameID, _ := k.Create(ctx, storyID, creator)
-	amount, _ := sdk.ParseCoin("100000000000trudex")
+	amount := sdk.NewCoin(params.StakeDenom, sdk.NewInt(100000000000))
 	argument := "cool story brew"
 
-	// back story with 100trudex
+	// back story with 100trusteak
 	k.bankKeeper.AddCoins(ctx, creator, sdk.Coins{amount})
 	duration := 30 * 24 * time.Hour
 	k.backingKeeper.Create(ctx, storyID, amount, argument, creator, duration)
 
-	// challenge with 33trudex (33% of total backings)
-	amount, _ = sdk.ParseCoin("33000000000trudex")
+	// challenge with 33trusteak (33% of total backings)
+	amount = sdk.NewCoin(params.StakeDenom, sdk.NewInt(33000000000))
 	err := k.AddToChallengePool(ctx, gameID, amount)
 	assert.Nil(t, err)
 

@@ -4,7 +4,9 @@ import (
 	"fmt"
 	"testing"
 
+	params "github.com/TruStory/truchain/parameters"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/davecgh/go-spew/spew"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -19,7 +21,7 @@ func TestNewGetChallenge(t *testing.T) {
 	ctx, k, sk, ck, bankKeeper := mockDB()
 
 	storyID := createFakeStory(ctx, sk, ck)
-	amount := sdk.NewCoin("trudex", sdk.NewInt(15000000000))
+	amount := sdk.NewCoin(params.StakeDenom, sdk.NewInt(15000000000))
 	argument := "test argument is long enough"
 	creator := sdk.AccAddress([]byte{1, 2})
 
@@ -39,7 +41,7 @@ func TestNewGetChallengeUsingTruStake(t *testing.T) {
 	ctx, k, sk, ck, bankKeeper := mockDB()
 
 	storyID := createFakeStory(ctx, sk, ck)
-	amount := sdk.NewCoin("trusteak", sdk.NewInt(15000000000))
+	amount := sdk.NewCoin(params.StakeDenom, sdk.NewInt(15000000000))
 	argument := "test argument is long enough"
 	creator := sdk.AccAddress([]byte{1, 2})
 
@@ -52,15 +54,14 @@ func TestNewGetChallengeUsingTruStake(t *testing.T) {
 	challenge, err := k.Challenge(ctx, id)
 	assert.Nil(t, err)
 
-	expectedCoin := sdk.NewCoin("trudex", amount.Amount)
-	assert.Equal(t, expectedCoin, challenge.Amount())
+	assert.Equal(t, amount, challenge.Amount())
 }
 
 func TestChallengesByGameID(t *testing.T) {
 	ctx, k, sk, ck, bankKeeper := mockDB()
 
 	storyID := createFakeStory(ctx, sk, ck)
-	amount := sdk.NewCoin("trudex", sdk.NewInt(15000000000))
+	amount := sdk.NewCoin(params.StakeDenom, sdk.NewInt(15000000000))
 	argument := "test argument is long enough"
 
 	creator := sdk.AccAddress([]byte{1, 2})
@@ -81,7 +82,7 @@ func TestChallengesByStoryIDAndCreator(t *testing.T) {
 	ctx, k, sk, ck, bankKeeper := mockDB()
 
 	storyID := createFakeStory(ctx, sk, ck)
-	amount := sdk.NewCoin("trudex", sdk.NewInt(15000000000))
+	amount := sdk.NewCoin(params.StakeDenom, sdk.NewInt(15000000000))
 	argument := "test argument is long enough"
 
 	creator := sdk.AccAddress([]byte{1, 2})
@@ -97,7 +98,7 @@ func TestTally(t *testing.T) {
 	ctx, k, sk, ck, bankKeeper := mockDB()
 
 	storyID := createFakeStory(ctx, sk, ck)
-	amount := sdk.NewCoin("trudex", sdk.NewInt(15000000000))
+	amount := sdk.NewCoin(params.StakeDenom, sdk.NewInt(15000000000))
 	argument := "test argument is long enough"
 
 	creator := sdk.AccAddress([]byte{1, 2})
@@ -118,19 +119,19 @@ func TestNewChallenge_Duplicate(t *testing.T) {
 	ctx, k, sk, ck, bankKeeper := mockDB()
 
 	storyID := createFakeStory(ctx, sk, ck)
-	amount := sdk.NewCoin("trudex", sdk.NewInt(50000000000))
+	amount := sdk.NewCoin(params.StakeDenom, sdk.NewInt(50000000000))
 	argument := "test argument is long enough"
 	creator := sdk.AccAddress([]byte{1, 2})
 
 	// give user some funds
-	bankKeeper.AddCoins(ctx, creator, sdk.Coins{amount})
+	bankKeeper.AddCoins(ctx, creator, sdk.Coins{amount.Plus(amount)})
 
 	challengeAmount, _ := sdk.ParseCoin("10000000000trudex")
 
 	_, err := k.Create(ctx, storyID, challengeAmount, argument, creator)
 	assert.Nil(t, err)
 
-	_, err = k.Create(ctx, storyID, challengeAmount, argument, creator)
+	_, err = k.Create(ctx, storyID, amount, argument, creator)
 	assert.NotNil(t, err)
 	assert.Equal(t, ErrDuplicateChallenge(5, creator).Code(), err.Code())
 }
@@ -139,7 +140,7 @@ func TestNewChallenge_MultipleChallengers(t *testing.T) {
 	ctx, k, sk, ck, bankKeeper := mockDB()
 
 	storyID := createFakeStory(ctx, sk, ck)
-	amount := sdk.NewCoin("trudex", sdk.NewInt(50000000000))
+	amount := sdk.NewCoin(params.StakeDenom, sdk.NewInt(50000000000))
 	argument := "test argument is long enough"
 	creator1 := sdk.AccAddress([]byte{1, 2})
 	creator2 := sdk.AccAddress([]byte{3, 4})
@@ -149,8 +150,10 @@ func TestNewChallenge_MultipleChallengers(t *testing.T) {
 	bankKeeper.AddCoins(ctx, creator2, sdk.Coins{amount})
 
 	challengeAmount, _ := sdk.ParseCoin("10000000000trudex")
+	// challengeAmount, _ := sdk.ParseCoin("10trudex")
+	// challengeAmount := sdk.NewCoin("trudex", sdk.NewInt(10000000))
 
-	id, err := k.Create(ctx, storyID, challengeAmount, argument, creator1)
+	id, err := k.Create(ctx, storyID, amount, argument, creator1)
 	assert.Nil(t, err)
 
 	challenge, _ := k.Challenge(ctx, id)
@@ -163,7 +166,8 @@ func TestNewChallenge_MultipleChallengers(t *testing.T) {
 	story, _ := k.storyKeeper.Story(ctx, storyID)
 	game, _ := k.gameKeeper.Game(ctx, story.GameID)
 
-	assert.True(t, game.ChallengePool.IsEqual(challengeAmount.Plus(amount)))
+	spew.Dump(game.ChallengePool)
+	assert.True(t, game.ChallengePool.IsEqual(amount.Plus(amount)))
 }
 
 func TestNewChallenge_ErrIncorrectCategoryCoin(t *testing.T) {
