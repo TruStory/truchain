@@ -54,7 +54,8 @@ func (g Game) IsVotingFinished(blockTime time.Time, quorum int) bool {
 // Params holds default parameters for a game
 type Params struct {
 	ChallengeToBackingRatio sdk.Dec       // % backings at which game begins
-	MinChallengeStake       sdk.Int       // min amount required to challenge
+	MinChallengeThreshold   sdk.Int       // min amount required to start a game
+	MinChallengeStake       sdk.Int       // min amount required to join a challenge
 	Expires                 time.Duration // time to expire if threshold not met
 	VotingPeriod            time.Duration // length of challenge game / voting period
 	VoteQuorum              int           // num voters (BCV) required
@@ -64,7 +65,8 @@ type Params struct {
 func DefaultParams() Params {
 	return Params{
 		ChallengeToBackingRatio: sdk.NewDecWithPrec(33, 2), // 33%
-		MinChallengeStake:       sdk.NewInt(10),
+		MinChallengeThreshold:   sdk.NewInt(10000000000),   // 10 trustake
+		MinChallengeStake:       sdk.NewInt(1000000000),    //  1 trustake
 		// Expires:                 10 * 24 * time.Hour,
 		// VotingPeriod:            1 * 24 * time.Hour,
 		// VoteQuorum:              7,
