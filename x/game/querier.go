@@ -9,9 +9,9 @@ import (
 
 // query endpoints supported by the truchain Querier
 const (
-	QueryPath                       = "games"
-	QueryGameByID                   = "id"
-	QueryChallengeThresholdByGameID = "challengeThresholdByGameID"
+	QueryPath                        = "games"
+	QueryGameByID                    = "id"
+	QueryChallengeThresholdByStoryID = "challengeThresholdByStoryID"
 )
 
 // QueryGameByIDParams are params for stories by category queries
@@ -27,8 +27,8 @@ func NewQuerier(
 		switch path[0] {
 		case QueryGameByID:
 			return queryGameByID(ctx, req, gameKeeper)
-		case QueryChallengeThresholdByGameID:
-			return queryChallengeThresholdByGameID(ctx, req, gameKeeper, backingKeeper)
+		case QueryChallengeThresholdByStoryID:
+			return queryChallengeThresholdByStoryID(ctx, req, gameKeeper, backingKeeper)
 		default:
 			return nil, sdk.ErrUnknownRequest("Unknown truchain query endpoint")
 		}
@@ -55,7 +55,7 @@ func queryGameByID(
 	return app.MustMarshal(game), nil
 }
 
-func queryChallengeThresholdByGameID(
+func queryChallengeThresholdByStoryID(
 	ctx sdk.Context,
 	req abci.RequestQuery,
 	gameKeeper ReadKeeper,
@@ -67,13 +67,8 @@ func queryChallengeThresholdByGameID(
 		return
 	}
 
-	game, err := gameKeeper.Game(ctx, params.ID)
-	if err != nil {
-		return
-	}
-
 	// get the total of all backings on story
-	totalBackingAmount, err := backingKeeper.TotalBackingAmount(ctx, game.StoryID)
+	totalBackingAmount, err := backingKeeper.TotalBackingAmount(ctx, params.ID)
 	if err != nil {
 		return nil, err
 	}

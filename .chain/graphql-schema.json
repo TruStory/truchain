@@ -1283,6 +1283,22 @@
             "deprecationReason": "",
             "description": "",
             "isDeprecated": false,
+            "name": "challengeThreshold",
+            "type": {
+              "kind": "NON_NULL",
+              "name": "",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "Coin",
+                "ofType": null
+              }
+            }
+          },
+          {
+            "args": [],
+            "deprecationReason": "",
+            "description": "",
+            "isDeprecated": false,
             "name": "challenges",
             "type": {
               "kind": "NON_NULL",
