@@ -125,12 +125,13 @@ func (ta *TruAPI) RegisterResolvers() {
 	ta.GraphQLClient.RegisterQueryResolver("params", ta.paramsResolver)
 
 	ta.GraphQLClient.RegisterObjectResolver("Game", game.Game{}, map[string]interface{}{
-		"id":                 func(_ context.Context, q game.Game) int64 { return q.ID },
-		"creator":            func(ctx context.Context, q game.Game) users.User { return getUser(ctx, q.Creator) },
-		"challengePool":      func(_ context.Context, q game.Game) sdk.Coin { return q.ChallengePool },
-		"challengeThreshold": ta.challengeThresholdResolver,
-		"totalVoteAmount":    ta.votesTotalAmountResolver,
+		"id":              func(_ context.Context, q game.Game) int64 { return q.ID },
+		"creator":         func(ctx context.Context, q game.Game) users.User { return getUser(ctx, q.Creator) },
+		"challengePool":   func(_ context.Context, q game.Game) sdk.Coin { return q.ChallengePool },
+		"totalVoteAmount": ta.votesTotalAmountResolver,
 
+		// Deprecated: remove in favor of challengeThreshold on a Story because a challenge threshold exists even when a game does not
+		"challengeThreshold": func(_ context.Context, q game.Game) sdk.Coin { return sdk.Coin{} },
 		// Deprecated: remove in favor of the auto-resolving field `challengeExpireTime`
 		"expiresTime": func(_ context.Context, q game.Game) time.Time { return q.ChallengeExpireTime },
 		// Deprecated: remove in favor of the auto-resolving field `votingEndTime`
@@ -140,16 +141,17 @@ func (ta *TruAPI) RegisterResolvers() {
 	ta.GraphQLClient.RegisterQueryResolver("stories", ta.allStoriesResolver)
 	ta.GraphQLClient.RegisterQueryResolver("story", ta.storyResolver)
 	ta.GraphQLClient.RegisterObjectResolver("Story", story.Story{}, map[string]interface{}{
-		"id":           func(_ context.Context, q story.Story) int64 { return q.ID },
-		"backings":     func(ctx context.Context, q story.Story) []backing.Backing { return getBackings(ctx, q.ID) },
-		"challenges":   func(ctx context.Context, q story.Story) []challenge.Challenge { return getChallenges(ctx, q.GameID) },
-		"backingTotal": ta.backingTotalResolver,
-		"category":     ta.storyCategoryResolver,
-		"creator":      func(ctx context.Context, q story.Story) users.User { return getUser(ctx, q.Creator) },
-		"source":       func(ctx context.Context, q story.Story) string { return q.Source.String() },
-		"argument":     func(ctx context.Context, q story.Story) string { return q.Argument },
-		"game":         ta.gameResolver,
-		"votes":        func(ctx context.Context, q story.Story) []vote.TokenVote { return getVotes(ctx, q.GameID) },
+		"id":                 func(_ context.Context, q story.Story) int64 { return q.ID },
+		"backings":           func(ctx context.Context, q story.Story) []backing.Backing { return getBackings(ctx, q.ID) },
+		"challenges":         func(ctx context.Context, q story.Story) []challenge.Challenge { return getChallenges(ctx, q.GameID) },
+		"backingTotal":       ta.backingTotalResolver,
+		"challengeThreshold": ta.challengeThresholdResolver,
+		"category":           ta.storyCategoryResolver,
+		"creator":            func(ctx context.Context, q story.Story) users.User { return getUser(ctx, q.Creator) },
+		"source":             func(ctx context.Context, q story.Story) string { return q.Source.String() },
+		"argument":           func(ctx context.Context, q story.Story) string { return q.Argument },
+		"game":               ta.gameResolver,
+		"votes":              func(ctx context.Context, q story.Story) []vote.TokenVote { return getVotes(ctx, q.GameID) },
 
 		// Deprecated: now part of argument
 		"evidence": func(ctx context.Context, q story.Story) []url.URL { return []url.URL{} },
