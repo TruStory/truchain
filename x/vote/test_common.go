@@ -167,15 +167,15 @@ func fakeValidationGame() (ctx sdk.Context, votes poll, k Keeper) {
 	k.backingKeeper.Update(ctx, b1)
 
 	b2, _ := k.backingKeeper.Backing(ctx, b2id)
-	b2.Interest = sdk.NewCoin("trudex", sdk.NewInt(500000000000))
+	b2.Interest = sdk.NewCoin(params.StakeDenom, sdk.NewInt(500000000000))
 	k.backingKeeper.Update(ctx, b2)
 
 	b3, _ := k.backingKeeper.Backing(ctx, b3id)
-	b3.Interest = sdk.NewCoin("trudex", sdk.NewInt(500000000000))
+	b3.Interest = sdk.NewCoin(params.StakeDenom, sdk.NewInt(500000000000))
 	k.backingKeeper.Update(ctx, b3)
 
 	b4, _ := k.backingKeeper.Backing(ctx, b4id)
-	b4.Interest = sdk.NewCoin("trudex", sdk.NewInt(500000000000))
+	b4.Interest = sdk.NewCoin(params.StakeDenom, sdk.NewInt(500000000000))
 	k.backingKeeper.Update(ctx, b4)
 	// change backing vote to FALSE
 	k.backingKeeper.ToggleVote(ctx, b4.ID())
