@@ -16,7 +16,7 @@ func TestCreateVoteMsg(t *testing.T) {
 	assert.NotNil(t, h)
 
 	storyID := createFakeStory(ctx, k.storyKeeper, ck)
-	amount := sdk.NewCoin("trudex", sdk.NewInt(15))
+	amount := sdk.NewCoin("trudex", sdk.NewInt(15000000000))
 	creator := sdk.AccAddress([]byte{1, 2})
 
 	// give user some funds

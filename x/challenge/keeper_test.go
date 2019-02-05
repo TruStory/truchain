@@ -19,7 +19,7 @@ func TestNewGetChallenge(t *testing.T) {
 	ctx, k, sk, ck, bankKeeper := mockDB()
 
 	storyID := createFakeStory(ctx, sk, ck)
-	amount := sdk.NewCoin("trudex", sdk.NewInt(15))
+	amount := sdk.NewCoin("trudex", sdk.NewInt(15000000000))
 	argument := "test argument is long enough"
 	creator := sdk.AccAddress([]byte{1, 2})
 
@@ -39,7 +39,7 @@ func TestNewGetChallengeUsingTruStake(t *testing.T) {
 	ctx, k, sk, ck, bankKeeper := mockDB()
 
 	storyID := createFakeStory(ctx, sk, ck)
-	amount := sdk.NewCoin("trusteak", sdk.NewInt(15))
+	amount := sdk.NewCoin("trusteak", sdk.NewInt(15000000000))
 	argument := "test argument is long enough"
 	creator := sdk.AccAddress([]byte{1, 2})
 
@@ -60,7 +60,7 @@ func TestChallengesByGameID(t *testing.T) {
 	ctx, k, sk, ck, bankKeeper := mockDB()
 
 	storyID := createFakeStory(ctx, sk, ck)
-	amount := sdk.NewCoin("trudex", sdk.NewInt(15))
+	amount := sdk.NewCoin("trudex", sdk.NewInt(15000000000))
 	argument := "test argument is long enough"
 
 	creator := sdk.AccAddress([]byte{1, 2})
@@ -81,7 +81,7 @@ func TestChallengesByStoryIDAndCreator(t *testing.T) {
 	ctx, k, sk, ck, bankKeeper := mockDB()
 
 	storyID := createFakeStory(ctx, sk, ck)
-	amount := sdk.NewCoin("trudex", sdk.NewInt(15))
+	amount := sdk.NewCoin("trudex", sdk.NewInt(15000000000))
 	argument := "test argument is long enough"
 
 	creator := sdk.AccAddress([]byte{1, 2})
@@ -97,7 +97,7 @@ func TestTally(t *testing.T) {
 	ctx, k, sk, ck, bankKeeper := mockDB()
 
 	storyID := createFakeStory(ctx, sk, ck)
-	amount := sdk.NewCoin("trudex", sdk.NewInt(15))
+	amount := sdk.NewCoin("trudex", sdk.NewInt(15000000000))
 	argument := "test argument is long enough"
 
 	creator := sdk.AccAddress([]byte{1, 2})
@@ -118,14 +118,14 @@ func TestNewChallenge_Duplicate(t *testing.T) {
 	ctx, k, sk, ck, bankKeeper := mockDB()
 
 	storyID := createFakeStory(ctx, sk, ck)
-	amount := sdk.NewCoin("trudex", sdk.NewInt(50))
+	amount := sdk.NewCoin("trudex", sdk.NewInt(50000000000))
 	argument := "test argument is long enough"
 	creator := sdk.AccAddress([]byte{1, 2})
 
 	// give user some funds
 	bankKeeper.AddCoins(ctx, creator, sdk.Coins{amount})
 
-	challengeAmount, _ := sdk.ParseCoin("10trudex")
+	challengeAmount, _ := sdk.ParseCoin("10000000000trudex")
 
 	_, err := k.Create(ctx, storyID, challengeAmount, argument, creator)
 	assert.Nil(t, err)
@@ -139,7 +139,7 @@ func TestNewChallenge_MultipleChallengers(t *testing.T) {
 	ctx, k, sk, ck, bankKeeper := mockDB()
 
 	storyID := createFakeStory(ctx, sk, ck)
-	amount := sdk.NewCoin("trudex", sdk.NewInt(50))
+	amount := sdk.NewCoin("trudex", sdk.NewInt(50000000000))
 	argument := "test argument is long enough"
 	creator1 := sdk.AccAddress([]byte{1, 2})
 	creator2 := sdk.AccAddress([]byte{3, 4})
@@ -148,7 +148,7 @@ func TestNewChallenge_MultipleChallengers(t *testing.T) {
 	bankKeeper.AddCoins(ctx, creator1, sdk.Coins{amount})
 	bankKeeper.AddCoins(ctx, creator2, sdk.Coins{amount})
 
-	challengeAmount, _ := sdk.ParseCoin("10trudex")
+	challengeAmount, _ := sdk.ParseCoin("10000000000trudex")
 
 	id, err := k.Create(ctx, storyID, challengeAmount, argument, creator1)
 	assert.Nil(t, err)
@@ -170,7 +170,7 @@ func TestNewChallenge_ErrIncorrectCategoryCoin(t *testing.T) {
 	ctx, k, sk, ck, _ := mockDB()
 
 	storyID := createFakeStory(ctx, sk, ck)
-	amount := sdk.NewCoin("testcoin", sdk.NewInt(15))
+	amount := sdk.NewCoin("testcoin", sdk.NewInt(15000000000))
 	argument := "test argument"
 	creator := sdk.AccAddress([]byte{1, 2})
 

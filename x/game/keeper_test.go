@@ -101,7 +101,7 @@ func Test_challengeThresholdNoBacking(t *testing.T) {
 	_, k, _ := mockDB()
 	amt := k.ChallengeThreshold(sdk.NewCoin("trudex", sdk.ZeroInt()))
 
-	assert.Equal(t, "10trudex", amt.String())
+	assert.Equal(t, "10000000000trudex", amt.String())
 }
 
 // challenge threshold should not go below min challenge stake
@@ -110,16 +110,16 @@ func Test_challengeThresholdNoBacking(t *testing.T) {
 // then instead
 func Test_challengeThresholdWithSmallBacking(t *testing.T) {
 	_, k, _ := mockDB()
-	amt := k.ChallengeThreshold(sdk.NewCoin("trudex", sdk.NewInt(21)))
+	amt := k.ChallengeThreshold(sdk.NewCoin("trudex", sdk.NewInt(21000000000)))
 
-	assert.Equal(t, "10trudex", amt.String())
+	assert.Equal(t, "10000000000trudex", amt.String())
 }
 
 func Test_challengeThresholdWithBacking(t *testing.T) {
 	_, k, _ := mockDB()
-	amt := k.ChallengeThreshold(sdk.NewCoin("trudex", sdk.NewInt(100)))
+	amt := k.ChallengeThreshold(sdk.NewCoin("trudex", sdk.NewInt(100000000000)))
 
-	assert.Equal(t, "33trudex", amt.String())
+	assert.Equal(t, "33000000000trudex", amt.String())
 }
 
 func Test_start(t *testing.T) {
@@ -127,7 +127,7 @@ func Test_start(t *testing.T) {
 
 	storyID := createFakeStory(ctx, k.storyKeeper, categoryKeeper)
 	gameID, _ := k.Create(ctx, storyID, creator)
-	amount, _ := sdk.ParseCoin("100trudex")
+	amount, _ := sdk.ParseCoin("100000000000trudex")
 	argument := "cool story brew"
 
 	// back story with 100trudex
@@ -136,7 +136,7 @@ func Test_start(t *testing.T) {
 	k.backingKeeper.Create(ctx, storyID, amount, argument, creator, duration)
 
 	// challenge with 33trudex (33% of total backings)
-	amount, _ = sdk.ParseCoin("33trudex")
+	amount, _ = sdk.ParseCoin("33000000000trudex")
 	err := k.AddToChallengePool(ctx, gameID, amount)
 	assert.Nil(t, err)
 
