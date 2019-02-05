@@ -24,6 +24,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/auth"
 	"github.com/cosmos/cosmos-sdk/x/bank"
 	"github.com/cosmos/cosmos-sdk/x/ibc"
+	sdkparams "github.com/cosmos/cosmos-sdk/x/params"
 	"github.com/joho/godotenv"
 	"github.com/spf13/viper"
 	abci "github.com/tendermint/tendermint/abci/types"
@@ -63,12 +64,15 @@ type TruChain struct {
 	keyMain            *sdk.KVStoreKey
 	keyStory           *sdk.KVStoreKey
 	keyVote            *sdk.KVStoreKey
+	keyParams          *sdk.KVStoreKey
+	tkeyParams         *sdk.TransientStoreKey
 
 	// manage getting and setting accounts
 	accountKeeper       auth.AccountKeeper
 	feeCollectionKeeper auth.FeeCollectionKeeper
 	coinKeeper          bank.Keeper
 	ibcMapper           ibc.Mapper
+	paramsKeeper        sdkparams.Keeper
 
 	// access truchain database
 	storyKeeper     story.WriteKeeper
@@ -124,19 +128,21 @@ func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *T
 		categories:         categories,
 		codec:              codec,
 		BaseApp:            bam.NewBaseApp(params.AppName, logger, db, auth.DefaultTxDecoder(codec), options...),
-		keyMain:            sdk.NewKVStoreKey("main"),
-		keyAccount:         sdk.NewKVStoreKey("acc"),
+		keyMain:            sdk.NewKVStoreKey(bam.MainStoreKey),
+		keyAccount:         sdk.NewKVStoreKey(auth.StoreKey),
 		keyIBC:             sdk.NewKVStoreKey("ibc"),
-		keyStory:           sdk.NewKVStoreKey("stories"),
-		keyCategory:        sdk.NewKVStoreKey("categories"),
-		keyBacking:         sdk.NewKVStoreKey("backings"),
-		keyBackingList:     sdk.NewKVStoreKey("backingList"),
-		keyChallenge:       sdk.NewKVStoreKey("challenges"),
+		keyStory:           sdk.NewKVStoreKey(story.StoreKey),
+		keyCategory:        sdk.NewKVStoreKey(category.StoreKey),
+		keyBacking:         sdk.NewKVStoreKey(backing.StoreKey),
+		keyBackingList:     sdk.NewKVStoreKey(backing.ListStoreKey),
+		keyChallenge:       sdk.NewKVStoreKey(challenge.StoreKey),
 		keyFee:             sdk.NewKVStoreKey("collectedFees"),
-		keyGame:            sdk.NewKVStoreKey("game"),
-		keyPendingGameList: sdk.NewKVStoreKey("pendingGameList"),
-		keyGameQueue:       sdk.NewKVStoreKey("gameQueue"),
-		keyVote:            sdk.NewKVStoreKey("vote"),
+		keyGame:            sdk.NewKVStoreKey(game.StoreKey),
+		keyPendingGameList: sdk.NewKVStoreKey(game.PendingListStoreKey),
+		keyGameQueue:       sdk.NewKVStoreKey(game.QueueStoreKey),
+		keyVote:            sdk.NewKVStoreKey(vote.StoreKey),
+		keyParams:          sdk.NewKVStoreKey(sdkparams.StoreKey),
+		tkeyParams:         sdk.NewTransientStoreKey(sdkparams.TStoreKey),
 		api:                nil,
 		apiStarted:         false,
 		blockCtx:           nil,
@@ -144,14 +150,18 @@ func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *T
 		registrarKey:       loadRegistrarKey(),
 	}
 
+	app.paramsKeeper = sdkparams.NewKeeper(codec, app.keyParams, app.tkeyParams)
+
 	// define and attach the mappers and keepers
 	app.accountKeeper = auth.NewAccountKeeper(
 		codec,
-		app.keyAccount,        // target store
+		app.keyAccount, // target store,
+		app.paramsKeeper.Subspace(auth.DefaultParamspace),
 		auth.ProtoBaseAccount, // prototype
 	)
+
 	app.coinKeeper = bank.NewBaseKeeper(app.accountKeeper)
-	app.ibcMapper = ibc.NewMapper(app.codec, app.keyIBC, app.RegisterCodespace(ibc.DefaultCodespace))
+	app.ibcMapper = ibc.NewMapper(app.codec, app.keyIBC, ibc.DefaultCodespace)
 	app.feeCollectionKeeper = auth.NewFeeCollectionKeeper(app.codec, app.keyFee)
 
 	// wire up keepers
@@ -232,13 +242,20 @@ func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *T
 	app.SetEndBlocker(app.EndBlocker)
 	app.SetAnteHandler(auth.NewAnteHandler(app.accountKeeper, app.feeCollectionKeeper))
 
-	// set fee for spam prevention and validator rewards
-	if params.Features[params.FeeFlag] {
-		app.SetMinimumFees(params.Fee)
-	}
+	//
+	// TODO:
+	// SetMininumFees is now unpexpored
+	// instead minimum gas price is loaded from config/gaid.tom
+	// also there is a refactor in place where
+	// SetMinGasPrices is a new exported function for this purpose (not yet released)
+	// See https://github.com/cosmos/cosmos-sdk/pull/3258
+	//
+	// if params.Features[params.FeeFlag] {
+	// 	app.SetMinGasPrices(params.Fee)
+	// }
 
 	// mount the multistore and load the latest state
-	app.MountStoresIAVL(
+	app.MountStores(
 		app.keyAccount,
 		app.keyBacking,
 		app.keyBackingList,

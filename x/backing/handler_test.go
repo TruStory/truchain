@@ -47,8 +47,8 @@ func TestBackStoryMsg_FailInsufficientFunds(t *testing.T) {
 	assert.NotNil(t, msg)
 
 	res := h(ctx, msg)
-	hasInsufficientFunds := strings.Contains(res.Log, "65541")
-	assert.True(t, hasInsufficientFunds, "should return err code")
+	assert.Equal(t, sdk.CodeInsufficientFunds, res.Code)
+	assert.Equal(t, sdk.CodespaceRoot, res.Codespace)
 }
 
 func TestBackStoryMsg(t *testing.T) {

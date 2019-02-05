@@ -9,7 +9,7 @@ import (
 
 // Story errors reserve 700 ~ 799.
 const (
-	DefaultCodespace sdk.CodespaceType = 9
+	DefaultCodespace sdk.CodespaceType = "backing"
 
 	CodeInvalidPeriod sdk.CodeType = 901
 	CodeQueueEmpty    sdk.CodeType = 902

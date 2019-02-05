@@ -38,17 +38,9 @@ func main() {
 		PersistentPreRunE: server.PersistentPreRunEFn(ctx),
 	}
 
-	appInit := server.DefaultAppInit
-	rootCmd.AddCommand(InitCmd(ctx, cdc, appInit))
-	rootCmd.AddCommand(gaiaInit.TestnetFilesCmd(ctx, cdc, appInit))
-
-	server.AddCommands(
-		ctx,
-		cdc,
-		rootCmd,
-		appInit,
-		newApp,
-		exportAppStateAndTMValidators)
+	rootCmd.AddCommand(InitCmd(ctx, cdc))
+	rootCmd.AddCommand(gaiaInit.TestnetFilesCmd(ctx, cdc))
+	server.AddCommands(ctx, cdc, rootCmd, newApp, exportAppStateAndTMValidators)
 
 	// prepare and add flags
 	rootDir := os.ExpandEnv("$HOME/.truchaind")
@@ -63,13 +55,12 @@ func main() {
 
 // InitCmd get cmd to initialize all files for tendermint and application
 // nolint: errcheck
-func InitCmd(ctx *server.Context, cdc *codec.Codec, appInit server.AppInit) *cobra.Command {
+func InitCmd(ctx *server.Context, cdc *codec.Codec) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "init",
 		Short: "Initialize genesis config, priv-validator file, and p2p-node file",
 		Args:  cobra.NoArgs,
 		RunE: func(_ *cobra.Command, _ []string) error {
-
 			config := ctx.Config
 			config.SetRoot(viper.GetString(cli.HomeFlag))
 			chainID := viper.GetString(client.FlagChainID)
@@ -83,13 +74,18 @@ func InitCmd(ctx *server.Context, cdc *codec.Codec, appInit server.AppInit) *cob
 			}
 			nodeID := string(nodeKey.ID())
 
-			pk := gaiaInit.ReadOrCreatePrivValidator(config.PrivValidatorFile())
+			// initalize files and upgrades priv_validator file format (< v0.28)
+			_, pk, err := gaiaInit.InitializeNodeValidatorFiles(config)
+			if err != nil {
+				return err
+			}
+
 			genTx, appMessage, validator, err := server.SimpleAppGenTx(cdc, pk)
 			if err != nil {
 				return err
 			}
 
-			appState, err := appInit.AppGenState(
+			appState, err := server.SimpleAppGenState(
 				cdc, tmtypes.GenesisDoc{}, []json.RawMessage{genTx})
 			if err != nil {
 				return err
@@ -130,7 +126,7 @@ func newApp(logger log.Logger, db dbm.DB, _ io.Writer) abci.Application {
 	return app.NewTruChain(logger, db)
 }
 
-func exportAppStateAndTMValidators(logger log.Logger, db dbm.DB, _ io.Writer) (json.RawMessage, []tmtypes.GenesisValidator, error) {
+func exportAppStateAndTMValidators(logger log.Logger, db dbm.DB, _ io.Writer, _ int64, _ bool) (json.RawMessage, []tmtypes.GenesisValidator, error) {
 	bapp := app.NewTruChain(logger, db)
 	return bapp.ExportAppStateAndValidators()
 }
