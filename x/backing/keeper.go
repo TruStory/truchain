@@ -416,6 +416,9 @@ func getInterest(
 	// calculate interest
 	interestRate := maxInterestRate.Mul(weightedAmount.Add(weightedPeriod))
 	// convert rate to a value
+	if interestRate.LT(params.MinInterestRate) {
+		interestRate = params.MinInterestRate
+	}
 	interest := amountDec.Mul(interestRate)
 
 	// return coin with rounded interest
