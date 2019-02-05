@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"time"
 
-	params "github.com/TruStory/truchain/parameters"
+	param "github.com/TruStory/truchain/parameters"
 	app "github.com/TruStory/truchain/types"
 	cat "github.com/TruStory/truchain/x/category"
 	"github.com/TruStory/truchain/x/story"
@@ -110,7 +110,7 @@ func (k Keeper) Create(
 
 	logger := ctx.Logger().With("module", "backing")
 
-	if amount.Denom != params.StakeDenom {
+	if amount.Denom != param.StakeDenom {
 		return 0, sdk.ErrInvalidCoins("Invalid backing token.")
 	}
 
@@ -123,16 +123,6 @@ func (k Keeper) Create(
 		return 0, ErrDuplicate(storyID, creator)
 	}
 
-	story, err := k.storyKeeper.Story(ctx, storyID)
-	if err != nil {
-		return
-	}
-
-	cat, err := k.categoryKeeper.GetCategory(ctx, story.CategoryID)
-	if err != nil {
-		return
-	}
-
 	// subtract principal from user
 	_, _, err = k.bankKeeper.SubtractCoins(ctx, creator, sdk.Coins{amount})
 	if err != nil {
@@ -143,7 +133,7 @@ func (k Keeper) Create(
 
 	// mint category coin from interest earned
 	interest := getInterest(
-		cat, amount, duration, DefaultMsgParams().MaxPeriod, params)
+		amount, duration, DefaultMsgParams().MaxPeriod, params)
 
 	vote := app.Vote{
 		ID:        k.GetNextID(ctx),
@@ -318,7 +308,7 @@ func (k Keeper) TotalBackingAmount(ctx sdk.Context, storyID int64) (
 		return
 	}
 
-	return sdk.NewCoin(params.StakeDenom, totalAmount), nil
+	return sdk.NewCoin(param.StakeDenom, totalAmount), nil
 }
 
 // ============================================================================
@@ -335,7 +325,6 @@ func (k Keeper) setBacking(ctx sdk.Context, backing Backing) {
 
 // getInterest calcuates the interest for the backing
 func getInterest(
-	category cat.Category,
 	amount sdk.Coin,
 	period time.Duration,
 	maxPeriod time.Duration,
@@ -376,7 +365,7 @@ func getInterest(
 	interest := amountDec.Mul(interestRate)
 
 	// return coin with rounded interest
-	cred := sdk.NewCoin(category.Denom(), interest.RoundInt())
+	cred := sdk.NewCoin(param.StakeDenom, interest.RoundInt())
 
 	return cred
 }
