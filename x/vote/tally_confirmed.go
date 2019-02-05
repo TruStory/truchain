@@ -64,7 +64,9 @@ func distributeRewardsConfirmed(
 			rewardCoin := sdk.NewCoin(pool.Denom, voterRewardAmount)
 
 			// remove reward amount from pool
-			pool = pool.Minus(rewardCoin)
+			// TODO: using restored version of Minus in sdk v0.26.0 until issue #325 is resolved
+			// after finshed should be pool.Minus(rewardCoin)
+			pool = subtract(pool, rewardCoin)
 
 			// payout user
 			_, _, err = bankKeeper.AddCoins(ctx, v.Creator(), sdk.Coins{rewardCoin})
@@ -138,4 +140,14 @@ func voterRewardAmount(pool sdk.Coin, voterCount int64) sdk.Int {
 	return poolDec.
 		QuoInt(voterCountInt).
 		RoundInt()
+}
+
+func subtract(coinA, coinB sdk.Coin) sdk.Coin {
+	if !coinA.SameDenomAs(coinB) {
+		return coinA
+	}
+	return sdk.Coin{
+		Denom:  coinA.Denom,
+		Amount: coinA.Amount.Sub(coinB.Amount),
+	}
 }
