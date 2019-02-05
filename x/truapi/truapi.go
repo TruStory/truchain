@@ -14,6 +14,7 @@ import (
 	"github.com/TruStory/truchain/x/db"
 	"github.com/TruStory/truchain/x/game"
 	"github.com/TruStory/truchain/x/graphql"
+	"github.com/TruStory/truchain/x/params"
 	"github.com/TruStory/truchain/x/story"
 	"github.com/TruStory/truchain/x/users"
 	"github.com/TruStory/truchain/x/vote"
@@ -123,6 +124,12 @@ func (ta *TruAPI) RegisterResolvers() {
 	})
 
 	ta.GraphQLClient.RegisterQueryResolver("params", ta.paramsResolver)
+	ta.GraphQLClient.RegisterObjectResolver("Params", params.Params{}, map[string]interface{}{
+		"backingAmountWeight":    func(_ context.Context, p params.Params) string { return p.BackingAmountWeight.String() },
+		"backingPeriodWeight":    func(_ context.Context, p params.Params) string { return p.BackingPeriodWeight.String() },
+		"backingMinInterestRate": func(_ context.Context, p params.Params) string { return p.BackingMinInterestRate.String() },
+		"backingMaxInterestRate": func(_ context.Context, p params.Params) string { return p.BackingMaxInterestRate.String() },
+	})
 
 	ta.GraphQLClient.RegisterObjectResolver("Game", game.Game{}, map[string]interface{}{
 		"id":              func(_ context.Context, q game.Game) int64 { return q.ID },
