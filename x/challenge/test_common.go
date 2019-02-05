@@ -106,7 +106,7 @@ func fakeFundedCreator(ctx sdk.Context, k bank.Keeper) sdk.AccAddress {
 	creator := sdk.AccAddress(bz)
 
 	// give user some category coins
-	amount := sdk.NewCoin("trudex", sdk.NewInt(2000))
+	amount := sdk.NewCoin("trudex", sdk.NewInt(2000000000000))
 	k.AddCoins(ctx, creator, sdk.Coins{amount})
 
 	return creator
@@ -116,8 +116,8 @@ func fakePendingGameQueue() (ctx sdk.Context, k Keeper) {
 	ctx, k, storyKeeper, catKeeper, _ := mockDB()
 
 	storyID := createFakeStory(ctx, storyKeeper, catKeeper)
-	amount := sdk.NewCoin("trudex", sdk.NewInt(1000))
-	trustake := sdk.NewCoin("trusteak", sdk.NewInt(1000))
+	amount := sdk.NewCoin("trudex", sdk.NewInt(1000000000000))
+	trustake := sdk.NewCoin("trusteak", sdk.NewInt(1000000000000))
 	argument := "test argument"
 
 	creator1 := fakeFundedCreator(ctx, k.bankKeeper)
@@ -137,7 +137,7 @@ func fakePendingGameQueue() (ctx sdk.Context, k Keeper) {
 	bk.Create(ctx, storyID, amount, argument, creator4, duration)
 
 	// fake challenges
-	challengeAmount := sdk.NewCoin("trudex", sdk.NewInt(10))
+	challengeAmount := sdk.NewCoin("trudex", sdk.NewInt(10000000000))
 	k.Create(ctx, storyID, challengeAmount, argument, creator1)
 	k.Create(ctx, storyID, challengeAmount, argument, creator2)
 
