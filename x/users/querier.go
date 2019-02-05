@@ -52,7 +52,7 @@ func queryUsersByAddresses(
 	for i, a := range params.Addresses {
 		addr, err := sdk.AccAddressFromBech32(a)
 		if err != nil {
-			return res, sdk.NewError(0, 0, "Error decoding address: "+err.Error())
+			return res, sdk.NewError("users", 0, "Error decoding address: "+err.Error())
 		}
 		account := k.GetAccount(ctx, addr)
 		if account != nil {

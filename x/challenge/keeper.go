@@ -16,6 +16,11 @@ import (
 	amino "github.com/tendermint/go-amino"
 )
 
+const (
+	// StoreKey is string representation of the store key for challenges
+	StoreKey = "challenges"
+)
+
 // ReadKeeper defines a module interface that facilitates read only access to truchain data
 type ReadKeeper interface {
 	app.ReadKeeper

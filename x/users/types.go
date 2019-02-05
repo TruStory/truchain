@@ -9,9 +9,9 @@ import (
 // User is the externally-facing account object
 type User struct {
 	Address       string        `json:"address"`
-	AccountNumber int64         `json:"account_number"`
+	AccountNumber uint64        `json:"account_number"`
 	Coins         sdk.Coins     `json:"coins"`
-	Sequence      int64         `json:"sequence"`
+	Sequence      uint64        `json:"sequence"`
 	Pubkey        tcmn.HexBytes `json:"pubkey"`
 }
 
