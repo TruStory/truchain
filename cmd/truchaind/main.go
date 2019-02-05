@@ -74,7 +74,7 @@ func InitCmd(ctx *server.Context, cdc *codec.Codec) *cobra.Command {
 			}
 			nodeID := string(nodeKey.ID())
 
-			// initalize files and upgrades priv_validator file format (< v0.28)
+			// initialize files and upgrades priv_validator file format (< v0.28)
 			_, pk, err := gaiaInit.InitializeNodeValidatorFiles(config)
 			if err != nil {
 				return err
