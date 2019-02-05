@@ -17,7 +17,7 @@ func TestSubmitChallengeMsg(t *testing.T) {
 	assert.NotNil(t, h)
 
 	storyID := createFakeStory(ctx, sk, ck)
-	amount := sdk.NewCoin("trudex", sdk.NewInt(15))
+	amount := sdk.NewCoin("trudex", sdk.NewInt(15000000000))
 	argument := "test argument"
 	creator := sdk.AccAddress([]byte{1, 2})
 

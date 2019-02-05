@@ -55,7 +55,7 @@ func Test_returnFunds(t *testing.T) {
 	vote := votes.falseVotes[1]
 
 	initialBalance := k.bankKeeper.GetCoins(ctx, vote.Creator())
-	assert.Equal(t, "1000trudex", initialBalance.String())
+	assert.Equal(t, "1000000000000trudex", initialBalance.String())
 
 	err := k.returnFunds(ctx, gameID)
 	assert.Nil(t, err)
