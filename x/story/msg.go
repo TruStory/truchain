@@ -63,9 +63,6 @@ func (msg SubmitStoryMsg) ValidateBasic() sdk.Error {
 	if msg.StoryType.IsValid() == false {
 		return ErrInvalidStoryType(msg.StoryType.String())
 	}
-	if len(msg.Source) == 0 {
-		return ErrInvalidSourceURL(msg.Source)
-	}
 	if len := len([]rune(msg.Argument)); len > 0 && (len < params.MinArgumentLength || len > params.MaxArgumentLength) {
 		return ErrInvalidStoryArgument(msg.Argument)
 	}
