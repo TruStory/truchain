@@ -1,23 +1,3 @@
-1
-[{Vote:{ID:1 Amount:100000regulation Argument:this is an argument Creator:B269349E6BBC046FDC529E13140BEE93AEC3058D Vote:true Timestamp:{CreatedBlock:1 CreatedTime:2018-11-29 02:28:27.057819 +0000 UTC UpdatedBlock:1 UpdatedTime:2018-11-29 02:28:27.057819 +0000 UTC}} StoryID:1 Interest:93regulation Expires:2019-01-30 21:37:42.613428 +0000 UTC Params:{AmountWeight:+3330000000 PeriodWeight:+6670000000 MinInterestRate:+0 MaxInterestRate:+1000000000} Period:1h0m0s}]
-10
-[]
-2
-[]
-3
-[]
-4
-[]
-5
-[]
-6
-[]
-7
-[]
-8
-[]
-9
-[]
 {
   "genesis_time": "2018-11-29T02:28:27.057819Z",
   "chain_id": "test-chain-JHrAIn",
@@ -466,43 +446,8 @@
         "timestamp": {}
       }
     ],
-    "challenges": [
-      {
-        "vote": {
-          "id": "1",
-          "amount": {
-            "denom": "regulation",
-            "amount": "200000"
-          },
-          "argument": "this is an argument",
-          "creator": "cosmos1rn7fh2xy7kecvgcarwa4kqhme86r7ymznn8t8z",
-          "vote": false,
-          "timestamp": {
-            "created_time": "2019-01-30T20:37:42.613536Z",
-            "updated_time": "2019-01-30T20:37:42.613536Z"
-          }
-        }
-      }
-    ],
-    "games": [
-      {
-        "id": "1",
-        "story_id": "1",
-        "creator": "cosmos1rn7fh2xy7kecvgcarwa4kqhme86r7ymznn8t8z",
-        "challenge_pool": {
-          "denom": "regulation",
-          "amount": "200000"
-        },
-        "challenge_expire_time": "2019-01-31T20:37:42.613536Z",
-        "voting_end_time": "2019-01-30T23:37:42.613536Z",
-        "timestamp": {
-          "created_time": "2019-01-30T20:37:42.613536Z",
-          "updated_time": "2019-01-30T20:37:42.613536Z"
-        }
-      }
-    ],
     "backings": {
-      "backing": [
+      "backings": [
         {
           "vote": {
             "id": "1",
@@ -525,7 +470,7 @@
             "denom": "regulation",
             "amount": "93"
           },
-          "expires": "2019-01-30T21:37:42.613428Z",
+          "matures_time": "2019-01-30T21:37:42.613428Z",
           "params": {
             "AmountWeight": "0.3330000000",
             "PeriodWeight": "0.6670000000",
@@ -535,32 +480,50 @@
           "period": "3600000000000"
         }
       ],
-      "unexpired": [
-        {
-          "vote": {
-            "id": "0",
-            "amount": {
-              "denom": "",
-              "amount": "0"
-            },
-            "creator": "cosmos1550dq7",
-            "vote": false,
-            "timestamp": {}
+      "backing_list": null
+    },
+    "challenges": [
+      {
+        "vote": {
+          "id": "1",
+          "amount": {
+            "denom": "regulation",
+            "amount": "200000"
           },
-          "story_id": "0",
-          "interest": {
-            "denom": "",
-            "amount": "0"
-          },
-          "expires": "1970-01-01T00:00:00Z",
-          "params": {
-            "AmountWeight": "0",
-            "PeriodWeight": "0",
-            "MinInterestRate": "0",
-            "MaxInterestRate": "0"
-          },
-          "period": "0"
+          "argument": "this is an argument",
+          "creator": "cosmos1rn7fh2xy7kecvgcarwa4kqhme86r7ymznn8t8z",
+          "vote": false,
+          "timestamp": {
+            "created_time": "2019-01-30T20:37:42.613536Z",
+            "updated_time": "2019-01-30T20:37:42.613536Z"
+          }
         }
+      }
+    ],
+    "games": {
+      "game": [
+        {
+          "id": "1",
+          "story_id": "1",
+          "creator": "cosmos1rn7fh2xy7kecvgcarwa4kqhme86r7ymznn8t8z",
+          "challenge_pool": {
+            "denom": "regulation",
+            "amount": "200000"
+          },
+          "challenge_expire_time": "2019-01-31T20:37:42.613536Z",
+          "voting_end_time": "2019-01-30T23:37:42.613536Z",
+          "timestamp": {
+            "created_time": "2019-01-30T20:37:42.613536Z",
+            "updated_time": "2019-01-30T20:37:42.613536Z"
+          }
+        }
+      ],
+      "pending_games": [
+        "1"
+      ],
+      "game_queue": [
+        "1",
+        "1"
       ]
     },
     "votes": [

@@ -79,8 +79,13 @@ This will utilize the `./truchaind` directory for data store.
 To export the current state of the application to a JSON file:
 
 ```bash
-$ bin/truchaind > filname.json
+$ bin/truchaind export > filname.json
 ```
+
+See [export](docs/export.md) for details on exporting the state.
+
+## Import State
+TODO
 
 ## GraphQL Queries
 You can reach your client at `http://localhost:3030/graphiql/`
@@ -186,3 +191,22 @@ If you run the tests your `./chain/.env` will be replaced. Make sure to replace 
 ## Generate Documentation
 
 `make doc`
+
+## Docker
+Development Docker file defined in `Dockerfile.dev`, to build it:
+```bash
+$ docker build -f Dockerfile.dev -t truchain_dev .
+```
+
+This image contains your exact local copy of `truchain` and it is only intended for local development.
+
+Then you can execute commands by:
+```bash
+$ docker run -it truchain_dev make test
+```
+
+##TODO
+To run daemon with a `postgres` bridge, use `docker-compose`:
+```bash
+$ docker-compose up --build
+```

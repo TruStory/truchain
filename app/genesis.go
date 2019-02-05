@@ -16,24 +16,28 @@ type GenesisState struct {
 	Accounts   []GenesisAccount      `json:"accounts"`
 	Stories    []story.Story         `json:"stories"`
 	Categories []category.Category   `json:"categories"`
-	Challenges []challenge.Challenge `json:"challenges"`
-	Games      []game.Game           `json:"games"`
 	Backings   backing.GenesisState  `json:"backings"`
+	Challenges []challenge.Challenge `json:"challenges"`
+	Games      game.GenesisState     `json:"games"`
 	Votes      []vote.TokenVote      `json:"votes"`
 }
 
 // NewGenesisState retturns the current GenesisState
-func NewGenesisState(accounts []GenesisAccount, storyData []story.Story, categoryData []category.Category,
-	challengeData []challenge.Challenge, gameData []game.Game, backingData backing.GenesisState,
+func NewGenesisState(accounts []GenesisAccount,
+	storyData []story.Story,
+	categoryData []category.Category,
+	backingData backing.GenesisState,
+	challengeData []challenge.Challenge,
+	gameData game.GenesisState,
 	voteData []vote.TokenVote) GenesisState {
 
 	return GenesisState{
 		Accounts:   accounts,
 		Stories:    storyData,
 		Categories: categoryData,
+		Backings:   backingData,
 		Challenges: challengeData,
 		Games:      gameData,
-		Backings:   backingData,
 		Votes:      voteData,
 	}
 }

@@ -5,6 +5,24 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
+// ChallengesByID holds a Challenge struct and its associated Challenge ID
+type ChallengesByID struct {
+	ChallengeID int64       `json:"challenge_id"`
+	Challenge   []Challenge `json:"challenge"`
+}
+
+// Challengers struct contains a creator address asosociated with its challengeID
+type Challengers struct {
+	ChallengeID int64          `json:"challenge_id"`
+	AccAddress  sdk.AccAddress `json:"creator"`
+}
+
+// ChallengersPerGame contains an array of challengers per GameID
+type ChallengersPerGame struct {
+	GameID      int64         `json:"game_id"`
+	Challengers []Challengers `json:"challengers"`
+}
+
 // Challenge defines a user's challenge on a story
 type Challenge struct {
 	app.Vote `json:"vote"`

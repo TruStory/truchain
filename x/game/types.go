@@ -19,6 +19,12 @@ import (
 // * NOT received min quorum (9+ votes)
 // * stake returned
 
+// // PerID contains a game and its gameID
+// type PerID struct {
+// 	GameID int64 `json:"game_id"`
+// 	Game   Game  `json:"game"`
+// }
+
 // Game defines a validation game on a story
 type Game struct {
 	ID                  int64          `json:"id"`

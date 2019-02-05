@@ -34,6 +34,10 @@ type ReadKeeper interface {
 	Tally(ctx sdk.Context, gameID int64) (falseVotes []Challenge, err sdk.Error)
 	Challenges(ctx sdk.Context) (challenges []Challenge)
 	ExportState(ctx sdk.Context, dnh string, bh int64)
+	ChallengesByID(ctx sdk.Context) (challengesByID []ChallengesByID)
+	ChallengersPerGameID(ctx sdk.Context) (challengers []ChallengersPerGame)
+	ChallengersByGameID(
+		ctx sdk.Context, gameID int64) (challengers []Challengers, err sdk.Error)
 }
 
 // WriteKeeper defines a module interface that facilities write only access to truchain data
@@ -207,6 +211,25 @@ func (k Keeper) ChallengesByGameID(
 	return
 }
 
+// ChallengersByGameID returns a Challengers array for a game id
+func (k Keeper) ChallengersByGameID(
+	ctx sdk.Context, gameID int64) (challengers []Challengers, err sdk.Error) {
+
+	// iterate over backing list and get backings
+	err = k.challengeList.Map(ctx, k, gameID, func(challengeID int64) sdk.Error {
+		challenge, err := k.Challenge(ctx, challengeID)
+		if err != nil {
+			return err
+		}
+		challenger := Challengers{ChallengeID: challenge.ID(), AccAddress: challenge.Vote.Creator}
+		challengers = append(challengers, challenger)
+
+		return nil
+	})
+
+	return
+}
+
 // ChallengeByStoryIDAndCreator returns a challenge for a given story id and creator
 func (k Keeper) ChallengeByStoryIDAndCreator(
 	ctx sdk.Context,
@@ -273,6 +296,50 @@ func (k Keeper) Challenges(ctx sdk.Context) (challenges []Challenge) {
 	}
 
 	return challenges
+}
+
+// ChallengersPerGameID ...
+func (k Keeper) ChallengersPerGameID(ctx sdk.Context) (challengers []ChallengersPerGame) {
+	gamesIDs := k.gameKeeper.IterateGames(ctx)
+	for _, id := range gamesIDs {
+		b, _ := k.ChallengersByGameID(ctx, id)
+
+		tempChallengers := ChallengersPerGame{GameID: id, Challengers: b}
+		challengers = append(challengers, tempChallengers)
+
+	}
+	return challengers
+}
+
+// ChallengesByID returns all challenges in the order they appear in the store
+func (k Keeper) ChallengesByID(ctx sdk.Context) (challengesByID []ChallengesByID) {
+
+	// get store
+	store := k.GetStore(ctx)
+
+	// builds prefix "challenges:id"
+	searchKey := fmt.Sprintf("%s:id", k.GetStoreKey().Name())
+	searchPrefix := []byte(searchKey)
+
+	// setup Iterator
+	iter := sdk.KVStorePrefixIterator(store, searchPrefix)
+	defer iter.Close()
+
+	// iterates through keyspace to find all challenges
+	for ; iter.Valid(); iter.Next() {
+		var challenge Challenge
+
+		k.GetCodec().MustUnmarshalBinaryLengthPrefixed(
+			iter.Value(), &challenge)
+
+		challenges, _ := k.ChallengesByGameID(ctx, challenge.ID())
+		tempChallenges := ChallengesByID{ChallengeID: challenge.ID(), Challenge: challenges}
+
+		challengesByID = append(challengesByID, tempChallenges)
+
+	}
+
+	return challengesByID
 }
 
 // ExportState gets all the current challenges and calls app.WriteJSONtoNodeHome() to write data to file.

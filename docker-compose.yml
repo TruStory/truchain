@@ -1,0 +1,25 @@
+version: '3'
+
+services:
+  postgres:
+    image: 'postgres:latest'
+    restart: always
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=TruMisil
+      - POSTGRES_DB=trudb
+  truchain:
+    build:
+      dockerfile: Dockerfile.dev
+      context: ./
+    depends_on:
+      - postgres
+    ports:
+      - "3030:3000"
+    links:
+      - postgres 
+    environment:
+      - PG_ADDR=postgres:5432
+      - PG_USER=postgres
+      - PG_USER_PW=TruMisil
+      - PG_DB_NAME=trudb

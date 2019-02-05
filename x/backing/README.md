@@ -12,7 +12,7 @@
 ### Stores
 * "backings"
     *  keys
-        * `"backings:id:5"` -> `Backing`
+        * `"backings:id:[BackingID]"` -> `Backing`
         * `"backings:unexpired:queue"` -> `[1,2,3]`
         * `"stories:id:[StoryID]:backings:user:[AccAddress]"` -> `[BackingID]`
             * mapping of backers for each story

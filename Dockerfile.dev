@@ -1,0 +1,20 @@
+FROM golang:alpine AS build-env
+
+# Set up dependencies
+ENV PACKAGES curl make git libc-dev bash gcc linux-headers eudev-dev
+ENV GOPATH=/go
+
+# Set working directory for the build
+WORKDIR $GOPATH/src/github.com/TruStory/truchain
+
+# Add source files
+COPY . .
+
+# Install minimum necessary dependencies, build TruChain, remove packages
+RUN apk add --no-cache $PACKAGES && \
+    curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh && \
+    make update_deps && \
+    make buidl
+
+# Run truchaind by default, omit entrypoint to ease using container with trucli
+CMD ["make", "run_daemon"]

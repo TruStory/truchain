@@ -9,7 +9,7 @@
 ### Stores
 * "categories"
     *  keys
-        * `"categories:id:5"` -> `Category`
+        * `"categories:id:[CategoryID]"` -> `Category`
 
 ## Notes
 

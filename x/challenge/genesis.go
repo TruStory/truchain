@@ -1,11 +1,11 @@
 package challenge
 
-import sdk "github.com/cosmos/cosmos-sdk/types"
+import (
+	sdk "github.com/cosmos/cosmos-sdk/types"
+)
 
-// ExportGenesis
+// ExportGenesis ...
 func ExportGenesis(ctx sdk.Context, ck WriteKeeper) []Challenge {
 
-	challenges := ck.Challenges(ctx)
-
-	return challenges
+	return ck.Challenges(ctx)
 }

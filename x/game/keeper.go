@@ -23,6 +23,9 @@ type ReadKeeper interface {
 	Game(ctx sdk.Context, id int64) (game Game, err sdk.Error)
 	ExportState(ctx sdk.Context, dnh string, bh int64)
 	Games(ctx sdk.Context) (games []Game)
+	PendingGames(ctx sdk.Context) (pendingGames []int64)
+	GameQueue(ctx sdk.Context) (gamesQueue []int64)
+	IterateGames(ctx sdk.Context) (gamesID []int64)
 }
 
 // WriteKeeper defines a module interface that facilities write only access to truchain data
@@ -211,13 +214,14 @@ func (k Keeper) Update(ctx sdk.Context, game Game) {
 	k.set(ctx, newGame)
 }
 
-// Games returns all games in the order they appear in the store
+// Games returns all games and their IDS in the order they appear in the store
 func (k Keeper) Games(ctx sdk.Context) (games []Game) {
 	// get store
 	store := k.GetStore(ctx)
 
 	// builds prefix "games:id"
 	searchKey := fmt.Sprintf("%s:id", k.GetStoreKey().Name())
+
 	searchPrefix := []byte(searchKey)
 
 	// setup Iterator
@@ -229,10 +233,69 @@ func (k Keeper) Games(ctx sdk.Context) (games []Game) {
 		var game Game
 		k.GetCodec().MustUnmarshalBinaryLengthPrefixed(
 			iter.Value(), &game)
+
 		games = append(games, game)
 	}
 
 	return games
+}
+
+// IterateGames returns the IDs of all the games
+func (k Keeper) IterateGames(ctx sdk.Context) (gamesID []int64) {
+	// get store
+	store := k.GetStore(ctx)
+
+	// builds prefix "games:id:"
+	searchKey := fmt.Sprintf("%s:id:", k.GetStoreKey().Name())
+	searchPrefix := []byte(searchKey)
+
+	// setup iterator
+	iter := sdk.KVStorePrefixIterator(store, searchPrefix)
+	defer iter.Close()
+
+	// iterates through keyspace to find all stories
+	for ; iter.Valid(); iter.Next() {
+		var game Game
+		k.GetCodec().MustUnmarshalBinaryLengthPrefixed(
+			iter.Value(), &game)
+		gamesID = append(gamesID, game.ID)
+	}
+
+	return gamesID
+}
+
+// PendingGames returns the pending games by ID
+func (k Keeper) PendingGames(ctx sdk.Context) (pendingGames []int64) {
+	pendingListStore := ctx.KVStore(k.pendingListKey)
+	iter := pendingListStore.Iterator(nil, nil)
+	for iter.Valid() {
+		var id int64
+		k.GetCodec().MustUnmarshalBinaryLengthPrefixed(
+			iter.Value(), &id)
+		pendingGames = append(pendingGames, id)
+		iter.Next()
+	}
+
+	iter.Close()
+
+	return pendingGames
+}
+
+// GameQueue returns the pending games by ID
+func (k Keeper) GameQueue(ctx sdk.Context) (gamesQueue []int64) {
+	queueStore := ctx.KVStore(k.queueKey)
+	iter := queueStore.Iterator(nil, nil)
+	for iter.Valid() {
+		var id int64
+		k.GetCodec().MustUnmarshalBinaryLengthPrefixed(
+			iter.Value(), &id)
+		gamesQueue = append(gamesQueue, id)
+		iter.Next()
+	}
+
+	iter.Close()
+
+	return gamesQueue
 }
 
 // ExportState returns the state for a given context
@@ -318,6 +381,7 @@ func (k Keeper) pushGameQueue(ctx sdk.Context, gameID int64) {
 
 	// push game id onto game queue that will get checked on each tick
 	k.queue(ctx).Push(gameID)
+
 	msg := "Pushed game %d to game queue"
 	logger.Info(fmt.Sprintf(msg, gameID))
 }

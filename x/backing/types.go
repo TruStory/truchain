@@ -7,6 +7,24 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
+// PerID struct contains a backing and its backingID
+type PerID struct {
+	BackingID int64   `json:"backing_id"`
+	Backing   Backing `json:"backing"`
+}
+
+// Backers struct contains a creator address associated with its backingID
+type Backers struct {
+	BackingID  int64          `json:"backing_id"`
+	AccAddress sdk.AccAddress `json:"creator"`
+}
+
+// BackersPerStory is a array of Backers per StoryID
+type BackersPerStory struct {
+	StoryID int64     `json:"story_id"`
+	Backers []Backers `json:"backers"`
+}
+
 // ============================================================================
 
 // Queue is a list of all backings

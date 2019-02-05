@@ -347,10 +347,9 @@ func (k Keeper) IterateStories(ctx sdk.Context) (storiesID []int64) {
 }
 
 // ExportState gets all the current stories and calls app.WriteJSONtoNodeHome() to write data to file.
+// OLD APPROACH
 func (k Keeper) ExportState(ctx sdk.Context, dnh string, bh int64) {
 
-	// st := Story{}
-	// fmt.Printf("%+v\n", st)
 	stories := k.StoriesNoSort(ctx)
 	app.WriteJSONtoNodeHome(stories, dnh, bh, fmt.Sprintf("%s.json", k.GetStoreKey().Name()))
 }
@@ -424,13 +423,3 @@ func (k Keeper) storyIDsByCategoryID(
 
 	return storyIDs, nil
 }
-
-// func (k Keeper) decodeStory(bz []byte) (st Story) {
-
-// 	// err := k.GetCodec().UnmarshalBinaryBare(bz, &st)
-
-// 	// if err != nil {
-// 	// 	panic(err)
-// 	// }
-// 	// return
-// }

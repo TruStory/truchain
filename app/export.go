@@ -43,15 +43,17 @@ func (app *TruChain) ExportAppStateAndValidators() (appState json.RawMessage, va
 		accounts,
 		story.ExportGenesis(ctx, app.storyKeeper),
 		category.ExportGenesis(ctx, app.categoryKeeper),
+		backing.ExportGenesis(ctx, app.backingKeeper),
 		challenge.ExportGenesis(ctx, app.challengeKeeper),
 		game.ExportGenesis(ctx, app.gameKeeper),
-		backing.ExportGenesis(ctx, app.backingKeeper),
 		vote.ExportGenesis(ctx, app.voteKeeper),
 	)
+
 	appState, err = codec.MarshalJSONIndent(app.codec, genState)
 	if err != nil {
 		return nil, nil, err
 	}
+
 	// TODO export validators
 	// validators = staking.WriteValidators(ctx, app.stakingKeeper)
 

@@ -33,14 +33,6 @@ type ReadKeeper interface {
 
 	TotalBackingAmount(
 		ctx sdk.Context, storyID int64) (totalAmount sdk.Coin, err sdk.Error)
-	ExportState(ctx sdk.Context)
-	Backings(ctx sdk.Context) (perID []PerID)
-	BackList(ctx sdk.Context) (unexpiredBackings []int64)
-	BackersPerStoryID(ctx sdk.Context) (backers []BackersPerStory)
-	BackersByStoryID(
-		ctx sdk.Context, storyID int64) (backers []Backers, err sdk.Error)
-	GetAllBackings(ctx sdk.Context) (backings []Backing, err sdk.Error)
-	GetAllBackingList(ctx sdk.Context) (backings []int64)
 }
 
 // WriteKeeper defines a module interface that facilities write only access
@@ -68,12 +60,7 @@ type WriteKeeper interface {
 type Keeper struct {
 	app.Keeper
 
-	// list of unmatured backings
-	backingListKey sdk.StoreKey
-	// list of games in the challenged state
-	pendingGameListKey sdk.StoreKey
-	// queue of games in the voting state
-	gameQueueKey sdk.StoreKey
+	backingListKey sdk.StoreKey // list of unexpired backings
 
 	storyKeeper    story.WriteKeeper // read-write access to story store
 	bankKeeper     bank.Keeper       // read-write access coin store
@@ -86,8 +73,6 @@ type Keeper struct {
 func NewKeeper(
 	storeKey sdk.StoreKey,
 	backingListKey sdk.StoreKey,
-	pendingGameListKey sdk.StoreKey,
-	gameQueueKey sdk.StoreKey,
 	storyKeeper story.WriteKeeper,
 	bankKeeper bank.Keeper,
 	categoryKeeper cat.ReadKeeper,
@@ -96,8 +81,6 @@ func NewKeeper(
 	return Keeper{
 		app.NewKeeper(codec, storeKey),
 		backingListKey,
-		pendingGameListKey,
-		gameQueueKey,
 		storyKeeper,
 		bankKeeper,
 		categoryKeeper,
@@ -173,12 +156,12 @@ func (k Keeper) Create(
 
 	// create new backing type with embedded vote
 	backing := Backing{
-		Vote:        vote,
-		StoryID:     storyID,
-		Interest:    interest,
-		MaturesTime: time.Now().Add(duration),
-		Params:      params,
-		Period:      duration,
+		Vote:     vote,
+		StoryID:  storyID,
+		Interest: interest,
+		Expires:  time.Now().Add(duration),
+		Params:   params,
+		Period:   duration,
 	}
 
 	// store backing
@@ -199,12 +182,12 @@ func (k Keeper) Create(
 // Update updates an existing backing
 func (k Keeper) Update(ctx sdk.Context, backing Backing) {
 	newBacking := Backing{
-		Vote:        backing.Vote,
-		StoryID:     backing.StoryID,
-		Interest:    backing.Interest,
-		MaturesTime: backing.MaturesTime,
-		Params:      backing.Params,
-		Period:      backing.Period,
+		Vote:     backing.Vote,
+		StoryID:  backing.StoryID,
+		Interest: backing.Interest,
+		Expires:  backing.Expires,
+		Params:   backing.Params,
+		Period:   backing.Period,
 	}
 
 	k.setBacking(ctx, newBacking)
@@ -254,25 +237,6 @@ func (k Keeper) BackingsByStoryID(
 	return
 }
 
-// BackersByStoryID ...
-func (k Keeper) BackersByStoryID(
-	ctx sdk.Context, storyID int64) (backers []Backers, err sdk.Error) {
-
-	// iterate over backing list and get backings
-	err = k.backingStoryList.Map(ctx, k, storyID, func(backingID int64) sdk.Error {
-		backing, err := k.Backing(ctx, backingID)
-		if err != nil {
-			return err
-		}
-		backer := Backers{BackingID: backing.ID(), AccAddress: backing.Vote.Creator}
-		backers = append(backers, backer)
-
-		return nil
-	})
-
-	return
-}
-
 // BackingByStoryIDAndCreator returns backings for a given story id and creator
 func (k Keeper) BackingByStoryIDAndCreator(
 	ctx sdk.Context,
@@ -288,7 +252,7 @@ func (k Keeper) BackingByStoryIDAndCreator(
 // RemoveFromList removes a backing from the backing list
 func (k Keeper) RemoveFromList(ctx sdk.Context, backingID int64) sdk.Error {
 	var ID int64
-	var indexToDelete uint64
+	var indeToDelete uint64
 	var found bool
 	backingList := k.backingList(ctx)
 	backingList.Iterate(&ID, func(index uint64) bool {
@@ -298,7 +262,7 @@ func (k Keeper) RemoveFromList(ctx sdk.Context, backingID int64) sdk.Error {
 			panic(err)
 		}
 		if tempBackingID == backingID {
-			indexToDelete = index
+			indeToDelete = index
 			found = true
 			return true
 		}
@@ -309,7 +273,7 @@ func (k Keeper) RemoveFromList(ctx sdk.Context, backingID int64) sdk.Error {
 		return ErrNotFound(backingID)
 	}
 
-	backingList.Delete(indexToDelete)
+	backingList.Delete(indeToDelete)
 
 	return nil
 }
@@ -349,6 +313,7 @@ func (k Keeper) TotalBackingAmount(ctx sdk.Context, storyID int64) (
 			return err
 		}
 
+		// totalAmount = totalAmount.Add(backing.Amount().Amount)
 		totalAmount = totalAmount.Add(backing.Amount().Amount)
 
 		return nil
@@ -365,110 +330,10 @@ func (k Keeper) TotalBackingAmount(ctx sdk.Context, storyID int64) (
 	return sdk.NewCoin(denom, totalAmount), nil
 }
 
-// GetAllBackings returns all the backings in the store
-func (k Keeper) GetAllBackings(ctx sdk.Context) (backings []Backing, err sdk.Error) {
-	backing := Backing{}
-	err = k.Each(ctx, func(val []byte) bool {
-		k.GetCodec().MustUnmarshalBinaryLengthPrefixed(val, &backing)
-		backings = append(backings, backing)
-		return true
-	})
-	k.GetAllBackingList(ctx)
-	return
-}
-
-// GetAllBackingList ...
-func (k Keeper) GetAllBackingList(ctx sdk.Context) (backings []int64) {
-	backingList := k.backingList(ctx)
-
-	var ID int64
-	backingList.Iterate(&ID, func(index uint64) bool {
-		var temp int64
-		err := backingList.Get(index, temp)
-		if err != nil {
-			panic(err)
-		}
-		backings = append(backings, temp)
-
-		return false
-	})
-
-	return backings
-
-}
-
-// Backings iterates over all backings and returns backing per ID
-func (k Keeper) Backings(ctx sdk.Context) (perID []PerID) {
-
-	store := k.GetStore(ctx)
-	// builds prefix "backing:id"
-	searchKey := fmt.Sprintf("%s:id", k.GetStoreKey().Name())
-	searchPrefix := []byte(searchKey)
-
-	// setup Iterator
-	iter := sdk.KVStorePrefixIterator(store, searchPrefix)
-	defer iter.Close()
-
-	// iterates through keyspace to find all backings
-	for ; iter.Valid(); iter.Next() {
-		var backing Backing
-		k.GetCodec().MustUnmarshalBinaryLengthPrefixed(
-			iter.Value(), &backing)
-
-		temp := PerID{BackingID: backing.ID(), Backing: backing}
-		perID = append(perID, temp)
-
-	}
-
-	return perID
-}
-
-// ExportState gets all the current categories and calls app.WriteJSONtoNodeHome() to write data to file.
-func (k Keeper) ExportState(ctx sdk.Context) {
-	fmt.Println("Backing")
-
-}
-
-// BackList gets all the backings that are not expired
-func (k Keeper) BackList(ctx sdk.Context) (unexpiredBackings []int64) {
-	store := k.GetStore(ctx)
-	// builds prefix "games:id"
-	searchKey := fmt.Sprintf("%s:unexpired", k.GetStoreKey().Name())
-	searchPrefix := []byte(searchKey)
-
-	// setup Iterator
-	iter := sdk.KVStorePrefixIterator(store, searchPrefix)
-	defer iter.Close()
-
-	// iterates through keyspace to find all games
-	for ; iter.Valid(); iter.Next() {
-		var backing Backing
-		k.GetCodec().MustUnmarshalBinaryLengthPrefixed(
-			iter.Value(), &backing)
-		unexpiredBackings = append(unexpiredBackings, backing.ID())
-	}
-
-	return unexpiredBackings
-}
-
-// BackersPerStoryID ...
-func (k Keeper) BackersPerStoryID(ctx sdk.Context) (backers []BackersPerStory) {
-	storiesIDs := k.storyKeeper.IterateStories(ctx)
-	for _, id := range storiesIDs {
-		b, _ := k.BackersByStoryID(ctx, id)
-
-		tempBackers := BackersPerStory{StoryID: id, Backers: b}
-		backers = append(backers, tempBackers)
-
-	}
-	return backers
-
-}
-
 // ============================================================================
 
 // getPrincipal calculates the principal, the amount the user gets back
-// after the backing matures. Returns a coin.
+// after the backing expires/matures. Returns a coin.
 func (k Keeper) getPrincipal(
 	ctx sdk.Context,
 	denom string,
@@ -543,9 +408,6 @@ func getInterest(
 	// calculate interest
 	interestRate := maxInterestRate.Mul(weightedAmount.Add(weightedPeriod))
 	// convert rate to a value
-	if interestRate.LT(params.MinInterestRate) {
-		interestRate = params.MinInterestRate
-	}
 	interest := amountDec.Mul(interestRate)
 
 	// return coin with rounded interest
@@ -554,25 +416,15 @@ func getInterest(
 	return coin
 }
 
+<<<<<<< HEAD
+func (k Keeper) backingList(ctx sdk.Context) list.List {
+	store := ctx.KVStore(k.backingListKey)
+	return list.NewList(k.GetCodec(), store)
+=======
 // ExportState returns the state for a given context
 func ExportState() {
 	fmt.Println("Backing State")
 	backing := Backing{}
 	fmt.Printf("%+v\n", backing)
-}
-
-func (k Keeper) backingList(ctx sdk.Context) list.List {
-	store := ctx.KVStore(k.backingListKey)
-	return list.NewList(k.GetCodec(), store)
-}
-
-func (k Keeper) pendingGameList(ctx sdk.Context) list.List {
-	return list.NewList(
-		k.GetCodec(),
-		ctx.KVStore(k.pendingGameListKey))
-}
-
-func (k Keeper) gameQueue(ctx sdk.Context) list.Queue {
-	store := ctx.KVStore(k.gameQueueKey)
-	return list.NewQueue(k.GetCodec(), store)
+>>>>>>> ..
 }
