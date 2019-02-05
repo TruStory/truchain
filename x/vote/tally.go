@@ -30,9 +30,14 @@ func processGame(ctx sdk.Context, k Keeper, game game.Game) sdk.Error {
 		return err
 	}
 
+	credDenom, err := k.storyKeeper.CategoryDenom(ctx, game.StoryID)
+	if err != nil {
+		return err
+	}
+
 	// distribute rewards
 	err = distributeRewards(
-		ctx, k.backingKeeper, k.bankKeeper, rewardPool, votes, confirmed)
+		ctx, k.backingKeeper, k.bankKeeper, rewardPool, votes, confirmed, credDenom)
 	if err != nil {
 		return err
 	}
@@ -114,21 +119,22 @@ func distributeRewards(
 	bankKeeper bank.Keeper,
 	rewardPool sdk.Coin,
 	votes poll,
-	confirmed bool) (
-	err sdk.Error) {
+	confirmed bool,
+	denom string) (err sdk.Error) {
 
 	logger := ctx.Logger().With("module", "vote")
 
 	if confirmed {
 		err = distributeRewardsConfirmed(
-			ctx, bankKeeper, votes, rewardPool)
+			ctx, bankKeeper, votes, rewardPool, denom)
 	} else {
 		err = distributeRewardsRejected(
 			ctx,
 			backingKeeper,
 			bankKeeper,
 			votes.falseVotes,
-			rewardPool)
+			rewardPool,
+			denom)
 	}
 	if err != nil {
 		return
