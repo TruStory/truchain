@@ -17,11 +17,18 @@ type User struct {
 
 // NewUser creates a new User struct from an auth.Account (like AppAccount)
 func NewUser(acc auth.Account) User {
+	var pubKey []byte
+
+	// GetPubKey can return nil and Bytes() will panic due to nil pointer
+	if acc.GetPubKey() != nil {
+		pubKey = acc.GetPubKey().Bytes()
+	}
+
 	return User{
 		Address:       acc.GetAddress().String(),
 		AccountNumber: acc.GetAccountNumber(),
 		Coins:         acc.GetCoins(),
 		Sequence:      acc.GetSequence(),
-		Pubkey:        tcmn.HexBytes(acc.GetPubKey().Bytes()),
+		Pubkey:        tcmn.HexBytes(pubKey),
 	}
 }
