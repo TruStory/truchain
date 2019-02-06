@@ -22,10 +22,10 @@ const (
 )
 
 // InitialCredAmount is the initial amount of cred for categories
-var InitialCredAmount = sdk.NewInt(100000000000)
+var InitialCredAmount = sdk.NewInt(100 * Shanev)
 
 // InitialTruStake is an `sdk.Coins` representing the balance a new user is granted upon registration
-var InitialTruStake = sdk.Coin{Amount: sdk.NewInt(10000000000000), Denom: StakeDenom}
+var InitialTruStake = sdk.Coin{Amount: sdk.NewInt(1000 * Shanev), Denom: StakeDenom}
 
 // RegistrationFee is an `auth.StdFee` representing the coin and gas cost of registering a new account
 // TODO: Use more accurate gas estimate [notduncansmith]
@@ -43,6 +43,12 @@ var Fee = sdk.Coins{
 const (
 	FeeFlag = iota
 	BootstrapFlag
+)
+
+// Coin units
+const (
+	Preethi = 1
+	Shanev  = 1000000000 * Preethi
 )
 
 // Features sets flags on features to turn on/off during testnet
