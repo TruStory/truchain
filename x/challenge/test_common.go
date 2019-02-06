@@ -108,7 +108,6 @@ func fakeFundedCreator(ctx sdk.Context, k bank.Keeper) sdk.AccAddress {
 
 	// give user some category coins
 	amount := sdk.NewCoin(params.StakeDenom, sdk.NewInt(2000000000000))
-	// amount := sdk.NewCoin("trudex", sdk.NewInt(2000))
 	k.AddCoins(ctx, creator, sdk.Coins{amount})
 
 	return creator

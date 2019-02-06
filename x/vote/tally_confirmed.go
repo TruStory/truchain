@@ -46,11 +46,12 @@ func distributeRewardsConfirmed(
 	pool sdk.Coin,
 	denom string) (err sdk.Error) {
 
-	fmt.Printf("reward pool (confirmed): %s\n", pool)
+	logger := ctx.Logger().With("module", "vote")
+	logger.Info(fmt.Sprintf("reward pool (confirmed): %s", pool))
 
 	// determine pool share per voter
 	voterRewardAmount := voterRewardAmount(pool, voterCount(votes.trueVotes))
-	fmt.Printf("token voter reward amount: %s\n", voterRewardAmount)
+	logger.Info(fmt.Sprintf("token voter reward amount: %s", voterRewardAmount))
 
 	// distribute reward to winners
 	for _, vote := range votes.trueVotes {
@@ -65,7 +66,7 @@ func distributeRewardsConfirmed(
 			if err != nil {
 				return err
 			}
-			fmt.Printf("giving back origin amount: %s\n", v.Amount())
+			logger.Info(fmt.Sprintf("giving back origin amount: %s", v.Amount()))
 
 			// calculate reward, an equal portion of the reward pool
 			rewardCoin := sdk.NewCoin(pool.Denom, voterRewardAmount)

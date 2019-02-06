@@ -165,10 +165,6 @@ func confirmStory(
 	// calculate what percent of the total weight is true votes
 	totalWeight := trueWeight.Add(falseWeight)
 	trueWeightDec := sdk.NewDecFromInt(trueWeight)
-	if totalWeight.IsZero() {
-		// TODO: handle this better
-		panic("Cannot be zero")
-	}
 	truePercentOfTotal := trueWeightDec.QuoInt(totalWeight)
 
 	// majority weight wins

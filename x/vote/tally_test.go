@@ -64,13 +64,11 @@ func TestWeightedVote(t *testing.T) {
 	trueWeights, _ := weightedVote(ctx, k.accountKeeper, votes.trueVotes)
 	falseWeights, _ := weightedVote(ctx, k.accountKeeper, votes.falseVotes)
 
-	assert.Equal(t, "10000000000000", trueWeights.String())
-	assert.Equal(t, "8000000000000", falseWeights.String())
-	// 5 true, 1000 trusteak each = 5000
-	assert.Equal(t, "5000", trueWeights.String())
+	// 5 true, 1000000000000 trusteak each = 5000000000000
+	assert.Equal(t, "5000000000000", trueWeights.String())
 
-	// 4 false, 1000 cred each = 4000
-	assert.Equal(t, "4000", falseWeights.String())
+	// 4 false, 1000000000000 cred each = 4000000000000
+	assert.Equal(t, "4000000000000", falseWeights.String())
 }
 
 func TestConfirmedStoryRewardPool(t *testing.T) {
