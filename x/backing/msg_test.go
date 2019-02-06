@@ -4,6 +4,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/TruStory/truchain/x/story"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/stretchr/testify/assert"
 )
@@ -33,7 +34,7 @@ func TestInvalidStoryIdBackMsg(t *testing.T) {
 	msg := NewBackStoryMsg(invalidStoryID, validStake, validArgument, validCreator, validPeriod)
 	err := msg.ValidateBasic()
 
-	assert.Equal(t, sdk.CodeType(702), err.Code(), err.Error())
+	assert.Equal(t, story.CodeInvalidStoryID, err.Code(), err.Error())
 }
 
 func TestInvalidAddressBackMsg(t *testing.T) {
@@ -45,7 +46,7 @@ func TestInvalidAddressBackMsg(t *testing.T) {
 	msg := NewBackStoryMsg(validStoryID, validStake, validArgument, invalidCreator, validPeriod)
 	err := msg.ValidateBasic()
 
-	assert.Equal(t, sdk.CodeType(7), err.Code(), err.Error())
+	assert.Equal(t, sdk.CodeInvalidAddress, err.Code(), err.Error())
 }
 
 func TestInValidStakeBackMsg(t *testing.T) {
@@ -57,7 +58,7 @@ func TestInValidStakeBackMsg(t *testing.T) {
 	msg := NewBackStoryMsg(validStoryID, invalidStake, validArgument, validCreator, validPeriod)
 	err := msg.ValidateBasic()
 
-	assert.Equal(t, sdk.CodeType(5), err.Code(), err.Error())
+	assert.Equal(t, sdk.CodeInsufficientFunds, err.Code(), err.Error())
 }
 
 func TestInValidBackingPeriodBackMsg(t *testing.T) {
@@ -69,7 +70,7 @@ func TestInValidBackingPeriodBackMsg(t *testing.T) {
 	msg := NewBackStoryMsg(validStoryID, validStake, validArgument, validCreator, invalidPeriod)
 	err := msg.ValidateBasic()
 
-	assert.Equal(t, sdk.CodeType(901), err.Code(), err.Error())
+	assert.Equal(t, CodeInvalidPeriod, err.Code(), err.Error())
 }
 
 func TestInValidBackingPeriod2BackMsg(t *testing.T) {
@@ -81,5 +82,5 @@ func TestInValidBackingPeriod2BackMsg(t *testing.T) {
 	msg := NewBackStoryMsg(validStoryID, validStake, validArgument, validCreator, invalidPeriod)
 	err := msg.ValidateBasic()
 
-	assert.Equal(t, sdk.CodeType(901), err.Code(), err.Error())
+	assert.Equal(t, CodeInvalidPeriod, err.Code(), err.Error())
 }

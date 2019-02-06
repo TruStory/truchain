@@ -254,4 +254,8 @@ func Test_subtract(t *testing.T) {
 
 	result.Amount = sdk.NewInt(-75)
 	assert.Equal(t, subtract(coinB, coinA), result)
+
+	// If different coin type return coinA
+	coinC, _ := sdk.ParseCoin("25anotherusecase")
+	assert.Equal(t, subtract(coinA, coinC), coinA)
 }

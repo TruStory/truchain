@@ -72,3 +72,12 @@ func TestBackStoryMsg(t *testing.T) {
 
 	assert.Equal(t, int64(1), idres.ID, "incorrect result backing id")
 }
+
+func TestByzantineMsg(t *testing.T) {
+	ctx, bk, _, _, _, _ := mockDB()
+	h := NewHandler(bk)
+	assert.NotNil(t, h)
+	res := h(ctx, nil)
+	assert.Equal(t, sdk.CodeUnknownRequest, res.Code)
+	assert.Equal(t, sdk.CodespaceRoot, res.Codespace)
+}
