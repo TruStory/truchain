@@ -213,7 +213,6 @@ func Test_getInterest_MidAmountMidPeriod(t *testing.T) {
 	maxPeriod := DefaultMsgParams().MaxPeriod
 
 	interest := getInterest(amount, period, maxPeriod, params)
-	// assert.Equal(t, interest.Amount.String(), sdk.NewInt(25000000000000).String())
 	assert.Equal(t, interest.Amount.String(), sdk.NewInt(508575000000000).String())
 }
 
@@ -224,7 +223,6 @@ func Test_getInterest_MaxAmountMinPeriod(t *testing.T) {
 
 	interest := getInterest(
 		amount, period, DefaultMsgParams().MaxPeriod, params)
-	// assert.Equal(t, interest.Amount.String(), sdk.NewInt(35523333300000).String())
 	assert.Equal(t, interest.Amount.String(), sdk.NewInt(100000000000000).String())
 }
 

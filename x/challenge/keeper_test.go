@@ -6,7 +6,6 @@ import (
 
 	params "github.com/TruStory/truchain/parameters"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/davecgh/go-spew/spew"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -126,9 +125,7 @@ func TestNewChallenge_Duplicate(t *testing.T) {
 	// give user some funds
 	bankKeeper.AddCoins(ctx, creator, sdk.Coins{amount.Plus(amount)})
 
-	challengeAmount, _ := sdk.ParseCoin("10000000000trudex")
-
-	_, err := k.Create(ctx, storyID, challengeAmount, argument, creator)
+	_, err := k.Create(ctx, storyID, amount, argument, creator)
 	assert.Nil(t, err)
 
 	_, err = k.Create(ctx, storyID, amount, argument, creator)
@@ -149,10 +146,6 @@ func TestNewChallenge_MultipleChallengers(t *testing.T) {
 	bankKeeper.AddCoins(ctx, creator1, sdk.Coins{amount})
 	bankKeeper.AddCoins(ctx, creator2, sdk.Coins{amount})
 
-	challengeAmount, _ := sdk.ParseCoin("10000000000trudex")
-	// challengeAmount, _ := sdk.ParseCoin("10trudex")
-	// challengeAmount := sdk.NewCoin("trudex", sdk.NewInt(10000000))
-
 	id, err := k.Create(ctx, storyID, amount, argument, creator1)
 	assert.Nil(t, err)
 
@@ -166,7 +159,6 @@ func TestNewChallenge_MultipleChallengers(t *testing.T) {
 	story, _ := k.storyKeeper.Story(ctx, storyID)
 	game, _ := k.gameKeeper.Game(ctx, story.GameID)
 
-	spew.Dump(game.ChallengePool)
 	assert.True(t, game.ChallengePool.IsEqual(amount.Plus(amount)))
 }
 
