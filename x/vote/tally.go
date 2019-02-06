@@ -18,19 +18,19 @@ func processGame(ctx sdk.Context, k Keeper, game game.Game) sdk.Error {
 		return err
 	}
 
+	credDenom, err := k.storyKeeper.CategoryDenom(ctx, game.StoryID)
+	if err != nil {
+		return err
+	}
+
 	// check if story was confirmed
-	confirmed, err := confirmStory(ctx, k.accountKeeper, votes)
+	confirmed, err := confirmStory(ctx, k.accountKeeper, votes, credDenom)
 	if err != nil {
 		return err
 	}
 
 	// calculate reward pool
 	rewardPool, err := rewardPool(ctx, votes, confirmed)
-	if err != nil {
-		return err
-	}
-
-	credDenom, err := k.storyKeeper.CategoryDenom(ctx, game.StoryID)
 	if err != nil {
 		return err
 	}
@@ -147,17 +147,17 @@ func distributeRewards(
 
 // determine if a story is confirmed or rejected
 func confirmStory(
-	ctx sdk.Context, accountKeeper auth.AccountKeeper, votes poll) (
+	ctx sdk.Context, accountKeeper auth.AccountKeeper, votes poll, denom string) (
 	confirmed bool, err sdk.Error) {
 
 	// calculate weighted true votes
-	trueWeight, err := weightedVote(ctx, accountKeeper, votes.trueVotes)
+	trueWeight, err := weightedVote(ctx, accountKeeper, votes.trueVotes, denom)
 	if err != nil {
 		return confirmed, err
 	}
 
 	// calculate weighted false votes
-	falseWeight, err := weightedVote(ctx, accountKeeper, votes.falseVotes)
+	falseWeight, err := weightedVote(ctx, accountKeeper, votes.falseVotes, denom)
 	if err != nil {
 		return confirmed, err
 	}
@@ -177,9 +177,9 @@ func confirmStory(
 	return false, nil
 }
 
-// calculate weighted vote based on user's total category coin balance
+// calculate weighted vote based on user's cred balance
 func weightedVote(
-	ctx sdk.Context, accountKeeper auth.AccountKeeper, votes []app.Voter) (
+	ctx sdk.Context, accountKeeper auth.AccountKeeper, votes []app.Voter, denom string) (
 	weightedAmount sdk.Int, err sdk.Error) {
 
 	weightedAmount = sdk.ZeroInt()
@@ -192,18 +192,13 @@ func weightedVote(
 		}
 
 		user := accountKeeper.GetAccount(ctx, v.Creator())
-
-		// get user's cred balance
-		credBalance := sdk.ZeroInt()
 		coins := user.GetCoins()
-		if coins.IsValid() {
-			categoryDenom := v.Amount().Denom
-			credBalance = coins.AmountOf(categoryDenom)
-		} else {
+		credBalance := coins.AmountOf(denom)
+		if credBalance.IsZero() {
 			// fix cold-start problem by adding 1 preethi
 			// when there is a 0 cred balance so the vote
 			// is counted
-			credBalance.Add(sdk.NewInt(1))
+			credBalance = credBalance.Add(sdk.NewInt(1))
 		}
 
 		weightedAmount = weightedAmount.Add(credBalance)

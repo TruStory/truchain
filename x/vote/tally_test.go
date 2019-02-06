@@ -54,21 +54,21 @@ func TestDistributeRewards(t *testing.T) {
 func TestConfirmStory(t *testing.T) {
 	ctx, votes, k := fakeValidationGame()
 
-	confirmed, _ := confirmStory(ctx, k.accountKeeper, votes)
+	confirmed, _ := confirmStory(ctx, k.accountKeeper, votes, "trudex")
 	assert.True(t, confirmed)
 }
 
 func TestWeightedVote(t *testing.T) {
 	ctx, votes, k := fakeValidationGame()
 
-	trueWeights, _ := weightedVote(ctx, k.accountKeeper, votes.trueVotes)
-	falseWeights, _ := weightedVote(ctx, k.accountKeeper, votes.falseVotes)
+	trueWeights, _ := weightedVote(ctx, k.accountKeeper, votes.trueVotes, "trudex")
+	falseWeights, _ := weightedVote(ctx, k.accountKeeper, votes.falseVotes, "trudex")
 
-	// 5 true, 1000000000000 trusteak each = 5000000000000
-	assert.Equal(t, "5000000000000", trueWeights.String())
+	// 5 true, 1 preethi added each due to cold-start
+	assert.Equal(t, "5", trueWeights.String())
 
-	// 4 false, 1000000000000 cred each = 4000000000000
-	assert.Equal(t, "4000000000000", falseWeights.String())
+	// 4 false, 1 preethi added each due to cold-start
+	assert.Equal(t, "4", falseWeights.String())
 }
 
 func TestConfirmedStoryRewardPool(t *testing.T) {
