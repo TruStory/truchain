@@ -21,7 +21,7 @@
 
 [[constraint]]
   name = "github.com/cosmos/cosmos-sdk"
-  version = "=v0.30.0"
+  version = "=v0.26.1-rc1"
 
 [[constraint]]
   name = "github.com/go-pg/pg"
@@ -37,11 +37,11 @@
 
 [[override]]
   name = "github.com/tendermint/tendermint"
-  version = "=v0.29.0"
+  version = "=0.26.1-rc3"
 
 [[override]]
   name = "github.com/tendermint/go-amino"
-  version = "=v0.14.1"
+  version = "=v0.14.0"
 
 [[constraint]]
   name = "github.com/samsarahq/thunder"

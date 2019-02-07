@@ -244,18 +244,3 @@ func Test_voterRewardAmount(t *testing.T) {
 	pool, _ := sdk.ParseCoin("1usecase")
 	assert.Equal(t, sdk.NewInt(0), voterRewardAmount(pool, 0))
 }
-
-func Test_subtract(t *testing.T) {
-	coinA, _ := sdk.ParseCoin("100usecase")
-	coinB, _ := sdk.ParseCoin("25usecase")
-
-	result, _ := sdk.ParseCoin("75usecase")
-	assert.Equal(t, subtract(coinA, coinB), result)
-
-	result.Amount = sdk.NewInt(-75)
-	assert.Equal(t, subtract(coinB, coinA), result)
-
-	// If different coin type return coinA
-	coinC, _ := sdk.ParseCoin("25anotherusecase")
-	assert.Equal(t, subtract(coinA, coinC), coinA)
-}

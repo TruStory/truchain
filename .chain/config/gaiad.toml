@@ -4,4 +4,4 @@
 ##### main base config options #####
 
 # Validators reject any tx from the mempool with less than the minimum fee per gas.
-minimum-gas-price = "10trusteak"
+minimum_fees = ""

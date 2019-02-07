@@ -145,8 +145,10 @@ func (a *API) stdSignatures(r PresignedRequest, d auth.StdSignDoc) ([]auth.StdSi
 	}
 
 	stdSig := auth.StdSignature{
-		PubKey:    key,
-		Signature: r.Signature.Bytes(),
+		PubKey:        key,
+		Signature:     r.Signature.Bytes(),
+		AccountNumber: d.AccountNumber,
+		Sequence:      d.Sequence,
 	}
 
 	sigs := []auth.StdSignature{stdSig}

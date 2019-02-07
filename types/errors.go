@@ -6,7 +6,7 @@ import (
 
 // App errors reserve 100 ~ 199.
 const (
-	DefaultCodespace sdk.CodespaceType = "types"
+	DefaultCodespace sdk.CodespaceType = 1
 
 	CodeInvalidArgumentMsg sdk.CodeType = 101
 )

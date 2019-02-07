@@ -2,6 +2,7 @@ package category
 
 import (
 	"encoding/json"
+	"strings"
 	"testing"
 
 	"github.com/TruStory/truchain/types"
@@ -40,8 +41,6 @@ func TestByzantineMsg(t *testing.T) {
 	assert.NotNil(t, h)
 
 	res := h(ctx, nil)
-
-	assert.Equal(t, sdk.CodeUnknownRequest, res.Code)
-	assert.Equal(t, sdk.CodespaceRoot, res.Codespace)
-
+	hasUnrecognizedMessage := strings.Contains(res.Log, "65542")
+	assert.True(t, hasUnrecognizedMessage, "should return err code")
 }

@@ -10,7 +10,7 @@ import (
 
 // Vote errors reserve 1100 ~ 1199.
 const (
-	DefaultCodespace sdk.CodespaceType = "vote"
+	DefaultCodespace sdk.CodespaceType = 12
 
 	CodeNotFound           sdk.CodeType = 1201
 	CodeDuplicate          sdk.CodeType = 1202

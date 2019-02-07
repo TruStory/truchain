@@ -9,7 +9,7 @@ import (
 
 // Challenge errors reserve 1000 ~ 1099.
 const (
-	DefaultCodespace sdk.CodespaceType = "challenge"
+	DefaultCodespace sdk.CodespaceType = 10
 
 	CodeNotFound           sdk.CodeType = 1001
 	CodeInvalidMsg         sdk.CodeType = 1002

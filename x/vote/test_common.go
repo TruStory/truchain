@@ -17,7 +17,6 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth"
 	"github.com/cosmos/cosmos-sdk/x/bank"
-	"github.com/cosmos/cosmos-sdk/x/params"
 	amino "github.com/tendermint/go-amino"
 	abci "github.com/tendermint/tendermint/abci/types"
 	cryptoAmino "github.com/tendermint/tendermint/crypto/encoding/amino"
@@ -29,18 +28,16 @@ func mockDB() (sdk.Context, Keeper, c.Keeper) {
 
 	db := dbm.NewMemDB()
 
-	accKey := sdk.NewKVStoreKey(auth.StoreKey)
-	storyKey := sdk.NewKVStoreKey(story.StoreKey)
-	catKey := sdk.NewKVStoreKey(c.StoreKey)
-	challengeKey := sdk.NewKVStoreKey(challenge.StoreKey)
-	gameKey := sdk.NewKVStoreKey(game.StoreKey)
-	pendingGameListKey := sdk.NewKVStoreKey(game.PendingListStoreKey)
-	gameQueueKey := sdk.NewKVStoreKey(game.QueueStoreKey)
-	voteKey := sdk.NewKVStoreKey(StoreKey)
-	backingKey := sdk.NewKVStoreKey(backing.StoreKey)
-	backingListKey := sdk.NewKVStoreKey(backing.ListStoreKey)
-	paramsKey := sdk.NewKVStoreKey(params.StoreKey)
-	transientParamsKey := sdk.NewTransientStoreKey(params.TStoreKey)
+	accKey := sdk.NewKVStoreKey("acc")
+	storyKey := sdk.NewKVStoreKey("stories")
+	catKey := sdk.NewKVStoreKey("categories")
+	challengeKey := sdk.NewKVStoreKey("challenges")
+	gameKey := sdk.NewKVStoreKey("games")
+	pendingGameListKey := sdk.NewKVStoreKey("pendingGameList")
+	gameQueueKey := sdk.NewKVStoreKey("gameQueue")
+	voteKey := sdk.NewKVStoreKey("vote")
+	backingKey := sdk.NewKVStoreKey("backing")
+	backingListKey := sdk.NewKVStoreKey("backingList")
 
 	ms := store.NewCommitMultiStore(db)
 	ms.MountStoreWithDB(accKey, sdk.StoreTypeIAVL, db)
@@ -63,8 +60,7 @@ func mockDB() (sdk.Context, Keeper, c.Keeper) {
 	codec.RegisterInterface((*auth.Account)(nil), nil)
 	codec.RegisterConcrete(&auth.BaseAccount{}, "auth/Account", nil)
 
-	pk := params.NewKeeper(codec, paramsKey, transientParamsKey)
-	am := auth.NewAccountKeeper(codec, accKey, pk.Subspace(auth.DefaultParamspace), auth.ProtoBaseAccount)
+	am := auth.NewAccountKeeper(codec, accKey, auth.ProtoBaseAccount)
 	bankKeeper := bank.NewBaseKeeper(am)
 	ck := c.NewKeeper(catKey, codec)
 	sk := story.NewKeeper(storyKey, ck, codec)

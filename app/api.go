@@ -56,7 +56,7 @@ func (app *TruChain) startAPI() {
 
 // RegisterKey generates a new address/account for a public key
 // Implements chttp.App
-func (app *TruChain) RegisterKey(k tcmn.HexBytes, algo string) (sdk.AccAddress, uint64, sdk.Coins, error) {
+func (app *TruChain) RegisterKey(k tcmn.HexBytes, algo string) (sdk.AccAddress, int64, sdk.Coins, error) {
 	var addr []byte
 
 	if string(algo[0]) == "*" {
@@ -147,8 +147,10 @@ func (app *TruChain) signedRegistrationTx(addr []byte, k tcmn.HexBytes, algo str
 		Msgs: []sdk.Msg{msg},
 		Fee:  params.RegistrationFee,
 		Signatures: []auth.StdSignature{auth.StdSignature{
-			PubKey:    app.registrarKey.PubKey(),
-			Signature: sigBytes,
+			PubKey:        app.registrarKey.PubKey(),
+			Signature:     sigBytes,
+			AccountNumber: 1,
+			Sequence:      registrarSequence,
 		}},
 		Memo: registrationMemo,
 	}

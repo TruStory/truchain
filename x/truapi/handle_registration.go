@@ -26,8 +26,8 @@ type RegistrationRequest struct {
 // RegistrationResponse is a JSON response body representing the result of registering a key
 type RegistrationResponse struct {
 	Address       string    `json:"address"`
-	AccountNumber uint64    `json:"account_number"`
-	Sequence      uint64    `json:"sequence"`
+	AccountNumber int64     `json:"account_number"`
+	Sequence      int64     `json:"sequence"`
 	Coins         sdk.Coins `json:"coins"`
 }
 

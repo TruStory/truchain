@@ -9,7 +9,6 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth"
 	"github.com/cosmos/cosmos-sdk/x/bank"
-	"github.com/cosmos/cosmos-sdk/x/params"
 	amino "github.com/tendermint/go-amino"
 	abci "github.com/tendermint/tendermint/abci/types"
 	"github.com/tendermint/tendermint/crypto"
@@ -29,16 +28,14 @@ func mockDB() (
 
 	db := dbm.NewMemDB()
 
-	accKey := sdk.NewKVStoreKey(auth.StoreKey)
-	storyKey := sdk.NewKVStoreKey(story.StoreKey)
-	catKey := sdk.NewKVStoreKey(category.StoreKey)
-	backingKey := sdk.NewKVStoreKey(StoreKey)
-	backingListKey := sdk.NewKVStoreKey(ListStoreKey)
+	accKey := sdk.NewKVStoreKey("acc")
+	storyKey := sdk.NewKVStoreKey("stories")
+	catKey := sdk.NewKVStoreKey("categories")
+	backingKey := sdk.NewKVStoreKey("backings")
+	backingListKey := sdk.NewKVStoreKey("backingList")
 	pendingGameListKey := sdk.NewKVStoreKey("pendingGameList")
 	gameQueueKey := sdk.NewKVStoreKey("gameQueue")
 	challengeKey := sdk.NewKVStoreKey("challenges")
-	paramsKey := sdk.NewKVStoreKey(params.StoreKey)
-	transientParamsKey := sdk.NewTransientStoreKey(params.TStoreKey)
 
 	ms := store.NewCommitMultiStore(db)
 	ms.MountStoreWithDB(accKey, sdk.StoreTypeIAVL, db)
@@ -60,8 +57,7 @@ func mockDB() (
 	codec.RegisterConcrete(&auth.BaseAccount{}, "auth/Account", nil)
 
 	ck := category.NewKeeper(catKey, codec)
-	pk := params.NewKeeper(codec, paramsKey, transientParamsKey)
-	am := auth.NewAccountKeeper(codec, accKey, pk.Subspace(auth.DefaultParamspace), auth.ProtoBaseAccount)
+	am := auth.NewAccountKeeper(codec, accKey, auth.ProtoBaseAccount)
 	bankKeeper := bank.NewBaseKeeper(am)
 	sk := story.NewKeeper(storyKey, ck, codec)
 	bk := NewKeeper(
