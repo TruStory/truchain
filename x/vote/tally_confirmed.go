@@ -3,6 +3,7 @@ package vote
 import (
 	"fmt"
 
+	params "github.com/TruStory/truchain/parameters"
 	app "github.com/TruStory/truchain/types"
 	"github.com/TruStory/truchain/x/backing"
 	"github.com/TruStory/truchain/x/challenge"
@@ -19,7 +20,9 @@ func confirmedPool(
 
 		case backing.Backing:
 			// slash inflationary rewards and add to pool
-			*pool = (*pool).Plus(v.Interest)
+			// TODO [shanev]: do proper conversion when we know it, still 1:1
+			interestInTrustake := sdk.NewCoin(params.StakeDenom, v.Interest.Amount)
+			*pool = (*pool).Plus(interestInTrustake)
 
 		case challenge.Challenge:
 			// add challenge amount to reward pool
@@ -41,6 +44,7 @@ func confirmedPool(
 
 func distributeRewardsConfirmed(
 	ctx sdk.Context,
+	backingKeeper backing.WriteKeeper,
 	bankKeeper bank.Keeper,
 	votes poll,
 	pool sdk.Coin,
@@ -58,7 +62,23 @@ func distributeRewardsConfirmed(
 		switch v := vote.(type) {
 
 		case backing.Backing:
-			// keep backing as is
+			// distribute backing principal and interest
+			_, _, err = bankKeeper.AddCoins(ctx, v.Creator(), sdk.Coins{v.Amount()})
+			if err != nil {
+				return err
+			}
+			fmt.Printf("distributing backing principal: %s\n", v.Amount())
+			logger.Info(fmt.Sprintf("distributing backing principal: %s", v.Amount()))
+
+			_, _, err = bankKeeper.AddCoins(ctx, v.Creator(), sdk.Coins{v.Interest})
+			if err != nil {
+				return err
+			}
+			fmt.Printf("distributing backing interest: %s\n", v.Interest)
+			// logger.Info(fmt.Sprintf("distributing backing interest: %s", v.Interest))
+
+			// remove from game list
+			err = backingKeeper.RemoveFromList(ctx, v.ID())
 
 		case TokenVote:
 			// get back original staked amount in trustake
@@ -66,7 +86,8 @@ func distributeRewardsConfirmed(
 			if err != nil {
 				return err
 			}
-			logger.Info(fmt.Sprintf("giving back origin amount: %s", v.Amount()))
+			fmt.Printf("giving back origin amount: %s\n", v.Amount())
+			// logger.Info(fmt.Sprintf("giving back origin amount: %s", v.Amount()))
 
 			// calculate reward, an equal portion of the reward pool
 			rewardCoin := sdk.NewCoin(pool.Denom, voterRewardAmount)
