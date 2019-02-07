@@ -43,7 +43,7 @@ func TestBackStoryMsg_FailInsufficientFunds(t *testing.T) {
 	argument := "cool story brew"
 	creator := sdk.AccAddress([]byte{1, 2})
 	// duration := 99 * time.Hour
-	duration := 1 * time.Hour
+	duration := 24 * time.Hour
 	msg := NewBackStoryMsg(storyID, amount, argument, creator, duration)
 	assert.NotNil(t, msg)
 
@@ -63,7 +63,7 @@ func TestBackStoryMsg(t *testing.T) {
 	argument := "cool story brew"
 	creator := createFakeFundedAccount(ctx, am, sdk.Coins{amount})
 	// duration := 99 * time.Hour
-	duration := 1 * time.Hour
+	duration := 24 * time.Hour
 	msg := NewBackStoryMsg(storyID, amount, argument, creator, duration)
 	assert.NotNil(t, msg)
 
