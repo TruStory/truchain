@@ -209,19 +209,19 @@ func Test_getInterest_MidAmountMidPeriod(t *testing.T) {
 	// 500,000,000,000,000 nano / 10^9 = 500,000 trudex
 	cred := "trudex"
 	amount := sdk.NewCoin(cred, sdk.NewInt(500000000000000))
-	period := 45 * 24 * time.Hour
+	period := (7 / 2) * 24 * time.Hour
 	params := DefaultParams()
 	maxPeriod := DefaultMsgParams().MaxPeriod
 
 	interest := getInterest(amount, period, maxPeriod, cred, params)
 	assert.Equal(t, "trudex", interest.Denom)
-	assert.Equal(t, interest.Amount.String(), sdk.NewInt(508575000000000).String())
+	assert.Equal(t, interest.Amount.String(), sdk.NewInt(22617857150000).String())
 }
 
 func Test_getInterest_MaxAmountMinPeriod(t *testing.T) {
 	cred := "trudex"
 	amount := sdk.NewCoin(cred, sdk.NewInt(1000000000000000))
-	period := 3 * 24 * time.Hour
+	period := 7 * 24 * time.Hour
 	params := DefaultParams()
 
 	interest := getInterest(
