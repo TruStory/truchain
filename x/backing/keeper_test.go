@@ -207,36 +207,41 @@ func TestRemoveFromList(t *testing.T) {
 
 func Test_getInterest_MidAmountMidPeriod(t *testing.T) {
 	// 500,000,000,000,000 nano / 10^9 = 500,000 trudex
-	amount := sdk.NewCoin("trudex", sdk.NewInt(500000000000000))
+	cred := "trudex"
+	amount := sdk.NewCoin(cred, sdk.NewInt(500000000000000))
 	period := 45 * 24 * time.Hour
 	params := DefaultParams()
 	maxPeriod := DefaultMsgParams().MaxPeriod
 
-	interest := getInterest(amount, period, maxPeriod, params)
+	interest := getInterest(amount, period, maxPeriod, cred, params)
+	assert.Equal(t, "trudex", interest.Denom)
 	assert.Equal(t, interest.Amount.String(), sdk.NewInt(508575000000000).String())
 }
 
 func Test_getInterest_MaxAmountMinPeriod(t *testing.T) {
-	amount := sdk.NewCoin("trudex", sdk.NewInt(1000000000000000))
+	cred := "trudex"
+	amount := sdk.NewCoin(cred, sdk.NewInt(1000000000000000))
 	period := 3 * 24 * time.Hour
 	params := DefaultParams()
 
 	interest := getInterest(
-		amount, period, DefaultMsgParams().MaxPeriod, params)
+		amount, period, DefaultMsgParams().MaxPeriod, cred, params)
 	assert.Equal(t, interest.Amount.String(), sdk.NewInt(100000000000000).String())
 }
 
 func Test_getInterest_MinAmountMaxPeriod(t *testing.T) {
-	amount := sdk.NewCoin("trudex", sdk.NewInt(0))
+	cred := "trudex"
+	amount := sdk.NewCoin(cred, sdk.NewInt(0))
 	period := 90 * 24 * time.Hour
 	params := DefaultParams()
 
 	interest := getInterest(
-		amount, period, DefaultMsgParams().MaxPeriod, params)
+		amount, period, DefaultMsgParams().MaxPeriod, cred, params)
 	assert.Equal(t, interest.Amount.String(), sdk.NewInt(0).String())
 }
 
 func Test_getInterest_MaxAmountMaxPeriod(t *testing.T) {
+	cred := "trudex"
 	amount := sdk.NewCoin("trudex", sdk.NewInt(1000000000000000))
 	// period := 90 * 24 * time.Hour
 	period := DefaultMsgParams().MaxPeriod
@@ -244,16 +249,17 @@ func Test_getInterest_MaxAmountMaxPeriod(t *testing.T) {
 	expected := sdk.NewDecFromInt(amount.Amount).Mul(params.MaxInterestRate)
 
 	interest := getInterest(
-		amount, period, DefaultMsgParams().MaxPeriod, params)
+		amount, period, DefaultMsgParams().MaxPeriod, cred, params)
 	assert.Equal(t, expected.RoundInt().String(), interest.Amount.String())
 }
 
 func Test_getInterest_MinAmountMinPeriod(t *testing.T) {
-	amount := sdk.NewCoin("trudex", sdk.NewInt(0))
+	cred := "trudex"
+	amount := sdk.NewCoin(cred, sdk.NewInt(0))
 	period := 3 * 24 * time.Hour
 	params := DefaultParams()
 
 	interest := getInterest(
-		amount, period, DefaultMsgParams().MaxPeriod, params)
-	assert.Equal(t, interest.String(), "0trusteak", "Interest is wrong")
+		amount, period, DefaultMsgParams().MaxPeriod, cred, params)
+	assert.Equal(t, interest.String(), "0trudex", "Interest is wrong")
 }

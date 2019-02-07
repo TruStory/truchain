@@ -131,9 +131,14 @@ func (k Keeper) Create(
 
 	params := DefaultParams()
 
+	credDenom, err := k.storyKeeper.CategoryDenom(ctx, storyID)
+	if err != nil {
+		return
+	}
+
 	// mint category coin from interest earned
 	interest := getInterest(
-		amount, duration, DefaultMsgParams().MaxPeriod, params)
+		amount, duration, DefaultMsgParams().MaxPeriod, credDenom, params)
 
 	vote := app.Vote{
 		ID:        k.GetNextID(ctx),
@@ -328,13 +333,12 @@ func getInterest(
 	amount sdk.Coin,
 	period time.Duration,
 	maxPeriod time.Duration,
+	credDenom string,
 	params Params) sdk.Coin {
 
 	// TODO: keep track of total supply
 	// https://github.com/TruStory/truchain/issues/22
 
-	// 1,000,000,000 preethi = 10^9 = 1 trustake
-	// 1,000,000,000,000,000 preethi = 10^15 / 10^9 = 10^6 = 1,000,000 trustake
 	totalSupply := sdk.NewDec(1000000000000000)
 
 	// inputs
@@ -364,8 +368,8 @@ func getInterest(
 	}
 	interest := amountDec.Mul(interestRate)
 
-	// return coin with rounded interest
-	cred := sdk.NewCoin(param.StakeDenom, interest.RoundInt())
+	// return cred coin with rounded interest
+	cred := sdk.NewCoin(credDenom, interest.RoundInt())
 
 	return cred
 }
