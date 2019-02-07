@@ -102,21 +102,10 @@ func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *T
 
 	// map of initial categories (slug -> title)
 	categories := map[string]string{
-		"btc":         "Bitcoin",
-		"consensus":   "Consensus Protocols",
-		"eli5":        "ELI5 for Crypto",
-		"boring":      "Enterprise Blockchains",
-		"eth":         "Ethereum",
-		"funds":       "Funds & Fundraising",
-		"glossary":    "Glossary",
-		"gov":         "Governance",
-		"meme":        "Memes",
-		"random":      "Random",
-		"regulation":  "Regulation",
-		"scams":       "Scams",
-		"scalability": "Scalability",
-		"token":       "Token Economics",
-		"usecases":    "Use Cases",
+		"crypto": "Cryptocurrency",
+		"eli5":   "ELI5",
+		"news":   "News",
+		"random": "Random",
 	}
 
 	// create your application type
