@@ -7,6 +7,8 @@ import (
 	"math/rand"
 	"sort"
 
+	"github.com/TruStory/truchain/parameters"
+
 	"github.com/TruStory/truchain/x/db"
 	"github.com/TruStory/truchain/x/params"
 	"github.com/TruStory/truchain/x/vote"
@@ -204,6 +206,13 @@ func (ta *TruAPI) challengeThresholdResolver(_ context.Context, q story.Story) s
 	err := json.Unmarshal(res.Value, amount)
 	if err != nil {
 		panic(err)
+	}
+
+	// Round up to next Shanev so we don't deal with precision
+	remainder := amount.Amount.Mod(sdk.NewInt(parameters.Shanev))
+	if !remainder.IsZero() {
+		roundedUp := amount.Amount.Sub(remainder).Add(sdk.NewInt(parameters.Shanev))
+		return sdk.NewCoin(amount.Denom, roundedUp)
 	}
 
 	return *amount

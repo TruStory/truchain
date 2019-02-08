@@ -45,6 +45,12 @@ const (
 	BootstrapFlag
 )
 
+// Coin units
+const (
+	Preethi = 1
+	Shanev  = 1000000000 * Preethi
+)
+
 // Features sets flags on features to turn on/off during testnet
 var Features = map[int]bool{
 	FeeFlag:       false,
