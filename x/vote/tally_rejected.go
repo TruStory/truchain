@@ -1,6 +1,7 @@
 package vote
 
 import (
+	params "github.com/TruStory/truchain/parameters"
 	app "github.com/TruStory/truchain/types"
 	"github.com/TruStory/truchain/x/backing"
 	"github.com/TruStory/truchain/x/challenge"
@@ -17,7 +18,9 @@ func rejectedPool(
 
 		case backing.Backing:
 			// forfeit backing and inflationary rewards, add to pool
-			*pool = (*pool).Plus(v.Amount()).Plus(v.Interest)
+			// TODO [shanev]: do proper conversion when we know it, still 1:1
+			interestInTrustake := sdk.NewCoin(params.StakeDenom, v.Interest.Amount)
+			*pool = (*pool).Plus(v.Amount()).Plus(interestInTrustake)
 
 		case TokenVote:
 			// add vote fee to reward pool
@@ -36,7 +39,9 @@ func rejectedPool(
 
 		case backing.Backing:
 			// slash inflationary rewards and add to pool, bad boy
-			*pool = (*pool).Plus(v.Interest)
+			// TODO [shanev]: do proper conversion when we know it, still 1:1
+			interestInTrustake := sdk.NewCoin(params.StakeDenom, v.Interest.Amount)
+			*pool = (*pool).Plus(interestInTrustake)
 
 		case challenge.Challenge:
 			// do nothing
