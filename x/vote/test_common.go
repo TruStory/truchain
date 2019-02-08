@@ -132,9 +132,28 @@ func fakeValidationGame() (ctx sdk.Context, votes poll, k Keeper) {
 
 	storyID := createFakeStory(ctx, k.storyKeeper, ck)
 	amount := sdk.NewCoin(params.StakeDenom, sdk.NewInt(1000000000000))
+	largeAmount := sdk.NewCoin(params.StakeDenom, sdk.NewInt(2000000000000))
 	argument := "test argument"
 
-	// each of these creators start with 2000trusteak
+	// GAME SCENARIO (STORY WILL BE CONFIRMED)
+	// 4 backers @ 1000, 2 challengers @ 1000, 1 challenger @ 2000
+	// game meets 100% challenge threshold
+	// total reward pool = 4000 (backers) + 4000 (challengers)
+
+	// total interest = 4 backers @ 500 each = 2000
+
+	// VOTING BEGINS (New Voters)
+	// 3 True Votes @ 1000 each, 1 False Vote @ 1000 each
+	// 1 Backer Switches to False (Backing Total goes down)
+
+	// GAME ENDS
+	// 6 TRUE VOTES (3 Backers, 3 True Voters)
+	// 5 FALSE VOTES (1 Changed Backer,3 Challengers, 1 False Voter)
+	// True Total = 3000 from Backers (since 1 switched) + 3000 from Voters = 6000 (before interest)
+	// False Total = 4000 from Challengers + 1000 from Voter = 5000
+	// Since Confirmed, only switched backer interest is added to the reward pool = 500
+	// Total Reward Pool = False Total (5000) + Switched Interest (500) = 5500
+
 	creator1 := fakeFundedCreator(ctx, k.bankKeeper)
 	creator2 := fakeFundedCreator(ctx, k.bankKeeper)
 	creator3 := fakeFundedCreator(ctx, k.bankKeeper)
@@ -144,6 +163,8 @@ func fakeValidationGame() (ctx sdk.Context, votes poll, k Keeper) {
 	creator7 := fakeFundedCreator(ctx, k.bankKeeper)
 	creator8 := fakeFundedCreator(ctx, k.bankKeeper)
 	creator9 := fakeFundedCreator(ctx, k.bankKeeper)
+	creator10 := fakeFundedCreator(ctx, k.bankKeeper) // largeAmountChallenger
+	creator11 := fakeFundedCreator(ctx, k.bankKeeper)
 
 	// fake backings
 	duration := 1 * time.Hour
@@ -155,10 +176,14 @@ func fakeValidationGame() (ctx sdk.Context, votes poll, k Keeper) {
 	// fake challenges
 	c1id, _ := k.challengeKeeper.Create(ctx, storyID, amount, argument, creator5)
 	c2id, _ := k.challengeKeeper.Create(ctx, storyID, amount, argument, creator6)
+	c3id, _ := k.challengeKeeper.Create(ctx, storyID, largeAmount, argument, creator10)
 
-	// fake votes
+	// fake votes (true)
 	v1id, _ := k.Create(ctx, storyID, amount, true, argument, creator7)
 	v2id, _ := k.Create(ctx, storyID, amount, true, argument, creator8)
+	v4id, _ := k.Create(ctx, storyID, amount, true, argument, creator11)
+
+	// fake votes(false)
 	v3id, _ := k.Create(ctx, storyID, amount, false, argument, creator9)
 
 	b1, _ := k.backingKeeper.Backing(ctx, b1id)
@@ -183,13 +208,15 @@ func fakeValidationGame() (ctx sdk.Context, votes poll, k Keeper) {
 
 	c1, _ := k.challengeKeeper.Challenge(ctx, c1id)
 	c2, _ := k.challengeKeeper.Challenge(ctx, c2id)
+	c3, _ := k.challengeKeeper.Challenge(ctx, c3id)
 
 	v1, _ := k.TokenVote(ctx, v1id)
 	v2, _ := k.TokenVote(ctx, v2id)
 	v3, _ := k.TokenVote(ctx, v3id)
+	v4, _ := k.TokenVote(ctx, v4id)
 
-	votes.trueVotes = append(votes.trueVotes, b1, b2, b3, v1, v2)
-	votes.falseVotes = append(votes.falseVotes, b4, c1, c2, v3)
+	votes.trueVotes = append(votes.trueVotes, b1, b2, b3, v1, v2, v4)
+	votes.falseVotes = append(votes.falseVotes, b4, c1, c2, c3, v3)
 
 	return
 }

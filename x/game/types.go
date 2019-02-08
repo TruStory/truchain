@@ -64,9 +64,9 @@ type Params struct {
 // DefaultParams creates a new MsgParams type with defaults
 func DefaultParams() Params {
 	return Params{
-		ChallengeToBackingRatio: sdk.NewDecWithPrec(33, 2), // 33%
-		MinChallengeThreshold:   sdk.NewInt(10000000000),   // 10 trustake
-		MinChallengeStake:       sdk.NewInt(1000000000),    //  1 trustake
+		ChallengeToBackingRatio: sdk.NewDecWithPrec(100, 2), // 33%
+		MinChallengeThreshold:   sdk.NewInt(10000000000),    // 10 trustake
+		MinChallengeStake:       sdk.NewInt(1000000000),     //  1 trustake
 		Expires:                 1 * 24 * time.Hour,
 		VotingPeriod:            1 * 24 * time.Hour,
 		VoteQuorum:              3,

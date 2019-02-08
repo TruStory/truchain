@@ -113,14 +113,14 @@ func Test_challengeThresholdWithSmallBacking(t *testing.T) {
 	_, k, _ := mockDB()
 	amt := k.ChallengeThreshold(sdk.NewCoin(params.StakeDenom, sdk.NewInt(21000000000)))
 
-	assert.Equal(t, "10000000000trusteak", amt.String())
+	assert.Equal(t, "21000000000trusteak", amt.String())
 }
 
 func Test_challengeThresholdWithBacking(t *testing.T) {
 	_, k, _ := mockDB()
 	amt := k.ChallengeThreshold(sdk.NewCoin(params.StakeDenom, sdk.NewInt(100000000000)))
 
-	assert.Equal(t, "33000000000trusteak", amt.String())
+	assert.Equal(t, "100000000000trusteak", amt.String())
 }
 
 func Test_start(t *testing.T) {
@@ -137,7 +137,7 @@ func Test_start(t *testing.T) {
 	k.backingKeeper.Create(ctx, storyID, amount, argument, creator, duration)
 
 	// challenge with 33trusteak (33% of total backings)
-	amount = sdk.NewCoin(params.StakeDenom, sdk.NewInt(33000000000))
+	amount = sdk.NewCoin(params.StakeDenom, sdk.NewInt(100000000000))
 	err := k.AddToChallengePool(ctx, gameID, amount)
 	assert.Nil(t, err)
 

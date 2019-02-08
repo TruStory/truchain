@@ -28,14 +28,14 @@ func TestTally(t *testing.T) {
 
 	votes, _ := tally(ctx, k, game)
 
-	assert.Equal(t, 5, len(votes.trueVotes))
-	assert.Equal(t, 4, len(votes.falseVotes))
+	assert.Equal(t, 6, len(votes.trueVotes))
+	assert.Equal(t, 5, len(votes.falseVotes))
 }
 
 func TestRewardPool(t *testing.T) {
 	ctx, votes, _ := fakeValidationGame()
 
-	expectedPool := sdk.NewCoin(params.StakeDenom, sdk.NewInt(3500000000000))
+	expectedPool := sdk.NewCoin(params.StakeDenom, sdk.NewInt(5500000000000))
 
 	pool, _ := rewardPool(ctx, votes, true)
 	assert.Equal(t, expectedPool.String(), pool.String())
@@ -65,10 +65,10 @@ func TestWeightedVote(t *testing.T) {
 	falseWeights, _ := weightedVote(ctx, k.accountKeeper, votes.falseVotes, "trudex")
 
 	// 5 true, 1 preethi added each due to cold-start
-	assert.Equal(t, "5", trueWeights.String())
+	assert.Equal(t, "6", trueWeights.String())
 
 	// 4 false, 1 preethi added each due to cold-start
-	assert.Equal(t, "4", falseWeights.String())
+	assert.Equal(t, "5", falseWeights.String())
 }
 
 func TestConfirmedStoryRewardPool(t *testing.T) {
@@ -77,7 +77,7 @@ func TestConfirmedStoryRewardPool(t *testing.T) {
 	pool := sdk.NewCoin(params.StakeDenom, sdk.ZeroInt())
 
 	confirmedPool(ctx, votes.falseVotes, &pool)
-	assert.Equal(t, "3500000000000trusteak", pool.String())
+	assert.Equal(t, "5500000000000trusteak", pool.String())
 }
 
 func TestDistributeRewardsConfirmed(t *testing.T) {
@@ -111,12 +111,12 @@ func TestDistributeRewardsConfirmed(t *testing.T) {
 	winningVoter1 := votes.trueVotes[3].(TokenVote)
 	coins = k.bankKeeper.GetCoins(ctx, winningVoter1.Creator())
 	assert.Equal(t, "2000000000000", coins.AmountOf(params.StakeDenom).String())
-	assert.Equal(t, "1750000000000", coins.AmountOf(cred).String())
+	assert.Equal(t, "1833333333333", coins.AmountOf(cred).String())
 
 	winningVoter2 := votes.trueVotes[4].(TokenVote)
 	coins = k.bankKeeper.GetCoins(ctx, winningVoter2.Creator())
 	assert.Equal(t, "2000000000000", coins.AmountOf(params.StakeDenom).String())
-	assert.Equal(t, "1750000000000", coins.AmountOf(cred).String())
+	assert.Equal(t, "1833333333333", coins.AmountOf(cred).String())
 
 	losingBacker1 := votes.falseVotes[0].(backing.Backing)
 	coins = k.bankKeeper.GetCoins(ctx, losingBacker1.Creator())
@@ -133,7 +133,12 @@ func TestDistributeRewardsConfirmed(t *testing.T) {
 	assert.Equal(t, "1000000000000", coins.AmountOf(params.StakeDenom).String())
 	assert.Equal(t, "0", coins.AmountOf(cred).String())
 
-	losingVoter1 := votes.falseVotes[3].(TokenVote)
+	losingChallenger3 := votes.falseVotes[3].(challenge.Challenge)
+	coins = k.bankKeeper.GetCoins(ctx, losingChallenger3.Creator())
+	assert.Equal(t, "0", coins.AmountOf(params.StakeDenom).String())
+	assert.Equal(t, "0", coins.AmountOf(cred).String())
+
+	losingVoter1 := votes.falseVotes[4].(TokenVote)
 	coins = k.bankKeeper.GetCoins(ctx, losingVoter1.Creator())
 	assert.Equal(t, "1000000000000", coins.AmountOf(params.StakeDenom).String())
 	assert.Equal(t, "0", coins.AmountOf(cred).String())
@@ -145,7 +150,7 @@ func TestRejectedStoryRewardPool(t *testing.T) {
 	pool := sdk.NewCoin(params.StakeDenom, sdk.ZeroInt())
 
 	rejectedPool(ctx, votes, &pool)
-	assert.Equal(t, "7000000000000trusteak", pool.String())
+	assert.Equal(t, "8000000000000trusteak", pool.String())
 }
 
 func TestChallengerPool(t *testing.T) {
@@ -154,7 +159,7 @@ func TestChallengerPool(t *testing.T) {
 	rejectedPool(ctx, votes, &pool)
 
 	coin := challengerPool(pool, DefaultParams())
-	assert.Equal(t, "5250000000000trusteak", coin.String())
+	assert.Equal(t, "6000000000000trusteak", coin.String())
 }
 
 func TestVoterPool(t *testing.T) {
@@ -163,7 +168,7 @@ func TestVoterPool(t *testing.T) {
 	rejectedPool(ctx, votes, &pool)
 
 	coin := voterPool(pool, DefaultParams())
-	assert.Equal(t, "1750000000000trusteak", coin.String())
+	assert.Equal(t, "2000000000000trusteak", coin.String())
 }
 
 func TestCount(t *testing.T) {
@@ -172,7 +177,7 @@ func TestCount(t *testing.T) {
 	rejectedPool(ctx, votes, &pool)
 
 	cAmount, vCount, _ := winnerInfo(votes.falseVotes)
-	assert.Equal(t, int64(2000000000000), cAmount.Int64())
+	assert.Equal(t, int64(4000000000000), cAmount.Int64())
 	assert.Equal(t, int64(1), vCount)
 }
 
@@ -223,17 +228,22 @@ func TestDistributeRewardsRejected(t *testing.T) {
 	winningChallenger1 := votes.falseVotes[1].(challenge.Challenge)
 	coins = k.bankKeeper.GetCoins(ctx, winningChallenger1.Creator())
 	assert.Equal(t, "2000000000000", coins.AmountOf(params.StakeDenom).String())
-	assert.Equal(t, "2625000000000", coins.AmountOf(cred).String())
+	assert.Equal(t, "1500000000000", coins.AmountOf(cred).String())
 
 	winningChallenger2 := votes.falseVotes[2].(challenge.Challenge)
 	coins = k.bankKeeper.GetCoins(ctx, winningChallenger2.Creator())
 	assert.Equal(t, "2000000000000", coins.AmountOf(params.StakeDenom).String())
-	assert.Equal(t, "2625000000000", coins.AmountOf(cred).String())
+	assert.Equal(t, "1500000000000", coins.AmountOf(cred).String())
 
-	winningVoter1 := votes.falseVotes[3].(TokenVote)
+	winningChallenger3 := votes.falseVotes[3].(challenge.Challenge)
+	coins = k.bankKeeper.GetCoins(ctx, winningChallenger3.Creator())
+	assert.Equal(t, "2000000000000", coins.AmountOf(params.StakeDenom).String())
+	assert.Equal(t, "3000000000000", coins.AmountOf(cred).String())
+
+	winningVoter1 := votes.falseVotes[4].(TokenVote)
 	coins = k.bankKeeper.GetCoins(ctx, winningVoter1.Creator())
 	assert.Equal(t, "2000000000000", coins.AmountOf(params.StakeDenom).String())
-	assert.Equal(t, "1750000000000", coins.AmountOf(cred).String())
+	assert.Equal(t, "2000000000000", coins.AmountOf(cred).String())
 
 	losingBacker1 := votes.trueVotes[0].(backing.Backing)
 	coins = k.bankKeeper.GetCoins(ctx, losingBacker1.Creator())
