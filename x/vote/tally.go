@@ -126,15 +126,10 @@ func distributeRewards(
 
 	if confirmed {
 		err = distributeRewardsConfirmed(
-			ctx, bankKeeper, votes, rewardPool, denom)
+			ctx, backingKeeper, bankKeeper, votes, rewardPool, denom)
 	} else {
 		err = distributeRewardsRejected(
-			ctx,
-			backingKeeper,
-			bankKeeper,
-			votes.falseVotes,
-			rewardPool,
-			denom)
+			ctx, backingKeeper, bankKeeper, votes, rewardPool, denom)
 	}
 	if err != nil {
 		return

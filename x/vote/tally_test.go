@@ -88,25 +88,25 @@ func TestDistributeRewardsConfirmed(t *testing.T) {
 	cred := "trudex"
 
 	err := distributeRewardsConfirmed(
-		ctx, k.bankKeeper, votes, pool, cred)
+		ctx, k.backingKeeper, k.bankKeeper, votes, pool, cred)
 	assert.Nil(t, err)
 
 	coins := sdk.Coins{}
 
 	winningBacker1 := votes.trueVotes[0].(backing.Backing)
 	coins = k.bankKeeper.GetCoins(ctx, winningBacker1.Creator())
-	assert.Equal(t, "1000000000000", coins.AmountOf(params.StakeDenom).String())
-	assert.Equal(t, "0", coins.AmountOf(cred).String())
+	assert.Equal(t, "2000000000000", coins.AmountOf(params.StakeDenom).String())
+	assert.Equal(t, "500000000000", coins.AmountOf(cred).String())
 
 	winningBacker2 := votes.trueVotes[1].(backing.Backing)
 	coins = k.bankKeeper.GetCoins(ctx, winningBacker2.Creator())
-	assert.Equal(t, "1000000000000", coins.AmountOf(params.StakeDenom).String())
-	assert.Equal(t, "0", coins.AmountOf(cred).String())
+	assert.Equal(t, "2000000000000", coins.AmountOf(params.StakeDenom).String())
+	assert.Equal(t, "500000000000", coins.AmountOf(cred).String())
 
 	winningBacker3 := votes.trueVotes[2].(backing.Backing)
 	coins = k.bankKeeper.GetCoins(ctx, winningBacker3.Creator())
-	assert.Equal(t, "1000000000000", coins.AmountOf(params.StakeDenom).String())
-	assert.Equal(t, "0", coins.AmountOf(cred).String())
+	assert.Equal(t, "2000000000000", coins.AmountOf(params.StakeDenom).String())
+	assert.Equal(t, "500000000000", coins.AmountOf(cred).String())
 
 	winningVoter1 := votes.trueVotes[3].(TokenVote)
 	coins = k.bankKeeper.GetCoins(ctx, winningVoter1.Creator())
@@ -211,7 +211,7 @@ func TestDistributeRewardsRejected(t *testing.T) {
 	cred := "trudex"
 
 	err := distributeRewardsRejected(
-		ctx, k.backingKeeper, k.bankKeeper, votes.falseVotes, pool, cred)
+		ctx, k.backingKeeper, k.bankKeeper, votes, pool, cred)
 	assert.Nil(t, err)
 
 	coins := sdk.Coins{}

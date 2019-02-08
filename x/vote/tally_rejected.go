@@ -1,6 +1,7 @@
 package vote
 
 import (
+	params "github.com/TruStory/truchain/parameters"
 	app "github.com/TruStory/truchain/types"
 	"github.com/TruStory/truchain/x/backing"
 	"github.com/TruStory/truchain/x/challenge"
@@ -17,7 +18,9 @@ func rejectedPool(
 
 		case backing.Backing:
 			// forfeit backing and inflationary rewards, add to pool
-			*pool = (*pool).Plus(v.Amount()).Plus(v.Interest)
+			// TODO [shanev]: do proper conversion when we know it, still 1:1
+			interestInTrustake := sdk.NewCoin(params.StakeDenom, v.Interest.Amount)
+			*pool = (*pool).Plus(v.Amount()).Plus(interestInTrustake)
 
 		case TokenVote:
 			// add vote fee to reward pool
@@ -36,7 +39,9 @@ func rejectedPool(
 
 		case backing.Backing:
 			// slash inflationary rewards and add to pool, bad boy
-			*pool = (*pool).Plus(v.Interest)
+			// TODO [shanev]: do proper conversion when we know it, still 1:1
+			interestInTrustake := sdk.NewCoin(params.StakeDenom, v.Interest.Amount)
+			*pool = (*pool).Plus(interestInTrustake)
 
 		case challenge.Challenge:
 			// do nothing
@@ -60,7 +65,7 @@ func distributeRewardsRejected(
 	ctx sdk.Context,
 	backingKeeper backing.WriteKeeper,
 	bankKeeper bank.Keeper,
-	winners []app.Voter,
+	votes poll,
 	pool sdk.Coin,
 	denom string) (err sdk.Error) {
 
@@ -74,7 +79,7 @@ func distributeRewardsRejected(
 	voterPool := voterPool(pool, params)
 
 	// get the total challenger stake amount and voter count
-	challengerTotalAmount, voterCount, err := winnerInfo(winners)
+	challengerTotalAmount, voterCount, err := winnerInfo(votes.falseVotes)
 	if err != nil {
 		return err
 	}
@@ -82,8 +87,31 @@ func distributeRewardsRejected(
 	// calculate voter reward amount
 	voterRewardAmount := voterRewardAmount(voterPool, voterCount)
 
-	// distribute reward
-	for _, vote := range winners {
+	// slash losers (true voters)
+	for _, vote := range votes.trueVotes {
+		switch v := vote.(type) {
+
+		case backing.Backing:
+			// don't get anything back, too bad sucka!
+			// remove backing from backing list, prevent maturing
+			err = backingKeeper.RemoveFromList(ctx, v.ID())
+
+		case challenge.Challenge:
+			// challengers cannot vote true -- skip
+
+		case TokenVote:
+			// slashed -- get nothing back
+
+		default:
+			err = ErrInvalidVote(v)
+		}
+
+		if err != nil {
+			return err
+		}
+	}
+	// distribute reward to winners (false voters)
+	for _, vote := range votes.falseVotes {
 		switch v := vote.(type) {
 
 		case backing.Backing:
