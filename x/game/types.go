@@ -3,8 +3,6 @@ package game
 import (
 	"time"
 
-	"github.com/TruStory/truchain/parameters"
-
 	app "github.com/TruStory/truchain/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )

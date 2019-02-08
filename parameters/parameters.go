@@ -22,7 +22,6 @@ const (
 )
 
 // InitialCredAmount is the initial amount of cred for categories
-
 var InitialCredAmount = sdk.NewInt(1000000000)
 
 // InitialTruStake is an `sdk.Coins` representing the balance a new user is granted upon registration
