@@ -298,20 +298,22 @@ func (k Keeper) TotalBackingAmount(ctx sdk.Context, storyID int64) (
 	totalCoin sdk.Coin, err sdk.Error) {
 
 	totalAmount := sdk.ZeroInt()
+	var ID int64
 
-	err = k.backingStoryList.Map(ctx, k, storyID, func(backingID int64) sdk.Error {
-		backing, err := k.Backing(ctx, backingID)
+	// iterate through unmatured backings
+	k.backingList(ctx).Iterate(&ID, func(index uint64) bool {
+		backing, err := k.Backing(ctx, ID)
 		if err != nil {
-			return err
+			panic(err)
 		}
 
-		totalAmount = totalAmount.Add(backing.Amount().Amount)
+		// if story ids match, append to total backing amount
+		if backing.StoryID == storyID {
+			totalAmount = totalAmount.Add(backing.Amount().Amount)
+		}
 
-		return nil
+		return false
 	})
-	if err != nil {
-		return
-	}
 
 	return sdk.NewCoin(param.StakeDenom, totalAmount), nil
 }
