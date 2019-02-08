@@ -1,6 +1,8 @@
 package vote
 
 import (
+	"fmt"
+
 	app "github.com/TruStory/truchain/types"
 	"github.com/TruStory/truchain/x/backing"
 	"github.com/TruStory/truchain/x/challenge"
@@ -41,10 +43,15 @@ func distributeRewardsConfirmed(
 	ctx sdk.Context,
 	bankKeeper bank.Keeper,
 	votes poll,
-	pool sdk.Coin) (err sdk.Error) {
+	pool sdk.Coin,
+	denom string) (err sdk.Error) {
+
+	logger := ctx.Logger().With("module", "vote")
+	logger.Info(fmt.Sprintf("reward pool (confirmed): %s", pool))
 
 	// determine pool share per voter
 	voterRewardAmount := voterRewardAmount(pool, voterCount(votes.trueVotes))
+	logger.Info(fmt.Sprintf("token voter reward amount: %s", voterRewardAmount))
 
 	// distribute reward to winners
 	for _, vote := range votes.trueVotes {
@@ -54,11 +61,12 @@ func distributeRewardsConfirmed(
 			// keep backing as is
 
 		case TokenVote:
-			// get back original staked amount
+			// get back original staked amount in trustake
 			_, _, err = bankKeeper.AddCoins(ctx, v.Creator(), sdk.Coins{v.Amount()})
 			if err != nil {
 				return err
 			}
+			logger.Info(fmt.Sprintf("giving back origin amount: %s", v.Amount()))
 
 			// calculate reward, an equal portion of the reward pool
 			rewardCoin := sdk.NewCoin(pool.Denom, voterRewardAmount)
@@ -66,11 +74,9 @@ func distributeRewardsConfirmed(
 			// remove reward amount from pool
 			pool = pool.Minus(rewardCoin)
 
-			// payout user
-			_, _, err = bankKeeper.AddCoins(ctx, v.Creator(), sdk.Coins{rewardCoin})
-			if err != nil {
-				return err
-			}
+			// distribute reward in cred
+			cred := app.NewCategoryCoin(denom, rewardCoin)
+			_, _, err = bankKeeper.AddCoins(ctx, v.Creator(), sdk.Coins{cred})
 
 		default:
 			if err = ErrInvalidVote(v); err != nil {

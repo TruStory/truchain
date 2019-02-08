@@ -1,6 +1,7 @@
 package vote
 
 import (
+	params "github.com/TruStory/truchain/parameters"
 	app "github.com/TruStory/truchain/types"
 	"github.com/TruStory/truchain/x/backing"
 	"github.com/TruStory/truchain/x/game"
@@ -17,8 +18,13 @@ func processGame(ctx sdk.Context, k Keeper, game game.Game) sdk.Error {
 		return err
 	}
 
+	credDenom, err := k.storyKeeper.CategoryDenom(ctx, game.StoryID)
+	if err != nil {
+		return err
+	}
+
 	// check if story was confirmed
-	confirmed, err := confirmStory(ctx, k.accountKeeper, votes)
+	confirmed, err := confirmStory(ctx, k.accountKeeper, votes, credDenom)
 	if err != nil {
 		return err
 	}
@@ -31,7 +37,7 @@ func processGame(ctx sdk.Context, k Keeper, game game.Game) sdk.Error {
 
 	// distribute rewards
 	err = distributeRewards(
-		ctx, k.backingKeeper, k.bankKeeper, rewardPool, votes, confirmed)
+		ctx, k.backingKeeper, k.bankKeeper, rewardPool, votes, confirmed, credDenom)
 	if err != nil {
 		return err
 	}
@@ -93,7 +99,7 @@ func rewardPool(
 	if !ok {
 		return pool, ErrInvalidVote(v, "Initializing reward pool")
 	}
-	pool = sdk.NewCoin(v.Amount().Denom, sdk.ZeroInt())
+	pool = sdk.NewCoin(params.StakeDenom, sdk.ZeroInt())
 
 	if confirmed {
 		err = confirmedPool(ctx, votes.falseVotes, &pool)
@@ -113,21 +119,22 @@ func distributeRewards(
 	bankKeeper bank.Keeper,
 	rewardPool sdk.Coin,
 	votes poll,
-	confirmed bool) (
-	err sdk.Error) {
+	confirmed bool,
+	denom string) (err sdk.Error) {
 
 	logger := ctx.Logger().With("module", "vote")
 
 	if confirmed {
 		err = distributeRewardsConfirmed(
-			ctx, bankKeeper, votes, rewardPool)
+			ctx, bankKeeper, votes, rewardPool, denom)
 	} else {
 		err = distributeRewardsRejected(
 			ctx,
 			backingKeeper,
 			bankKeeper,
 			votes.falseVotes,
-			rewardPool)
+			rewardPool,
+			denom)
 	}
 	if err != nil {
 		return
@@ -140,17 +147,17 @@ func distributeRewards(
 
 // determine if a story is confirmed or rejected
 func confirmStory(
-	ctx sdk.Context, accountKeeper auth.AccountKeeper, votes poll) (
+	ctx sdk.Context, accountKeeper auth.AccountKeeper, votes poll, denom string) (
 	confirmed bool, err sdk.Error) {
 
 	// calculate weighted true votes
-	trueWeight, err := weightedVote(ctx, accountKeeper, votes.trueVotes)
+	trueWeight, err := weightedVote(ctx, accountKeeper, votes.trueVotes, denom)
 	if err != nil {
 		return confirmed, err
 	}
 
 	// calculate weighted false votes
-	falseWeight, err := weightedVote(ctx, accountKeeper, votes.falseVotes)
+	falseWeight, err := weightedVote(ctx, accountKeeper, votes.falseVotes, denom)
 	if err != nil {
 		return confirmed, err
 	}
@@ -170,9 +177,9 @@ func confirmStory(
 	return false, nil
 }
 
-// calculate weighted vote based on user's total category coin balance
+// calculate weighted vote based on user's cred balance
 func weightedVote(
-	ctx sdk.Context, accountKeeper auth.AccountKeeper, votes []app.Voter) (
+	ctx sdk.Context, accountKeeper auth.AccountKeeper, votes []app.Voter, denom string) (
 	weightedAmount sdk.Int, err sdk.Error) {
 
 	weightedAmount = sdk.ZeroInt()
@@ -185,21 +192,16 @@ func weightedVote(
 		}
 
 		user := accountKeeper.GetAccount(ctx, v.Creator())
-
-		// get user's category coin balance
-		categoryCoinBalance := sdk.ZeroInt()
 		coins := user.GetCoins()
-		if coins.IsValid() {
-			categoryDenom := v.Amount().Denom
-			categoryCoinBalance = coins.AmountOf(categoryDenom)
+		credBalance := coins.AmountOf(denom)
+		if credBalance.IsZero() {
+			// fix cold-start problem by adding 1 preethi
+			// when there is a 0 cred balance so the vote
+			// is counted
+			credBalance = credBalance.Add(sdk.NewInt(1))
 		}
 
-		// get user's BCV stake
-		stake := v.Amount().Amount
-
-		// weight = balance + stake
-		voteWeight := categoryCoinBalance.Add(stake)
-		weightedAmount = weightedAmount.Add(voteWeight)
+		weightedAmount = weightedAmount.Add(credBalance)
 	}
 
 	return weightedAmount, nil
@@ -208,7 +210,7 @@ func weightedVote(
 // Make sure reward pool is empty (<= 1 coin)
 // Makes up for rounding error during division
 func checkForEmptyPool(pool sdk.Coin) sdk.Error {
-	oneCoin := sdk.NewCoin(pool.Denom, sdk.OneInt())
+	oneCoin := sdk.NewCoin(params.StakeDenom, sdk.OneInt())
 	if !(pool.IsLT(oneCoin) || pool.IsEqual(oneCoin)) {
 		return ErrNonEmptyRewardPool(pool)
 	}

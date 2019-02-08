@@ -22,7 +22,8 @@ const (
 )
 
 // InitialCredAmount is the initial amount of cred for categories
-var InitialCredAmount = sdk.NewInt(100 * Shanev)
+
+var InitialCredAmount = sdk.NewInt(1000000000)
 
 // InitialTruStake is an `sdk.Coins` representing the balance a new user is granted upon registration
 var InitialTruStake = sdk.Coin{Amount: sdk.NewInt(1000 * Shanev), Denom: StakeDenom}
@@ -54,5 +55,5 @@ const (
 // Features sets flags on features to turn on/off during testnet
 var Features = map[int]bool{
 	FeeFlag:       false,
-	BootstrapFlag: true,
+	BootstrapFlag: false,
 }

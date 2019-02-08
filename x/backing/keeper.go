@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"time"
 
-	params "github.com/TruStory/truchain/parameters"
+	param "github.com/TruStory/truchain/parameters"
 	app "github.com/TruStory/truchain/types"
 	cat "github.com/TruStory/truchain/x/category"
 	"github.com/TruStory/truchain/x/story"
@@ -110,10 +110,11 @@ func (k Keeper) Create(
 
 	logger := ctx.Logger().With("module", "backing")
 
-	// check if user has enough cat coins or trustake to back
-	trustake := sdk.NewCoin(params.StakeDenom, amount.Amount)
-	if !k.bankKeeper.HasCoins(ctx, creator, sdk.Coins{amount}) &&
-		!k.bankKeeper.HasCoins(ctx, creator, sdk.Coins{trustake}) {
+	if amount.Denom != param.StakeDenom {
+		return 0, sdk.ErrInvalidCoins("Invalid backing token.")
+	}
+
+	if !k.bankKeeper.HasCoins(ctx, creator, sdk.Coins{amount}) {
 		return 0, sdk.ErrInsufficientFunds("Insufficient funds for backing.")
 	}
 
@@ -122,48 +123,32 @@ func (k Keeper) Create(
 		return 0, ErrDuplicate(storyID, creator)
 	}
 
-	// get story value from story id
-	story, err := k.storyKeeper.Story(ctx, storyID)
-	if err != nil {
-		return
-	}
-
-	// get category value from category id
-	cat, err := k.categoryKeeper.GetCategory(ctx, story.CategoryID)
-	if err != nil {
-		return
-	}
-
-	// set principal, converting from trustake if needed
-	principal, err := k.getPrincipal(ctx, cat.Denom(), amount, creator)
-	if err != nil {
-		return
-	}
-
 	// subtract principal from user
-	_, _, err = k.bankKeeper.SubtractCoins(ctx, creator, sdk.Coins{principal})
+	_, _, err = k.bankKeeper.SubtractCoins(ctx, creator, sdk.Coins{amount})
 	if err != nil {
 		return
 	}
 
-	// load default backing parameters
 	params := DefaultParams()
+
+	credDenom, err := k.storyKeeper.CategoryDenom(ctx, storyID)
+	if err != nil {
+		return
+	}
 
 	// mint category coin from interest earned
 	interest := getInterest(
-		cat, amount, duration, DefaultMsgParams().MaxPeriod, params)
+		amount, duration, DefaultMsgParams().MaxPeriod, credDenom, params)
 
-	// create new implicit true vote type
 	vote := app.Vote{
 		ID:        k.GetNextID(ctx),
-		Amount:    principal,
+		Amount:    amount,
 		Argument:  argument,
 		Creator:   creator,
 		Vote:      true,
 		Timestamp: app.NewTimestamp(ctx.BlockHeader()),
 	}
 
-	// create new backing type with embedded vote
 	backing := Backing{
 		Vote:        vote,
 		StoryID:     storyID,
@@ -172,8 +157,6 @@ func (k Keeper) Create(
 		Params:      params,
 		Period:      duration,
 	}
-
-	// store backing
 	k.setBacking(ctx, backing)
 
 	// add backing id to the backing list for future processing
@@ -330,44 +313,10 @@ func (k Keeper) TotalBackingAmount(ctx sdk.Context, storyID int64) (
 		return
 	}
 
-	denom, err := k.storyKeeper.CategoryDenom(ctx, storyID)
-	if err != nil {
-		return
-	}
-
-	return sdk.NewCoin(denom, totalAmount), nil
+	return sdk.NewCoin(param.StakeDenom, totalAmount), nil
 }
 
 // ============================================================================
-
-// getPrincipal calculates the principal, the amount the user gets back
-// after the backing matures. Returns a coin.
-func (k Keeper) getPrincipal(
-	ctx sdk.Context,
-	denom string,
-	amount sdk.Coin,
-	userAddr sdk.AccAddress) (principal sdk.Coin, err sdk.Error) {
-
-	// check which type of coin user wants to back in
-	switch amount.Denom {
-	case denom:
-		// check and return amount if user has enough category coins
-		if k.bankKeeper.HasCoins(ctx, userAddr, sdk.Coins{amount}) {
-			return amount, nil
-		}
-
-	case params.StakeDenom:
-		// mint category coins from trustake
-		principal, err = app.SwapForCategoryCoin(
-			ctx, k.bankKeeper, amount, denom, userAddr)
-
-	default:
-		return principal, sdk.ErrInvalidCoins("Invalid backing token")
-
-	}
-
-	return
-}
 
 // setBacking stores a `Backing` type in the KVStore
 func (k Keeper) setBacking(ctx sdk.Context, backing Backing) {
@@ -381,17 +330,15 @@ func (k Keeper) setBacking(ctx sdk.Context, backing Backing) {
 
 // getInterest calcuates the interest for the backing
 func getInterest(
-	category cat.Category,
 	amount sdk.Coin,
 	period time.Duration,
 	maxPeriod time.Duration,
+	credDenom string,
 	params Params) sdk.Coin {
 
 	// TODO: keep track of total supply
 	// https://github.com/TruStory/truchain/issues/22
 
-	// 1,000,000,000 preethi = 10^9 = 1 trustake
-	// 1,000,000,000,000,000 preethi = 10^15 / 10^9 = 10^6 = 1,000,000 trustake
 	totalSupply := sdk.NewDec(1000000000000000)
 
 	// inputs
@@ -421,10 +368,10 @@ func getInterest(
 	}
 	interest := amountDec.Mul(interestRate)
 
-	// return coin with rounded interest
-	coin := sdk.NewCoin(category.Denom(), interest.RoundInt())
+	// return cred coin with rounded interest
+	cred := sdk.NewCoin(credDenom, interest.RoundInt())
 
-	return coin
+	return cred
 }
 
 func (k Keeper) backingList(ctx sdk.Context) list.List {

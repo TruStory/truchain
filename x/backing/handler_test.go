@@ -6,6 +6,7 @@ import (
 	"testing"
 	"time"
 
+	params "github.com/TruStory/truchain/parameters"
 	"github.com/TruStory/truchain/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/stretchr/testify/assert"
@@ -38,11 +39,11 @@ func TestBackStoryMsg_FailInsufficientFunds(t *testing.T) {
 	assert.NotNil(t, h)
 
 	storyID := int64(1)
-	amount, _ := sdk.ParseCoin("5trushane")
+	amount := sdk.NewCoin(params.StakeDenom, sdk.NewInt(5000000))
 	argument := "cool story brew"
 	creator := sdk.AccAddress([]byte{1, 2})
 	// duration := 99 * time.Hour
-	duration := 1 * time.Hour
+	duration := 24 * time.Hour
 	msg := NewBackStoryMsg(storyID, amount, argument, creator, duration)
 	assert.NotNil(t, msg)
 
@@ -58,11 +59,11 @@ func TestBackStoryMsg(t *testing.T) {
 	assert.NotNil(t, h)
 
 	storyID := createFakeStory(ctx, sk, ck)
-	amount, _ := sdk.ParseCoin("5trudex")
+	amount := sdk.NewCoin(params.StakeDenom, sdk.NewInt(5000000))
 	argument := "cool story brew"
 	creator := createFakeFundedAccount(ctx, am, sdk.Coins{amount})
 	// duration := 99 * time.Hour
-	duration := 1 * time.Hour
+	duration := 24 * time.Hour
 	msg := NewBackStoryMsg(storyID, amount, argument, creator, duration)
 	assert.NotNil(t, msg)
 

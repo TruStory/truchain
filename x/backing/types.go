@@ -55,8 +55,8 @@ func DefaultMsgParams() MsgParams {
 		MaxArgumentLength: 1000,
 		// MinPeriod:         3 * 24 * time.Hour,  // 3 days
 		// MaxPeriod:         90 * 24 * time.Hour, // 90 days
-		MinPeriod: 1 * time.Hour,
-		MaxPeriod: 3 * 24 * time.Hour,
+		MinPeriod: 24 * time.Hour,
+		MaxPeriod: 7 * 24 * time.Hour,
 	}
 }
 

@@ -22,6 +22,7 @@ func rejectedPool(
 		case TokenVote:
 			// add vote fee to reward pool
 			*pool = (*pool).Plus(v.Amount())
+
 		default:
 			if err = ErrInvalidVote(v); err != nil {
 				return err
@@ -60,7 +61,8 @@ func distributeRewardsRejected(
 	backingKeeper backing.WriteKeeper,
 	bankKeeper bank.Keeper,
 	winners []app.Voter,
-	pool sdk.Coin) (err sdk.Error) {
+	pool sdk.Coin,
+	denom string) (err sdk.Error) {
 
 	// load default parameters
 	params := DefaultParams()
@@ -102,14 +104,15 @@ func distributeRewardsRejected(
 			rewardAmount := challengerRewardAmount(
 				v.Amount(), challengerTotalAmount, challengerPool)
 
-			// mint reward coin
+			// calculate reward
 			rewardCoin := sdk.NewCoin(pool.Denom, rewardAmount)
 
 			// remove reward amount from pool
 			pool = pool.Minus(rewardCoin)
 
-			// payout user
-			_, _, err = bankKeeper.AddCoins(ctx, v.Creator(), sdk.Coins{rewardCoin})
+			// distribute reward in cred
+			cred := app.NewCategoryCoin(denom, rewardCoin)
+			_, _, err = bankKeeper.AddCoins(ctx, v.Creator(), sdk.Coins{cred})
 
 		case TokenVote:
 			// get back original staked amount
@@ -124,8 +127,9 @@ func distributeRewardsRejected(
 			// remove reward amount from pool
 			pool = pool.Minus(rewardCoin)
 
-			// payout user
-			_, _, err = bankKeeper.AddCoins(ctx, v.Creator(), sdk.Coins{rewardCoin})
+			// distribute reward in cred
+			cred := app.NewCategoryCoin(denom, rewardCoin)
+			_, _, err = bankKeeper.AddCoins(ctx, v.Creator(), sdk.Coins{cred})
 
 		default:
 			err = ErrInvalidVote(v)

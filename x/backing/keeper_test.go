@@ -52,7 +52,7 @@ func TestToggleVote(t *testing.T) {
 func TestGetBacking(t *testing.T) {
 	ctx, bk, sk, ck, bankKeeper, _ := mockDB()
 	storyID := createFakeStory(ctx, sk, ck)
-	amount, _ := sdk.ParseCoin("5trudex")
+	amount := sdk.NewCoin(params.StakeDenom, sdk.NewInt(5000000))
 	argument := "cool story brew"
 	creator := sdk.AccAddress([]byte{1, 2})
 	duration := DefaultMsgParams().MinPeriod
@@ -67,7 +67,7 @@ func TestGetBacking(t *testing.T) {
 func TestBackingsByStoryID(t *testing.T) {
 	ctx, bk, sk, ck, bankKeeper, _ := mockDB()
 	storyID := createFakeStory(ctx, sk, ck)
-	amount, _ := sdk.ParseCoin("5trudex")
+	amount := sdk.NewCoin(params.StakeDenom, sdk.NewInt(5000000))
 	argument := "cool story brew"
 	duration := DefaultMsgParams().MinPeriod
 
@@ -87,7 +87,7 @@ func TestBackingsByStoryID(t *testing.T) {
 func TestBackingsByStoryIDAndCreator(t *testing.T) {
 	ctx, bk, sk, ck, bankKeeper, _ := mockDB()
 	storyID := createFakeStory(ctx, sk, ck)
-	amount, _ := sdk.ParseCoin("5trudex")
+	amount := sdk.NewCoin(params.StakeDenom, sdk.NewInt(5000000))
 	argument := "cool story brew"
 	duration := DefaultMsgParams().MinPeriod
 
@@ -104,7 +104,7 @@ func TestTally(t *testing.T) {
 	ctx, k, sk, ck, bankKeeper, _ := mockDB()
 	storyID := createFakeStory(ctx, sk, ck)
 
-	amount, _ := sdk.ParseCoin("5trudex")
+	amount := sdk.NewCoin(params.StakeDenom, sdk.NewInt(5000000))
 	argument := "cool story brew"
 	duration := DefaultMsgParams().MinPeriod
 
@@ -125,7 +125,7 @@ func TestTotalBacking(t *testing.T) {
 	ctx, k, sk, ck, bankKeeper, _ := mockDB()
 	storyID := createFakeStory(ctx, sk, ck)
 
-	amount, _ := sdk.ParseCoin("5trudex")
+	amount := sdk.NewCoin(params.StakeDenom, sdk.NewInt(5000000))
 	argument := "cool story brew"
 	duration := DefaultMsgParams().MinPeriod
 
@@ -139,13 +139,13 @@ func TestTotalBacking(t *testing.T) {
 
 	total, _ := k.TotalBackingAmount(ctx, storyID)
 
-	assert.Equal(t, "10trudex", total.String())
+	assert.Equal(t, "10000000trusteak", total.String())
 }
 
 func TestNewBacking_ErrInsufficientFunds(t *testing.T) {
 	ctx, bk, sk, ck, _, _ := mockDB()
 	storyID := createFakeStory(ctx, sk, ck)
-	amount, _ := sdk.ParseCoin("5trudex")
+	amount := sdk.NewCoin(params.StakeDenom, sdk.NewInt(5000000))
 	argument := "cool story brew"
 	creator := sdk.AccAddress([]byte{1, 2})
 	duration := DefaultMsgParams().MinPeriod
@@ -158,7 +158,7 @@ func TestNewBacking_ErrInsufficientFunds(t *testing.T) {
 func TestNewBacking(t *testing.T) {
 	ctx, bk, sk, ck, bankKeeper, _ := mockDB()
 	storyID := createFakeStory(ctx, sk, ck)
-	amount, _ := sdk.ParseCoin("5trudex")
+	amount := sdk.NewCoin(params.StakeDenom, sdk.NewInt(5000000))
 	argument := "cool story brew"
 	creator := sdk.AccAddress([]byte{1, 2})
 	duration := DefaultMsgParams().MinPeriod
@@ -171,7 +171,7 @@ func TestNewBacking(t *testing.T) {
 func TestDuplicateBacking(t *testing.T) {
 	ctx, bk, sk, ck, bankKeeper, _ := mockDB()
 	storyID := createFakeStory(ctx, sk, ck)
-	amount, _ := sdk.ParseCoin("5trudex")
+	amount := sdk.NewCoin(params.StakeDenom, sdk.NewInt(5000000))
 	argument := "cool story brew"
 	creator := sdk.AccAddress([]byte{1, 2})
 	duration := DefaultMsgParams().MinPeriod
@@ -188,7 +188,7 @@ func TestDuplicateBacking(t *testing.T) {
 func TestRemoveFromList(t *testing.T) {
 	ctx, bk, sk, ck, bankKeeper, _ := mockDB()
 	storyID := createFakeStory(ctx, sk, ck)
-	amount, _ := sdk.ParseCoin("5trudex")
+	amount := sdk.NewCoin(params.StakeDenom, sdk.NewInt(5000000))
 	argument := "cool story brew"
 	creator := sdk.AccAddress([]byte{1, 2})
 	duration := DefaultMsgParams().MinPeriod
@@ -205,92 +205,43 @@ func TestRemoveFromList(t *testing.T) {
 	assert.NotNil(t, err)
 }
 
-func Test_getPrincipal_InCategoryCoins(t *testing.T) {
-	ctx, bk, _, ck, bankKeeper, _ := mockDB()
-	cat := createFakeCategory(ctx, ck)
-	amount, _ := sdk.ParseCoin("5trudex")
-	userAddr := sdk.AccAddress([]byte{1, 2})
-
-	// give fake user some fake category coins
-	bankKeeper.AddCoins(ctx, userAddr, sdk.Coins{amount})
-
-	coin, err := bk.getPrincipal(ctx, cat.Denom(), amount, userAddr)
-	assert.Nil(t, err)
-	assert.Equal(t, amount, coin, "Incorrect principal calculation")
-	assert.Equal(t, "trudex", amount.Denom, "Incorrect principal coin")
-}
-
-func Test_getPrincipal_InTrustake(t *testing.T) {
-	ctx, bk, _, ck, bankKeeper, _ := mockDB()
-	cat := createFakeCategory(ctx, ck)
-	userAddr := sdk.AccAddress([]byte{1, 2})
-
-	// give fake user some fake trustake
-	bankKeeper.AddCoins(ctx, userAddr, sdk.Coins{fiver})
-
-	// back with trustake, get principal in cat coins
-	coin, err := bk.getPrincipal(ctx, cat.Denom(), fiver, userAddr)
-	assert.Nil(t, err)
-	assert.Equal(t, fiver.Amount, coin.Amount, "Incorrect principal calculation")
-	assert.Equal(t, "trudex", coin.Denom, "Incorrect principal coin")
-}
-
-func Test_getPrincipal_ErrInvalidCoin(t *testing.T) {
-	ctx, bk, _, ck, bankKeeper, _ := mockDB()
-	cat := createFakeCategory(ctx, ck)
-	amount := sdk.NewCoin("trubtc", sdk.NewInt(5))
-	userAddr := sdk.AccAddress([]byte{1, 2})
-
-	// give fake user some fake coins
-	bankKeeper.AddCoins(ctx, userAddr, sdk.Coins{fiver})
-
-	_, err := bk.getPrincipal(ctx, cat.Denom(), amount, userAddr)
-	assert.NotNil(t, err)
-	// assert.Equal(t, sdk.ErrInsufficientCoins().Code(), err.Code(), "invalid error")
-}
-
 func Test_getInterest_MidAmountMidPeriod(t *testing.T) {
-	ctx, _, _, ck, _, _ := mockDB()
-	cat := createFakeCategory(ctx, ck)
 	// 500,000,000,000,000 nano / 10^9 = 500,000 trudex
-	amount := sdk.NewCoin("trudex", sdk.NewInt(500000000000000))
-	period := 45 * 24 * time.Hour
+	cred := "trudex"
+	amount := sdk.NewCoin(cred, sdk.NewInt(500000000000000))
+	period := (7 / 2) * 24 * time.Hour
 	params := DefaultParams()
 	maxPeriod := DefaultMsgParams().MaxPeriod
 
-	interest := getInterest(cat, amount, period, maxPeriod, params)
-	// assert.Equal(t, interest.Amount.String(), sdk.NewInt(25000000000000).String())
-	assert.Equal(t, interest.Amount.String(), sdk.NewInt(508575000000000).String())
+	interest := getInterest(amount, period, maxPeriod, cred, params)
+	assert.Equal(t, "trudex", interest.Denom)
+	assert.Equal(t, interest.Amount.String(), sdk.NewInt(22617857150000).String())
 }
 
 func Test_getInterest_MaxAmountMinPeriod(t *testing.T) {
-	ctx, _, _, ck, _, _ := mockDB()
-	cat := createFakeCategory(ctx, ck)
-	amount := sdk.NewCoin("trudex", sdk.NewInt(1000000000000000))
-	period := 3 * 24 * time.Hour
+	cred := "trudex"
+	amount := sdk.NewCoin(cred, sdk.NewInt(1000000000000000))
+	period := 7 * 24 * time.Hour
 	params := DefaultParams()
 
 	interest := getInterest(
-		cat, amount, period, DefaultMsgParams().MaxPeriod, params)
-	// assert.Equal(t, interest.Amount.String(), sdk.NewInt(35523333300000).String())
+		amount, period, DefaultMsgParams().MaxPeriod, cred, params)
 	assert.Equal(t, interest.Amount.String(), sdk.NewInt(100000000000000).String())
 }
 
 func Test_getInterest_MinAmountMaxPeriod(t *testing.T) {
-	ctx, _, _, ck, _, _ := mockDB()
-	cat := createFakeCategory(ctx, ck)
-	amount := sdk.NewCoin("trudex", sdk.NewInt(0))
+	cred := "trudex"
+	amount := sdk.NewCoin(cred, sdk.NewInt(0))
 	period := 90 * 24 * time.Hour
 	params := DefaultParams()
 
 	interest := getInterest(
-		cat, amount, period, DefaultMsgParams().MaxPeriod, params)
+		amount, period, DefaultMsgParams().MaxPeriod, cred, params)
 	assert.Equal(t, interest.Amount.String(), sdk.NewInt(0).String())
 }
 
 func Test_getInterest_MaxAmountMaxPeriod(t *testing.T) {
-	ctx, _, _, ck, _, _ := mockDB()
-	cat := createFakeCategory(ctx, ck)
+	cred := "trudex"
 	amount := sdk.NewCoin("trudex", sdk.NewInt(1000000000000000))
 	// period := 90 * 24 * time.Hour
 	period := DefaultMsgParams().MaxPeriod
@@ -298,18 +249,17 @@ func Test_getInterest_MaxAmountMaxPeriod(t *testing.T) {
 	expected := sdk.NewDecFromInt(amount.Amount).Mul(params.MaxInterestRate)
 
 	interest := getInterest(
-		cat, amount, period, DefaultMsgParams().MaxPeriod, params)
+		amount, period, DefaultMsgParams().MaxPeriod, cred, params)
 	assert.Equal(t, expected.RoundInt().String(), interest.Amount.String())
 }
 
 func Test_getInterest_MinAmountMinPeriod(t *testing.T) {
-	ctx, _, _, ck, _, _ := mockDB()
-	cat := createFakeCategory(ctx, ck)
-	amount := sdk.NewCoin("trudex", sdk.NewInt(0))
+	cred := "trudex"
+	amount := sdk.NewCoin(cred, sdk.NewInt(0))
 	period := 3 * 24 * time.Hour
 	params := DefaultParams()
 
 	interest := getInterest(
-		cat, amount, period, DefaultMsgParams().MaxPeriod, params)
+		amount, period, DefaultMsgParams().MaxPeriod, cred, params)
 	assert.Equal(t, interest.String(), "0trudex", "Interest is wrong")
 }

@@ -94,7 +94,6 @@ func (k Keeper) EndGame(ctx sdk.Context, storyID int64, confirmed bool) sdk.Erro
 	}
 
 	// update story state
-	story.GameID = 0
 	if confirmed {
 		story.State = Confirmed
 	} else {
@@ -114,7 +113,6 @@ func (k Keeper) ExpireGame(ctx sdk.Context, storyID int64) sdk.Error {
 	}
 
 	// update story state
-	story.GameID = 0
 	story.State = Unconfirmed
 	k.UpdateStory(ctx, story)
 

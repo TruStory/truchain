@@ -7,6 +7,7 @@ import (
 
 	"github.com/TruStory/truchain/x/backing"
 
+	params "github.com/TruStory/truchain/parameters"
 	c "github.com/TruStory/truchain/x/category"
 	game "github.com/TruStory/truchain/x/game"
 	"github.com/TruStory/truchain/x/story"
@@ -106,7 +107,7 @@ func fakeFundedCreator(ctx sdk.Context, k bank.Keeper) sdk.AccAddress {
 	creator := sdk.AccAddress(bz)
 
 	// give user some category coins
-	amount := sdk.NewCoin("trudex", sdk.NewInt(2000000000000))
+	amount := sdk.NewCoin(params.StakeDenom, sdk.NewInt(2000000000000))
 	k.AddCoins(ctx, creator, sdk.Coins{amount})
 
 	return creator
@@ -116,8 +117,7 @@ func fakePendingGameQueue() (ctx sdk.Context, k Keeper) {
 	ctx, k, storyKeeper, catKeeper, _ := mockDB()
 
 	storyID := createFakeStory(ctx, storyKeeper, catKeeper)
-	amount := sdk.NewCoin("trudex", sdk.NewInt(1000000000000))
-	trustake := sdk.NewCoin("trusteak", sdk.NewInt(1000000000000))
+	amount := sdk.NewCoin(params.StakeDenom, sdk.NewInt(1000000000000))
 	argument := "test argument"
 
 	creator1 := fakeFundedCreator(ctx, k.bankKeeper)
@@ -131,13 +131,14 @@ func fakePendingGameQueue() (ctx sdk.Context, k Keeper) {
 	// need to type assert for testing
 	// because the backing keeper inside the challenge keeper is read-only
 	bk, _ := k.backingKeeper.(backing.WriteKeeper)
-	bk.Create(ctx, storyID, trustake, argument, creator1, duration)
+	bk.Create(ctx, storyID, amount, argument, creator1, duration)
 	bk.Create(ctx, storyID, amount, argument, creator2, duration)
 	bk.Create(ctx, storyID, amount, argument, creator3, duration)
 	bk.Create(ctx, storyID, amount, argument, creator4, duration)
 
 	// fake challenges
-	challengeAmount := sdk.NewCoin("trudex", sdk.NewInt(10000000000))
+	challengeAmount := sdk.NewCoin(params.StakeDenom, sdk.NewInt(10000000000))
+
 	k.Create(ctx, storyID, challengeAmount, argument, creator1)
 	k.Create(ctx, storyID, challengeAmount, argument, creator2)
 
