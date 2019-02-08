@@ -211,7 +211,7 @@ func TestDistributeRewardsRejected(t *testing.T) {
 	cred := "trudex"
 
 	err := distributeRewardsRejected(
-		ctx, k.backingKeeper, k.bankKeeper, votes.falseVotes, pool, cred)
+		ctx, k.backingKeeper, k.bankKeeper, votes, pool, cred)
 	assert.Nil(t, err)
 
 	coins := sdk.Coins{}

@@ -67,17 +67,15 @@ func distributeRewardsConfirmed(
 			if err != nil {
 				return err
 			}
-			fmt.Printf("distributing backing principal: %s\n", v.Amount())
 			logger.Info(fmt.Sprintf("distributing backing principal: %s", v.Amount()))
 
 			_, _, err = bankKeeper.AddCoins(ctx, v.Creator(), sdk.Coins{v.Interest})
 			if err != nil {
 				return err
 			}
-			fmt.Printf("distributing backing interest: %s\n", v.Interest)
-			// logger.Info(fmt.Sprintf("distributing backing interest: %s", v.Interest))
+			logger.Info(fmt.Sprintf("distributing backing interest: %s", v.Interest))
 
-			// remove from game list
+			// remove from backing list, prevent from maturing
 			err = backingKeeper.RemoveFromList(ctx, v.ID())
 
 		case TokenVote:
@@ -86,8 +84,7 @@ func distributeRewardsConfirmed(
 			if err != nil {
 				return err
 			}
-			fmt.Printf("giving back origin amount: %s\n", v.Amount())
-			// logger.Info(fmt.Sprintf("giving back origin amount: %s", v.Amount()))
+			logger.Info(fmt.Sprintf("giving back original amount: %s", v.Amount()))
 
 			// calculate reward, an equal portion of the reward pool
 			rewardCoin := sdk.NewCoin(pool.Denom, voterRewardAmount)
@@ -114,6 +111,9 @@ func distributeRewardsConfirmed(
 		case backing.Backing:
 			// return backing because we are nice people
 			_, _, err = bankKeeper.AddCoins(ctx, v.Creator(), sdk.Coins{v.Amount()})
+
+			// remove from backing list, prevent from maturing
+			err = backingKeeper.RemoveFromList(ctx, v.ID())
 
 		case challenge.Challenge:
 			// do nothing

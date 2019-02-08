@@ -65,7 +65,7 @@ func distributeRewardsRejected(
 	ctx sdk.Context,
 	backingKeeper backing.WriteKeeper,
 	bankKeeper bank.Keeper,
-	winners []app.Voter,
+	votes poll,
 	pool sdk.Coin,
 	denom string) (err sdk.Error) {
 
@@ -79,7 +79,7 @@ func distributeRewardsRejected(
 	voterPool := voterPool(pool, params)
 
 	// get the total challenger stake amount and voter count
-	challengerTotalAmount, voterCount, err := winnerInfo(winners)
+	challengerTotalAmount, voterCount, err := winnerInfo(votes.falseVotes)
 	if err != nil {
 		return err
 	}
@@ -87,8 +87,31 @@ func distributeRewardsRejected(
 	// calculate voter reward amount
 	voterRewardAmount := voterRewardAmount(voterPool, voterCount)
 
-	// distribute reward
-	for _, vote := range winners {
+	// slash losers (true voters)
+	for _, vote := range votes.trueVotes {
+		switch v := vote.(type) {
+
+		case backing.Backing:
+			// don't get anything back, too bad sucka!
+			// remove backing from backing list, prevent maturing
+			err = backingKeeper.RemoveFromList(ctx, v.ID())
+
+		case challenge.Challenge:
+			// challengers cannot vote true -- skip
+
+		case TokenVote:
+			// slashed -- get nothing back
+
+		default:
+			err = ErrInvalidVote(v)
+		}
+
+		if err != nil {
+			return err
+		}
+	}
+	// distribute reward to winners (false voters)
+	for _, vote := range votes.falseVotes {
 		switch v := vote.(type) {
 
 		case backing.Backing:
