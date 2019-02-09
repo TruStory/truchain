@@ -8,7 +8,7 @@ import (
 
 // Story errors reserve 700 ~ 799.
 const (
-	DefaultCodespace sdk.CodespaceType = 7
+	DefaultCodespace sdk.CodespaceType = "story"
 
 	CodeInvalidStoryBody            sdk.CodeType = 701
 	CodeInvalidStoryID              sdk.CodeType = 702

@@ -8,7 +8,7 @@ import (
 
 // Category errors reserve 800 ~ 899.
 const (
-	DefaultCodespace sdk.CodespaceType = 8
+	DefaultCodespace sdk.CodespaceType = "category"
 
 	CodeInvalidCategory    sdk.CodeType = 801
 	CodeCategoryNotFound   sdk.CodeType = 802

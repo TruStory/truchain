@@ -24,6 +24,8 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/auth"
 	"github.com/cosmos/cosmos-sdk/x/bank"
 	"github.com/cosmos/cosmos-sdk/x/ibc"
+	sdkparams "github.com/cosmos/cosmos-sdk/x/params"
+	"github.com/cosmos/cosmos-sdk/x/staking"
 	"github.com/joho/godotenv"
 	"github.com/spf13/viper"
 	abci "github.com/tendermint/tendermint/abci/types"
@@ -63,12 +65,15 @@ type TruChain struct {
 	keyMain            *sdk.KVStoreKey
 	keyStory           *sdk.KVStoreKey
 	keyVote            *sdk.KVStoreKey
+	keyParams          *sdk.KVStoreKey
+	tkeyParams         *sdk.TransientStoreKey
 
 	// manage getting and setting accounts
 	accountKeeper       auth.AccountKeeper
 	feeCollectionKeeper auth.FeeCollectionKeeper
 	coinKeeper          bank.Keeper
 	ibcMapper           ibc.Mapper
+	paramsKeeper        sdkparams.Keeper
 
 	// access truchain database
 	storyKeeper     story.WriteKeeper
@@ -110,9 +115,14 @@ func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *T
 
 	// create your application type
 	var app = &TruChain{
-		categories:         categories,
-		codec:              codec,
-		BaseApp:            bam.NewBaseApp(params.AppName, logger, db, auth.DefaultTxDecoder(codec), options...),
+		BaseApp: bam.NewBaseApp(params.AppName, logger, db, auth.DefaultTxDecoder(codec), options...),
+		codec:   codec,
+
+		categories: categories,
+
+		keyParams:  sdk.NewKVStoreKey("params"),
+		tkeyParams: sdk.NewTransientStoreKey("transient_params"),
+
 		keyMain:            sdk.NewKVStoreKey("main"),
 		keyAccount:         sdk.NewKVStoreKey("acc"),
 		keyIBC:             sdk.NewKVStoreKey("ibc"),
@@ -121,7 +131,7 @@ func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *T
 		keyBacking:         sdk.NewKVStoreKey("backings"),
 		keyBackingList:     sdk.NewKVStoreKey("backingList"),
 		keyChallenge:       sdk.NewKVStoreKey("challenges"),
-		keyFee:             sdk.NewKVStoreKey("collectedFees"),
+		keyFee:             sdk.NewKVStoreKey("fee_collection"),
 		keyGame:            sdk.NewKVStoreKey("game"),
 		keyPendingGameList: sdk.NewKVStoreKey("pendingGameList"),
 		keyGameQueue:       sdk.NewKVStoreKey("gameQueue"),
@@ -133,14 +143,24 @@ func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *T
 		registrarKey:       loadRegistrarKey(),
 	}
 
-	// define and attach the mappers and keepers
+	// The ParamsKeeper handles parameter storage for the application
+	app.paramsKeeper = sdkparams.NewKeeper(app.codec, app.keyParams, app.tkeyParams)
+
+	// The AccountKeeper handles address -> account lookups
 	app.accountKeeper = auth.NewAccountKeeper(
-		codec,
-		app.keyAccount,        // target store
-		auth.ProtoBaseAccount, // prototype
+		app.codec,
+		app.keyAccount,
+		app.paramsKeeper.Subspace(auth.DefaultParamspace),
+		auth.ProtoBaseAccount,
 	)
-	app.coinKeeper = bank.NewBaseKeeper(app.accountKeeper)
-	app.ibcMapper = ibc.NewMapper(app.codec, app.keyIBC, app.RegisterCodespace(ibc.DefaultCodespace))
+
+	app.coinKeeper = bank.NewBaseKeeper(
+		app.accountKeeper,
+		app.paramsKeeper.Subspace(bank.DefaultParamspace),
+		bank.DefaultCodespace,
+	)
+
+	app.ibcMapper = ibc.NewMapper(app.codec, app.keyIBC, ibc.DefaultCodespace)
 	app.feeCollectionKeeper = auth.NewFeeCollectionKeeper(app.codec, app.keyFee)
 
 	// wire up keepers
@@ -193,7 +213,10 @@ func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *T
 		codec,
 	)
 
-	// register message routes for modifying state
+	// The AnteHandler handles signature verification and transaction pre-processing
+	app.SetAnteHandler(auth.NewAnteHandler(app.accountKeeper, app.feeCollectionKeeper))
+
+	// The app.Router is the main transaction router where each module registers its routes
 	app.Router().
 		AddRoute("bank", bank.NewHandler(app.coinKeeper)).
 		AddRoute("ibc", ibc.NewHandler(app.ibcMapper, app.coinKeeper)).
@@ -204,7 +227,7 @@ func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *T
 		AddRoute("vote", vote.NewHandler(app.voteKeeper)).
 		AddRoute("users", users.NewHandler(app.accountKeeper))
 
-	// register query routes for reading state
+	// The app.QueryRouter is the main query router where each module registers its routes
 	app.QueryRouter().
 		AddRoute(story.QueryPath, story.NewQuerier(app.storyKeeper)).
 		AddRoute(category.QueryPath, category.NewQuerier(app.categoryKeeper)).
@@ -215,20 +238,28 @@ func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *T
 		AddRoute(vote.QueryPath, vote.NewQuerier(app.voteKeeper)).
 		AddRoute(clientParams.QueryPath, clientParams.NewQuerier())
 
-	// perform initialization logic
+	// The initChainer handles translating the genesis.json file into initial state for the network
 	app.SetInitChainer(app.initChainer)
+
 	app.SetBeginBlocker(app.BeginBlocker)
 	app.SetEndBlocker(app.EndBlocker)
-	app.SetAnteHandler(auth.NewAnteHandler(app.accountKeeper, app.feeCollectionKeeper))
 
-	// set fee for spam prevention and validator rewards
-	if params.Features[params.FeeFlag] {
-		app.SetMinimumFees(params.Fee)
-	}
+	//
+	// TODO:
+	// SetMininumFees is now unpexpored
+	// instead minimum gas price is loaded from config/gaid.tom
+	// also there is a refactor in place where
+	// SetMinGasPrices is a new exported function for this purpose (not yet released)
+	// See https://github.com/cosmos/cosmos-sdk/pull/3258
+	//
+	// if params.Features[params.FeeFlag] {
+	// 	app.SetMinGasPrices(params.Fee)
+	// }
 
 	// mount the multistore and load the latest state
-	app.MountStoresIAVL(
+	app.MountStores(
 		app.keyAccount,
+		app.keyParams,
 		app.keyBacking,
 		app.keyBackingList,
 		app.keyCategory,
@@ -241,6 +272,9 @@ func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *T
 		app.keyMain,
 		app.keyStory,
 		app.keyVote)
+
+	app.MountStoresTransient(app.tkeyParams)
+
 	err := app.LoadLatestVersion(app.keyMain)
 
 	if err != nil {
@@ -271,11 +305,11 @@ func loadEnvVars() {
 func MakeCodec() *codec.Codec {
 	cdc := codec.New()
 
-	codec.RegisterCrypto(cdc)
-	sdk.RegisterCodec(cdc)
-	bank.RegisterCodec(cdc)
-	ibc.RegisterCodec(cdc)
 	auth.RegisterCodec(cdc)
+	bank.RegisterCodec(cdc)
+	staking.RegisterCodec(cdc)
+	sdk.RegisterCodec(cdc)
+	ibc.RegisterCodec(cdc)
 
 	// register msg types
 	story.RegisterAmino(cdc)
@@ -288,7 +322,7 @@ func MakeCodec() *codec.Codec {
 	// register other types
 	cdc.RegisterConcrete(&types.AppAccount{}, "types/AppAccount", nil)
 
-	cdc.Seal()
+	codec.RegisterCrypto(cdc)
 
 	return cdc
 }
@@ -337,10 +371,10 @@ func (app *TruChain) EndBlocker(ctx sdk.Context, _ abci.RequestEndBlock) abci.Re
 // returned if any step getting the state or set of validators fails.
 func (app *TruChain) ExportAppStateAndValidators() (appState json.RawMessage, validators []tmtypes.GenesisValidator, err error) {
 	ctx := app.NewContext(true, abci.Header{})
-	accounts := []*types.GenesisAccount{}
+	accounts := []*auth.BaseAccount{}
 
 	appendAccountsFn := func(acc auth.Account) bool {
-		account := &types.GenesisAccount{
+		account := &auth.BaseAccount{
 			Address: acc.GetAddress(),
 			Coins:   acc.GetCoins(),
 		}
@@ -351,7 +385,12 @@ func (app *TruChain) ExportAppStateAndValidators() (appState json.RawMessage, va
 
 	app.accountKeeper.IterateAccounts(ctx, appendAccountsFn)
 
-	genState := types.GenesisState{Accounts: accounts}
+	genState := types.GenesisState{
+		Accounts: accounts,
+		AuthData: auth.DefaultGenesisState(),
+		BankData: bank.DefaultGenesisState(),
+	}
+
 	appState, err = codec.MarshalJSONIndent(app.codec, genState)
 	if err != nil {
 		return nil, nil, err

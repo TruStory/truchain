@@ -56,7 +56,7 @@ func (app *TruChain) startAPI() {
 
 // RegisterKey generates a new address/account for a public key
 // Implements chttp.App
-func (app *TruChain) RegisterKey(k tcmn.HexBytes, algo string) (sdk.AccAddress, int64, sdk.Coins, error) {
+func (app *TruChain) RegisterKey(k tcmn.HexBytes, algo string) (sdk.AccAddress, uint64, sdk.Coins, error) {
 	var addr []byte
 
 	if string(algo[0]) == "*" {
@@ -74,6 +74,16 @@ func (app *TruChain) RegisterKey(k tcmn.HexBytes, algo string) (sdk.AccAddress, 
 	}
 
 	res, err := app.DeliverPresigned(tx)
+
+	if !res.CheckTx.IsOK() {
+		fmt.Println("TX Broadcast CheckTx error: ", res.CheckTx.Log)
+		return sdk.AccAddress{}, 0, sdk.Coins{}, errors.New(res.CheckTx.Log)
+	}
+
+	if !res.DeliverTx.IsOK() {
+		fmt.Println("TX Broadcast DeliverTx error: ", res.DeliverTx.Log)
+		return sdk.AccAddress{}, 0, sdk.Coins{}, errors.New(res.DeliverTx.Log)
+	}
 
 	if err != nil {
 		fmt.Println("TX Broadcast error: ", err, res)
@@ -147,10 +157,8 @@ func (app *TruChain) signedRegistrationTx(addr []byte, k tcmn.HexBytes, algo str
 		Msgs: []sdk.Msg{msg},
 		Fee:  params.RegistrationFee,
 		Signatures: []auth.StdSignature{auth.StdSignature{
-			PubKey:        app.registrarKey.PubKey(),
-			Signature:     sigBytes,
-			AccountNumber: 1,
-			Sequence:      registrarSequence,
+			PubKey:    app.registrarKey.PubKey(),
+			Signature: sigBytes,
 		}},
 		Memo: registrationMemo,
 	}

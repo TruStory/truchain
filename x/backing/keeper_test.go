@@ -215,7 +215,7 @@ func Test_getInterest_MidAmountMidPeriod(t *testing.T) {
 
 	interest := getInterest(amount, period, maxPeriod, cred, params)
 	assert.Equal(t, "trudex", interest.Denom)
-	assert.Equal(t, interest.Amount.String(), sdk.NewInt(22617857150000).String())
+	assert.Equal(t, sdk.NewInt(22617857142857).String(), interest.Amount.String())
 }
 
 func Test_getInterest_MaxAmountMinPeriod(t *testing.T) {

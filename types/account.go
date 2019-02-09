@@ -2,8 +2,10 @@ package types
 
 import (
 	"github.com/cosmos/cosmos-sdk/codec"
-	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth"
+	"github.com/cosmos/cosmos-sdk/x/bank"
+
+	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
 var _ auth.Account = (*AppAccount)(nil)
@@ -45,31 +47,7 @@ func GetAccountDecoder(cdc *codec.Codec) auth.AccountDecoder {
 
 // GenesisState reflects the genesis state of the application.
 type GenesisState struct {
-	Accounts []*GenesisAccount `json:"accounts"`
-}
-
-// GenesisAccount reflects a genesis account the application expects in it's
-// genesis state.
-type GenesisAccount struct {
-	Address sdk.AccAddress `json:"address"`
-	Coins   sdk.Coins      `json:"coins"`
-}
-
-// NewGenesisAccount returns a reference to a new GenesisAccount given an
-// AppAccount.
-func NewGenesisAccount(aa *AppAccount) *GenesisAccount {
-	return &GenesisAccount{
-		Address: aa.Address,
-		Coins:   aa.Coins.Sort(),
-	}
-}
-
-// ToAppAccount converts a GenesisAccount to an AppAccount.
-func (ga *GenesisAccount) ToAppAccount() (acc *AppAccount, err error) {
-	return &AppAccount{
-		BaseAccount: auth.BaseAccount{
-			Address: ga.Address,
-			Coins:   ga.Coins.Sort(),
-		},
-	}, nil
+	AuthData auth.GenesisState   `json:"auth"`
+	BankData bank.GenesisState   `json:"bank"`
+	Accounts []*auth.BaseAccount `json:"accounts"`
 }

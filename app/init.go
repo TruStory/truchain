@@ -1,6 +1,9 @@
 package app
 
 import (
+	"github.com/cosmos/cosmos-sdk/x/auth"
+	"github.com/cosmos/cosmos-sdk/x/bank"
+
 	"github.com/TruStory/truchain/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	abci "github.com/tendermint/tendermint/abci/types"
@@ -13,25 +16,18 @@ import (
 // application's account mapper.
 func (app *TruChain) initChainer(ctx sdk.Context, req abci.RequestInitChain) abci.ResponseInitChain {
 	stateJSON := req.AppStateBytes
+
 	genesisState := new(types.GenesisState)
 	err := app.codec.UnmarshalJSON(stateJSON, genesisState)
 
 	if err != nil {
-		// TODO: https://github.com/cosmos/cosmos-sdk/issues/468
 		panic(err)
 	}
 
-	for i, gacc := range genesisState.Accounts {
-		acc, err := gacc.ToAppAccount()
-		if err != nil {
-			// TODO: https://github.com/cosmos/cosmos-sdk/issues/468
-			panic(err)
-		}
-
+	for i, acc := range genesisState.Accounts {
 		acc.AccountNumber = app.accountKeeper.GetNextAccountNumber(ctx)
-
 		if i == 1 { // TODO: more robust way of identifying registrar account [notduncansmith]
-			err := acc.BaseAccount.SetPubKey(app.registrarKey.PubKey())
+			err := acc.SetPubKey(app.registrarKey.PubKey())
 			if err != nil {
 				panic(err)
 			}
@@ -39,6 +35,9 @@ func (app *TruChain) initChainer(ctx sdk.Context, req abci.RequestInitChain) abc
 
 		app.accountKeeper.SetAccount(ctx, acc)
 	}
+
+	auth.InitGenesis(ctx, app.accountKeeper, app.feeCollectionKeeper, genesisState.AuthData)
+	bank.InitGenesis(ctx, app.coinKeeper, genesisState.BankData)
 
 	// get genesis account address
 	genesisAddr := genesisState.Accounts[0].Address

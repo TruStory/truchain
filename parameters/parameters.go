@@ -31,7 +31,7 @@ var InitialTruStake = sdk.Coin{Amount: sdk.NewInt(1000000000000), Denom: StakeDe
 // TODO: Use more accurate gas estimate [notduncansmith]
 var RegistrationFee = auth.StdFee{
 	Amount: sdk.Coins{sdk.Coin{Amount: sdk.NewInt(1), Denom: StakeDenom}},
-	Gas:    10000,
+	Gas:    20000,
 }
 
 // Fee is for spam prevention and validator rewards

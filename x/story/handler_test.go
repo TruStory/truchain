@@ -2,7 +2,6 @@ package story
 
 import (
 	"encoding/json"
-	"strings"
 	"testing"
 
 	"github.com/TruStory/truchain/types"
@@ -112,8 +111,8 @@ func TestSubmitStoryMsg_ErrInvalidCategory(t *testing.T) {
 	assert.NotNil(t, msg)
 
 	res := h(ctx, msg)
-	hasInvalidCategory := strings.Contains(res.Log, "801")
-	assert.True(t, hasInvalidCategory, "should return err code")
+	assert.Equal(t, c.CodeInvalidCategory, res.Code)
+	assert.Equal(t, c.DefaultCodespace, res.Codespace)
 }
 
 func TestByzantineMsg(t *testing.T) {
@@ -125,8 +124,8 @@ func TestByzantineMsg(t *testing.T) {
 	fakeMsg := c.NewCreateCategoryMsg("title", sdk.AccAddress([]byte{1, 2}), "slug", "")
 
 	res := h(ctx, fakeMsg)
-	hasUnrecognizedMessage := strings.Contains(res.Log, "65542")
-	assert.True(t, hasUnrecognizedMessage, "should return err code")
+	assert.Equal(t, sdk.CodeUnknownRequest, res.Code)
+	assert.Equal(t, sdk.CodespaceRoot, res.Codespace)
 }
 
 func TestFlagStoryMsg(t *testing.T) {
