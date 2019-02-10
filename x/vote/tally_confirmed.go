@@ -54,7 +54,8 @@ func distributeRewardsConfirmed(
 	logger.Info(fmt.Sprintf("reward pool (confirmed): %s", pool))
 
 	// determine pool share per voter
-	voterRewardAmount := voterRewardAmount(pool, voterCount(votes.trueVotes))
+	voterCount := voterCount(votes.trueVotes)
+	voterRewardAmount := voterRewardAmount(pool, voterCount)
 	logger.Info(fmt.Sprintf("token voter reward amount: %s", voterRewardAmount))
 
 	// distribute reward to winners
@@ -131,11 +132,21 @@ func distributeRewardsConfirmed(
 		}
 	}
 
-	// TODO [shanev]: Remove after fixing https://github.com/TruStory/truchain/issues/314
-	// err = checkForEmptyPool(pool)
-	// if err != nil {
-	// 	return err
-	// }
+	err = checkForEmptyPoolConfirmed(pool, voterCount)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// accounts for leeway in reward pool due to division
+// 169 pool / 10 voters = 16.9 = 16 per voter, 9 left in pool
+// pool must be < voter counter
+func checkForEmptyPoolConfirmed(pool sdk.Coin, voterCount int64) sdk.Error {
+	if pool.Amount.GT(sdk.NewInt(voterCount)) {
+		return ErrNonEmptyRewardPool(pool)
+	}
 
 	return nil
 }

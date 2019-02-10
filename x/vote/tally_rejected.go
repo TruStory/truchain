@@ -79,7 +79,7 @@ func distributeRewardsRejected(
 	voterPool := voterPool(pool, params)
 
 	// get the total challenger stake amount and voter count
-	challengerTotalAmount, voterCount, err := winnerInfo(votes.falseVotes)
+	challengerTotalAmount, challengerCount, voterCount, err := winnerInfo(votes.falseVotes)
 	if err != nil {
 		return err
 	}
@@ -168,11 +168,10 @@ func distributeRewardsRejected(
 		}
 	}
 
-	// TODO [shanev]: Remove after fixing https://github.com/TruStory/truchain/issues/314
-	// err = checkForEmptyPool(pool)
-	// if err != nil {
-	// 	return err
-	// }
+	err = checkForEmptyPoolRejected(pool, challengerCount, voterCount)
+	if err != nil {
+		return err
+	}
 
 	return nil
 }
@@ -203,7 +202,10 @@ func voterPool(pool sdk.Coin, params Params) sdk.Coin {
 // winnerInfo returns data needed to calculate the reward pool
 func winnerInfo(
 	winners []app.Voter) (
-	challengerTotalAmount sdk.Int, voterCount int64, err sdk.Error) {
+	challengerTotalAmount sdk.Int,
+	challengerCount int64,
+	voterCount int64,
+	err sdk.Error) {
 
 	challengerTotalAmount = sdk.ZeroInt()
 
@@ -212,15 +214,16 @@ func winnerInfo(
 		case backing.Backing:
 			// skip
 		case challenge.Challenge:
+			challengerCount = challengerCount + 1
 			challengerTotalAmount = challengerTotalAmount.Add(v.Amount().Amount)
 		case TokenVote:
 			voterCount = voterCount + 1
 		default:
-			return challengerTotalAmount, voterCount, ErrInvalidVote(v)
+			return challengerTotalAmount, challengerCount, voterCount, ErrInvalidVote(v)
 		}
 	}
 
-	return challengerTotalAmount, voterCount, nil
+	return challengerTotalAmount, challengerCount, voterCount, nil
 }
 
 // amount / challengerTotalAmount * challengerPool
@@ -234,4 +237,11 @@ func challengerRewardAmount(
 		MulInt(challengerPool.Amount)
 
 	return rewardAmountDec.TruncateInt()
+}
+
+// accounts for leeway in reward pool due to division
+func checkForEmptyPoolRejected(
+	pool sdk.Coin, challengerCount int64, voterCount int64) sdk.Error {
+
+	return checkForEmptyPoolConfirmed(pool, challengerCount+voterCount)
 }

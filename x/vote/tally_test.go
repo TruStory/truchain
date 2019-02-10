@@ -176,8 +176,9 @@ func TestCount(t *testing.T) {
 	pool := sdk.NewCoin(params.StakeDenom, sdk.ZeroInt())
 	rejectedPool(ctx, votes, &pool)
 
-	cAmount, vCount, _ := winnerInfo(votes.falseVotes)
+	cAmount, cCount, vCount, _ := winnerInfo(votes.falseVotes)
 	assert.Equal(t, int64(4000000000000), cAmount.Int64())
+	assert.Equal(t, int64(3), cCount)
 	assert.Equal(t, int64(1), vCount)
 }
 
@@ -272,8 +273,23 @@ func TestDistributeRewardsRejected(t *testing.T) {
 }
 
 func TestCheckForEmptyPool(t *testing.T) {
-	pool, _ := sdk.ParseCoin("1trusteak")
-	err := checkForEmptyPool(pool)
+	pool, _ := sdk.ParseCoin("4trusteak")
+	voterCount := int64(10)
+	err := checkForEmptyPoolConfirmed(pool, voterCount)
+	assert.Nil(t, err)
+}
+
+func TestCheckForEmptyPool2(t *testing.T) {
+	pool, _ := sdk.ParseCoin("5trusteak")
+	voterCount := int64(10)
+	err := checkForEmptyPoolConfirmed(pool, voterCount)
+	assert.Nil(t, err)
+}
+
+func TestCheckForEmptyPool3(t *testing.T) {
+	pool, _ := sdk.ParseCoin("9trusteak")
+	voterCount := int64(10)
+	err := checkForEmptyPoolConfirmed(pool, voterCount)
 	assert.Nil(t, err)
 }
 

@@ -201,14 +201,3 @@ func weightedVote(
 
 	return weightedAmount, nil
 }
-
-// Make sure reward pool is empty (<= 1 coin)
-// Makes up for rounding error during division
-func checkForEmptyPool(pool sdk.Coin) sdk.Error {
-	oneCoin := sdk.NewCoin(params.StakeDenom, sdk.OneInt())
-	if !(pool.IsLT(oneCoin) || pool.IsEqual(oneCoin)) {
-		return ErrNonEmptyRewardPool(pool)
-	}
-
-	return nil
-}
