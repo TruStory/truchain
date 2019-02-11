@@ -184,7 +184,9 @@ func (k Keeper) ChallengeThreshold(totalBackingAmount sdk.Coin) sdk.Coin {
 	// we have backers
 	// calculate challenge threshold amount (based on total backings)
 	totalBackingDec := sdk.NewDecFromInt(totalBackingAmount.Amount)
-	challengeThresholdAmount := totalBackingDec.Mul(params.ChallengeToBackingRatio).RoundInt()
+	challengeThresholdAmount := totalBackingDec.
+		Mul(params.ChallengeToBackingRatio).
+		TruncateInt()
 
 	// challenge threshold can't be less than min challenge stake
 	if challengeThresholdAmount.LT(params.MinChallengeThreshold) {

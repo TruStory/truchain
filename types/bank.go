@@ -11,7 +11,7 @@ func NewCategoryCoin(toDenom string, from sdk.Coin) sdk.Coin {
 
 	return sdk.NewCoin(
 		toDenom,
-		sdk.NewDecFromInt(from.Amount).Mul(rate).RoundInt())
+		sdk.NewDecFromInt(from.Amount).Mul(rate).TruncateInt())
 }
 
 // SwapForCategoryCoin swaps any coin for category coin
