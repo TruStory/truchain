@@ -107,6 +107,7 @@ func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *T
 
 	// map of initial categories (slug -> title)
 	categories := map[string]string{
+		"bugs":   "Bugs",
 		"crypto": "Cryptocurrency",
 		"eli5":   "ELI5",
 		"health": "Health",
