@@ -185,7 +185,7 @@ func challengerPool(pool sdk.Coin, params Params) sdk.Coin {
 	challengerPoolAmount :=
 		sdk.NewDecFromInt(pool.Amount).Mul(challengerPoolShare)
 
-	return sdk.NewCoin(pool.Denom, challengerPoolAmount.RoundInt())
+	return sdk.NewCoin(pool.Denom, challengerPoolAmount.TruncateInt())
 }
 
 // calculate reward pool for voters (25% of pool)
@@ -197,7 +197,7 @@ func voterPool(pool sdk.Coin, params Params) sdk.Coin {
 	voterPoolAmount :=
 		sdk.NewDecFromInt(pool.Amount).Mul(voterPoolShare)
 
-	return sdk.NewCoin(pool.Denom, voterPoolAmount.RoundInt())
+	return sdk.NewCoin(pool.Denom, voterPoolAmount.TruncateInt())
 }
 
 // winnerInfo returns data needed to calculate the reward pool
@@ -233,5 +233,5 @@ func challengerRewardAmount(
 		QuoInt(challengerTotalAmount).
 		MulInt(challengerPool.Amount)
 
-	return rewardAmountDec.RoundInt()
+	return rewardAmountDec.TruncateInt()
 }
