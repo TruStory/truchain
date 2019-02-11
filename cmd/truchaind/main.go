@@ -8,8 +8,11 @@ import (
 
 	gaiaInit "github.com/cosmos/cosmos-sdk/cmd/gaia/init"
 	"github.com/cosmos/cosmos-sdk/codec"
+	"github.com/cosmos/cosmos-sdk/x/auth"
+	"github.com/cosmos/cosmos-sdk/x/bank"
 
 	"github.com/TruStory/truchain/app"
+	"github.com/TruStory/truchain/types"
 	"github.com/cosmos/cosmos-sdk/client"
 
 	"github.com/cosmos/cosmos-sdk/server"
@@ -20,15 +23,17 @@ import (
 	"github.com/tendermint/tendermint/libs/common"
 	dbm "github.com/tendermint/tendermint/libs/db"
 	"github.com/tendermint/tendermint/libs/log"
-	"github.com/tendermint/tendermint/p2p"
 	tmtypes "github.com/tendermint/tendermint/types"
 )
 
 const (
 	flagClientHome = "home-client"
+	flagOverwrite  = "overwrite"
 )
 
 func main() {
+	cobra.EnableCommandSorting = false
+
 	cdc := app.MakeCodec()
 	ctx := server.NewDefaultContext()
 
@@ -38,15 +43,12 @@ func main() {
 		PersistentPreRunE: server.PersistentPreRunEFn(ctx),
 	}
 
-	appInit := server.DefaultAppInit
-	rootCmd.AddCommand(InitCmd(ctx, cdc, appInit))
-	rootCmd.AddCommand(gaiaInit.TestnetFilesCmd(ctx, cdc, appInit))
+	rootCmd.AddCommand(InitCmd(ctx, cdc))
 
 	server.AddCommands(
 		ctx,
 		cdc,
 		rootCmd,
-		appInit,
 		newApp,
 		exportAppStateAndTMValidators)
 
@@ -61,9 +63,8 @@ func main() {
 	}
 }
 
-// InitCmd get cmd to initialize all files for tendermint and application
-// nolint: errcheck
-func InitCmd(ctx *server.Context, cdc *codec.Codec, appInit server.AppInit) *cobra.Command {
+// InitCmd initializes all files for tendermint and application
+func InitCmd(ctx *server.Context, cdc *codec.Codec) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "init",
 		Short: "Initialize genesis config, priv-validator file, and p2p-node file",
@@ -72,65 +73,61 @@ func InitCmd(ctx *server.Context, cdc *codec.Codec, appInit server.AppInit) *cob
 
 			config := ctx.Config
 			config.SetRoot(viper.GetString(cli.HomeFlag))
+
 			chainID := viper.GetString(client.FlagChainID)
 			if chainID == "" {
 				chainID = fmt.Sprintf("test-chain-%v", common.RandStr(6))
 			}
 
-			nodeKey, err := p2p.LoadOrGenNodeKey(config.NodeKeyFile())
-			if err != nil {
-				return err
-			}
-			nodeID := string(nodeKey.ID())
-
-			pk := gaiaInit.ReadOrCreatePrivValidator(config.PrivValidatorFile())
-			genTx, appMessage, validator, err := server.SimpleAppGenTx(cdc, pk)
+			_, pk, err := gaiaInit.InitializeNodeValidatorFiles(config)
 			if err != nil {
 				return err
 			}
 
-			appState, err := appInit.AppGenState(
-				cdc, tmtypes.GenesisDoc{}, []json.RawMessage{genTx})
-			if err != nil {
-				return err
+			var appState json.RawMessage
+			genFile := config.GenesisFile()
+
+			if !viper.GetBool(flagOverwrite) && common.FileExists(genFile) {
+				return fmt.Errorf("genesis.json file already exists: %v", genFile)
 			}
-			appStateJSON, err := cdc.MarshalJSON(appState)
+
+			genesis := types.GenesisState{
+				AuthData: auth.DefaultGenesisState(),
+				BankData: bank.DefaultGenesisState(),
+			}
+
+			appState, err = codec.MarshalJSONIndent(cdc, genesis)
 			if err != nil {
 				return err
 			}
 
-			toPrint := struct {
-				ChainID    string          `json:"chain_id"`
-				NodeID     string          `json:"node_id"`
-				AppMessage json.RawMessage `json:"app_message"`
-			}{
-				chainID,
-				nodeID,
-				appMessage,
-			}
-			out, err := codec.MarshalJSONIndent(cdc, toPrint)
+			_, _, validator, err := server.SimpleAppGenTx(cdc, pk)
 			if err != nil {
 				return err
 			}
-			fmt.Fprintf(os.Stderr, "%s\n", string(out))
-			return gaiaInit.ExportGenesisFile(config.GenesisFile(), chainID,
-				[]tmtypes.GenesisValidator{validator}, appStateJSON)
+
+			if err = gaiaInit.ExportGenesisFile(genFile, chainID, []tmtypes.GenesisValidator{validator}, appState); err != nil {
+				return err
+			}
+
+			fmt.Printf("Initialized truchaind configuration and bootstrapping files in %s...\n", viper.GetString(cli.HomeFlag))
+			return nil
 		},
 	}
 
 	cmd.Flags().String(cli.HomeFlag, app.DefaultNodeHome, "node's home directory")
-	cmd.Flags().String(flagClientHome, app.DefaultCLIHome, "client's home directory")
 	cmd.Flags().String(client.FlagChainID, "", "genesis file chain-id, if left blank will be randomly created")
-	cmd.Flags().String(client.FlagName, "", "validator's moniker")
-	cmd.MarkFlagRequired(client.FlagName)
+	cmd.Flags().BoolP(flagOverwrite, "o", false, "overwrite the genesis.json file")
+
 	return cmd
 }
 
-func newApp(logger log.Logger, db dbm.DB, _ io.Writer) abci.Application {
+func newApp(logger log.Logger, db dbm.DB, traceStore io.Writer) abci.Application {
 	return app.NewTruChain(logger, db)
 }
 
-func exportAppStateAndTMValidators(logger log.Logger, db dbm.DB, _ io.Writer) (json.RawMessage, []tmtypes.GenesisValidator, error) {
+func exportAppStateAndTMValidators(logger log.Logger, db dbm.DB, _ io.Writer, _ int64, _ bool) (
+	json.RawMessage, []tmtypes.GenesisValidator, error) {
 	bapp := app.NewTruChain(logger, db)
 	return bapp.ExportAppStateAndValidators()
 }

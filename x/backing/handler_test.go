@@ -48,8 +48,9 @@ func TestBackStoryMsg_FailInsufficientFunds(t *testing.T) {
 	assert.NotNil(t, msg)
 
 	res := h(ctx, msg)
-	hasInsufficientFunds := strings.Contains(res.Log, "65541")
-	assert.True(t, hasInsufficientFunds, "should return err code")
+	assert.Equal(t, sdk.CodeInsufficientFunds, res.Code)
+	assert.Equal(t, sdk.CodespaceRoot, res.Codespace)
+
 }
 
 func TestBackStoryMsg(t *testing.T) {
@@ -72,4 +73,13 @@ func TestBackStoryMsg(t *testing.T) {
 	_ = json.Unmarshal(res.Data, &idres)
 
 	assert.Equal(t, int64(1), idres.ID, "incorrect result backing id")
+}
+
+func TestByzantineMsg(t *testing.T) {
+	ctx, bk, _, _, _, _ := mockDB()
+	h := NewHandler(bk)
+	assert.NotNil(t, h)
+	res := h(ctx, nil)
+	assert.Equal(t, sdk.CodeUnknownRequest, res.Code)
+	assert.Equal(t, sdk.CodespaceRoot, res.Codespace)
 }

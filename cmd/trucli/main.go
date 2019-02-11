@@ -3,19 +3,26 @@ package main
 import (
 	"os"
 
+	"github.com/cosmos/cosmos-sdk/codec"
+	auth "github.com/cosmos/cosmos-sdk/x/auth/client/rest"
+	bank "github.com/cosmos/cosmos-sdk/x/bank/client/rest"
+
 	"github.com/TruStory/truchain/app"
-	"github.com/TruStory/truchain/types"
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/keys"
+	"github.com/cosmos/cosmos-sdk/client/lcd"
 	"github.com/cosmos/cosmos-sdk/client/rpc"
 	"github.com/cosmos/cosmos-sdk/client/tx"
+	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/version"
 	authcmd "github.com/cosmos/cosmos-sdk/x/auth/client/cli"
 	bankcmd "github.com/cosmos/cosmos-sdk/x/bank/client/cli"
-	ibccmd "github.com/cosmos/cosmos-sdk/x/ibc/client/cli"
-	stakecmd "github.com/cosmos/cosmos-sdk/x/stake/client/cli"
 	"github.com/spf13/cobra"
 	"github.com/tendermint/tmlibs/cli"
+)
+
+const (
+	storeAcc = "acc"
 )
 
 // rootCmd is the entry point for this binary
@@ -33,39 +40,31 @@ func main() {
 	// get the codec
 	cdc := app.MakeCodec()
 
-	// TODO: Setup keybase, viper object, etc. to be passed into
-	// the below functions and eliminate global vars, like we do
-	// with the cdc.
+	// Read in the configuration file for the sdk
+	config := sdk.GetConfig()
+	config.SetBech32PrefixForAccount(sdk.Bech32PrefixAccAddr, sdk.Bech32PrefixAccPub)
+	config.SetBech32PrefixForValidator(sdk.Bech32PrefixValAddr, sdk.Bech32PrefixValPub)
+	config.SetBech32PrefixForConsensusNode(sdk.Bech32PrefixConsAddr, sdk.Bech32PrefixConsPub)
+	config.Seal()
 
-	// add standard rpc, and tx commands
-	rpc.AddCommands(rootCmd)
-	rootCmd.AddCommand(client.LineBreak)
-	tx.AddCommands(rootCmd, cdc)
-	rootCmd.AddCommand(client.LineBreak)
+	mc := []sdk.ModuleClients{}
 
-	// add query/post commands (custom to binary)
+	rootCmd := &cobra.Command{
+		Use:   "trucli",
+		Short: "TruChain Client",
+	}
+
+	// Add --chain-id to persistent flags and mark it required
+	rootCmd.PersistentFlags().String(client.FlagChainID, "", "Chain ID of tendermint node")
+
+	// Construct Root Command
 	rootCmd.AddCommand(
-		client.GetCommands(
-			stakecmd.GetCmdQueryValidator("stake", cdc),
-			stakecmd.GetCmdQueryValidators("stake", cdc),
-			stakecmd.GetCmdQueryDelegation("stake", cdc),
-			stakecmd.GetCmdQueryDelegations("stake", cdc),
-			authcmd.GetAccountCmd("acc", cdc, types.GetAccountDecoder(cdc)),
-		)...)
-
-	rootCmd.AddCommand(
-		client.PostCommands(
-			bankcmd.SendTxCmd(cdc),
-			ibccmd.IBCTransferCmd(cdc),
-			ibccmd.IBCRelayCmd(cdc),
-			stakecmd.GetCmdCreateValidator(cdc),
-			stakecmd.GetCmdEditValidator(cdc),
-			stakecmd.GetCmdDelegate(cdc),
-			stakecmd.GetCmdUnbond("stake", cdc),
-		)...)
-
-	// add proxy, version and key info
-	rootCmd.AddCommand(
+		rpc.StatusCommand(),
+		client.ConfigCmd(),
+		queryCmd(cdc, mc),
+		txCmd(cdc, mc),
+		client.LineBreak,
+		lcd.ServeCommand(cdc, registerRoutes),
 		client.LineBreak,
 		keys.Commands(),
 		client.LineBreak,
@@ -76,7 +75,57 @@ func main() {
 	executor := cli.PrepareMainCmd(rootCmd, "BC", os.ExpandEnv("$HOME/.trucli"))
 	err := executor.Execute()
 	if err != nil {
-		// Note: Handle with #870
 		panic(err)
 	}
+}
+
+func queryCmd(cdc *codec.Codec, mc []sdk.ModuleClients) *cobra.Command {
+	queryCmd := &cobra.Command{
+		Use:     "query",
+		Aliases: []string{"q"},
+		Short:   "Querying subcommands",
+	}
+
+	queryCmd.AddCommand(
+		rpc.ValidatorCommand(),
+		rpc.BlockCommand(),
+		tx.SearchTxCmd(cdc),
+		tx.QueryTxCmd(cdc),
+		client.LineBreak,
+		authcmd.GetAccountCmd(storeAcc, cdc),
+	)
+
+	for _, m := range mc {
+		queryCmd.AddCommand(m.GetQueryCmd())
+	}
+
+	return queryCmd
+}
+
+func txCmd(cdc *codec.Codec, mc []sdk.ModuleClients) *cobra.Command {
+	txCmd := &cobra.Command{
+		Use:   "tx",
+		Short: "Transactions subcommands",
+	}
+
+	txCmd.AddCommand(
+		bankcmd.SendTxCmd(cdc),
+		client.LineBreak,
+		authcmd.GetSignCommand(cdc),
+		bankcmd.GetBroadcastCommand(cdc),
+		client.LineBreak,
+	)
+	for _, m := range mc {
+		txCmd.AddCommand(m.GetTxCmd())
+	}
+	return txCmd
+}
+
+func registerRoutes(rs *lcd.RestServer) {
+	rs.CliCtx = rs.CliCtx.WithAccountDecoder(rs.Cdc)
+	keys.RegisterRoutes(rs.Mux, rs.CliCtx.Indent)
+	rpc.RegisterRoutes(rs.CliCtx, rs.Mux)
+	tx.RegisterRoutes(rs.CliCtx, rs.Mux, rs.Cdc)
+	auth.RegisterRoutes(rs.CliCtx, rs.Mux, rs.Cdc, storeAcc)
+	bank.RegisterRoutes(rs.CliCtx, rs.Mux, rs.Cdc, rs.KeyBase)
 }

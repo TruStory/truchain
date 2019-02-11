@@ -18,6 +18,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth"
 	"github.com/cosmos/cosmos-sdk/x/bank"
+	sdkparams "github.com/cosmos/cosmos-sdk/x/params"
 	amino "github.com/tendermint/go-amino"
 	abci "github.com/tendermint/tendermint/abci/types"
 	cryptoAmino "github.com/tendermint/tendermint/crypto/encoding/amino"
@@ -39,6 +40,8 @@ func mockDB() (sdk.Context, Keeper, c.Keeper) {
 	voteKey := sdk.NewKVStoreKey("vote")
 	backingKey := sdk.NewKVStoreKey("backing")
 	backingListKey := sdk.NewKVStoreKey("backingList")
+	paramsKey := sdk.NewKVStoreKey(sdkparams.StoreKey)
+	transientParamsKey := sdk.NewTransientStoreKey(sdkparams.TStoreKey)
 
 	ms := store.NewCommitMultiStore(db)
 	ms.MountStoreWithDB(accKey, sdk.StoreTypeIAVL, db)
@@ -51,6 +54,8 @@ func mockDB() (sdk.Context, Keeper, c.Keeper) {
 	ms.MountStoreWithDB(voteKey, sdk.StoreTypeIAVL, db)
 	ms.MountStoreWithDB(backingKey, sdk.StoreTypeIAVL, db)
 	ms.MountStoreWithDB(backingListKey, sdk.StoreTypeIAVL, db)
+	ms.MountStoreWithDB(paramsKey, sdk.StoreTypeIAVL, db)
+	ms.MountStoreWithDB(transientParamsKey, sdk.StoreTypeTransient, db)
 	ms.LoadLatestVersion()
 
 	header := abci.Header{Time: time.Now().Add(50 * 24 * time.Hour)}
@@ -61,8 +66,12 @@ func mockDB() (sdk.Context, Keeper, c.Keeper) {
 	codec.RegisterInterface((*auth.Account)(nil), nil)
 	codec.RegisterConcrete(&auth.BaseAccount{}, "auth/Account", nil)
 
-	am := auth.NewAccountKeeper(codec, accKey, auth.ProtoBaseAccount)
-	bankKeeper := bank.NewBaseKeeper(am)
+	pk := sdkparams.NewKeeper(codec, paramsKey, transientParamsKey)
+	am := auth.NewAccountKeeper(codec, accKey, pk.Subspace(auth.DefaultParamspace), auth.ProtoBaseAccount)
+	bankKeeper := bank.NewBaseKeeper(am,
+		pk.Subspace(bank.DefaultParamspace),
+		bank.DefaultCodespace,
+	)
 	ck := c.NewKeeper(catKey, codec)
 	sk := story.NewKeeper(storyKey, ck, codec)
 	backingKeeper := backing.NewKeeper(

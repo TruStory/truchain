@@ -8,7 +8,7 @@ import (
 
 // Game errors reserve 1100 ~ 1199.
 const (
-	DefaultCodespace sdk.CodespaceType = 11
+	DefaultCodespace sdk.CodespaceType = "game"
 
 	CodeNotFound   sdk.CodeType = 1101
 	CodeDuplicate  sdk.CodeType = 1102

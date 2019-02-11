@@ -16,6 +16,15 @@ import (
 	amino "github.com/tendermint/go-amino"
 )
 
+const (
+	// StoreKey is string representation of the store key for games
+	StoreKey = "games"
+	// QueueStoreKey is string representation of the store key for game queue.
+	QueueStoreKey = "gameQueue"
+	// PendingListStoreKey is string representation of the store key for the list of pending games.
+	PendingListStoreKey = "pendingGameList"
+)
+
 // ReadKeeper defines a module interface that facilitates read only access to truchain data
 type ReadKeeper interface {
 	app.ReadKeeper
