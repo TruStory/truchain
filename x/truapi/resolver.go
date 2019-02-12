@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"math/rand"
 	"sort"
 
 	"github.com/TruStory/truchain/parameters"
@@ -282,14 +281,8 @@ func (ta *TruAPI) twitterProfileResolver(
 	addr := q.Address
 	twitterProfile, err := ta.DBClient.TwitterProfileByAddress(addr)
 	if err != nil {
-		fmt.Println("Twitter profile not found. Returning mock data.")
-		return db.TwitterProfile{
-			ID:        1234,
-			Username:  "someone",
-			FullName:  "Some Person",
-			Address:   addr,
-			AvatarURI: fmt.Sprintf("https://randomuser.me/api/portraits/thumb/women/%d.jpg", rand.Intn(50)+1),
-		}
+		fmt.Println("Resolver err: ", err)
+		return db.TwitterProfile{}
 	}
 
 	return twitterProfile
