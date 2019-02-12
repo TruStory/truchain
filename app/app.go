@@ -357,6 +357,10 @@ func (app *TruChain) BeginBlocker(ctx sdk.Context, req abci.RequestBeginBlock) a
 		}
 	}
 
+	if app.apiStarted == false && ctx.BlockHeight() > int64(1) {
+		panic("API server not started.")
+	}
+
 	return abci.ResponseBeginBlock{}
 }
 
