@@ -54,7 +54,8 @@ func distributeRewardsConfirmed(
 	logger.Info(fmt.Sprintf("reward pool (confirmed): %s", pool))
 
 	// determine pool share per voter
-	voterRewardAmount := voterRewardAmount(pool, voterCount(votes.trueVotes))
+	voterCount := voterCount(votes.trueVotes)
+	voterRewardAmount := voterRewardAmount(pool, voterCount)
 	logger.Info(fmt.Sprintf("token voter reward amount: %s", voterRewardAmount))
 
 	// distribute reward to winners
@@ -89,9 +90,7 @@ func distributeRewardsConfirmed(
 			// calculate reward, an equal portion of the reward pool
 			rewardCoin := sdk.NewCoin(pool.Denom, voterRewardAmount)
 
-			// TODO: using restored version of Minus in sdk v0.26.0 until issue #325 is resolved
-			// after finshed should be pool.Minus(rewardCoin)
-			pool = subtract(pool, rewardCoin)
+			pool = pool.Minus(rewardCoin)
 
 			// distribute reward in cred
 			cred := app.NewCategoryCoin(denom, rewardCoin)
@@ -133,11 +132,21 @@ func distributeRewardsConfirmed(
 		}
 	}
 
-	// TODO [shanev]: Remove after fixing https://github.com/TruStory/truchain/issues/314
-	// err = checkForEmptyPool(pool)
-	// if err != nil {
-	// 	return err
-	// }
+	err = checkForEmptyPoolConfirmed(pool, voterCount)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// accounts for leeway in reward pool due to division
+// 169 pool / 10 voters = 16.9 = 16 per voter, 9 left in pool
+// pool must be < voter counter
+func checkForEmptyPoolConfirmed(pool sdk.Coin, voterCount int64) sdk.Error {
+	if pool.Amount.GT(sdk.NewInt(voterCount)) {
+		return ErrNonEmptyRewardPool(pool)
+	}
 
 	return nil
 }
@@ -165,15 +174,5 @@ func voterRewardAmount(pool sdk.Coin, voterCount int64) sdk.Int {
 
 	return poolDec.
 		QuoInt(voterCountInt).
-		RoundInt()
-}
-
-func subtract(coinA, coinB sdk.Coin) sdk.Coin {
-	if !coinA.SameDenomAs(coinB) {
-		return coinA
-	}
-	return sdk.Coin{
-		Denom:  coinA.Denom,
-		Amount: coinA.Amount.Sub(coinB.Amount),
-	}
+		TruncateInt()
 }
