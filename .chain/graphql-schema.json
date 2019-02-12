@@ -549,6 +549,29 @@
             "deprecationReason": "",
             "description": "",
             "isDeprecated": false,
+            "name": "int",
+            "type": {
+              "kind": "OBJECT",
+              "name": "Int",
+              "ofType": null
+            }
+          }
+        ],
+        "inputFields": [],
+        "interfaces": [],
+        "kind": "OBJECT",
+        "name": "Dec",
+        "possibleTypes": []
+      },
+      {
+        "description": "",
+        "enumValues": [],
+        "fields": [
+          {
+            "args": [],
+            "deprecationReason": "",
+            "description": "",
+            "isDeprecated": false,
             "name": "challengeExpireTime",
             "type": {
               "kind": "NON_NULL",
@@ -746,19 +769,29 @@
       {
         "description": "",
         "enumValues": [],
+        "fields": [],
+        "inputFields": [],
+        "interfaces": [],
+        "kind": "OBJECT",
+        "name": "Int",
+        "possibleTypes": []
+      },
+      {
+        "description": "",
+        "enumValues": [],
         "fields": [
           {
             "args": [],
             "deprecationReason": "",
             "description": "",
             "isDeprecated": false,
-            "name": "backingAmountWeight",
+            "name": "amountWeight",
             "type": {
               "kind": "NON_NULL",
               "name": "",
               "ofType": {
-                "kind": "SCALAR",
-                "name": "string",
+                "kind": "OBJECT",
+                "name": "Dec",
                 "ofType": null
               }
             }
@@ -768,13 +801,13 @@
             "deprecationReason": "",
             "description": "",
             "isDeprecated": false,
-            "name": "backingMaxDuration",
+            "name": "maxInterestRate",
             "type": {
               "kind": "NON_NULL",
               "name": "",
               "ofType": {
-                "kind": "SCALAR",
-                "name": "int64",
+                "kind": "OBJECT",
+                "name": "Dec",
                 "ofType": null
               }
             }
@@ -784,13 +817,13 @@
             "deprecationReason": "",
             "description": "",
             "isDeprecated": false,
-            "name": "backingMaxInterestRate",
+            "name": "minInterestRate",
             "type": {
               "kind": "NON_NULL",
               "name": "",
               "ofType": {
-                "kind": "SCALAR",
-                "name": "string",
+                "kind": "OBJECT",
+                "name": "Dec",
                 "ofType": null
               }
             }
@@ -800,45 +833,13 @@
             "deprecationReason": "",
             "description": "",
             "isDeprecated": false,
-            "name": "backingMinDuration",
+            "name": "periodWeight",
             "type": {
               "kind": "NON_NULL",
               "name": "",
               "ofType": {
-                "kind": "SCALAR",
-                "name": "int64",
-                "ofType": null
-              }
-            }
-          },
-          {
-            "args": [],
-            "deprecationReason": "",
-            "description": "",
-            "isDeprecated": false,
-            "name": "backingMinInterestRate",
-            "type": {
-              "kind": "NON_NULL",
-              "name": "",
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "string",
-                "ofType": null
-              }
-            }
-          },
-          {
-            "args": [],
-            "deprecationReason": "",
-            "description": "",
-            "isDeprecated": false,
-            "name": "backingPeriodWeight",
-            "type": {
-              "kind": "NON_NULL",
-              "name": "",
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "string",
+                "kind": "OBJECT",
+                "name": "Dec",
                 "ofType": null
               }
             }
@@ -1906,7 +1907,7 @@
               "name": "",
               "ofType": {
                 "kind": "SCALAR",
-                "name": "int64",
+                "name": "uint64",
                 "ofType": null
               }
             }
@@ -1994,7 +1995,7 @@
               "name": "",
               "ofType": {
                 "kind": "SCALAR",
-                "name": "int64",
+                "name": "uint64",
                 "ofType": null
               }
             }
@@ -2205,6 +2206,16 @@
         "interfaces": [],
         "kind": "SCALAR",
         "name": "string",
+        "possibleTypes": []
+      },
+      {
+        "description": "",
+        "enumValues": [],
+        "fields": [],
+        "inputFields": [],
+        "interfaces": [],
+        "kind": "SCALAR",
+        "name": "uint64",
         "possibleTypes": []
       }
     ]

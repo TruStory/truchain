@@ -1,6 +1,8 @@
 package vote
 
 import (
+	"fmt"
+
 	app "github.com/TruStory/truchain/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
@@ -61,4 +63,10 @@ func DefaultParams() Params {
 type poll struct {
 	trueVotes  []app.Voter
 	falseVotes []app.Voter
+}
+
+func (p poll) String() string {
+	return fmt.Sprintf(
+		"Poll results:\n True votes: %v\n False votes: %v",
+		p.trueVotes, p.falseVotes)
 }
