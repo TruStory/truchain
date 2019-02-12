@@ -23,6 +23,8 @@ func (k Keeper) NewResponseEndBlock(ctx sdk.Context) sdk.Tags {
 // filterGameQueue checks to see if a validation game has ended, then processes
 // that game. It calls itself recursively until all games have been processed.
 func (k Keeper) filterGameQueue(ctx sdk.Context, gameQueue queue.Queue) sdk.Error {
+	logger := ctx.Logger().With("module", "vote")
+
 	if gameQueue.IsEmpty() {
 		return nil
 	}
@@ -47,6 +49,11 @@ func (k Keeper) filterGameQueue(ctx sdk.Context, gameQueue queue.Queue) sdk.Erro
 
 	// handle expired voting periods
 	if game.IsVotingExpired(blockTime, quorum) {
+
+		logger.Info(
+			fmt.Sprintf(
+				"Voting period expired for story: %d", game.StoryID))
+
 		// remove from queue
 		gameQueue.Pop()
 

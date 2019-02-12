@@ -1,6 +1,8 @@
 package vote
 
 import (
+	"fmt"
+
 	params "github.com/TruStory/truchain/parameters"
 	app "github.com/TruStory/truchain/types"
 	"github.com/TruStory/truchain/x/backing"
@@ -12,6 +14,9 @@ import (
 
 // tally votes and distribute rewards
 func processGame(ctx sdk.Context, k Keeper, game game.Game) sdk.Error {
+	logger := ctx.Logger().With("module", "vote")
+	logger.Info(fmt.Sprintf("Processing game: %d...", game.ID))
+
 	// tally backings, challenges, and votes
 	votes, err := tally(ctx, k, game)
 	if err != nil {
@@ -29,11 +34,15 @@ func processGame(ctx sdk.Context, k Keeper, game game.Game) sdk.Error {
 		return err
 	}
 
+	logger.Info(fmt.Sprintf("Story confirmed: %t", confirmed))
+
 	// calculate reward pool
 	rewardPool, err := rewardPool(ctx, votes, confirmed)
 	if err != nil {
 		return err
 	}
+
+	logger.Info("Reward pool: ", rewardPool)
 
 	// distribute rewards
 	err = distributeRewards(
@@ -53,6 +62,9 @@ func processGame(ctx sdk.Context, k Keeper, game game.Game) sdk.Error {
 
 // tally backings, challenges, and token votes into two true and false slices
 func tally(ctx sdk.Context, k Keeper, game game.Game) (votes poll, err sdk.Error) {
+
+	logger := ctx.Logger().With("module", "vote")
+	logger.Info("Tallying votes ...")
 
 	// tally backings
 	trueBackings, falseBackings, err := k.backingKeeper.Tally(ctx, game.StoryID)
@@ -86,6 +98,8 @@ func tally(ctx sdk.Context, k Keeper, game game.Game) (votes poll, err sdk.Error
 	for _, v := range falseTokenVotes {
 		votes.falseVotes = append(votes.falseVotes, v)
 	}
+
+	logger.Info(votes.String())
 
 	return votes, nil
 }

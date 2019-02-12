@@ -69,14 +69,18 @@ func distributeRewardsRejected(
 	pool sdk.Coin,
 	denom string) (err sdk.Error) {
 
+	logger := ctx.Logger().With("module", "vote")
+
 	// load default parameters
 	params := DefaultParams()
 
 	// calculate reward pool for challengers (75% of pool)
 	challengerPool := challengerPool(pool, params)
+	logger.Info("Challenger reward pool: ", challengerPool)
 
 	// calculate reward pool for voters (25% of pool)
 	voterPool := voterPool(pool, params)
+	logger.Info("Voter reward pool: ", voterPool)
 
 	// get the total challenger stake amount and voter count
 	challengerTotalAmount, challengerCount, voterCount, err := winnerInfo(votes.falseVotes)
@@ -117,6 +121,10 @@ func distributeRewardsRejected(
 		case backing.Backing:
 			// get back stake amount because we are nice
 			_, _, err = bankKeeper.AddCoins(ctx, v.Creator(), sdk.Coins{v.Amount()})
+			if err != nil {
+				return err
+			}
+			logger.Info("Giving back original amount: ", v.Amount())
 
 			// remove backing from backing list
 			err = backingKeeper.RemoveFromList(ctx, v.ID())
@@ -127,6 +135,7 @@ func distributeRewardsRejected(
 			if err != nil {
 				return err
 			}
+			logger.Info("Giving back original amount: ", v.Amount())
 
 			// calculate reward (X% of pool, in proportion to stake)
 			rewardAmount := challengerRewardAmount(
@@ -141,6 +150,7 @@ func distributeRewardsRejected(
 			// distribute reward in cred
 			cred := app.NewCategoryCoin(denom, rewardCoin)
 			_, _, err = bankKeeper.AddCoins(ctx, v.Creator(), sdk.Coins{cred})
+			logger.Info("Distributed reward of: ", cred)
 
 		case TokenVote:
 			// get back original staked amount
@@ -158,6 +168,7 @@ func distributeRewardsRejected(
 			// distribute reward in cred
 			cred := app.NewCategoryCoin(denom, rewardCoin)
 			_, _, err = bankKeeper.AddCoins(ctx, v.Creator(), sdk.Coins{cred})
+			logger.Info("Distributed reward of: ", cred)
 
 		default:
 			err = ErrInvalidVote(v)
@@ -167,6 +178,8 @@ func distributeRewardsRejected(
 			return err
 		}
 	}
+
+	logger.Info("Amount left in pool: ", pool)
 
 	err = checkForEmptyPoolRejected(pool, challengerCount, voterCount)
 	if err != nil {
