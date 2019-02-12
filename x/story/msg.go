@@ -12,7 +12,7 @@ type SubmitStoryMsg struct {
 	Body       string         `json:"body"`
 	CategoryID int64          `json:"category_id"`
 	Creator    sdk.AccAddress `json:"creator"`
-	Source     string         `json:"source"`
+	Source     string         `json:"source,omitempty"`
 	StoryType  Type           `json:"story_type"`
 }
 
