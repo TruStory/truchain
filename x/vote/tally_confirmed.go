@@ -55,7 +55,8 @@ func distributeRewardsConfirmed(
 	// determine pool share per voter
 	voterCount := voterCount(votes.trueVotes)
 	voterRewardAmount := voterRewardAmount(pool, voterCount)
-	logger.Info(fmt.Sprintf("Token voter reward amount: %s", voterRewardAmount))
+	logger.Info(
+		fmt.Sprintf("Token voter reward amount: %s", voterRewardAmount))
 
 	// distribute reward to winners
 	for _, vote := range votes.trueVotes {
@@ -67,13 +68,15 @@ func distributeRewardsConfirmed(
 			if err != nil {
 				return err
 			}
-			logger.Info("Distributing backing principal: ", v.Amount())
+			logger.Info(
+				fmt.Sprintf("Distributing backing principal: %v", v.Amount()))
 
 			_, _, err = bankKeeper.AddCoins(ctx, v.Creator(), sdk.Coins{v.Interest})
 			if err != nil {
 				return err
 			}
-			logger.Info("Distributing backing interest: ", v.Interest)
+			logger.Info(
+				fmt.Sprintf("Distributing backing interest: %v", v.Interest))
 
 			// remove from backing list, prevent from maturing
 			err = backingKeeper.RemoveFromList(ctx, v.ID())
@@ -84,7 +87,8 @@ func distributeRewardsConfirmed(
 			if err != nil {
 				return err
 			}
-			logger.Info("Giving back original amount: ", v.Amount())
+			logger.Info(
+				fmt.Sprintf("Giving back original amount: %v", v.Amount()))
 
 			// calculate reward, an equal portion of the reward pool
 			rewardCoin := sdk.NewCoin(pool.Denom, voterRewardAmount)
@@ -93,7 +97,7 @@ func distributeRewardsConfirmed(
 			// distribute reward in cred
 			cred := app.NewCategoryCoin(denom, rewardCoin)
 			_, _, err = bankKeeper.AddCoins(ctx, v.Creator(), sdk.Coins{cred})
-			logger.Info("Distributed reward of: ", cred)
+			logger.Info(fmt.Sprintf("Distributed reward of: %v", cred))
 
 		default:
 			if err = ErrInvalidVote(v); err != nil {
@@ -117,7 +121,7 @@ func distributeRewardsConfirmed(
 			if err != nil {
 				return err
 			}
-			logger.Info("Giving back original amount: ", v.Amount())
+			logger.Info(fmt.Sprintf("Giving back original amount: %v", v.Amount()))
 
 			// remove from backing list, prevent from maturing
 			err = backingKeeper.RemoveFromList(ctx, v.ID())
@@ -139,7 +143,7 @@ func distributeRewardsConfirmed(
 		}
 	}
 
-	logger.Info("Amount left in pool: ", pool)
+	logger.Info(fmt.Sprintf("Amount left in pool: %v", pool))
 
 	err = checkForEmptyPoolConfirmed(pool, voterCount)
 	if err != nil {

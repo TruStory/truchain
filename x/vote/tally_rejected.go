@@ -1,6 +1,8 @@
 package vote
 
 import (
+	"fmt"
+
 	params "github.com/TruStory/truchain/parameters"
 	app "github.com/TruStory/truchain/types"
 	"github.com/TruStory/truchain/x/backing"
@@ -76,14 +78,15 @@ func distributeRewardsRejected(
 
 	// calculate reward pool for challengers (75% of pool)
 	challengerPool := challengerPool(pool, params)
-	logger.Info("Challenger reward pool: ", challengerPool)
+	logger.Info(fmt.Sprintf("Challenger reward pool: %v", challengerPool))
 
 	// calculate reward pool for voters (25% of pool)
 	voterPool := voterPool(pool, params)
-	logger.Info("Voter reward pool: ", voterPool)
+	logger.Info(fmt.Sprintf("Voter reward pool: %v", voterPool))
 
 	// get the total challenger stake amount and voter count
-	challengerTotalAmount, challengerCount, voterCount, err := winnerInfo(votes.falseVotes)
+	challengerTotalAmount, challengerCount, voterCount, err :=
+		winnerInfo(votes.falseVotes)
 	if err != nil {
 		return err
 	}
@@ -124,7 +127,7 @@ func distributeRewardsRejected(
 			if err != nil {
 				return err
 			}
-			logger.Info("Giving back original amount: ", v.Amount())
+			logger.Info(fmt.Sprintf("Giving back original amount: %v", v.Amount()))
 
 			// remove backing from backing list
 			err = backingKeeper.RemoveFromList(ctx, v.ID())
@@ -135,7 +138,7 @@ func distributeRewardsRejected(
 			if err != nil {
 				return err
 			}
-			logger.Info("Giving back original amount: ", v.Amount())
+			logger.Info(fmt.Sprintf("Giving back original amount: %v", v.Amount()))
 
 			// calculate reward (X% of pool, in proportion to stake)
 			rewardAmount := challengerRewardAmount(
@@ -150,7 +153,7 @@ func distributeRewardsRejected(
 			// distribute reward in cred
 			cred := app.NewCategoryCoin(denom, rewardCoin)
 			_, _, err = bankKeeper.AddCoins(ctx, v.Creator(), sdk.Coins{cred})
-			logger.Info("Distributed reward of: ", cred)
+			logger.Info(fmt.Sprintf("Distributed reward of: %v", cred))
 
 		case TokenVote:
 			// get back original staked amount
@@ -168,7 +171,7 @@ func distributeRewardsRejected(
 			// distribute reward in cred
 			cred := app.NewCategoryCoin(denom, rewardCoin)
 			_, _, err = bankKeeper.AddCoins(ctx, v.Creator(), sdk.Coins{cred})
-			logger.Info("Distributed reward of: ", cred)
+			logger.Info(fmt.Sprintf("Distributed reward of: %v", cred))
 
 		default:
 			err = ErrInvalidVote(v)
@@ -179,7 +182,7 @@ func distributeRewardsRejected(
 		}
 	}
 
-	logger.Info("Amount left in pool: ", pool)
+	logger.Info(fmt.Sprintf("Amount left in pool: %v", pool))
 
 	err = checkForEmptyPoolRejected(pool, challengerCount, voterCount)
 	if err != nil {
