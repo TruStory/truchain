@@ -158,7 +158,7 @@ func TestChallengerPool(t *testing.T) {
 	pool := sdk.NewCoin(params.StakeDenom, sdk.ZeroInt())
 	rejectedPool(ctx, votes, &pool)
 
-	coin := challengerPool(pool, DefaultParams())
+	coin := calculateChallengerPool(pool, DefaultParams())
 	assert.Equal(t, "6000000000000trusteak", coin.String())
 }
 
@@ -167,7 +167,7 @@ func TestVoterPool(t *testing.T) {
 	pool := sdk.NewCoin(params.StakeDenom, sdk.ZeroInt())
 	rejectedPool(ctx, votes, &pool)
 
-	coin := voterPool(pool, DefaultParams())
+	coin := calculateVoterPool(pool, DefaultParams())
 	assert.Equal(t, "2000000000000trusteak", coin.String())
 }
 
