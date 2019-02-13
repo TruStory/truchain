@@ -126,7 +126,6 @@ func (a *API) stdMsg(name string, raw json.RawMessage) (sdk.Msg, error) {
 
 func (a *API) stdFee(fragment json.RawMessage) (auth.StdFee, error) {
 	fee := new(auth.StdFee)
-	fmt.Println(string(fragment))
 	err := json.Unmarshal(fragment, fee)
 
 	if err != nil {
