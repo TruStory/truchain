@@ -60,8 +60,9 @@ func distributeRewardsConfirmed(
 
 	// distribute reward to winners
 	for _, vote := range votes.trueVotes {
-		switch v := vote.(type) {
+		logger.Info(fmt.Sprintf("Processing vote type: %T", vote))
 
+		switch v := vote.(type) {
 		case backing.Backing:
 			// distribute backing principal and interest
 			_, _, err = bankKeeper.AddCoins(ctx, v.Creator(), sdk.Coins{v.Amount()})
@@ -69,7 +70,7 @@ func distributeRewardsConfirmed(
 				return err
 			}
 			logger.Info(
-				fmt.Sprintf("Distributing backing principal: %v", v.Amount()))
+				fmt.Sprintf("Giving back original backing principal: %v", v.Amount()))
 
 			_, _, err = bankKeeper.AddCoins(ctx, v.Creator(), sdk.Coins{v.Interest})
 			if err != nil {
@@ -88,7 +89,7 @@ func distributeRewardsConfirmed(
 				return err
 			}
 			logger.Info(
-				fmt.Sprintf("Giving back original amount: %v", v.Amount()))
+				fmt.Sprintf("Giving back original vote amount: %v", v.Amount()))
 
 			// calculate reward, an equal portion of the reward pool
 			rewardCoin := sdk.NewCoin(pool.Denom, voterRewardAmount)
@@ -97,7 +98,7 @@ func distributeRewardsConfirmed(
 			// distribute reward in cred
 			cred := app.NewCategoryCoin(denom, rewardCoin)
 			_, _, err = bankKeeper.AddCoins(ctx, v.Creator(), sdk.Coins{cred})
-			logger.Info(fmt.Sprintf("Distributed reward of: %v", cred))
+			logger.Info(fmt.Sprintf("Distributed vote reward of: %v", cred))
 
 		default:
 			if err = ErrInvalidVote(v); err != nil {
@@ -112,8 +113,9 @@ func distributeRewardsConfirmed(
 
 	// slash losers
 	for _, vote := range votes.falseVotes {
-		switch v := vote.(type) {
+		logger.Info(fmt.Sprintf("Processing vote type: %T", vote))
 
+		switch v := vote.(type) {
 		// backer who changed their implicit TRUE vote to FALSE
 		case backing.Backing:
 			// return backing because we are nice people
@@ -121,7 +123,7 @@ func distributeRewardsConfirmed(
 			if err != nil {
 				return err
 			}
-			logger.Info(fmt.Sprintf("Giving back original amount: %v", v.Amount()))
+			logger.Info(fmt.Sprintf("Giving back original backing amount: %v", v.Amount()))
 
 			// remove from backing list, prevent from maturing
 			err = backingKeeper.RemoveFromList(ctx, v.ID())

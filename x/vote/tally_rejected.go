@@ -74,15 +74,7 @@ func distributeRewardsRejected(
 	logger := ctx.Logger().With("module", "vote")
 
 	// load default parameters
-	params := DefaultParams()
-
-	// calculate reward pool for challengers (75% of pool)
-	challengerPool := challengerPool(pool, params)
-	logger.Info(fmt.Sprintf("Challenger reward pool: %v", challengerPool))
-
-	// calculate reward pool for voters (25% of pool)
-	voterPool := voterPool(pool, params)
-	logger.Info(fmt.Sprintf("Voter reward pool: %v", voterPool))
+	defaults := DefaultParams()
 
 	// get the total challenger stake amount and voter count
 	challengerTotalAmount, challengerCount, voterCount, err :=
@@ -91,13 +83,28 @@ func distributeRewardsRejected(
 		return err
 	}
 
+	// challenger pool is 100% of reward pool when no voters
+	challengerPool := pool
+	voterPool := sdk.NewCoin(params.StakeDenom, sdk.ZeroInt())
+
+	if voterCount > 0 {
+		// calculate reward pool for challengers (75% of pool)
+		challengerPool = calculateChallengerPool(pool, defaults)
+		logger.Info(fmt.Sprintf("Challenger reward pool: %v", challengerPool))
+
+		// calculate reward pool for voters (25% of pool)
+		voterPool = calculateVoterPool(pool, defaults)
+		logger.Info(fmt.Sprintf("Voter reward pool: %v", voterPool))
+	}
+
 	// calculate voter reward amount
 	voterRewardAmount := voterRewardAmount(voterPool, voterCount)
 
 	// slash losers (true voters)
 	for _, vote := range votes.trueVotes {
-		switch v := vote.(type) {
+		logger.Info(fmt.Sprintf("Processing vote type: %T", vote))
 
+		switch v := vote.(type) {
 		case backing.Backing:
 			// don't get anything back, too bad sucka!
 			// remove backing from backing list, prevent maturing
@@ -119,15 +126,16 @@ func distributeRewardsRejected(
 	}
 	// distribute reward to winners (false voters)
 	for _, vote := range votes.falseVotes {
-		switch v := vote.(type) {
+		logger.Info(fmt.Sprintf("Processing vote type: %T", vote))
 
+		switch v := vote.(type) {
 		case backing.Backing:
 			// get back stake amount because we are nice
 			_, _, err = bankKeeper.AddCoins(ctx, v.Creator(), sdk.Coins{v.Amount()})
 			if err != nil {
 				return err
 			}
-			logger.Info(fmt.Sprintf("Giving back original amount: %v", v.Amount()))
+			logger.Info(fmt.Sprintf("Giving back original backing amount: %v", v.Amount()))
 
 			// remove backing from backing list
 			err = backingKeeper.RemoveFromList(ctx, v.ID())
@@ -138,7 +146,7 @@ func distributeRewardsRejected(
 			if err != nil {
 				return err
 			}
-			logger.Info(fmt.Sprintf("Giving back original amount: %v", v.Amount()))
+			logger.Info(fmt.Sprintf("Giving back original challenge stake: %v", v.Amount()))
 
 			// calculate reward (X% of pool, in proportion to stake)
 			rewardAmount := challengerRewardAmount(
@@ -153,7 +161,7 @@ func distributeRewardsRejected(
 			// distribute reward in cred
 			cred := app.NewCategoryCoin(denom, rewardCoin)
 			_, _, err = bankKeeper.AddCoins(ctx, v.Creator(), sdk.Coins{cred})
-			logger.Info(fmt.Sprintf("Distributed reward of: %v", cred))
+			logger.Info(fmt.Sprintf("Distributed challenge reward of: %v", cred))
 
 		case TokenVote:
 			// get back original staked amount
@@ -161,6 +169,7 @@ func distributeRewardsRejected(
 			if err != nil {
 				return err
 			}
+			logger.Info(fmt.Sprintf("Giving back original vote stake: %v", v.Amount()))
 
 			// calculate reward (1-X% of pool, in equal proportions)
 			rewardCoin := sdk.NewCoin(pool.Denom, voterRewardAmount)
@@ -171,7 +180,7 @@ func distributeRewardsRejected(
 			// distribute reward in cred
 			cred := app.NewCategoryCoin(denom, rewardCoin)
 			_, _, err = bankKeeper.AddCoins(ctx, v.Creator(), sdk.Coins{cred})
-			logger.Info(fmt.Sprintf("Distributed reward of: %v", cred))
+			logger.Info(fmt.Sprintf("Distributed vote reward of: %v", cred))
 
 		default:
 			err = ErrInvalidVote(v)
@@ -193,7 +202,7 @@ func distributeRewardsRejected(
 }
 
 // calculate reward pool for challengers (75% of pool)
-func challengerPool(pool sdk.Coin, params Params) sdk.Coin {
+func calculateChallengerPool(pool sdk.Coin, params Params) sdk.Coin {
 
 	challengerPoolShare := params.ChallengerRewardPoolShare
 
@@ -204,7 +213,7 @@ func challengerPool(pool sdk.Coin, params Params) sdk.Coin {
 }
 
 // calculate reward pool for voters (25% of pool)
-func voterPool(pool sdk.Coin, params Params) sdk.Coin {
+func calculateVoterPool(pool sdk.Coin, params Params) sdk.Coin {
 
 	challengerPoolShare := params.ChallengerRewardPoolShare
 	voterPoolShare := sdk.OneDec().Sub(challengerPoolShare)

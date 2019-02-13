@@ -68,7 +68,7 @@ func DefaultParams() Params {
 		MinChallengeThreshold:   sdk.NewInt(10000000000),    // 10 trustake
 		MinChallengeStake:       sdk.NewInt(1000000000),     //  1 trustake
 		Expires:                 1 * 24 * time.Hour,
-		VotingPeriod:            1 * time.Minute,
-		VoteQuorum:              1,
+		VotingPeriod:            1 * 24 * time.Hour,
+		VoteQuorum:              3,
 	}
 }
