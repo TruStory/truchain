@@ -221,7 +221,8 @@ func (ta *TruAPI) gameResolver(_ context.Context, q story.Story) game.Game {
 	res := ta.RunQuery("games/id", game.QueryGameByIDParams{ID: q.GameID})
 
 	if res.Code != 0 {
-		fmt.Println("Resolver err: ", res)
+		// TODO [shanev]: see https://github.com/TruStory/truchain/issues/199
+		// fmt.Println("Resolver err: ", res)
 		return game.Game{}
 	}
 
