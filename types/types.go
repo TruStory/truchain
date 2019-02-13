@@ -1,6 +1,7 @@
 package types
 
 import (
+	"fmt"
 	"time"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -51,6 +52,10 @@ type Vote struct {
 	Creator   sdk.AccAddress `json:"creator"`
 	Vote      bool           `json:"vote"`
 	Timestamp Timestamp      `json:"timestamp"`
+}
+
+func (v Vote) String() string {
+	return fmt.Sprintf("Vote<%v %t>", v.Amount, v.Vote)
 }
 
 // NewVote creates a new Vote type with defaults

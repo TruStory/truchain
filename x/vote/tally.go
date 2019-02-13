@@ -42,7 +42,7 @@ func processGame(ctx sdk.Context, k Keeper, game game.Game) sdk.Error {
 		return err
 	}
 
-	logger.Info("Reward pool: ", rewardPool)
+	logger.Info(fmt.Sprintf("Reward pool: %v", rewardPool))
 
 	// distribute rewards
 	err = distributeRewards(
