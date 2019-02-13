@@ -16,11 +16,11 @@ buidl: build
 
 build: build_cli build_daemon
 
-br: build_daemon run_daemon
+br: build_daemon start
 
 bwd: build_daemon wipe_chain debug
 
-bwr: build_daemon wipe_chain run_daemon
+bwr: build_daemon wipe_chain start
 
 build_cli:
 	go build -o bin/trucli cmd/trucli/main.go
@@ -32,11 +32,8 @@ doc:
 	@echo "--> Wait a few seconds and visit http://localhost:6060/pkg/github.com/TruStory/truchain/"
 	godoc -http=:6060
 
-debug:
-	bin/truchaind --home $(CHAIN_DIR) --log_level "app:info,story:info,backing:info,challenge:info,game:info,users:info,vote:info,*:error" start
-
-run_daemon:
-	bin/truchaind --home $(CHAIN_DIR) start
+start:
+	bin/truchaind --home $(CHAIN_DIR) --log_level "main:info,state:info,*:error,app:info,backing:info,challenge:info,game:info,story:info,vote:info" start
 
 wipe_chain:
 	bin/truchaind --home $(CHAIN_DIR) unsafe-reset-all

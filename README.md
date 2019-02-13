@@ -65,7 +65,7 @@ Open the `genesis.json` file and in the "validators" section overwrite the "addr
 
 5. Start blockchain
 
-`make run_daemon` (or `make debug` for debug logging)
+`make start`
 
 You can wipe the chain, build, and start using the alias `make bwr`.
 
