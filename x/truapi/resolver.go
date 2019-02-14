@@ -282,7 +282,8 @@ func (ta *TruAPI) twitterProfileResolver(
 	addr := q.Address
 	twitterProfile, err := ta.DBClient.TwitterProfileByAddress(addr)
 	if err != nil {
-		fmt.Println("Resolver err: ", err)
+		// TODO [shanev]: Add back after adding error handling to resolvers
+		// fmt.Println("Resolver err: ", err)
 		return db.TwitterProfile{}
 	}
 
