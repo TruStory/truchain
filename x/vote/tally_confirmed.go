@@ -60,7 +60,7 @@ func distributeRewardsConfirmed(
 
 	// distribute reward to winners
 	for _, vote := range votes.trueVotes {
-		logger.Info(fmt.Sprintf("Processing vote type: %T", vote))
+		logger.Info(fmt.Sprintf("Processing winning vote type: %T", vote))
 
 		switch v := vote.(type) {
 		case backing.Backing:
@@ -113,7 +113,7 @@ func distributeRewardsConfirmed(
 
 	// slash losers
 	for _, vote := range votes.falseVotes {
-		logger.Info(fmt.Sprintf("Processing vote type: %T", vote))
+		logger.Info(fmt.Sprintf("Processing losing vote type: %T", vote))
 
 		switch v := vote.(type) {
 		// backer who changed their implicit TRUE vote to FALSE
@@ -147,10 +147,11 @@ func distributeRewardsConfirmed(
 
 	logger.Info(fmt.Sprintf("Amount left in pool: %v", pool))
 
-	err = checkForEmptyPoolConfirmed(pool, voterCount)
-	if err != nil {
-		return err
-	}
+	// TODO [shanev]: Remove after https://github.com/TruStory/truchain/issues/374 is fixed
+	// err = checkForEmptyPoolConfirmed(pool, voterCount)
+	// if err != nil {
+	// 	return err
+	// }
 
 	return nil
 }
