@@ -67,7 +67,7 @@ func DefaultParams() Params {
 		ChallengeToBackingRatio: sdk.NewDecWithPrec(100, 2), // 100%
 		MinChallengeThreshold:   sdk.NewInt(10000000000),    // 10 trustake
 		MinChallengeStake:       sdk.NewInt(1),              //  1 preethi
-		Expires:                 1 * 24 * time.Hour,
+		Expires:                 7 * 24 * time.Hour,
 		VotingPeriod:            1 * 24 * time.Hour,
 		VoteQuorum:              3,
 	}
