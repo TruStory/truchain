@@ -229,3 +229,55 @@ func fakeValidationGame() (ctx sdk.Context, votes poll, k Keeper) {
 
 	return
 }
+
+func fakeValidationGame2() (ctx sdk.Context, votes poll, k Keeper) {
+	ctx, k, ck := mockDB()
+
+	storyID := createFakeStory(ctx, k.storyKeeper, ck)
+	amount1 := sdk.NewCoin(params.StakeDenom, sdk.NewInt(100000000000))
+	amount2 := sdk.NewCoin(params.StakeDenom, sdk.NewInt(55000000000))
+	amount3 := sdk.NewCoin(params.StakeDenom, sdk.NewInt(172000000000))
+	amount4 := sdk.NewCoin(params.StakeDenom, sdk.NewInt(83000000000))
+	amount5 := sdk.NewCoin(params.StakeDenom, sdk.NewInt(10000000000))
+	argument := "test argument"
+
+	creator1 := fakeFundedCreator(ctx, k.bankKeeper)
+	creator2 := fakeFundedCreator(ctx, k.bankKeeper)
+	creator3 := fakeFundedCreator(ctx, k.bankKeeper)
+	creator5 := fakeFundedCreator(ctx, k.bankKeeper)
+	creator6 := fakeFundedCreator(ctx, k.bankKeeper)
+	creator10 := fakeFundedCreator(ctx, k.bankKeeper)
+
+	// fake backings
+	duration := 1 * time.Hour
+	b1id, _ := k.backingKeeper.Create(ctx, storyID, amount1, argument, creator1, duration)
+	b2id, _ := k.backingKeeper.Create(ctx, storyID, amount2, argument, creator2, duration)
+	b3id, _ := k.backingKeeper.Create(ctx, storyID, amount1, argument, creator3, duration)
+
+	// fake challenges
+	c1id, _ := k.challengeKeeper.Create(ctx, storyID, amount3, argument, creator5)
+	c2id, _ := k.challengeKeeper.Create(ctx, storyID, amount4, argument, creator6)
+	c3id, _ := k.challengeKeeper.Create(ctx, storyID, amount5, argument, creator10)
+
+	b1, _ := k.backingKeeper.Backing(ctx, b1id)
+	cred := "trudex"
+	b1.Interest = sdk.NewCoin(cred, sdk.NewInt(6670333000))
+	k.backingKeeper.Update(ctx, b1)
+
+	b2, _ := k.backingKeeper.Backing(ctx, b2id)
+	b2.Interest = sdk.NewCoin(cred, sdk.NewInt(3668600732))
+	k.backingKeeper.Update(ctx, b2)
+
+	b3, _ := k.backingKeeper.Backing(ctx, b3id)
+	b3.Interest = sdk.NewCoin(cred, sdk.NewInt(6670333000))
+	k.backingKeeper.Update(ctx, b3)
+
+	c1, _ := k.challengeKeeper.Challenge(ctx, c1id)
+	c2, _ := k.challengeKeeper.Challenge(ctx, c2id)
+	c3, _ := k.challengeKeeper.Challenge(ctx, c3id)
+
+	votes.trueVotes = append(votes.trueVotes, b1, b2, b3)
+	votes.falseVotes = append(votes.falseVotes, c1, c2, c3)
+
+	return
+}
