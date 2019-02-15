@@ -80,6 +80,15 @@ func TestConfirmedStoryRewardPool(t *testing.T) {
 	assert.Equal(t, "5500000000000trusteak", pool.String())
 }
 
+func TestConfirmedStoryRewardPool2(t *testing.T) {
+	ctx, votes, _ := fakeValidationGame2()
+
+	pool := sdk.NewCoin(params.StakeDenom, sdk.ZeroInt())
+
+	confirmedPool(ctx, votes.falseVotes, &pool)
+	assert.Equal(t, "265000000000trusteak", pool.String())
+}
+
 func TestDistributeRewardsConfirmed(t *testing.T) {
 	ctx, votes, k := fakeValidationGame()
 	pool := sdk.NewCoin(params.StakeDenom, sdk.ZeroInt())
@@ -96,27 +105,27 @@ func TestDistributeRewardsConfirmed(t *testing.T) {
 	winningBacker1 := votes.trueVotes[0].(backing.Backing)
 	coins = k.bankKeeper.GetCoins(ctx, winningBacker1.Creator())
 	assert.Equal(t, "2000000000000", coins.AmountOf(params.StakeDenom).String())
-	assert.Equal(t, "500000000000", coins.AmountOf(cred).String())
+	assert.Equal(t, "1416666666666", coins.AmountOf(cred).String())
 
 	winningBacker2 := votes.trueVotes[1].(backing.Backing)
 	coins = k.bankKeeper.GetCoins(ctx, winningBacker2.Creator())
 	assert.Equal(t, "2000000000000", coins.AmountOf(params.StakeDenom).String())
-	assert.Equal(t, "500000000000", coins.AmountOf(cred).String())
+	assert.Equal(t, "1416666666666", coins.AmountOf(cred).String())
 
 	winningBacker3 := votes.trueVotes[2].(backing.Backing)
 	coins = k.bankKeeper.GetCoins(ctx, winningBacker3.Creator())
 	assert.Equal(t, "2000000000000", coins.AmountOf(params.StakeDenom).String())
-	assert.Equal(t, "500000000000", coins.AmountOf(cred).String())
+	assert.Equal(t, "1416666666666", coins.AmountOf(cred).String())
 
 	winningVoter1 := votes.trueVotes[3].(TokenVote)
 	coins = k.bankKeeper.GetCoins(ctx, winningVoter1.Creator())
 	assert.Equal(t, "2000000000000", coins.AmountOf(params.StakeDenom).String())
-	assert.Equal(t, "1833333333333", coins.AmountOf(cred).String())
+	assert.Equal(t, "916666666666", coins.AmountOf(cred).String())
 
 	winningVoter2 := votes.trueVotes[4].(TokenVote)
 	coins = k.bankKeeper.GetCoins(ctx, winningVoter2.Creator())
 	assert.Equal(t, "2000000000000", coins.AmountOf(params.StakeDenom).String())
-	assert.Equal(t, "1833333333333", coins.AmountOf(cred).String())
+	assert.Equal(t, "916666666666", coins.AmountOf(cred).String())
 
 	losingBacker1 := votes.falseVotes[0].(backing.Backing)
 	coins = k.bankKeeper.GetCoins(ctx, losingBacker1.Creator())
@@ -141,6 +150,50 @@ func TestDistributeRewardsConfirmed(t *testing.T) {
 	losingVoter1 := votes.falseVotes[4].(TokenVote)
 	coins = k.bankKeeper.GetCoins(ctx, losingVoter1.Creator())
 	assert.Equal(t, "1000000000000", coins.AmountOf(params.StakeDenom).String())
+	assert.Equal(t, "0", coins.AmountOf(cred).String())
+}
+
+func TestDistributeRewardsConfirmed2(t *testing.T) {
+	ctx, votes, k := fakeValidationGame2()
+	pool := sdk.NewCoin(params.StakeDenom, sdk.ZeroInt())
+	confirmedPool(ctx, votes.falseVotes, &pool)
+
+	cred := "trudex"
+
+	err := distributeRewardsConfirmed(
+		ctx, k.backingKeeper, k.bankKeeper, votes, pool, cred)
+	assert.Nil(t, err)
+
+	coins := sdk.Coins{}
+
+	winningBacker1 := votes.trueVotes[0].(backing.Backing)
+	coins = k.bankKeeper.GetCoins(ctx, winningBacker1.Creator())
+	assert.Equal(t, "2000000000000", coins.AmountOf(params.StakeDenom).String())
+	assert.Equal(t, "95003666333", coins.AmountOf(cred).String())
+
+	winningBacker2 := votes.trueVotes[1].(backing.Backing)
+	coins = k.bankKeeper.GetCoins(ctx, winningBacker2.Creator())
+	assert.Equal(t, "2000000000000", coins.AmountOf(params.StakeDenom).String())
+	assert.Equal(t, "92001934065", coins.AmountOf(cred).String())
+
+	winningBacker3 := votes.trueVotes[2].(backing.Backing)
+	coins = k.bankKeeper.GetCoins(ctx, winningBacker3.Creator())
+	assert.Equal(t, "2000000000000", coins.AmountOf(params.StakeDenom).String())
+	assert.Equal(t, "95003666333", coins.AmountOf(cred).String())
+
+	losingChallenger1 := votes.falseVotes[0].(challenge.Challenge)
+	coins = k.bankKeeper.GetCoins(ctx, losingChallenger1.Creator())
+	assert.Equal(t, "1828000000000", coins.AmountOf(params.StakeDenom).String())
+	assert.Equal(t, "0", coins.AmountOf(cred).String())
+
+	losingChallenger2 := votes.falseVotes[1].(challenge.Challenge)
+	coins = k.bankKeeper.GetCoins(ctx, losingChallenger2.Creator())
+	assert.Equal(t, "1917000000000", coins.AmountOf(params.StakeDenom).String())
+	assert.Equal(t, "0", coins.AmountOf(cred).String())
+
+	losingChallenger3 := votes.falseVotes[2].(challenge.Challenge)
+	coins = k.bankKeeper.GetCoins(ctx, losingChallenger3.Creator())
+	assert.Equal(t, "1990000000000", coins.AmountOf(params.StakeDenom).String())
 	assert.Equal(t, "0", coins.AmountOf(cred).String())
 }
 
