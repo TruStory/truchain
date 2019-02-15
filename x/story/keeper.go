@@ -356,7 +356,7 @@ func (k Keeper) storyIDsByCategoryID(
 	store := k.GetStore(ctx)
 
 	// iterate over subspace, creating a list of stories
-	iter := sdk.KVStorePrefixIterator(store, prefix)
+	iter := sdk.KVStoreReversePrefixIterator(store, prefix)
 	defer iter.Close()
 	for ; iter.Valid(); iter.Next() {
 		var storyID int64
