@@ -14,6 +14,8 @@ import (
 const (
 	// StoreKey is string representation of the store key for stories
 	StoreKey = "stories"
+	// QueueStoreKey is string representation of the store key for backing list
+	QueueStoreKey = "storyQueue"
 )
 
 // ReadKeeper defines a module interface that facilitates read only access
@@ -55,16 +57,23 @@ type WriteKeeper interface {
 type Keeper struct {
 	app.Keeper
 
+	storyQueueKey sdk.StoreKey
+
 	categoryKeeper category.ReadKeeper
 }
 
 // NewKeeper creates a new keeper with write and read access
 func NewKeeper(
 	storeKey sdk.StoreKey,
+	storyQueueKey sdk.StoreKey,
 	categoryKeeper category.ReadKeeper,
 	codec *amino.Codec) Keeper {
 
-	return Keeper{app.NewKeeper(codec, storeKey), categoryKeeper}
+	return Keeper{
+		app.NewKeeper(codec, storeKey),
+		storyQueueKey,
+		categoryKeeper,
+	}
 }
 
 // ============================================================================
@@ -368,3 +377,8 @@ func (k Keeper) storyIDsByCategoryID(
 
 	return storyIDs, nil
 }
+
+// func (k Keeper) storyQueue(ctx sdk.Context) queue.Queue {
+// 	store := ctx.KVStore(k.gameQueueKey)
+// 	return queue.NewQueue(k.GetCodec(), store)
+// }
