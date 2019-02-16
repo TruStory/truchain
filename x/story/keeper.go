@@ -7,6 +7,7 @@ import (
 
 	app "github.com/TruStory/truchain/types"
 	"github.com/TruStory/truchain/x/category"
+	queue "github.com/cosmos/cosmos-sdk/store"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	amino "github.com/tendermint/go-amino"
 )
@@ -51,6 +52,7 @@ type WriteKeeper interface {
 	EndGame(ctx sdk.Context, storyID int64, confirmed bool) sdk.Error
 	ExpireGame(ctx sdk.Context, storyID int64) sdk.Error
 	UpdateStory(ctx sdk.Context, story Story)
+	NewResponseEndBlock(ctx sdk.Context) sdk.Tags
 }
 
 // Keeper data type storing keys to the key-value store
@@ -378,7 +380,7 @@ func (k Keeper) storyIDsByCategoryID(
 	return storyIDs, nil
 }
 
-// func (k Keeper) storyQueue(ctx sdk.Context) queue.Queue {
-// 	store := ctx.KVStore(k.gameQueueKey)
-// 	return queue.NewQueue(k.GetCodec(), store)
-// }
+func (k Keeper) storyQueue(ctx sdk.Context) queue.Queue {
+	store := ctx.KVStore(k.storyQueueKey)
+	return queue.NewQueue(k.GetCodec(), store)
+}
