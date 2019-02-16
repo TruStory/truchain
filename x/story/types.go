@@ -1,6 +1,7 @@
 package story
 
 import (
+	"fmt"
 	"net/url"
 	"time"
 
@@ -71,6 +72,11 @@ type Story struct {
 	State      State          `json:"state"`
 	Type       Type           `json:"type"`
 	Timestamp  app.Timestamp  `json:"timestamp"`
+}
+
+func (s Story) String() string {
+	return fmt.Sprintf(
+		"Story <%d %s %s %d>", s.ID, s.Body, s.ExpireTime, s.GameID)
 }
 
 // Params holds parameters for a story
