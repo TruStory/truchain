@@ -4,7 +4,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/auth"
 	"github.com/cosmos/cosmos-sdk/x/bank"
 
-	"github.com/TruStory/truchain/types"
+	"github.com/TruStory/truchain/x/category"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	abci "github.com/tendermint/tendermint/abci/types"
 )
@@ -17,7 +17,7 @@ import (
 func (app *TruChain) initChainer(ctx sdk.Context, req abci.RequestInitChain) abci.ResponseInitChain {
 	stateJSON := req.AppStateBytes
 
-	genesisState := new(types.GenesisState)
+	genesisState := new(GenesisState)
 	err := app.codec.UnmarshalJSON(stateJSON, genesisState)
 
 	if err != nil {
@@ -38,15 +38,15 @@ func (app *TruChain) initChainer(ctx sdk.Context, req abci.RequestInitChain) abc
 
 	auth.InitGenesis(ctx, app.accountKeeper, app.feeCollectionKeeper, genesisState.AuthData)
 	bank.InitGenesis(ctx, app.coinKeeper, genesisState.BankData)
-
-	// get genesis account address
-	genesisAddr := genesisState.Accounts[0].Address
-
-	// persist initial categories on chain
-	err = app.categoryKeeper.InitCategories(ctx, genesisAddr, app.categories)
-	if err != nil {
-		panic(err)
-	}
+	category.InitGenesis(ctx, app.categoryKeeper, genesisState.Categories)
 
 	return abci.ResponseInitChain{}
+}
+
+// GenesisState reflects the genesis state of the application.
+type GenesisState struct {
+	AuthData   auth.GenesisState   `json:"auth"`
+	BankData   bank.GenesisState   `json:"bank"`
+	Accounts   []*auth.BaseAccount `json:"accounts"`
+	Categories []category.Category `json:"categories"`
 }

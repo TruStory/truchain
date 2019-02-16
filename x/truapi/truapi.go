@@ -102,7 +102,9 @@ func (ta *TruAPI) RegisterResolvers() {
 	ta.GraphQLClient.RegisterObjectResolver("Category", category.Category{}, map[string]interface{}{
 		"id":      func(_ context.Context, q category.Category) int64 { return q.ID },
 		"stories": ta.categoryStoriesResolver,
-		"creator": func(ctx context.Context, q category.Category) users.User { return getUser(ctx, q.Creator) },
+
+		// Deprecated: categories no longer have a creator
+		"creator": func(ctx context.Context, q category.Category) users.User { return getUser(ctx, sdk.AccAddress{}) },
 	})
 
 	ta.GraphQLClient.RegisterQueryResolver("challenge", ta.challengeResolver)

@@ -2,17 +2,15 @@ package category
 
 import (
 	app "github.com/TruStory/truchain/types"
-	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
 // Category is a type that defines the category for a story
 type Category struct {
-	ID          int64          `json:"id"`
-	Creator     sdk.AccAddress `json:"creator"`
-	Title       string         `json:"name"`
-	Slug        string         `json:"slug"`
-	Description string         `json:"description,omitempty"`
-	Timestamp   app.Timestamp  `json:"timestamp"`
+	ID          int64         `json:"id"`
+	Title       string        `json:"name"`
+	Slug        string        `json:"slug"`
+	Description string        `json:"description,omitempty"`
+	Timestamp   app.Timestamp `json:"timestamp"`
 }
 
 // Denom returns the name of the coin, alias for slug
