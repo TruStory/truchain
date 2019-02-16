@@ -2,6 +2,7 @@ package story
 
 import (
 	"net/url"
+	"time"
 
 	app "github.com/TruStory/truchain/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -63,12 +64,25 @@ type Story struct {
 	Body       string         `json:"body"`
 	CategoryID int64          `json:"category_id"`
 	Creator    sdk.AccAddress `json:"creator"`
+	ExpireTime time.Time      `json:"expire_time"`
 	Flagged    bool           `json:"flagged,omitempty"`
 	GameID     int64          `json:"game_id,omitempty"`
 	Source     url.URL        `json:"source,omitempty"`
 	State      State          `json:"state"`
 	Type       Type           `json:"type"`
 	Timestamp  app.Timestamp  `json:"timestamp"`
+}
+
+// Params holds parameters for a story
+type Params struct {
+	ExpireDuration time.Duration
+}
+
+// DefaultParams is the default parameters for voting
+func DefaultParams() Params {
+	return Params{
+		ExpireDuration: 1 * 24 * time.Hour,
+	}
 }
 
 // MsgParams holds default parameters for a story
