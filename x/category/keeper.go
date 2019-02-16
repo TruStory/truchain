@@ -1,8 +1,6 @@
 package category
 
 import (
-	"sort"
-
 	app "github.com/TruStory/truchain/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	amino "github.com/tendermint/go-amino"
@@ -25,10 +23,7 @@ type ReadKeeper interface {
 type WriteKeeper interface {
 	ReadKeeper
 
-	InitCategories(
-		ctx sdk.Context, creator sdk.AccAddress, categories map[string]string) (err sdk.Error)
-
-	NewCategory(ctx sdk.Context, title string, creator sdk.AccAddress, slug string, description string) (int64, sdk.Error)
+	NewCategory(ctx sdk.Context, title string, slug string, description string) int64
 }
 
 // Keeper data type storing keys to the key-value store
@@ -42,39 +37,37 @@ func NewKeeper(storeKey sdk.StoreKey, codec *amino.Codec) Keeper {
 }
 
 // InitCategories creates the initial set of categories
-func (k Keeper) InitCategories(
-	ctx sdk.Context, creator sdk.AccAddress, categories map[string]string) (err sdk.Error) {
+// func (k Keeper) InitCategories(
+// 	ctx sdk.Context, creator sdk.AccAddress, categories map[string]string) (err sdk.Error) {
 
-	// sort keys to make category creation deterministic
-	var keys []string
-	for key := range categories {
-		keys = append(keys, key)
-	}
-	sort.Strings(keys)
+// 	// sort keys to make category creation deterministic
+// 	var keys []string
+// 	for key := range categories {
+// 		keys = append(keys, key)
+// 	}
+// 	sort.Strings(keys)
 
-	for _, key := range keys {
-		title := categories[key]
-		slug := key
-		_, err = k.NewCategory(ctx, title, creator, slug, "")
-		if err != nil {
-			return err
-		}
-	}
+// 	for _, key := range keys {
+// 		title := categories[key]
+// 		slug := key
+// 		_, err = k.NewCategory(ctx, title, creator, slug, "")
+// 		if err != nil {
+// 			return err
+// 		}
+// 	}
 
-	return
-}
+// 	return
+// }
 
 // NewCategory adds a story to the key-value store
 func (k Keeper) NewCategory(
 	ctx sdk.Context,
 	title string,
-	creator sdk.AccAddress,
 	slug string,
-	description string) (int64, sdk.Error) {
+	description string) int64 {
 
 	cat := Category{
 		k.GetNextID(ctx),
-		creator,
 		title,
 		slug,
 		description,
@@ -83,7 +76,7 @@ func (k Keeper) NewCategory(
 
 	k.setCategory(ctx, cat)
 
-	return cat.ID, nil
+	return cat.ID
 }
 
 // GetCategory gets the category with the given id from the key-value store

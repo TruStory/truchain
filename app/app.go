@@ -393,7 +393,7 @@ func (app *TruChain) ExportAppStateAndValidators() (appState json.RawMessage, va
 
 	app.accountKeeper.IterateAccounts(ctx, appendAccountsFn)
 
-	genState := types.GenesisState{
+	genState := GenesisState{
 		Accounts: accounts,
 		AuthData: auth.DefaultGenesisState(),
 		BankData: bank.DefaultGenesisState(),

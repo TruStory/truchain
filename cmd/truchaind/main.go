@@ -12,7 +12,6 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/bank"
 
 	"github.com/TruStory/truchain/app"
-	"github.com/TruStory/truchain/types"
 	"github.com/cosmos/cosmos-sdk/client"
 
 	"github.com/cosmos/cosmos-sdk/server"
@@ -91,7 +90,7 @@ func InitCmd(ctx *server.Context, cdc *codec.Codec) *cobra.Command {
 				return fmt.Errorf("genesis.json file already exists: %v", genFile)
 			}
 
-			genesis := types.GenesisState{
+			genesis := app.GenesisState{
 				AuthData: auth.DefaultGenesisState(),
 				BankData: bank.DefaultGenesisState(),
 			}
