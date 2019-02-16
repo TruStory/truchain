@@ -64,6 +64,7 @@ type TruChain struct {
 	keyIBC             *sdk.KVStoreKey
 	keyMain            *sdk.KVStoreKey
 	keyStory           *sdk.KVStoreKey
+	keyStoryQueue      *sdk.KVStoreKey
 	keyVote            *sdk.KVStoreKey
 	keyParams          *sdk.KVStoreKey
 	tkeyParams         *sdk.TransientStoreKey
@@ -113,16 +114,17 @@ func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *T
 		keyMain:            sdk.NewKVStoreKey("main"),
 		keyAccount:         sdk.NewKVStoreKey("acc"),
 		keyIBC:             sdk.NewKVStoreKey("ibc"),
-		keyStory:           sdk.NewKVStoreKey("stories"),
-		keyCategory:        sdk.NewKVStoreKey("categories"),
-		keyBacking:         sdk.NewKVStoreKey("backings"),
-		keyBackingList:     sdk.NewKVStoreKey("backingList"),
-		keyChallenge:       sdk.NewKVStoreKey("challenges"),
+		keyStory:           sdk.NewKVStoreKey(story.StoreKey),
+		keyStoryQueue:      sdk.NewKVStoreKey(story.QueueStoreKey),
+		keyCategory:        sdk.NewKVStoreKey(category.StoreKey),
+		keyBacking:         sdk.NewKVStoreKey(backing.StoreKey),
+		keyBackingList:     sdk.NewKVStoreKey(backing.ListStoreKey),
+		keyChallenge:       sdk.NewKVStoreKey(challenge.StoreKey),
 		keyFee:             sdk.NewKVStoreKey("fee_collection"),
-		keyGame:            sdk.NewKVStoreKey("game"),
-		keyPendingGameList: sdk.NewKVStoreKey("pendingGameList"),
-		keyGameQueue:       sdk.NewKVStoreKey("gameQueue"),
-		keyVote:            sdk.NewKVStoreKey("vote"),
+		keyGame:            sdk.NewKVStoreKey(game.StoreKey),
+		keyPendingGameList: sdk.NewKVStoreKey(game.PendingListStoreKey),
+		keyGameQueue:       sdk.NewKVStoreKey(game.QueueStoreKey),
+		keyVote:            sdk.NewKVStoreKey(vote.StoreKey),
 		api:                nil,
 		apiStarted:         false,
 		blockCtx:           nil,
@@ -157,6 +159,7 @@ func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *T
 	)
 	app.storyKeeper = story.NewKeeper(
 		app.keyStory,
+		app.keyStoryQueue,
 		app.categoryKeeper,
 		app.codec,
 	)
@@ -233,18 +236,6 @@ func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *T
 	app.SetBeginBlocker(app.BeginBlocker)
 	app.SetEndBlocker(app.EndBlocker)
 
-	//
-	// TODO:
-	// SetMininumFees is now unpexpored
-	// instead minimum gas price is loaded from config/gaid.tom
-	// also there is a refactor in place where
-	// SetMinGasPrices is a new exported function for this purpose (not yet released)
-	// See https://github.com/cosmos/cosmos-sdk/pull/3258
-	//
-	// if params.Features[params.FeeFlag] {
-	// 	app.SetMinGasPrices(params.Fee)
-	// }
-
 	// mount the multistore and load the latest state
 	app.MountStores(
 		app.keyAccount,
@@ -260,6 +251,7 @@ func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *T
 		app.keyIBC,
 		app.keyMain,
 		app.keyStory,
+		app.keyStoryQueue,
 		app.keyVote)
 
 	app.MountStoresTransient(app.tkeyParams)

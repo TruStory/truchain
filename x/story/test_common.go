@@ -18,11 +18,13 @@ func mockDB() (sdk.Context, Keeper, c.Keeper) {
 	db := dbm.NewMemDB()
 
 	storyKey := sdk.NewKVStoreKey("stories")
+	storyQueueKey := sdk.NewKVStoreKey("storyQueue")
 	catKey := sdk.NewKVStoreKey("categories")
 	challengeKey := sdk.NewKVStoreKey("challenges")
 
 	ms := store.NewCommitMultiStore(db)
 	ms.MountStoreWithDB(storyKey, sdk.StoreTypeIAVL, db)
+	ms.MountStoreWithDB(storyQueueKey, sdk.StoreTypeIAVL, db)
 	ms.MountStoreWithDB(catKey, sdk.StoreTypeIAVL, db)
 	ms.MountStoreWithDB(challengeKey, sdk.StoreTypeIAVL, db)
 	ms.LoadLatestVersion()
@@ -34,7 +36,7 @@ func mockDB() (sdk.Context, Keeper, c.Keeper) {
 	RegisterAmino(codec)
 
 	ck := c.NewKeeper(catKey, codec)
-	sk := NewKeeper(storyKey, ck, codec)
+	sk := NewKeeper(storyKey, storyQueueKey, ck, codec)
 
 	return ctx, sk, ck
 }
