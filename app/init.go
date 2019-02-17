@@ -15,6 +15,7 @@ type GenesisState struct {
 	BankData   bank.GenesisState   `json:"bank"`
 	Accounts   []*auth.BaseAccount `json:"accounts"`
 	Categories []category.Category `json:"categories"`
+	// StoryData story
 }
 
 // initChainer implements the custom application logic that the BaseApp will

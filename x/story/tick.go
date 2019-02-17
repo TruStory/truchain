@@ -30,11 +30,6 @@ func (k Keeper) processStoryQueue(ctx sdk.Context, storyQueue queue.Queue) sdk.E
 		panic(err)
 	}
 
-	// game, err := k.gameKeeper.Game(ctx, gameID)
-	// if err != nil {
-	// 	return err
-	// }
-
 	story, err := k.Story(ctx, storyID)
 	if err != nil {
 		return err
@@ -42,10 +37,9 @@ func (k Keeper) processStoryQueue(ctx sdk.Context, storyQueue queue.Queue) sdk.E
 
 	logger.Info("Processing " + story.String())
 
-	// blockTime := ctx.BlockHeader().Time
+	if ctx.BlockHeader().Time.After(story.ExpireTime) {
 
-	// // handle expired voting periods
-	// if game.IsVotingExpired(blockTime, quorum) {
+	}
 
 	// 	logger.Info(
 	// 		fmt.Sprintf(

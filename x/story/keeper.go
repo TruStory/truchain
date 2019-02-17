@@ -171,7 +171,9 @@ func (k Keeper) Create(
 	k.appendStoriesList(
 		ctx, storyIDsByCategoryKey(k, categoryID, story.Timestamp, false), story)
 
-	logger.Info(fmt.Sprintf("Created story %d: %s", story.ID, body))
+	k.storyQueue(ctx).Push(story.ID)
+
+	logger.Info("Created ", story.String())
 
 	return story.ID, nil
 }
