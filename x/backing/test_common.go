@@ -98,7 +98,7 @@ func createFakeStory(ctx sdk.Context, sk story.Keeper, ck category.WriteKeeper) 
 }
 
 func createFakeCategory(ctx sdk.Context, ck category.WriteKeeper) category.Category {
-	id := ck.NewCategory(ctx, "decentralized exchanges", "trudex", "category for experts in decentralized exchanges")
+	id := ck.Create(ctx, "decentralized exchanges", "trudex", "category for experts in decentralized exchanges")
 	cat, _ := ck.GetCategory(ctx, id)
 	return cat
 }
