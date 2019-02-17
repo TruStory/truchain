@@ -78,7 +78,7 @@ func TestSubmitStoryMsgWithOnlyRequiredFields(t *testing.T) {
 	creator := sdk.AccAddress([]byte{1, 2})
 	kind := Default
 	source := "http://trustory.io"
-	argument := ""
+	argument := "argument has a min length"
 
 	msg := NewSubmitStoryMsg(argument, body, cat.ID, creator, source, kind)
 	assert.NotNil(t, msg)

@@ -53,7 +53,7 @@ func TestGetBacking(t *testing.T) {
 	ctx, bk, sk, ck, bankKeeper, _ := mockDB()
 	storyID := createFakeStory(ctx, sk, ck)
 	amount := sdk.NewCoin(params.StakeDenom, sdk.NewInt(5000000))
-	argument := "cool story brew"
+	argument := "cool story brew.."
 	creator := sdk.AccAddress([]byte{1, 2})
 	duration := DefaultMsgParams().MinPeriod
 	bankKeeper.AddCoins(ctx, creator, sdk.Coins{amount})

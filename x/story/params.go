@@ -1,6 +1,7 @@
 package story
 
 import (
+	"fmt"
 	"time"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -14,9 +15,9 @@ const DefaultParamspace = "story"
 var (
 	KeyExpireDuration    = []byte("expireDuration")
 	KeyMinStoryLength    = []byte("minStoryLength")
-	keyMaxStoryLength    = []byte("maxStoryLength")
-	keyMinArgumentLength = []byte("minArgumentLength")
-	keyMaxArgumentLength = []byte("maxArugmentLength")
+	KeyMaxStoryLength    = []byte("maxStoryLength")
+	KeyMinArgumentLength = []byte("minArgumentLength")
+	KeyMaxArgumentLength = []byte("maxArugmentLength")
 )
 
 // Params holds parameters for a story
@@ -31,7 +32,11 @@ type Params struct {
 // DefaultParams is the story params for testing
 func DefaultParams() Params {
 	return Params{
-		ExpireDuration: 1 * 24 * time.Hour,
+		ExpireDuration:    1 * 24 * time.Hour,
+		MinStoryLength:    25,
+		MaxStoryLength:    350,
+		MinArgumentLength: 10,
+		MaxArgumentLength: 3000,
 	}
 }
 
@@ -40,9 +45,9 @@ func (p *Params) KeyValuePairs() params.KeyValuePairs {
 	return params.KeyValuePairs{
 		{KeyExpireDuration, &p.ExpireDuration},
 		{KeyMinStoryLength, &p.MinStoryLength},
-		{keyMaxStoryLength, &p.MaxStoryLength},
-		{keyMinArgumentLength, &p.MinArgumentLength},
-		{keyMaxArgumentLength, &p.MaxArgumentLength},
+		{KeyMaxStoryLength, &p.MaxStoryLength},
+		{KeyMinArgumentLength, &p.MinArgumentLength},
+		{KeyMaxArgumentLength, &p.MaxArgumentLength},
 	}
 }
 
@@ -59,5 +64,9 @@ func (k Keeper) ExpireDuration(ctx sdk.Context) (res time.Duration) {
 
 // SetParams sets the params for the story
 func (k Keeper) SetParams(ctx sdk.Context, params Params) {
+	logger := ctx.Logger().With("module", "story")
+
 	k.paramStore.SetParamSet(ctx, &params)
+
+	logger.Info(fmt.Sprintf("Loaded story params: %+v", params))
 }

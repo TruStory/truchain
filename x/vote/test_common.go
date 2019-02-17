@@ -106,7 +106,7 @@ func mockDB() (sdk.Context, Keeper, c.Keeper) {
 }
 
 func createFakeStory(ctx sdk.Context, sk story.WriteKeeper, ck c.WriteKeeper) int64 {
-	body := "Body of story."
+	body := "TruStory validators can be bootstrapped with a single genesis file."
 	cat := createFakeCategory(ctx, ck)
 	creator := sdk.AccAddress([]byte{1, 2})
 	storyType := story.Default

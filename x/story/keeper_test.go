@@ -33,7 +33,7 @@ func TestAddGetStory(t *testing.T) {
 	assert.Equal(t, story.ID, savedStory.ID, "Story received from store does not match expected value")
 
 	// test incrementing id by adding another story
-	body := "Body of story 2."
+	body := "Body of story 2. I must be long enough."
 	creator := sdk.AccAddress([]byte{3, 4})
 	kind := Default
 	source := url.URL{}
