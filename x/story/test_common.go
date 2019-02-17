@@ -7,6 +7,7 @@ import (
 	c "github.com/TruStory/truchain/x/category"
 	"github.com/cosmos/cosmos-sdk/store"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/cosmos/cosmos-sdk/x/params"
 	amino "github.com/tendermint/go-amino"
 	abci "github.com/tendermint/tendermint/abci/types"
 	cryptoAmino "github.com/tendermint/tendermint/crypto/encoding/amino"
@@ -21,12 +22,16 @@ func mockDB() (sdk.Context, Keeper, c.Keeper) {
 	storyQueueKey := sdk.NewKVStoreKey("storyQueue")
 	catKey := sdk.NewKVStoreKey("categories")
 	challengeKey := sdk.NewKVStoreKey("challenges")
+	paramsKey := sdk.NewKVStoreKey(params.StoreKey)
+	transientParamsKey := sdk.NewTransientStoreKey(params.TStoreKey)
 
 	ms := store.NewCommitMultiStore(db)
 	ms.MountStoreWithDB(storyKey, sdk.StoreTypeIAVL, db)
 	ms.MountStoreWithDB(storyQueueKey, sdk.StoreTypeIAVL, db)
 	ms.MountStoreWithDB(catKey, sdk.StoreTypeIAVL, db)
 	ms.MountStoreWithDB(challengeKey, sdk.StoreTypeIAVL, db)
+	ms.MountStoreWithDB(paramsKey, sdk.StoreTypeIAVL, db)
+	ms.MountStoreWithDB(transientParamsKey, sdk.StoreTypeTransient, db)
 	ms.LoadLatestVersion()
 
 	ctx := sdk.NewContext(ms, abci.Header{}, false, log.NewNopLogger())
@@ -36,7 +41,9 @@ func mockDB() (sdk.Context, Keeper, c.Keeper) {
 	RegisterAmino(codec)
 
 	ck := c.NewKeeper(catKey, codec)
-	sk := NewKeeper(storyKey, storyQueueKey, ck, codec)
+	pk := params.NewKeeper(codec, paramsKey, transientParamsKey)
+	sk := NewKeeper(storyKey, storyQueueKey, ck, pk.Subspace(DefaultParamspace), codec)
+	InitGenesis(ctx, sk, DefaultGenesisState())
 
 	return ctx, sk, ck
 }

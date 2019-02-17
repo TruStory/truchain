@@ -1,14 +1,22 @@
 package story
 
-import "time"
-import sdk "github.com/cosmos/cosmos-sdk/types"
+import (
+	sdk "github.com/cosmos/cosmos-sdk/types"
+)
 
 // GenesisState - all story state that must be provided at genesis
 type GenesisState struct {
-	ExpireDuration time.Duration `json:"expire_duration"`
+	Params Params `json:"params"`
 }
 
 // InitGenesis initializes story state from genesis file
-func InitGenesis(ctx sdk.Context, storyKeeper WriteKeeper) {
+func InitGenesis(ctx sdk.Context, storyKeeper WriteKeeper, data GenesisState) {
+	storyKeeper.SetParams(ctx, data.Params)
+}
 
+// DefaultGenesisState for tests
+func DefaultGenesisState() GenesisState {
+	return GenesisState{
+		Params: DefaultParams(),
+	}
 }

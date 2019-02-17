@@ -71,7 +71,10 @@ func mockDB() (
 		pk.Subspace(bank.DefaultParamspace),
 		bank.DefaultCodespace,
 	)
-	sk := story.NewKeeper(storyKey, storyQueueKey, ck, codec)
+
+	sk := story.NewKeeper(storyKey, storyQueueKey, ck, pk.Subspace(story.DefaultParamspace), codec)
+	story.InitGenesis(ctx, sk, story.DefaultGenesisState())
+
 	bk := NewKeeper(
 		backingKey,
 		backingListKey,

@@ -7,10 +7,10 @@ import (
 
 // NewResponseEndBlock is called at the end of every block tick
 func (k Keeper) NewResponseEndBlock(ctx sdk.Context) sdk.Tags {
-	err := k.processStoryQueue(ctx, k.storyQueue(ctx))
-	if err != nil {
-		panic(err)
-	}
+	// err := k.processStoryQueue(ctx, k.storyQueue(ctx))
+	// if err != nil {
+	// 	panic(err)
+	// }
 
 	return sdk.EmptyTags()
 }

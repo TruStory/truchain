@@ -161,6 +161,7 @@ func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *T
 		app.keyStory,
 		app.keyStoryQueue,
 		app.categoryKeeper,
+		app.paramsKeeper.Subspace(story.DefaultParamspace),
 		app.codec,
 	)
 	app.backingKeeper = backing.NewKeeper(

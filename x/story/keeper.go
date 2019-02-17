@@ -4,11 +4,13 @@ import (
 	"fmt"
 	"net/url"
 	"sort"
+	"time"
 
 	app "github.com/TruStory/truchain/types"
 	"github.com/TruStory/truchain/x/category"
 	queue "github.com/cosmos/cosmos-sdk/store"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/cosmos/cosmos-sdk/x/params"
 	amino "github.com/tendermint/go-amino"
 )
 
@@ -34,6 +36,7 @@ type ReadKeeper interface {
 	Stories(ctx sdk.Context) (stories []Story)
 	StoriesByCategoryID(ctx sdk.Context, catID int64) (stories []Story, err sdk.Error)
 	Story(ctx sdk.Context, storyID int64) (Story, sdk.Error)
+	ExpireDuration(ctx sdk.Context) (res time.Duration)
 }
 
 // WriteKeeper defines a module interface that facilities read/write access
@@ -53,15 +56,16 @@ type WriteKeeper interface {
 	ExpireGame(ctx sdk.Context, storyID int64) sdk.Error
 	UpdateStory(ctx sdk.Context, story Story)
 	NewResponseEndBlock(ctx sdk.Context) sdk.Tags
+	SetParams(ctx sdk.Context, params Params)
 }
 
 // Keeper data type storing keys to the key-value store
 type Keeper struct {
 	app.Keeper
 
-	storyQueueKey sdk.StoreKey
-
+	storyQueueKey  sdk.StoreKey
 	categoryKeeper category.ReadKeeper
+	paramStore     params.Subspace
 }
 
 // NewKeeper creates a new keeper with write and read access
@@ -69,12 +73,14 @@ func NewKeeper(
 	storeKey sdk.StoreKey,
 	storyQueueKey sdk.StoreKey,
 	categoryKeeper category.ReadKeeper,
+	paramStore params.Subspace,
 	codec *amino.Codec) Keeper {
 
 	return Keeper{
 		app.NewKeeper(codec, storeKey),
 		storyQueueKey,
 		categoryKeeper,
+		paramStore.WithTypeTable(ParamTypeTable()),
 	}
 }
 
@@ -158,7 +164,7 @@ func (k Keeper) Create(
 		Body:       body,
 		CategoryID: categoryID,
 		Creator:    creator,
-		ExpireTime: ctx.BlockHeader().Time.Add(DefaultParams().ExpireDuration),
+		ExpireTime: ctx.BlockHeader().Time.Add(k.ExpireDuration(ctx)),
 		Flagged:    false,
 		GameID:     0,
 		Source:     source,
@@ -173,7 +179,7 @@ func (k Keeper) Create(
 
 	k.storyQueue(ctx).Push(story.ID)
 
-	logger.Info("Created ", story.String())
+	logger.Info("Created " + story.String())
 
 	return story.ID, nil
 }
