@@ -79,18 +79,6 @@ func (s Story) String() string {
 		"Story <%d %s %s %d>", s.ID, s.Body, s.ExpireTime, s.GameID)
 }
 
-// Params holds parameters for a story
-type Params struct {
-	ExpireDuration time.Duration
-}
-
-// DefaultParams is the default parameters for voting
-func DefaultParams() Params {
-	return Params{
-		ExpireDuration: 1 * 24 * time.Hour,
-	}
-}
-
 // MsgParams holds default parameters for a story
 type MsgParams struct {
 	MinStoryLength    int // min number of chars for story body

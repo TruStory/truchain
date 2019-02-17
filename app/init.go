@@ -1,6 +1,7 @@
 package app
 
 import (
+	"github.com/TruStory/truchain/x/story"
 	"github.com/cosmos/cosmos-sdk/x/auth"
 	"github.com/cosmos/cosmos-sdk/x/bank"
 
@@ -15,7 +16,7 @@ type GenesisState struct {
 	BankData   bank.GenesisState   `json:"bank"`
 	Accounts   []*auth.BaseAccount `json:"accounts"`
 	Categories []category.Category `json:"categories"`
-	// StoryData story
+	StoryData  story.GenesisState  `json:"story"`
 }
 
 // initChainer implements the custom application logic that the BaseApp will
@@ -48,6 +49,7 @@ func (app *TruChain) initChainer(ctx sdk.Context, req abci.RequestInitChain) abc
 	auth.InitGenesis(ctx, app.accountKeeper, app.feeCollectionKeeper, genesisState.AuthData)
 	bank.InitGenesis(ctx, app.coinKeeper, genesisState.BankData)
 	category.InitGenesis(ctx, app.categoryKeeper, genesisState.Categories)
+	story.InitGenesis(ctx, app.storyKeeper, genesisState.StoryData)
 
 	return abci.ResponseInitChain{}
 }
