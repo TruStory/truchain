@@ -9,14 +9,14 @@ type GenesisState struct {
 	Params Params `json:"params"`
 }
 
-// InitGenesis initializes story state from genesis file
-func InitGenesis(ctx sdk.Context, storyKeeper WriteKeeper, data GenesisState) {
-	storyKeeper.SetParams(ctx, data.Params)
-}
-
 // DefaultGenesisState for tests
 func DefaultGenesisState() GenesisState {
 	return GenesisState{
 		Params: DefaultParams(),
 	}
+}
+
+// InitGenesis initializes story state from genesis file
+func InitGenesis(ctx sdk.Context, storyKeeper WriteKeeper, data GenesisState) {
+	storyKeeper.SetParams(ctx, data.Params)
 }
