@@ -83,9 +83,6 @@ type TruChain struct {
 	gameKeeper      game.WriteKeeper
 	voteKeeper      vote.WriteKeeper
 
-	// list of initial categories
-	categories map[string]string
-
 	// state to run api
 	blockCtx     *sdk.Context
 	blockHeader  abci.Header
@@ -105,22 +102,10 @@ func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *T
 
 	loadEnvVars()
 
-	// map of initial categories (slug -> title)
-	categories := map[string]string{
-		"bugs":   "Bugs",
-		"crypto": "Cryptocurrency",
-		"eli5":   "ELI5",
-		"health": "Health",
-		"news":   "News",
-		"random": "Random",
-	}
-
 	// create your application type
 	var app = &TruChain{
 		BaseApp: bam.NewBaseApp(params.AppName, logger, db, auth.DefaultTxDecoder(codec), options...),
 		codec:   codec,
-
-		categories: categories,
 
 		keyParams:  sdk.NewKVStoreKey("params"),
 		tkeyParams: sdk.NewTransientStoreKey("transient_params"),

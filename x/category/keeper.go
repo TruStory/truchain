@@ -3,7 +3,6 @@ package category
 import (
 	app "github.com/TruStory/truchain/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/davecgh/go-spew/spew"
 	amino "github.com/tendermint/go-amino"
 )
 
@@ -37,35 +36,14 @@ func NewKeeper(storeKey sdk.StoreKey, codec *amino.Codec) Keeper {
 	return Keeper{app.NewKeeper(codec, storeKey)}
 }
 
-// InitCategories creates the initial set of categories
-// func (k Keeper) InitCategories(
-// 	ctx sdk.Context, creator sdk.AccAddress, categories map[string]string) (err sdk.Error) {
-
-// 	// sort keys to make category creation deterministic
-// 	var keys []string
-// 	for key := range categories {
-// 		keys = append(keys, key)
-// 	}
-// 	sort.Strings(keys)
-
-// 	for _, key := range keys {
-// 		title := categories[key]
-// 		slug := key
-// 		_, err = k.NewCategory(ctx, title, creator, slug, "")
-// 		if err != nil {
-// 			return err
-// 		}
-// 	}
-
-// 	return
-// }
-
 // Create adds a story to the key-value store
 func (k Keeper) Create(
 	ctx sdk.Context,
 	title string,
 	slug string,
 	description string) int64 {
+
+	logger := ctx.Logger().With("module", "category")
 
 	cat := Category{
 		k.GetNextID(ctx),
@@ -75,9 +53,9 @@ func (k Keeper) Create(
 		app.NewTimestamp(ctx.BlockHeader()),
 	}
 
-	spew.Dump(cat)
-
 	k.setCategory(ctx, cat)
+
+	logger.Info("Created " + cat.String())
 
 	return cat.ID
 }

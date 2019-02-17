@@ -9,6 +9,14 @@ import (
 	abci "github.com/tendermint/tendermint/abci/types"
 )
 
+// GenesisState reflects the genesis state of the application.
+type GenesisState struct {
+	AuthData   auth.GenesisState   `json:"auth"`
+	BankData   bank.GenesisState   `json:"bank"`
+	Accounts   []*auth.BaseAccount `json:"accounts"`
+	Categories []category.Category `json:"categories"`
+}
+
 // initChainer implements the custom application logic that the BaseApp will
 // invoke upon initialization. In this case, it will take the application's
 // state provided by 'req' and attempt to deserialize said state. The state
@@ -41,12 +49,4 @@ func (app *TruChain) initChainer(ctx sdk.Context, req abci.RequestInitChain) abc
 	category.InitGenesis(ctx, app.categoryKeeper, genesisState.Categories)
 
 	return abci.ResponseInitChain{}
-}
-
-// GenesisState reflects the genesis state of the application.
-type GenesisState struct {
-	AuthData   auth.GenesisState   `json:"auth"`
-	BankData   bank.GenesisState   `json:"bank"`
-	Accounts   []*auth.BaseAccount `json:"accounts"`
-	Categories []category.Category `json:"categories"`
 }

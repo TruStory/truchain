@@ -33,7 +33,7 @@ doc:
 	godoc -http=:6060
 
 start:
-	bin/truchaind --home $(CHAIN_DIR) --log_level "main:info,state:info,*:error,app:info,backing:info,challenge:info,game:info,story:info,vote:info" start
+	bin/truchaind --home $(CHAIN_DIR) --log_level "main:info,state:info,*:error,app:info,backing:info,category:info,challenge:info,game:info,story:info,vote:info" start
 
 wipe_chain:
 	bin/truchaind --home $(CHAIN_DIR) unsafe-reset-all

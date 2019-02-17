@@ -168,8 +168,13 @@ func (app *TruChain) signedRegistrationTx(addr []byte, k tcmn.HexBytes, algo str
 
 func (app *TruChain) initialCoins() sdk.Coins {
 	coins := sdk.Coins{}
-	for k := range app.categories {
-		coin := sdk.NewCoin(k, params.InitialCredAmount)
+	categories, err := app.categoryKeeper.GetAllCategories(*(app.blockCtx))
+	if err != nil {
+		panic(err)
+	}
+
+	for _, cat := range categories {
+		coin := sdk.NewCoin(cat.Denom(), params.InitialCredAmount)
 		coins = append(coins, coin)
 	}
 
