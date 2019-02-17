@@ -135,7 +135,7 @@ func (k Keeper) ExpireGame(ctx sdk.Context, storyID int64) sdk.Error {
 	}
 
 	// update story state
-	story.State = Unconfirmed
+	story.State = Expired
 	k.UpdateStory(ctx, story)
 
 	return nil
