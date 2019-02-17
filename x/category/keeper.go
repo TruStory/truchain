@@ -23,7 +23,7 @@ type ReadKeeper interface {
 type WriteKeeper interface {
 	ReadKeeper
 
-	NewCategory(ctx sdk.Context, title string, slug string, description string) int64
+	Create(ctx sdk.Context, title string, slug string, description string) int64
 }
 
 // Keeper data type storing keys to the key-value store
@@ -59,8 +59,8 @@ func NewKeeper(storeKey sdk.StoreKey, codec *amino.Codec) Keeper {
 // 	return
 // }
 
-// NewCategory adds a story to the key-value store
-func (k Keeper) NewCategory(
+// Create adds a story to the key-value store
+func (k Keeper) Create(
 	ctx sdk.Context,
 	title string,
 	slug string,

@@ -18,7 +18,7 @@ func TestGetCategory_ErrCategoryNotFound(t *testing.T) {
 func TestNewGetCategory(t *testing.T) {
 	ctx, ck := mockDB()
 
-	catID := ck.NewCategory(ctx, "dog memes", "doggo", "category for dog memes")
+	catID := ck.Create(ctx, "dog memes", "doggo", "category for dog memes")
 	cat, _ := ck.GetCategory(ctx, catID)
 
 	assert.Equal(t, cat.Denom(), "doggo", "should return coin name")
