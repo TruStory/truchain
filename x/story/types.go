@@ -62,7 +62,6 @@ func (i Type) String() string {
 // Story type
 type Story struct {
 	ID         int64          `json:"id"`
-	Argument   string         `json:"arguments,omitempty"`
 	Body       string         `json:"body"`
 	CategoryID int64          `json:"category_id"`
 	Creator    sdk.AccAddress `json:"creator"`

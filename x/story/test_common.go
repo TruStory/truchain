@@ -49,17 +49,15 @@ func mockDB() (sdk.Context, Keeper, c.Keeper) {
 }
 
 func createFakeStory(ctx sdk.Context, sk Keeper, ck c.WriteKeeper) int64 {
-	body := "Body of story. This must be long enough."
+	body := "TruStory will add what's missing in social networks. Value and truth."
 
 	ctx = ctx.WithBlockHeader(abci.Header{Time: time.Now().UTC()})
-
 	cat := createFakeCategory(ctx, ck)
 	creator := sdk.AccAddress([]byte{1, 2})
 	storyType := Default
 	source := url.URL{}
-	argument := "I am an argument. I also must be long enough."
 
-	storyID, err := sk.Create(ctx, argument, body, cat.ID, creator, source, storyType)
+	storyID, err := sk.Create(ctx, body, cat.ID, creator, source, storyType)
 	if err != nil {
 		panic(err)
 	}
