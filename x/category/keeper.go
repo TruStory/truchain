@@ -3,6 +3,7 @@ package category
 import (
 	app "github.com/TruStory/truchain/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/davecgh/go-spew/spew"
 	amino "github.com/tendermint/go-amino"
 )
 
@@ -73,6 +74,8 @@ func (k Keeper) Create(
 		description,
 		app.NewTimestamp(ctx.BlockHeader()),
 	}
+
+	spew.Dump(cat)
 
 	k.setCategory(ctx, cat)
 
