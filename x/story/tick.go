@@ -1,16 +1,18 @@
 package story
 
 import (
+	"fmt"
+
 	queue "github.com/cosmos/cosmos-sdk/store"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
 // NewResponseEndBlock is called at the end of every block tick
 func (k Keeper) NewResponseEndBlock(ctx sdk.Context) sdk.Tags {
-	// err := k.processStoryQueue(ctx, k.storyQueue(ctx))
-	// if err != nil {
-	// 	panic(err)
-	// }
+	err := k.processStoryQueue(ctx, k.storyQueue(ctx))
+	if err != nil {
+		panic(err)
+	}
 
 	return sdk.EmptyTags()
 }
@@ -37,49 +39,17 @@ func (k Keeper) processStoryQueue(ctx sdk.Context, storyQueue queue.Queue) sdk.E
 
 	logger.Info("Processing " + story.String())
 
-	if ctx.BlockHeader().Time.After(story.ExpireTime) {
-
+	if ctx.BlockHeader().Time.Before(story.ExpireTime) {
+		// story hasn't expired yet
+		// terminate and wait until the next block
+		return nil
 	}
 
-	// 	logger.Info(
-	// 		fmt.Sprintf(
-	// 			"Voting period expired for story: %d", game.StoryID))
+	logger.Info(fmt.Sprintf("Handling expired story: %d", story.ID))
 
-	// 	// remove from queue
-	// 	gameQueue.Pop()
-
-	// 	// return funds
-	// 	err = k.returnFunds(ctx, gameID)
-	// 	if err != nil {
-	// 		return err
-	// 	}
-
-	// 	// update story
-	// 	err = k.storyKeeper.ExpireGame(ctx, game.StoryID)
-	// 	if err != nil {
-	// 		return err
-	// 	}
-
-	// 	// process next game
-	// 	return k.filterGameQueue(ctx, gameQueue)
-	// }
-
-	// // Terminate recursion on finding the first unfinished game,
-	// // because it means all the ones behind it in the queue
-	// // are also unfinished.
-	// if !game.IsVotingFinished(blockTime, quorum) {
-	// 	return nil
-	// }
-
-	// // only left with finished games at this point...
-	// // remove finished game from queue
-	// gameQueue.Pop()
-
-	// // process game
-	// err = processGame(ctx, k, game)
-	// if err != nil {
-	// 	return err
-	// }
+	storyQueue.Pop()
+	story.State = Expired
+	k.UpdateStory(ctx, story)
 
 	// check next story
 	return k.processStoryQueue(ctx, storyQueue)

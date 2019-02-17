@@ -20,19 +20,20 @@ const (
 	Challenged
 	Confirmed
 	Rejected
+	Expired
 )
 
 // IsValid returns true if the value is listed in the enum definition, false otherwise.
 func (i State) IsValid() bool {
 	switch i {
-	case Unconfirmed, Challenged, Confirmed, Rejected:
+	case Unconfirmed, Challenged, Confirmed, Rejected, Expired:
 		return true
 	}
 	return false
 }
 
 func (i State) String() string {
-	return [...]string{"Unconfirmed", "Challenged", "Confirmed", "Rejected"}[i]
+	return [...]string{"Unconfirmed", "Challenged", "Confirmed", "Rejected", "Expired"}[i]
 }
 
 // Type is a type that defines a story type
