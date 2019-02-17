@@ -37,9 +37,9 @@ func DefaultParams() Params {
 // KeyValuePairs implements params.ParamSet
 func (p *Params) KeyValuePairs() params.KeyValuePairs {
 	return params.KeyValuePairs{
-		{KeyExpireDuration, &p.ExpireDuration},
-		{KeyMinStoryLength, &p.MinStoryLength},
-		{KeyMaxStoryLength, &p.MaxStoryLength},
+		{Key: KeyExpireDuration, Value: &p.ExpireDuration},
+		{Key: KeyMinStoryLength, Value: &p.MinStoryLength},
+		{Key: KeyMaxStoryLength, Value: &p.MaxStoryLength},
 	}
 }
 

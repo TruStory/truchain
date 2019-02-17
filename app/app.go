@@ -318,21 +318,6 @@ func (app *TruChain) BeginBlocker(ctx sdk.Context, req abci.RequestBeginBlock) a
 	if !(app.apiStarted) {
 		go app.startAPI()
 		app.apiStarted = true
-
-		if params.Features[params.BootstrapFlag] {
-			if ctx.BlockHeight() == int64(1) {
-				loadTestDB(
-					ctx, app.storyKeeper,
-					app.accountKeeper,
-					app.backingKeeper,
-					app.categoryKeeper,
-					app.challengeKeeper,
-					app.voteKeeper,
-					app.gameKeeper,
-					app.coinKeeper,
-				)
-			}
-		}
 	}
 
 	if app.apiStarted == false && ctx.BlockHeight() > int64(1) {
