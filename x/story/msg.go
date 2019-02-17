@@ -8,7 +8,6 @@ import (
 
 // SubmitStoryMsg defines a message to submit a story
 type SubmitStoryMsg struct {
-	Argument   string         `json:"argument,omitempty"`
 	Body       string         `json:"body"`
 	CategoryID int64          `json:"category_id"`
 	Creator    sdk.AccAddress `json:"creator"`
@@ -18,7 +17,6 @@ type SubmitStoryMsg struct {
 
 // NewSubmitStoryMsg creates a new message to submit a story
 func NewSubmitStoryMsg(
-	argument string,
 	body string,
 	categoryID int64,
 	creator sdk.AccAddress,
@@ -26,7 +24,6 @@ func NewSubmitStoryMsg(
 	storyType Type) SubmitStoryMsg {
 
 	return SubmitStoryMsg{
-		Argument:   argument,
 		Body:       body,
 		CategoryID: categoryID,
 		Creator:    creator,
@@ -61,9 +58,7 @@ func (msg SubmitStoryMsg) ValidateBasic() sdk.Error {
 	if msg.StoryType.IsValid() == false {
 		return ErrInvalidStoryType(msg.StoryType.String())
 	}
-	if len(msg.Argument) == 0 {
-		return ErrInvalidStoryArgument(msg.Argument)
-	}
+
 	return nil
 }
 

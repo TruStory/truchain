@@ -45,7 +45,6 @@ type WriteKeeper interface {
 
 	Create(
 		ctx sdk.Context,
-		argument string,
 		body string,
 		categoryID int64,
 		creator sdk.AccAddress,
@@ -144,7 +143,6 @@ func (k Keeper) ExpireGame(ctx sdk.Context, storyID int64) sdk.Error {
 // Create adds a story to the key-value store
 func (k Keeper) Create(
 	ctx sdk.Context,
-	argument string,
 	body string,
 	categoryID int64,
 	creator sdk.AccAddress,
@@ -153,7 +151,7 @@ func (k Keeper) Create(
 
 	logger := ctx.Logger().With("module", "story")
 
-	err := k.validate(ctx, body, argument)
+	err := k.validate(ctx, body)
 	if err != nil {
 		return 0, err
 	}
@@ -165,7 +163,6 @@ func (k Keeper) Create(
 
 	story := Story{
 		ID:         k.GetNextID(ctx),
-		Argument:   argument,
 		Body:       body,
 		CategoryID: categoryID,
 		Creator:    creator,
@@ -307,7 +304,6 @@ func (k Keeper) Stories(ctx sdk.Context) (stories []Story) {
 func (k Keeper) UpdateStory(ctx sdk.Context, story Story) {
 	newStory := Story{
 		story.ID,
-		story.Argument,
 		story.Body,
 		story.CategoryID,
 		story.Creator,
@@ -398,22 +394,15 @@ func (k Keeper) storyQueue(ctx sdk.Context) queue.Queue {
 	return queue.NewQueue(k.GetCodec(), store)
 }
 
-func (k Keeper) validate(ctx sdk.Context, body string, argument string) sdk.Error {
+func (k Keeper) validate(ctx sdk.Context, body string) sdk.Error {
 	var minStoryLength int
 	var maxStoryLength int
-	var minArgumentLength int
-	var maxArgumentLength int
 
 	k.paramStore.Get(ctx, KeyMinStoryLength, &minStoryLength)
 	k.paramStore.Get(ctx, KeyMaxStoryLength, &maxStoryLength)
-	k.paramStore.Get(ctx, KeyMinArgumentLength, &minArgumentLength)
-	k.paramStore.Get(ctx, KeyMaxArgumentLength, &maxArgumentLength)
 
 	if len := len([]rune(body)); len < minStoryLength || len > maxStoryLength {
 		return ErrInvalidStoryBody(body)
-	}
-	if len := len([]rune(argument)); len > 0 && (len < minArgumentLength || len > maxArgumentLength) {
-		return ErrInvalidStoryArgument(argument)
 	}
 
 	return nil
