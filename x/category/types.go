@@ -7,7 +7,7 @@ import (
 // Category is a type that defines the category for a story
 type Category struct {
 	ID          int64         `json:"id"`
-	Title       string        `json:"name"`
+	Title       string        `json:"title"`
 	Slug        string        `json:"slug"`
 	Description string        `json:"description,omitempty"`
 	Timestamp   app.Timestamp `json:"timestamp"`
