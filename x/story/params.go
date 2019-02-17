@@ -1,7 +1,6 @@
 package story
 
 import (
-	"fmt"
 	"time"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -12,11 +11,21 @@ import (
 const DefaultParamspace = "story"
 
 // KeyExpireDuration is store's key for expire duration
-var KeyExpireDuration = []byte("expireDuration")
+var (
+	KeyExpireDuration    = []byte("expireDuration")
+	KeyMinStoryLength    = []byte("minStoryLength")
+	keyMaxStoryLength    = []byte("maxStoryLength")
+	keyMinArgumentLength = []byte("minArgumentLength")
+	keyMaxArgumentLength = []byte("maxArugmentLength")
+)
 
 // Params holds parameters for a story
 type Params struct {
-	ExpireDuration time.Duration `json:"expire_duration"`
+	ExpireDuration    time.Duration `json:"expire_duration"`
+	MinStoryLength    int           `json:"min_story_length"`
+	MaxStoryLength    int           `json:"max_story_length"`
+	MinArgumentLength int           `json:"min_argument_length"`
+	MaxArgumentLength int           `json:"max_argument_length"`
 }
 
 // DefaultParams is the story params for testing
@@ -30,11 +39,11 @@ func DefaultParams() Params {
 func (p *Params) KeyValuePairs() params.KeyValuePairs {
 	return params.KeyValuePairs{
 		{KeyExpireDuration, &p.ExpireDuration},
+		{KeyMinStoryLength, &p.MinStoryLength},
+		{keyMaxStoryLength, &p.MaxStoryLength},
+		{keyMinArgumentLength, &p.MinArgumentLength},
+		{keyMaxArgumentLength, &p.MaxArgumentLength},
 	}
-}
-
-func (p Params) String() string {
-	return fmt.Sprintf("Params <%s>", p.ExpireDuration)
 }
 
 // ParamTypeTable for story module
