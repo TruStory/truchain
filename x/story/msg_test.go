@@ -24,19 +24,19 @@ func TestValidSubmitStoryMsg(t *testing.T) {
 	assert.Equal(t, []sdk.AccAddress{validCreator}, msg.GetSigners())
 }
 
-func TestValidSubmitStoryUnicodeMsg(t *testing.T) {
-	validBody := "你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好好好好好"
-	assert.Equal(t, DefaultMsgParams().MaxStoryLength, len([]rune(validBody)))
+// func TestValidSubmitStoryUnicodeMsg(t *testing.T) {
+// 	validBody := "你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好好好好好"
+// 	assert.Equal(t, DefaultMsgParams().MaxStoryLength, len([]rune(validBody)))
 
-	validCategoryID := int64(1)
-	validCreator := sdk.AccAddress([]byte{1, 2})
-	validSource := "http://shanesbrain.net"
-	validStoryType := Default
-	validArgument := "argument body"
-	msg := NewSubmitStoryMsg(validArgument, validBody, validCategoryID, validCreator, validSource, validStoryType)
-	err := msg.ValidateBasic()
-	assert.Nil(t, err)
-}
+// 	validCategoryID := int64(1)
+// 	validCreator := sdk.AccAddress([]byte{1, 2})
+// 	validSource := "http://shanesbrain.net"
+// 	validStoryType := Default
+// 	validArgument := "argument body"
+// 	msg := NewSubmitStoryMsg(validArgument, validBody, validCategoryID, validCreator, validSource, validStoryType)
+// 	err := msg.ValidateBasic()
+// 	assert.Nil(t, err)
+// }
 
 func TestInValidBodySubmitStoryMsg(t *testing.T) {
 	invalidBody := ""

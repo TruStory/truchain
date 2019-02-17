@@ -49,9 +49,7 @@ func (msg SubmitStoryMsg) GetSignBytes() []byte {
 
 // ValidateBasic implements Msg
 func (msg SubmitStoryMsg) ValidateBasic() sdk.Error {
-	params := DefaultMsgParams()
-
-	if len := len([]rune(msg.Body)); len < params.MinStoryLength || len > params.MaxStoryLength {
+	if len(msg.Body) == 0 {
 		return ErrInvalidStoryBody(msg.Body)
 	}
 	if msg.CategoryID == 0 {
@@ -63,7 +61,7 @@ func (msg SubmitStoryMsg) ValidateBasic() sdk.Error {
 	if msg.StoryType.IsValid() == false {
 		return ErrInvalidStoryType(msg.StoryType.String())
 	}
-	if len := len([]rune(msg.Argument)); len > 0 && (len < params.MinArgumentLength || len > params.MaxArgumentLength) {
+	if len(msg.Argument) == 0 {
 		return ErrInvalidStoryArgument(msg.Argument)
 	}
 	return nil

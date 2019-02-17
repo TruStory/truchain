@@ -92,7 +92,7 @@ func mockDB() (sdk.Context, Keeper, story.Keeper, c.Keeper, bank.Keeper) {
 }
 
 func createFakeStory(ctx sdk.Context, sk story.Keeper, ck c.WriteKeeper) int64 {
-	body := "Body of story."
+	body := "TruStory is the world's first sustainable social network."
 	cat := createFakeCategory(ctx, ck)
 	creator := sdk.AccAddress([]byte{1, 2})
 	storyType := story.Default

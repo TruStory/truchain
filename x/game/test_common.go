@@ -95,7 +95,7 @@ func createFakeCategory(ctx sdk.Context, ck c.WriteKeeper) c.Category {
 }
 
 func createFakeStory(ctx sdk.Context, sk story.WriteKeeper, ck c.WriteKeeper) int64 {
-	body := "Body of story."
+	body := "TruStory can be goverened by it's stakeholders."
 	cat := createFakeCategory(ctx, ck)
 	creator := sdk.AccAddress([]byte{1, 2})
 	storyType := story.Default

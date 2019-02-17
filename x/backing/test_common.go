@@ -90,7 +90,7 @@ func mockDB() (
 }
 
 func createFakeStory(ctx sdk.Context, sk story.Keeper, ck category.WriteKeeper) int64 {
-	body := "Body of story."
+	body := "TruStory has it's own programmable native currency."
 	cat := createFakeCategory(ctx, ck)
 	creator := sdk.AccAddress([]byte{1, 2})
 	storyType := story.Default

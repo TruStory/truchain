@@ -153,7 +153,12 @@ func (k Keeper) Create(
 
 	logger := ctx.Logger().With("module", "story")
 
-	_, err := k.categoryKeeper.GetCategory(ctx, categoryID)
+	err := k.validate(ctx, body, argument)
+	if err != nil {
+		return 0, err
+	}
+
+	_, err = k.categoryKeeper.GetCategory(ctx, categoryID)
 	if err != nil {
 		return 0, category.ErrInvalidCategory(categoryID)
 	}
@@ -391,4 +396,25 @@ func (k Keeper) storyIDsByCategoryID(
 func (k Keeper) storyQueue(ctx sdk.Context) queue.Queue {
 	store := ctx.KVStore(k.storyQueueKey)
 	return queue.NewQueue(k.GetCodec(), store)
+}
+
+func (k Keeper) validate(ctx sdk.Context, body string, argument string) sdk.Error {
+	var minStoryLength int
+	var maxStoryLength int
+	var minArgumentLength int
+	var maxArgumentLength int
+
+	k.paramStore.Get(ctx, KeyMinStoryLength, &minStoryLength)
+	k.paramStore.Get(ctx, KeyMaxStoryLength, &maxStoryLength)
+	k.paramStore.Get(ctx, KeyMinArgumentLength, &minArgumentLength)
+	k.paramStore.Get(ctx, KeyMaxArgumentLength, &maxArgumentLength)
+
+	if len := len([]rune(body)); len < minStoryLength || len > maxStoryLength {
+		return ErrInvalidStoryBody(body)
+	}
+	if len := len([]rune(argument)); len > 0 && (len < minArgumentLength || len > maxArgumentLength) {
+		return ErrInvalidStoryArgument(argument)
+	}
+
+	return nil
 }
