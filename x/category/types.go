@@ -1,6 +1,8 @@
 package category
 
 import (
+	"fmt"
+
 	app "github.com/TruStory/truchain/types"
 )
 
@@ -16,6 +18,11 @@ type Category struct {
 // Denom returns the name of the coin, alias for slug
 func (c Category) Denom() string {
 	return c.Slug
+}
+
+func (c Category) String() string {
+	return fmt.Sprintf(
+		"Category<%s %s %s>", c.Title, c.Slug, c.Description)
 }
 
 // MsgParams holds data for category parameters

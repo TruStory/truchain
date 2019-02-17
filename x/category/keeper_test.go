@@ -23,23 +23,3 @@ func TestNewGetCategory(t *testing.T) {
 
 	assert.Equal(t, cat.Denom(), "doggo", "should return coin name")
 }
-
-// func TestInitCategories(t *testing.T) {
-// 	ctx, k := mockDB()
-
-// 	categories := map[string]string{
-// 		"btc":      "Bitcoin",
-// 		"shitcoin": "Shitcoins",
-// 	}
-
-// 	creator := sdk.AccAddress([]byte{1, 2})
-
-// 	err := k.InitCategories(ctx, creator, categories)
-// 	assert.Nil(t, err)
-
-// 	cat, _ := k.GetCategory(ctx, 1)
-// 	assert.Contains(t, categories, cat.Slug)
-
-// 	cat, _ = k.GetCategory(ctx, 2)
-// 	assert.Contains(t, categories, cat.Slug)
-// }
