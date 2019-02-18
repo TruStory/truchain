@@ -243,24 +243,19 @@ func (k Keeper) Tally(
 	ctx sdk.Context, storyID int64) (
 	trueVotes []Backing, falseVotes []Backing, err sdk.Error) {
 
-	// iterate through unmatured backings
-	// TODO map through backing -> story mappings instead
-	// var ID int64
-	// k.backingList(ctx).Iterate(&ID, func(index uint64) bool {
-	// 	backing, err := k.Backing(ctx, ID)
-	// 	if err != nil {
-	// 		panic(err)
-	// 	}
+	err = k.backingStoryList.Map(ctx, k, storyID, func(backingID int64) sdk.Error {
+		backing, err := k.Backing(ctx, backingID)
+		if err != nil {
+			return err
+		}
+		if backing.VoteChoice() == true {
+			trueVotes = append(trueVotes, backing)
+		} else {
+			falseVotes = append(falseVotes, backing)
+		}
 
-	// 	if backing.StoryID() == storyID {
-	// 		if backing.VoteChoice() == true {
-	// 			trueVotes = append(trueVotes, backing)
-	// 		} else {
-	// 			falseVotes = append(falseVotes, backing)
-	// 		}
-	// 	}
-	// 	return false
-	// })
+		return nil
+	})
 
 	return
 }
@@ -269,25 +264,19 @@ func (k Keeper) Tally(
 func (k Keeper) TotalBackingAmount(ctx sdk.Context, storyID int64) (
 	totalCoin sdk.Coin, err sdk.Error) {
 
-	totalAmount := sdk.ZeroInt()
-	// var ID int64
+	totalAmount := sdk.NewCoin(param.StakeDenom, sdk.ZeroInt())
 
-	// iterate through unmatured backings
-	// k.backingList(ctx).Iterate(&ID, func(index uint64) bool {
-	// 	backing, err := k.Backing(ctx, ID)
-	// 	if err != nil {
-	// 		panic(err)
-	// 	}
+	err = k.backingStoryList.Map(ctx, k, storyID, func(backingID int64) sdk.Error {
+		backing, err := k.Backing(ctx, backingID)
+		if err != nil {
+			return err
+		}
+		totalAmount = totalAmount.Plus(backing.Amount())
 
-	// 	// if story ids match, append to total backing amount
-	// 	if backing.StoryID() == storyID {
-	// 		totalAmount = totalAmount.Add(backing.Amount().Amount)
-	// 	}
+		return nil
+	})
 
-	// 	return false
-	// })
-
-	return sdk.NewCoin(param.StakeDenom, totalAmount), nil
+	return totalAmount, nil
 }
 
 // ============================================================================
