@@ -54,8 +54,6 @@ type WriteKeeper interface {
 		creator sdk.AccAddress,
 		duration time.Duration) (int64, sdk.Error)
 
-	RemoveFromList(ctx sdk.Context, backingID int64) sdk.Error
-
 	Update(ctx sdk.Context, backing Backing)
 
 	ToggleVote(ctx sdk.Context, backingID int64) (int64, sdk.Error)
@@ -67,8 +65,6 @@ type WriteKeeper interface {
 type Keeper struct {
 	app.Keeper
 
-	// list of unmatured backings
-	backingListKey sdk.StoreKey
 	// list of games in the challenged state
 	pendingGameListKey sdk.StoreKey
 	// queue of games in the voting state
@@ -84,7 +80,6 @@ type Keeper struct {
 // NewKeeper creates a new keeper with write and read access
 func NewKeeper(
 	storeKey sdk.StoreKey,
-	backingListKey sdk.StoreKey,
 	pendingGameListKey sdk.StoreKey,
 	gameQueueKey sdk.StoreKey,
 	storyKeeper story.WriteKeeper,
@@ -94,7 +89,6 @@ func NewKeeper(
 
 	return Keeper{
 		app.NewKeeper(codec, storeKey),
-		backingListKey,
 		pendingGameListKey,
 		gameQueueKey,
 		storyKeeper,
@@ -165,9 +159,6 @@ func (k Keeper) Create(
 		Period:      duration,
 	}
 	k.setBacking(ctx, backing)
-
-	// add backing id to the backing list for future processing
-	k.backingList(ctx).Push(backing.ID())
 
 	// add backing <-> story mapping
 	k.backingStoryList.Append(ctx, k, storyID, creator, backing.ID())
@@ -247,57 +238,29 @@ func (k Keeper) BackingByStoryIDAndCreator(
 	return
 }
 
-// RemoveFromList removes a backing from the backing list
-func (k Keeper) RemoveFromList(ctx sdk.Context, backingID int64) sdk.Error {
-	var ID int64
-	var indexToDelete uint64
-	var found bool
-	backingList := k.backingList(ctx)
-	backingList.Iterate(&ID, func(index uint64) bool {
-		var tempBackingID int64
-		err := backingList.Get(index, &tempBackingID)
-		if err != nil {
-			panic(err)
-		}
-		if tempBackingID == backingID {
-			indexToDelete = index
-			found = true
-			return true
-		}
-		return false
-	})
-
-	if found == false {
-		return ErrNotFound(backingID)
-	}
-
-	backingList.Delete(indexToDelete)
-
-	return nil
-}
-
 // Tally backings for voting
 func (k Keeper) Tally(
 	ctx sdk.Context, storyID int64) (
 	trueVotes []Backing, falseVotes []Backing, err sdk.Error) {
 
 	// iterate through unmatured backings
-	var ID int64
-	k.backingList(ctx).Iterate(&ID, func(index uint64) bool {
-		backing, err := k.Backing(ctx, ID)
-		if err != nil {
-			panic(err)
-		}
+	// TODO map through backing -> story mappings instead
+	// var ID int64
+	// k.backingList(ctx).Iterate(&ID, func(index uint64) bool {
+	// 	backing, err := k.Backing(ctx, ID)
+	// 	if err != nil {
+	// 		panic(err)
+	// 	}
 
-		if backing.StoryID() == storyID {
-			if backing.VoteChoice() == true {
-				trueVotes = append(trueVotes, backing)
-			} else {
-				falseVotes = append(falseVotes, backing)
-			}
-		}
-		return false
-	})
+	// 	if backing.StoryID() == storyID {
+	// 		if backing.VoteChoice() == true {
+	// 			trueVotes = append(trueVotes, backing)
+	// 		} else {
+	// 			falseVotes = append(falseVotes, backing)
+	// 		}
+	// 	}
+	// 	return false
+	// })
 
 	return
 }
@@ -307,22 +270,22 @@ func (k Keeper) TotalBackingAmount(ctx sdk.Context, storyID int64) (
 	totalCoin sdk.Coin, err sdk.Error) {
 
 	totalAmount := sdk.ZeroInt()
-	var ID int64
+	// var ID int64
 
 	// iterate through unmatured backings
-	k.backingList(ctx).Iterate(&ID, func(index uint64) bool {
-		backing, err := k.Backing(ctx, ID)
-		if err != nil {
-			panic(err)
-		}
+	// k.backingList(ctx).Iterate(&ID, func(index uint64) bool {
+	// 	backing, err := k.Backing(ctx, ID)
+	// 	if err != nil {
+	// 		panic(err)
+	// 	}
 
-		// if story ids match, append to total backing amount
-		if backing.StoryID() == storyID {
-			totalAmount = totalAmount.Add(backing.Amount().Amount)
-		}
+	// 	// if story ids match, append to total backing amount
+	// 	if backing.StoryID() == storyID {
+	// 		totalAmount = totalAmount.Add(backing.Amount().Amount)
+	// 	}
 
-		return false
-	})
+	// 	return false
+	// })
 
 	return sdk.NewCoin(param.StakeDenom, totalAmount), nil
 }
@@ -383,11 +346,6 @@ func getInterest(
 	cred := sdk.NewCoin(credDenom, interest.RoundInt())
 
 	return cred
-}
-
-func (k Keeper) backingList(ctx sdk.Context) list.List {
-	store := ctx.KVStore(k.backingListKey)
-	return list.NewList(k.GetCodec(), store)
 }
 
 func (k Keeper) pendingGameList(ctx sdk.Context) list.List {

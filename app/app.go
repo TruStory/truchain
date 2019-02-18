@@ -54,7 +54,6 @@ type TruChain struct {
 	// keys to access the multistore
 	keyAccount              *sdk.KVStoreKey
 	keyBacking              *sdk.KVStoreKey
-	keyBackingList          *sdk.KVStoreKey
 	keyCategory             *sdk.KVStoreKey
 	keyChallenge            *sdk.KVStoreKey
 	keyFee                  *sdk.KVStoreKey
@@ -118,7 +117,6 @@ func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *T
 		keyStoryQueue:           sdk.NewKVStoreKey(story.QueueStoreKey),
 		keyCategory:             sdk.NewKVStoreKey(category.StoreKey),
 		keyBacking:              sdk.NewKVStoreKey(backing.StoreKey),
-		keyBackingList:          sdk.NewKVStoreKey(backing.ListStoreKey),
 		keyChallenge:            sdk.NewKVStoreKey(challenge.StoreKey),
 		keyFee:                  sdk.NewKVStoreKey("fee_collection"),
 		keyGame:                 sdk.NewKVStoreKey(game.StoreKey),
@@ -166,7 +164,6 @@ func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *T
 	)
 	app.backingKeeper = backing.NewKeeper(
 		app.keyBacking,
-		app.keyBackingList,
 		app.keyChallengedStoryQueue,
 		app.keyGameQueue,
 		app.storyKeeper,
@@ -242,7 +239,6 @@ func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *T
 		app.keyAccount,
 		app.keyParams,
 		app.keyBacking,
-		app.keyBackingList,
 		app.keyCategory,
 		app.keyChallenge,
 		app.keyFee,
