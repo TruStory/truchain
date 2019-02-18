@@ -40,7 +40,6 @@ func mockDB() (sdk.Context, Keeper, c.Keeper) {
 	gameQueueKey := sdk.NewKVStoreKey("gameQueue")
 	voteKey := sdk.NewKVStoreKey("vote")
 	backingKey := sdk.NewKVStoreKey("backing")
-	backingListKey := sdk.NewKVStoreKey("backingList")
 	paramsKey := sdk.NewKVStoreKey(sdkparams.StoreKey)
 	transientParamsKey := sdk.NewTransientStoreKey(sdkparams.TStoreKey)
 
@@ -55,7 +54,6 @@ func mockDB() (sdk.Context, Keeper, c.Keeper) {
 	ms.MountStoreWithDB(gameQueueKey, sdk.StoreTypeIAVL, db)
 	ms.MountStoreWithDB(voteKey, sdk.StoreTypeIAVL, db)
 	ms.MountStoreWithDB(backingKey, sdk.StoreTypeIAVL, db)
-	ms.MountStoreWithDB(backingListKey, sdk.StoreTypeIAVL, db)
 	ms.MountStoreWithDB(paramsKey, sdk.StoreTypeIAVL, db)
 	ms.MountStoreWithDB(transientParamsKey, sdk.StoreTypeTransient, db)
 	ms.LoadLatestVersion()
@@ -80,7 +78,6 @@ func mockDB() (sdk.Context, Keeper, c.Keeper) {
 
 	backingKeeper := backing.NewKeeper(
 		backingKey,
-		backingListKey,
 		pendingGameListKey,
 		gameQueueKey,
 		sk,
