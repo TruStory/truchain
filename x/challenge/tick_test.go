@@ -14,40 +14,40 @@ func TestNewResponseEndBlock(t *testing.T) {
 	assert.Equal(t, sdk.Tags{}, tags)
 }
 
-func Test_filterExpiredGames(t *testing.T) {
-	ctx, k := fakePendingGameQueue()
+// func Test_filterExpiredGames(t *testing.T) {
+// 	ctx, k := fakePendingGameQueue()
 
-	q := k.pendingGameList(ctx)
-	assert.Equal(t, uint64(1), q.Len())
+// 	q := k.pendingGameList(ctx)
+// 	assert.Equal(t, uint64(1), q.Len())
 
-	err := k.filterExpiredGames(ctx, q)
-	assert.Nil(t, err)
-}
+// 	err := k.filterExpiredGames(ctx, q)
+// 	assert.Nil(t, err)
+// }
 
-func Test_removingExpiredGameFromPendingGameList(t *testing.T) {
-	ctx, k := fakePendingGameQueue()
-	q := k.pendingGameList(ctx)
+// func Test_removingExpiredGameFromPendingGameList(t *testing.T) {
+// 	ctx, k := fakePendingGameQueue()
+// 	q := k.pendingGameList(ctx)
 
-	assert.Equal(t, uint64(1), q.Len())
+// 	assert.Equal(t, uint64(1), q.Len())
 
-	// modify challenged expired time in game
-	game, _ := k.gameKeeper.Game(ctx, 1)
-	expireTime := game.ChallengeExpireTime.AddDate(0, -1, 0)
-	game.ChallengeExpireTime = expireTime
-	k.gameKeeper.Update(ctx, game)
+// 	// modify challenged expired time in game
+// 	game, _ := k.gameKeeper.Game(ctx, 1)
+// 	expireTime := game.ChallengeExpireTime.AddDate(0, -1, 0)
+// 	game.ChallengeExpireTime = expireTime
+// 	k.gameKeeper.Update(ctx, game)
 
-	err := k.filterExpiredGames(ctx, q)
-	assert.Nil(t, err)
+// 	err := k.filterExpiredGames(ctx, q)
+// 	assert.Nil(t, err)
 
-	// NOTE: deleting an item from a Cosmos sdk.List type
-	// DOES NOT change the result of Len(). So we cannot test
-	// if the length of a queue went down after an item is removed.
-	// In this case, it is still 1.
-	assert.Equal(t, uint64(1), q.Len())
+// 	// NOTE: deleting an item from a Cosmos sdk.List type
+// 	// DOES NOT change the result of Len(). So we cannot test
+// 	// if the length of a queue went down after an item is removed.
+// 	// In this case, it is still 1.
+// 	assert.Equal(t, uint64(1), q.Len())
 
-	// but if we iterate the list, we should find nothing..
-	q.Iterate(game.ID, func(index uint64) bool {
-		assert.Fail(t, "should not find any games")
-		return false
-	})
-}
+// 	// but if we iterate the list, we should find nothing..
+// 	q.Iterate(game.ID, func(index uint64) bool {
+// 		assert.Fail(t, "should not find any games")
+// 		return false
+// 	})
+// }
