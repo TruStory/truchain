@@ -218,21 +218,21 @@ func (ta *TruAPI) challengeThresholdResolver(_ context.Context, q story.Story) s
 }
 
 func (ta *TruAPI) gameResolver(_ context.Context, q story.Story) game.Game {
-	res := ta.RunQuery("games/id", game.QueryGameByIDParams{ID: q.GameID})
+	// res := ta.RunQuery("games/id", game.QueryGameByIDParams{ID: q.GameID})
 
-	if res.Code != 0 {
-		// TODO [shanev]: see https://github.com/TruStory/truchain/issues/199
-		// fmt.Println("Resolver err: ", res)
-		return game.Game{}
-	}
+	// if res.Code != 0 {
+	// 	// TODO [shanev]: see https://github.com/TruStory/truchain/issues/199
+	// 	// fmt.Println("Resolver err: ", res)
+	// 	return game.Game{}
+	// }
 
 	g := new(game.Game)
 
-	err := json.Unmarshal(res.Value, g)
+	// err := json.Unmarshal(res.Value, g)
 
-	if err != nil {
-		panic(err)
-	}
+	// if err != nil {
+	// 	panic(err)
+	// }
 
 	return *g
 }

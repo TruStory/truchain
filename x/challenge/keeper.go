@@ -62,7 +62,7 @@ type Keeper struct {
 	gameKeeper    game.WriteKeeper
 	storyKeeper   story.WriteKeeper
 
-	challengeList app.UserList // challenge <-> game mappings
+	challengeList app.UserList // challenge <-> story mappings
 }
 
 // NewKeeper creates a new keeper with write and read access
@@ -82,7 +82,7 @@ func NewKeeper(
 		bankKeeper,
 		gameKeeper,
 		storyKeeper,
-		app.NewUserList(gameKeeper.GetStoreKey()),
+		app.NewUserList(storyKeeper.GetStoreKey()),
 	}
 }
 
@@ -108,29 +108,15 @@ func (k Keeper) Create(
 		return 0, sdk.ErrInsufficientFunds("Does not meet minimum stake amount.")
 	}
 
-	// get the story
-	story, err := k.storyKeeper.Story(ctx, storyID)
-	if err != nil {
-		return 0, err
-	}
-
-	// create game if one doesn't exist yet
-	gameID := story.GameID
-	if gameID == 0 {
-		gameID, err = k.gameKeeper.Create(ctx, story.ID, creator)
-		if err != nil {
-			return 0, err
-		}
-	}
-
 	// make sure creator hasn't already challenged
-	if k.challengeList.Includes(ctx, k, gameID, creator) {
-		return 0, ErrDuplicateChallenge(gameID, creator)
+	if k.challengeList.Includes(ctx, k, storyID, creator) {
+		return 0, ErrDuplicateChallenge(storyID, creator)
 	}
 
 	// create implicit false vote
 	vote := app.Vote{
 		ID:        k.GetNextID(ctx),
+		StoryID:   storyID,
 		Amount:    amount,
 		Argument:  argument,
 		Creator:   creator,
@@ -146,8 +132,8 @@ func (k Keeper) Create(
 		k.GetIDKey(challenge.ID()),
 		k.GetCodec().MustMarshalBinaryLengthPrefixed(challenge))
 
-	// persist challenge <-> game mapping
-	k.challengeList.Append(ctx, k, gameID, creator, challenge.ID())
+	// persist challenge <-> story mapping
+	k.challengeList.Append(ctx, k, storyID, creator, challenge.ID())
 
 	// deduct challenge amount from user
 	_, _, err = k.bankKeeper.SubtractCoins(ctx, creator, sdk.Coins{amount})
@@ -156,10 +142,10 @@ func (k Keeper) Create(
 	}
 
 	// add another amount to the challenge pool
-	err = k.gameKeeper.AddToChallengePool(ctx, gameID, amount)
-	if err != nil {
-		return 0, err
-	}
+	// err = k.gameKeeper.AddToChallengePool(ctx, gameID, amount)
+	// if err != nil {
+	// 	return 0, err
+	// }
 
 	msg := fmt.Sprintf("Challenged story %d with %s by %s",
 		storyID, amount.String(), creator.String())
@@ -213,7 +199,7 @@ func (k Keeper) ChallengeByStoryIDAndCreator(
 	}
 
 	// get the challenge
-	challengeID := k.challengeList.Get(ctx, k, s.GameID, creator)
+	challengeID := k.challengeList.Get(ctx, k, s.ID, creator)
 	challenge, err = k.Challenge(ctx, challengeID)
 
 	return
