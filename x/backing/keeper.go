@@ -68,7 +68,7 @@ type Keeper struct {
 	// list of games in the challenged state
 	pendingGameListKey sdk.StoreKey
 	// queue of games in the voting state
-	gameQueueKey sdk.StoreKey
+	votingStoryQueueKey sdk.StoreKey
 
 	storyKeeper    story.WriteKeeper // read-write access to story store
 	bankKeeper     bank.Keeper       // read-write access coin store
@@ -81,7 +81,7 @@ type Keeper struct {
 func NewKeeper(
 	storeKey sdk.StoreKey,
 	pendingGameListKey sdk.StoreKey,
-	gameQueueKey sdk.StoreKey,
+	votingStoryQueueKey sdk.StoreKey,
 	storyKeeper story.WriteKeeper,
 	bankKeeper bank.Keeper,
 	categoryKeeper cat.ReadKeeper,
@@ -90,7 +90,7 @@ func NewKeeper(
 	return Keeper{
 		app.NewKeeper(codec, storeKey),
 		pendingGameListKey,
-		gameQueueKey,
+		votingStoryQueueKey,
 		storyKeeper,
 		bankKeeper,
 		categoryKeeper,
@@ -344,6 +344,6 @@ func (k Keeper) pendingGameList(ctx sdk.Context) list.List {
 }
 
 func (k Keeper) gameQueue(ctx sdk.Context) list.Queue {
-	store := ctx.KVStore(k.gameQueueKey)
+	store := ctx.KVStore(k.votingStoryQueueKey)
 	return list.NewQueue(k.GetCodec(), store)
 }

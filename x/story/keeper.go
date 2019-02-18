@@ -17,8 +17,8 @@ import (
 const (
 	// StoreKey is string representation of the store key for stories
 	StoreKey = "stories"
-	// ChallengedQueueStoreKey is string representation of the store key for challenged stories
-	ChallengedQueueStoreKey = "challengedStoryQueue"
+	// VotingQueueStoreKey is string representation of the store key for challenged stories
+	VotingQueueStoreKey = "votingStoryQueue"
 	// QueueStoreKey is string representation of the store key for backing list
 	QueueStoreKey = "storyQueue"
 )
