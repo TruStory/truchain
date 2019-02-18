@@ -39,7 +39,7 @@ func (k Keeper) processMaturedBackings(ctx sdk.Context) sdk.Error {
 			panic(err)
 		}
 
-		if k.isGameInSession(ctx, backing.StoryID) {
+		if k.isGameInSession(ctx, backing.StoryID()) {
 			// skip maturing it
 			// process next one
 			return false

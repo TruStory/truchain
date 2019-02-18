@@ -17,6 +17,11 @@ func (v TokenVote) ID() int64 {
 	return v.Vote.ID
 }
 
+// StoryID implements `Voter`
+func (v TokenVote) StoryID() int64 {
+	return v.Vote.ID
+}
+
 // Amount implements `Voter`
 func (v TokenVote) Amount() sdk.Coin {
 	return v.Vote.Amount

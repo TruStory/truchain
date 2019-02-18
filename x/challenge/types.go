@@ -15,6 +15,11 @@ func (c Challenge) ID() int64 {
 	return c.Vote.ID
 }
 
+// StoryID implements `Voter`
+func (c Challenge) StoryID() int64 {
+	return c.Vote.StoryID
+}
+
 // Amount implements `Voter`
 func (c Challenge) Amount() sdk.Coin {
 	return c.Vote.Amount
