@@ -207,9 +207,9 @@ func (k Keeper) ChallengeByStoryIDAndCreator(
 
 // Tally challenges for voting
 func (k Keeper) Tally(
-	ctx sdk.Context, gameID int64) (falseVotes []Challenge, err sdk.Error) {
+	ctx sdk.Context, storyID int64) (falseVotes []Challenge, err sdk.Error) {
 
-	err = k.challengeList.Map(ctx, k, gameID, func(challengeID int64) sdk.Error {
+	err = k.challengeList.Map(ctx, k, storyID, func(challengeID int64) sdk.Error {
 		challenge, err := k.Challenge(ctx, challengeID)
 		if err != nil {
 			return err
