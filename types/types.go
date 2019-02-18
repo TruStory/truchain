@@ -38,6 +38,7 @@ func (t Timestamp) Update(blockHeader abci.Header) Timestamp {
 // by any type that has voting capabilities, implicit or explicit.
 type Voter interface {
 	ID() int64
+	StoryID() int64
 	Amount() sdk.Coin
 	Creator() sdk.AccAddress
 	VoteChoice() bool
@@ -47,6 +48,7 @@ type Voter interface {
 // for `Backing`, `Challenge`, and `TokenVote`, containing common fields.
 type Vote struct {
 	ID        int64          `json:"id"`
+	StoryID   int64          `json:"story_id"`
 	Amount    sdk.Coin       `json:"amount"`
 	Argument  string         `json:"argument,omitempty"`
 	Creator   sdk.AccAddress `json:"creator"`
@@ -60,7 +62,12 @@ func (v Vote) String() string {
 
 // NewVote creates a new Vote type with defaults
 func NewVote(
-	id int64, amount sdk.Coin, creator sdk.AccAddress, vote bool, timestamp Timestamp) Vote {
+	id int64,
+	storyID int64,
+	amount sdk.Coin,
+	creator sdk.AccAddress,
+	vote bool,
+	timestamp Timestamp) Vote {
 
-	return Vote{id, amount, "", creator, vote, timestamp}
+	return Vote{id, storyID, amount, "", creator, vote, timestamp}
 }

@@ -149,6 +149,7 @@ func (k Keeper) Create(
 
 	vote := app.Vote{
 		ID:        k.GetNextID(ctx),
+		StoryID:   storyID,
 		Amount:    amount,
 		Argument:  argument,
 		Creator:   creator,
@@ -158,7 +159,6 @@ func (k Keeper) Create(
 
 	backing := Backing{
 		Vote:        vote,
-		StoryID:     storyID,
 		Interest:    interest,
 		MaturesTime: time.Now().Add(duration),
 		Params:      params,
@@ -182,7 +182,6 @@ func (k Keeper) Create(
 func (k Keeper) Update(ctx sdk.Context, backing Backing) {
 	newBacking := Backing{
 		Vote:        backing.Vote,
-		StoryID:     backing.StoryID,
 		Interest:    backing.Interest,
 		MaturesTime: backing.MaturesTime,
 		Params:      backing.Params,
@@ -290,7 +289,7 @@ func (k Keeper) Tally(
 			panic(err)
 		}
 
-		if backing.StoryID == storyID {
+		if backing.StoryID() == storyID {
 			if backing.VoteChoice() == true {
 				trueVotes = append(trueVotes, backing)
 			} else {
@@ -318,7 +317,7 @@ func (k Keeper) TotalBackingAmount(ctx sdk.Context, storyID int64) (
 		}
 
 		// if story ids match, append to total backing amount
-		if backing.StoryID == storyID {
+		if backing.StoryID() == storyID {
 			totalAmount = totalAmount.Add(backing.Amount().Amount)
 		}
 

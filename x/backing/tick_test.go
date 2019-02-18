@@ -96,6 +96,7 @@ func Test_distributeEarnings(t *testing.T) {
 	// create new vote type
 	vote := app.Vote{
 		ID:        int64(1),
+		StoryID:   int64(5),
 		Amount:    principal,
 		Argument:  "",
 		Creator:   creator,
@@ -106,7 +107,6 @@ func Test_distributeEarnings(t *testing.T) {
 	// create new backing type with embedded vote
 	backing := Backing{
 		vote,
-		int64(5),
 		interest,
 		matures,
 		params,

@@ -64,7 +64,6 @@ func DefaultMsgParams() MsgParams {
 type Backing struct {
 	app.Vote `json:"vote"`
 
-	StoryID     int64         `json:"story_id"`
 	Interest    sdk.Coin      `json:"interest"`
 	MaturesTime time.Time     `json:"matures_time"`
 	Params      Params        `json:"params"`
@@ -74,6 +73,11 @@ type Backing struct {
 // ID implements `Voter`
 func (b Backing) ID() int64 {
 	return b.Vote.ID
+}
+
+// StoryID implements `Voter`
+func (b Backing) StoryID() int64 {
+	return b.Vote.StoryID
 }
 
 // Amount implements `Voter`
