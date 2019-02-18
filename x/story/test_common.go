@@ -74,3 +74,13 @@ func createFakeCategory(ctx sdk.Context, ck c.WriteKeeper) c.Category {
 	cat, _ := ck.GetCategory(ctx, id)
 	return cat
 }
+
+func fakeStories() (ctx sdk.Context, storyKeeper Keeper) {
+	ctx, storyKeeper, catKeeper := mockDB()
+
+	createFakeStory(ctx, storyKeeper, catKeeper)
+	createFakeStory(ctx, storyKeeper, catKeeper)
+	createFakeStory(ctx, storyKeeper, catKeeper)
+
+	return
+}
