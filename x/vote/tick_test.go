@@ -10,7 +10,7 @@ package vote
 // func Test_checkGames(t *testing.T) {
 // 	ctx, _, k := fakeValidationGame()
 
-// 	qStore := ctx.KVStore(k.gameQueueKey)
+// 	qStore := ctx.KVStore(k.votingStoryQueueKey)
 // 	q := store.NewQueue(k.GetCodec(), qStore)
 // 	err := k.filterGameQueue(ctx, q)
 // 	assert.Nil(t, err)
@@ -20,7 +20,7 @@ package vote
 // 	ctx, votes, k := fakeValidationGame()
 
 // 	// get the gameID
-// 	qStore := ctx.KVStore(k.gameQueueKey)
+// 	qStore := ctx.KVStore(k.votingStoryQueueKey)
 // 	q := store.NewQueue(k.GetCodec(), qStore)
 // 	var gameID int64
 // 	q.Peek(&gameID)
@@ -39,7 +39,7 @@ package vote
 // 	ctx, votes, k := fakeValidationGame()
 
 // 	// get the gameID
-// 	qStore := ctx.KVStore(k.gameQueueKey)
+// 	qStore := ctx.KVStore(k.votingStoryQueueKey)
 // 	q := store.NewQueue(k.GetCodec(), qStore)
 // 	var gameID int64
 // 	q.Peek(&gameID)

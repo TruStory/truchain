@@ -52,21 +52,20 @@ type TruChain struct {
 	codec *codec.Codec
 
 	// keys to access the multistore
-	keyAccount              *sdk.KVStoreKey
-	keyBacking              *sdk.KVStoreKey
-	keyCategory             *sdk.KVStoreKey
-	keyChallenge            *sdk.KVStoreKey
-	keyFee                  *sdk.KVStoreKey
-	keyGame                 *sdk.KVStoreKey
-	keyChallengedStoryQueue *sdk.KVStoreKey
-	keyGameQueue            *sdk.KVStoreKey
-	keyIBC                  *sdk.KVStoreKey
-	keyMain                 *sdk.KVStoreKey
-	keyStory                *sdk.KVStoreKey
-	keyStoryQueue           *sdk.KVStoreKey
-	keyVote                 *sdk.KVStoreKey
-	keyParams               *sdk.KVStoreKey
-	tkeyParams              *sdk.TransientStoreKey
+	keyAccount          *sdk.KVStoreKey
+	keyBacking          *sdk.KVStoreKey
+	keyCategory         *sdk.KVStoreKey
+	keyChallenge        *sdk.KVStoreKey
+	keyFee              *sdk.KVStoreKey
+	keyGame             *sdk.KVStoreKey
+	keyVotingStoryQueue *sdk.KVStoreKey
+	keyIBC              *sdk.KVStoreKey
+	keyMain             *sdk.KVStoreKey
+	keyStory            *sdk.KVStoreKey
+	keyStoryQueue       *sdk.KVStoreKey
+	keyVote             *sdk.KVStoreKey
+	keyParams           *sdk.KVStoreKey
+	tkeyParams          *sdk.TransientStoreKey
 
 	// manage getting and setting accounts
 	accountKeeper       auth.AccountKeeper
@@ -110,24 +109,23 @@ func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *T
 		keyParams:  sdk.NewKVStoreKey("params"),
 		tkeyParams: sdk.NewTransientStoreKey("transient_params"),
 
-		keyMain:                 sdk.NewKVStoreKey("main"),
-		keyAccount:              sdk.NewKVStoreKey("acc"),
-		keyIBC:                  sdk.NewKVStoreKey("ibc"),
-		keyStory:                sdk.NewKVStoreKey(story.StoreKey),
-		keyStoryQueue:           sdk.NewKVStoreKey(story.QueueStoreKey),
-		keyCategory:             sdk.NewKVStoreKey(category.StoreKey),
-		keyBacking:              sdk.NewKVStoreKey(backing.StoreKey),
-		keyChallenge:            sdk.NewKVStoreKey(challenge.StoreKey),
-		keyFee:                  sdk.NewKVStoreKey("fee_collection"),
-		keyGame:                 sdk.NewKVStoreKey(game.StoreKey),
-		keyChallengedStoryQueue: sdk.NewKVStoreKey(story.ChallengedQueueStoreKey),
-		keyGameQueue:            sdk.NewKVStoreKey(game.QueueStoreKey),
-		keyVote:                 sdk.NewKVStoreKey(vote.StoreKey),
-		api:                     nil,
-		apiStarted:              false,
-		blockCtx:                nil,
-		blockHeader:             abci.Header{},
-		registrarKey:            loadRegistrarKey(),
+		keyMain:             sdk.NewKVStoreKey("main"),
+		keyAccount:          sdk.NewKVStoreKey("acc"),
+		keyIBC:              sdk.NewKVStoreKey("ibc"),
+		keyStory:            sdk.NewKVStoreKey(story.StoreKey),
+		keyStoryQueue:       sdk.NewKVStoreKey(story.QueueStoreKey),
+		keyCategory:         sdk.NewKVStoreKey(category.StoreKey),
+		keyBacking:          sdk.NewKVStoreKey(backing.StoreKey),
+		keyChallenge:        sdk.NewKVStoreKey(challenge.StoreKey),
+		keyFee:              sdk.NewKVStoreKey("fee_collection"),
+		keyGame:             sdk.NewKVStoreKey(game.StoreKey),
+		keyVotingStoryQueue: sdk.NewKVStoreKey(story.VotingQueueStoreKey),
+		keyVote:             sdk.NewKVStoreKey(vote.StoreKey),
+		api:                 nil,
+		apiStarted:          false,
+		blockCtx:            nil,
+		blockHeader:         abci.Header{},
+		registrarKey:        loadRegistrarKey(),
 	}
 
 	// The ParamsKeeper handles parameter storage for the application
@@ -155,6 +153,7 @@ func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *T
 		app.keyCategory,
 		codec,
 	)
+
 	app.storyKeeper = story.NewKeeper(
 		app.keyStory,
 		app.keyStoryQueue,
@@ -162,36 +161,39 @@ func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *T
 		app.paramsKeeper.Subspace(story.DefaultParamspace),
 		app.codec,
 	)
+
 	app.backingKeeper = backing.NewKeeper(
 		app.keyBacking,
-		app.keyChallengedStoryQueue,
-		app.keyGameQueue,
+		app.keyStoryQueue,
+		app.keyVotingStoryQueue,
 		app.storyKeeper,
 		app.coinKeeper,
 		app.categoryKeeper,
 		codec,
 	)
-	app.gameKeeper = game.NewKeeper(
-		app.keyGame,
-		app.keyChallengedStoryQueue,
-		app.keyGameQueue,
-		app.storyKeeper,
-		app.backingKeeper,
-		app.coinKeeper,
-		codec,
-	)
+
+	// app.gameKeeper = game.NewKeeper(
+	// 	app.keyGame,
+	// 	app.keyVotingStoryQueue,
+	// 	app.storyKeeper,
+	// 	app.backingKeeper,
+	// 	app.coinKeeper,
+	// 	codec,
+	// )
+
 	app.challengeKeeper = challenge.NewKeeper(
 		app.keyChallenge,
-		app.keyChallengedStoryQueue,
+		app.keyVotingStoryQueue,
 		app.backingKeeper,
 		app.coinKeeper,
 		app.gameKeeper,
 		app.storyKeeper,
 		codec,
 	)
+
 	app.voteKeeper = vote.NewKeeper(
 		app.keyVote,
-		app.keyGameQueue,
+		app.keyVotingStoryQueue,
 		app.accountKeeper,
 		app.backingKeeper,
 		app.challengeKeeper,
@@ -243,8 +245,7 @@ func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *T
 		app.keyChallenge,
 		app.keyFee,
 		app.keyGame,
-		app.keyChallengedStoryQueue,
-		app.keyGameQueue,
+		app.keyVotingStoryQueue,
 		app.keyIBC,
 		app.keyMain,
 		app.keyStory,
