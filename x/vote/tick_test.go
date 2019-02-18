@@ -1,69 +1,61 @@
 package vote
 
-import (
-	"testing"
+// func TestNewResponseEndBlock(t *testing.T) {
+// 	ctx, _, k := fakeValidationGame()
 
-	"github.com/cosmos/cosmos-sdk/store"
-	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/stretchr/testify/assert"
-)
+// 	tags := k.NewResponseEndBlock(ctx)
+// 	assert.Equal(t, sdk.Tags{}, tags)
+// }
 
-func TestNewResponseEndBlock(t *testing.T) {
-	ctx, _, k := fakeValidationGame()
+// func Test_checkGames(t *testing.T) {
+// 	ctx, _, k := fakeValidationGame()
 
-	tags := k.NewResponseEndBlock(ctx)
-	assert.Equal(t, sdk.Tags{}, tags)
-}
+// 	qStore := ctx.KVStore(k.gameQueueKey)
+// 	q := store.NewQueue(k.GetCodec(), qStore)
+// 	err := k.filterGameQueue(ctx, q)
+// 	assert.Nil(t, err)
+// }
 
-func Test_checkGames(t *testing.T) {
-	ctx, _, k := fakeValidationGame()
+// func Test_quorum(t *testing.T) {
+// 	ctx, votes, k := fakeValidationGame()
 
-	qStore := ctx.KVStore(k.gameQueueKey)
-	q := store.NewQueue(k.GetCodec(), qStore)
-	err := k.filterGameQueue(ctx, q)
-	assert.Nil(t, err)
-}
+// 	// get the gameID
+// 	qStore := ctx.KVStore(k.gameQueueKey)
+// 	q := store.NewQueue(k.GetCodec(), qStore)
+// 	var gameID int64
+// 	q.Peek(&gameID)
 
-func Test_quorum(t *testing.T) {
-	ctx, votes, k := fakeValidationGame()
+// 	// retrieve the game
+// 	game, _ := k.gameKeeper.Game(ctx, gameID)
 
-	// get the gameID
-	qStore := ctx.KVStore(k.gameQueueKey)
-	q := store.NewQueue(k.GetCodec(), qStore)
-	var gameID int64
-	q.Peek(&gameID)
+// 	story, _ := k.storyKeeper.Story(ctx, game.StoryID)
 
-	// retrieve the game
-	game, _ := k.gameKeeper.Game(ctx, gameID)
+// 	totalBCV, _ := k.quorum(ctx, story.ID)
 
-	story, _ := k.storyKeeper.Story(ctx, game.StoryID)
+// 	assert.Equal(t, len(votes.falseVotes)+len(votes.trueVotes), totalBCV)
+// }
 
-	totalBCV, _ := k.quorum(ctx, story.ID)
+// func Test_returnFunds(t *testing.T) {
+// 	ctx, votes, k := fakeValidationGame()
 
-	assert.Equal(t, len(votes.falseVotes)+len(votes.trueVotes), totalBCV)
-}
+// 	// get the gameID
+// 	qStore := ctx.KVStore(k.gameQueueKey)
+// 	q := store.NewQueue(k.GetCodec(), qStore)
+// 	var gameID int64
+// 	q.Peek(&gameID)
 
-func Test_returnFunds(t *testing.T) {
-	ctx, votes, k := fakeValidationGame()
+// 	vote := votes.falseVotes[1]
 
-	// get the gameID
-	qStore := ctx.KVStore(k.gameQueueKey)
-	q := store.NewQueue(k.GetCodec(), qStore)
-	var gameID int64
-	q.Peek(&gameID)
+// 	initialBalance := k.bankKeeper.GetCoins(ctx, vote.Creator())
+// 	assert.Equal(t, "1000000000000trusteak", initialBalance.String())
 
-	vote := votes.falseVotes[1]
+// 	err := k.returnFunds(ctx, gameID)
+// 	assert.Nil(t, err)
 
-	initialBalance := k.bankKeeper.GetCoins(ctx, vote.Creator())
-	assert.Equal(t, "1000000000000trusteak", initialBalance.String())
+// 	// no, not the sneaker
+// 	// FYI - Steve Jobs used to wear NB
+// 	expectedNewBalance := sdk.Coins{vote.Amount()}.Plus(initialBalance)
+// 	actualNewBalance := k.bankKeeper.GetCoins(ctx, vote.Creator())
 
-	err := k.returnFunds(ctx, gameID)
-	assert.Nil(t, err)
-
-	// no, not the sneaker
-	// FYI - Steve Jobs used to wear NB
-	expectedNewBalance := sdk.Coins{vote.Amount()}.Plus(initialBalance)
-	actualNewBalance := k.bankKeeper.GetCoins(ctx, vote.Creator())
-
-	assert.Equal(t, expectedNewBalance, actualNewBalance)
-}
+// 	assert.Equal(t, expectedNewBalance, actualNewBalance)
+// }
