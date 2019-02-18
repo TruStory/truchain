@@ -159,14 +159,14 @@ func (ta *TruAPI) RegisterResolvers() {
 	ta.GraphQLClient.RegisterObjectResolver("Story", story.Story{}, map[string]interface{}{
 		"id":                 func(_ context.Context, q story.Story) int64 { return q.ID },
 		"backings":           func(ctx context.Context, q story.Story) []backing.Backing { return getBackings(ctx, q.ID) },
-		"challenges":         func(ctx context.Context, q story.Story) []challenge.Challenge { return getChallenges(ctx, q.GameID) },
+		"challenges":         func(ctx context.Context, q story.Story) []challenge.Challenge { return getChallenges(ctx, q.ID) },
 		"backingTotal":       ta.backingTotalResolver,
 		"challengeThreshold": ta.challengeThresholdResolver,
 		"category":           ta.storyCategoryResolver,
 		"creator":            func(ctx context.Context, q story.Story) users.User { return getUser(ctx, q.Creator) },
 		"source":             func(ctx context.Context, q story.Story) string { return q.Source.String() },
 		"game":               ta.gameResolver,
-		"votes":              func(ctx context.Context, q story.Story) []vote.TokenVote { return getVotes(ctx, q.GameID) },
+		"votes":              func(ctx context.Context, q story.Story) []vote.TokenVote { return getVotes(ctx, q.ID) },
 
 		// Deprecated: now part of argument
 		"evidence": func(ctx context.Context, q story.Story) []url.URL { return []url.URL{} },

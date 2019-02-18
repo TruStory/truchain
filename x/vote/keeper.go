@@ -114,13 +114,13 @@ func (k Keeper) Create(
 	}
 
 	// make sure validation game has started
-	if story.GameID <= 0 {
-		return 0, ErrGameNotStarted(storyID)
-	}
+	// if story.GameID <= 0 {
+	// 	return 0, ErrGameNotStarted(storyID)
+	// }
 
 	// check if this voter has already cast a vote
-	if k.voterList.Includes(ctx, k, story.GameID, creator) {
-		return 0, ErrDuplicateVoteForGame(story.GameID, creator)
+	if k.voterList.Includes(ctx, k, story.ID, creator) {
+		return 0, ErrDuplicateVoteForGame(story.ID, creator)
 	}
 
 	// check if user has the funds
@@ -149,8 +149,8 @@ func (k Keeper) Create(
 	// persist vote
 	k.set(ctx, tokenVote)
 
-	// persist game <-> tokenVote association
-	k.voterList.Append(ctx, k, story.GameID, creator, vote.ID)
+	// persist story <-> tokenVote association
+	k.voterList.Append(ctx, k, story.ID, creator, vote.ID)
 
 	logger.Info(fmt.Sprintf(
 		"Voted on story %d with %s by %s", storyID, amount.String(), creator.String()))
@@ -201,7 +201,7 @@ func (k Keeper) TokenVotesByStoryIDAndCreator(
 	}
 
 	// get the vote
-	tokenVoteID := k.voterList.Get(ctx, k, s.GameID, creator)
+	tokenVoteID := k.voterList.Get(ctx, k, s.ID, creator)
 	vote, err = k.TokenVote(ctx, tokenVoteID)
 
 	return

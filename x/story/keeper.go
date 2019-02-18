@@ -170,7 +170,6 @@ func (k Keeper) Create(
 		Creator:    creator,
 		ExpireTime: ctx.BlockHeader().Time.Add(k.ExpireDuration(ctx)),
 		Flagged:    false,
-		GameID:     0,
 		Source:     source,
 		State:      Unconfirmed,
 		Type:       storyType,
@@ -313,10 +312,10 @@ func (k Keeper) UpdateStory(ctx sdk.Context, story Story) {
 		story.Creator,
 		story.ExpireTime,
 		story.Flagged,
-		story.GameID,
 		story.Source,
 		story.State,
 		story.Type,
+		story.VotingEndTime,
 		story.Timestamp.Update(ctx.BlockHeader()),
 	}
 

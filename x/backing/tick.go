@@ -3,7 +3,6 @@ package backing
 import (
 	"fmt"
 
-	list "github.com/cosmos/cosmos-sdk/store"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
@@ -21,85 +20,85 @@ func (k Keeper) NewResponseEndBlock(ctx sdk.Context) sdk.Tags {
 
 // processMaturedBackings checks to see if backings have matured
 func (k Keeper) processMaturedBackings(ctx sdk.Context) sdk.Error {
-	logger := ctx.Logger().With("module", "backing")
+	// logger := ctx.Logger().With("module", "backing")
 
-	// find all matured backings
-	var backingID int64
-	var indicesToDelete []uint64
-	backingList := k.backingList(ctx)
-	backingList.Iterate(&backingID, func(index uint64) bool {
-		var tempBackingID int64
-		err := backingList.Get(index, &tempBackingID)
-		if err != nil {
-			panic(err)
-		}
+	// // find all matured backings
+	// var backingID int64
+	// var indicesToDelete []uint64
+	// backingList := k.backingList(ctx)
+	// backingList.Iterate(&backingID, func(index uint64) bool {
+	// 	var tempBackingID int64
+	// 	err := backingList.Get(index, &tempBackingID)
+	// 	if err != nil {
+	// 		panic(err)
+	// 	}
 
-		backing, err := k.Backing(ctx, tempBackingID)
-		if err != nil {
-			panic(err)
-		}
+	// 	backing, err := k.Backing(ctx, tempBackingID)
+	// 	if err != nil {
+	// 		panic(err)
+	// 	}
 
-		if k.isGameInSession(ctx, backing.StoryID()) {
-			// skip maturing it
-			// process next one
-			return false
-		}
+	// 	if k.isGameInSession(ctx, backing.StoryID()) {
+	// 		// skip maturing it
+	// 		// process next one
+	// 		return false
+	// 	}
 
-		if backing.HasMatured(ctx.BlockHeader().Time) {
-			indicesToDelete = append(indicesToDelete, index)
+	// 	if backing.HasMatured(ctx.BlockHeader().Time) {
+	// 		indicesToDelete = append(indicesToDelete, index)
 
-			// distribute earnings from matured backings
-			err := k.distributeEarnings(ctx, backing)
-			if err != nil {
-				panic(err)
-			}
-		}
-		return false
-	})
+	// 		// distribute earnings from matured backings
+	// 		err := k.distributeEarnings(ctx, backing)
+	// 		if err != nil {
+	// 			panic(err)
+	// 		}
+	// 	}
+	// 	return false
+	// })
 
-	for _, v := range indicesToDelete {
-		backingList.Delete(v)
-		msg := "Removed matured backing %d from backing list"
-		logger.Info(fmt.Sprintf(msg, backingID))
-	}
+	// for _, v := range indicesToDelete {
+	// 	backingList.Delete(v)
+	// 	msg := "Removed matured backing %d from backing list"
+	// 	logger.Info(fmt.Sprintf(msg, backingID))
+	// }
 
 	return nil
 }
 
-func (k Keeper) isGameInSession(ctx sdk.Context, storyID int64) bool {
-	story, err := k.storyKeeper.Story(ctx, storyID)
-	if err != nil {
-		panic(err)
-	}
+// func (k Keeper) isGameInSession(ctx sdk.Context, storyID int64) bool {
+// 	story, err := k.storyKeeper.Story(ctx, storyID)
+// 	if err != nil {
+// 		panic(err)
+// 	}
 
-	gameID := story.GameID
+// 	gameID := story.GameID
 
-	// check if game is going on...
-	if gameID > 0 {
-		gameFoundInPendingGameList := k.isGameInList(k.pendingGameList(ctx), gameID)
-		gameFoundInGameQueue := k.isGameInList(k.gameQueue(ctx).List, gameID)
-		if gameFoundInPendingGameList || gameFoundInGameQueue {
-			// backing is in challenged or voting phase
-			return true
-		}
-	}
+// 	// check if game is going on...
+// 	if gameID > 0 {
+// 		gameFoundInPendingGameList := k.isGameInList(k.pendingGameList(ctx), gameID)
+// 		gameFoundInGameQueue := k.isGameInList(k.gameQueue(ctx).List, gameID)
+// 		if gameFoundInPendingGameList || gameFoundInGameQueue {
+// 			// backing is in challenged or voting phase
+// 			return true
+// 		}
+// 	}
 
-	return false
-}
+// 	return false
+// }
 
-func (k Keeper) isGameInList(gameList list.List, gameID int64) bool {
-	var found bool
-	var ID int64
-	gameList.Iterate(&ID, func(uint64) bool {
-		if ID == gameID {
-			found = true
-			return true
-		}
-		return false
-	})
+// func (k Keeper) isGameInList(gameList list.List, gameID int64) bool {
+// 	var found bool
+// 	var ID int64
+// 	gameList.Iterate(&ID, func(uint64) bool {
+// 		if ID == gameID {
+// 			found = true
+// 			return true
+// 		}
+// 		return false
+// 	})
 
-	return found
-}
+// 	return found
+// }
 
 // distributeEarnings adds coins from the backing to the user.
 // Earnings is the original amount (principal) + interest.

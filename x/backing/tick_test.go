@@ -57,31 +57,31 @@ func Test_processMaturedBackings_MaturedBackings(t *testing.T) {
 	assert.Nil(t, err)
 }
 
-func Test_processMaturedBackings_GameInSession(t *testing.T) {
-	ctx, bk, sk, ck, bankKeeper, _ := mockDB()
-	storyID := createFakeStory(ctx, sk, ck)
-	amount, _ := sdk.ParseCoin("5trudex")
-	argument := "cool story brew"
-	creator := sdk.AccAddress([]byte{1, 2})
-	duration := 99 * time.Hour
-	bankKeeper.AddCoins(ctx, creator, sdk.Coins{amount})
-	bk.Create(ctx, storyID, amount, argument, creator, duration)
-	bk.Create(ctx, storyID, amount, argument, creator, duration)
-	bk.Create(ctx, storyID, amount, argument, creator, duration)
-	bk.Create(ctx, storyID, amount, argument, creator, duration)
-	bk.Create(ctx, storyID, amount, argument, creator, duration)
+// func Test_processMaturedBackings_GameInSession(t *testing.T) {
+// 	ctx, bk, sk, ck, bankKeeper, _ := mockDB()
+// 	storyID := createFakeStory(ctx, sk, ck)
+// 	amount, _ := sdk.ParseCoin("5trudex")
+// 	argument := "cool story brew"
+// 	creator := sdk.AccAddress([]byte{1, 2})
+// 	duration := 99 * time.Hour
+// 	bankKeeper.AddCoins(ctx, creator, sdk.Coins{amount})
+// 	bk.Create(ctx, storyID, amount, argument, creator, duration)
+// 	bk.Create(ctx, storyID, amount, argument, creator, duration)
+// 	bk.Create(ctx, storyID, amount, argument, creator, duration)
+// 	bk.Create(ctx, storyID, amount, argument, creator, duration)
+// 	bk.Create(ctx, storyID, amount, argument, creator, duration)
 
-	story, _ := sk.Story(ctx, storyID)
-	story.GameID = 5
-	sk.UpdateStory(ctx, story)
+// 	story, _ := sk.Story(ctx, storyID)
+// 	story.GameID = 5
+// 	sk.UpdateStory(ctx, story)
 
-	gameList := bk.pendingGameList(ctx)
-	var testID int64 = 5
-	gameList.Push(testID)
+// 	gameList := bk.pendingGameList(ctx)
+// 	var testID int64 = 5
+// 	gameList.Push(testID)
 
-	err := bk.processMaturedBackings(ctx)
-	assert.Nil(t, err)
-}
+// 	err := bk.processMaturedBackings(ctx)
+// 	assert.Nil(t, err)
+// }
 
 func Test_distributeEarnings(t *testing.T) {
 	ctx, bk, _, _, _, _ := mockDB()
@@ -117,15 +117,15 @@ func Test_distributeEarnings(t *testing.T) {
 	assert.Nil(t, err)
 }
 
-func Test_isGameInList(t *testing.T) {
-	ctx, k, _, _, _, _ := mockDB()
-	gameList := k.pendingGameList(ctx)
-	var testID int64 = 5
-	gameList.Push(testID)
+// func Test_isGameInList(t *testing.T) {
+// 	ctx, k, _, _, _, _ := mockDB()
+// 	gameList := k.pendingGameList(ctx)
+// 	var testID int64 = 5
+// 	gameList.Push(testID)
 
-	found := k.isGameInList(gameList, 5)
-	assert.True(t, found)
+// 	found := k.isGameInList(gameList, 5)
+// 	assert.True(t, found)
 
-	found = k.isGameInList(gameList, 4)
-	assert.False(t, found)
-}
+// 	found = k.isGameInList(gameList, 4)
+// 	assert.False(t, found)
+// }
