@@ -52,20 +52,21 @@ type TruChain struct {
 	codec *codec.Codec
 
 	// keys to access the multistore
-	keyAccount          *sdk.KVStoreKey
-	keyBacking          *sdk.KVStoreKey
-	keyCategory         *sdk.KVStoreKey
-	keyChallenge        *sdk.KVStoreKey
-	keyFee              *sdk.KVStoreKey
-	keyGame             *sdk.KVStoreKey
-	keyIBC              *sdk.KVStoreKey
-	keyMain             *sdk.KVStoreKey
-	keyStory            *sdk.KVStoreKey
-	keyStoryQueue       *sdk.KVStoreKey
-	keyVotingStoryQueue *sdk.KVStoreKey
-	keyVote             *sdk.KVStoreKey
-	keyParams           *sdk.KVStoreKey
-	tkeyParams          *sdk.TransientStoreKey
+	keyAccount           *sdk.KVStoreKey
+	keyBacking           *sdk.KVStoreKey
+	keyCategory          *sdk.KVStoreKey
+	keyChallenge         *sdk.KVStoreKey
+	keyFee               *sdk.KVStoreKey
+	keyGame              *sdk.KVStoreKey
+	keyIBC               *sdk.KVStoreKey
+	keyMain              *sdk.KVStoreKey
+	keyStory             *sdk.KVStoreKey
+	keyStoryQueue        *sdk.KVStoreKey
+	keyVotingStoryQueue  *sdk.KVStoreKey
+	keyExpiredStoryQueue *sdk.KVStoreKey
+	keyVote              *sdk.KVStoreKey
+	keyParams            *sdk.KVStoreKey
+	tkeyParams           *sdk.TransientStoreKey
 
 	// manage getting and setting accounts
 	accountKeeper       auth.AccountKeeper
@@ -109,23 +110,24 @@ func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *T
 		keyParams:  sdk.NewKVStoreKey("params"),
 		tkeyParams: sdk.NewTransientStoreKey("transient_params"),
 
-		keyMain:             sdk.NewKVStoreKey("main"),
-		keyAccount:          sdk.NewKVStoreKey("acc"),
-		keyIBC:              sdk.NewKVStoreKey("ibc"),
-		keyStory:            sdk.NewKVStoreKey(story.StoreKey),
-		keyStoryQueue:       sdk.NewKVStoreKey(story.QueueStoreKey),
-		keyCategory:         sdk.NewKVStoreKey(category.StoreKey),
-		keyBacking:          sdk.NewKVStoreKey(backing.StoreKey),
-		keyChallenge:        sdk.NewKVStoreKey(challenge.StoreKey),
-		keyFee:              sdk.NewKVStoreKey("fee_collection"),
-		keyGame:             sdk.NewKVStoreKey(game.StoreKey),
-		keyVotingStoryQueue: sdk.NewKVStoreKey(story.VotingQueueStoreKey),
-		keyVote:             sdk.NewKVStoreKey(vote.StoreKey),
-		api:                 nil,
-		apiStarted:          false,
-		blockCtx:            nil,
-		blockHeader:         abci.Header{},
-		registrarKey:        loadRegistrarKey(),
+		keyMain:              sdk.NewKVStoreKey("main"),
+		keyAccount:           sdk.NewKVStoreKey("acc"),
+		keyIBC:               sdk.NewKVStoreKey("ibc"),
+		keyStory:             sdk.NewKVStoreKey(story.StoreKey),
+		keyStoryQueue:        sdk.NewKVStoreKey(story.QueueStoreKey),
+		keyCategory:          sdk.NewKVStoreKey(category.StoreKey),
+		keyBacking:           sdk.NewKVStoreKey(backing.StoreKey),
+		keyChallenge:         sdk.NewKVStoreKey(challenge.StoreKey),
+		keyFee:               sdk.NewKVStoreKey("fee_collection"),
+		keyGame:              sdk.NewKVStoreKey(game.StoreKey),
+		keyVotingStoryQueue:  sdk.NewKVStoreKey(story.VotingQueueStoreKey),
+		keyExpiredStoryQueue: sdk.NewKVStoreKey(story.ExpiredQueueStoreKey),
+		keyVote:              sdk.NewKVStoreKey(vote.StoreKey),
+		api:                  nil,
+		apiStarted:           false,
+		blockCtx:             nil,
+		blockHeader:          abci.Header{},
+		registrarKey:         loadRegistrarKey(),
 	}
 
 	// The ParamsKeeper handles parameter storage for the application
