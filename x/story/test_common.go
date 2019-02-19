@@ -20,6 +20,7 @@ func mockDB() (sdk.Context, Keeper, c.Keeper) {
 
 	storyKey := sdk.NewKVStoreKey("stories")
 	storyQueueKey := sdk.NewKVStoreKey("storyQueue")
+	votingStoryQueueKey := sdk.NewKVStoreKey("votingStoryQueue")
 	catKey := sdk.NewKVStoreKey("categories")
 	challengeKey := sdk.NewKVStoreKey("challenges")
 	paramsKey := sdk.NewKVStoreKey(params.StoreKey)
@@ -28,6 +29,7 @@ func mockDB() (sdk.Context, Keeper, c.Keeper) {
 	ms := store.NewCommitMultiStore(db)
 	ms.MountStoreWithDB(storyKey, sdk.StoreTypeIAVL, db)
 	ms.MountStoreWithDB(storyQueueKey, sdk.StoreTypeIAVL, db)
+	ms.MountStoreWithDB(votingStoryQueueKey, sdk.StoreTypeIAVL, db)
 	ms.MountStoreWithDB(catKey, sdk.StoreTypeIAVL, db)
 	ms.MountStoreWithDB(challengeKey, sdk.StoreTypeIAVL, db)
 	ms.MountStoreWithDB(paramsKey, sdk.StoreTypeIAVL, db)
@@ -42,7 +44,13 @@ func mockDB() (sdk.Context, Keeper, c.Keeper) {
 
 	ck := c.NewKeeper(catKey, codec)
 	pk := params.NewKeeper(codec, paramsKey, transientParamsKey)
-	sk := NewKeeper(storyKey, storyQueueKey, ck, pk.Subspace(DefaultParamspace), codec)
+	sk := NewKeeper(
+		storyKey,
+		storyQueueKey,
+		votingStoryQueueKey,
+		ck,
+		pk.Subspace(DefaultParamspace),
+		codec)
 	InitGenesis(ctx, sk, DefaultGenesisState())
 
 	return ctx, sk, ck
