@@ -206,6 +206,7 @@ func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *T
 		app.backingKeeper,
 		app.challengeKeeper,
 		app.coinKeeper,
+		app.paramsKeeper.Subspace(distribution.DefaultParamspace),
 		codec,
 	)
 
