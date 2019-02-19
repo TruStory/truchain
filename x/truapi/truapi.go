@@ -41,9 +41,22 @@ func NewTruAPI(aa *chttp.App) *TruAPI {
 	return &ta
 }
 
+// [hschoenburg] TODO device token table added here
+// associate with wallet address
+// follow pattern for TwitterProfile
+
 // RegisterModels registers types for off-chain DB models
 func (ta *TruAPI) RegisterModels() {
 	err := ta.DBClient.RegisterModel(&db.TwitterProfile{})
+	if err != nil {
+		panic(err)
+	}
+
+  err = ta.DBClient.RegisterModel(&db.DeviceToken{})
+	if err != nil {
+		panic(err)
+	}
+  err = ta.DBClient.RegisterModel(&db.PushNotif{})
 	if err != nil {
 		panic(err)
 	}
@@ -58,6 +71,7 @@ func (ta *TruAPI) RegisterRoutes() {
 	ta.HandleFunc("/graphql", ta.HandleGraphQL)
 	ta.HandleFunc("/presigned", ta.HandlePresigned)
 	ta.HandleFunc("/register", ta.HandleRegistration)
+  ta.HandleFunc("/device", ta.HandleDevice)
 }
 
 // RegisterResolvers builds the app's GraphQL schema from resolvers (declared in `resolver.go`)

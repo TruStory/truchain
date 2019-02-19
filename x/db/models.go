@@ -1,6 +1,9 @@
 package db
 
-import "fmt"
+import (
+	"fmt"
+	"time"
+)
 
 // Datastore defines all operations on the DB
 // This interface can be mocked out for tests, etc.
@@ -13,6 +16,7 @@ type Datastore interface {
 type Mutations interface {
 	GenericMutations
 	UpsertTwitterProfile(profile *TwitterProfile) error
+	InsertDeviceToken(token *DeviceToken) error
 }
 
 // Queries read from the database
@@ -56,5 +60,54 @@ func (c *Client) UpsertTwitterProfile(profile *TwitterProfile) error {
 		Set("address = EXCLUDED.address, username = EXCLUDED.username, full_name = EXCLUDED.full_name, avatar_uri = EXCLUDED.avatar_uri").
 		Insert()
 
+	return err
+}
+
+// DeviceToken is q device token associated with an account
+type DeviceToken struct {
+	ID      int64  `json:"id"`
+	Address string `json:"address"`
+	Token   string `json:"token"`
+}
+
+// DeviceToken implements `String`
+func (d DeviceToken) String() string {
+	return fmt.Sprintf("Device Token<%d %s %s>", d.ID, d.Address, d.Token)
+}
+
+// InsertDeviceToken implements `Datastore`.
+// Inserts a new DeviceToken for an address
+// Multiple tokens per address allow users to use multiple devices
+func (c *Client) InsertDeviceToken(token *DeviceToken) error {
+	_, err := c.Model(token).Insert()
+	return err
+}
+
+// stores a push notif queued for delivery
+type PushNotif struct {
+	ID        int64
+	Token     string
+	Payload   string
+  Tag       string
+	Scheduled time.Time
+	Sent      time.Time
+}
+
+// PushNotif implements `String`
+func (p PushNotif) String() string {
+	return fmt.Sprintf("Push Notif<%d %s %s %s %s %s>", p.ID, p.Token, p.Payload, p.Tag, p.Scheduled, p.Sent)
+}
+
+// InsertPushNotif implements `Datastore`.
+// Inserts a new PushNotif
+func (c *Client) InsertPushNotif(notif *PushNotif) error {
+	_, err := c.Model(notif).Insert()
+	return err
+}
+
+// UpdatePushNotif implements `Datastore`.
+// Updates an existing notif to mark as sent.
+func (c *Client) UpdatePushNotif(notif *PushNotif) error {
+	_, err := c.Model(notif).Update()
 	return err
 }
