@@ -37,7 +37,7 @@ func (k Keeper) processStoryQueue(ctx sdk.Context, storyQueue queue.Queue) sdk.E
 		return err
 	}
 
-	if story.State == Challenged {
+	if story.State == Voting {
 		// add story id to challenged story queue
 	}
 
