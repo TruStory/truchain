@@ -59,7 +59,7 @@ This is the private key to the account added in step 3b.
 
 Copy `genesis.json` from secrets repo into `.chain/config`.
 
-Run `make wipe_chain`. 
+Run `make reset`. 
 
 Open the `genesis.json` file and in the "validators" section overwrite the "address" and "pub_key"->"value" fields with the corresponding values from `.chain/config/priv_validator.json`.
 
@@ -67,7 +67,7 @@ Open the `genesis.json` file and in the "validators" section overwrite the "addr
 
 `make start`
 
-You can wipe the chain, build, and start using the alias `make bwr`.
+You can wipe the chain, build, and start using the alias `make restart`.
 
 ## GraphQL Queries
 You can reach your client at `http://localhost:3030/graphiql/`
