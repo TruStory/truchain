@@ -58,11 +58,11 @@ type TruChain struct {
 	keyChallenge        *sdk.KVStoreKey
 	keyFee              *sdk.KVStoreKey
 	keyGame             *sdk.KVStoreKey
-	keyVotingStoryQueue *sdk.KVStoreKey
 	keyIBC              *sdk.KVStoreKey
 	keyMain             *sdk.KVStoreKey
 	keyStory            *sdk.KVStoreKey
 	keyStoryQueue       *sdk.KVStoreKey
+	keyVotingStoryQueue *sdk.KVStoreKey
 	keyVote             *sdk.KVStoreKey
 	keyParams           *sdk.KVStoreKey
 	tkeyParams          *sdk.TransientStoreKey
@@ -328,9 +328,9 @@ func (app *TruChain) BeginBlocker(ctx sdk.Context, req abci.RequestBeginBlock) a
 // application.
 func (app *TruChain) EndBlocker(ctx sdk.Context, _ abci.RequestEndBlock) abci.ResponseEndBlock {
 	app.storyKeeper.NewResponseEndBlock(ctx)
-	app.backingKeeper.NewResponseEndBlock(ctx)
-	app.challengeKeeper.NewResponseEndBlock(ctx)
-	app.voteKeeper.NewResponseEndBlock(ctx)
+	// app.backingKeeper.NewResponseEndBlock(ctx)
+	// app.challengeKeeper.NewResponseEndBlock(ctx)
+	// app.voteKeeper.NewResponseEndBlock(ctx)
 
 	return abci.ResponseEndBlock{}
 }

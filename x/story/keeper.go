@@ -98,7 +98,7 @@ func (k Keeper) StartGame(
 	}
 
 	// update story state
-	story.State = Challenged
+	story.State = Voting
 	k.UpdateStory(ctx, story)
 
 	// add story to challenged list
@@ -171,7 +171,7 @@ func (k Keeper) Create(
 		ExpireTime: ctx.BlockHeader().Time.Add(k.ExpireDuration(ctx)),
 		Flagged:    false,
 		Source:     source,
-		State:      Unconfirmed,
+		State:      Review,
 		Type:       storyType,
 		Timestamp:  app.NewTimestamp(ctx.BlockHeader()),
 	}

@@ -16,8 +16,8 @@ type State int8
 
 // List of acceptable story states
 const (
-	Unconfirmed = State(iota)
-	Challenged
+	Review = State(iota)
+	Voting
 	Confirmed
 	Rejected
 	Expired
@@ -26,14 +26,14 @@ const (
 // IsValid returns true if the value is listed in the enum definition, false otherwise.
 func (i State) IsValid() bool {
 	switch i {
-	case Unconfirmed, Challenged, Confirmed, Rejected, Expired:
+	case Review, Voting, Confirmed, Rejected, Expired:
 		return true
 	}
 	return false
 }
 
 func (i State) String() string {
-	return [...]string{"Unconfirmed", "Challenged", "Confirmed", "Rejected", "Expired"}[i]
+	return [...]string{"Review", "Voting", "Confirmed", "Rejected", "Expired"}[i]
 }
 
 // Type is a type that defines a story type
