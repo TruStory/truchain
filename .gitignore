@@ -25,6 +25,7 @@ node_modules/
 .DS_Store
 ./registrar.key
 .env
+web/
 
 # These stay ignored until we switch to modules
 go.mod
