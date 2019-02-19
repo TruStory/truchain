@@ -8,6 +8,7 @@ import (
 	queue "github.com/cosmos/cosmos-sdk/store"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/bank"
+	"github.com/cosmos/cosmos-sdk/x/params"
 	amino "github.com/tendermint/go-amino"
 )
 
@@ -26,6 +27,7 @@ type Keeper struct {
 	backingKeeper   backing.WriteKeeper
 	challengeKeeper challenge.WriteKeeper
 	bankKeeper      bank.Keeper
+	paramStore      params.Subspace
 }
 
 // NewKeeper creates a new keeper with write and read access
@@ -36,6 +38,7 @@ func NewKeeper(
 	backingKeeper backing.WriteKeeper,
 	challengeKeeper challenge.WriteKeeper,
 	bankKeeper bank.Keeper,
+	paramStore params.Subspace,
 	codec *amino.Codec) Keeper {
 
 	return Keeper{
@@ -45,6 +48,7 @@ func NewKeeper(
 		backingKeeper,
 		challengeKeeper,
 		bankKeeper,
+		paramStore,
 	}
 }
 
