@@ -37,21 +37,18 @@ func (k Keeper) processStoryQueue(ctx sdk.Context, storyQueue queue.Queue) sdk.E
 		return err
 	}
 
-	if story.State == Voting {
-		// add story id to challenged story queue
-	}
-
-	// move challenges and votes to associate with story id, not game
-	// remove game
-
-	// process challenged story queue
-	// -- check block time > voting end time (add field to story)
-	// -- if so, tally and distribute
-	// -- if not, move to next block
-
-	// get rid of pending game list and game queue
-
 	logger.Info("Processing " + story.String())
+
+	// if the state of the story has changed to voting,
+	// add it to the voting story queue to be handled later
+	if story.State == Voting {
+		logger.Info("Voting begun for " + story.String())
+		k.votingStoryQueue(ctx).Push(storyID)
+
+		// pop and process next story
+		storyQueue.Pop()
+		return k.processStoryQueue(ctx, storyQueue)
+	}
 
 	if ctx.BlockHeader().Time.Before(story.ExpireTime) {
 		// story hasn't expired yet
@@ -59,7 +56,7 @@ func (k Keeper) processStoryQueue(ctx sdk.Context, storyQueue queue.Queue) sdk.E
 		return nil
 	}
 
-	logger.Info(fmt.Sprintf("Handling expired story: %d", story.ID))
+	logger.Info(fmt.Sprintf("Handling expired: %d", story.ID))
 
 	storyQueue.Pop()
 	story.State = Expired
@@ -68,3 +65,9 @@ func (k Keeper) processStoryQueue(ctx sdk.Context, storyQueue queue.Queue) sdk.E
 	// check next story
 	return k.processStoryQueue(ctx, storyQueue)
 }
+
+// TODO
+// process voting story queue
+// -- check block time > voting end time (add field to story)
+// -- if so, tally and distribute
+// -- if not, move to next block

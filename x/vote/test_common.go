@@ -73,7 +73,7 @@ func mockDB() (sdk.Context, Keeper, c.Keeper) {
 		bank.DefaultCodespace,
 	)
 	ck := c.NewKeeper(catKey, codec)
-	sk := story.NewKeeper(storyKey, storyQueueKey, ck, pk.Subspace(story.DefaultParamspace), codec)
+	sk := story.NewKeeper(storyKey, storyQueueKey, votingStoryQueueKey, ck, pk.Subspace(story.DefaultParamspace), codec)
 	story.InitGenesis(ctx, sk, story.DefaultGenesisState())
 
 	backingKeeper := backing.NewKeeper(

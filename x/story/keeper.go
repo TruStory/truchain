@@ -64,15 +64,17 @@ type WriteKeeper interface {
 type Keeper struct {
 	app.Keeper
 
-	storyQueueKey  sdk.StoreKey
-	categoryKeeper category.ReadKeeper
-	paramStore     params.Subspace
+	storyQueueKey       sdk.StoreKey
+	votingStoryQueueKey sdk.StoreKey
+	categoryKeeper      category.ReadKeeper
+	paramStore          params.Subspace
 }
 
 // NewKeeper creates a new keeper with write and read access
 func NewKeeper(
 	storeKey sdk.StoreKey,
 	storyQueueKey sdk.StoreKey,
+	votingStoryQueueKey sdk.StoreKey,
 	categoryKeeper category.ReadKeeper,
 	paramStore params.Subspace,
 	codec *amino.Codec) Keeper {
@@ -80,6 +82,7 @@ func NewKeeper(
 	return Keeper{
 		app.NewKeeper(codec, storeKey),
 		storyQueueKey,
+		votingStoryQueueKey,
 		categoryKeeper,
 		paramStore.WithTypeTable(ParamTypeTable()),
 	}
@@ -396,6 +399,11 @@ func (k Keeper) storyIDsByCategoryID(
 
 func (k Keeper) storyQueue(ctx sdk.Context) queue.Queue {
 	store := ctx.KVStore(k.storyQueueKey)
+	return queue.NewQueue(k.GetCodec(), store)
+}
+
+func (k Keeper) votingStoryQueue(ctx sdk.Context) queue.Queue {
+	store := ctx.KVStore(k.votingStoryQueueKey)
 	return queue.NewQueue(k.GetCodec(), store)
 }
 
