@@ -37,6 +37,20 @@ func (k Keeper) processStoryQueue(ctx sdk.Context, storyQueue queue.Queue) sdk.E
 		return err
 	}
 
+	if story.State == Challenged {
+		// add story id to challenged story queue
+	}
+
+	// move challenges and votes to associate with story id, not game
+	// remove game
+
+	// process challenged story queue
+	// -- check block time > voting end time (add field to story)
+	// -- if so, tally and distribute
+	// -- if not, move to next block
+
+	// get rid of pending game list and game queue
+
 	logger.Info("Processing " + story.String())
 
 	if ctx.BlockHeader().Time.Before(story.ExpireTime) {
