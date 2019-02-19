@@ -10,7 +10,7 @@ import (
 func TestNewResponseEndBlock(t *testing.T) {
 	ctx, k := fakePendingGameQueue()
 
-	tags := k.NewResponseEndBlock(ctx)
+	tags := k.EndBlock(ctx)
 	assert.Equal(t, sdk.Tags{}, tags)
 }
 

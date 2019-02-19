@@ -32,6 +32,7 @@ func mockDB() (
 	accKey := sdk.NewKVStoreKey(auth.StoreKey)
 	storyKey := sdk.NewKVStoreKey(story.StoreKey)
 	storyQueueKey := sdk.NewKVStoreKey(story.QueueStoreKey)
+	expiredStoryQueueKey := sdk.NewKVStoreKey(story.ExpiredQueueStoreKey)
 	votingStoryQueueKey := sdk.NewKVStoreKey(story.VotingQueueStoreKey)
 	catKey := sdk.NewKVStoreKey(category.StoreKey)
 	backingKey := sdk.NewKVStoreKey(StoreKey)
@@ -44,6 +45,7 @@ func mockDB() (
 	ms.MountStoreWithDB(accKey, sdk.StoreTypeIAVL, db)
 	ms.MountStoreWithDB(storyKey, sdk.StoreTypeIAVL, db)
 	ms.MountStoreWithDB(storyQueueKey, sdk.StoreTypeIAVL, db)
+	ms.MountStoreWithDB(expiredStoryQueueKey, sdk.StoreTypeIAVL, db)
 	ms.MountStoreWithDB(catKey, sdk.StoreTypeIAVL, db)
 	ms.MountStoreWithDB(backingKey, sdk.StoreTypeIAVL, db)
 	ms.MountStoreWithDB(pendingGameListKey, sdk.StoreTypeIAVL, db)
@@ -70,7 +72,15 @@ func mockDB() (
 		bank.DefaultCodespace,
 	)
 
-	sk := story.NewKeeper(storyKey, storyQueueKey, votingStoryQueueKey, ck, pk.Subspace(story.DefaultParamspace), codec)
+	sk := story.NewKeeper(
+		storyKey,
+		storyQueueKey,
+		expiredStoryQueueKey,
+		votingStoryQueueKey,
+		ck,
+		pk.Subspace(story.DefaultParamspace),
+		codec)
+
 	story.InitGenesis(ctx, sk, story.DefaultGenesisState())
 
 	bk := NewKeeper(

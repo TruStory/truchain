@@ -41,7 +41,7 @@ func queryByGameID(
 		return
 	}
 
-	challenges, sdkErr := k.ChallengesByGameID(ctx, params.ID)
+	challenges, sdkErr := k.ChallengesByStoryID(ctx, params.ID)
 	if sdkErr != nil {
 		return
 	}

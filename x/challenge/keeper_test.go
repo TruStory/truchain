@@ -73,7 +73,7 @@ func TestChallengesByGameID(t *testing.T) {
 	k.Create(ctx, storyID, amount, argument, creator2)
 
 	story, _ := sk.Story(ctx, storyID)
-	challenges, _ := k.ChallengesByGameID(ctx, story.ID)
+	challenges, _ := k.ChallengesByStoryID(ctx, story.ID)
 	assert.Equal(t, 2, len(challenges))
 }
 
