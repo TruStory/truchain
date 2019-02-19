@@ -12,7 +12,7 @@ import (
 func TestNewResponseEndBlock(t *testing.T) {
 	ctx, storyKeeper := fakeStories()
 
-	tags := storyKeeper.NewResponseEndBlock(ctx)
+	tags := storyKeeper.EndBlock(ctx)
 	assert.Equal(t, sdk.Tags{}, tags)
 }
 

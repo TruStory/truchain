@@ -12,6 +12,7 @@ import (
 	"github.com/TruStory/truchain/x/backing"
 	"github.com/TruStory/truchain/x/category"
 	"github.com/TruStory/truchain/x/challenge"
+	"github.com/TruStory/truchain/x/distribution"
 	"github.com/TruStory/truchain/x/game"
 	clientParams "github.com/TruStory/truchain/x/params"
 	"github.com/TruStory/truchain/x/story"
@@ -56,6 +57,7 @@ type TruChain struct {
 	keyBacking           *sdk.KVStoreKey
 	keyCategory          *sdk.KVStoreKey
 	keyChallenge         *sdk.KVStoreKey
+	keyDistribution      *sdk.KVStoreKey
 	keyFee               *sdk.KVStoreKey
 	keyGame              *sdk.KVStoreKey
 	keyIBC               *sdk.KVStoreKey
@@ -76,12 +78,13 @@ type TruChain struct {
 	paramsKeeper        sdkparams.Keeper
 
 	// access truchain database
-	storyKeeper     story.WriteKeeper
-	categoryKeeper  category.WriteKeeper
-	backingKeeper   backing.WriteKeeper
-	challengeKeeper challenge.WriteKeeper
-	gameKeeper      game.WriteKeeper
-	voteKeeper      vote.WriteKeeper
+	storyKeeper        story.WriteKeeper
+	categoryKeeper     category.WriteKeeper
+	backingKeeper      backing.WriteKeeper
+	challengeKeeper    challenge.WriteKeeper
+	gameKeeper         game.WriteKeeper
+	voteKeeper         vote.WriteKeeper
+	distributionKeeper distribution.Keeper
 
 	// state to run api
 	blockCtx     *sdk.Context
@@ -118,6 +121,7 @@ func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *T
 		keyCategory:          sdk.NewKVStoreKey(category.StoreKey),
 		keyBacking:           sdk.NewKVStoreKey(backing.StoreKey),
 		keyChallenge:         sdk.NewKVStoreKey(challenge.StoreKey),
+		keyDistribution:      sdk.NewKVStoreKey(distribution.StoreKey),
 		keyFee:               sdk.NewKVStoreKey("fee_collection"),
 		keyGame:              sdk.NewKVStoreKey(game.StoreKey),
 		keyVotingStoryQueue:  sdk.NewKVStoreKey(story.VotingQueueStoreKey),
@@ -159,6 +163,7 @@ func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *T
 	app.storyKeeper = story.NewKeeper(
 		app.keyStory,
 		app.keyStoryQueue,
+		app.keyExpiredStoryQueue,
 		app.keyVotingStoryQueue,
 		app.categoryKeeper,
 		app.paramsKeeper.Subspace(story.DefaultParamspace),
@@ -191,6 +196,16 @@ func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *T
 		app.coinKeeper,
 		app.gameKeeper,
 		app.storyKeeper,
+		codec,
+	)
+
+	app.distributionKeeper = distribution.NewKeeper(
+		app.keyDistribution,
+		app.keyExpiredStoryQueue,
+		app.storyKeeper,
+		app.backingKeeper,
+		app.challengeKeeper,
+		app.coinKeeper,
 		codec,
 	)
 
@@ -246,13 +261,15 @@ func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *T
 		app.keyBacking,
 		app.keyCategory,
 		app.keyChallenge,
+		app.keyDistribution,
 		app.keyFee,
 		app.keyGame,
-		app.keyVotingStoryQueue,
 		app.keyIBC,
 		app.keyMain,
 		app.keyStory,
 		app.keyStoryQueue,
+		app.keyExpiredStoryQueue,
+		app.keyVotingStoryQueue,
 		app.keyVote)
 
 	app.MountStoresTransient(app.tkeyParams)
@@ -330,7 +347,8 @@ func (app *TruChain) BeginBlocker(ctx sdk.Context, req abci.RequestBeginBlock) a
 // EndBlocker reflects logic to run after all TXs are processed by the
 // application.
 func (app *TruChain) EndBlocker(ctx sdk.Context, _ abci.RequestEndBlock) abci.ResponseEndBlock {
-	app.storyKeeper.NewResponseEndBlock(ctx)
+	app.storyKeeper.EndBlock(ctx)
+	app.distributionKeeper.EndBlock(ctx)
 	// app.backingKeeper.NewResponseEndBlock(ctx)
 	// app.challengeKeeper.NewResponseEndBlock(ctx)
 	// app.voteKeeper.NewResponseEndBlock(ctx)

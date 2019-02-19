@@ -7,8 +7,8 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
-// NewResponseEndBlock is called at the end of every block tick
-func (k Keeper) NewResponseEndBlock(ctx sdk.Context) sdk.Tags {
+// EndBlock is called at the end of every block tick
+func (k Keeper) EndBlock(ctx sdk.Context) sdk.Tags {
 	err := k.processStoryQueue(ctx, k.storyQueue(ctx))
 	if err != nil {
 		panic(err)
@@ -19,7 +19,9 @@ func (k Keeper) NewResponseEndBlock(ctx sdk.Context) sdk.Tags {
 
 // ============================================================================
 
-// processStoryQueue checks to see if a story has expired
+// processStoryQueue checks to see if a story has expired. It checks the state of
+// a story, and pushes it's id to the appropriate queue (voting or expired) to
+// be handled later in another end blocker.
 func (k Keeper) processStoryQueue(ctx sdk.Context, storyQueue queue.Queue) sdk.Error {
 	logger := ctx.Logger().With("module", "story")
 
@@ -61,6 +63,11 @@ func (k Keeper) processStoryQueue(ctx sdk.Context, storyQueue queue.Queue) sdk.E
 	storyQueue.Pop()
 	story.State = Expired
 	k.UpdateStory(ctx, story)
+
+	// Push to the expired story queue, which gets handled in
+	// the distribution module. At the end of each block, rewards
+	// are distributed to backers, and challengers are returned funds.
+	k.expiredStoryQueue(ctx).Push(storyID)
 
 	// check next story
 	return k.processStoryQueue(ctx, storyQueue)

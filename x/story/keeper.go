@@ -58,7 +58,7 @@ type WriteKeeper interface {
 	EndGame(ctx sdk.Context, storyID int64, confirmed bool) sdk.Error
 	ExpireGame(ctx sdk.Context, storyID int64) sdk.Error
 	UpdateStory(ctx sdk.Context, story Story)
-	NewResponseEndBlock(ctx sdk.Context) sdk.Tags
+	EndBlock(ctx sdk.Context) sdk.Tags
 	SetParams(ctx sdk.Context, params Params)
 }
 
@@ -66,16 +66,18 @@ type WriteKeeper interface {
 type Keeper struct {
 	app.Keeper
 
-	storyQueueKey       sdk.StoreKey
-	votingStoryQueueKey sdk.StoreKey
-	categoryKeeper      category.ReadKeeper
-	paramStore          params.Subspace
+	storyQueueKey        sdk.StoreKey
+	expiredStoryQueueKey sdk.StoreKey
+	votingStoryQueueKey  sdk.StoreKey
+	categoryKeeper       category.ReadKeeper
+	paramStore           params.Subspace
 }
 
 // NewKeeper creates a new keeper with write and read access
 func NewKeeper(
 	storeKey sdk.StoreKey,
 	storyQueueKey sdk.StoreKey,
+	expiredStoryQueueKey sdk.StoreKey,
 	votingStoryQueueKey sdk.StoreKey,
 	categoryKeeper category.ReadKeeper,
 	paramStore params.Subspace,
@@ -84,6 +86,7 @@ func NewKeeper(
 	return Keeper{
 		app.NewKeeper(codec, storeKey),
 		storyQueueKey,
+		expiredStoryQueueKey,
 		votingStoryQueueKey,
 		categoryKeeper,
 		paramStore.WithTypeTable(ParamTypeTable()),
@@ -401,6 +404,11 @@ func (k Keeper) storyIDsByCategoryID(
 
 func (k Keeper) storyQueue(ctx sdk.Context) queue.Queue {
 	store := ctx.KVStore(k.storyQueueKey)
+	return queue.NewQueue(k.GetCodec(), store)
+}
+
+func (k Keeper) expiredStoryQueue(ctx sdk.Context) queue.Queue {
+	store := ctx.KVStore(k.expiredStoryQueueKey)
 	return queue.NewQueue(k.GetCodec(), store)
 }
 

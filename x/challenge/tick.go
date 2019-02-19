@@ -7,8 +7,8 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
-// NewResponseEndBlock is called at the end of every block tick
-func (k Keeper) NewResponseEndBlock(ctx sdk.Context) sdk.Tags {
+// EndBlock is called at the end of every block tick
+func (k Keeper) EndBlock(ctx sdk.Context) sdk.Tags {
 	err := k.filterExpiredGames(ctx, k.pendingGameList(ctx))
 	if err != nil {
 		panic(err)
@@ -65,7 +65,7 @@ func (k Keeper) returnFunds(ctx sdk.Context, gameID int64) sdk.Error {
 	logger := ctx.Logger().With("module", "challenge")
 
 	// get challenges
-	challenges, err := k.ChallengesByGameID(ctx, gameID)
+	challenges, err := k.ChallengesByStoryID(ctx, gameID)
 	if err != nil {
 		return err
 	}

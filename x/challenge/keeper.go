@@ -28,8 +28,8 @@ type ReadKeeper interface {
 	Challenge(
 		ctx sdk.Context, challengeID int64) (challenge Challenge, err sdk.Error)
 
-	ChallengesByGameID(
-		ctx sdk.Context, gameID int64) (challenges []Challenge, err sdk.Error)
+	ChallengesByStoryID(
+		ctx sdk.Context, storyID int64) (challenges []Challenge, err sdk.Error)
 
 	ChallengeByStoryIDAndCreator(
 		ctx sdk.Context,
@@ -47,7 +47,7 @@ type WriteKeeper interface {
 		ctx sdk.Context, storyID int64, amount sdk.Coin, argument string,
 		creator sdk.AccAddress) (int64, sdk.Error)
 
-	NewResponseEndBlock(ctx sdk.Context) sdk.Tags
+	EndBlock(ctx sdk.Context) sdk.Tags
 }
 
 // Keeper data type storing keys to the key-value store
@@ -141,6 +141,15 @@ func (k Keeper) Create(
 		return 0, err
 	}
 
+	// TODO
+	// check if quorum is met, if not we're done
+
+	// TODO
+	// get total backing amount
+	// check if total challenge amount exceeds total backing amount
+	// if so, change story state to VOTING
+	// update story
+
 	// add another amount to the challenge pool
 	// err = k.gameKeeper.AddToChallengePool(ctx, gameID, amount)
 	// if err != nil {
@@ -168,12 +177,12 @@ func (k Keeper) Challenge(
 	return
 }
 
-// ChallengesByGameID returns the list of challenges for a game id
-func (k Keeper) ChallengesByGameID(
-	ctx sdk.Context, gameID int64) (challenges []Challenge, err sdk.Error) {
+// ChallengesByStoryID returns the list of challenges for a story id
+func (k Keeper) ChallengesByStoryID(
+	ctx sdk.Context, storyID int64) (challenges []Challenge, err sdk.Error) {
 
 	// iterate over and return challenges for a game
-	err = k.challengeList.Map(ctx, k, gameID, func(challengeID int64) sdk.Error {
+	err = k.challengeList.Map(ctx, k, storyID, func(challengeID int64) sdk.Error {
 		challenge, err := k.Challenge(ctx, challengeID)
 		if err != nil {
 			return err
