@@ -19,6 +19,8 @@ const (
 	StoreKey = "stories"
 	// VotingQueueStoreKey is string representation of the store key for challenged stories
 	VotingQueueStoreKey = "votingStoryQueue"
+	// ExpiredQueueStoreKey is string representation of the store key for expired stories
+	ExpiredQueueStoreKey = "expiredStoryQueue"
 	// QueueStoreKey is string representation of the store key for backing list
 	QueueStoreKey = "storyQueue"
 )
