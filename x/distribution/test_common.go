@@ -114,6 +114,7 @@ func mockDB() (
 		pk.Subspace(DefaultParamspace),
 		codec,
 	)
+	InitGenesis(ctx, distKeeper, DefaultGenesisState())
 
 	return ctx, distKeeper, storyKeeper, backingKeeper, challengeKeeper, bankKeeper
 }

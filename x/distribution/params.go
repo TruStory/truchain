@@ -51,9 +51,23 @@ func ParamTypeTable() params.TypeTable {
 	return params.NewTypeTable().RegisterParamSet(&Params{})
 }
 
-// AmountWeight for the backing/challenge interest
-func (k Keeper) AmountWeight(ctx sdk.Context) (res sdk.Dec) {
+func (k Keeper) amountWeight(ctx sdk.Context) (res sdk.Dec) {
 	k.paramStore.Get(ctx, KeyAmountWeight, &res)
+	return
+}
+
+func (k Keeper) periodWeight(ctx sdk.Context) (res sdk.Dec) {
+	k.paramStore.Get(ctx, KeyPeriodWeight, &res)
+	return
+}
+
+func (k Keeper) maxInterestRate(ctx sdk.Context) (res sdk.Dec) {
+	k.paramStore.Get(ctx, KeyMaxInterestRate, &res)
+	return
+}
+
+func (k Keeper) minInterestRate(ctx sdk.Context) (res sdk.Dec) {
+	k.paramStore.Get(ctx, KeyMinInterestRate, &res)
 	return
 }
 

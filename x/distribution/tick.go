@@ -72,13 +72,11 @@ func (k Keeper) distributeEarningsToBackers(ctx sdk.Context, storyID int64) sdk.
 
 		// give the interest earned to the user (in cred)
 		period := story.VotingEndTime.Sub(story.Timestamp.CreatedTime)
-		fmt.Printf("period %s\n", period)
 		denom, err := k.storyKeeper.CategoryDenom(ctx, storyID)
 		if err != nil {
 			return err
 		}
-		interest := getInterest(
-			backing.Amount(), period, period, denom, DefaultParams())
+		interest := k.interest(ctx, backing.Amount(), period, period, denom)
 		_, _, err = k.bankKeeper.AddCoins(ctx, backing.Creator(), sdk.Coins{interest})
 		if err != nil {
 			return err
@@ -118,12 +116,12 @@ func (k Keeper) returnFundsToChallengers(ctx sdk.Context, storyID int64) sdk.Err
 	return nil
 }
 
-func getInterest(
+func (k Keeper) interest(
+	ctx sdk.Context,
 	amount sdk.Coin,
 	period time.Duration,
 	maxPeriod time.Duration,
-	credDenom string,
-	params Params) sdk.Coin {
+	credDenom string) sdk.Coin {
 
 	// TODO: keep track of total supply
 	// https://github.com/TruStory/truchain/issues/22
@@ -132,9 +130,9 @@ func getInterest(
 
 	// inputs
 	maxAmount := totalSupply
-	amountWeight := params.AmountWeight
-	periodWeight := params.PeriodWeight
-	maxInterestRate := params.MaxInterestRate
+	amountWeight := k.amountWeight(ctx)
+	periodWeight := k.periodWeight(ctx)
+	maxInterestRate := k.maxInterestRate(ctx)
 
 	// type cast values to unitless decimals for math operations
 	periodDec := sdk.NewDec(int64(period))
@@ -152,8 +150,9 @@ func getInterest(
 	// calculate interest
 	interestRate := maxInterestRate.Mul(weightedAmount.Add(weightedPeriod))
 	// convert rate to a value
-	if interestRate.LT(params.MinInterestRate) {
-		interestRate = params.MinInterestRate
+	minInterestRate := k.minInterestRate(ctx)
+	if interestRate.LT(minInterestRate) {
+		interestRate = minInterestRate
 	}
 	interest := amountDec.Mul(interestRate)
 
