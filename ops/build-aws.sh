@@ -6,20 +6,30 @@ PATH=/home/ubuntu/go/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin
 GOPATH=/home/ubuntu/go
 cd "${GOPATH}/src/github.com/TruStory/truchain"
 
+COMMIT_BEFORE_PULL=$(git rev-parse HEAD)
+
 # get repo
-git pull || echo "git pull failed."
+git pull > /dev/null
 
-# build node
-make update_deps
-make buidl
+COMMIT_AFTER_PULL=$(git rev-parse HEAD)
 
-# stop truchaind daemon
-sudo systemctl stop truchaind.service
+# if new commits on branch, update and restart truchain service
+if [ "$COMMIT_BEFORE_PULL" != "$COMMIT_AFTER_PULL" ]
+then
 
-# copy files
-cp bin/truchaind $GOPATH/bin
-cp bin/trucli $GOPATH/bin
-cp .chain/bootstrap.csv ~/.truchaind/bootstrap.csv
+  # build node
+  make update_deps
+  make buidl
 
-# start truchain daemon
-sudo systemctl start truchaind.service
+  # stop truchaind daemon
+  sudo systemctl stop truchaind.service
+
+  # copy files
+  cp bin/truchaind $GOPATH/bin
+  cp bin/trucli $GOPATH/bin
+  cp .chain/bootstrap.csv ~/.truchaind/bootstrap.csv
+
+  # start truchain daemon
+  sudo systemctl start truchaind.service
+
+fi
