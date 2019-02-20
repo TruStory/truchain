@@ -107,14 +107,14 @@ func (k Keeper) returnFundsToChallengers(ctx sdk.Context, storyID int64) sdk.Err
 
 	// return funds
 	for _, v := range challenges {
-		msg := "Returned challenged amount %s back to %s for story %d."
-		logger.Info(fmt.Sprintf(msg, v.Amount(), v.Creator(), storyID))
-
-		_, _, err = k.bankKeeper.AddCoins(
-			ctx, v.Creator(), sdk.Coins{v.Amount()})
+		_, _, err = k.bankKeeper.AddCoins(ctx, v.Creator(), sdk.Coins{v.Amount()})
 		if err != nil {
 			return err
 		}
+
+		logger.Info(fmt.Sprintf(
+			"Returned challenged amount %s back to %s for story %d",
+			v.Amount(), v.Creator(), storyID))
 	}
 
 	return nil
