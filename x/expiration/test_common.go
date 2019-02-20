@@ -1,9 +1,14 @@
-package backing
+package expiration
 
 import (
+	"crypto/rand"
+	"fmt"
 	"net/url"
+	"time"
 
+	"github.com/TruStory/truchain/x/backing"
 	"github.com/TruStory/truchain/x/category"
+	"github.com/TruStory/truchain/x/challenge"
 	"github.com/TruStory/truchain/x/story"
 	"github.com/cosmos/cosmos-sdk/store"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -12,8 +17,6 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/params"
 	amino "github.com/tendermint/go-amino"
 	abci "github.com/tendermint/tendermint/abci/types"
-	"github.com/tendermint/tendermint/crypto"
-	"github.com/tendermint/tendermint/crypto/ed25519"
 	cryptoAmino "github.com/tendermint/tendermint/crypto/encoding/amino"
 	dbm "github.com/tendermint/tendermint/libs/db"
 	"github.com/tendermint/tendermint/libs/log"
@@ -23,9 +26,9 @@ func mockDB() (
 	sdk.Context,
 	Keeper,
 	story.Keeper,
-	category.Keeper,
-	bank.Keeper,
-	auth.AccountKeeper) {
+	backing.Keeper,
+	challenge.Keeper,
+	bank.Keeper) {
 
 	db := dbm.NewMemDB()
 
@@ -35,9 +38,9 @@ func mockDB() (
 	expiredStoryQueueKey := sdk.NewKVStoreKey(story.ExpiredQueueStoreKey)
 	votingStoryQueueKey := sdk.NewKVStoreKey(story.VotingQueueStoreKey)
 	catKey := sdk.NewKVStoreKey(category.StoreKey)
-	backingKey := sdk.NewKVStoreKey(StoreKey)
-	pendingGameListKey := sdk.NewKVStoreKey("pendingGameList")
-	challengeKey := sdk.NewKVStoreKey("challenges")
+	backingKey := sdk.NewKVStoreKey(backing.StoreKey)
+	challengeKey := sdk.NewKVStoreKey(challenge.StoreKey)
+	distKey := sdk.NewKVStoreKey(StoreKey)
 	paramsKey := sdk.NewKVStoreKey(params.StoreKey)
 	transientParamsKey := sdk.NewTransientStoreKey(params.TStoreKey)
 
@@ -48,9 +51,9 @@ func mockDB() (
 	ms.MountStoreWithDB(expiredStoryQueueKey, sdk.StoreTypeIAVL, db)
 	ms.MountStoreWithDB(catKey, sdk.StoreTypeIAVL, db)
 	ms.MountStoreWithDB(backingKey, sdk.StoreTypeIAVL, db)
-	ms.MountStoreWithDB(pendingGameListKey, sdk.StoreTypeIAVL, db)
 	ms.MountStoreWithDB(votingStoryQueueKey, sdk.StoreTypeIAVL, db)
 	ms.MountStoreWithDB(challengeKey, sdk.StoreTypeIAVL, db)
+	ms.MountStoreWithDB(distKey, sdk.StoreTypeIAVL, db)
 	ms.MountStoreWithDB(paramsKey, sdk.StoreTypeIAVL, db)
 	ms.MountStoreWithDB(transientParamsKey, sdk.StoreTypeTransient, db)
 	ms.LoadLatestVersion()
@@ -59,11 +62,12 @@ func mockDB() (
 
 	codec := amino.NewCodec()
 	cryptoAmino.RegisterAmino(codec)
-	RegisterAmino(codec)
+	// RegisterAmino(codec)
 	codec.RegisterInterface((*auth.Account)(nil), nil)
 	codec.RegisterConcrete(&auth.BaseAccount{}, "auth/Account", nil)
 
-	ck := category.NewKeeper(catKey, codec)
+	categoryKeeper := category.NewKeeper(catKey, codec)
+	category.InitGenesis(ctx, categoryKeeper, category.DefaultCategories())
 
 	pk := params.NewKeeper(codec, paramsKey, transientParamsKey)
 	am := auth.NewAccountKeeper(codec, accKey, pk.Subspace(auth.DefaultParamspace), auth.ProtoBaseAccount)
@@ -72,58 +76,69 @@ func mockDB() (
 		bank.DefaultCodespace,
 	)
 
-	sk := story.NewKeeper(
+	storyKeeper := story.NewKeeper(
 		storyKey,
 		storyQueueKey,
 		expiredStoryQueueKey,
 		votingStoryQueueKey,
-		ck,
+		categoryKeeper,
 		pk.Subspace(story.DefaultParamspace),
 		codec)
 
-	story.InitGenesis(ctx, sk, story.DefaultGenesisState())
+	story.InitGenesis(ctx, storyKeeper, story.DefaultGenesisState())
 
-	bk := NewKeeper(
+	backingKeeper := backing.NewKeeper(
 		backingKey,
-		sk,
+		storyKeeper,
 		bankKeeper,
-		ck,
+		categoryKeeper,
 		codec,
 	)
 
-	return ctx, bk, sk, ck, bankKeeper, am
+	challengeKeeper := challenge.NewKeeper(
+		challengeKey,
+		votingStoryQueueKey,
+		backingKeeper,
+		bankKeeper,
+		storyKeeper,
+		codec,
+	)
+
+	expirationKeeper := NewKeeper(
+		distKey,
+		expiredStoryQueueKey,
+		storyKeeper,
+		backingKeeper,
+		challengeKeeper,
+		bankKeeper,
+		pk.Subspace(DefaultParamspace),
+		codec,
+	)
+	InitGenesis(ctx, expirationKeeper, DefaultGenesisState())
+
+	return ctx, expirationKeeper, storyKeeper, backingKeeper, challengeKeeper, bankKeeper
 }
 
-func createFakeStory(ctx sdk.Context, sk story.Keeper, ck category.WriteKeeper) int64 {
-	body := "TruStory has it's own programmable native currency."
-	cat := createFakeCategory(ctx, ck)
+func createFakeStory(ctx sdk.Context, sk story.WriteKeeper) int64 {
+	body := "TruStory can be goverened by it's stakeholders."
 	creator := sdk.AccAddress([]byte{1, 2})
 	storyType := story.Default
 	source := url.URL{}
 
-	storyID, _ := sk.Create(ctx, body, cat.ID, creator, source, storyType)
+	ctx = ctx.WithBlockHeader(abci.Header{Time: time.Now().UTC()})
+	catID := int64(1)
+	storyID, err := sk.Create(ctx, body, catID, creator, source, storyType)
+	fmt.Println(err)
 
 	return storyID
 }
 
-func createFakeCategory(ctx sdk.Context, ck category.WriteKeeper) category.Category {
-	id := ck.Create(ctx, "decentralized exchanges", "trudex", "category for experts in decentralized exchanges")
-	cat, _ := ck.GetCategory(ctx, id)
-	return cat
-}
+func fakeFundedCreator(ctx sdk.Context, k bank.Keeper) sdk.AccAddress {
+	bz := make([]byte, 4)
+	rand.Read(bz)
+	creator := sdk.AccAddress(bz)
+	amount := sdk.NewCoin("trusteak", sdk.NewInt(2000000000000))
+	k.AddCoins(ctx, creator, sdk.Coins{amount})
 
-func createFakeFundedAccount(ctx sdk.Context, am auth.AccountKeeper, coins sdk.Coins) sdk.AccAddress {
-	_, _, addr := keyPubAddr()
-	baseAcct := auth.NewBaseAccountWithAddress(addr)
-	_ = baseAcct.SetCoins(coins)
-	am.SetAccount(ctx, &baseAcct)
-
-	return addr
-}
-
-func keyPubAddr() (crypto.PrivKey, crypto.PubKey, sdk.AccAddress) {
-	key := ed25519.GenPrivKey()
-	pub := key.PubKey()
-	addr := sdk.AccAddress(pub.Address())
-	return key, pub, addr
+	return creator
 }

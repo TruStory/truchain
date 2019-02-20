@@ -1,7 +1,9 @@
 package story
 
 import (
+	"fmt"
 	"net/url"
+	"time"
 
 	app "github.com/TruStory/truchain/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -14,23 +16,24 @@ type State int8
 
 // List of acceptable story states
 const (
-	Unconfirmed = State(iota)
-	Challenged
+	New State = iota
+	Voting
 	Confirmed
 	Rejected
+	Expired
 )
 
 // IsValid returns true if the value is listed in the enum definition, false otherwise.
-func (i State) IsValid() bool {
-	switch i {
-	case Unconfirmed, Challenged, Confirmed, Rejected:
+func (s State) IsValid() bool {
+	switch s {
+	case New, Voting, Confirmed, Rejected, Expired:
 		return true
 	}
 	return false
 }
 
-func (i State) String() string {
-	return [...]string{"Unconfirmed", "Challenged", "Confirmed", "Rejected"}[i]
+func (s State) String() string {
+	return [...]string{"New", "Voting", "Confirmed", "Rejected", "Expired"}[s]
 }
 
 // Type is a type that defines a story type
@@ -58,33 +61,21 @@ func (i Type) String() string {
 
 // Story type
 type Story struct {
-	ID         int64          `json:"id"`
-	Argument   string         `json:"arguments,omitempty"`
-	Body       string         `json:"body"`
-	CategoryID int64          `json:"category_id"`
-	Creator    sdk.AccAddress `json:"creator"`
-	Flagged    bool           `json:"flagged,omitempty"`
-	GameID     int64          `json:"game_id,omitempty"`
-	Source     url.URL        `json:"source,omitempty"`
-	State      State          `json:"state"`
-	Type       Type           `json:"type"`
-	Timestamp  app.Timestamp  `json:"timestamp"`
+	ID            int64          `json:"id"`
+	Body          string         `json:"body"`
+	CategoryID    int64          `json:"category_id"`
+	Creator       sdk.AccAddress `json:"creator"`
+	ExpireTime    time.Time      `json:"expire_time"`
+	Flagged       bool           `json:"flagged,omitempty"`
+	Source        url.URL        `json:"source,omitempty"`
+	State         State          `json:"state"`
+	Type          Type           `json:"type"`
+	VotingEndTime time.Time      `json:"voting_end_time,omitempty"`
+	Timestamp     app.Timestamp  `json:"timestamp"`
 }
 
-// MsgParams holds default parameters for a story
-type MsgParams struct {
-	MinStoryLength    int // min number of chars for story body
-	MaxStoryLength    int // max number of chars for story body
-	MinArgumentLength int // min number of chars for argument
-	MaxArgumentLength int // max number of chars for argument
-}
-
-// DefaultMsgParams creates a new MsgParams type with defaults
-func DefaultMsgParams() MsgParams {
-	return MsgParams{
-		MinStoryLength:    25,
-		MaxStoryLength:    350,
-		MinArgumentLength: 10,
-		MaxArgumentLength: 3000,
-	}
+func (s Story) String() string {
+	return fmt.Sprintf(
+		"Story <%d %s %s %d %s>",
+		s.ID, s.Body, s.ExpireTime, s.State, s.VotingEndTime)
 }

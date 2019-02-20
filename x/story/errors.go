@@ -16,13 +16,7 @@ const (
 	CodeInvalidStoryType            sdk.CodeType = 706
 	CodeStoriesWithCategoryNotFound sdk.CodeType = 707
 	CodeInvalidSourceURL            sdk.CodeType = 708
-	CodeInvalidStoryArgument        sdk.CodeType = 709
 )
-
-// ErrInvalidStoryArgument throws an error on invalid title
-func ErrInvalidStoryArgument(msg string) sdk.Error {
-	return sdk.NewError(DefaultCodespace, CodeInvalidStoryArgument, "Invalid story argument: "+msg)
-}
 
 // ErrInvalidStoryBody throws an error on invalid title
 func ErrInvalidStoryBody(body string) sdk.Error {

@@ -12,6 +12,7 @@ import (
 	"github.com/TruStory/truchain/x/backing"
 	"github.com/TruStory/truchain/x/category"
 	"github.com/TruStory/truchain/x/challenge"
+	"github.com/TruStory/truchain/x/expiration"
 	"github.com/TruStory/truchain/x/game"
 	clientParams "github.com/TruStory/truchain/x/params"
 	"github.com/TruStory/truchain/x/story"
@@ -52,21 +53,22 @@ type TruChain struct {
 	codec *codec.Codec
 
 	// keys to access the multistore
-	keyAccount         *sdk.KVStoreKey
-	keyBacking         *sdk.KVStoreKey
-	keyBackingList     *sdk.KVStoreKey
-	keyCategory        *sdk.KVStoreKey
-	keyChallenge       *sdk.KVStoreKey
-	keyFee             *sdk.KVStoreKey
-	keyGame            *sdk.KVStoreKey
-	keyPendingGameList *sdk.KVStoreKey
-	keyGameQueue       *sdk.KVStoreKey
-	keyIBC             *sdk.KVStoreKey
-	keyMain            *sdk.KVStoreKey
-	keyStory           *sdk.KVStoreKey
-	keyVote            *sdk.KVStoreKey
-	keyParams          *sdk.KVStoreKey
-	tkeyParams         *sdk.TransientStoreKey
+	keyAccount           *sdk.KVStoreKey
+	keyBacking           *sdk.KVStoreKey
+	keyCategory          *sdk.KVStoreKey
+	keyChallenge         *sdk.KVStoreKey
+	keyExpiration        *sdk.KVStoreKey
+	keyFee               *sdk.KVStoreKey
+	keyGame              *sdk.KVStoreKey
+	keyIBC               *sdk.KVStoreKey
+	keyMain              *sdk.KVStoreKey
+	keyStory             *sdk.KVStoreKey
+	keyStoryQueue        *sdk.KVStoreKey
+	keyVotingStoryQueue  *sdk.KVStoreKey
+	keyExpiredStoryQueue *sdk.KVStoreKey
+	keyVote              *sdk.KVStoreKey
+	keyParams            *sdk.KVStoreKey
+	tkeyParams           *sdk.TransientStoreKey
 
 	// manage getting and setting accounts
 	accountKeeper       auth.AccountKeeper
@@ -76,12 +78,13 @@ type TruChain struct {
 	paramsKeeper        sdkparams.Keeper
 
 	// access truchain database
-	storyKeeper     story.WriteKeeper
-	categoryKeeper  category.WriteKeeper
-	backingKeeper   backing.WriteKeeper
-	challengeKeeper challenge.WriteKeeper
-	gameKeeper      game.WriteKeeper
-	voteKeeper      vote.WriteKeeper
+	storyKeeper      story.WriteKeeper
+	categoryKeeper   category.WriteKeeper
+	backingKeeper    backing.WriteKeeper
+	challengeKeeper  challenge.WriteKeeper
+	gameKeeper       game.WriteKeeper
+	voteKeeper       vote.WriteKeeper
+	expirationKeeper expiration.Keeper
 
 	// state to run api
 	blockCtx     *sdk.Context
@@ -110,24 +113,25 @@ func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *T
 		keyParams:  sdk.NewKVStoreKey("params"),
 		tkeyParams: sdk.NewTransientStoreKey("transient_params"),
 
-		keyMain:            sdk.NewKVStoreKey("main"),
-		keyAccount:         sdk.NewKVStoreKey("acc"),
-		keyIBC:             sdk.NewKVStoreKey("ibc"),
-		keyStory:           sdk.NewKVStoreKey("stories"),
-		keyCategory:        sdk.NewKVStoreKey("categories"),
-		keyBacking:         sdk.NewKVStoreKey("backings"),
-		keyBackingList:     sdk.NewKVStoreKey("backingList"),
-		keyChallenge:       sdk.NewKVStoreKey("challenges"),
-		keyFee:             sdk.NewKVStoreKey("fee_collection"),
-		keyGame:            sdk.NewKVStoreKey("game"),
-		keyPendingGameList: sdk.NewKVStoreKey("pendingGameList"),
-		keyGameQueue:       sdk.NewKVStoreKey("gameQueue"),
-		keyVote:            sdk.NewKVStoreKey("vote"),
-		api:                nil,
-		apiStarted:         false,
-		blockCtx:           nil,
-		blockHeader:        abci.Header{},
-		registrarKey:       loadRegistrarKey(),
+		keyMain:              sdk.NewKVStoreKey("main"),
+		keyAccount:           sdk.NewKVStoreKey("acc"),
+		keyIBC:               sdk.NewKVStoreKey("ibc"),
+		keyStory:             sdk.NewKVStoreKey(story.StoreKey),
+		keyStoryQueue:        sdk.NewKVStoreKey(story.QueueStoreKey),
+		keyCategory:          sdk.NewKVStoreKey(category.StoreKey),
+		keyBacking:           sdk.NewKVStoreKey(backing.StoreKey),
+		keyChallenge:         sdk.NewKVStoreKey(challenge.StoreKey),
+		keyExpiration:        sdk.NewKVStoreKey(expiration.StoreKey),
+		keyFee:               sdk.NewKVStoreKey("fee_collection"),
+		keyGame:              sdk.NewKVStoreKey(game.StoreKey),
+		keyVotingStoryQueue:  sdk.NewKVStoreKey(story.VotingQueueStoreKey),
+		keyExpiredStoryQueue: sdk.NewKVStoreKey(story.ExpiredQueueStoreKey),
+		keyVote:              sdk.NewKVStoreKey(vote.StoreKey),
+		api:                  nil,
+		apiStarted:           false,
+		blockCtx:             nil,
+		blockHeader:          abci.Header{},
+		registrarKey:         loadRegistrarKey(),
 	}
 
 	// The ParamsKeeper handles parameter storage for the application
@@ -155,42 +159,58 @@ func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *T
 		app.keyCategory,
 		codec,
 	)
+
 	app.storyKeeper = story.NewKeeper(
 		app.keyStory,
+		app.keyStoryQueue,
+		app.keyExpiredStoryQueue,
+		app.keyVotingStoryQueue,
 		app.categoryKeeper,
+		app.paramsKeeper.Subspace(story.DefaultParamspace),
 		app.codec,
 	)
+
 	app.backingKeeper = backing.NewKeeper(
 		app.keyBacking,
-		app.keyBackingList,
-		app.keyPendingGameList,
-		app.keyGameQueue,
 		app.storyKeeper,
 		app.coinKeeper,
 		app.categoryKeeper,
 		codec,
 	)
+
 	app.gameKeeper = game.NewKeeper(
 		app.keyGame,
-		app.keyPendingGameList,
-		app.keyGameQueue,
+		app.keyVotingStoryQueue,
+		app.keyStoryQueue,
 		app.storyKeeper,
 		app.backingKeeper,
 		app.coinKeeper,
 		codec,
 	)
+
 	app.challengeKeeper = challenge.NewKeeper(
 		app.keyChallenge,
-		app.keyPendingGameList,
+		app.keyVotingStoryQueue,
 		app.backingKeeper,
 		app.coinKeeper,
-		app.gameKeeper,
 		app.storyKeeper,
 		codec,
 	)
+
+	app.expirationKeeper = expiration.NewKeeper(
+		app.keyExpiration,
+		app.keyExpiredStoryQueue,
+		app.storyKeeper,
+		app.backingKeeper,
+		app.challengeKeeper,
+		app.coinKeeper,
+		app.paramsKeeper.Subspace(expiration.DefaultParamspace),
+		codec,
+	)
+
 	app.voteKeeper = vote.NewKeeper(
 		app.keyVote,
-		app.keyGameQueue,
+		app.keyVotingStoryQueue,
 		app.accountKeeper,
 		app.backingKeeper,
 		app.challengeKeeper,
@@ -233,33 +253,22 @@ func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *T
 	app.SetBeginBlocker(app.BeginBlocker)
 	app.SetEndBlocker(app.EndBlocker)
 
-	//
-	// TODO:
-	// SetMininumFees is now unpexpored
-	// instead minimum gas price is loaded from config/gaid.tom
-	// also there is a refactor in place where
-	// SetMinGasPrices is a new exported function for this purpose (not yet released)
-	// See https://github.com/cosmos/cosmos-sdk/pull/3258
-	//
-	// if params.Features[params.FeeFlag] {
-	// 	app.SetMinGasPrices(params.Fee)
-	// }
-
 	// mount the multistore and load the latest state
 	app.MountStores(
 		app.keyAccount,
 		app.keyParams,
 		app.keyBacking,
-		app.keyBackingList,
 		app.keyCategory,
 		app.keyChallenge,
+		app.keyExpiration,
 		app.keyFee,
 		app.keyGame,
-		app.keyPendingGameList,
-		app.keyGameQueue,
 		app.keyIBC,
 		app.keyMain,
 		app.keyStory,
+		app.keyStoryQueue,
+		app.keyExpiredStoryQueue,
+		app.keyVotingStoryQueue,
 		app.keyVote)
 
 	app.MountStoresTransient(app.tkeyParams)
@@ -325,21 +334,6 @@ func (app *TruChain) BeginBlocker(ctx sdk.Context, req abci.RequestBeginBlock) a
 	if !(app.apiStarted) {
 		go app.startAPI()
 		app.apiStarted = true
-
-		if params.Features[params.BootstrapFlag] {
-			if ctx.BlockHeight() == int64(1) {
-				loadTestDB(
-					ctx, app.storyKeeper,
-					app.accountKeeper,
-					app.backingKeeper,
-					app.categoryKeeper,
-					app.challengeKeeper,
-					app.voteKeeper,
-					app.gameKeeper,
-					app.coinKeeper,
-				)
-			}
-		}
 	}
 
 	if app.apiStarted == false && ctx.BlockHeight() > int64(1) {
@@ -352,8 +346,8 @@ func (app *TruChain) BeginBlocker(ctx sdk.Context, req abci.RequestBeginBlock) a
 // EndBlocker reflects logic to run after all TXs are processed by the
 // application.
 func (app *TruChain) EndBlocker(ctx sdk.Context, _ abci.RequestEndBlock) abci.ResponseEndBlock {
-	app.backingKeeper.NewResponseEndBlock(ctx)
-	app.challengeKeeper.NewResponseEndBlock(ctx)
+	app.storyKeeper.EndBlock(ctx)
+	app.expirationKeeper.EndBlock(ctx)
 	app.voteKeeper.NewResponseEndBlock(ctx)
 
 	return abci.ResponseEndBlock{}
@@ -379,9 +373,12 @@ func (app *TruChain) ExportAppStateAndValidators() (appState json.RawMessage, va
 	app.accountKeeper.IterateAccounts(ctx, appendAccountsFn)
 
 	genState := GenesisState{
-		Accounts: accounts,
-		AuthData: auth.DefaultGenesisState(),
-		BankData: bank.DefaultGenesisState(),
+		Accounts:       accounts,
+		AuthData:       auth.DefaultGenesisState(),
+		BankData:       bank.DefaultGenesisState(),
+		Categories:     category.DefaultCategories(),
+		ExpirationData: expiration.DefaultGenesisState(),
+		StoryData:      story.DefaultGenesisState(),
 	}
 
 	appState, err = codec.MarshalJSONIndent(app.codec, genState)

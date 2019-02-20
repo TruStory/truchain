@@ -9,12 +9,12 @@ import (
 
 // Category is a type that defines the category for a story
 type Category struct {
-	ID          int64         `json:"id"`
+	ID          int64         `json:"id,omitempty"`
 	Title       string        `json:"title"`
 	Slug        string        `json:"slug"`
 	Description string        `json:"description,omitempty"`
 	TotalCred   sdk.Coin      `json:"total_cred"`
-	Timestamp   app.Timestamp `json:"timestamp"`
+	Timestamp   app.Timestamp `json:"timestamp,omitempty"`
 }
 
 // Denom returns the name of the coin, alias for slug

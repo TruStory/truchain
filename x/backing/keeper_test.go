@@ -53,7 +53,7 @@ func TestGetBacking(t *testing.T) {
 	ctx, bk, sk, ck, bankKeeper, _ := mockDB()
 	storyID := createFakeStory(ctx, sk, ck)
 	amount := sdk.NewCoin(params.StakeDenom, sdk.NewInt(5000000))
-	argument := "cool story brew"
+	argument := "cool story brew.."
 	creator := sdk.AccAddress([]byte{1, 2})
 	duration := DefaultMsgParams().MinPeriod
 	bankKeeper.AddCoins(ctx, creator, sdk.Coins{amount})
@@ -183,26 +183,6 @@ func TestDuplicateBacking(t *testing.T) {
 
 	_, err := bk.Create(ctx, storyID, amount, argument, creator, duration)
 	assert.Equal(t, ErrDuplicate(storyID, creator).Code(), err.Code())
-}
-
-func TestRemoveFromList(t *testing.T) {
-	ctx, bk, sk, ck, bankKeeper, _ := mockDB()
-	storyID := createFakeStory(ctx, sk, ck)
-	amount := sdk.NewCoin(params.StakeDenom, sdk.NewInt(5000000))
-	argument := "cool story brew"
-	creator := sdk.AccAddress([]byte{1, 2})
-	duration := DefaultMsgParams().MinPeriod
-	bankKeeper.AddCoins(ctx, creator, sdk.Coins{amount})
-	bankKeeper.AddCoins(ctx, creator, sdk.Coins{amount})
-
-	backingID, _ := bk.Create(ctx, storyID, amount, argument, creator, duration)
-	assert.NotNil(t, backingID)
-
-	err := bk.RemoveFromList(ctx, backingID)
-	assert.Nil(t, err)
-
-	err = bk.RemoveFromList(ctx, backingID)
-	assert.NotNil(t, err)
 }
 
 func Test_getInterest_MidAmountMidPeriod(t *testing.T) {

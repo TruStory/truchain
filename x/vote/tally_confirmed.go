@@ -82,12 +82,6 @@ func distributeRewardsConfirmed(
 			logger.Info(fmt.Sprintf(
 				"Distributing backing interest: %v", v.Interest))
 
-			// remove from backing list, prevent from maturing
-			err = backingKeeper.RemoveFromList(ctx, v.ID())
-			if err != nil {
-				return err
-			}
-
 			pool = pool.Minus(rewardCoin)
 
 			// distribute reward in cred
@@ -135,9 +129,6 @@ func distributeRewardsConfirmed(
 				return err
 			}
 			logger.Info(fmt.Sprintf("Giving back original backing amount: %v", v.Amount()))
-
-			// remove from backing list, prevent from maturing
-			err = backingKeeper.RemoveFromList(ctx, v.ID())
 
 		case challenge.Challenge:
 			// do nothing

@@ -57,7 +57,7 @@ type WriteKeeper interface {
 type Keeper struct {
 	app.Keeper
 
-	gameQueueKey sdk.StoreKey
+	votingStoryQueueKey sdk.StoreKey
 
 	accountKeeper   auth.AccountKeeper
 	backingKeeper   backing.WriteKeeper
@@ -72,7 +72,7 @@ type Keeper struct {
 // NewKeeper creates a new keeper with write and read access
 func NewKeeper(
 	storeKey sdk.StoreKey,
-	gameQueueKey sdk.StoreKey,
+	votingStoryQueueKey sdk.StoreKey,
 	accountKeeper auth.AccountKeeper,
 	backingKeeper backing.WriteKeeper,
 	challengeKeeper challenge.WriteKeeper,
@@ -83,7 +83,7 @@ func NewKeeper(
 
 	return Keeper{
 		app.NewKeeper(codec, storeKey),
-		gameQueueKey,
+		votingStoryQueueKey,
 		accountKeeper,
 		backingKeeper,
 		challengeKeeper,
@@ -108,19 +108,20 @@ func (k Keeper) Create(
 	}
 
 	// get the story
-	story, err := k.storyKeeper.Story(ctx, storyID)
+	currentStory, err := k.storyKeeper.Story(ctx, storyID)
 	if err != nil {
 		return 0, err
 	}
 
 	// make sure validation game has started
-	if story.GameID <= 0 {
-		return 0, ErrGameNotStarted(storyID)
-	}
+	// TODO [shanev] fix me in https://github.com/TruStory/truchain/issues/387
+	// if currentStory.State != story.Voting {
+	// 	return 0, ErrGameNotStarted(storyID)
+	// }
 
 	// check if this voter has already cast a vote
-	if k.voterList.Includes(ctx, k, story.GameID, creator) {
-		return 0, ErrDuplicateVoteForGame(story.GameID, creator)
+	if k.voterList.Includes(ctx, k, currentStory.ID, creator) {
+		return 0, ErrDuplicateVoteForGame(currentStory.ID, creator)
 	}
 
 	// check if user has the funds
@@ -149,8 +150,8 @@ func (k Keeper) Create(
 	// persist vote
 	k.set(ctx, tokenVote)
 
-	// persist game <-> tokenVote association
-	k.voterList.Append(ctx, k, story.GameID, creator, vote.ID)
+	// persist story <-> tokenVote association
+	k.voterList.Append(ctx, k, currentStory.ID, creator, vote.ID)
 
 	logger.Info(fmt.Sprintf(
 		"Voted on story %d with %s by %s", storyID, amount.String(), creator.String()))
@@ -201,7 +202,7 @@ func (k Keeper) TokenVotesByStoryIDAndCreator(
 	}
 
 	// get the vote
-	tokenVoteID := k.voterList.Get(ctx, k, s.GameID, creator)
+	tokenVoteID := k.voterList.Get(ctx, k, s.ID, creator)
 	vote, err = k.TokenVote(ctx, tokenVoteID)
 
 	return
@@ -251,7 +252,7 @@ func (k Keeper) TotalVoteAmountByGameID(ctx sdk.Context, gameID int64) (
 // ============================================================================
 
 func (k Keeper) gameQueue(ctx sdk.Context) queue.Queue {
-	store := ctx.KVStore(k.gameQueueKey)
+	store := ctx.KVStore(k.votingStoryQueueKey)
 	return queue.NewQueue(k.GetCodec(), store)
 }
 

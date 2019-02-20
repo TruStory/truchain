@@ -93,11 +93,6 @@ func (k Keeper) Create(
 		return 0, err
 	}
 
-	// check if a game already exists on story
-	if story.GameID != 0 {
-		return 0, ErrExists(storyID)
-	}
-
 	// create new game type
 	game := Game{
 		ID:                  k.GetNextID(ctx),
@@ -119,7 +114,6 @@ func (k Keeper) Create(
 	k.set(ctx, game)
 
 	// update story with gameID
-	story.GameID = game.ID
 	k.storyKeeper.UpdateStory(ctx, story)
 
 	return game.ID, nil

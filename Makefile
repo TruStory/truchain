@@ -1,6 +1,6 @@
 PACKAGES=$(shell go list ./...)
 
-MODULES = backing category challenge game story vote
+MODULES = backing category challenge expiration game story vote
 
 CHAIN_DIR = ./.chain
 
@@ -16,12 +16,6 @@ buidl: build
 
 build: build_cli build_daemon
 
-br: build_daemon start
-
-bwd: build_daemon wipe_chain debug
-
-bwr: build_daemon wipe_chain start
-
 build_cli:
 	go build -o bin/trucli cmd/trucli/main.go
 
@@ -32,11 +26,13 @@ doc:
 	@echo "--> Wait a few seconds and visit http://localhost:6060/pkg/github.com/TruStory/truchain/"
 	godoc -http=:6060
 
-start:
-	bin/truchaind --home $(CHAIN_DIR) --log_level "main:info,state:info,*:error,app:info,backing:info,category:info,challenge:info,game:info,story:info,vote:info" start
-
-wipe_chain:
+reset:
 	bin/truchaind --home $(CHAIN_DIR) unsafe-reset-all
+
+restart: build_daemon reset start
+
+start:
+	bin/truchaind --home $(CHAIN_DIR) --log_level "main:info,state:info,*:error,app:info,backing:info,category:info,challenge:info,expiration:info,game:info,story:info,vote:info" start
 
 check:
 	gometalinter ./...
@@ -54,18 +50,14 @@ set_registrar:
 	mkdir -p $(HOME)/.truchaind
 	cp $(CHAIN_DIR)/registrar.key $(HOME)/.truchaind/registrar.key
 
-set_seed_data:
-	mkdir -p $(HOME)/.truchaind
-	cp $(CHAIN_DIR)/bootstrap.csv $(HOME)/.truchaind/bootstrap.csv
-
 set_env_vars:
 	mkdir -p $(HOME)/.truchaind
 	cp .env.example $(CHAIN_DIR)/.env
 	cp .env.example $(HOME)/.truchaind/.env
 
-test: set_registrar set_seed_data set_env_vars go_test
+test: set_registrar set_env_vars go_test
 
-test_cover: set_registrar set_seed_data set_env_vars
+test_cover: set_registrar set_env_vars
 	@go test $(PACKAGES) -v -timeout 30m -race -coverprofile=coverage.txt -covermode=atomic
 
 update_deps:

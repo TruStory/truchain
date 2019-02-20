@@ -32,28 +32,30 @@ func mockDB() (sdk.Context, Keeper, c.Keeper) {
 
 	accKey := sdk.NewKVStoreKey("acc")
 	storyKey := sdk.NewKVStoreKey("stories")
+	storyQueueKey := sdk.NewKVStoreKey(story.QueueStoreKey)
+	expiredStoryQueueKey := sdk.NewKVStoreKey(story.ExpiredQueueStoreKey)
 	catKey := sdk.NewKVStoreKey("categories")
 	challengeKey := sdk.NewKVStoreKey("challenges")
 	gameKey := sdk.NewKVStoreKey("games")
 	pendingGameListKey := sdk.NewKVStoreKey("pendingGameList")
-	gameQueueKey := sdk.NewKVStoreKey("gameQueue")
+	votingStoryQueueKey := sdk.NewKVStoreKey("gameQueue")
 	voteKey := sdk.NewKVStoreKey("vote")
 	backingKey := sdk.NewKVStoreKey("backing")
-	backingListKey := sdk.NewKVStoreKey("backingList")
 	paramsKey := sdk.NewKVStoreKey(sdkparams.StoreKey)
 	transientParamsKey := sdk.NewTransientStoreKey(sdkparams.TStoreKey)
 
 	ms := store.NewCommitMultiStore(db)
 	ms.MountStoreWithDB(accKey, sdk.StoreTypeIAVL, db)
 	ms.MountStoreWithDB(storyKey, sdk.StoreTypeIAVL, db)
+	ms.MountStoreWithDB(storyQueueKey, sdk.StoreTypeIAVL, db)
+	ms.MountStoreWithDB(expiredStoryQueueKey, sdk.StoreTypeIAVL, db)
 	ms.MountStoreWithDB(catKey, sdk.StoreTypeIAVL, db)
 	ms.MountStoreWithDB(challengeKey, sdk.StoreTypeIAVL, db)
 	ms.MountStoreWithDB(gameKey, sdk.StoreTypeIAVL, db)
 	ms.MountStoreWithDB(pendingGameListKey, sdk.StoreTypeIAVL, db)
-	ms.MountStoreWithDB(gameQueueKey, sdk.StoreTypeIAVL, db)
+	ms.MountStoreWithDB(votingStoryQueueKey, sdk.StoreTypeIAVL, db)
 	ms.MountStoreWithDB(voteKey, sdk.StoreTypeIAVL, db)
 	ms.MountStoreWithDB(backingKey, sdk.StoreTypeIAVL, db)
-	ms.MountStoreWithDB(backingListKey, sdk.StoreTypeIAVL, db)
 	ms.MountStoreWithDB(paramsKey, sdk.StoreTypeIAVL, db)
 	ms.MountStoreWithDB(transientParamsKey, sdk.StoreTypeTransient, db)
 	ms.LoadLatestVersion()
@@ -73,23 +75,37 @@ func mockDB() (sdk.Context, Keeper, c.Keeper) {
 		bank.DefaultCodespace,
 	)
 	ck := c.NewKeeper(catKey, codec)
-	sk := story.NewKeeper(storyKey, ck, codec)
+	sk := story.NewKeeper(
+		storyKey,
+		storyQueueKey,
+		expiredStoryQueueKey,
+		votingStoryQueueKey,
+		ck,
+		pk.Subspace(story.DefaultParamspace),
+		codec)
+
+	story.InitGenesis(ctx, sk, story.DefaultGenesisState())
+
 	backingKeeper := backing.NewKeeper(
 		backingKey,
-		backingListKey,
-		pendingGameListKey,
-		gameQueueKey,
 		sk,
 		bankKeeper,
 		ck,
 		codec,
 	)
-	gameKeeper := game.NewKeeper(gameKey, pendingGameListKey, gameQueueKey, sk, backingKeeper, bankKeeper, codec)
-	challengeKeeper := challenge.NewKeeper(challengeKey, pendingGameListKey, backingKeeper, bankKeeper, gameKeeper, sk, codec)
+	gameKeeper := game.NewKeeper(gameKey, pendingGameListKey, votingStoryQueueKey, sk, backingKeeper, bankKeeper, codec)
+	challengeKeeper := challenge.NewKeeper(
+		challengeKey,
+		pendingGameListKey,
+		backingKeeper,
+		bankKeeper,
+		sk,
+		codec,
+	)
 
 	k := NewKeeper(
 		voteKey,
-		gameQueueKey,
+		votingStoryQueueKey,
 		am,
 		backingKeeper,
 		challengeKeeper,
@@ -102,14 +118,13 @@ func mockDB() (sdk.Context, Keeper, c.Keeper) {
 }
 
 func createFakeStory(ctx sdk.Context, sk story.WriteKeeper, ck c.WriteKeeper) int64 {
-	body := "Body of story."
+	body := "TruStory validators can be bootstrapped with a single genesis file."
 	cat := createFakeCategory(ctx, ck)
 	creator := sdk.AccAddress([]byte{1, 2})
 	storyType := story.Default
 	source := url.URL{}
-	argument := "this is a fake argument"
 
-	storyID, _ := sk.Create(ctx, argument, body, cat.ID, creator, source, storyType)
+	storyID, _ := sk.Create(ctx, body, cat.ID, creator, source, storyType)
 
 	return storyID
 }

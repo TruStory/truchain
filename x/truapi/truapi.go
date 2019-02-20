@@ -51,6 +51,13 @@ func (ta *TruAPI) RegisterModels() {
 
 // RegisterRoutes applies the TruStory API routes to the `chttp.API` router
 func (ta *TruAPI) RegisterRoutes() {
+	// Register routes for Trustory React web app
+	fs := http.FileServer(http.Dir("web/static"))
+	http.Handle("/static/", http.StripPrefix("/static/", fs))
+	http.HandleFunc("/web/", func(w http.ResponseWriter, r *http.Request) {
+		http.ServeFile(w, r, "web/index.html")
+	})
+
 	ta.Use(chttp.JSONResponseMiddleware)
 	http.Handle("/graphql", thunder.Handler(ta.GraphQLClient.Schema))
 	http.Handle("/graphiql/", http.StripPrefix("/graphiql/", graphiql.Handler()))
@@ -152,18 +159,20 @@ func (ta *TruAPI) RegisterResolvers() {
 	ta.GraphQLClient.RegisterObjectResolver("Story", story.Story{}, map[string]interface{}{
 		"id":                 func(_ context.Context, q story.Story) int64 { return q.ID },
 		"backings":           func(ctx context.Context, q story.Story) []backing.Backing { return getBackings(ctx, q.ID) },
-		"challenges":         func(ctx context.Context, q story.Story) []challenge.Challenge { return getChallenges(ctx, q.GameID) },
+		"challenges":         func(ctx context.Context, q story.Story) []challenge.Challenge { return getChallenges(ctx, q.ID) },
 		"backingTotal":       ta.backingTotalResolver,
 		"challengeThreshold": ta.challengeThresholdResolver,
 		"category":           ta.storyCategoryResolver,
 		"creator":            func(ctx context.Context, q story.Story) users.User { return getUser(ctx, q.Creator) },
 		"source":             func(ctx context.Context, q story.Story) string { return q.Source.String() },
-		"argument":           func(ctx context.Context, q story.Story) string { return q.Argument },
-		"game":               ta.gameResolver,
-		"votes":              func(ctx context.Context, q story.Story) []vote.TokenVote { return getVotes(ctx, q.GameID) },
+		"votes":              func(ctx context.Context, q story.Story) []vote.TokenVote { return getVotes(ctx, q.ID) },
 
 		// Deprecated: now part of argument
 		"evidence": func(ctx context.Context, q story.Story) []url.URL { return []url.URL{} },
+		// Deprecated: arguments are now only on BCV
+		"argument": func(ctx context.Context, q story.Story) string { return "" },
+		// Deprecated: no more game, its gone
+		"game": func(ctx context.Context, q story.Story) game.Game { return game.Game{} },
 	})
 
 	ta.GraphQLClient.RegisterObjectResolver("TwitterProfile", db.TwitterProfile{}, map[string]interface{}{

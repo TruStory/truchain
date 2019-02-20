@@ -28,8 +28,8 @@ type ReadKeeper interface {
 	Challenge(
 		ctx sdk.Context, challengeID int64) (challenge Challenge, err sdk.Error)
 
-	ChallengesByGameID(
-		ctx sdk.Context, gameID int64) (challenges []Challenge, err sdk.Error)
+	ChallengesByStoryID(
+		ctx sdk.Context, storyID int64) (challenges []Challenge, err sdk.Error)
 
 	ChallengeByStoryIDAndCreator(
 		ctx sdk.Context,
@@ -46,8 +46,6 @@ type WriteKeeper interface {
 	Create(
 		ctx sdk.Context, storyID int64, amount sdk.Coin, argument string,
 		creator sdk.AccAddress) (int64, sdk.Error)
-
-	NewResponseEndBlock(ctx sdk.Context) sdk.Tags
 }
 
 // Keeper data type storing keys to the key-value store
@@ -59,10 +57,9 @@ type Keeper struct {
 
 	backingKeeper backing.ReadKeeper
 	bankKeeper    bank.Keeper
-	gameKeeper    game.WriteKeeper
 	storyKeeper   story.WriteKeeper
 
-	challengeList app.UserList // challenge <-> game mappings
+	challengeList app.UserList // challenge <-> story mappings
 }
 
 // NewKeeper creates a new keeper with write and read access
@@ -71,7 +68,6 @@ func NewKeeper(
 	pendingGameListKey sdk.StoreKey,
 	backingKeeper backing.ReadKeeper,
 	bankKeeper bank.Keeper,
-	gameKeeper game.WriteKeeper,
 	storyKeeper story.WriteKeeper,
 	codec *amino.Codec) Keeper {
 
@@ -80,9 +76,8 @@ func NewKeeper(
 		pendingGameListKey,
 		backingKeeper,
 		bankKeeper,
-		gameKeeper,
 		storyKeeper,
-		app.NewUserList(gameKeeper.GetStoreKey()),
+		app.NewUserList(storyKeeper.GetStoreKey()),
 	}
 }
 
@@ -108,29 +103,15 @@ func (k Keeper) Create(
 		return 0, sdk.ErrInsufficientFunds("Does not meet minimum stake amount.")
 	}
 
-	// get the story
-	story, err := k.storyKeeper.Story(ctx, storyID)
-	if err != nil {
-		return 0, err
-	}
-
-	// create game if one doesn't exist yet
-	gameID := story.GameID
-	if gameID == 0 {
-		gameID, err = k.gameKeeper.Create(ctx, story.ID, creator)
-		if err != nil {
-			return 0, err
-		}
-	}
-
 	// make sure creator hasn't already challenged
-	if k.challengeList.Includes(ctx, k, gameID, creator) {
-		return 0, ErrDuplicateChallenge(gameID, creator)
+	if k.challengeList.Includes(ctx, k, storyID, creator) {
+		return 0, ErrDuplicateChallenge(storyID, creator)
 	}
 
 	// create implicit false vote
 	vote := app.Vote{
 		ID:        k.GetNextID(ctx),
+		StoryID:   storyID,
 		Amount:    amount,
 		Argument:  argument,
 		Creator:   creator,
@@ -146,17 +127,11 @@ func (k Keeper) Create(
 		k.GetIDKey(challenge.ID()),
 		k.GetCodec().MustMarshalBinaryLengthPrefixed(challenge))
 
-	// persist challenge <-> game mapping
-	k.challengeList.Append(ctx, k, gameID, creator, challenge.ID())
+	// persist challenge <-> story mapping
+	k.challengeList.Append(ctx, k, storyID, creator, challenge.ID())
 
 	// deduct challenge amount from user
 	_, _, err = k.bankKeeper.SubtractCoins(ctx, creator, sdk.Coins{amount})
-	if err != nil {
-		return 0, err
-	}
-
-	// add another amount to the challenge pool
-	err = k.gameKeeper.AddToChallengePool(ctx, gameID, amount)
 	if err != nil {
 		return 0, err
 	}
@@ -182,12 +157,12 @@ func (k Keeper) Challenge(
 	return
 }
 
-// ChallengesByGameID returns the list of challenges for a game id
-func (k Keeper) ChallengesByGameID(
-	ctx sdk.Context, gameID int64) (challenges []Challenge, err sdk.Error) {
+// ChallengesByStoryID returns the list of challenges for a story id
+func (k Keeper) ChallengesByStoryID(
+	ctx sdk.Context, storyID int64) (challenges []Challenge, err sdk.Error) {
 
 	// iterate over and return challenges for a game
-	err = k.challengeList.Map(ctx, k, gameID, func(challengeID int64) sdk.Error {
+	err = k.challengeList.Map(ctx, k, storyID, func(challengeID int64) sdk.Error {
 		challenge, err := k.Challenge(ctx, challengeID)
 		if err != nil {
 			return err
@@ -213,7 +188,7 @@ func (k Keeper) ChallengeByStoryIDAndCreator(
 	}
 
 	// get the challenge
-	challengeID := k.challengeList.Get(ctx, k, s.GameID, creator)
+	challengeID := k.challengeList.Get(ctx, k, s.ID, creator)
 	challenge, err = k.Challenge(ctx, challengeID)
 
 	return
@@ -221,9 +196,9 @@ func (k Keeper) ChallengeByStoryIDAndCreator(
 
 // Tally challenges for voting
 func (k Keeper) Tally(
-	ctx sdk.Context, gameID int64) (falseVotes []Challenge, err sdk.Error) {
+	ctx sdk.Context, storyID int64) (falseVotes []Challenge, err sdk.Error) {
 
-	err = k.challengeList.Map(ctx, k, gameID, func(challengeID int64) sdk.Error {
+	err = k.challengeList.Map(ctx, k, storyID, func(challengeID int64) sdk.Error {
 		challenge, err := k.Challenge(ctx, challengeID)
 		if err != nil {
 			return err

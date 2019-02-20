@@ -107,8 +107,6 @@ func distributeRewardsRejected(
 		switch v := vote.(type) {
 		case backing.Backing:
 			// don't get anything back, too bad sucka!
-			// remove backing from backing list, prevent maturing
-			err = backingKeeper.RemoveFromList(ctx, v.ID())
 
 		case challenge.Challenge:
 			// challengers cannot vote true -- skip
@@ -136,9 +134,6 @@ func distributeRewardsRejected(
 				return err
 			}
 			logger.Info(fmt.Sprintf("Giving back original backing amount: %v", v.Amount()))
-
-			// remove backing from backing list
-			err = backingKeeper.RemoveFromList(ctx, v.ID())
 
 		case challenge.Challenge:
 			// get back staked amount

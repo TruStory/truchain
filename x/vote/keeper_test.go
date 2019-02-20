@@ -55,7 +55,7 @@ func TestGetVotesByGameID(t *testing.T) {
 
 	story, _ := k.storyKeeper.Story(ctx, storyID)
 
-	votes, _ := k.TokenVotesByGameID(ctx, story.GameID)
+	votes, _ := k.TokenVotesByGameID(ctx, story.ID)
 	assert.Equal(t, 2, len(votes))
 }
 
@@ -106,21 +106,22 @@ func TestTotalVoteAmountByGameID(t *testing.T) {
 
 	story, _ := k.storyKeeper.Story(ctx, storyID)
 
-	totalAmount, _ := k.TotalVoteAmountByGameID(ctx, story.GameID)
+	totalAmount, _ := k.TotalVoteAmountByGameID(ctx, story.ID)
 	assert.Equal(t, "30000000000trusteak", totalAmount.String())
 }
 
-func TestCreateVote_ErrGameNotStarted(t *testing.T) {
-	ctx, k, ck := mockDB()
+// TODO [shanev] add back in https://github.com/TruStory/truchain/issues/387
+// func TestCreateVote_ErrGameNotStarted(t *testing.T) {
+// 	ctx, k, ck := mockDB()
 
-	storyID := createFakeStory(ctx, k.storyKeeper, ck)
-	amount := sdk.NewCoin(params.StakeDenom, sdk.NewInt(5000000))
-	comment := "test comment is long enough"
-	creator := sdk.AccAddress([]byte{1, 2})
+// 	storyID := createFakeStory(ctx, k.storyKeeper, ck)
+// 	amount := sdk.NewCoin(params.StakeDenom, sdk.NewInt(5000000))
+// 	comment := "test comment is long enough"
+// 	creator := sdk.AccAddress([]byte{1, 2})
 
-	vote := true
+// 	vote := true
 
-	_, err := k.Create(ctx, storyID, amount, vote, comment, creator)
-	assert.NotNil(t, err)
-	assert.Equal(t, ErrGameNotStarted(storyID).Code(), err.Code())
-}
+// 	_, err := k.Create(ctx, storyID, amount, vote, comment, creator)
+// 	assert.NotNil(t, err)
+// 	assert.Equal(t, ErrGameNotStarted(storyID).Code(), err.Code())
+// }

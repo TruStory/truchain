@@ -8,7 +8,6 @@ import (
 	app "github.com/TruStory/truchain/types"
 	cat "github.com/TruStory/truchain/x/category"
 	"github.com/TruStory/truchain/x/story"
-	list "github.com/cosmos/cosmos-sdk/store"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/bank"
 	amino "github.com/tendermint/go-amino"
@@ -54,25 +53,14 @@ type WriteKeeper interface {
 		creator sdk.AccAddress,
 		duration time.Duration) (int64, sdk.Error)
 
-	RemoveFromList(ctx sdk.Context, backingID int64) sdk.Error
-
 	Update(ctx sdk.Context, backing Backing)
 
 	ToggleVote(ctx sdk.Context, backingID int64) (int64, sdk.Error)
-
-	NewResponseEndBlock(ctx sdk.Context) sdk.Tags
 }
 
 // Keeper data type storing keys to the key-value store
 type Keeper struct {
 	app.Keeper
-
-	// list of unmatured backings
-	backingListKey sdk.StoreKey
-	// list of games in the challenged state
-	pendingGameListKey sdk.StoreKey
-	// queue of games in the voting state
-	gameQueueKey sdk.StoreKey
 
 	storyKeeper    story.WriteKeeper // read-write access to story store
 	bankKeeper     bank.Keeper       // read-write access coin store
@@ -84,9 +72,6 @@ type Keeper struct {
 // NewKeeper creates a new keeper with write and read access
 func NewKeeper(
 	storeKey sdk.StoreKey,
-	backingListKey sdk.StoreKey,
-	pendingGameListKey sdk.StoreKey,
-	gameQueueKey sdk.StoreKey,
 	storyKeeper story.WriteKeeper,
 	bankKeeper bank.Keeper,
 	categoryKeeper cat.ReadKeeper,
@@ -94,9 +79,6 @@ func NewKeeper(
 
 	return Keeper{
 		app.NewKeeper(codec, storeKey),
-		backingListKey,
-		pendingGameListKey,
-		gameQueueKey,
 		storyKeeper,
 		bankKeeper,
 		categoryKeeper,
@@ -149,6 +131,7 @@ func (k Keeper) Create(
 
 	vote := app.Vote{
 		ID:        k.GetNextID(ctx),
+		StoryID:   storyID,
 		Amount:    amount,
 		Argument:  argument,
 		Creator:   creator,
@@ -158,16 +141,12 @@ func (k Keeper) Create(
 
 	backing := Backing{
 		Vote:        vote,
-		StoryID:     storyID,
 		Interest:    interest,
 		MaturesTime: time.Now().Add(duration),
 		Params:      params,
 		Period:      duration,
 	}
 	k.setBacking(ctx, backing)
-
-	// add backing id to the backing list for future processing
-	k.backingList(ctx).Push(backing.ID())
 
 	// add backing <-> story mapping
 	k.backingStoryList.Append(ctx, k, storyID, creator, backing.ID())
@@ -182,7 +161,6 @@ func (k Keeper) Create(
 func (k Keeper) Update(ctx sdk.Context, backing Backing) {
 	newBacking := Backing{
 		Vote:        backing.Vote,
-		StoryID:     backing.StoryID,
 		Interest:    backing.Interest,
 		MaturesTime: backing.MaturesTime,
 		Params:      backing.Params,
@@ -248,56 +226,23 @@ func (k Keeper) BackingByStoryIDAndCreator(
 	return
 }
 
-// RemoveFromList removes a backing from the backing list
-func (k Keeper) RemoveFromList(ctx sdk.Context, backingID int64) sdk.Error {
-	var ID int64
-	var indexToDelete uint64
-	var found bool
-	backingList := k.backingList(ctx)
-	backingList.Iterate(&ID, func(index uint64) bool {
-		var tempBackingID int64
-		err := backingList.Get(index, &tempBackingID)
-		if err != nil {
-			panic(err)
-		}
-		if tempBackingID == backingID {
-			indexToDelete = index
-			found = true
-			return true
-		}
-		return false
-	})
-
-	if found == false {
-		return ErrNotFound(backingID)
-	}
-
-	backingList.Delete(indexToDelete)
-
-	return nil
-}
-
 // Tally backings for voting
 func (k Keeper) Tally(
 	ctx sdk.Context, storyID int64) (
 	trueVotes []Backing, falseVotes []Backing, err sdk.Error) {
 
-	// iterate through unmatured backings
-	var ID int64
-	k.backingList(ctx).Iterate(&ID, func(index uint64) bool {
-		backing, err := k.Backing(ctx, ID)
+	err = k.backingStoryList.Map(ctx, k, storyID, func(backingID int64) sdk.Error {
+		backing, err := k.Backing(ctx, backingID)
 		if err != nil {
-			panic(err)
+			return err
+		}
+		if backing.VoteChoice() == true {
+			trueVotes = append(trueVotes, backing)
+		} else {
+			falseVotes = append(falseVotes, backing)
 		}
 
-		if backing.StoryID == storyID {
-			if backing.VoteChoice() == true {
-				trueVotes = append(trueVotes, backing)
-			} else {
-				falseVotes = append(falseVotes, backing)
-			}
-		}
-		return false
+		return nil
 	})
 
 	return
@@ -307,25 +252,23 @@ func (k Keeper) Tally(
 func (k Keeper) TotalBackingAmount(ctx sdk.Context, storyID int64) (
 	totalCoin sdk.Coin, err sdk.Error) {
 
-	totalAmount := sdk.ZeroInt()
-	var ID int64
+	totalAmount := sdk.NewCoin(param.StakeDenom, sdk.ZeroInt())
 
-	// iterate through unmatured backings
-	k.backingList(ctx).Iterate(&ID, func(index uint64) bool {
-		backing, err := k.Backing(ctx, ID)
+	err = k.backingStoryList.Map(ctx, k, storyID, func(backingID int64) sdk.Error {
+		backing, err := k.Backing(ctx, backingID)
 		if err != nil {
-			panic(err)
+			return err
 		}
+		totalAmount = totalAmount.Plus(backing.Amount())
 
-		// if story ids match, append to total backing amount
-		if backing.StoryID == storyID {
-			totalAmount = totalAmount.Add(backing.Amount().Amount)
-		}
-
-		return false
+		return nil
 	})
 
-	return sdk.NewCoin(param.StakeDenom, totalAmount), nil
+	if err != nil {
+		return
+	}
+
+	return totalAmount, nil
 }
 
 // ============================================================================
@@ -384,20 +327,4 @@ func getInterest(
 	cred := sdk.NewCoin(credDenom, interest.RoundInt())
 
 	return cred
-}
-
-func (k Keeper) backingList(ctx sdk.Context) list.List {
-	store := ctx.KVStore(k.backingListKey)
-	return list.NewList(k.GetCodec(), store)
-}
-
-func (k Keeper) pendingGameList(ctx sdk.Context) list.List {
-	return list.NewList(
-		k.GetCodec(),
-		ctx.KVStore(k.pendingGameListKey))
-}
-
-func (k Keeper) gameQueue(ctx sdk.Context) list.Queue {
-	store := ctx.KVStore(k.gameQueueKey)
-	return list.NewQueue(k.GetCodec(), store)
 }
