@@ -293,6 +293,7 @@ func (ta *TruAPI) usersResolver(ctx context.Context, q users.QueryUsersByAddress
 
 func (ta *TruAPI) voteResolver(
 	_ context.Context, q app.QueryByStoryIDAndCreatorParams) vote.TokenVote {
+
 	res := ta.RunQuery("votes/storyIDAndCreator", q)
 
 	if res.Code != 0 {
@@ -312,7 +313,8 @@ func (ta *TruAPI) voteResolver(
 func (ta *TruAPI) votesResolver(
 	_ context.Context, q app.QueryByIDParams) []vote.TokenVote {
 
-	res := ta.RunQuery("votes/gameID", q)
+	res := ta.RunQuery(
+		path.Join(vote.QueryPath, vote.QueryByStoryID), q)
 
 	if res.Code != 0 {
 		fmt.Println("Resolver err: ", res)

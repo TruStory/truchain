@@ -30,7 +30,7 @@ type ReadKeeper interface {
 
 	TokenVote(ctx sdk.Context, id int64) (vote TokenVote, err sdk.Error)
 
-	TokenVotesByGameID(ctx sdk.Context, gameID int64) ([]TokenVote, sdk.Error)
+	TokenVotesByStoryID(ctx sdk.Context, storyID int64) ([]TokenVote, sdk.Error)
 
 	TokenVotesByStoryIDAndCreator(
 		ctx sdk.Context,
@@ -167,12 +167,12 @@ func (k Keeper) TokenVote(ctx sdk.Context, id int64) (vote TokenVote, err sdk.Er
 	return vote, nil
 }
 
-// TokenVotesByGameID returns a list of votes for a given game
-func (k Keeper) TokenVotesByGameID(
-	ctx sdk.Context, gameID int64) (votes []TokenVote, err sdk.Error) {
+// TokenVotesByStoryID returns a list of votes for a given game
+func (k Keeper) TokenVotesByStoryID(
+	ctx sdk.Context, storyID int64) (votes []TokenVote, err sdk.Error) {
 
 	// iterate over voter list and get votes
-	err = k.voterList.Map(ctx, k, gameID, func(voterID int64) sdk.Error {
+	err = k.voterList.Map(ctx, k, storyID, func(voterID int64) sdk.Error {
 		vote, err := k.TokenVote(ctx, voterID)
 		if err != nil {
 			return err
@@ -233,7 +233,7 @@ func (k Keeper) TotalVoteAmountByGameID(ctx sdk.Context, gameID int64) (
 
 	totalAmount := sdk.ZeroInt()
 
-	votes, err := k.TokenVotesByGameID(ctx, gameID)
+	votes, err := k.TokenVotesByStoryID(ctx, gameID)
 	if err != nil {
 		return
 	}

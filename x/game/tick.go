@@ -48,28 +48,28 @@ func (k Keeper) checkStories(ctx sdk.Context) sdk.Error {
 }
 
 // quorum returns the total count of backings, challenges, votes
-// func (k Keeper) quorum(ctx sdk.Context, storyID int64) (total int, err sdk.Error) {
-// 	backings, err := k.backingKeeper.BackingsByStoryID(ctx, storyID)
-// 	if err != nil {
-// 		return
-// 	}
+func (k Keeper) quorum(ctx sdk.Context, storyID int64) (total int, err sdk.Error) {
+	backings, err := k.backingKeeper.BackingsByStoryID(ctx, storyID)
+	if err != nil {
+		return
+	}
 
-// 	story, err := k.storyKeeper.Story(ctx, storyID)
-// 	if err != nil {
-// 		return
-// 	}
+	story, err := k.storyKeeper.Story(ctx, storyID)
+	if err != nil {
+		return
+	}
 
-// 	challenges, err := k.challengeKeeper.ChallengesByStoryID(ctx, story.ID)
-// 	if err != nil {
-// 		return
-// 	}
+	challenges, err := k.challengeKeeper.ChallengesByStoryID(ctx, story.ID)
+	if err != nil {
+		return
+	}
 
-// 	tokenVotes, err := k.TokenVotesByGameID(ctx, story.ID)
-// 	if err != nil {
-// 		return
-// 	}
+	tokenVotes, err := k.voteKeeper.TokenVotesByStoryID(ctx, story.ID)
+	if err != nil {
+		return
+	}
 
-// 	total = len(backings) + len(challenges) + len(tokenVotes)
+	total = len(backings) + len(challenges) + len(tokenVotes)
 
-// 	return total, nil
-// }
+	return total, nil
+}
