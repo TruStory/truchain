@@ -110,6 +110,7 @@ func TestTotalVoteAmountByGameID(t *testing.T) {
 	assert.Equal(t, "30000000000trusteak", totalAmount.String())
 }
 
+// TODO [shanev] add back in https://github.com/TruStory/truchain/issues/387
 // func TestCreateVote_ErrGameNotStarted(t *testing.T) {
 // 	ctx, k, ck := mockDB()
 

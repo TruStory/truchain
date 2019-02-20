@@ -179,7 +179,7 @@ func (k Keeper) Create(
 		ExpireTime: ctx.BlockHeader().Time.Add(k.ExpireDuration(ctx)),
 		Flagged:    false,
 		Source:     source,
-		State:      Review,
+		State:      New,
 		Type:       storyType,
 		Timestamp:  app.NewTimestamp(ctx.BlockHeader()),
 	}
