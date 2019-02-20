@@ -1,4 +1,4 @@
-package distribution
+package expiration
 
 import (
 	"fmt"
@@ -18,7 +18,7 @@ func (k Keeper) EndBlock(ctx sdk.Context) sdk.Tags {
 
 // recursively process expired stories
 func (k Keeper) handleExpiredStories(ctx sdk.Context) sdk.Error {
-	logger := ctx.Logger().With("module", "distribution")
+	logger := ctx.Logger().With("module", "expiration")
 
 	expiredStoryQueue := k.expiredStoryQueue(ctx)
 
@@ -51,7 +51,7 @@ func (k Keeper) handleExpiredStories(ctx sdk.Context) sdk.Error {
 }
 
 func (k Keeper) distributeEarningsToBackers(ctx sdk.Context, storyID int64) sdk.Error {
-	logger := ctx.Logger().With("module", "distribution")
+	logger := ctx.Logger().With("module", "expiration")
 
 	story, err := k.storyKeeper.Story(ctx, storyID)
 	if err != nil {
@@ -99,7 +99,7 @@ func (k Keeper) distributeEarningsToBackers(ctx sdk.Context, storyID int64) sdk.
 // TODO [shanev]: Also distribute interest to challengers
 // see https://github.com/TruStory/truchain/issues/385
 func (k Keeper) returnFundsToChallengers(ctx sdk.Context, storyID int64) sdk.Error {
-	logger := ctx.Logger().With("module", "distribution")
+	logger := ctx.Logger().With("module", "expiration")
 
 	// get challenges
 	challenges, err := k.challengeKeeper.ChallengesByStoryID(ctx, storyID)

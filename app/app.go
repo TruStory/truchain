@@ -12,7 +12,7 @@ import (
 	"github.com/TruStory/truchain/x/backing"
 	"github.com/TruStory/truchain/x/category"
 	"github.com/TruStory/truchain/x/challenge"
-	"github.com/TruStory/truchain/x/distribution"
+	"github.com/TruStory/truchain/x/expiration"
 	"github.com/TruStory/truchain/x/game"
 	clientParams "github.com/TruStory/truchain/x/params"
 	"github.com/TruStory/truchain/x/story"
@@ -57,7 +57,7 @@ type TruChain struct {
 	keyBacking           *sdk.KVStoreKey
 	keyCategory          *sdk.KVStoreKey
 	keyChallenge         *sdk.KVStoreKey
-	keyDistribution      *sdk.KVStoreKey
+	keyExpiration        *sdk.KVStoreKey
 	keyFee               *sdk.KVStoreKey
 	keyGame              *sdk.KVStoreKey
 	keyIBC               *sdk.KVStoreKey
@@ -78,13 +78,13 @@ type TruChain struct {
 	paramsKeeper        sdkparams.Keeper
 
 	// access truchain database
-	storyKeeper        story.WriteKeeper
-	categoryKeeper     category.WriteKeeper
-	backingKeeper      backing.WriteKeeper
-	challengeKeeper    challenge.WriteKeeper
-	gameKeeper         game.WriteKeeper
-	voteKeeper         vote.WriteKeeper
-	distributionKeeper distribution.Keeper
+	storyKeeper      story.WriteKeeper
+	categoryKeeper   category.WriteKeeper
+	backingKeeper    backing.WriteKeeper
+	challengeKeeper  challenge.WriteKeeper
+	gameKeeper       game.WriteKeeper
+	voteKeeper       vote.WriteKeeper
+	expirationKeeper expiration.Keeper
 
 	// state to run api
 	blockCtx     *sdk.Context
@@ -121,7 +121,7 @@ func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *T
 		keyCategory:          sdk.NewKVStoreKey(category.StoreKey),
 		keyBacking:           sdk.NewKVStoreKey(backing.StoreKey),
 		keyChallenge:         sdk.NewKVStoreKey(challenge.StoreKey),
-		keyDistribution:      sdk.NewKVStoreKey(distribution.StoreKey),
+		keyExpiration:        sdk.NewKVStoreKey(expiration.StoreKey),
 		keyFee:               sdk.NewKVStoreKey("fee_collection"),
 		keyGame:              sdk.NewKVStoreKey(game.StoreKey),
 		keyVotingStoryQueue:  sdk.NewKVStoreKey(story.VotingQueueStoreKey),
@@ -197,14 +197,14 @@ func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *T
 		codec,
 	)
 
-	app.distributionKeeper = distribution.NewKeeper(
-		app.keyDistribution,
+	app.expirationKeeper = expiration.NewKeeper(
+		app.keyExpiration,
 		app.keyExpiredStoryQueue,
 		app.storyKeeper,
 		app.backingKeeper,
 		app.challengeKeeper,
 		app.coinKeeper,
-		app.paramsKeeper.Subspace(distribution.DefaultParamspace),
+		app.paramsKeeper.Subspace(expiration.DefaultParamspace),
 		codec,
 	)
 
@@ -260,7 +260,7 @@ func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *T
 		app.keyBacking,
 		app.keyCategory,
 		app.keyChallenge,
-		app.keyDistribution,
+		app.keyExpiration,
 		app.keyFee,
 		app.keyGame,
 		app.keyIBC,
@@ -347,7 +347,7 @@ func (app *TruChain) BeginBlocker(ctx sdk.Context, req abci.RequestBeginBlock) a
 // application.
 func (app *TruChain) EndBlocker(ctx sdk.Context, _ abci.RequestEndBlock) abci.ResponseEndBlock {
 	app.storyKeeper.EndBlock(ctx)
-	app.distributionKeeper.EndBlock(ctx)
+	app.expirationKeeper.EndBlock(ctx)
 	app.voteKeeper.NewResponseEndBlock(ctx)
 
 	return abci.ResponseEndBlock{}
@@ -373,12 +373,12 @@ func (app *TruChain) ExportAppStateAndValidators() (appState json.RawMessage, va
 	app.accountKeeper.IterateAccounts(ctx, appendAccountsFn)
 
 	genState := GenesisState{
-		Accounts:         accounts,
-		AuthData:         auth.DefaultGenesisState(),
-		BankData:         bank.DefaultGenesisState(),
-		Categories:       category.DefaultCategories(),
-		DistributionData: distribution.DefaultGenesisState(),
-		StoryData:        story.DefaultGenesisState(),
+		Accounts:       accounts,
+		AuthData:       auth.DefaultGenesisState(),
+		BankData:       bank.DefaultGenesisState(),
+		Categories:     category.DefaultCategories(),
+		ExpirationData: expiration.DefaultGenesisState(),
+		StoryData:      story.DefaultGenesisState(),
 	}
 
 	appState, err = codec.MarshalJSONIndent(app.codec, genState)

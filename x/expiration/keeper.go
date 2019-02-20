@@ -1,4 +1,4 @@
-package distribution
+package expiration
 
 import (
 	app "github.com/TruStory/truchain/types"
@@ -13,8 +13,8 @@ import (
 )
 
 const (
-	// StoreKey is string representation of the store key for distribution
-	StoreKey = "distribution"
+	// StoreKey is string representation of the store key for expiration
+	StoreKey = "expiration"
 )
 
 // Keeper data type storing keys to the key-value store
