@@ -21,42 +21,42 @@ func (k Keeper) EndBlock(ctx sdk.Context) sdk.Tags {
 
 // filterExpiredGames checks to see if a pending game has expired
 func (k Keeper) filterExpiredGames(ctx sdk.Context, pendingList list.List) sdk.Error {
-	logger := ctx.Logger().With("module", "challenge")
+	// logger := ctx.Logger().With("module", "challenge")
 
 	// find all expired games
-	var gameID int64
-	var indicesToDelete []uint64
-	pendingList.Iterate(&gameID, func(index uint64) bool {
-		var tempGameID int64
-		err := pendingList.Get(index, &tempGameID)
-		if err != nil {
-			panic(err)
-		}
+	// var gameID int64
+	// var indicesToDelete []uint64
+	// pendingList.Iterate(&gameID, func(index uint64) bool {
+	// 	var tempGameID int64
+	// 	err := pendingList.Get(index, &tempGameID)
+	// 	if err != nil {
+	// 		panic(err)
+	// 	}
 
-		game, err := k.gameKeeper.Game(ctx, tempGameID)
-		if err != nil {
-			panic(err)
-		}
+	// 	game, err := k.gameKeeper.Game(ctx, tempGameID)
+	// 	if err != nil {
+	// 		panic(err)
+	// 	}
 
-		if game.IsExpired(ctx.BlockHeader().Time) {
-			indicesToDelete = append(indicesToDelete, index)
-		}
+	// 	if game.IsExpired(ctx.BlockHeader().Time) {
+	// 		indicesToDelete = append(indicesToDelete, index)
+	// 	}
 
-		return false
-	})
+	// 	return false
+	// })
 
-	// delete expired games and return challenged funds
-	for _, v := range indicesToDelete {
-		pendingList.Delete(v)
+	// // delete expired games and return challenged funds
+	// for _, v := range indicesToDelete {
+	// 	pendingList.Delete(v)
 
-		msg := "Removed expired game %d from pending game list"
-		logger.Info(fmt.Sprintf(msg, gameID))
+	// 	msg := "Removed expired game %d from pending game list"
+	// 	logger.Info(fmt.Sprintf(msg, gameID))
 
-		err := k.returnFunds(ctx, gameID)
-		if err != nil {
-			return err
-		}
-	}
+	// 	err := k.returnFunds(ctx, gameID)
+	// 	if err != nil {
+	// 		return err
+	// 	}
+	// }
 
 	return nil
 }
