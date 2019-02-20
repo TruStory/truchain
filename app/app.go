@@ -180,14 +180,15 @@ func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *T
 		codec,
 	)
 
-	// app.gameKeeper = game.NewKeeper(
-	// 	app.keyGame,
-	// 	app.keyVotingStoryQueue,
-	// 	app.storyKeeper,
-	// 	app.backingKeeper,
-	// 	app.coinKeeper,
-	// 	codec,
-	// )
+	app.gameKeeper = game.NewKeeper(
+		app.keyGame,
+		app.keyVotingStoryQueue,
+		app.keyStoryQueue,
+		app.storyKeeper,
+		app.backingKeeper,
+		app.coinKeeper,
+		codec,
+	)
 
 	app.challengeKeeper = challenge.NewKeeper(
 		app.keyChallenge,

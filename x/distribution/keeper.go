@@ -48,7 +48,7 @@ func NewKeeper(
 		backingKeeper,
 		challengeKeeper,
 		bankKeeper,
-		paramStore,
+		paramStore.WithTypeTable(ParamTypeTable()),
 	}
 }
 
