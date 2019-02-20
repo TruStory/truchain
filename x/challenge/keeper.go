@@ -136,21 +136,6 @@ func (k Keeper) Create(
 		return 0, err
 	}
 
-	// TODO
-	// check if quorum is met, if not we're done
-
-	// TODO
-	// get total backing amount
-	// check if total challenge amount exceeds total backing amount
-	// if so, change story state to VOTING
-	// update story
-
-	// add another amount to the challenge pool
-	// err = k.gameKeeper.AddToChallengePool(ctx, gameID, amount)
-	// if err != nil {
-	// 	return 0, err
-	// }
-
 	msg := fmt.Sprintf("Challenged story %d with %s by %s",
 		storyID, amount.String(), creator.String())
 	logger.Info(msg)

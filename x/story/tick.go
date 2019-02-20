@@ -72,9 +72,3 @@ func (k Keeper) processStoryQueue(ctx sdk.Context, storyQueue queue.Queue) sdk.E
 	// check next story
 	return k.processStoryQueue(ctx, storyQueue)
 }
-
-// TODO
-// process voting story queue
-// -- check block time > voting end time (add field to story)
-// -- if so, tally and distribute
-// -- if not, move to next block

@@ -133,6 +133,7 @@ func TestNewChallenge_Duplicate(t *testing.T) {
 	assert.Equal(t, ErrDuplicateChallenge(5, creator).Code(), err.Code())
 }
 
+// TODO [shanev]: Add this to game in https://github.com/TruStory/truchain/issues/387
 // func TestNewChallenge_MultipleChallengers(t *testing.T) {
 // 	ctx, k, sk, ck, bankKeeper := mockDB()
 
