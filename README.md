@@ -152,17 +152,17 @@ All data in stores are binary encoded using [Amino](https://github.com/tendermin
 
 Most chain operations are executed based on changes to data. Lists and queues are checked every time a new block is produced:
 
-1. Backing list
+1. Story Queue
 
-Handles the lifecycle of backings, distributing funds after backings mature.
+A queue of all new stories that haven't expired or gone through voting yet.
 
-2. Pending game list
+2. Expired Story Queue
 
-Handles the lifecycle of challenges. Games in this list have been challenged but haven't met the threshold required for voting to begin. After the threshold is met, games in this list are promoted to the game queue.
+Stories that expire before going into voting are pushed into this list. The queue is processed after each block to distribute rewards to backers and return funds to challengers.
 
-3. Game queue
+3. Voting Story Queue
 
-Handles the lifecycle of voting on a story (validation game). Upon completion of a game, funds are distributed to winners, and removed from losers.
+Handles the lifecycle of voting on a story (validation game). Upon completion of a voting game, funds are distributed to winners, and removed from losers.
 
 ## Testing
 
