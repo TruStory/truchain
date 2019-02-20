@@ -2,6 +2,7 @@ package distribution
 
 import (
 	"fmt"
+	"time"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
@@ -52,6 +53,11 @@ func (k Keeper) handleExpiredStories(ctx sdk.Context) sdk.Error {
 func (k Keeper) distributeEarningsToBackers(ctx sdk.Context, storyID int64) sdk.Error {
 	logger := ctx.Logger().With("module", "distribution")
 
+	story, err := k.storyKeeper.Story(ctx, storyID)
+	if err != nil {
+		return err
+	}
+
 	backings, err := k.backingKeeper.BackingsByStoryID(ctx, storyID)
 	if err != nil {
 		return err
@@ -65,7 +71,14 @@ func (k Keeper) distributeEarningsToBackers(ctx sdk.Context, storyID int64) sdk.
 		}
 
 		// give the interest earned to the user (in cred)
-		_, _, err = k.bankKeeper.AddCoins(ctx, backing.Creator(), sdk.Coins{backing.Interest})
+		period := story.VotingEndTime.Sub(story.Timestamp.CreatedTime)
+		denom, err := k.storyKeeper.CategoryDenom(ctx, storyID)
+		if err != nil {
+			return err
+		}
+		interest := getInterest(
+			backing.Amount(), period, period, denom, DefaultParams())
+		_, _, err = k.bankKeeper.AddCoins(ctx, backing.Creator(), sdk.Coins{interest})
 		if err != nil {
 			return err
 		}
@@ -102,4 +115,49 @@ func (k Keeper) returnFundsToChallengers(ctx sdk.Context, storyID int64) sdk.Err
 	}
 
 	return nil
+}
+
+func getInterest(
+	amount sdk.Coin,
+	period time.Duration,
+	maxPeriod time.Duration,
+	credDenom string,
+	params Params) sdk.Coin {
+
+	// TODO: keep track of total supply
+	// https://github.com/TruStory/truchain/issues/22
+
+	totalSupply := sdk.NewDec(1000000000000000)
+
+	// inputs
+	maxAmount := totalSupply
+	amountWeight := params.AmountWeight
+	periodWeight := params.PeriodWeight
+	maxInterestRate := params.MaxInterestRate
+
+	// type cast values to unitless decimals for math operations
+	periodDec := sdk.NewDec(int64(period))
+	maxPeriodDec := sdk.NewDec(int64(maxPeriod))
+	amountDec := sdk.NewDecFromInt(amount.Amount)
+
+	// normalize amount and period to 0 - 1
+	normalizedAmount := amountDec.Quo(maxAmount)
+	normalizedPeriod := periodDec.Quo(maxPeriodDec)
+
+	// apply weights to normalized amount and period
+	weightedAmount := normalizedAmount.Mul(amountWeight)
+	weightedPeriod := normalizedPeriod.Mul(periodWeight)
+
+	// calculate interest
+	interestRate := maxInterestRate.Mul(weightedAmount.Add(weightedPeriod))
+	// convert rate to a value
+	if interestRate.LT(params.MinInterestRate) {
+		interestRate = params.MinInterestRate
+	}
+	interest := amountDec.Mul(interestRate)
+
+	// return cred coin with rounded interest
+	cred := sdk.NewCoin(credDenom, interest.RoundInt())
+
+	return cred
 }

@@ -169,22 +169,6 @@
             "deprecationReason": "",
             "description": "",
             "isDeprecated": false,
-            "name": "storyID",
-            "type": {
-              "kind": "NON_NULL",
-              "name": "",
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "int64",
-                "ofType": null
-              }
-            }
-          },
-          {
-            "args": [],
-            "deprecationReason": "",
-            "description": "",
-            "isDeprecated": false,
             "name": "timestamp",
             "type": {
               "kind": "NON_NULL",
@@ -549,29 +533,6 @@
             "deprecationReason": "",
             "description": "",
             "isDeprecated": false,
-            "name": "int",
-            "type": {
-              "kind": "OBJECT",
-              "name": "Int",
-              "ofType": null
-            }
-          }
-        ],
-        "inputFields": [],
-        "interfaces": [],
-        "kind": "OBJECT",
-        "name": "Dec",
-        "possibleTypes": []
-      },
-      {
-        "description": "",
-        "enumValues": [],
-        "fields": [
-          {
-            "args": [],
-            "deprecationReason": "",
-            "description": "",
-            "isDeprecated": false,
             "name": "challengeExpireTime",
             "type": {
               "kind": "NON_NULL",
@@ -769,29 +730,19 @@
       {
         "description": "",
         "enumValues": [],
-        "fields": [],
-        "inputFields": [],
-        "interfaces": [],
-        "kind": "OBJECT",
-        "name": "Int",
-        "possibleTypes": []
-      },
-      {
-        "description": "",
-        "enumValues": [],
         "fields": [
           {
             "args": [],
             "deprecationReason": "",
             "description": "",
             "isDeprecated": false,
-            "name": "amountWeight",
+            "name": "backingAmountWeight",
             "type": {
               "kind": "NON_NULL",
               "name": "",
               "ofType": {
-                "kind": "OBJECT",
-                "name": "Dec",
+                "kind": "SCALAR",
+                "name": "string",
                 "ofType": null
               }
             }
@@ -801,13 +752,13 @@
             "deprecationReason": "",
             "description": "",
             "isDeprecated": false,
-            "name": "maxInterestRate",
+            "name": "backingMaxDuration",
             "type": {
               "kind": "NON_NULL",
               "name": "",
               "ofType": {
-                "kind": "OBJECT",
-                "name": "Dec",
+                "kind": "SCALAR",
+                "name": "int64",
                 "ofType": null
               }
             }
@@ -817,13 +768,13 @@
             "deprecationReason": "",
             "description": "",
             "isDeprecated": false,
-            "name": "minInterestRate",
+            "name": "backingMaxInterestRate",
             "type": {
               "kind": "NON_NULL",
               "name": "",
               "ofType": {
-                "kind": "OBJECT",
-                "name": "Dec",
+                "kind": "SCALAR",
+                "name": "string",
                 "ofType": null
               }
             }
@@ -833,13 +784,45 @@
             "deprecationReason": "",
             "description": "",
             "isDeprecated": false,
-            "name": "periodWeight",
+            "name": "backingMinDuration",
             "type": {
               "kind": "NON_NULL",
               "name": "",
               "ofType": {
-                "kind": "OBJECT",
-                "name": "Dec",
+                "kind": "SCALAR",
+                "name": "int64",
+                "ofType": null
+              }
+            }
+          },
+          {
+            "args": [],
+            "deprecationReason": "",
+            "description": "",
+            "isDeprecated": false,
+            "name": "backingMinInterestRate",
+            "type": {
+              "kind": "NON_NULL",
+              "name": "",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "string",
+                "ofType": null
+              }
+            }
+          },
+          {
+            "args": [],
+            "deprecationReason": "",
+            "description": "",
+            "isDeprecated": false,
+            "name": "backingPeriodWeight",
+            "type": {
+              "kind": "NON_NULL",
+              "name": "",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "string",
                 "ofType": null
               }
             }
@@ -1411,22 +1394,6 @@
             "deprecationReason": "",
             "description": "",
             "isDeprecated": false,
-            "name": "gameID",
-            "type": {
-              "kind": "NON_NULL",
-              "name": "",
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "int64",
-                "ofType": null
-              }
-            }
-          },
-          {
-            "args": [],
-            "deprecationReason": "",
-            "description": "",
-            "isDeprecated": false,
             "name": "iD",
             "type": {
               "kind": "NON_NULL",
@@ -1539,6 +1506,22 @@
                     "ofType": null
                   }
                 }
+              }
+            }
+          },
+          {
+            "args": [],
+            "deprecationReason": "",
+            "description": "",
+            "isDeprecated": false,
+            "name": "votingEndTime",
+            "type": {
+              "kind": "NON_NULL",
+              "name": "",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Time",
+                "ofType": null
               }
             }
           }
