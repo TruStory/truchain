@@ -9,9 +9,7 @@ import (
 
 	params "github.com/TruStory/truchain/parameters"
 	app "github.com/TruStory/truchain/types"
-	"github.com/TruStory/truchain/x/game"
 	"github.com/TruStory/truchain/x/story"
-	list "github.com/cosmos/cosmos-sdk/store"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	amino "github.com/tendermint/go-amino"
 )
@@ -52,9 +50,6 @@ type WriteKeeper interface {
 type Keeper struct {
 	app.Keeper
 
-	// list of games waiting to meet challenge threshold
-	pendingGameListKey sdk.StoreKey
-
 	backingKeeper backing.ReadKeeper
 	bankKeeper    bank.Keeper
 	storyKeeper   story.WriteKeeper
@@ -65,7 +60,6 @@ type Keeper struct {
 // NewKeeper creates a new keeper with write and read access
 func NewKeeper(
 	storeKey sdk.StoreKey,
-	pendingGameListKey sdk.StoreKey,
 	backingKeeper backing.ReadKeeper,
 	bankKeeper bank.Keeper,
 	storyKeeper story.WriteKeeper,
@@ -73,7 +67,6 @@ func NewKeeper(
 
 	return Keeper{
 		app.NewKeeper(codec, storeKey),
-		pendingGameListKey,
 		backingKeeper,
 		bankKeeper,
 		storyKeeper,
@@ -99,9 +92,9 @@ func (k Keeper) Create(
 	}
 
 	// check if challenge amount is greater than minimum stake
-	if amount.Amount.LT(game.DefaultParams().MinChallengeStake) {
-		return 0, sdk.ErrInsufficientFunds("Does not meet minimum stake amount.")
-	}
+	// if amount.Amount.LT(game.DefaultParams().MinChallengeStake) {
+	// 	return 0, sdk.ErrInsufficientFunds("Does not meet minimum stake amount.")
+	// }
 
 	// make sure creator hasn't already challenged
 	if k.challengeList.Includes(ctx, k, storyID, creator) {
@@ -213,12 +206,4 @@ func (k Keeper) Tally(
 	})
 
 	return
-}
-
-// ============================================================================
-
-func (k Keeper) pendingGameList(ctx sdk.Context) list.List {
-	return list.NewList(
-		k.GetCodec(),
-		ctx.KVStore(k.pendingGameListKey))
 }

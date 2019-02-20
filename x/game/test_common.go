@@ -4,6 +4,8 @@ import (
 	"net/url"
 	"time"
 
+	"github.com/TruStory/truchain/x/challenge"
+
 	"github.com/TruStory/truchain/x/backing"
 	c "github.com/TruStory/truchain/x/category"
 	"github.com/TruStory/truchain/x/story"
@@ -27,9 +29,8 @@ func mockDB() (sdk.Context, Keeper, c.Keeper) {
 	storyQueueKey := sdk.NewKVStoreKey(story.QueueStoreKey)
 	expiredStoryQueueKey := sdk.NewKVStoreKey(story.ExpiredQueueStoreKey)
 	catKey := sdk.NewKVStoreKey(c.StoreKey)
-	challengeKey := sdk.NewKVStoreKey("challenges")
+	challengeKey := sdk.NewKVStoreKey(challenge.StoreKey)
 	gameKey := sdk.NewKVStoreKey(StoreKey)
-	pendingGameListKey := sdk.NewKVStoreKey(PendingListStoreKey)
 	votingStoryQueueKey := sdk.NewKVStoreKey(QueueStoreKey)
 	backingKey := sdk.NewKVStoreKey(backing.StoreKey)
 	paramsKey := sdk.NewKVStoreKey(params.StoreKey)
@@ -43,7 +44,6 @@ func mockDB() (sdk.Context, Keeper, c.Keeper) {
 	ms.MountStoreWithDB(catKey, sdk.StoreTypeIAVL, db)
 	ms.MountStoreWithDB(challengeKey, sdk.StoreTypeIAVL, db)
 	ms.MountStoreWithDB(gameKey, sdk.StoreTypeIAVL, db)
-	ms.MountStoreWithDB(pendingGameListKey, sdk.StoreTypeIAVL, db)
 	ms.MountStoreWithDB(votingStoryQueueKey, sdk.StoreTypeIAVL, db)
 	ms.MountStoreWithDB(backingKey, sdk.StoreTypeIAVL, db)
 	ms.MountStoreWithDB(paramsKey, sdk.StoreTypeIAVL, db)
@@ -84,7 +84,23 @@ func mockDB() (sdk.Context, Keeper, c.Keeper) {
 		codec,
 	)
 
-	k := NewKeeper(gameKey, pendingGameListKey, votingStoryQueueKey, sk, backingKeeper, bankKeeper, codec)
+	challengeKeeper := challenge.NewKeeper(
+		challengeKey,
+		backingKeeper,
+		bankKeeper,
+		sk,
+		codec,
+	)
+
+	k := NewKeeper(
+		gameKey,
+		votingStoryQueueKey,
+		sk,
+		backingKeeper,
+		challengeKeeper,
+		bankKeeper,
+		codec,
+	)
 
 	return ctx, k, ck
 }

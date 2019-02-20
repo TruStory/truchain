@@ -29,7 +29,6 @@ import (
 func mockDB() (sdk.Context, Keeper, c.Keeper) {
 
 	db := dbm.NewMemDB()
-
 	accKey := sdk.NewKVStoreKey("acc")
 	storyKey := sdk.NewKVStoreKey("stories")
 	storyQueueKey := sdk.NewKVStoreKey(story.QueueStoreKey)
@@ -93,13 +92,22 @@ func mockDB() (sdk.Context, Keeper, c.Keeper) {
 		ck,
 		codec,
 	)
-	gameKeeper := game.NewKeeper(gameKey, pendingGameListKey, votingStoryQueueKey, sk, backingKeeper, bankKeeper, codec)
+
 	challengeKeeper := challenge.NewKeeper(
 		challengeKey,
-		pendingGameListKey,
 		backingKeeper,
 		bankKeeper,
 		sk,
+		codec,
+	)
+
+	gameKeeper := game.NewKeeper(
+		gameKey,
+		storyQueueKey,
+		sk,
+		backingKeeper,
+		challengeKeeper,
+		bankKeeper,
 		codec,
 	)
 

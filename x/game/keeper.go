@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/TruStory/truchain/x/backing"
+	"github.com/TruStory/truchain/x/challenge"
 
 	"github.com/cosmos/cosmos-sdk/x/bank"
 
@@ -48,33 +49,30 @@ type WriteKeeper interface {
 type Keeper struct {
 	app.Keeper
 
-	// waiting to meet challenge threshold
-	pendingListKey sdk.StoreKey
+	storyQueueKey sdk.StoreKey
 
-	// threshold met, voting starting..
-	queueKey sdk.StoreKey
-
-	storyKeeper   story.WriteKeeper
-	backingKeeper backing.WriteKeeper
-	bankKeeper    bank.Keeper
+	storyKeeper     story.WriteKeeper
+	backingKeeper   backing.WriteKeeper
+	challengeKeeper challenge.WriteKeeper
+	bankKeeper      bank.Keeper
 }
 
 // NewKeeper creates a new keeper with write and read access
 func NewKeeper(
 	storeKey sdk.StoreKey,
-	pendingListKey sdk.StoreKey,
-	queueKey sdk.StoreKey,
+	storyQueueKey sdk.StoreKey,
 	storyKeeper story.WriteKeeper,
 	backingKeeper backing.WriteKeeper,
+	challengeKeeper challenge.WriteKeeper,
 	bankKeeper bank.Keeper,
 	codec *amino.Codec) Keeper {
 
 	return Keeper{
 		app.NewKeeper(codec, storeKey),
-		pendingListKey,
-		queueKey,
+		storyQueueKey,
 		storyKeeper,
 		backingKeeper,
+		challengeKeeper,
 		bankKeeper,
 	}
 }
@@ -85,7 +83,7 @@ func NewKeeper(
 func (k Keeper) Create(
 	ctx sdk.Context, storyID int64, creator sdk.AccAddress) (int64, sdk.Error) {
 
-	logger := ctx.Logger().With("module", "game")
+	// logger := ctx.Logger().With("module", "game")
 
 	// get the story being challenged
 	story, err := k.storyKeeper.Story(ctx, storyID)
@@ -103,12 +101,6 @@ func (k Keeper) Create(
 		ChallengePool:       sdk.NewCoin(params.StakeDenom, sdk.ZeroInt()),
 		Timestamp:           app.NewTimestamp(ctx.BlockHeader()),
 	}
-
-	// push game id onto queue that will get checked
-	// on each block tick for expired games
-	k.pendingList(ctx).Push(game.ID)
-	msg := "Added game %d to pending game list, len %d"
-	logger.Info(fmt.Sprintf(msg, game.ID, k.pendingList(ctx).Len()))
 
 	// set game in KVStore
 	k.set(ctx, game)
@@ -208,13 +200,8 @@ func (k Keeper) Update(ctx sdk.Context, game Game) {
 
 // ============================================================================
 
-func (k Keeper) pendingList(ctx sdk.Context) list.List {
-	pendingListStore := ctx.KVStore(k.pendingListKey)
-	return list.NewList(k.GetCodec(), pendingListStore)
-}
-
-func (k Keeper) queue(ctx sdk.Context) list.Queue {
-	queueStore := ctx.KVStore(k.queueKey)
+func (k Keeper) storyQueue(ctx sdk.Context) list.Queue {
+	queueStore := ctx.KVStore(k.storyQueueKey)
 	return list.NewQueue(k.GetCodec(), queueStore)
 }
 
@@ -245,42 +232,8 @@ func (k Keeper) start(ctx sdk.Context, game *Game) (err sdk.Error) {
 	k.set(ctx, *game)
 
 	// promote game from pending game list to game queue
-	k.removePendingGameList(ctx, game.ID)
-	k.pushGameQueue(ctx, game.ID)
+	// k.removePendingGameList(ctx, game.ID)
+	// k.pushGameQueue(ctx, game.ID)
 
 	return
-}
-
-func (k Keeper) removePendingGameList(ctx sdk.Context, gameID int64) {
-	logger := ctx.Logger().With("module", "game")
-
-	pendingList := k.pendingList(ctx)
-
-	// find index of game id to delete in pending queue
-	var ID int64
-	var indexToDelete uint64
-	pendingList.Iterate(&ID, func(index uint64) bool {
-		var tempGameID int64
-		err := pendingList.Get(index, &tempGameID)
-		if err != nil {
-			panic(err)
-		}
-		if tempGameID == gameID {
-			indexToDelete = index
-			return true
-		}
-		return false
-	})
-
-	pendingList.Delete(indexToDelete)
-	logger.Info(fmt.Sprintf("Removed pending game %d", gameID))
-}
-
-func (k Keeper) pushGameQueue(ctx sdk.Context, gameID int64) {
-	logger := ctx.Logger().With("module", "game")
-
-	// push game id onto game queue that will get checked on each tick
-	k.queue(ctx).Push(gameID)
-	msg := "Pushed game %d to game queue"
-	logger.Info(fmt.Sprintf(msg, gameID))
 }
