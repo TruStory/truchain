@@ -23,7 +23,7 @@ func (k Keeper) NewResponseEndBlock(ctx sdk.Context) sdk.Tags {
 // filterGameQueue checks to see if a validation game has ended, then processes
 // that game. It calls itself recursively until all games have been processed.
 func (k Keeper) filterGameQueue(ctx sdk.Context, gameQueue queue.Queue) sdk.Error {
-	logger := ctx.Logger().With("module", "vote")
+	// logger := ctx.Logger().With("module", "vote")
 
 	if gameQueue.IsEmpty() {
 		return nil
@@ -34,61 +34,61 @@ func (k Keeper) filterGameQueue(ctx sdk.Context, gameQueue queue.Queue) sdk.Erro
 		panic(err)
 	}
 
-	// retrieve the game
-	game, err := k.gameKeeper.Game(ctx, gameID)
-	if err != nil {
-		return err
-	}
+	// // retrieve the game
+	// game, err := k.gameKeeper.Game(ctx, gameID)
+	// if err != nil {
+	// 	return err
+	// }
 
-	blockTime := ctx.BlockHeader().Time
+	// blockTime := ctx.BlockHeader().Time
 
-	quorum, err := k.quorum(ctx, game.StoryID)
-	if err != nil {
-		return err
-	}
+	// quorum, err := k.quorum(ctx, game.StoryID)
+	// if err != nil {
+	// 	return err
+	// }
 
-	// handle expired voting periods
-	if game.IsVotingExpired(blockTime, quorum) {
+	// // handle expired voting periods
+	// if game.IsVotingExpired(blockTime, quorum) {
 
-		logger.Info(
-			fmt.Sprintf(
-				"Voting period expired for story: %d", game.StoryID))
+	// 	logger.Info(
+	// 		fmt.Sprintf(
+	// 			"Voting period expired for story: %d", game.StoryID))
 
-		// remove from queue
-		gameQueue.Pop()
+	// 	// remove from queue
+	// 	gameQueue.Pop()
 
-		// return funds
-		err = k.returnFunds(ctx, gameID)
-		if err != nil {
-			return err
-		}
+	// 	// return funds
+	// 	err = k.returnFunds(ctx, gameID)
+	// 	if err != nil {
+	// 		return err
+	// 	}
 
-		// update story
-		err = k.storyKeeper.ExpireGame(ctx, game.StoryID)
-		if err != nil {
-			return err
-		}
+	// 	// update story
+	// 	err = k.storyKeeper.ExpireGame(ctx, game.StoryID)
+	// 	if err != nil {
+	// 		return err
+	// 	}
 
-		// process next game
-		return k.filterGameQueue(ctx, gameQueue)
-	}
+	// 	// process next game
+	// 	return k.filterGameQueue(ctx, gameQueue)
+	// }
 
-	// Terminate recursion on finding the first unfinished game,
-	// because it means all the ones behind it in the queue
-	// are also unfinished.
-	if !game.IsVotingFinished(blockTime, quorum) {
-		return nil
-	}
+	// // Terminate recursion on finding the first unfinished game,
+	// // because it means all the ones behind it in the queue
+	// // are also unfinished.
+	// if !game.IsVotingFinished(blockTime, quorum) {
+	// 	return nil
+	// }
 
-	// only left with finished games at this point...
-	// remove finished game from queue
-	gameQueue.Pop()
+	// // only left with finished games at this point...
+	// // remove finished game from queue
+	// gameQueue.Pop()
 
-	// process game
-	err = processGame(ctx, k, game)
-	if err != nil {
-		return err
-	}
+	// // process game
+	// err = processGame(ctx, k, game)
+	// if err != nil {
+	// 	return err
+	// }
 
 	// check next game
 	return k.filterGameQueue(ctx, gameQueue)

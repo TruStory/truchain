@@ -9,8 +9,6 @@ import (
 
 	"github.com/TruStory/truchain/x/challenge"
 
-	"github.com/TruStory/truchain/x/game"
-
 	params "github.com/TruStory/truchain/parameters"
 	c "github.com/TruStory/truchain/x/category"
 	"github.com/TruStory/truchain/x/story"
@@ -101,16 +99,6 @@ func mockDB() (sdk.Context, Keeper, c.Keeper) {
 		codec,
 	)
 
-	gameKeeper := game.NewKeeper(
-		gameKey,
-		storyQueueKey,
-		sk,
-		backingKeeper,
-		challengeKeeper,
-		bankKeeper,
-		codec,
-	)
-
 	k := NewKeeper(
 		voteKey,
 		votingStoryQueueKey,
@@ -118,7 +106,6 @@ func mockDB() (sdk.Context, Keeper, c.Keeper) {
 		backingKeeper,
 		challengeKeeper,
 		sk,
-		gameKeeper,
 		bankKeeper,
 		codec)
 

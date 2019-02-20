@@ -5,7 +5,6 @@ import (
 
 	"github.com/TruStory/truchain/x/backing"
 	"github.com/TruStory/truchain/x/challenge"
-	"github.com/TruStory/truchain/x/game"
 	"github.com/TruStory/truchain/x/story"
 	"github.com/cosmos/cosmos-sdk/x/auth"
 	"github.com/cosmos/cosmos-sdk/x/bank"
@@ -63,7 +62,6 @@ type Keeper struct {
 	backingKeeper   backing.WriteKeeper
 	challengeKeeper challenge.WriteKeeper
 	storyKeeper     story.WriteKeeper
-	gameKeeper      game.WriteKeeper
 	bankKeeper      bank.Keeper
 
 	voterList app.UserList
@@ -77,7 +75,6 @@ func NewKeeper(
 	backingKeeper backing.WriteKeeper,
 	challengeKeeper challenge.WriteKeeper,
 	storyKeeper story.WriteKeeper,
-	gameKeeper game.WriteKeeper,
 	bankKeeper bank.Keeper,
 	codec *amino.Codec) Keeper {
 
@@ -88,9 +85,8 @@ func NewKeeper(
 		backingKeeper,
 		challengeKeeper,
 		storyKeeper,
-		gameKeeper,
 		bankKeeper,
-		app.NewUserList(gameKeeper.GetStoreKey()),
+		app.NewUserList(storyKeeper.GetStoreKey()),
 	}
 }
 

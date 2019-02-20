@@ -214,7 +214,6 @@ func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *T
 		app.backingKeeper,
 		app.challengeKeeper,
 		app.storyKeeper,
-		app.gameKeeper,
 		app.coinKeeper,
 		codec,
 	)
