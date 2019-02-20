@@ -24,6 +24,7 @@ type WriteKeeper interface {
 	ReadKeeper
 
 	Create(ctx sdk.Context, title string, slug string, description string) int64
+	AddToTotalCred(ctx sdk.Context, id int64, amt sdk.Coin) sdk.Error
 }
 
 // Keeper data type storing keys to the key-value store
@@ -50,6 +51,7 @@ func (k Keeper) Create(
 		title,
 		slug,
 		description,
+		sdk.NewCoin(slug, sdk.ZeroInt()),
 		app.NewTimestamp(ctx.BlockHeader()),
 	}
 
@@ -80,6 +82,23 @@ func (k Keeper) GetAllCategories(ctx sdk.Context) (cats []Category, err sdk.Erro
 		cats = append(cats, cat)
 		return true
 	})
+	return
+}
+
+// AddToTotalCred updates the total supply of cred for the key-value store
+func (k Keeper) AddToTotalCred(ctx sdk.Context, id int64, amt sdk.Coin) (err sdk.Error) {
+	cat, err := k.GetCategory(ctx, id)
+	if err != nil {
+		return ErrCategoryNotFound(id)
+	}
+
+	if amt.Denom != cat.Denom() {
+		return ErrCodeDenomMismatch(id)
+	}
+
+	cat.TotalCred = cat.TotalCred.Plus(amt)
+	k.setCategory(ctx, cat)
+
 	return
 }
 
