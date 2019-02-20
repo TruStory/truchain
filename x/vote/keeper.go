@@ -108,19 +108,20 @@ func (k Keeper) Create(
 	}
 
 	// get the story
-	story, err := k.storyKeeper.Story(ctx, storyID)
+	currentStory, err := k.storyKeeper.Story(ctx, storyID)
 	if err != nil {
 		return 0, err
 	}
 
 	// make sure validation game has started
-	// if story.GameID <= 0 {
+	// TODO [shanev] fix me in https://github.com/TruStory/truchain/issues/387
+	// if currentStory.State != story.Voting {
 	// 	return 0, ErrGameNotStarted(storyID)
 	// }
 
 	// check if this voter has already cast a vote
-	if k.voterList.Includes(ctx, k, story.ID, creator) {
-		return 0, ErrDuplicateVoteForGame(story.ID, creator)
+	if k.voterList.Includes(ctx, k, currentStory.ID, creator) {
+		return 0, ErrDuplicateVoteForGame(currentStory.ID, creator)
 	}
 
 	// check if user has the funds
@@ -150,7 +151,7 @@ func (k Keeper) Create(
 	k.set(ctx, tokenVote)
 
 	// persist story <-> tokenVote association
-	k.voterList.Append(ctx, k, story.ID, creator, vote.ID)
+	k.voterList.Append(ctx, k, currentStory.ID, creator, vote.ID)
 
 	logger.Info(fmt.Sprintf(
 		"Voted on story %d with %s by %s", storyID, amount.String(), creator.String()))
