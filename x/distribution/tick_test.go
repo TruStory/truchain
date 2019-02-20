@@ -6,6 +6,7 @@ import (
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/stretchr/testify/assert"
+	abci "github.com/tendermint/tendermint/abci/types"
 )
 
 func Test_handleExpiredStoriesEmptyQueue(t *testing.T) {
@@ -18,8 +19,8 @@ func Test_handleExpiredStoriesEmptyQueue(t *testing.T) {
 func Test_handleExpiredStories(t *testing.T) {
 	ctx, k, storyKeeper, backingKeeper, challengeKeeper, bankKeeper := mockDB()
 
+	ctx = ctx.WithBlockHeader(abci.Header{Time: time.Now()})
 	storyID := createFakeStory(ctx, storyKeeper)
-
 	amount := sdk.NewCoin("trusteak", sdk.NewInt(100000))
 	argument := "test argument right here"
 	backer := fakeFundedCreator(ctx, bankKeeper)
