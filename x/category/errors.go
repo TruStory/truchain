@@ -13,6 +13,7 @@ const (
 	CodeInvalidCategory    sdk.CodeType = 801
 	CodeCategoryNotFound   sdk.CodeType = 802
 	CodeInvalidCategoryMsg sdk.CodeType = 803
+	CodeDenomMismatch      sdk.CodeType = 804
 )
 
 // ErrInvalidCategory throws an error when the category is invalid
@@ -28,4 +29,9 @@ func ErrInvalidCategoryMsg(msg string) sdk.Error {
 // ErrCategoryNotFound throws an error when the searched category is not found
 func ErrCategoryNotFound(id int64) sdk.Error {
 	return sdk.NewError(DefaultCodespace, CodeCategoryNotFound, "Category id not found: "+fmt.Sprintf("%d", id))
+}
+
+// ErrCodeDenomMismatch throws an error when a category msg is invalid
+func ErrCodeDenomMismatch(id int64) sdk.Error {
+	return sdk.NewError(DefaultCodespace, CodeDenomMismatch, "Coins could not be added to category because the coin denom does not match the category denom.")
 }

@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	app "github.com/TruStory/truchain/types"
+	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
 // Category is a type that defines the category for a story
@@ -12,6 +13,7 @@ type Category struct {
 	Title       string        `json:"title"`
 	Slug        string        `json:"slug"`
 	Description string        `json:"description,omitempty"`
+	TotalCred   sdk.Coin      `json:"total_cred"`
 	Timestamp   app.Timestamp `json:"timestamp,omitempty"`
 }
 
