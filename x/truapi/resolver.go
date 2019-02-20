@@ -330,9 +330,13 @@ func (ta *TruAPI) votesResolver(
 	return *tokenVotes
 }
 
+// TODO: DO NOT PASS A GAME HERE
 func (ta *TruAPI) votesTotalAmountResolver(_ context.Context, q game.Game) sdk.Coin {
+
 	res := ta.RunQuery(
-		"votes/totalVoteAmountByGameID", app.QueryByIDParams{ID: q.ID})
+		path.Join(vote.QueryPath, vote.QueryTotalVoteAmountByStoryID),
+		app.QueryByIDParams{ID: q.ID},
+	)
 
 	if res.Code != 0 {
 		fmt.Println("Resolver err: ", res)
