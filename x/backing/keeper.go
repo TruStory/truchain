@@ -264,6 +264,10 @@ func (k Keeper) TotalBackingAmount(ctx sdk.Context, storyID int64) (
 		return nil
 	})
 
+	if err != nil {
+		return
+	}
+
 	return totalAmount, nil
 }
 
