@@ -71,7 +71,7 @@ func (k Keeper) distributeEarningsToBackers(ctx sdk.Context, storyID int64) sdk.
 		}
 
 		// give the interest earned to the user (in cred)
-		period := story.VotingEndTime.Sub(story.Timestamp.CreatedTime)
+		period := story.ExpireTime.Sub(backing.Timestamp.CreatedTime)
 		denom, err := k.storyKeeper.CategoryDenom(ctx, storyID)
 		if err != nil {
 			return err
