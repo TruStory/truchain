@@ -37,7 +37,7 @@ type ReadKeeper interface {
 		storyID int64,
 		creator sdk.AccAddress) (vote TokenVote, err sdk.Error)
 
-	TotalVoteAmountByGameID(ctx sdk.Context, gameID int64) (
+	TotalVoteAmountByStoryID(ctx sdk.Context, storyID int64) (
 		totalCoin sdk.Coin, err sdk.Error)
 }
 
@@ -227,13 +227,13 @@ func (k Keeper) Tally(
 	return
 }
 
-// TotalVoteAmountByGameID returns the total of all votes for a game
-func (k Keeper) TotalVoteAmountByGameID(ctx sdk.Context, gameID int64) (
+// TotalVoteAmountByStoryID returns the total of all votes for a game
+func (k Keeper) TotalVoteAmountByStoryID(ctx sdk.Context, storyID int64) (
 	totalCoin sdk.Coin, err sdk.Error) {
 
 	totalAmount := sdk.ZeroInt()
 
-	votes, err := k.TokenVotesByStoryID(ctx, gameID)
+	votes, err := k.TokenVotesByStoryID(ctx, storyID)
 	if err != nil {
 		return
 	}

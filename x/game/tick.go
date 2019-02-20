@@ -13,13 +13,43 @@ func (k Keeper) EndBlock(ctx sdk.Context) sdk.Tags {
 	return sdk.EmptyTags()
 }
 
-// recursively check for meeting quorum and challenge threshold
+// find all expired games
+// var gameID int64
+// var indicesToDelete []uint64
+// pendingList.Iterate(&gameID, func(index uint64) bool {
+// 	var tempGameID int64
+// 	err := pendingList.Get(index, &tempGameID)
+// 	if err != nil {
+// 		panic(err)
+// 	}
+
+// 	game, err := k.gameKeeper.Game(ctx, tempGameID)
+// 	if err != nil {
+// 		panic(err)
+// 	}
+
+// 	if game.IsExpired(ctx.BlockHeader().Time) {
+// 		indicesToDelete = append(indicesToDelete, index)
+// 	}
+
+// 	return false
+// })
+
+// iteratively check for meeting quorum and challenge threshold
 func (k Keeper) checkStories(ctx sdk.Context) sdk.Error {
 	// logger := ctx.Logger().With("module", "expiration")
 
-	// expiredStoryQueue := k.expiredStoryQueue(ctx)
+	var storyID int64
+	k.storyQueue(ctx).List.Iterate(&storyID, func(index uint64) bool {
+		// story, err := k.storyKeeper.Story(ctx, storyID)
+		// if err != nil {
+		// 	panic(err)
+		// }
 
-	// if expiredStoryQueue.IsEmpty() {
+		return false
+	})
+
+	// if storyQueue.IsEmpty() {
 	// 	// done processing all expired stories
 	// 	// terminate
 	// 	return nil

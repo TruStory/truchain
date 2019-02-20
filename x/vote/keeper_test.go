@@ -106,7 +106,7 @@ func TestTotalVoteAmountByGameID(t *testing.T) {
 
 	story, _ := k.storyKeeper.Story(ctx, storyID)
 
-	totalAmount, _ := k.TotalVoteAmountByGameID(ctx, story.ID)
+	totalAmount, _ := k.TotalVoteAmountByStoryID(ctx, story.ID)
 	assert.Equal(t, "30000000000trusteak", totalAmount.String())
 }
 
