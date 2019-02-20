@@ -96,6 +96,8 @@ func (k Keeper) distributeEarningsToBackers(ctx sdk.Context, storyID int64) sdk.
 	return nil
 }
 
+// TODO [shanev]: Also distribute interest to challengers
+// see https://github.com/TruStory/truchain/issues/385
 func (k Keeper) returnFundsToChallengers(ctx sdk.Context, storyID int64) sdk.Error {
 	logger := ctx.Logger().With("module", "distribution")
 
