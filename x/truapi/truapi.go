@@ -165,13 +165,14 @@ func (ta *TruAPI) RegisterResolvers() {
 		"category":           ta.storyCategoryResolver,
 		"creator":            func(ctx context.Context, q story.Story) users.User { return getUser(ctx, q.Creator) },
 		"source":             func(ctx context.Context, q story.Story) string { return q.Source.String() },
-		"game":               ta.gameResolver,
 		"votes":              func(ctx context.Context, q story.Story) []vote.TokenVote { return getVotes(ctx, q.ID) },
 
 		// Deprecated: now part of argument
 		"evidence": func(ctx context.Context, q story.Story) []url.URL { return []url.URL{} },
 		// Deprecated: arguments are now only on BCV
 		"argument": func(ctx context.Context, q story.Story) string { return "" },
+		// Deprecated: no more game, its gone
+		"game": func(ctx context.Context, q story.Story) game.Game { return game.Game{} },
 	})
 
 	ta.GraphQLClient.RegisterObjectResolver("TwitterProfile", db.TwitterProfile{}, map[string]interface{}{
