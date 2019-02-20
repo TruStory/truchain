@@ -1,5 +1,7 @@
 package vote
 
+// TODO [shanev]: add this back in https://github.com/TruStory/truchain/issues/387
+
 // func TestNewResponseEndBlock(t *testing.T) {
 // 	ctx, _, k := fakeValidationGame()
 

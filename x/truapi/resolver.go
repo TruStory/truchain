@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"path"
 	"sort"
 
 	"github.com/TruStory/truchain/parameters"
@@ -177,7 +178,8 @@ func (ta *TruAPI) challengeResolver(
 func (ta *TruAPI) challengesResolver(
 	_ context.Context, q app.QueryByIDParams) []challenge.Challenge {
 
-	res := ta.RunQuery("challenges/gameID", q)
+	res := ta.RunQuery(
+		path.Join(challenge.QueryPath, challenge.QueryByStoryID), q)
 
 	if res.Code != 0 {
 		fmt.Println("Resolver err: ", res)

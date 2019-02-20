@@ -9,7 +9,7 @@ import (
 // query endpoints supported by the truchain Querier
 const (
 	QueryPath                = "challenges"
-	QueryByGameID            = "gameID"
+	QueryByStoryID           = "storyID"
 	QueryByStoryIDAndCreator = "storyIDAndCreator"
 )
 
@@ -17,8 +17,8 @@ const (
 func NewQuerier(k ReadKeeper) sdk.Querier {
 	return func(ctx sdk.Context, path []string, req abci.RequestQuery) (res []byte, err sdk.Error) {
 		switch path[0] {
-		case QueryByGameID:
-			return queryByGameID(ctx, req, k)
+		case QueryByStoryID:
+			return queryByStoryID(ctx, req, k)
 		case QueryByStoryIDAndCreator:
 			return queryByStoryIDAndCreator(ctx, req, k)
 		default:
@@ -29,7 +29,7 @@ func NewQuerier(k ReadKeeper) sdk.Querier {
 
 // ============================================================================
 
-func queryByGameID(
+func queryByStoryID(
 	ctx sdk.Context,
 	req abci.RequestQuery,
 	k ReadKeeper) (res []byte, sdkErr sdk.Error) {
