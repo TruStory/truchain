@@ -178,12 +178,24 @@ func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *T
 		codec,
 	)
 
+	app.voteKeeper = vote.NewKeeper(
+		app.keyVote,
+		app.keyVotingStoryQueue,
+		app.accountKeeper,
+		app.backingKeeper,
+		app.challengeKeeper,
+		app.storyKeeper,
+		app.coinKeeper,
+		codec,
+	)
+
 	app.gameKeeper = game.NewKeeper(
 		app.keyGame,
 		app.keyStoryQueue,
 		app.storyKeeper,
 		app.backingKeeper,
 		app.challengeKeeper,
+		app.voteKeeper,
 		app.coinKeeper,
 		codec,
 	)
@@ -204,17 +216,6 @@ func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *T
 		app.challengeKeeper,
 		app.coinKeeper,
 		app.paramsKeeper.Subspace(expiration.DefaultParamspace),
-		codec,
-	)
-
-	app.voteKeeper = vote.NewKeeper(
-		app.keyVote,
-		app.keyVotingStoryQueue,
-		app.accountKeeper,
-		app.backingKeeper,
-		app.challengeKeeper,
-		app.storyKeeper,
-		app.coinKeeper,
 		codec,
 	)
 

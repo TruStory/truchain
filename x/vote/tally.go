@@ -1,108 +1,105 @@
 package vote
 
 import (
-	"fmt"
-
 	params "github.com/TruStory/truchain/parameters"
 	app "github.com/TruStory/truchain/types"
 	"github.com/TruStory/truchain/x/backing"
-	"github.com/TruStory/truchain/x/game"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth"
 	"github.com/cosmos/cosmos-sdk/x/bank"
 )
 
 // tally votes and distribute rewards
-func processGame(ctx sdk.Context, k Keeper, game game.Game) sdk.Error {
-	logger := ctx.Logger().With("module", "vote")
-	logger.Info(fmt.Sprintf("Processing game: %d...", game.ID))
+// func processGame(ctx sdk.Context, k Keeper, game game.Game) sdk.Error {
+// 	logger := ctx.Logger().With("module", "vote")
+// 	logger.Info(fmt.Sprintf("Processing game: %d...", game.ID))
 
-	// tally backings, challenges, and votes
-	votes, err := tally(ctx, k, game)
-	if err != nil {
-		return err
-	}
+// 	// tally backings, challenges, and votes
+// 	votes, err := tally(ctx, k, game)
+// 	if err != nil {
+// 		return err
+// 	}
 
-	credDenom, err := k.storyKeeper.CategoryDenom(ctx, game.StoryID)
-	if err != nil {
-		return err
-	}
+// 	credDenom, err := k.storyKeeper.CategoryDenom(ctx, game.StoryID)
+// 	if err != nil {
+// 		return err
+// 	}
 
-	// check if story was confirmed
-	confirmed, err := confirmStory(ctx, k.accountKeeper, votes, credDenom)
-	if err != nil {
-		return err
-	}
+// 	// check if story was confirmed
+// 	confirmed, err := confirmStory(ctx, k.accountKeeper, votes, credDenom)
+// 	if err != nil {
+// 		return err
+// 	}
 
-	logger.Info(fmt.Sprintf("Story confirmed: %t", confirmed))
+// 	logger.Info(fmt.Sprintf("Story confirmed: %t", confirmed))
 
-	// calculate reward pool
-	rewardPool, err := rewardPool(ctx, votes, confirmed)
-	if err != nil {
-		return err
-	}
+// 	// calculate reward pool
+// 	rewardPool, err := rewardPool(ctx, votes, confirmed)
+// 	if err != nil {
+// 		return err
+// 	}
 
-	logger.Info(fmt.Sprintf("Reward pool: %v", rewardPool))
+// 	logger.Info(fmt.Sprintf("Reward pool: %v", rewardPool))
 
-	// distribute rewards
-	err = distributeRewards(
-		ctx, k.backingKeeper, k.bankKeeper, rewardPool, votes, confirmed, credDenom)
-	if err != nil {
-		return err
-	}
+// 	// distribute rewards
+// 	err = distributeRewards(
+// 		ctx, k.backingKeeper, k.bankKeeper, rewardPool, votes, confirmed, credDenom)
+// 	if err != nil {
+// 		return err
+// 	}
 
-	// update story state
-	err = k.storyKeeper.EndGame(ctx, game.StoryID, confirmed)
-	if err != nil {
-		return err
-	}
+// 	// update story state
+// 	err = k.storyKeeper.EndGame(ctx, game.StoryID, confirmed)
+// 	if err != nil {
+// 		return err
+// 	}
 
-	return nil
-}
+// 	return nil
+// }
 
 // tally backings, challenges, and token votes into two true and false slices
-func tally(ctx sdk.Context, k Keeper, game game.Game) (votes poll, err sdk.Error) {
+// func tally(ctx sdk.Context, k Keeper, game game.Game) (votes poll, err sdk.Error) {
 
-	logger := ctx.Logger().With("module", "vote")
-	logger.Info("Tallying votes ...")
+// 	logger := ctx.Logger().With("module", "vote")
+// 	logger.Info("Tallying votes ...")
 
-	// tally backings
-	trueBackings, falseBackings, err := k.backingKeeper.Tally(ctx, game.StoryID)
-	if err != nil {
-		return
-	}
-	for _, v := range trueBackings {
-		votes.trueVotes = append(votes.trueVotes, v)
-	}
-	for _, v := range falseBackings {
-		votes.falseVotes = append(votes.falseVotes, v)
-	}
+// 	// tally backings
+// 	trueBackings, falseBackings, err := k.backingKeeper.Tally(ctx, game.StoryID)
+// 	if err != nil {
+// 		return
+// 	}
+// 	for _, v := range trueBackings {
+// 		votes.trueVotes = append(votes.trueVotes, v)
+// 	}
+// 	for _, v := range falseBackings {
+// 		votes.falseVotes = append(votes.falseVotes, v)
+// 	}
 
-	// tally challenges
-	falseChallenges, err := k.challengeKeeper.Tally(ctx, game.ID)
-	if err != nil {
-		return
-	}
-	for _, v := range falseChallenges {
-		votes.falseVotes = append(votes.falseVotes, v)
-	}
+// 	// tally challenges
+// 	falseChallenges, err := k.challengeKeeper.Tally(ctx, game.ID)
+// 	if err != nil {
+// 		return
+// 	}
+// 	for _, v := range falseChallenges {
+// 		votes.falseVotes = append(votes.falseVotes, v)
+// 	}
 
-	// tally token votes
-	trueTokenVotes, falseTokenVotes, err := k.Tally(ctx, game.ID)
-	if err != nil {
-		return
-	}
-	for _, v := range trueTokenVotes {
-		votes.trueVotes = append(votes.trueVotes, v)
-	}
-	for _, v := range falseTokenVotes {
-		votes.falseVotes = append(votes.falseVotes, v)
-	}
+// 	// tally token votes
+// 	trueTokenVotes, falseTokenVotes, err := k.Tally(ctx, game.ID)
+// 	if err != nil {
+// 		return
+// 	}
+// 	for _, v := range trueTokenVotes {
+// 		votes.trueVotes = append(votes.trueVotes, v)
+// 	}
+// 	for _, v := range falseTokenVotes {
+// 		votes.falseVotes = append(votes.falseVotes, v)
+// 	}
 
-	logger.Info(votes.String())
+// 	logger.Info(votes.String())
 
-	return votes, nil
-}
+// 	return votes, nil
+// }
 
 func rewardPool(
 	ctx sdk.Context, votes poll, confirmed bool) (pool sdk.Coin, err sdk.Error) {
