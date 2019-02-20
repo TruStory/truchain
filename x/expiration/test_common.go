@@ -104,7 +104,7 @@ func mockDB() (
 		codec,
 	)
 
-	distKeeper := NewKeeper(
+	expirationKeeper := NewKeeper(
 		distKey,
 		expiredStoryQueueKey,
 		storyKeeper,
@@ -114,9 +114,9 @@ func mockDB() (
 		pk.Subspace(DefaultParamspace),
 		codec,
 	)
-	InitGenesis(ctx, distKeeper, DefaultGenesisState())
+	InitGenesis(ctx, expirationKeeper, DefaultGenesisState())
 
-	return ctx, distKeeper, storyKeeper, backingKeeper, challengeKeeper, bankKeeper
+	return ctx, expirationKeeper, storyKeeper, backingKeeper, challengeKeeper, bankKeeper
 }
 
 func createFakeStory(ctx sdk.Context, sk story.WriteKeeper) int64 {
