@@ -65,7 +65,7 @@ func (k Keeper) processStoryQueue(ctx sdk.Context, storyQueue queue.Queue) sdk.E
 	k.UpdateStory(ctx, story)
 
 	// Push to the expired story queue, which gets handled in
-	// the distribution module. At the end of each block, rewards
+	// the expiration module. At the end of each block, rewards
 	// are distributed to backers, and challengers are returned funds.
 	k.expiredStoryQueue(ctx).Push(storyID)
 

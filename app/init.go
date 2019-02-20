@@ -1,7 +1,7 @@
 package app
 
 import (
-	"github.com/TruStory/truchain/x/distribution"
+	"github.com/TruStory/truchain/x/expiration"
 	"github.com/TruStory/truchain/x/story"
 	"github.com/cosmos/cosmos-sdk/x/auth"
 	"github.com/cosmos/cosmos-sdk/x/bank"
@@ -13,12 +13,12 @@ import (
 
 // GenesisState reflects the genesis state of the application.
 type GenesisState struct {
-	AuthData         auth.GenesisState         `json:"auth"`
-	BankData         bank.GenesisState         `json:"bank"`
-	Accounts         []*auth.BaseAccount       `json:"accounts"`
-	Categories       []category.Category       `json:"categories"`
-	DistributionData distribution.GenesisState `json:"distribution"`
-	StoryData        story.GenesisState        `json:"story"`
+	AuthData       auth.GenesisState       `json:"auth"`
+	BankData       bank.GenesisState       `json:"bank"`
+	Accounts       []*auth.BaseAccount     `json:"accounts"`
+	Categories     []category.Category     `json:"categories"`
+	ExpirationData expiration.GenesisState `json:"expiration"`
+	StoryData      story.GenesisState      `json:"story"`
 }
 
 // initChainer implements the custom application logic that the BaseApp will
@@ -51,7 +51,7 @@ func (app *TruChain) initChainer(ctx sdk.Context, req abci.RequestInitChain) abc
 	auth.InitGenesis(ctx, app.accountKeeper, app.feeCollectionKeeper, genesisState.AuthData)
 	bank.InitGenesis(ctx, app.coinKeeper, genesisState.BankData)
 	category.InitGenesis(ctx, app.categoryKeeper, genesisState.Categories)
-	distribution.InitGenesis(ctx, app.distributionKeeper, genesisState.DistributionData)
+	expiration.InitGenesis(ctx, app.expirationKeeper, genesisState.ExpirationData)
 	story.InitGenesis(ctx, app.storyKeeper, genesisState.StoryData)
 
 	return abci.ResponseInitChain{}

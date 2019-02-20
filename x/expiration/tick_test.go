@@ -1,4 +1,4 @@
-package distribution
+package expiration
 
 import (
 	"testing"
@@ -41,7 +41,7 @@ func Test_handleExpiredStories(t *testing.T) {
 	err = k.handleExpiredStories(ctx)
 	assert.Nil(t, err)
 
-	// check distribution for backer
+	// check expiration for backer
 	coins := bankKeeper.GetCoins(ctx, backer)
 	assert.Equal(t, "6670crypto,2000000000000trusteak", coins.String())
 

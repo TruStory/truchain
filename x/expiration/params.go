@@ -1,4 +1,4 @@
-package distribution
+package expiration
 
 import (
 	"fmt"
@@ -7,10 +7,10 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/params"
 )
 
-// DefaultParamspace defines the default distribution module parameter subspace
-const DefaultParamspace = "distribution"
+// DefaultParamspace defines the default expiration module parameter subspace
+const DefaultParamspace = "expiration"
 
-// store keys for distribution params
+// store keys for expiration params
 var (
 	KeyAmountWeight    = []byte("amountWeight")
 	KeyPeriodWeight    = []byte("periodWeight")
@@ -71,9 +71,9 @@ func (k Keeper) minInterestRate(ctx sdk.Context) (res sdk.Dec) {
 	return
 }
 
-// SetParams sets the params for the distribution module
+// SetParams sets the params for the expiration module
 func (k Keeper) SetParams(ctx sdk.Context, params Params) {
-	logger := ctx.Logger().With("module", "distribution")
+	logger := ctx.Logger().With("module", "expiration")
 	k.paramStore.SetParamSet(ctx, &params)
-	logger.Info(fmt.Sprintf("Loaded distribution module params: %+v", params))
+	logger.Info(fmt.Sprintf("Loaded expiration module params: %+v", params))
 }

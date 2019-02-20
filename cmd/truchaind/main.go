@@ -13,7 +13,7 @@ import (
 
 	"github.com/TruStory/truchain/app"
 	"github.com/TruStory/truchain/x/category"
-	"github.com/TruStory/truchain/x/distribution"
+	"github.com/TruStory/truchain/x/expiration"
 	"github.com/TruStory/truchain/x/story"
 	"github.com/cosmos/cosmos-sdk/client"
 
@@ -94,11 +94,11 @@ func InitCmd(ctx *server.Context, cdc *codec.Codec) *cobra.Command {
 			}
 
 			genesis := app.GenesisState{
-				AuthData:         auth.DefaultGenesisState(),
-				BankData:         bank.DefaultGenesisState(),
-				Categories:       category.DefaultCategories(),
-				DistributionData: distribution.DefaultGenesisState(),
-				StoryData:        story.DefaultGenesisState(),
+				AuthData:       auth.DefaultGenesisState(),
+				BankData:       bank.DefaultGenesisState(),
+				Categories:     category.DefaultCategories(),
+				ExpirationData: expiration.DefaultGenesisState(),
+				StoryData:      story.DefaultGenesisState(),
 			}
 
 			appState, err = codec.MarshalJSONIndent(cdc, genesis)

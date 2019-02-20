@@ -1,4 +1,4 @@
-package distribution
+package expiration
 
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -17,6 +17,6 @@ func DefaultGenesisState() GenesisState {
 }
 
 // InitGenesis initializes story state from genesis file
-func InitGenesis(ctx sdk.Context, distributionKeeper Keeper, data GenesisState) {
-	distributionKeeper.SetParams(ctx, data.Params)
+func InitGenesis(ctx sdk.Context, expirationKeeper Keeper, data GenesisState) {
+	expirationKeeper.SetParams(ctx, data.Params)
 }
