@@ -97,7 +97,6 @@ func mockDB() (
 
 	challengeKeeper := challenge.NewKeeper(
 		challengeKey,
-		votingStoryQueueKey,
 		backingKeeper,
 		bankKeeper,
 		storyKeeper,
