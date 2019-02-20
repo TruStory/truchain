@@ -85,8 +85,6 @@ func mockDB() (
 
 	bk := NewKeeper(
 		backingKey,
-		pendingGameListKey,
-		votingStoryQueueKey,
 		sk,
 		bankKeeper,
 		ck,

@@ -78,8 +78,6 @@ func mockDB() (sdk.Context, Keeper, c.Keeper) {
 
 	backingKeeper := backing.NewKeeper(
 		backingKey,
-		pendingGameListKey,
-		votingStoryQueueKey,
 		sk,
 		bankKeeper,
 		ck,
