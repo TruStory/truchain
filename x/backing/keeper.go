@@ -57,8 +57,6 @@ type WriteKeeper interface {
 	Update(ctx sdk.Context, backing Backing)
 
 	ToggleVote(ctx sdk.Context, backingID int64) (int64, sdk.Error)
-
-	NewResponseEndBlock(ctx sdk.Context) sdk.Tags
 }
 
 // Keeper data type storing keys to the key-value store

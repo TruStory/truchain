@@ -59,7 +59,6 @@ type Keeper struct {
 
 	backingKeeper backing.ReadKeeper
 	bankKeeper    bank.Keeper
-	gameKeeper    game.WriteKeeper
 	storyKeeper   story.WriteKeeper
 
 	challengeList app.UserList // challenge <-> story mappings
@@ -71,7 +70,6 @@ func NewKeeper(
 	pendingGameListKey sdk.StoreKey,
 	backingKeeper backing.ReadKeeper,
 	bankKeeper bank.Keeper,
-	gameKeeper game.WriteKeeper,
 	storyKeeper story.WriteKeeper,
 	codec *amino.Codec) Keeper {
 
@@ -80,7 +78,6 @@ func NewKeeper(
 		pendingGameListKey,
 		backingKeeper,
 		bankKeeper,
-		gameKeeper,
 		storyKeeper,
 		app.NewUserList(storyKeeper.GetStoreKey()),
 	}
