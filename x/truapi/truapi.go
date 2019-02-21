@@ -4,7 +4,6 @@ import (
 	"context"
 	"net/http"
 	"net/url"
-	"time"
 
 	app "github.com/TruStory/truchain/types"
 	"github.com/TruStory/truchain/x/backing"
@@ -12,7 +11,6 @@ import (
 	"github.com/TruStory/truchain/x/challenge"
 	"github.com/TruStory/truchain/x/chttp"
 	"github.com/TruStory/truchain/x/db"
-	"github.com/TruStory/truchain/x/game"
 	"github.com/TruStory/truchain/x/graphql"
 	"github.com/TruStory/truchain/x/params"
 	"github.com/TruStory/truchain/x/story"
@@ -97,11 +95,6 @@ func (ta *TruAPI) RegisterResolvers() {
 		"vote":      func(ctx context.Context, q backing.Backing) bool { return q.VoteChoice() },
 		"creator":   func(ctx context.Context, q backing.Backing) users.User { return getUser(ctx, q.Creator()) },
 		"timestamp": func(ctx context.Context, q backing.Backing) app.Timestamp { return q.Timestamp },
-
-		// Deprecated: now part of argument
-		"evidence": func(ctx context.Context, q backing.Backing) []url.URL { return []url.URL{} },
-		// Deprecated: renamed to maturesTime
-		"expires": func(ctx context.Context, q backing.Backing) time.Time { return q.MaturesTime },
 	})
 
 	ta.GraphQLClient.RegisterQueryResolver("categories", ta.allCategoriesResolver)
@@ -109,9 +102,6 @@ func (ta *TruAPI) RegisterResolvers() {
 	ta.GraphQLClient.RegisterObjectResolver("Category", category.Category{}, map[string]interface{}{
 		"id":      func(_ context.Context, q category.Category) int64 { return q.ID },
 		"stories": ta.categoryStoriesResolver,
-
-		// Deprecated: categories no longer have a creator
-		"creator": func(ctx context.Context, q category.Category) users.User { return getUser(ctx, sdk.AccAddress{}) },
 	})
 
 	ta.GraphQLClient.RegisterQueryResolver("challenge", ta.challengeResolver)
@@ -121,9 +111,6 @@ func (ta *TruAPI) RegisterResolvers() {
 		"vote":      func(ctx context.Context, q challenge.Challenge) bool { return q.VoteChoice() },
 		"creator":   func(ctx context.Context, q challenge.Challenge) users.User { return getUser(ctx, q.Creator()) },
 		"timestamp": func(ctx context.Context, q challenge.Challenge) app.Timestamp { return q.Timestamp },
-
-		// Deprecated: now part of argument
-		"evidence": func(ctx context.Context, q challenge.Challenge) []url.URL { return []url.URL{} },
 	})
 
 	ta.GraphQLClient.RegisterObjectResolver("Coin", sdk.Coin{}, map[string]interface{}{
@@ -140,20 +127,6 @@ func (ta *TruAPI) RegisterResolvers() {
 		"backingMaxInterestRate": func(_ context.Context, p params.Params) string { return p.BackingMaxInterestRate.String() },
 	})
 
-	ta.GraphQLClient.RegisterObjectResolver("Game", game.Game{}, map[string]interface{}{
-		"id":              func(_ context.Context, q game.Game) int64 { return q.ID },
-		"creator":         func(ctx context.Context, q game.Game) users.User { return getUser(ctx, q.Creator) },
-		"challengePool":   func(_ context.Context, q game.Game) sdk.Coin { return q.ChallengePool },
-		"totalVoteAmount": ta.votesTotalAmountResolver,
-
-		// Deprecated: remove in favor of challengeThreshold on a Story because a challenge threshold exists even when a game does not
-		"challengeThreshold": func(_ context.Context, q game.Game) sdk.Coin { return sdk.Coin{} },
-		// Deprecated: remove in favor of the auto-resolving field `challengeExpireTime`
-		"expiresTime": func(_ context.Context, q game.Game) time.Time { return q.ChallengeExpireTime },
-		// Deprecated: remove in favor of the auto-resolving field `votingEndTime`
-		"votingPeriodEndTime": func(_ context.Context, q game.Game) time.Time { return q.VotingEndTime },
-	})
-
 	ta.GraphQLClient.RegisterQueryResolver("stories", ta.allStoriesResolver)
 	ta.GraphQLClient.RegisterQueryResolver("story", ta.storyResolver)
 	ta.GraphQLClient.RegisterObjectResolver("Story", story.Story{}, map[string]interface{}{
@@ -166,13 +139,6 @@ func (ta *TruAPI) RegisterResolvers() {
 		"creator":            func(ctx context.Context, q story.Story) users.User { return getUser(ctx, q.Creator) },
 		"source":             func(ctx context.Context, q story.Story) string { return q.Source.String() },
 		"votes":              func(ctx context.Context, q story.Story) []vote.TokenVote { return getVotes(ctx, q.ID) },
-
-		// Deprecated: now part of argument
-		"evidence": func(ctx context.Context, q story.Story) []url.URL { return []url.URL{} },
-		// Deprecated: arguments are now only on BCV
-		"argument": func(ctx context.Context, q story.Story) string { return "" },
-		// Deprecated: no more game, its gone
-		"game": func(ctx context.Context, q story.Story) game.Game { return game.Game{} },
 	})
 
 	ta.GraphQLClient.RegisterObjectResolver("TwitterProfile", db.TwitterProfile{}, map[string]interface{}{
@@ -198,9 +164,6 @@ func (ta *TruAPI) RegisterResolvers() {
 		"vote":      func(ctx context.Context, q vote.TokenVote) bool { return q.VoteChoice() },
 		"creator":   func(ctx context.Context, q vote.TokenVote) users.User { return getUser(ctx, q.Creator()) },
 		"timestamp": func(ctx context.Context, q vote.TokenVote) app.Timestamp { return q.Timestamp },
-
-		// Deprecated: now part of argument
-		"evidence": func(ctx context.Context, q vote.TokenVote) []url.URL { return []url.URL{} },
 	})
 
 	ta.GraphQLClient.BuildSchema()

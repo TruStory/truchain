@@ -41,7 +41,7 @@ func mockDB() (
 	catKey := sdk.NewKVStoreKey(c.StoreKey)
 	challengeKey := sdk.NewKVStoreKey(challenge.StoreKey)
 	gameKey := sdk.NewKVStoreKey(StoreKey)
-	votingStoryQueueKey := sdk.NewKVStoreKey(QueueStoreKey)
+	votingStoryQueueKey := sdk.NewKVStoreKey(story.VotingQueueStoreKey)
 	backingKey := sdk.NewKVStoreKey(backing.StoreKey)
 	voteKey := sdk.NewKVStoreKey(vote.StoreKey)
 	paramsKey := sdk.NewKVStoreKey(params.StoreKey)
