@@ -51,7 +51,7 @@ func (app *TruChain) initChainer(ctx sdk.Context, req abci.RequestInitChain) abc
 	}
 
 	auth.InitGenesis(ctx, app.accountKeeper, app.feeCollectionKeeper, genesisState.AuthData)
-	bank.InitGenesis(ctx, app.coinKeeper, genesisState.BankData)
+	bank.InitGenesis(ctx, app.bankKeeper, genesisState.BankData)
 	category.InitGenesis(ctx, app.categoryKeeper, genesisState.Categories)
 	expiration.InitGenesis(ctx, app.expirationKeeper, genesisState.ExpirationData)
 	game.InitGenesis(ctx, app.gameKeeper, genesisState.GameData)
