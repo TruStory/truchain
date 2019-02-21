@@ -7,7 +7,6 @@ import (
 
 	"github.com/cosmos/cosmos-sdk/x/bank"
 
-	params "github.com/TruStory/truchain/parameters"
 	app "github.com/TruStory/truchain/types"
 	"github.com/TruStory/truchain/x/story"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -83,7 +82,7 @@ func (k Keeper) Create(
 
 	logger := ctx.Logger().With("module", "challenge")
 
-	if amount.Denom != params.StakeDenom {
+	if amount.Denom != app.StakeDenom {
 		return 0, sdk.ErrInvalidCoins("Invalid backing token.")
 	}
 

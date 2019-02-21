@@ -3,7 +3,6 @@ package vote
 import (
 	"fmt"
 
-	params "github.com/TruStory/truchain/parameters"
 	app "github.com/TruStory/truchain/types"
 	"github.com/TruStory/truchain/x/backing"
 	"github.com/TruStory/truchain/x/challenge"
@@ -21,7 +20,7 @@ func confirmedPool(
 		case backing.Backing:
 			// slash inflationary rewards and add to pool
 			// TODO [shanev]: do proper conversion when we know it, still 1:1
-			interestInTrustake := sdk.NewCoin(params.StakeDenom, v.Interest.Amount)
+			interestInTrustake := sdk.NewCoin(app.StakeDenom, v.Interest.Amount)
 			*pool = (*pool).Plus(interestInTrustake)
 
 		case challenge.Challenge:

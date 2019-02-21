@@ -4,7 +4,7 @@ import (
 	"testing"
 	"time"
 
-	params "github.com/TruStory/truchain/parameters"
+	app "github.com/TruStory/truchain/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/stretchr/testify/assert"
 )
@@ -27,7 +27,7 @@ func TestRegisterChallengeNoBackersMeetMinChallenge(t *testing.T) {
 	storyID := createFakeStory(ctx, k.storyKeeper, categoryKeeper)
 	gameID, _ := k.Create(ctx, storyID, creator)
 
-	amount := sdk.NewCoin(params.StakeDenom, sdk.NewInt(5000000))
+	amount := sdk.NewCoin(app.StakeDenom, sdk.NewInt(5000000))
 	err := k.AddToChallengePool(ctx, gameID, amount)
 	assert.Nil(t, err)
 
@@ -41,7 +41,7 @@ func TestRegisterChallengeNoBackersNotMeetMinChallenge(t *testing.T) {
 	storyID := createFakeStory(ctx, k.storyKeeper, categoryKeeper)
 	gameID, _ := k.Create(ctx, storyID, creator)
 
-	amount := sdk.NewCoin(params.StakeDenom, sdk.NewInt(5000000))
+	amount := sdk.NewCoin(app.StakeDenom, sdk.NewInt(5000000))
 	err := k.AddToChallengePool(ctx, gameID, amount)
 	assert.Nil(t, err)
 
@@ -54,7 +54,7 @@ func TestRegisterChallengeHaveBackersMeetThreshold(t *testing.T) {
 
 	storyID := createFakeStory(ctx, k.storyKeeper, categoryKeeper)
 	gameID, _ := k.Create(ctx, storyID, creator)
-	amount := sdk.NewCoin(params.StakeDenom, sdk.NewInt(100))
+	amount := sdk.NewCoin(app.StakeDenom, sdk.NewInt(100))
 	argument := "cool story brew"
 
 	// back story with 100trusteak
@@ -73,7 +73,7 @@ func TestRegisterChallengeHaveBackersNotMeetThreshold(t *testing.T) {
 
 	storyID := createFakeStory(ctx, k.storyKeeper, categoryKeeper)
 	gameID, _ := k.Create(ctx, storyID, creator)
-	amount := sdk.NewCoin(params.StakeDenom, sdk.NewInt(100))
+	amount := sdk.NewCoin(app.StakeDenom, sdk.NewInt(100))
 	argument := "cool story brew"
 
 	// back story with 100trusteak
@@ -82,7 +82,7 @@ func TestRegisterChallengeHaveBackersNotMeetThreshold(t *testing.T) {
 	k.backingKeeper.Create(ctx, storyID, amount, argument, creator, duration)
 
 	// challenge with 32truteak (32% of total backings)
-	amount = sdk.NewCoin(params.StakeDenom, sdk.NewInt(32))
+	amount = sdk.NewCoin(app.StakeDenom, sdk.NewInt(32))
 	err := k.AddToChallengePool(ctx, gameID, amount)
 	assert.Nil(t, err)
 }
@@ -100,7 +100,7 @@ func TestSetGame(t *testing.T) {
 
 func Test_challengeThresholdNoBacking(t *testing.T) {
 	_, k, _ := mockDB()
-	amt := k.ChallengeThreshold(sdk.NewCoin(params.StakeDenom, sdk.ZeroInt()))
+	amt := k.ChallengeThreshold(sdk.NewCoin(app.StakeDenom, sdk.ZeroInt()))
 
 	assert.Equal(t, "10000000000trusteak", amt.String())
 }
@@ -111,14 +111,14 @@ func Test_challengeThresholdNoBacking(t *testing.T) {
 // then instead
 func Test_challengeThresholdWithSmallBacking(t *testing.T) {
 	_, k, _ := mockDB()
-	amt := k.ChallengeThreshold(sdk.NewCoin(params.StakeDenom, sdk.NewInt(21000000000)))
+	amt := k.ChallengeThreshold(sdk.NewCoin(app.StakeDenom, sdk.NewInt(21000000000)))
 
 	assert.Equal(t, "21000000000trusteak", amt.String())
 }
 
 func Test_challengeThresholdWithBacking(t *testing.T) {
 	_, k, _ := mockDB()
-	amt := k.ChallengeThreshold(sdk.NewCoin(params.StakeDenom, sdk.NewInt(100000000000)))
+	amt := k.ChallengeThreshold(sdk.NewCoin(app.StakeDenom, sdk.NewInt(100000000000)))
 
 	assert.Equal(t, "100000000000trusteak", amt.String())
 }
@@ -128,7 +128,7 @@ func Test_start(t *testing.T) {
 
 	storyID := createFakeStory(ctx, k.storyKeeper, categoryKeeper)
 	gameID, _ := k.Create(ctx, storyID, creator)
-	amount := sdk.NewCoin(params.StakeDenom, sdk.NewInt(100000000000))
+	amount := sdk.NewCoin(app.StakeDenom, sdk.NewInt(100000000000))
 	argument := "cool story brew"
 
 	// back story with 100trusteak
@@ -137,7 +137,7 @@ func Test_start(t *testing.T) {
 	k.backingKeeper.Create(ctx, storyID, amount, argument, creator, duration)
 
 	// challenge with 33trusteak (33% of total backings)
-	amount = sdk.NewCoin(params.StakeDenom, sdk.NewInt(100000000000))
+	amount = sdk.NewCoin(app.StakeDenom, sdk.NewInt(100000000000))
 	err := k.AddToChallengePool(ctx, gameID, amount)
 	assert.Nil(t, err)
 

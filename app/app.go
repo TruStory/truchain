@@ -7,7 +7,6 @@ import (
 	"os"
 	"path/filepath"
 
-	params "github.com/TruStory/truchain/parameters"
 	"github.com/TruStory/truchain/types"
 	"github.com/TruStory/truchain/x/backing"
 	"github.com/TruStory/truchain/x/category"
@@ -107,7 +106,7 @@ func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *T
 
 	// create your application type
 	var app = &TruChain{
-		BaseApp: bam.NewBaseApp(params.AppName, logger, db, auth.DefaultTxDecoder(codec), options...),
+		BaseApp: bam.NewBaseApp(types.AppName, logger, db, auth.DefaultTxDecoder(codec), options...),
 		codec:   codec,
 
 		keyParams:  sdk.NewKVStoreKey("params"),
@@ -197,6 +196,7 @@ func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *T
 		app.challengeKeeper,
 		app.voteKeeper,
 		app.coinKeeper,
+		app.paramsKeeper.Subspace(game.DefaultParamspace),
 		codec,
 	)
 

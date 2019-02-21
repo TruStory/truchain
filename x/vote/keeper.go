@@ -9,7 +9,6 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/auth"
 	"github.com/cosmos/cosmos-sdk/x/bank"
 
-	params "github.com/TruStory/truchain/parameters"
 	app "github.com/TruStory/truchain/types"
 	queue "github.com/cosmos/cosmos-sdk/store"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -99,7 +98,7 @@ func (k Keeper) Create(
 
 	logger := ctx.Logger().With("module", "vote")
 
-	if amount.Denom != params.StakeDenom {
+	if amount.Denom != app.StakeDenom {
 		return 0, sdk.ErrInvalidCoins("Invalid voting token.")
 	}
 
@@ -242,7 +241,7 @@ func (k Keeper) TotalVoteAmountByStoryID(ctx sdk.Context, storyID int64) (
 		totalAmount = totalAmount.Add(tokenVote.Amount().Amount)
 	}
 
-	return sdk.NewCoin(params.StakeDenom, totalAmount), nil
+	return sdk.NewCoin(app.StakeDenom, totalAmount), nil
 }
 
 // ============================================================================

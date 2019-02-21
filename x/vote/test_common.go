@@ -9,7 +9,7 @@ import (
 
 	"github.com/TruStory/truchain/x/challenge"
 
-	params "github.com/TruStory/truchain/parameters"
+	app "github.com/TruStory/truchain/types"
 	c "github.com/TruStory/truchain/x/category"
 	"github.com/TruStory/truchain/x/story"
 	"github.com/cosmos/cosmos-sdk/store"
@@ -139,7 +139,7 @@ func fakeFundedCreator(ctx sdk.Context, k bank.Keeper) sdk.AccAddress {
 	rand.Read(bz)
 	creator := sdk.AccAddress(bz)
 
-	amount := sdk.NewCoin(params.StakeDenom, sdk.NewInt(2000000000000))
+	amount := sdk.NewCoin(app.StakeDenom, sdk.NewInt(2000000000000))
 	k.AddCoins(ctx, creator, sdk.Coins{amount})
 
 	return creator
@@ -150,8 +150,8 @@ func fakeValidationGame() (ctx sdk.Context, votes poll, k Keeper) {
 	ctx, k, ck := mockDB()
 
 	storyID := createFakeStory(ctx, k.storyKeeper, ck)
-	amount := sdk.NewCoin(params.StakeDenom, sdk.NewInt(1000000000000))
-	largeAmount := sdk.NewCoin(params.StakeDenom, sdk.NewInt(2000000000000))
+	amount := sdk.NewCoin(app.StakeDenom, sdk.NewInt(1000000000000))
+	largeAmount := sdk.NewCoin(app.StakeDenom, sdk.NewInt(2000000000000))
 	argument := "test argument"
 
 	// GAME SCENARIO (STORY WILL BE CONFIRMED)
@@ -244,11 +244,11 @@ func fakeValidationGame2() (ctx sdk.Context, votes poll, k Keeper) {
 	ctx, k, ck := mockDB()
 
 	storyID := createFakeStory(ctx, k.storyKeeper, ck)
-	amount1 := sdk.NewCoin(params.StakeDenom, sdk.NewInt(100000000000))
-	amount2 := sdk.NewCoin(params.StakeDenom, sdk.NewInt(55000000000))
-	amount3 := sdk.NewCoin(params.StakeDenom, sdk.NewInt(172000000000))
-	amount4 := sdk.NewCoin(params.StakeDenom, sdk.NewInt(83000000000))
-	amount5 := sdk.NewCoin(params.StakeDenom, sdk.NewInt(10000000000))
+	amount1 := sdk.NewCoin(app.StakeDenom, sdk.NewInt(100000000000))
+	amount2 := sdk.NewCoin(app.StakeDenom, sdk.NewInt(55000000000))
+	amount3 := sdk.NewCoin(app.StakeDenom, sdk.NewInt(172000000000))
+	amount4 := sdk.NewCoin(app.StakeDenom, sdk.NewInt(83000000000))
+	amount5 := sdk.NewCoin(app.StakeDenom, sdk.NewInt(10000000000))
 	argument := "test argument"
 
 	creator1 := fakeFundedCreator(ctx, k.bankKeeper)

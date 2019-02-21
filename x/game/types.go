@@ -40,7 +40,7 @@ func (g Game) IsExpired(blockTime time.Time) bool {
 // 2. didn't meet the minimum voter quorum
 func (g Game) IsVotingExpired(blockTime time.Time, quorum int) bool {
 	return blockTime.After(g.VotingEndTime) &&
-		(quorum < DefaultParams().VoteQuorum)
+		(quorum < DefaultParams().MinQuorum)
 }
 
 // IsVotingFinished returns true if:
@@ -48,27 +48,27 @@ func (g Game) IsVotingExpired(blockTime time.Time, quorum int) bool {
 // 2. met the minimum voter quorum
 func (g Game) IsVotingFinished(blockTime time.Time, quorum int) bool {
 	return blockTime.After(g.VotingEndTime) &&
-		(quorum >= DefaultParams().VoteQuorum)
+		(quorum >= DefaultParams().MinQuorum)
 }
 
 // Params holds default parameters for a game
-type Params struct {
-	ChallengeToBackingRatio sdk.Dec       // % backings at which game begins
-	MinChallengeThreshold   sdk.Int       // min amount required to start a game
-	MinChallengeStake       sdk.Int       // min amount required to join a challenge
-	Expires                 time.Duration // time to expire if threshold not met
-	VotingPeriod            time.Duration // length of challenge game / voting period
-	VoteQuorum              int           // num voters (BCV) required
-}
+// type Params struct {
+// 	ChallengeToBackingRatio sdk.Dec       // % backings at which game begins
+// 	MinChallengeThreshold   sdk.Int       // min amount required to start a game
+// 	MinChallengeStake       sdk.Int       // min amount required to join a challenge
+// 	Expires                 time.Duration // time to expire if threshold not met
+// 	VotingPeriod            time.Duration // length of challenge game / voting period
+// 	VoteQuorum              int           // num voters (BCV) required
+// }
 
-// DefaultParams creates a new MsgParams type with defaults
-func DefaultParams() Params {
-	return Params{
-		ChallengeToBackingRatio: sdk.NewDecWithPrec(100, 2), // 100%
-		MinChallengeThreshold:   sdk.NewInt(10000000000),    // 10 trustake
-		MinChallengeStake:       sdk.NewInt(1),              //  1 preethi
-		Expires:                 7 * 24 * time.Hour,
-		VotingPeriod:            1 * 24 * time.Hour,
-		VoteQuorum:              3,
-	}
-}
+// // DefaultParams creates a new MsgParams type with defaults
+// func DefaultParams() Params {
+// 	return Params{
+// 		ChallengeToBackingRatio: sdk.NewDecWithPrec(100, 2), // 100%
+// 		MinChallengeThreshold:   sdk.NewInt(10000000000),    // 10 trustake
+// 		MinChallengeStake:       sdk.NewInt(1),              //  1 preethi
+// 		Expires:                 7 * 24 * time.Hour,
+// 		VotingPeriod:            1 * 24 * time.Hour,
+// 		VoteQuorum:              3,
+// 	}
+// }
