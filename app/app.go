@@ -72,7 +72,7 @@ type TruChain struct {
 	// manage getting and setting accounts
 	accountKeeper       auth.AccountKeeper
 	feeCollectionKeeper auth.FeeCollectionKeeper
-	coinKeeper          bank.Keeper
+	bankKeeper          bank.Keeper
 	ibcMapper           ibc.Mapper
 	paramsKeeper        sdkparams.Keeper
 
@@ -144,7 +144,7 @@ func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *T
 		auth.ProtoBaseAccount,
 	)
 
-	app.coinKeeper = bank.NewBaseKeeper(
+	app.bankKeeper = bank.NewBaseKeeper(
 		app.accountKeeper,
 		app.paramsKeeper.Subspace(bank.DefaultParamspace),
 		bank.DefaultCodespace,
@@ -172,7 +172,7 @@ func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *T
 	app.backingKeeper = backing.NewKeeper(
 		app.keyBacking,
 		app.storyKeeper,
-		app.coinKeeper,
+		app.bankKeeper,
 		app.categoryKeeper,
 		codec,
 	)
@@ -184,7 +184,7 @@ func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *T
 		app.backingKeeper,
 		app.challengeKeeper,
 		app.storyKeeper,
-		app.coinKeeper,
+		app.bankKeeper,
 		codec,
 	)
 
@@ -195,7 +195,7 @@ func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *T
 		app.backingKeeper,
 		app.challengeKeeper,
 		app.voteKeeper,
-		app.coinKeeper,
+		app.bankKeeper,
 		app.paramsKeeper.Subspace(game.DefaultParamspace),
 		codec,
 	)
@@ -203,7 +203,7 @@ func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *T
 	app.challengeKeeper = challenge.NewKeeper(
 		app.keyChallenge,
 		app.backingKeeper,
-		app.coinKeeper,
+		app.bankKeeper,
 		app.storyKeeper,
 		codec,
 	)
@@ -214,7 +214,7 @@ func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *T
 		app.storyKeeper,
 		app.backingKeeper,
 		app.challengeKeeper,
-		app.coinKeeper,
+		app.bankKeeper,
 		app.paramsKeeper.Subspace(expiration.DefaultParamspace),
 		codec,
 	)
@@ -226,8 +226,8 @@ func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *T
 
 	// The app.Router is the main transaction router where each module registers its routes
 	app.Router().
-		AddRoute("bank", bank.NewHandler(app.coinKeeper)).
-		AddRoute("ibc", ibc.NewHandler(app.ibcMapper, app.coinKeeper)).
+		AddRoute("bank", bank.NewHandler(app.bankKeeper)).
+		AddRoute("ibc", ibc.NewHandler(app.ibcMapper, app.bankKeeper)).
 		AddRoute("story", story.NewHandler(app.storyKeeper)).
 		AddRoute("category", category.NewHandler(app.categoryKeeper)).
 		AddRoute("backing", backing.NewHandler(app.backingKeeper)).
