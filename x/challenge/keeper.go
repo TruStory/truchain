@@ -34,6 +34,9 @@ type ReadKeeper interface {
 		creator sdk.AccAddress) (challenge Challenge, err sdk.Error)
 
 	Tally(ctx sdk.Context, gameID int64) (falseVotes []Challenge, err sdk.Error)
+
+	TotalChallengeAmount(ctx sdk.Context, storyID int64) (
+		totalCoin sdk.Coin, err sdk.Error)
 }
 
 // WriteKeeper defines a module interface that facilities write only access to truchain data
@@ -205,4 +208,27 @@ func (k Keeper) Tally(
 	})
 
 	return
+}
+
+// TotalChallengeAmount returns the total of all backings
+func (k Keeper) TotalChallengeAmount(ctx sdk.Context, storyID int64) (
+	totalCoin sdk.Coin, err sdk.Error) {
+
+	totalAmount := sdk.NewCoin(app.StakeDenom, sdk.ZeroInt())
+
+	err = k.challengeList.Map(ctx, k, storyID, func(id int64) sdk.Error {
+		challenge, err := k.Challenge(ctx, id)
+		if err != nil {
+			return err
+		}
+		totalAmount = totalAmount.Plus(challenge.Amount())
+
+		return nil
+	})
+
+	if err != nil {
+		return
+	}
+
+	return totalAmount, nil
 }

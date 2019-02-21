@@ -52,7 +52,7 @@ func TestChallenge(t *testing.T) {
 	story, _ := sk.Story(ctx, storyID)
 	assert.Equal(t, New, story.State, "state should match")
 
-	sk.StartGame(ctx, storyID)
+	sk.StartVotingPeriod(ctx, storyID)
 	story, _ = sk.Story(ctx, storyID)
 	assert.Equal(t, Voting, story.State, "state should match")
 }
@@ -94,8 +94,8 @@ func TestGetChallengedStoriesWithCategory(t *testing.T) {
 		createFakeStory(ctx, sk, ck)
 	}
 
-	sk.StartGame(ctx, 2)
-	sk.StartGame(ctx, 3)
+	sk.StartVotingPeriod(ctx, 2)
+	sk.StartVotingPeriod(ctx, 3)
 
 	stories, _ := sk.ChallengedStoriesWithCategory(ctx, 1)
 	assert.Equal(t, 2, len(stories))
@@ -109,8 +109,8 @@ func TestFeedWithCategory(t *testing.T) {
 		createFakeStory(ctx, sk, ck)
 	}
 
-	sk.StartGame(ctx, 2)
-	sk.StartGame(ctx, 4)
+	sk.StartVotingPeriod(ctx, 2)
+	sk.StartVotingPeriod(ctx, 4)
 
 	stories, _ := sk.FeedByCategoryID(ctx, 1)
 

@@ -228,7 +228,7 @@ func (k Keeper) start(ctx sdk.Context, game *Game) (err sdk.Error) {
 	msg := "Challenge threshold met for game %d"
 	logger.Info(fmt.Sprintf(msg, game.ID))
 
-	err = k.storyKeeper.StartGame(ctx, game.StoryID)
+	err = k.storyKeeper.StartVotingPeriod(ctx, game.StoryID)
 	if err != nil {
 		return
 	}

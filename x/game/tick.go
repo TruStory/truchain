@@ -1,6 +1,8 @@
 package game
 
 import (
+	"fmt"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
@@ -13,68 +15,72 @@ func (k Keeper) EndBlock(ctx sdk.Context) sdk.Tags {
 	return sdk.EmptyTags()
 }
 
-// find all expired games
-// var gameID int64
-// var indicesToDelete []uint64
-// pendingList.Iterate(&gameID, func(index uint64) bool {
-// 	var tempGameID int64
-// 	err := pendingList.Get(index, &tempGameID)
-// 	if err != nil {
-// 		panic(err)
-// 	}
-
-// 	game, err := k.gameKeeper.Game(ctx, tempGameID)
-// 	if err != nil {
-// 		panic(err)
-// 	}
-
-// 	if game.IsExpired(ctx.BlockHeader().Time) {
-// 		indicesToDelete = append(indicesToDelete, index)
-// 	}
-
-// 	return false
-// })
-
-// iteratively check for meeting quorum and challenge threshold
+// Iteratively check for meeting quorum and challenge threshold.
+// If found, update state of story to voting. Then it'll get picked up
+// by the story end blocker, where it'll be added to the voting story queue.
+//
+// NOTE: This is bit of an expensive operation, and might not be the
+// best thing to do at after each block. Watch this space and optimize
+// in the future if needed, like moving this into challenge create.
 func (k Keeper) checkStories(ctx sdk.Context) sdk.Error {
-	// logger := ctx.Logger().With("module", "expiration")
+	logger := ctx.Logger().With("module", "game")
 
 	var storyID int64
 	k.storyQueue(ctx).List.Iterate(&storyID, func(index uint64) bool {
-		// story, err := k.storyKeeper.Story(ctx, storyID)
-		// if err != nil {
-		// 	panic(err)
-		// }
+		quorum, err := k.quorum(ctx, storyID)
+		if err != nil {
+			panic(err)
+		}
+
+		if quorum < k.minQuorum(ctx) {
+			// move to next story id
+			return false
+		}
+
+		backingPool, err := k.backingKeeper.TotalBackingAmount(ctx, storyID)
+		if err != nil {
+			panic(err)
+		}
+
+		challengePool, err := k.challengeKeeper.TotalChallengeAmount(ctx, storyID)
+		if err != nil {
+			panic(err)
+		}
+
+		challengeThreshold := k.challengeThreshold(ctx, backingPool)
+
+		logger.Info(fmt.Sprintf(
+			"Backing pool: %s, challenge pool: %s, threshold: %s",
+			backingPool, challengePool, challengeThreshold))
+
+		if challengePool.IsGTE(challengeThreshold) {
+			k.storyKeeper.StartVotingPeriod(ctx, storyID)
+
+			logger.Info(fmt.Sprintf(
+				"Challenge threshold and quorum met. Voting started for story %d",
+				storyID))
+		}
 
 		return false
 	})
 
-	// if storyQueue.IsEmpty() {
-	// 	// done processing all expired stories
-	// 	// terminate
-	// 	return nil
-	// }
+	return nil
+}
 
-	// var storyID int64
-	// if err := expiredStoryQueue.Peek(&storyID); err != nil {
-	// 	panic(err)
-	// }
-	// logger.Info(fmt.Sprintf("Handling expired story id: %d", storyID))
+func (k Keeper) challengeThreshold(ctx sdk.Context, totalBackingAmount sdk.Coin) sdk.Coin {
+	// calculate challenge threshold amount (based on total backings)
+	totalBackingDec := sdk.NewDecFromInt(totalBackingAmount.Amount)
+	challengeThresholdAmount := totalBackingDec.
+		Mul(k.challengeToBackingRatio(ctx)).
+		TruncateInt()
 
-	// expiredStoryQueue.Pop()
+	// challenge threshold can't be less than min challenge stake
+	minChallengeThreshold := k.minChallengeThreshold(ctx)
+	if challengeThresholdAmount.LT(minChallengeThreshold) {
+		return sdk.NewCoin(totalBackingAmount.Denom, minChallengeThreshold)
+	}
 
-	// err := k.distributeEarningsToBackers(ctx, storyID)
-	// if err != nil {
-	// 	return err
-	// }
-
-	// err = k.returnFundsToChallengers(ctx, storyID)
-	// if err != nil {
-	// 	return err
-	// }
-
-	// handle next expired story
-	return k.checkStories(ctx)
+	return sdk.NewCoin(totalBackingAmount.Denom, challengeThresholdAmount)
 }
 
 // quorum returns the total count of backings, challenges, votes
