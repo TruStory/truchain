@@ -78,7 +78,7 @@ func mockDB() (sdk.Context, Keeper, c.Keeper) {
 		expiredStoryQueueKey,
 		votingStoryQueueKey,
 		ck,
-		pk.Subspace(story.DefaultParamspace),
+		pk.Subspace(story.StoreKey),
 		codec)
 
 	story.InitGenesis(ctx, sk, story.DefaultGenesisState())
@@ -96,8 +96,10 @@ func mockDB() (sdk.Context, Keeper, c.Keeper) {
 		backingKeeper,
 		bankKeeper,
 		sk,
+		pk.Subspace(challenge.StoreKey),
 		codec,
 	)
+	challenge.InitGenesis(ctx, challengeKeeper, challenge.DefaultGenesisState())
 
 	k := NewKeeper(
 		voteKey,
