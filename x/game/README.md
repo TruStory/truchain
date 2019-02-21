@@ -4,19 +4,8 @@
 
 ## Keeper
 
-Stores all data pertaining to a validation game.
-
-### Dependencies
-* story keeper
-
-### Stores
-* "games"
-    * keys
-        * `"games:id:[GameID]"` -> `Game`
-        * `"games:len"` -> `[int64]`
-        * lists
-            * `sdk.Queue` (started games)
-            * `"stories:id:[StoryID]:games:time:[Time]"` -> `[GameID]`
+Checks the story queue after each block to see if the quorum and challenge threshold have been met.
+Changes state of story to voting if so.
 
 ## Notes
 
