@@ -30,9 +30,6 @@ const (
 type ReadKeeper interface {
 	app.ReadKeeper
 
-	ChallengedStoriesWithCategory(
-		ctx sdk.Context,
-		catID int64) (stories []Story, err sdk.Error)
 	CategoryDenom(ctx sdk.Context, id int64) (name string, err sdk.Error)
 	FeedByCategoryID(
 		ctx sdk.Context,
@@ -228,14 +225,6 @@ func (k Keeper) StoriesByCategoryID(
 
 	return k.storiesByCategoryID(
 		ctx, storyIDsByCategorySubspaceKey(k, catID, false), catID)
-}
-
-// ChallengedStoriesWithCategory gets all challenged stories for a category
-func (k Keeper) ChallengedStoriesWithCategory(
-	ctx sdk.Context, catID int64) (stories []Story, err sdk.Error) {
-
-	return k.storiesByCategoryID(
-		ctx, storyIDsByCategorySubspaceKey(k, catID, true), catID)
 }
 
 // FeedByCategoryID gets stories ordered by challenged stories first

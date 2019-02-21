@@ -86,21 +86,6 @@ func TestGetStoriesWithCategory(t *testing.T) {
 	assert.Equal(t, numStories, len(stories))
 }
 
-func TestGetChallengedStoriesWithCategory(t *testing.T) {
-	ctx, sk, ck := mockDB()
-
-	numStories := 5
-	for i := 0; i < numStories; i++ {
-		createFakeStory(ctx, sk, ck)
-	}
-
-	sk.StartVotingPeriod(ctx, 2)
-	sk.StartVotingPeriod(ctx, 3)
-
-	stories, _ := sk.ChallengedStoriesWithCategory(ctx, 1)
-	assert.Equal(t, 2, len(stories))
-}
-
 func TestFeedWithCategory(t *testing.T) {
 	ctx, sk, ck := mockDB()
 
