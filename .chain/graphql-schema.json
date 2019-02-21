@@ -65,46 +65,6 @@
             "deprecationReason": "",
             "description": "",
             "isDeprecated": false,
-            "name": "evidence",
-            "type": {
-              "kind": "NON_NULL",
-              "name": "",
-              "ofType": {
-                "kind": "LIST",
-                "name": "",
-                "ofType": {
-                  "kind": "NON_NULL",
-                  "name": "",
-                  "ofType": {
-                    "kind": "OBJECT",
-                    "name": "URL",
-                    "ofType": null
-                  }
-                }
-              }
-            }
-          },
-          {
-            "args": [],
-            "deprecationReason": "",
-            "description": "",
-            "isDeprecated": false,
-            "name": "expires",
-            "type": {
-              "kind": "NON_NULL",
-              "name": "",
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "Time",
-                "ofType": null
-              }
-            }
-          },
-          {
-            "args": [],
-            "deprecationReason": "",
-            "description": "",
-            "isDeprecated": false,
             "name": "interest",
             "type": {
               "kind": "NON_NULL",
@@ -207,22 +167,6 @@
         "description": "",
         "enumValues": [],
         "fields": [
-          {
-            "args": [],
-            "deprecationReason": "",
-            "description": "",
-            "isDeprecated": false,
-            "name": "creator",
-            "type": {
-              "kind": "NON_NULL",
-              "name": "",
-              "ofType": {
-                "kind": "OBJECT",
-                "name": "User",
-                "ofType": null
-              }
-            }
-          },
           {
             "args": [],
             "deprecationReason": "",
@@ -423,30 +367,6 @@
             "deprecationReason": "",
             "description": "",
             "isDeprecated": false,
-            "name": "evidence",
-            "type": {
-              "kind": "NON_NULL",
-              "name": "",
-              "ofType": {
-                "kind": "LIST",
-                "name": "",
-                "ofType": {
-                  "kind": "NON_NULL",
-                  "name": "",
-                  "ofType": {
-                    "kind": "OBJECT",
-                    "name": "URL",
-                    "ofType": null
-                  }
-                }
-              }
-            }
-          },
-          {
-            "args": [],
-            "deprecationReason": "",
-            "description": "",
-            "isDeprecated": false,
             "name": "timestamp",
             "type": {
               "kind": "NON_NULL",
@@ -561,209 +481,6 @@
         "interfaces": [],
         "kind": "OBJECT",
         "name": "Dec",
-        "possibleTypes": []
-      },
-      {
-        "description": "",
-        "enumValues": [],
-        "fields": [
-          {
-            "args": [],
-            "deprecationReason": "",
-            "description": "",
-            "isDeprecated": false,
-            "name": "challengeExpireTime",
-            "type": {
-              "kind": "NON_NULL",
-              "name": "",
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "Time",
-                "ofType": null
-              }
-            }
-          },
-          {
-            "args": [],
-            "deprecationReason": "",
-            "description": "",
-            "isDeprecated": false,
-            "name": "challengePool",
-            "type": {
-              "kind": "NON_NULL",
-              "name": "",
-              "ofType": {
-                "kind": "OBJECT",
-                "name": "Coin",
-                "ofType": null
-              }
-            }
-          },
-          {
-            "args": [],
-            "deprecationReason": "",
-            "description": "",
-            "isDeprecated": false,
-            "name": "challengeThreshold",
-            "type": {
-              "kind": "NON_NULL",
-              "name": "",
-              "ofType": {
-                "kind": "OBJECT",
-                "name": "Coin",
-                "ofType": null
-              }
-            }
-          },
-          {
-            "args": [],
-            "deprecationReason": "",
-            "description": "",
-            "isDeprecated": false,
-            "name": "creator",
-            "type": {
-              "kind": "NON_NULL",
-              "name": "",
-              "ofType": {
-                "kind": "OBJECT",
-                "name": "User",
-                "ofType": null
-              }
-            }
-          },
-          {
-            "args": [],
-            "deprecationReason": "",
-            "description": "",
-            "isDeprecated": false,
-            "name": "expiresTime",
-            "type": {
-              "kind": "NON_NULL",
-              "name": "",
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "Time",
-                "ofType": null
-              }
-            }
-          },
-          {
-            "args": [],
-            "deprecationReason": "",
-            "description": "",
-            "isDeprecated": false,
-            "name": "iD",
-            "type": {
-              "kind": "NON_NULL",
-              "name": "",
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "int64",
-                "ofType": null
-              }
-            }
-          },
-          {
-            "args": [],
-            "deprecationReason": "",
-            "description": "",
-            "isDeprecated": false,
-            "name": "id",
-            "type": {
-              "kind": "NON_NULL",
-              "name": "",
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "int64",
-                "ofType": null
-              }
-            }
-          },
-          {
-            "args": [],
-            "deprecationReason": "",
-            "description": "",
-            "isDeprecated": false,
-            "name": "storyID",
-            "type": {
-              "kind": "NON_NULL",
-              "name": "",
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "int64",
-                "ofType": null
-              }
-            }
-          },
-          {
-            "args": [],
-            "deprecationReason": "",
-            "description": "",
-            "isDeprecated": false,
-            "name": "timestamp",
-            "type": {
-              "kind": "NON_NULL",
-              "name": "",
-              "ofType": {
-                "kind": "OBJECT",
-                "name": "Timestamp",
-                "ofType": null
-              }
-            }
-          },
-          {
-            "args": [],
-            "deprecationReason": "",
-            "description": "",
-            "isDeprecated": false,
-            "name": "totalVoteAmount",
-            "type": {
-              "kind": "NON_NULL",
-              "name": "",
-              "ofType": {
-                "kind": "OBJECT",
-                "name": "Coin",
-                "ofType": null
-              }
-            }
-          },
-          {
-            "args": [],
-            "deprecationReason": "",
-            "description": "",
-            "isDeprecated": false,
-            "name": "votingEndTime",
-            "type": {
-              "kind": "NON_NULL",
-              "name": "",
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "Time",
-                "ofType": null
-              }
-            }
-          },
-          {
-            "args": [],
-            "deprecationReason": "",
-            "description": "",
-            "isDeprecated": false,
-            "name": "votingPeriodEndTime",
-            "type": {
-              "kind": "NON_NULL",
-              "name": "",
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "Time",
-                "ofType": null
-              }
-            }
-          }
-        ],
-        "inputFields": [],
-        "interfaces": [],
-        "kind": "OBJECT",
-        "name": "Game",
         "possibleTypes": []
       },
       {
@@ -1179,22 +896,6 @@
             "deprecationReason": "",
             "description": "",
             "isDeprecated": false,
-            "name": "argument",
-            "type": {
-              "kind": "NON_NULL",
-              "name": "",
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "string",
-                "ofType": null
-              }
-            }
-          },
-          {
-            "args": [],
-            "deprecationReason": "",
-            "description": "",
-            "isDeprecated": false,
             "name": "backingTotal",
             "type": {
               "kind": "NON_NULL",
@@ -1339,30 +1040,6 @@
             "deprecationReason": "",
             "description": "",
             "isDeprecated": false,
-            "name": "evidence",
-            "type": {
-              "kind": "NON_NULL",
-              "name": "",
-              "ofType": {
-                "kind": "LIST",
-                "name": "",
-                "ofType": {
-                  "kind": "NON_NULL",
-                  "name": "",
-                  "ofType": {
-                    "kind": "OBJECT",
-                    "name": "URL",
-                    "ofType": null
-                  }
-                }
-              }
-            }
-          },
-          {
-            "args": [],
-            "deprecationReason": "",
-            "description": "",
-            "isDeprecated": false,
             "name": "expireTime",
             "type": {
               "kind": "NON_NULL",
@@ -1386,22 +1063,6 @@
               "ofType": {
                 "kind": "SCALAR",
                 "name": "bool",
-                "ofType": null
-              }
-            }
-          },
-          {
-            "args": [],
-            "deprecationReason": "",
-            "description": "",
-            "isDeprecated": false,
-            "name": "game",
-            "type": {
-              "kind": "NON_NULL",
-              "name": "",
-              "ofType": {
-                "kind": "OBJECT",
-                "name": "Game",
                 "ofType": null
               }
             }
@@ -1750,173 +1411,6 @@
             "deprecationReason": "",
             "description": "",
             "isDeprecated": false,
-            "name": "forceQuery",
-            "type": {
-              "kind": "NON_NULL",
-              "name": "",
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "bool",
-                "ofType": null
-              }
-            }
-          },
-          {
-            "args": [],
-            "deprecationReason": "",
-            "description": "",
-            "isDeprecated": false,
-            "name": "fragment",
-            "type": {
-              "kind": "NON_NULL",
-              "name": "",
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "string",
-                "ofType": null
-              }
-            }
-          },
-          {
-            "args": [],
-            "deprecationReason": "",
-            "description": "",
-            "isDeprecated": false,
-            "name": "host",
-            "type": {
-              "kind": "NON_NULL",
-              "name": "",
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "string",
-                "ofType": null
-              }
-            }
-          },
-          {
-            "args": [],
-            "deprecationReason": "",
-            "description": "",
-            "isDeprecated": false,
-            "name": "opaque",
-            "type": {
-              "kind": "NON_NULL",
-              "name": "",
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "string",
-                "ofType": null
-              }
-            }
-          },
-          {
-            "args": [],
-            "deprecationReason": "",
-            "description": "",
-            "isDeprecated": false,
-            "name": "path",
-            "type": {
-              "kind": "NON_NULL",
-              "name": "",
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "string",
-                "ofType": null
-              }
-            }
-          },
-          {
-            "args": [],
-            "deprecationReason": "",
-            "description": "",
-            "isDeprecated": false,
-            "name": "rawPath",
-            "type": {
-              "kind": "NON_NULL",
-              "name": "",
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "string",
-                "ofType": null
-              }
-            }
-          },
-          {
-            "args": [],
-            "deprecationReason": "",
-            "description": "",
-            "isDeprecated": false,
-            "name": "rawQuery",
-            "type": {
-              "kind": "NON_NULL",
-              "name": "",
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "string",
-                "ofType": null
-              }
-            }
-          },
-          {
-            "args": [],
-            "deprecationReason": "",
-            "description": "",
-            "isDeprecated": false,
-            "name": "scheme",
-            "type": {
-              "kind": "NON_NULL",
-              "name": "",
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "string",
-                "ofType": null
-              }
-            }
-          },
-          {
-            "args": [],
-            "deprecationReason": "",
-            "description": "",
-            "isDeprecated": false,
-            "name": "url",
-            "type": {
-              "kind": "NON_NULL",
-              "name": "",
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "string",
-                "ofType": null
-              }
-            }
-          },
-          {
-            "args": [],
-            "deprecationReason": "",
-            "description": "",
-            "isDeprecated": false,
-            "name": "user",
-            "type": {
-              "kind": "OBJECT",
-              "name": "Userinfo",
-              "ofType": null
-            }
-          }
-        ],
-        "inputFields": [],
-        "interfaces": [],
-        "kind": "OBJECT",
-        "name": "URL",
-        "possibleTypes": []
-      },
-      {
-        "description": "",
-        "enumValues": [],
-        "fields": [
-          {
-            "args": [],
-            "deprecationReason": "",
-            "description": "",
-            "isDeprecated": false,
             "name": "accountNumber",
             "type": {
               "kind": "NON_NULL",
@@ -2042,16 +1536,6 @@
       {
         "description": "",
         "enumValues": [],
-        "fields": [],
-        "inputFields": [],
-        "interfaces": [],
-        "kind": "OBJECT",
-        "name": "Userinfo",
-        "possibleTypes": []
-      },
-      {
-        "description": "",
-        "enumValues": [],
         "fields": [
           {
             "args": [],
@@ -2098,30 +1582,6 @@
                 "kind": "OBJECT",
                 "name": "User",
                 "ofType": null
-              }
-            }
-          },
-          {
-            "args": [],
-            "deprecationReason": "",
-            "description": "",
-            "isDeprecated": false,
-            "name": "evidence",
-            "type": {
-              "kind": "NON_NULL",
-              "name": "",
-              "ofType": {
-                "kind": "LIST",
-                "name": "",
-                "ofType": {
-                  "kind": "NON_NULL",
-                  "name": "",
-                  "ofType": {
-                    "kind": "OBJECT",
-                    "name": "URL",
-                    "ofType": null
-                  }
-                }
               }
             }
           },
