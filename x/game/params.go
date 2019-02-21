@@ -15,7 +15,6 @@ const DefaultParamspace = "games"
 var (
 	KeyChallengeToBackingRatio = []byte("challengeToBackingRatio")
 	KeyMinChallengeThreshold   = []byte("minChallengeThreshold")
-	KeyMinChallengeStake       = []byte("minChallengeStake")
 	KeyMinQuorum               = []byte("minQuorum")
 	KeyVotingPeriod            = []byte("votingPeriod")
 )
@@ -24,7 +23,6 @@ var (
 type Params struct {
 	ChallengeToBackingRatio sdk.Dec       `json:"challenge_to_backing_ratio"`
 	MinChallengeThreshold   sdk.Int       `json:"min_challenge_threshold"`
-	MinChallengeStake       sdk.Int       `json:"min_challenge_stake"`
 	MinQuorum               int           `json:"min_quorum"`
 	VotingPeriod            time.Duration `json:"voting_period"`
 }
@@ -33,11 +31,9 @@ type Params struct {
 func DefaultParams() Params {
 	return Params{
 		ChallengeToBackingRatio: sdk.NewDecWithPrec(100, 2), // 100%
-		// MinChallengeThreshold:   sdk.NewInt(10000000000),    // 10 trustake
-		MinChallengeThreshold: sdk.NewInt(1), // 1 preethi
-		MinChallengeStake:     sdk.NewInt(1), //  1 preethi
-		MinQuorum:             3,
-		VotingPeriod:          1 * 24 * time.Hour,
+		MinChallengeThreshold:   sdk.NewInt(1),              // 1 preethi
+		MinQuorum:               3,
+		VotingPeriod:            1 * 24 * time.Hour,
 	}
 }
 
@@ -46,7 +42,6 @@ func (p *Params) KeyValuePairs() params.KeyValuePairs {
 	return params.KeyValuePairs{
 		{Key: KeyChallengeToBackingRatio, Value: &p.ChallengeToBackingRatio},
 		{Key: KeyMinChallengeThreshold, Value: &p.MinChallengeThreshold},
-		{Key: KeyMinChallengeStake, Value: &p.MinChallengeStake},
 		{Key: KeyMinQuorum, Value: &p.MinQuorum},
 		{Key: KeyVotingPeriod, Value: &p.VotingPeriod},
 	}
