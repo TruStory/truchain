@@ -12,7 +12,6 @@ import (
 	"github.com/TruStory/truchain/x/category"
 	"github.com/TruStory/truchain/x/challenge"
 	"github.com/TruStory/truchain/x/db"
-	"github.com/TruStory/truchain/x/game"
 	"github.com/TruStory/truchain/x/params"
 	"github.com/TruStory/truchain/x/story"
 	"github.com/TruStory/truchain/x/users"
@@ -325,8 +324,7 @@ func (ta *TruAPI) votesResolver(
 	return *tokenVotes
 }
 
-// TODO: DO NOT PASS A GAME HERE
-func (ta *TruAPI) votesTotalAmountResolver(_ context.Context, q game.Game) sdk.Coin {
+func (ta *TruAPI) votesTotalAmountResolver(_ context.Context, q story.Story) sdk.Coin {
 
 	res := ta.RunQuery(
 		path.Join(vote.QueryPath, vote.QueryTotalVoteAmountByStoryID),

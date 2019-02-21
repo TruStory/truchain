@@ -54,7 +54,10 @@ func (k Keeper) checkStories(ctx sdk.Context) sdk.Error {
 			backingPool, challengePool, challengeThreshold))
 
 		if challengePool.IsGTE(challengeThreshold) {
-			k.storyKeeper.StartVotingPeriod(ctx, storyID)
+			err := k.storyKeeper.StartVotingPeriod(ctx, storyID)
+			if err != nil {
+				panic(err)
+			}
 
 			logger.Info(fmt.Sprintf(
 				"Challenge threshold and quorum met. Voting started for story %d",
