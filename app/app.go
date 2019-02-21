@@ -24,7 +24,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/auth"
 	"github.com/cosmos/cosmos-sdk/x/bank"
 	"github.com/cosmos/cosmos-sdk/x/ibc"
-	sdkparams "github.com/cosmos/cosmos-sdk/x/params"
+	"github.com/cosmos/cosmos-sdk/x/params"
 	"github.com/cosmos/cosmos-sdk/x/staking"
 	"github.com/joho/godotenv"
 	"github.com/spf13/viper"
@@ -74,7 +74,7 @@ type TruChain struct {
 	feeCollectionKeeper auth.FeeCollectionKeeper
 	bankKeeper          bank.Keeper
 	ibcMapper           ibc.Mapper
-	paramsKeeper        sdkparams.Keeper
+	paramsKeeper        params.Keeper
 
 	// access truchain database
 	storyKeeper      story.WriteKeeper
@@ -134,7 +134,7 @@ func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *T
 	}
 
 	// The ParamsKeeper handles parameter storage for the application
-	app.paramsKeeper = sdkparams.NewKeeper(app.codec, app.keyParams, app.tkeyParams)
+	app.paramsKeeper = params.NewKeeper(app.codec, app.keyParams, app.tkeyParams)
 
 	// The AccountKeeper handles address -> account lookups
 	app.accountKeeper = auth.NewAccountKeeper(
