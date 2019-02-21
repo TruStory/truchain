@@ -10,11 +10,11 @@ import (
 
 	"github.com/cosmos/cosmos-sdk/x/bank"
 
-	params "github.com/TruStory/truchain/parameters"
 	app "github.com/TruStory/truchain/types"
 	"github.com/TruStory/truchain/x/story"
 	list "github.com/cosmos/cosmos-sdk/store"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/cosmos/cosmos-sdk/x/params"
 	amino "github.com/tendermint/go-amino"
 )
 
@@ -57,6 +57,7 @@ type Keeper struct {
 	challengeKeeper challenge.WriteKeeper
 	voteKeeper      vote.WriteKeeper
 	bankKeeper      bank.Keeper
+	paramStore      params.Subspace
 }
 
 // NewKeeper creates a new keeper with write and read access
