@@ -1,9 +1,11 @@
 package game
 
 import (
+	"crypto/rand"
 	"net/url"
 	"time"
 
+	"github.com/TruStory/truchain/x/category"
 	"github.com/TruStory/truchain/x/challenge"
 	"github.com/TruStory/truchain/x/vote"
 
@@ -22,7 +24,14 @@ import (
 	"github.com/tendermint/tendermint/libs/log"
 )
 
-func mockDB() (sdk.Context, Keeper, c.Keeper) {
+func mockDB() (
+	sdk.Context,
+	Keeper,
+	story.Keeper,
+	backing.Keeper,
+	challenge.Keeper,
+	bank.Keeper) {
+
 	db := dbm.NewMemDB()
 
 	accKey := sdk.NewKVStoreKey(auth.StoreKey)
@@ -67,7 +76,10 @@ func mockDB() (sdk.Context, Keeper, c.Keeper) {
 		pk.Subspace(bank.DefaultParamspace),
 		bank.DefaultCodespace,
 	)
+
 	ck := c.NewKeeper(catKey, codec)
+	category.InitGenesis(ctx, ck, category.DefaultCategories())
+
 	sk := story.NewKeeper(
 		storyKey,
 		storyQueueKey,
@@ -117,28 +129,30 @@ func mockDB() (sdk.Context, Keeper, c.Keeper) {
 		pk.Subspace(DefaultParamspace),
 		codec,
 	)
+	InitGenesis(ctx, k, DefaultGenesisState())
 
-	return ctx, k, ck
+	return ctx, k, sk, backingKeeper, challengeKeeper, bankKeeper
 }
 
-func createFakeCategory(ctx sdk.Context, ck c.WriteKeeper) c.Category {
-	existing, err := ck.GetCategory(ctx, 1)
-	if err == nil {
-		return existing
-	}
-	id := ck.Create(ctx, "decentralized exchanges", "trudex", "category for experts in decentralized exchanges")
-	cat, _ := ck.GetCategory(ctx, id)
-	return cat
-}
-
-func createFakeStory(ctx sdk.Context, sk story.WriteKeeper, ck c.WriteKeeper) int64 {
-	body := "TruStory can be goverened by it's stakeholders."
-	cat := createFakeCategory(ctx, ck)
+func createFakeStory(ctx sdk.Context, sk story.WriteKeeper) int64 {
+	body := "These bits are going inside a key-value store. Woo hoo!"
 	creator := sdk.AccAddress([]byte{1, 2})
 	storyType := story.Default
 	source := url.URL{}
 
-	storyID, _ := sk.Create(ctx, body, cat.ID, creator, source, storyType)
+	ctx = ctx.WithBlockHeader(abci.Header{Time: time.Now().UTC()})
+	catID := int64(1)
+	storyID, _ := sk.Create(ctx, body, catID, creator, source, storyType)
 
 	return storyID
+}
+
+func fakeFundedCreator(ctx sdk.Context, k bank.Keeper) sdk.AccAddress {
+	bz := make([]byte, 4)
+	rand.Read(bz)
+	creator := sdk.AccAddress(bz)
+	amount := sdk.NewCoin("trusteak", sdk.NewInt(2000000000000))
+	k.AddCoins(ctx, creator, sdk.Coins{amount})
+
+	return creator
 }

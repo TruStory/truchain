@@ -17,12 +17,12 @@ import (
 const (
 	// StoreKey is string representation of the store key for stories
 	StoreKey = "stories"
-	// VotingQueueStoreKey is string representation of the store key for challenged stories
-	VotingQueueStoreKey = "votingStoryQueue"
-	// ExpiredQueueStoreKey is string representation of the store key for expired stories
-	ExpiredQueueStoreKey = "expiredStoryQueue"
 	// QueueStoreKey is string representation of the store key for backing list
 	QueueStoreKey = "storyQueue"
+	// ExpiredQueueStoreKey is string representation of the store key for expired stories
+	ExpiredQueueStoreKey = "expiredStoryQueue"
+	// VotingQueueStoreKey is string representation of the store key for challenged stories
+	VotingQueueStoreKey = "votingStoryQueue"
 )
 
 // ReadKeeper defines a module interface that facilitates read only access
@@ -54,7 +54,7 @@ type WriteKeeper interface {
 		creator sdk.AccAddress,
 		source url.URL,
 		storyType Type) (int64, sdk.Error)
-	StartGame(ctx sdk.Context, storyID int64) sdk.Error
+	StartVotingPeriod(ctx sdk.Context, storyID int64) sdk.Error
 	EndGame(ctx sdk.Context, storyID int64, confirmed bool) sdk.Error
 	ExpireGame(ctx sdk.Context, storyID int64) sdk.Error
 	UpdateStory(ctx sdk.Context, story Story)
@@ -95,18 +95,17 @@ func NewKeeper(
 
 // ============================================================================
 
-// StartGame records challenging a story
-func (k Keeper) StartGame(
-	ctx sdk.Context, storyID int64) sdk.Error {
-
-	// get story
+// StartVotingPeriod updates story to indicate a voting period
+func (k Keeper) StartVotingPeriod(ctx sdk.Context, storyID int64) sdk.Error {
 	story, err := k.Story(ctx, storyID)
 	if err != nil {
 		return err
 	}
 
-	// update story state
 	story.State = Voting
+	// TODO: set voting end time here??
+	// game.VotingEndTime = ctx.BlockHeader().Time.Add(DefaultParams().VotingPeriod)
+
 	k.UpdateStory(ctx, story)
 
 	// add story to challenged list

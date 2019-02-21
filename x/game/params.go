@@ -9,7 +9,7 @@ import (
 )
 
 // DefaultParamspace defines the default game module parameter subspace
-const DefaultParamspace = "game"
+const DefaultParamspace = "games"
 
 // store keys for expiration params
 var (
@@ -33,10 +33,11 @@ type Params struct {
 func DefaultParams() Params {
 	return Params{
 		ChallengeToBackingRatio: sdk.NewDecWithPrec(100, 2), // 100%
-		MinChallengeThreshold:   sdk.NewInt(10000000000),    // 10 trustake
-		MinChallengeStake:       sdk.NewInt(1),              //  1 preethi
-		MinQuorum:               3,
-		VotingPeriod:            1 * 24 * time.Hour,
+		// MinChallengeThreshold:   sdk.NewInt(10000000000),    // 10 trustake
+		MinChallengeThreshold: sdk.NewInt(1), // 1 preethi
+		MinChallengeStake:     sdk.NewInt(1), //  1 preethi
+		MinQuorum:             3,
+		VotingPeriod:          1 * 24 * time.Hour,
 	}
 }
 
@@ -58,6 +59,16 @@ func ParamTypeTable() params.TypeTable {
 
 func (k Keeper) minQuorum(ctx sdk.Context) (res int) {
 	k.paramStore.Get(ctx, KeyMinQuorum, &res)
+	return
+}
+
+func (k Keeper) challengeToBackingRatio(ctx sdk.Context) (res sdk.Dec) {
+	k.paramStore.Get(ctx, KeyChallengeToBackingRatio, &res)
+	return
+}
+
+func (k Keeper) minChallengeThreshold(ctx sdk.Context) (res sdk.Int) {
+	k.paramStore.Get(ctx, KeyMinChallengeThreshold, &res)
 	return
 }
 
