@@ -3,7 +3,6 @@ package vote
 import (
 	"fmt"
 
-	params "github.com/TruStory/truchain/parameters"
 	app "github.com/TruStory/truchain/types"
 	"github.com/TruStory/truchain/x/backing"
 	"github.com/TruStory/truchain/x/challenge"
@@ -21,7 +20,7 @@ func rejectedPool(
 		case backing.Backing:
 			// forfeit backing and inflationary rewards, add to pool
 			// TODO [shanev]: do proper conversion when we know it, still 1:1
-			interestInTrustake := sdk.NewCoin(params.StakeDenom, v.Interest.Amount)
+			interestInTrustake := sdk.NewCoin(app.StakeDenom, v.Interest.Amount)
 			*pool = (*pool).Plus(v.Amount()).Plus(interestInTrustake)
 
 		case TokenVote:
@@ -42,7 +41,7 @@ func rejectedPool(
 		case backing.Backing:
 			// slash inflationary rewards and add to pool, bad boy
 			// TODO [shanev]: do proper conversion when we know it, still 1:1
-			interestInTrustake := sdk.NewCoin(params.StakeDenom, v.Interest.Amount)
+			interestInTrustake := sdk.NewCoin(app.StakeDenom, v.Interest.Amount)
 			*pool = (*pool).Plus(interestInTrustake)
 
 		case challenge.Challenge:
@@ -85,7 +84,7 @@ func distributeRewardsRejected(
 
 	// challenger pool is 100% of reward pool when no voters
 	challengerPool := pool
-	voterPool := sdk.NewCoin(params.StakeDenom, sdk.ZeroInt())
+	voterPool := sdk.NewCoin(app.StakeDenom, sdk.ZeroInt())
 
 	if voterCount > 0 {
 		// calculate reward pool for challengers (75% of pool)

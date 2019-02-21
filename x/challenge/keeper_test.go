@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	params "github.com/TruStory/truchain/parameters"
+	app "github.com/TruStory/truchain/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/stretchr/testify/assert"
 )
@@ -20,7 +20,7 @@ func TestNewGetChallenge(t *testing.T) {
 	ctx, k, sk, ck, bankKeeper := mockDB()
 
 	storyID := createFakeStory(ctx, sk, ck)
-	amount := sdk.NewCoin(params.StakeDenom, sdk.NewInt(15000000000))
+	amount := sdk.NewCoin(app.StakeDenom, sdk.NewInt(15000000000))
 	argument := "test argument is long enough"
 	creator := sdk.AccAddress([]byte{1, 2})
 
@@ -40,7 +40,7 @@ func TestNewGetChallengeUsingTruStake(t *testing.T) {
 	ctx, k, sk, ck, bankKeeper := mockDB()
 
 	storyID := createFakeStory(ctx, sk, ck)
-	amount := sdk.NewCoin(params.StakeDenom, sdk.NewInt(15000000000))
+	amount := sdk.NewCoin(app.StakeDenom, sdk.NewInt(15000000000))
 	argument := "test argument is long enough"
 	creator := sdk.AccAddress([]byte{1, 2})
 
@@ -60,7 +60,7 @@ func TestChallengesByGameID(t *testing.T) {
 	ctx, k, sk, ck, bankKeeper := mockDB()
 
 	storyID := createFakeStory(ctx, sk, ck)
-	amount := sdk.NewCoin(params.StakeDenom, sdk.NewInt(15000000000))
+	amount := sdk.NewCoin(app.StakeDenom, sdk.NewInt(15000000000))
 	argument := "test argument is long enough"
 
 	creator := sdk.AccAddress([]byte{1, 2})
@@ -81,7 +81,7 @@ func TestChallengesByStoryIDAndCreator(t *testing.T) {
 	ctx, k, sk, ck, bankKeeper := mockDB()
 
 	storyID := createFakeStory(ctx, sk, ck)
-	amount := sdk.NewCoin(params.StakeDenom, sdk.NewInt(15000000000))
+	amount := sdk.NewCoin(app.StakeDenom, sdk.NewInt(15000000000))
 	argument := "test argument is long enough"
 
 	creator := sdk.AccAddress([]byte{1, 2})
@@ -97,7 +97,7 @@ func TestTally(t *testing.T) {
 	ctx, k, sk, ck, bankKeeper := mockDB()
 
 	storyID := createFakeStory(ctx, sk, ck)
-	amount := sdk.NewCoin(params.StakeDenom, sdk.NewInt(15000000000))
+	amount := sdk.NewCoin(app.StakeDenom, sdk.NewInt(15000000000))
 	argument := "test argument is long enough"
 
 	creator := sdk.AccAddress([]byte{1, 2})
@@ -118,7 +118,7 @@ func TestNewChallenge_Duplicate(t *testing.T) {
 	ctx, k, sk, ck, bankKeeper := mockDB()
 
 	storyID := createFakeStory(ctx, sk, ck)
-	amount := sdk.NewCoin(params.StakeDenom, sdk.NewInt(50000000000))
+	amount := sdk.NewCoin(app.StakeDenom, sdk.NewInt(50000000000))
 	argument := "test argument is long enough"
 	creator := sdk.AccAddress([]byte{1, 2})
 
@@ -138,7 +138,7 @@ func TestNewChallenge_Duplicate(t *testing.T) {
 // 	ctx, k, sk, ck, bankKeeper := mockDB()
 
 // 	storyID := createFakeStory(ctx, sk, ck)
-// 	amount := sdk.NewCoin(params.StakeDenom, sdk.NewInt(50000000000))
+// 	amount := sdk.NewCoin(app.StakeDenom, sdk.NewInt(50000000000))
 // 	argument := "test argument is long enough"
 // 	creator1 := sdk.AccAddress([]byte{1, 2})
 // 	creator2 := sdk.AccAddress([]byte{3, 4})

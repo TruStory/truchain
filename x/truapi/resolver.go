@@ -7,21 +7,16 @@ import (
 	"path"
 	"sort"
 
-	"github.com/TruStory/truchain/parameters"
-
-	"github.com/TruStory/truchain/x/db"
-	"github.com/TruStory/truchain/x/params"
-	"github.com/TruStory/truchain/x/vote"
-
-	"github.com/TruStory/truchain/x/challenge"
-
-	"github.com/TruStory/truchain/x/backing"
-
 	app "github.com/TruStory/truchain/types"
+	"github.com/TruStory/truchain/x/backing"
 	"github.com/TruStory/truchain/x/category"
+	"github.com/TruStory/truchain/x/challenge"
+	"github.com/TruStory/truchain/x/db"
 	"github.com/TruStory/truchain/x/game"
+	"github.com/TruStory/truchain/x/params"
 	"github.com/TruStory/truchain/x/story"
 	"github.com/TruStory/truchain/x/users"
+	"github.com/TruStory/truchain/x/vote"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	amino "github.com/tendermint/go-amino"
 )
@@ -210,9 +205,9 @@ func (ta *TruAPI) challengeThresholdResolver(_ context.Context, q story.Story) s
 	}
 
 	// Round up to next Shanev so we don't deal with precision
-	remainder := amount.Amount.Mod(sdk.NewInt(parameters.Shanev))
+	remainder := amount.Amount.Mod(sdk.NewInt(app.Shanev))
 	if !remainder.IsZero() {
-		roundedUp := amount.Amount.Sub(remainder).Add(sdk.NewInt(parameters.Shanev))
+		roundedUp := amount.Amount.Sub(remainder).Add(sdk.NewInt(app.Shanev))
 		return sdk.NewCoin(amount.Denom, roundedUp)
 	}
 

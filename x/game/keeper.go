@@ -44,6 +44,7 @@ type WriteKeeper interface {
 	AddToChallengePool(
 		ctx sdk.Context, gameID int64, amount sdk.Coin) (err sdk.Error)
 	Update(ctx sdk.Context, game Game)
+	SetParams(ctx sdk.Context, params Params)
 }
 
 // Keeper data type storing keys to the key-value store
@@ -69,6 +70,7 @@ func NewKeeper(
 	challengeKeeper challenge.WriteKeeper,
 	voteKeeper vote.WriteKeeper,
 	bankKeeper bank.Keeper,
+	paramStore params.Subspace,
 	codec *amino.Codec) Keeper {
 
 	return Keeper{
@@ -79,6 +81,7 @@ func NewKeeper(
 		challengeKeeper,
 		voteKeeper,
 		bankKeeper,
+		paramStore.WithTypeTable(ParamTypeTable()),
 	}
 }
 
@@ -98,13 +101,13 @@ func (k Keeper) Create(
 
 	// create new game type
 	game := Game{
-		ID:                  k.GetNextID(ctx),
-		StoryID:             storyID,
-		Creator:             creator,
-		ChallengeExpireTime: ctx.BlockHeader().Time.Add(DefaultParams().Expires),
-		VotingEndTime:       time.Time{},
-		ChallengePool:       sdk.NewCoin(params.StakeDenom, sdk.ZeroInt()),
-		Timestamp:           app.NewTimestamp(ctx.BlockHeader()),
+		ID:      k.GetNextID(ctx),
+		StoryID: storyID,
+		Creator: creator,
+		// ChallengeExpireTime: ctx.BlockHeader().Time.Add(DefaultParams().Expires),
+		VotingEndTime: time.Time{},
+		ChallengePool: sdk.NewCoin(app.StakeDenom, sdk.ZeroInt()),
+		Timestamp:     app.NewTimestamp(ctx.BlockHeader()),
 	}
 
 	// set game in KVStore

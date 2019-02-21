@@ -114,6 +114,7 @@ func mockDB() (sdk.Context, Keeper, c.Keeper) {
 		challengeKeeper,
 		voteKeeper,
 		bankKeeper,
+		pk.Subspace(DefaultParamspace),
 		codec,
 	)
 

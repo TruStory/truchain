@@ -20,6 +20,12 @@ const (
 	Portname = "1337"
 )
 
+// Coin units
+const (
+	Preethi = 1
+	Shanev  = 1000000000 * Preethi
+)
+
 // InitialCredAmount is the initial amount of cred for categories
 var InitialCredAmount = sdk.NewInt(1000000000)
 

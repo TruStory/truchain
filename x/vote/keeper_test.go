@@ -3,7 +3,7 @@ package vote
 import (
 	"testing"
 
-	params "github.com/TruStory/truchain/parameters"
+	app "github.com/TruStory/truchain/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/stretchr/testify/assert"
 )
@@ -12,7 +12,7 @@ func TestCreateGetVote(t *testing.T) {
 	ctx, k, ck := mockDB()
 
 	storyID := createFakeStory(ctx, k.storyKeeper, ck)
-	amount := sdk.NewCoin(params.StakeDenom, sdk.NewInt(15000000000))
+	amount := sdk.NewCoin(app.StakeDenom, sdk.NewInt(15000000000))
 	comment := "test comment is long enough"
 	creator := sdk.AccAddress([]byte{1, 2})
 
@@ -34,7 +34,7 @@ func TestGetVotesByGameID(t *testing.T) {
 	ctx, k, ck := mockDB()
 
 	storyID := createFakeStory(ctx, k.storyKeeper, ck)
-	amount := sdk.NewCoin(params.StakeDenom, sdk.NewInt(15000000000))
+	amount := sdk.NewCoin(app.StakeDenom, sdk.NewInt(15000000000))
 	comment := "test comment is long enough"
 	creator := sdk.AccAddress([]byte{1, 2})
 	creator2 := sdk.AccAddress([]byte{3, 4})
@@ -63,7 +63,7 @@ func TestGetVotesByStoryIDAndCreator(t *testing.T) {
 	ctx, k, ck := mockDB()
 
 	storyID := createFakeStory(ctx, k.storyKeeper, ck)
-	amount := sdk.NewCoin(params.StakeDenom, sdk.NewInt(15000000000))
+	amount := sdk.NewCoin(app.StakeDenom, sdk.NewInt(15000000000))
 	comment := "test comment is long enough"
 	creator := sdk.AccAddress([]byte{1, 2})
 
@@ -85,7 +85,7 @@ func TestTotalVoteAmountByGameID(t *testing.T) {
 	ctx, k, ck := mockDB()
 
 	storyID := createFakeStory(ctx, k.storyKeeper, ck)
-	amount := sdk.NewCoin(params.StakeDenom, sdk.NewInt(15000000000))
+	amount := sdk.NewCoin(app.StakeDenom, sdk.NewInt(15000000000))
 	comment := "test comment is long enough"
 	creator := sdk.AccAddress([]byte{1, 2})
 	creator1 := sdk.AccAddress([]byte{2, 3})
@@ -115,7 +115,7 @@ func TestTotalVoteAmountByGameID(t *testing.T) {
 // 	ctx, k, ck := mockDB()
 
 // 	storyID := createFakeStory(ctx, k.storyKeeper, ck)
-// 	amount := sdk.NewCoin(params.StakeDenom, sdk.NewInt(5000000))
+// 	amount := sdk.NewCoin(app.StakeDenom, sdk.NewInt(5000000))
 // 	comment := "test comment is long enough"
 // 	creator := sdk.AccAddress([]byte{1, 2})
 

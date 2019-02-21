@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"time"
 
-	param "github.com/TruStory/truchain/parameters"
 	app "github.com/TruStory/truchain/types"
 	cat "github.com/TruStory/truchain/x/category"
 	"github.com/TruStory/truchain/x/story"
@@ -99,7 +98,7 @@ func (k Keeper) Create(
 
 	logger := ctx.Logger().With("module", "backing")
 
-	if amount.Denom != param.StakeDenom {
+	if amount.Denom != app.StakeDenom {
 		return 0, sdk.ErrInvalidCoins("Invalid backing token.")
 	}
 
@@ -252,7 +251,7 @@ func (k Keeper) Tally(
 func (k Keeper) TotalBackingAmount(ctx sdk.Context, storyID int64) (
 	totalCoin sdk.Coin, err sdk.Error) {
 
-	totalAmount := sdk.NewCoin(param.StakeDenom, sdk.ZeroInt())
+	totalAmount := sdk.NewCoin(app.StakeDenom, sdk.ZeroInt())
 
 	err = k.backingStoryList.Map(ctx, k, storyID, func(backingID int64) sdk.Error {
 		backing, err := k.Backing(ctx, backingID)

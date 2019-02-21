@@ -7,7 +7,7 @@ import (
 
 	"github.com/TruStory/truchain/x/backing"
 
-	params "github.com/TruStory/truchain/parameters"
+	app "github.com/TruStory/truchain/types"
 	c "github.com/TruStory/truchain/x/category"
 	"github.com/TruStory/truchain/x/story"
 	"github.com/cosmos/cosmos-sdk/store"
@@ -118,7 +118,7 @@ func fakeFundedCreator(ctx sdk.Context, k bank.Keeper) sdk.AccAddress {
 	creator := sdk.AccAddress(bz)
 
 	// give user some category coins
-	amount := sdk.NewCoin(params.StakeDenom, sdk.NewInt(2000000000000))
+	amount := sdk.NewCoin(app.StakeDenom, sdk.NewInt(2000000000000))
 	k.AddCoins(ctx, creator, sdk.Coins{amount})
 
 	return creator

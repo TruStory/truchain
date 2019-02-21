@@ -5,14 +5,14 @@ import (
 	"testing"
 	"time"
 
-	params "github.com/TruStory/truchain/parameters"
+	app "github.com/TruStory/truchain/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/stretchr/testify/assert"
 )
 
 var fiver = sdk.Coin{
 	Amount: sdk.NewInt(5),
-	Denom:  params.StakeDenom,
+	Denom:  app.StakeDenom,
 }
 
 func Test_key(t *testing.T) {
@@ -52,7 +52,7 @@ func TestToggleVote(t *testing.T) {
 func TestGetBacking(t *testing.T) {
 	ctx, bk, sk, ck, bankKeeper, _ := mockDB()
 	storyID := createFakeStory(ctx, sk, ck)
-	amount := sdk.NewCoin(params.StakeDenom, sdk.NewInt(5000000))
+	amount := sdk.NewCoin(app.StakeDenom, sdk.NewInt(5000000))
 	argument := "cool story brew.."
 	creator := sdk.AccAddress([]byte{1, 2})
 	duration := DefaultMsgParams().MinPeriod
@@ -67,7 +67,7 @@ func TestGetBacking(t *testing.T) {
 func TestBackingsByStoryID(t *testing.T) {
 	ctx, bk, sk, ck, bankKeeper, _ := mockDB()
 	storyID := createFakeStory(ctx, sk, ck)
-	amount := sdk.NewCoin(params.StakeDenom, sdk.NewInt(5000000))
+	amount := sdk.NewCoin(app.StakeDenom, sdk.NewInt(5000000))
 	argument := "cool story brew"
 	duration := DefaultMsgParams().MinPeriod
 
@@ -87,7 +87,7 @@ func TestBackingsByStoryID(t *testing.T) {
 func TestBackingsByStoryIDAndCreator(t *testing.T) {
 	ctx, bk, sk, ck, bankKeeper, _ := mockDB()
 	storyID := createFakeStory(ctx, sk, ck)
-	amount := sdk.NewCoin(params.StakeDenom, sdk.NewInt(5000000))
+	amount := sdk.NewCoin(app.StakeDenom, sdk.NewInt(5000000))
 	argument := "cool story brew"
 	duration := DefaultMsgParams().MinPeriod
 
@@ -104,7 +104,7 @@ func TestTally(t *testing.T) {
 	ctx, k, sk, ck, bankKeeper, _ := mockDB()
 	storyID := createFakeStory(ctx, sk, ck)
 
-	amount := sdk.NewCoin(params.StakeDenom, sdk.NewInt(5000000))
+	amount := sdk.NewCoin(app.StakeDenom, sdk.NewInt(5000000))
 	argument := "cool story brew"
 	duration := DefaultMsgParams().MinPeriod
 
@@ -125,7 +125,7 @@ func TestTotalBacking(t *testing.T) {
 	ctx, k, sk, ck, bankKeeper, _ := mockDB()
 	storyID := createFakeStory(ctx, sk, ck)
 
-	amount := sdk.NewCoin(params.StakeDenom, sdk.NewInt(5000000))
+	amount := sdk.NewCoin(app.StakeDenom, sdk.NewInt(5000000))
 	argument := "cool story brew"
 	duration := DefaultMsgParams().MinPeriod
 
@@ -145,7 +145,7 @@ func TestTotalBacking(t *testing.T) {
 func TestNewBacking_ErrInsufficientFunds(t *testing.T) {
 	ctx, bk, sk, ck, _, _ := mockDB()
 	storyID := createFakeStory(ctx, sk, ck)
-	amount := sdk.NewCoin(params.StakeDenom, sdk.NewInt(5000000))
+	amount := sdk.NewCoin(app.StakeDenom, sdk.NewInt(5000000))
 	argument := "cool story brew"
 	creator := sdk.AccAddress([]byte{1, 2})
 	duration := DefaultMsgParams().MinPeriod
@@ -158,7 +158,7 @@ func TestNewBacking_ErrInsufficientFunds(t *testing.T) {
 func TestNewBacking(t *testing.T) {
 	ctx, bk, sk, ck, bankKeeper, _ := mockDB()
 	storyID := createFakeStory(ctx, sk, ck)
-	amount := sdk.NewCoin(params.StakeDenom, sdk.NewInt(5000000))
+	amount := sdk.NewCoin(app.StakeDenom, sdk.NewInt(5000000))
 	argument := "cool story brew"
 	creator := sdk.AccAddress([]byte{1, 2})
 	duration := DefaultMsgParams().MinPeriod
@@ -171,7 +171,7 @@ func TestNewBacking(t *testing.T) {
 func TestDuplicateBacking(t *testing.T) {
 	ctx, bk, sk, ck, bankKeeper, _ := mockDB()
 	storyID := createFakeStory(ctx, sk, ck)
-	amount := sdk.NewCoin(params.StakeDenom, sdk.NewInt(5000000))
+	amount := sdk.NewCoin(app.StakeDenom, sdk.NewInt(5000000))
 	argument := "cool story brew"
 	creator := sdk.AccAddress([]byte{1, 2})
 	duration := DefaultMsgParams().MinPeriod

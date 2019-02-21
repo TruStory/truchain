@@ -10,7 +10,6 @@ import (
 	"net/http"
 	"time"
 
-	params "github.com/TruStory/truchain/parameters"
 	"github.com/TruStory/truchain/types"
 	"github.com/TruStory/truchain/x/chttp"
 	"github.com/TruStory/truchain/x/truapi"
@@ -51,7 +50,7 @@ func (app *TruChain) startAPI() {
 	app.api.RegisterRoutes()
 	app.api.GraphQLClient.GenerateSchema()
 	app.api.RegisterModels()
-	log.Fatal(app.api.ListenAndServe(params.Hostname + ":" + params.Portname))
+	log.Fatal(app.api.ListenAndServe(types.Hostname + ":" + types.Portname))
 }
 
 // RegisterKey generates a new address/account for a public key
@@ -145,7 +144,7 @@ func (app *TruChain) signedRegistrationTx(addr []byte, k tcmn.HexBytes, algo str
 	registrationMemo := "reg"
 
 	// Sign tx as registrar
-	bytesToSign := auth.StdSignBytes(chainID, registrarNum, registrarSequence, params.RegistrationFee, []sdk.Msg{msg}, registrationMemo)
+	bytesToSign := auth.StdSignBytes(chainID, registrarNum, registrarSequence, types.RegistrationFee, []sdk.Msg{msg}, registrationMemo)
 	sigBytes, err := app.registrarKey.Sign(bytesToSign)
 
 	if err != nil {
@@ -155,7 +154,7 @@ func (app *TruChain) signedRegistrationTx(addr []byte, k tcmn.HexBytes, algo str
 	// Construct and submit signed tx
 	tx := auth.StdTx{
 		Msgs: []sdk.Msg{msg},
-		Fee:  params.RegistrationFee,
+		Fee:  types.RegistrationFee,
 		Signatures: []auth.StdSignature{auth.StdSignature{
 			PubKey:    app.registrarKey.PubKey(),
 			Signature: sigBytes,
@@ -174,11 +173,11 @@ func (app *TruChain) initialCoins() sdk.Coins {
 	}
 
 	for _, cat := range categories {
-		coin := sdk.NewCoin(cat.Denom(), params.InitialCredAmount)
+		coin := sdk.NewCoin(cat.Denom(), types.InitialCredAmount)
 		coins = append(coins, coin)
 	}
 
-	coins = append(coins, params.InitialTruStake)
+	coins = append(coins, types.InitialTruStake)
 
 	// coins need to be sorted by denom to be valid
 	coins.Sort()
