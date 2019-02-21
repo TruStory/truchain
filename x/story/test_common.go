@@ -52,7 +52,7 @@ func mockDB() (sdk.Context, Keeper, c.Keeper) {
 		expiredStoryQueueKey,
 		votingStoryQueueKey,
 		ck,
-		pk.Subspace(DefaultParamspace),
+		pk.Subspace(StoreKey),
 		codec)
 	InitGenesis(ctx, sk, DefaultGenesisState())
 

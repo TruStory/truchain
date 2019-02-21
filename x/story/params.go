@@ -8,9 +8,6 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/params"
 )
 
-// DefaultParamspace defines the default auth module parameter subspace
-const DefaultParamspace = "story"
-
 // KeyExpireDuration is store's key for expire duration
 var (
 	KeyExpireDuration = []byte("expireDuration")

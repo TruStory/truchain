@@ -165,7 +165,7 @@ func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *T
 		app.keyExpiredStoryQueue,
 		app.keyVotingStoryQueue,
 		app.categoryKeeper,
-		app.paramsKeeper.Subspace(story.DefaultParamspace),
+		app.paramsKeeper.Subspace(story.StoreKey),
 		app.codec,
 	)
 
@@ -196,7 +196,7 @@ func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *T
 		app.challengeKeeper,
 		app.voteKeeper,
 		app.bankKeeper,
-		app.paramsKeeper.Subspace(game.DefaultParamspace),
+		app.paramsKeeper.Subspace(game.StoreKey),
 		codec,
 	)
 
@@ -205,6 +205,7 @@ func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *T
 		app.backingKeeper,
 		app.bankKeeper,
 		app.storyKeeper,
+		app.paramsKeeper.Subspace(challenge.StoreKey),
 		codec,
 	)
 
@@ -215,7 +216,7 @@ func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *T
 		app.backingKeeper,
 		app.challengeKeeper,
 		app.bankKeeper,
-		app.paramsKeeper.Subspace(expiration.DefaultParamspace),
+		app.paramsKeeper.Subspace(expiration.StoreKey),
 		codec,
 	)
 
