@@ -7,9 +7,6 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/params"
 )
 
-// DefaultParamspace defines the default expiration module parameter subspace
-const DefaultParamspace = "expiration"
-
 // store keys for expiration params
 var (
 	KeyAmountWeight    = []byte("amountWeight")

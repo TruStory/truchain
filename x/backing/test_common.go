@@ -78,7 +78,7 @@ func mockDB() (
 		expiredStoryQueueKey,
 		votingStoryQueueKey,
 		ck,
-		pk.Subspace(story.DefaultParamspace),
+		pk.Subspace(story.StoreKey),
 		codec)
 
 	story.InitGenesis(ctx, sk, story.DefaultGenesisState())

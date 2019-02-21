@@ -6,6 +6,7 @@ import (
 	"github.com/TruStory/truchain/x/backing"
 
 	"github.com/cosmos/cosmos-sdk/x/bank"
+	"github.com/cosmos/cosmos-sdk/x/params"
 
 	app "github.com/TruStory/truchain/types"
 	"github.com/TruStory/truchain/x/story"
@@ -55,6 +56,7 @@ type Keeper struct {
 	backingKeeper backing.ReadKeeper
 	bankKeeper    bank.Keeper
 	storyKeeper   story.WriteKeeper
+	paramStore    params.Subspace
 
 	challengeList app.UserList // challenge <-> story mappings
 }
@@ -65,6 +67,7 @@ func NewKeeper(
 	backingKeeper backing.ReadKeeper,
 	bankKeeper bank.Keeper,
 	storyKeeper story.WriteKeeper,
+	paramStore params.Subspace,
 	codec *amino.Codec) Keeper {
 
 	return Keeper{
@@ -72,6 +75,7 @@ func NewKeeper(
 		backingKeeper,
 		bankKeeper,
 		storyKeeper,
+		paramStore.WithTypeTable(ParamTypeTable()),
 		app.NewUserList(storyKeeper.GetStoreKey()),
 	}
 }

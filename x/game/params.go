@@ -8,9 +8,6 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/params"
 )
 
-// DefaultParamspace defines the default game module parameter subspace
-const DefaultParamspace = "games"
-
 // store keys for expiration params
 var (
 	KeyChallengeToBackingRatio = []byte("challengeToBackingRatio")
