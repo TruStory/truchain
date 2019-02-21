@@ -91,8 +91,8 @@ func NewCategoryCoin(toDenom string, from sdk.Coin) sdk.Coin {
 		sdk.NewDecFromInt(from.Amount).Mul(rate).TruncateInt())
 }
 
+// ExchangeCoinsBetweenDenoms exchanges coins from trustake to cred
 // TODO [Shane]: https://github.com/TruStory/truchain/issues/21
-// ExchangeRate exchanges coins from trustake to cred
 func ExchangeCoinsBetweenDenoms(from sdk.Coin, toDenom string) sdk.Dec {
 
 	if from.Denom == toDenom {
