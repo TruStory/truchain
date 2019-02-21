@@ -25,17 +25,13 @@ type ReadKeeper interface {
 
 	Challenge(
 		ctx sdk.Context, challengeID int64) (challenge Challenge, err sdk.Error)
-
 	ChallengesByStoryID(
 		ctx sdk.Context, storyID int64) (challenges []Challenge, err sdk.Error)
-
 	ChallengeByStoryIDAndCreator(
 		ctx sdk.Context,
 		storyID int64,
 		creator sdk.AccAddress) (challenge Challenge, err sdk.Error)
-
 	Tally(ctx sdk.Context, gameID int64) (falseVotes []Challenge, err sdk.Error)
-
 	TotalChallengeAmount(ctx sdk.Context, storyID int64) (
 		totalCoin sdk.Coin, err sdk.Error)
 }
@@ -47,6 +43,7 @@ type WriteKeeper interface {
 	Create(
 		ctx sdk.Context, storyID int64, amount sdk.Coin, argument string,
 		creator sdk.AccAddress) (int64, sdk.Error)
+	SetParams(ctx sdk.Context, params Params)
 }
 
 // Keeper data type storing keys to the key-value store

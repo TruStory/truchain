@@ -6,6 +6,8 @@ import (
 	"io"
 	"os"
 
+	"github.com/TruStory/truchain/x/challenge"
+
 	"github.com/TruStory/truchain/x/game"
 
 	gaiaInit "github.com/cosmos/cosmos-sdk/cmd/gaia/init"
@@ -99,6 +101,7 @@ func InitCmd(ctx *server.Context, cdc *codec.Codec) *cobra.Command {
 				AuthData:       auth.DefaultGenesisState(),
 				BankData:       bank.DefaultGenesisState(),
 				Categories:     category.DefaultCategories(),
+				ChallengeData:  challenge.DefaultGenesisState(),
 				ExpirationData: expiration.DefaultGenesisState(),
 				GameData:       game.DefaultGenesisState(),
 				StoryData:      story.DefaultGenesisState(),
