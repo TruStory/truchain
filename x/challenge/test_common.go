@@ -2,6 +2,7 @@ package challenge
 
 import (
 	"crypto/rand"
+	"fmt"
 	"net/url"
 	"time"
 
@@ -22,7 +23,7 @@ import (
 	"github.com/tendermint/tendermint/libs/log"
 )
 
-func mockDB() (sdk.Context, Keeper, story.Keeper, c.Keeper, bank.Keeper) {
+func mockDB() (sdk.Context, Keeper, story.Keeper, backing.Keeper, bank.Keeper) {
 	db := dbm.NewMemDB()
 
 	accKey := sdk.NewKVStoreKey("acc")
@@ -65,7 +66,10 @@ func mockDB() (sdk.Context, Keeper, story.Keeper, c.Keeper, bank.Keeper) {
 		pk.Subspace(bank.DefaultParamspace),
 		bank.DefaultCodespace,
 	)
+
 	ck := c.NewKeeper(catKey, codec)
+	c.InitGenesis(ctx, ck, c.DefaultCategories())
+
 	sk := story.NewKeeper(
 		storyKey,
 		storyQueueKey,
@@ -95,29 +99,21 @@ func mockDB() (sdk.Context, Keeper, story.Keeper, c.Keeper, bank.Keeper) {
 
 	InitGenesis(ctx, k, DefaultGenesisState())
 
-	return ctx, k, sk, ck, bankKeeper
+	return ctx, k, sk, backingKeeper, bankKeeper
 }
 
-func createFakeStory(ctx sdk.Context, sk story.Keeper, ck c.WriteKeeper) int64 {
-	body := "TruStory is the world's first sustainable social network."
-	cat := createFakeCategory(ctx, ck)
+func createFakeStory(ctx sdk.Context, sk story.WriteKeeper) int64 {
+	body := "TruStory can be goverened by it's stakeholders."
 	creator := sdk.AccAddress([]byte{1, 2})
 	storyType := story.Default
 	source := url.URL{}
 
-	storyID, _ := sk.Create(ctx, body, cat.ID, creator, source, storyType)
+	ctx = ctx.WithBlockHeader(abci.Header{Time: time.Now().UTC()})
+	catID := int64(1)
+	storyID, err := sk.Create(ctx, body, catID, creator, source, storyType)
+	fmt.Println(err)
 
 	return storyID
-}
-
-func createFakeCategory(ctx sdk.Context, ck c.WriteKeeper) c.Category {
-	existing, err := ck.GetCategory(ctx, 1)
-	if err == nil {
-		return existing
-	}
-	id := ck.Create(ctx, "decentralized exchanges", "trudex", "category for experts in decentralized exchanges")
-	cat, _ := ck.GetCategory(ctx, id)
-	return cat
 }
 
 func fakeFundedCreator(ctx sdk.Context, k bank.Keeper) sdk.AccAddress {

@@ -3,10 +3,12 @@ package challenge
 import (
 	"fmt"
 	"testing"
+	"time"
 
 	app "github.com/TruStory/truchain/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/stretchr/testify/assert"
+	abci "github.com/tendermint/tendermint/abci/types"
 )
 
 func TestValidKeys(t *testing.T) {
@@ -17,9 +19,9 @@ func TestValidKeys(t *testing.T) {
 }
 
 func TestNewGetChallenge(t *testing.T) {
-	ctx, k, sk, ck, bankKeeper := mockDB()
+	ctx, k, sk, _, bankKeeper := mockDB()
 
-	storyID := createFakeStory(ctx, sk, ck)
+	storyID := createFakeStory(ctx, sk)
 	amount := sdk.NewCoin(app.StakeDenom, sdk.NewInt(15000000000))
 	argument := "test argument is long enough"
 	creator := sdk.AccAddress([]byte{1, 2})
@@ -37,9 +39,9 @@ func TestNewGetChallenge(t *testing.T) {
 }
 
 func TestNewGetChallengeUsingTruStake(t *testing.T) {
-	ctx, k, sk, ck, bankKeeper := mockDB()
+	ctx, k, sk, _, bankKeeper := mockDB()
 
-	storyID := createFakeStory(ctx, sk, ck)
+	storyID := createFakeStory(ctx, sk)
 	amount := sdk.NewCoin(app.StakeDenom, sdk.NewInt(15000000000))
 	argument := "test argument is long enough"
 	creator := sdk.AccAddress([]byte{1, 2})
@@ -57,9 +59,9 @@ func TestNewGetChallengeUsingTruStake(t *testing.T) {
 }
 
 func TestChallengesByGameID(t *testing.T) {
-	ctx, k, sk, ck, bankKeeper := mockDB()
+	ctx, k, sk, _, bankKeeper := mockDB()
 
-	storyID := createFakeStory(ctx, sk, ck)
+	storyID := createFakeStory(ctx, sk)
 	amount := sdk.NewCoin(app.StakeDenom, sdk.NewInt(15000000000))
 	argument := "test argument is long enough"
 
@@ -78,9 +80,9 @@ func TestChallengesByGameID(t *testing.T) {
 }
 
 func TestChallengesByStoryIDAndCreator(t *testing.T) {
-	ctx, k, sk, ck, bankKeeper := mockDB()
+	ctx, k, sk, _, bankKeeper := mockDB()
 
-	storyID := createFakeStory(ctx, sk, ck)
+	storyID := createFakeStory(ctx, sk)
 	amount := sdk.NewCoin(app.StakeDenom, sdk.NewInt(15000000000))
 	argument := "test argument is long enough"
 
@@ -94,9 +96,9 @@ func TestChallengesByStoryIDAndCreator(t *testing.T) {
 }
 
 func TestTally(t *testing.T) {
-	ctx, k, sk, ck, bankKeeper := mockDB()
+	ctx, k, sk, _, bankKeeper := mockDB()
 
-	storyID := createFakeStory(ctx, sk, ck)
+	storyID := createFakeStory(ctx, sk)
 	amount := sdk.NewCoin(app.StakeDenom, sdk.NewInt(15000000000))
 	argument := "test argument is long enough"
 
@@ -115,9 +117,9 @@ func TestTally(t *testing.T) {
 }
 
 func TestNewChallenge_Duplicate(t *testing.T) {
-	ctx, k, sk, ck, bankKeeper := mockDB()
+	ctx, k, sk, _, bankKeeper := mockDB()
 
-	storyID := createFakeStory(ctx, sk, ck)
+	storyID := createFakeStory(ctx, sk)
 	amount := sdk.NewCoin(app.StakeDenom, sdk.NewInt(50000000000))
 	argument := "test argument is long enough"
 	creator := sdk.AccAddress([]byte{1, 2})
@@ -133,44 +135,50 @@ func TestNewChallenge_Duplicate(t *testing.T) {
 	assert.Equal(t, ErrDuplicateChallenge(5, creator).Code(), err.Code())
 }
 
-// TODO [shanev]: Add this to game in https://github.com/TruStory/truchain/issues/387
-// func TestNewChallenge_MultipleChallengers(t *testing.T) {
-// 	ctx, k, sk, ck, bankKeeper := mockDB()
-
-// 	storyID := createFakeStory(ctx, sk, ck)
-// 	amount := sdk.NewCoin(app.StakeDenom, sdk.NewInt(50000000000))
-// 	argument := "test argument is long enough"
-// 	creator1 := sdk.AccAddress([]byte{1, 2})
-// 	creator2 := sdk.AccAddress([]byte{3, 4})
-
-// 	// give user some funds
-// 	bankKeeper.AddCoins(ctx, creator1, sdk.Coins{amount})
-// 	bankKeeper.AddCoins(ctx, creator2, sdk.Coins{amount})
-
-// 	id, err := k.Create(ctx, storyID, amount, argument, creator1)
-// 	assert.Nil(t, err)
-
-// 	challenge, _ := k.Challenge(ctx, id)
-
-// 	_, err = k.Create(ctx, challenge.ID(), amount, argument, creator2)
-// 	assert.Nil(t, err)
-// 	assert.False(t, bankKeeper.HasCoins(ctx, creator2, sdk.Coins{amount}))
-
-// 	// check game pool amount
-// 	story, _ := k.storyKeeper.Story(ctx, storyID)
-// 	game, _ := k.gameKeeper.Game(ctx, story.GameID)
-
-// 	assert.True(t, game.ChallengePool.IsEqual(amount.Plus(amount)))
-// }
-
 func TestNewChallenge_ErrIncorrectCategoryCoin(t *testing.T) {
-	ctx, k, sk, ck, _ := mockDB()
+	ctx, k, sk, _, _ := mockDB()
 
-	storyID := createFakeStory(ctx, sk, ck)
+	storyID := createFakeStory(ctx, sk)
 	amount := sdk.NewCoin("testcoin", sdk.NewInt(15000000000))
 	argument := "test argument"
 	creator := sdk.AccAddress([]byte{1, 2})
 
 	_, err := k.Create(ctx, storyID, amount, argument, creator)
 	assert.NotNil(t, err)
+}
+
+func Test_checkThreshold(t *testing.T) {
+	ctx, k, storyKeeper, backingKeeper, bankKeeper := mockDB()
+
+	ctx = ctx.WithBlockHeader(abci.Header{Time: time.Now()})
+	storyID := createFakeStory(ctx, storyKeeper)
+	amount := sdk.NewCoin("trusteak", sdk.NewInt(100000))
+	argument := "test argument right here"
+	backer1 := fakeFundedCreator(ctx, bankKeeper)
+	backer2 := fakeFundedCreator(ctx, bankKeeper)
+	challenger1 := fakeFundedCreator(ctx, bankKeeper)
+	challenger2 := fakeFundedCreator(ctx, bankKeeper)
+	duration := 5 * 24 * time.Hour
+
+	_, err := backingKeeper.Create(
+		ctx, storyID, amount, argument, backer1, duration)
+	assert.Nil(t, err)
+
+	_, err = backingKeeper.Create(
+		ctx, storyID, amount, argument, backer2, duration)
+	assert.Nil(t, err)
+
+	_, err = k.Create(
+		ctx, storyID, amount, argument, challenger1)
+	assert.Nil(t, err)
+
+	_, err = k.Create(
+		ctx, storyID, amount, argument, challenger2)
+	assert.Nil(t, err)
+
+	err = k.checkThreshold(ctx, storyID)
+	assert.Nil(t, err)
+
+	story, _ := storyKeeper.Story(ctx, storyID)
+	assert.Equal(t, story.State.String(), "Voting")
 }
