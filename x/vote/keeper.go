@@ -24,7 +24,7 @@ const (
 type ReadKeeper interface {
 	app.ReadKeeper
 
-	Tally(ctx sdk.Context, gameID int64) (
+	Tally(ctx sdk.Context, storyID int64) (
 		trueVotes []TokenVote, falseVotes []TokenVote, err sdk.Error)
 
 	TokenVote(ctx sdk.Context, id int64) (vote TokenVote, err sdk.Error)
@@ -202,10 +202,10 @@ func (k Keeper) TokenVotesByStoryIDAndCreator(
 
 // Tally votes
 func (k Keeper) Tally(
-	ctx sdk.Context, gameID int64) (
+	ctx sdk.Context, storyID int64) (
 	trueVotes []TokenVote, falseVotes []TokenVote, err sdk.Error) {
 
-	err = k.voterList.Map(ctx, k, gameID, func(voteID int64) sdk.Error {
+	err = k.voterList.Map(ctx, k, storyID, func(voteID int64) sdk.Error {
 		tokenVote, err := k.TokenVote(ctx, voteID)
 		if err != nil {
 			return err

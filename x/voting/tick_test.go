@@ -1,63 +1,53 @@
 package voting
 
-// TODO [shanev]: add this back in https://github.com/TruStory/truchain/issues/387
+import (
+	"testing"
+	"time"
 
-// func TestNewResponseEndBlock(t *testing.T) {
-// 	ctx, _, k := fakeValidationGame()
+	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/stretchr/testify/assert"
+	abci "github.com/tendermint/tendermint/abci/types"
+)
 
-// 	tags := k.NewResponseEndBlock(ctx)
-// 	assert.Equal(t, sdk.Tags{}, tags)
-// }
+func TestEndBlock(t *testing.T) {
+	ctx, _, k := fakeValidationGame()
 
-// func Test_checkGames(t *testing.T) {
-// 	ctx, _, k := fakeValidationGame()
+	tags := k.EndBlock(ctx)
+	assert.Equal(t, sdk.Tags{}, tags)
+}
 
-// 	qStore := ctx.KVStore(k.votingStoryQueueKey)
-// 	q := store.NewQueue(k.GetCodec(), qStore)
-// 	err := k.filterGameQueue(ctx, q)
-// 	assert.Nil(t, err)
-// }
+func Test_processVotingStoryListNotMeetQuorum(t *testing.T) {
+	ctx, _, k := fakeValidationGame()
 
-// func Test_quorum(t *testing.T) {
-// 	ctx, votes, k := fakeValidationGame()
+	err := k.processVotingStoryList(ctx)
+	assert.Nil(t, err)
+}
 
-// 	// get the gameID
-// 	qStore := ctx.KVStore(k.votingStoryQueueKey)
-// 	q := store.NewQueue(k.GetCodec(), qStore)
-// 	var gameID int64
-// 	q.Peek(&gameID)
+func Test_processVotingStoryListNotMeetVoteEndTime(t *testing.T) {
+	ctx, _, k := fakeValidationGame()
 
-// 	// retrieve the game
-// 	game, _ := k.gameKeeper.Game(ctx, gameID)
+	k.votingStoryList(ctx).Push(int64(1))
 
-// 	story, _ := k.storyKeeper.Story(ctx, game.StoryID)
+	err := k.processVotingStoryList(ctx)
+	assert.Nil(t, err)
+}
 
-// 	totalBCV, _ := k.quorum(ctx, story.ID)
+func Test_processVotingStoryListVerifyStory(t *testing.T) {
+	ctx, _, k := fakeValidationGame()
 
-// 	assert.Equal(t, len(votes.falseVotes)+len(votes.trueVotes), totalBCV)
-// }
+	k.votingStoryList(ctx).Push(int64(1))
 
-// func Test_returnFunds(t *testing.T) {
-// 	ctx, votes, k := fakeValidationGame()
+	ctx = ctx.WithBlockHeader(abci.Header{Time: time.Now().Add(50 * 24 * time.Hour)})
 
-// 	// get the gameID
-// 	qStore := ctx.KVStore(k.votingStoryQueueKey)
-// 	q := store.NewQueue(k.GetCodec(), qStore)
-// 	var gameID int64
-// 	q.Peek(&gameID)
+	err := k.processVotingStoryList(ctx)
+	assert.Nil(t, err)
+}
 
-// 	vote := votes.falseVotes[1]
+func Test_quorum(t *testing.T) {
+	ctx, votes, k := fakeValidationGame()
 
-// 	initialBalance := k.bankKeeper.GetCoins(ctx, vote.Creator())
-// 	assert.Equal(t, "1000000000000trusteak", initialBalance.String())
+	storyID := int64(1)
+	totalBCV, _ := k.quorum(ctx, storyID)
 
-// 	err := k.returnFunds(ctx, gameID)
-// 	assert.Nil(t, err)
-
-// 	// no, not the sneaker
-// 	// FYI - Steve Jobs used to wear NB
-// 	expectedNewBalance := sdk.Coins{vote.Amount()}.Plus(initialBalance)
-// 	actualNewBalance := k.bankKeeper.GetCoins(ctx, vote.Creator())
-
-// 	assert.Equal(t, expectedNewBalance, actualNewBalance)
-// }
+	assert.Equal(t, len(votes.falseVotes)+len(votes.trueVotes), totalBCV)
+}

@@ -52,8 +52,7 @@ type WriteKeeper interface {
 		source url.URL,
 		storyType Type) (int64, sdk.Error)
 	StartVotingPeriod(ctx sdk.Context, storyID int64) sdk.Error
-	EndGame(ctx sdk.Context, storyID int64, confirmed bool) sdk.Error
-	ExpireGame(ctx sdk.Context, storyID int64) sdk.Error
+	EndVotingPeriod(ctx sdk.Context, storyID int64, confirmed bool) sdk.Error
 	UpdateStory(ctx sdk.Context, story Story)
 	EndBlock(ctx sdk.Context) sdk.Tags
 	SetParams(ctx sdk.Context, params Params)
@@ -110,9 +109,8 @@ func (k Keeper) StartVotingPeriod(ctx sdk.Context, storyID int64) sdk.Error {
 	return nil
 }
 
-// EndGame records the end of a validation game on a story
-func (k Keeper) EndGame(ctx sdk.Context, storyID int64, confirmed bool) sdk.Error {
-	// get story
+// EndVotingPeriod records the end of a validation game on a story
+func (k Keeper) EndVotingPeriod(ctx sdk.Context, storyID int64, confirmed bool) sdk.Error {
 	story, err := k.Story(ctx, storyID)
 	if err != nil {
 		return err
@@ -124,21 +122,7 @@ func (k Keeper) EndGame(ctx sdk.Context, storyID int64, confirmed bool) sdk.Erro
 	} else {
 		story.State = Rejected
 	}
-	k.UpdateStory(ctx, story)
-
-	return nil
-}
-
-// ExpireGame resets a story after a game has expired
-func (k Keeper) ExpireGame(ctx sdk.Context, storyID int64) sdk.Error {
-	// get story
-	story, err := k.Story(ctx, storyID)
-	if err != nil {
-		return err
-	}
-
-	// update story state
-	story.State = Expired
+	story.VotingEndTime = ctx.BlockHeader().Time
 	k.UpdateStory(ctx, story)
 
 	return nil

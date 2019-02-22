@@ -48,17 +48,3 @@ func DefaultMsgParams() MsgParams {
 		MaxArgumentLength: 3000,
 	}
 }
-
-// Params holds parameters for voting
-type Params struct {
-	ChallengerRewardPoolShare sdk.Dec
-	MajorityPercent           sdk.Dec
-}
-
-// DefaultParams is the default parameters for voting
-func DefaultParams() Params {
-	return Params{
-		ChallengerRewardPoolShare: sdk.NewDecWithPrec(75, 2), // 75%
-		MajorityPercent:           sdk.NewDecWithPrec(51, 2), // 51%
-	}
-}

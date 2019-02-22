@@ -61,7 +61,8 @@ func mockDB() (sdk.Context, Keeper, c.Keeper) {
 	ms.MountStoreWithDB(transientParamsKey, sdk.StoreTypeTransient, db)
 	ms.LoadLatestVersion()
 
-	header := abci.Header{Time: time.Now().Add(50 * 24 * time.Hour)}
+	// header := abci.Header{Time: time.Now().Add(50 * 24 * time.Hour)}
+	header := abci.Header{Time: time.Now()}
 	ctx := sdk.NewContext(ms, header, false, log.NewNopLogger())
 
 	codec := amino.NewCodec()
@@ -127,6 +128,7 @@ func mockDB() (sdk.Context, Keeper, c.Keeper) {
 		bankKeeper,
 		pk.Subspace(StoreKey),
 		codec)
+	InitGenesis(ctx, k, DefaultGenesisState())
 
 	return ctx, k, ck
 }

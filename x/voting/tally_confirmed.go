@@ -6,45 +6,12 @@ import (
 	app "github.com/TruStory/truchain/types"
 	"github.com/TruStory/truchain/x/backing"
 	"github.com/TruStory/truchain/x/challenge"
+	tokenVote "github.com/TruStory/truchain/x/vote"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/cosmos/cosmos-sdk/x/bank"
 )
 
-// calculate reward pool for a confirmed story
-func confirmedPool(
-	ctx sdk.Context, falseVotes []app.Voter, pool *sdk.Coin) (err sdk.Error) {
-
-	for _, vote := range falseVotes {
-		switch v := vote.(type) {
-
-		case backing.Backing:
-			// slash inflationary rewards and add to pool
-			// TODO [shanev]: do proper conversion when we know it, still 1:1
-			interestInTrustake := sdk.NewCoin(app.StakeDenom, v.Interest.Amount)
-			*pool = (*pool).Plus(interestInTrustake)
-
-		case challenge.Challenge:
-			// add challenge amount to reward pool
-			*pool = (*pool).Plus(v.Amount())
-
-		case TokenVote:
-			// add vote fee to reward pool
-			*pool = (*pool).Plus(v.Amount())
-
-		default:
-			if err = ErrInvalidVote(v); err != nil {
-				return err
-			}
-		}
-	}
-
-	return nil
-}
-
-func distributeRewardsConfirmed(
+func (k Keeper) distributeRewardsConfirmed(
 	ctx sdk.Context,
-	backingKeeper backing.WriteKeeper,
-	bankKeeper bank.Keeper,
 	votes poll,
 	pool sdk.Coin,
 	denom string) (err sdk.Error) {
@@ -67,14 +34,14 @@ func distributeRewardsConfirmed(
 		switch v := vote.(type) {
 		case backing.Backing:
 			// distribute backing principal and interest
-			_, _, err = bankKeeper.AddCoins(ctx, v.Creator(), sdk.Coins{v.Amount()})
+			_, _, err = k.bankKeeper.AddCoins(ctx, v.Creator(), sdk.Coins{v.Amount()})
 			if err != nil {
 				return err
 			}
 			logger.Info(fmt.Sprintf(
 				"Giving back original backing principal: %v", v.Amount()))
 
-			_, _, err = bankKeeper.AddCoins(ctx, v.Creator(), sdk.Coins{v.Interest})
+			_, _, err = k.bankKeeper.AddCoins(ctx, v.Creator(), sdk.Coins{v.Interest})
 			if err != nil {
 				return err
 			}
@@ -84,13 +51,13 @@ func distributeRewardsConfirmed(
 			pool = pool.Minus(rewardCoin)
 
 			// distribute reward in cred
-			_, _, err = bankKeeper.AddCoins(ctx, v.Creator(), sdk.Coins{cred})
+			_, _, err = k.bankKeeper.AddCoins(ctx, v.Creator(), sdk.Coins{cred})
 			logger.Info(fmt.Sprintf(
 				"Distributed to backer a reward of: %v", cred))
 
-		case TokenVote:
+		case tokenVote.TokenVote:
 			// get back original staked amount in trustake
-			_, _, err = bankKeeper.AddCoins(ctx, v.Creator(), sdk.Coins{v.Amount()})
+			_, _, err = k.bankKeeper.AddCoins(ctx, v.Creator(), sdk.Coins{v.Amount()})
 			if err != nil {
 				return err
 			}
@@ -100,7 +67,7 @@ func distributeRewardsConfirmed(
 			pool = pool.Minus(rewardCoin)
 
 			// distribute reward in cred
-			_, _, err = bankKeeper.AddCoins(ctx, v.Creator(), sdk.Coins{cred})
+			_, _, err = k.bankKeeper.AddCoins(ctx, v.Creator(), sdk.Coins{cred})
 			logger.Info(fmt.Sprintf(
 				"Distributed to voter a reward of: %v", cred))
 
@@ -123,7 +90,7 @@ func distributeRewardsConfirmed(
 		// backer who changed their implicit TRUE vote to FALSE
 		case backing.Backing:
 			// return backing because we are nice people
-			_, _, err = bankKeeper.AddCoins(ctx, v.Creator(), sdk.Coins{v.Amount()})
+			_, _, err = k.bankKeeper.AddCoins(ctx, v.Creator(), sdk.Coins{v.Amount()})
 			if err != nil {
 				return err
 			}
@@ -133,7 +100,7 @@ func distributeRewardsConfirmed(
 			// do nothing
 			// don't get their stake back
 
-		case TokenVote:
+		case tokenVote.TokenVote:
 			// do nothing
 			// don't get their stake back
 
@@ -151,6 +118,37 @@ func distributeRewardsConfirmed(
 	err = checkForEmptyPoolConfirmed(pool, voterCount)
 	if err != nil {
 		return err
+	}
+
+	return nil
+}
+
+// calculate reward pool for a confirmed story
+func confirmedPool(falseVotes []app.Voter, pool *sdk.Coin) (err sdk.Error) {
+
+	for _, vote := range falseVotes {
+		switch v := vote.(type) {
+
+		case backing.Backing:
+			// slash inflationary rewards and add to pool
+			// TODO [shanev]: do proper conversion when we know it, still 1:1
+			interestInTrustake := sdk.NewCoin(app.StakeDenom, v.Interest.Amount)
+			*pool = (*pool).Plus(interestInTrustake)
+
+		case challenge.Challenge:
+			// add challenge amount to reward pool
+			*pool = (*pool).Plus(v.Amount())
+
+		case tokenVote.TokenVote:
+			// add vote fee to reward pool
+			*pool = (*pool).Plus(v.Amount())
+
+		default:
+			fmt.Println("WTF...........................")
+			if err = ErrInvalidVote(v); err != nil {
+				return err
+			}
+		}
 	}
 
 	return nil

@@ -18,8 +18,6 @@ func (k Keeper) EndBlock(ctx sdk.Context) sdk.Tags {
 
 // Iterate voting story list to see if a validation game has ended
 func (k Keeper) processVotingStoryList(ctx sdk.Context) sdk.Error {
-	// logger := ctx.Logger().With("module", "vote")
-
 	var storyID int64
 	k.votingStoryList(ctx).Iterate(&storyID, func(index uint64) bool {
 		quorum, err := k.quorum(ctx, storyID)
@@ -81,42 +79,3 @@ func (k Keeper) quorum(ctx sdk.Context, storyID int64) (total int, err sdk.Error
 
 	return total, nil
 }
-
-// func (k Keeper) returnFunds(ctx sdk.Context, gameID int64) sdk.Error {
-// 	logger := ctx.Logger().With("module", "vote")
-
-// 	// get challenges
-// 	challenges, err := k.challengeKeeper.ChallengesByStoryID(ctx, gameID)
-// 	if err != nil {
-// 		return err
-// 	}
-
-// 	// get token votes
-// 	tokenVotes, err := k.TokenVotesByStoryID(ctx, gameID)
-// 	if err != nil {
-// 		return err
-// 	}
-
-// 	// collate votes
-// 	var votes []app.Voter
-// 	for _, v := range challenges {
-// 		votes = append(votes, v)
-// 	}
-// 	for _, v := range tokenVotes {
-// 		votes = append(votes, v)
-// 	}
-
-// 	// return funds
-// 	for _, v := range votes {
-// 		_, _, err = k.bankKeeper.AddCoins(
-// 			ctx, v.Creator(), sdk.Coins{v.Amount()})
-// 		if err != nil {
-// 			return err
-// 		}
-// 	}
-
-// 	logger.Info(fmt.Sprintf(
-// 		"Returned funds for %d users for game %d", len(votes), gameID))
-
-// 	return nil
-// }

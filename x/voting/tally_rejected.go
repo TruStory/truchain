@@ -6,12 +6,11 @@ import (
 	app "github.com/TruStory/truchain/types"
 	"github.com/TruStory/truchain/x/backing"
 	"github.com/TruStory/truchain/x/challenge"
+	tokenVote "github.com/TruStory/truchain/x/vote"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/cosmos/cosmos-sdk/x/bank"
 )
 
-func rejectedPool(
-	ctx sdk.Context, votes poll, pool *sdk.Coin) (err sdk.Error) {
+func rejectedPool(votes poll, pool *sdk.Coin) (err sdk.Error) {
 
 	// people who voted TRUE / lost the game
 	for _, vote := range votes.trueVotes {
@@ -23,7 +22,7 @@ func rejectedPool(
 			interestInTrustake := sdk.NewCoin(app.StakeDenom, v.Interest.Amount)
 			*pool = (*pool).Plus(v.Amount()).Plus(interestInTrustake)
 
-		case TokenVote:
+		case tokenVote.TokenVote:
 			// add vote fee to reward pool
 			*pool = (*pool).Plus(v.Amount())
 
@@ -48,7 +47,7 @@ func rejectedPool(
 			// do nothing
 			// winning challengers keep their stake
 
-		case TokenVote:
+		case tokenVote.TokenVote:
 			// do nothing
 			// winning voters keep their stake
 
@@ -62,18 +61,13 @@ func rejectedPool(
 	return nil
 }
 
-func distributeRewardsRejected(
+func (k Keeper) distributeRewardsRejected(
 	ctx sdk.Context,
-	backingKeeper backing.WriteKeeper,
-	bankKeeper bank.Keeper,
 	votes poll,
 	pool sdk.Coin,
 	denom string) (err sdk.Error) {
 
-	logger := ctx.Logger().With("module", "vote")
-
-	// load default parameters
-	defaults := DefaultParams()
+	logger := ctx.Logger().With("module", "voting")
 
 	// get the total challenger stake amount and voter count
 	challengerTotalAmount, challengerCount, voterCount, err :=
@@ -88,11 +82,11 @@ func distributeRewardsRejected(
 
 	if voterCount > 0 {
 		// calculate reward pool for challengers (75% of pool)
-		challengerPool = calculateChallengerPool(pool, defaults)
+		challengerPool = k.calculateChallengerPool(ctx, pool)
 		logger.Info(fmt.Sprintf("Challenger reward pool: %v", challengerPool))
 
 		// calculate reward pool for voters (25% of pool)
-		voterPool = calculateVoterPool(pool, defaults)
+		voterPool = k.calculateVoterPool(ctx, pool)
 		logger.Info(fmt.Sprintf("Voter reward pool: %v", voterPool))
 	}
 
@@ -110,7 +104,7 @@ func distributeRewardsRejected(
 		case challenge.Challenge:
 			// challengers cannot vote true -- skip
 
-		case TokenVote:
+		case tokenVote.TokenVote:
 			// slashed -- get nothing back
 
 		default:
@@ -128,7 +122,7 @@ func distributeRewardsRejected(
 		switch v := vote.(type) {
 		case backing.Backing:
 			// get back stake amount because we are nice
-			_, _, err = bankKeeper.AddCoins(ctx, v.Creator(), sdk.Coins{v.Amount()})
+			_, _, err = k.bankKeeper.AddCoins(ctx, v.Creator(), sdk.Coins{v.Amount()})
 			if err != nil {
 				return err
 			}
@@ -136,7 +130,7 @@ func distributeRewardsRejected(
 
 		case challenge.Challenge:
 			// get back staked amount
-			_, _, err = bankKeeper.AddCoins(ctx, v.Creator(), sdk.Coins{v.Amount()})
+			_, _, err = k.bankKeeper.AddCoins(ctx, v.Creator(), sdk.Coins{v.Amount()})
 			if err != nil {
 				return err
 			}
@@ -154,12 +148,12 @@ func distributeRewardsRejected(
 
 			// distribute reward in cred
 			cred := app.NewCategoryCoin(denom, rewardCoin)
-			_, _, err = bankKeeper.AddCoins(ctx, v.Creator(), sdk.Coins{cred})
+			_, _, err = k.bankKeeper.AddCoins(ctx, v.Creator(), sdk.Coins{cred})
 			logger.Info(fmt.Sprintf("Distributed challenge reward of: %v", cred))
 
-		case TokenVote:
+		case tokenVote.TokenVote:
 			// get back original staked amount
-			_, _, err = bankKeeper.AddCoins(ctx, v.Creator(), sdk.Coins{v.Amount()})
+			_, _, err = k.bankKeeper.AddCoins(ctx, v.Creator(), sdk.Coins{v.Amount()})
 			if err != nil {
 				return err
 			}
@@ -173,7 +167,7 @@ func distributeRewardsRejected(
 
 			// distribute reward in cred
 			cred := app.NewCategoryCoin(denom, rewardCoin)
-			_, _, err = bankKeeper.AddCoins(ctx, v.Creator(), sdk.Coins{cred})
+			_, _, err = k.bankKeeper.AddCoins(ctx, v.Creator(), sdk.Coins{cred})
 			logger.Info(fmt.Sprintf("Distributed vote reward of: %v", cred))
 
 		default:
@@ -196,24 +190,17 @@ func distributeRewardsRejected(
 }
 
 // calculate reward pool for challengers (75% of pool)
-func calculateChallengerPool(pool sdk.Coin, params Params) sdk.Coin {
-
-	challengerPoolShare := params.ChallengerRewardPoolShare
-
-	challengerPoolAmount :=
-		sdk.NewDecFromInt(pool.Amount).Mul(challengerPoolShare)
+func (k Keeper) calculateChallengerPool(ctx sdk.Context, pool sdk.Coin) sdk.Coin {
+	challengerPoolAmount := sdk.NewDecFromInt(pool.Amount).
+		Mul(k.challengerRewardPoolShare(ctx))
 
 	return sdk.NewCoin(pool.Denom, challengerPoolAmount.TruncateInt())
 }
 
 // calculate reward pool for voters (25% of pool)
-func calculateVoterPool(pool sdk.Coin, params Params) sdk.Coin {
-
-	challengerPoolShare := params.ChallengerRewardPoolShare
-	voterPoolShare := sdk.OneDec().Sub(challengerPoolShare)
-
-	voterPoolAmount :=
-		sdk.NewDecFromInt(pool.Amount).Mul(voterPoolShare)
+func (k Keeper) calculateVoterPool(ctx sdk.Context, pool sdk.Coin) sdk.Coin {
+	voterPoolShare := sdk.OneDec().Sub(k.challengerRewardPoolShare(ctx))
+	voterPoolAmount := sdk.NewDecFromInt(pool.Amount).Mul(voterPoolShare)
 
 	return sdk.NewCoin(pool.Denom, voterPoolAmount.TruncateInt())
 }
@@ -235,7 +222,7 @@ func winnerInfo(
 		case challenge.Challenge:
 			challengerCount = challengerCount + 1
 			challengerTotalAmount = challengerTotalAmount.Add(v.Amount().Amount)
-		case TokenVote:
+		case tokenVote.TokenVote:
 			voterCount = voterCount + 1
 		default:
 			return challengerTotalAmount, challengerCount, voterCount, ErrInvalidVote(v)
