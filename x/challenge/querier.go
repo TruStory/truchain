@@ -8,9 +8,10 @@ import (
 
 // query endpoints supported by the truchain Querier
 const (
-	QueryPath                = "challenges"
-	QueryByStoryID           = "storyID"
-	QueryByStoryIDAndCreator = "storyIDAndCreator"
+	QueryPath                     = "challenges"
+	QueryByStoryID                = "storyID"
+	QueryByStoryIDAndCreator      = "storyIDAndCreator"
+	QueryChallengeAmountByStoryID = "totalAmountByStoryID"
 )
 
 // NewQuerier returns a function that handles queries on the KVStore
@@ -21,6 +22,8 @@ func NewQuerier(k ReadKeeper) sdk.Querier {
 			return queryByStoryID(ctx, req, k)
 		case QueryByStoryIDAndCreator:
 			return queryByStoryIDAndCreator(ctx, req, k)
+		case QueryChallengeAmountByStoryID:
+			return queryChallengeAmountByStoryID(ctx, req, k)
 		default:
 			return nil, sdk.ErrUnknownRequest("Unknown query endpoint")
 		}
@@ -47,6 +50,21 @@ func queryByStoryID(
 	}
 
 	return app.MustMarshal(challenges), nil
+}
+
+func queryChallengeAmountByStoryID(ctx sdk.Context, req abci.RequestQuery, k ReadKeeper) (res []byte, err sdk.Error) {
+	params := app.QueryByIDParams{}
+
+	if err = app.UnmarshalQueryParams(req, &params); err != nil {
+		return
+	}
+
+	challengePool, err := k.TotalChallengeAmount(ctx, params.ID)
+	if err != nil {
+		return
+	}
+
+	return app.MustMarshal(challengePool), nil
 }
 
 func queryByStoryIDAndCreator(
