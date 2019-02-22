@@ -330,7 +330,7 @@ func (app *TruChain) BeginBlocker(ctx sdk.Context, req abci.RequestBeginBlock) a
 func (app *TruChain) EndBlocker(ctx sdk.Context, _ abci.RequestEndBlock) abci.ResponseEndBlock {
 	app.storyKeeper.EndBlock(ctx)
 	app.expirationKeeper.EndBlock(ctx)
-	app.voteKeeper.NewResponseEndBlock(ctx)
+	// app.votingKeeper.EndBlock(ctx)
 
 	return abci.ResponseEndBlock{}
 }

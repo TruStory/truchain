@@ -1,4 +1,4 @@
-package vote
+package voting
 
 // TODO [shanev]: add this back in https://github.com/TruStory/truchain/issues/387
 

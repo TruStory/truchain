@@ -1,4 +1,4 @@
-package vote
+package voting
 
 import (
 	app "github.com/TruStory/truchain/types"
