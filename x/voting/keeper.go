@@ -46,8 +46,6 @@ type Keeper struct {
 	voteKeeper      vote.WriteKeeper
 	bankKeeper      bank.Keeper
 	paramStore      params.Subspace
-
-	voterList app.UserList
 }
 
 // NewKeeper creates a new keeper with write and read access
@@ -73,7 +71,6 @@ func NewKeeper(
 		voteKeeper,
 		bankKeeper,
 		paramStore.WithTypeTable(ParamTypeTable()),
-		app.NewUserList(storyKeeper.GetStoreKey()),
 	}
 }
 
