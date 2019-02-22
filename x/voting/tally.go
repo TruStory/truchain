@@ -9,9 +9,9 @@ import (
 
 // tally votes and distribute rewards
 func (k Keeper) verifyStory(ctx sdk.Context, storyID int64) sdk.Error {
-	// logger := ctx.Logger().With("module", "voting")
+	logger := ctx.Logger().With("module", "voting")
 
-	fmt.Printf("Verifying story id: %d...\n", storyID)
+	logger.Info(fmt.Sprintf("Verifying story id: %d...", storyID))
 
 	// tally backings, challenges, and votes
 	votes, err := k.tally(ctx, storyID)
@@ -30,7 +30,7 @@ func (k Keeper) verifyStory(ctx sdk.Context, storyID int64) sdk.Error {
 		return err
 	}
 
-	fmt.Printf("Story confirmed: %t\n", confirmed)
+	logger.Info(fmt.Sprintf("Story confirmed: %t", confirmed))
 
 	// calculate reward pool
 	rewardPool, err := rewardPool(votes, confirmed)
@@ -38,7 +38,7 @@ func (k Keeper) verifyStory(ctx sdk.Context, storyID int64) sdk.Error {
 		return err
 	}
 
-	fmt.Printf("Reward pool: %v\n", rewardPool)
+	logger.Info(fmt.Sprintf("Reward pool: %v", rewardPool))
 
 	// distribute rewards
 	err = k.distributeRewards(ctx, rewardPool, votes, confirmed, credDenom)
@@ -94,7 +94,7 @@ func (k Keeper) tally(ctx sdk.Context, storyID int64) (votes poll, err sdk.Error
 		votes.falseVotes = append(votes.falseVotes, v)
 	}
 
-	fmt.Println(votes.String())
+	logger.Info(votes.String())
 
 	return votes, nil
 }
@@ -187,15 +187,11 @@ func rewardPool(votes poll, confirmed bool) (pool sdk.Coin, err sdk.Error) {
 
 	// initialize an empty reward pool, false votes will always exist
 	// because challengers with implicit false votes will always exist
-	fmt.Println("in here 1")
-
 	v, ok := votes.falseVotes[0].(app.Voter)
 	if !ok {
 		return pool, ErrInvalidVote(v, "Initializing reward pool")
 	}
 	pool = sdk.NewCoin(app.StakeDenom, sdk.ZeroInt())
-
-	fmt.Println("in here 2")
 
 	if confirmed {
 		err = confirmedPool(votes.falseVotes, &pool)
@@ -205,8 +201,6 @@ func rewardPool(votes poll, confirmed bool) (pool sdk.Coin, err sdk.Error) {
 	if err != nil {
 		return pool, err
 	}
-
-	fmt.Println("in here 3")
 
 	return pool, nil
 }

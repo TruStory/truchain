@@ -16,7 +16,7 @@ func (k Keeper) distributeRewardsConfirmed(
 	pool sdk.Coin,
 	denom string) (err sdk.Error) {
 
-	logger := ctx.Logger().With("module", "vote")
+	logger := ctx.Logger().With("module", "voting")
 
 	// determine pool share per voter
 	voterCount := int64(len(votes.trueVotes))
@@ -144,7 +144,6 @@ func confirmedPool(falseVotes []app.Voter, pool *sdk.Coin) (err sdk.Error) {
 			*pool = (*pool).Plus(v.Amount())
 
 		default:
-			fmt.Println("WTF...........................")
 			if err = ErrInvalidVote(v); err != nil {
 				return err
 			}
