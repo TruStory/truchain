@@ -52,10 +52,10 @@ func TestWeightedVote(t *testing.T) {
 	trueWeights, _ := k.weightedVote(ctx, votes.trueVotes, "trudex")
 	falseWeights, _ := k.weightedVote(ctx, votes.falseVotes, "trudex")
 
-	// 5 true, 1 preethi added each due to cold-start
+	// 1 preethi added each due to cold-start
 	assert.Equal(t, "6", trueWeights.String())
 
-	// 4 false, 1 preethi added each due to cold-start
+	// 1 preethi added each due to cold-start
 	assert.Equal(t, "5", falseWeights.String())
 }
 
