@@ -37,34 +37,6 @@ func (v TokenVote) VoteChoice() bool {
 	return v.Vote.Vote
 }
 
-// MsgParams holds default parameters for a vote
-type MsgParams struct {
-	MinArgumentLength int // min number of chars for argument
-	MaxArgumentLength int // max number of chars for argument
-}
-
-// DefaultMsgParams creates a new MsgParams type with defaults
-func DefaultMsgParams() MsgParams {
-	return MsgParams{
-		MinArgumentLength: 10,
-		MaxArgumentLength: 3000,
-	}
-}
-
-// Params holds parameters for voting
-type Params struct {
-	ChallengerRewardPoolShare sdk.Dec
-	MajorityPercent           sdk.Dec
-}
-
-// DefaultParams is the default parameters for voting
-func DefaultParams() Params {
-	return Params{
-		ChallengerRewardPoolShare: sdk.NewDecWithPrec(75, 2), // 75%
-		MajorityPercent:           sdk.NewDecWithPrec(51, 2), // 51%
-	}
-}
-
 type poll struct {
 	trueVotes  []app.Voter
 	falseVotes []app.Voter

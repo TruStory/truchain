@@ -11,6 +11,7 @@ import (
 	"github.com/TruStory/truchain/x/challenge"
 	"github.com/TruStory/truchain/x/expiration"
 	"github.com/TruStory/truchain/x/story"
+	"github.com/TruStory/truchain/x/voting"
 	"github.com/cosmos/cosmos-sdk/client"
 	gaiaInit "github.com/cosmos/cosmos-sdk/cmd/gaia/init"
 	"github.com/cosmos/cosmos-sdk/codec"
@@ -99,6 +100,7 @@ func InitCmd(ctx *server.Context, cdc *codec.Codec) *cobra.Command {
 				ChallengeData:  challenge.DefaultGenesisState(),
 				ExpirationData: expiration.DefaultGenesisState(),
 				StoryData:      story.DefaultGenesisState(),
+				VotingData:     voting.DefaultGenesisState(),
 			}
 
 			appState, err = codec.MarshalJSONIndent(cdc, genesis)

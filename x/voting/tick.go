@@ -4,8 +4,8 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
-// NewResponseEndBlock is called at the end of every block tick
-func (k Keeper) NewResponseEndBlock(ctx sdk.Context) sdk.Tags {
+// EndBlock is called at the end of every block tick
+func (k Keeper) EndBlock(ctx sdk.Context) sdk.Tags {
 	err := k.filterGameQueue(ctx)
 	if err != nil {
 		panic(err)

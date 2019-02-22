@@ -17,6 +17,7 @@ import (
 	"github.com/TruStory/truchain/x/truapi"
 	"github.com/TruStory/truchain/x/users"
 	"github.com/TruStory/truchain/x/vote"
+	"github.com/TruStory/truchain/x/voting"
 	bam "github.com/cosmos/cosmos-sdk/baseapp"
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -64,6 +65,7 @@ type TruChain struct {
 	keyVotingStoryQueue  *sdk.KVStoreKey
 	keyExpiredStoryQueue *sdk.KVStoreKey
 	keyVote              *sdk.KVStoreKey
+	keyVoting            *sdk.KVStoreKey
 	keyParams            *sdk.KVStoreKey
 	tkeyParams           *sdk.TransientStoreKey
 
@@ -74,13 +76,14 @@ type TruChain struct {
 	ibcMapper           ibc.Mapper
 	paramsKeeper        params.Keeper
 
-	// access truchain database
-	storyKeeper      story.WriteKeeper
-	categoryKeeper   category.WriteKeeper
+	// access truchain multistore
 	backingKeeper    backing.WriteKeeper
+	categoryKeeper   category.WriteKeeper
 	challengeKeeper  challenge.WriteKeeper
-	voteKeeper       vote.WriteKeeper
 	expirationKeeper expiration.Keeper
+	storyKeeper      story.WriteKeeper
+	voteKeeper       vote.WriteKeeper
+	votingKeeper     voting.WriteKeeper
 
 	// state to run api
 	blockCtx     *sdk.Context
@@ -122,6 +125,7 @@ func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *T
 		keyVotingStoryQueue:  sdk.NewKVStoreKey(story.VotingQueueStoreKey),
 		keyExpiredStoryQueue: sdk.NewKVStoreKey(story.ExpiredQueueStoreKey),
 		keyVote:              sdk.NewKVStoreKey(vote.StoreKey),
+		keyVoting:            sdk.NewKVStoreKey(voting.StoreKey),
 		api:                  nil,
 		apiStarted:           false,
 		blockCtx:             nil,
@@ -204,6 +208,19 @@ func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *T
 		codec,
 	)
 
+	app.votingKeeper = voting.NewKeeper(
+		app.keyVoting,
+		app.keyVotingStoryQueue,
+		app.accountKeeper,
+		app.backingKeeper,
+		app.challengeKeeper,
+		app.storyKeeper,
+		app.voteKeeper,
+		app.bankKeeper,
+		app.paramsKeeper.Subspace(voting.StoreKey),
+		codec,
+	)
+
 	// The AnteHandler handles signature verification and transaction pre-processing
 	// TODO [shanev]: see https://github.com/TruStory/truchain/issues/364
 	// Add this back after fixing issues with signature verification
@@ -251,7 +268,9 @@ func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *T
 		app.keyStoryQueue,
 		app.keyExpiredStoryQueue,
 		app.keyVotingStoryQueue,
-		app.keyVote)
+		app.keyVote,
+		app.keyVoting,
+	)
 
 	app.MountStoresTransient(app.tkeyParams)
 
@@ -330,7 +349,7 @@ func (app *TruChain) BeginBlocker(ctx sdk.Context, req abci.RequestBeginBlock) a
 func (app *TruChain) EndBlocker(ctx sdk.Context, _ abci.RequestEndBlock) abci.ResponseEndBlock {
 	app.storyKeeper.EndBlock(ctx)
 	app.expirationKeeper.EndBlock(ctx)
-	// app.votingKeeper.EndBlock(ctx)
+	app.votingKeeper.EndBlock(ctx)
 
 	return abci.ResponseEndBlock{}
 }
@@ -361,6 +380,7 @@ func (app *TruChain) ExportAppStateAndValidators() (appState json.RawMessage, va
 		Categories:     category.DefaultCategories(),
 		ExpirationData: expiration.DefaultGenesisState(),
 		StoryData:      story.DefaultGenesisState(),
+		VotingData:     voting.DefaultGenesisState(),
 	}
 
 	appState, err = codec.MarshalJSONIndent(app.codec, genState)
