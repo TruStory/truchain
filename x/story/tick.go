@@ -45,7 +45,7 @@ func (k Keeper) processStoryQueue(ctx sdk.Context, storyQueue queue.Queue) sdk.E
 	// add it to the voting story queue to be handled later
 	if story.State == Voting {
 		logger.Info("Voting begun for " + story.String())
-		k.votingStoryList(ctx).Push(storyID)
+		k.votingStoryQueue(ctx).Push(storyID)
 
 		// pop and process next story
 		storyQueue.Pop()
