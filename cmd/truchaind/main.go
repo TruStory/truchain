@@ -6,22 +6,17 @@ import (
 	"io"
 	"os"
 
-	"github.com/TruStory/truchain/x/challenge"
-
-	"github.com/TruStory/truchain/x/game"
-
-	gaiaInit "github.com/cosmos/cosmos-sdk/cmd/gaia/init"
-	"github.com/cosmos/cosmos-sdk/codec"
-	"github.com/cosmos/cosmos-sdk/x/auth"
-	"github.com/cosmos/cosmos-sdk/x/bank"
-
 	"github.com/TruStory/truchain/app"
 	"github.com/TruStory/truchain/x/category"
+	"github.com/TruStory/truchain/x/challenge"
 	"github.com/TruStory/truchain/x/expiration"
 	"github.com/TruStory/truchain/x/story"
 	"github.com/cosmos/cosmos-sdk/client"
-
+	gaiaInit "github.com/cosmos/cosmos-sdk/cmd/gaia/init"
+	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/cosmos/cosmos-sdk/server"
+	"github.com/cosmos/cosmos-sdk/x/auth"
+	"github.com/cosmos/cosmos-sdk/x/bank"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	abci "github.com/tendermint/tendermint/abci/types"
@@ -103,7 +98,6 @@ func InitCmd(ctx *server.Context, cdc *codec.Codec) *cobra.Command {
 				Categories:     category.DefaultCategories(),
 				ChallengeData:  challenge.DefaultGenesisState(),
 				ExpirationData: expiration.DefaultGenesisState(),
-				GameData:       game.DefaultGenesisState(),
 				StoryData:      story.DefaultGenesisState(),
 			}
 
