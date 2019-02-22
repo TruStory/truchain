@@ -3,7 +3,6 @@ package app
 import (
 	"github.com/TruStory/truchain/x/challenge"
 	"github.com/TruStory/truchain/x/expiration"
-	"github.com/TruStory/truchain/x/game"
 	"github.com/TruStory/truchain/x/story"
 	"github.com/cosmos/cosmos-sdk/x/auth"
 	"github.com/cosmos/cosmos-sdk/x/bank"
@@ -21,7 +20,6 @@ type GenesisState struct {
 	Categories     []category.Category     `json:"categories"`
 	ChallengeData  challenge.GenesisState  `json:"challenge"`
 	ExpirationData expiration.GenesisState `json:"expiration"`
-	GameData       game.GenesisState       `json:"game"`
 	StoryData      story.GenesisState      `json:"story"`
 }
 
@@ -57,7 +55,6 @@ func (app *TruChain) initChainer(ctx sdk.Context, req abci.RequestInitChain) abc
 	category.InitGenesis(ctx, app.categoryKeeper, genesisState.Categories)
 	challenge.InitGenesis(ctx, app.challengeKeeper, genesisState.ChallengeData)
 	expiration.InitGenesis(ctx, app.expirationKeeper, genesisState.ExpirationData)
-	game.InitGenesis(ctx, app.gameKeeper, genesisState.GameData)
 	story.InitGenesis(ctx, app.storyKeeper, genesisState.StoryData)
 
 	return abci.ResponseInitChain{}

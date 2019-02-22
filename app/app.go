@@ -12,7 +12,6 @@ import (
 	"github.com/TruStory/truchain/x/category"
 	"github.com/TruStory/truchain/x/challenge"
 	"github.com/TruStory/truchain/x/expiration"
-	"github.com/TruStory/truchain/x/game"
 	clientParams "github.com/TruStory/truchain/x/params"
 	"github.com/TruStory/truchain/x/story"
 	"github.com/TruStory/truchain/x/truapi"
@@ -58,7 +57,6 @@ type TruChain struct {
 	keyChallenge         *sdk.KVStoreKey
 	keyExpiration        *sdk.KVStoreKey
 	keyFee               *sdk.KVStoreKey
-	keyGame              *sdk.KVStoreKey
 	keyIBC               *sdk.KVStoreKey
 	keyMain              *sdk.KVStoreKey
 	keyStory             *sdk.KVStoreKey
@@ -81,7 +79,6 @@ type TruChain struct {
 	categoryKeeper   category.WriteKeeper
 	backingKeeper    backing.WriteKeeper
 	challengeKeeper  challenge.WriteKeeper
-	gameKeeper       game.WriteKeeper
 	voteKeeper       vote.WriteKeeper
 	expirationKeeper expiration.Keeper
 
@@ -122,7 +119,6 @@ func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *T
 		keyChallenge:         sdk.NewKVStoreKey(challenge.StoreKey),
 		keyExpiration:        sdk.NewKVStoreKey(expiration.StoreKey),
 		keyFee:               sdk.NewKVStoreKey("fee_collection"),
-		keyGame:              sdk.NewKVStoreKey(game.StoreKey),
 		keyVotingStoryQueue:  sdk.NewKVStoreKey(story.VotingQueueStoreKey),
 		keyExpiredStoryQueue: sdk.NewKVStoreKey(story.ExpiredQueueStoreKey),
 		keyVote:              sdk.NewKVStoreKey(vote.StoreKey),
@@ -188,18 +184,6 @@ func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *T
 		codec,
 	)
 
-	app.gameKeeper = game.NewKeeper(
-		app.keyGame,
-		app.keyStoryQueue,
-		app.storyKeeper,
-		app.backingKeeper,
-		app.challengeKeeper,
-		app.voteKeeper,
-		app.bankKeeper,
-		app.paramsKeeper.Subspace(game.StoreKey),
-		codec,
-	)
-
 	app.challengeKeeper = challenge.NewKeeper(
 		app.keyChallenge,
 		app.backingKeeper,
@@ -261,7 +245,6 @@ func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *T
 		app.keyChallenge,
 		app.keyExpiration,
 		app.keyFee,
-		app.keyGame,
 		app.keyIBC,
 		app.keyMain,
 		app.keyStory,
