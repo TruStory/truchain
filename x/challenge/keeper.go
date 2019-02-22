@@ -94,7 +94,6 @@ func (k Keeper) Create(
 		return 0, sdk.ErrInsufficientFunds("Insufficient funds for challenge.")
 	}
 
-	// check if challenge amount is greater than minimum stake
 	if amount.Amount.LT(k.minChallengeStake(ctx)) {
 		return 0, sdk.ErrInsufficientFunds("Does not meet minimum stake amount.")
 	}
@@ -128,6 +127,11 @@ func (k Keeper) Create(
 
 	// deduct challenge amount from user
 	_, _, err = k.bankKeeper.SubtractCoins(ctx, creator, sdk.Coins{amount})
+	if err != nil {
+		return 0, err
+	}
+
+	err = k.checkThreshold(ctx, storyID)
 	if err != nil {
 		return 0, err
 	}
@@ -232,6 +236,38 @@ func (k Keeper) TotalChallengeAmount(ctx sdk.Context, storyID int64) (
 	}
 
 	return totalAmount, nil
+}
+
+func (k Keeper) checkThreshold(ctx sdk.Context, storyID int64) sdk.Error {
+	logger := ctx.Logger().With("module", "challenge")
+
+	backingPool, err := k.backingKeeper.TotalBackingAmount(ctx, storyID)
+	if err != nil {
+		return err
+	}
+
+	challengePool, err := k.TotalChallengeAmount(ctx, storyID)
+	if err != nil {
+		return err
+	}
+
+	challengeThreshold := k.challengeThreshold(ctx, backingPool)
+
+	logger.Info(fmt.Sprintf(
+		"Backing pool: %s, challenge pool: %s, threshold: %s",
+		backingPool, challengePool, challengeThreshold))
+
+	if challengePool.IsGTE(challengeThreshold) {
+		err := k.storyKeeper.StartVotingPeriod(ctx, storyID)
+		if err != nil {
+			return err
+		}
+
+		logger.Info(fmt.Sprintf(
+			"Challenge threshold met. Voting started for story %d", storyID))
+	}
+
+	return nil
 }
 
 func (k Keeper) challengeThreshold(ctx sdk.Context, totalBackingAmount sdk.Coin) sdk.Coin {
