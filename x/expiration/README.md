@@ -1,4 +1,4 @@
-# TruChain: Expiration Module
+# TruChain: Expiration Worker Module
 
 ![](dep.png)
 
