@@ -152,7 +152,7 @@ func Test_checkThreshold(t *testing.T) {
 
 	ctx = ctx.WithBlockHeader(abci.Header{Time: time.Now()})
 	storyID := createFakeStory(ctx, storyKeeper)
-	amount := sdk.NewCoin("trusteak", sdk.NewInt(100000))
+	amount := sdk.NewCoin("trusteak", sdk.NewInt(10000000000))
 	argument := "test argument right here"
 	backer1 := fakeFundedCreator(ctx, bankKeeper)
 	backer2 := fakeFundedCreator(ctx, bankKeeper)

@@ -59,6 +59,11 @@ func (k Keeper) minQuorum(ctx sdk.Context) (res int) {
 	return
 }
 
+func (k Keeper) majorityPercent(ctx sdk.Context) (res sdk.Dec) {
+	k.paramStore.Get(ctx, KeyMajorityPercent, &res)
+	return
+}
+
 func (k Keeper) votingDuration(ctx sdk.Context) (res time.Duration) {
 	k.paramStore.Get(ctx, KeyVotingDuration, &res)
 	return
