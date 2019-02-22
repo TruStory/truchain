@@ -8,7 +8,7 @@ import (
 
 	app "github.com/TruStory/truchain/types"
 	"github.com/TruStory/truchain/x/category"
-	queue "github.com/cosmos/cosmos-sdk/store"
+	list "github.com/cosmos/cosmos-sdk/store"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/params"
 	amino "github.com/tendermint/go-amino"
@@ -21,8 +21,8 @@ const (
 	QueueStoreKey = "storyQueue"
 	// ExpiredQueueStoreKey is string representation of the store key for expired stories
 	ExpiredQueueStoreKey = "expiredStoryQueue"
-	// VotingQueueStoreKey is string representation of the store key for challenged stories
-	VotingQueueStoreKey = "votingStoryQueue"
+	// VotingListStoreKey is string representation of the store key for challenged stories
+	VotingListStoreKey = "votingStoryList"
 )
 
 // ReadKeeper defines a module interface that facilitates read only access
@@ -65,7 +65,7 @@ type Keeper struct {
 
 	storyQueueKey        sdk.StoreKey
 	expiredStoryQueueKey sdk.StoreKey
-	votingStoryQueueKey  sdk.StoreKey
+	votingStoryListKey   sdk.StoreKey
 	categoryKeeper       category.ReadKeeper
 	paramStore           params.Subspace
 }
@@ -75,7 +75,7 @@ func NewKeeper(
 	storeKey sdk.StoreKey,
 	storyQueueKey sdk.StoreKey,
 	expiredStoryQueueKey sdk.StoreKey,
-	votingStoryQueueKey sdk.StoreKey,
+	votingStoryListKey sdk.StoreKey,
 	categoryKeeper category.ReadKeeper,
 	paramStore params.Subspace,
 	codec *amino.Codec) Keeper {
@@ -84,7 +84,7 @@ func NewKeeper(
 		app.NewKeeper(codec, storeKey),
 		storyQueueKey,
 		expiredStoryQueueKey,
-		votingStoryQueueKey,
+		votingStoryListKey,
 		categoryKeeper,
 		paramStore.WithTypeTable(ParamTypeTable()),
 	}
@@ -100,9 +100,7 @@ func (k Keeper) StartVotingPeriod(ctx sdk.Context, storyID int64) sdk.Error {
 	}
 
 	story.State = Voting
-	// TODO: set voting end time here??
-	// game.VotingEndTime = ctx.BlockHeader().Time.Add(DefaultParams().VotingPeriod)
-
+	story.VotingStartTime = ctx.BlockHeader().Time
 	k.UpdateStory(ctx, story)
 
 	// add story to challenged list
@@ -311,6 +309,7 @@ func (k Keeper) UpdateStory(ctx sdk.Context, story Story) {
 		story.Source,
 		story.State,
 		story.Type,
+		story.VotingStartTime,
 		story.VotingEndTime,
 		story.Timestamp.Update(ctx.BlockHeader()),
 	}
@@ -390,19 +389,19 @@ func (k Keeper) storyIDsByCategoryID(
 	return storyIDs, nil
 }
 
-func (k Keeper) storyQueue(ctx sdk.Context) queue.Queue {
+func (k Keeper) storyQueue(ctx sdk.Context) list.Queue {
 	store := ctx.KVStore(k.storyQueueKey)
-	return queue.NewQueue(k.GetCodec(), store)
+	return list.NewQueue(k.GetCodec(), store)
 }
 
-func (k Keeper) expiredStoryQueue(ctx sdk.Context) queue.Queue {
+func (k Keeper) expiredStoryQueue(ctx sdk.Context) list.Queue {
 	store := ctx.KVStore(k.expiredStoryQueueKey)
-	return queue.NewQueue(k.GetCodec(), store)
+	return list.NewQueue(k.GetCodec(), store)
 }
 
-func (k Keeper) votingStoryQueue(ctx sdk.Context) queue.Queue {
-	store := ctx.KVStore(k.votingStoryQueueKey)
-	return queue.NewQueue(k.GetCodec(), store)
+func (k Keeper) votingStoryList(ctx sdk.Context) list.List {
+	store := ctx.KVStore(k.votingStoryListKey)
+	return list.NewList(k.GetCodec(), store)
 }
 
 func (k Keeper) validate(ctx sdk.Context, body string) sdk.Error {

@@ -61,17 +61,18 @@ func (i Type) String() string {
 
 // Story type
 type Story struct {
-	ID            int64          `json:"id"`
-	Body          string         `json:"body"`
-	CategoryID    int64          `json:"category_id"`
-	Creator       sdk.AccAddress `json:"creator"`
-	ExpireTime    time.Time      `json:"expire_time"`
-	Flagged       bool           `json:"flagged,omitempty"`
-	Source        url.URL        `json:"source,omitempty"`
-	State         State          `json:"state"`
-	Type          Type           `json:"type"`
-	VotingEndTime time.Time      `json:"voting_end_time,omitempty"`
-	Timestamp     app.Timestamp  `json:"timestamp"`
+	ID              int64          `json:"id"`
+	Body            string         `json:"body"`
+	CategoryID      int64          `json:"category_id"`
+	Creator         sdk.AccAddress `json:"creator"`
+	ExpireTime      time.Time      `json:"expire_time"`
+	Flagged         bool           `json:"flagged,omitempty"`
+	Source          url.URL        `json:"source,omitempty"`
+	State           State          `json:"state"`
+	Type            Type           `json:"type"`
+	VotingStartTime time.Time      `json:"voting_start_time,omitempty"`
+	VotingEndTime   time.Time      `json:"voting_end_time,omitempty"`
+	Timestamp       app.Timestamp  `json:"timestamp"`
 }
 
 func (s Story) String() string {
