@@ -3,6 +3,7 @@ package challenge
 import (
 	"fmt"
 
+	app "github.com/TruStory/truchain/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/params"
 )
@@ -24,9 +25,9 @@ type Params struct {
 // DefaultParams is the story params for testing
 func DefaultParams() Params {
 	return Params{
-		ChallengeToBackingRatio: sdk.NewDecWithPrec(100, 2), // 100%
-		MinChallengeThreshold:   sdk.NewInt(1),              // 1 preethi
-		MinChallengeStake:       sdk.NewInt(1),              // 1 preethi
+		ChallengeToBackingRatio: sdk.NewDecWithPrec(100, 2),  // 100%
+		MinChallengeThreshold:   sdk.NewInt(10 * app.Shanev), // 10 shanev
+		MinChallengeStake:       sdk.NewInt(1),               // 1 preethi
 	}
 }
 

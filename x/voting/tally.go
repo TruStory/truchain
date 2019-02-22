@@ -144,7 +144,7 @@ func (k Keeper) confirmStory(
 	truePercentOfTotal := trueWeightDec.QuoInt(totalWeight)
 
 	// majority weight wins
-	if truePercentOfTotal.GTE(DefaultParams().MajorityPercent) {
+	if truePercentOfTotal.GTE(k.majorityPercent(ctx)) {
 		// story confirmed
 		return true, nil
 	}
