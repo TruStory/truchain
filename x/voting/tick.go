@@ -60,17 +60,12 @@ func (k Keeper) quorum(ctx sdk.Context, storyID int64) (total int, err sdk.Error
 		return
 	}
 
-	story, err := k.storyKeeper.Story(ctx, storyID)
+	challenges, err := k.challengeKeeper.ChallengesByStoryID(ctx, storyID)
 	if err != nil {
 		return
 	}
 
-	challenges, err := k.challengeKeeper.ChallengesByStoryID(ctx, story.ID)
-	if err != nil {
-		return
-	}
-
-	tokenVotes, err := k.voteKeeper.TokenVotesByStoryID(ctx, story.ID)
+	tokenVotes, err := k.voteKeeper.TokenVotesByStoryID(ctx, storyID)
 	if err != nil {
 		return
 	}
