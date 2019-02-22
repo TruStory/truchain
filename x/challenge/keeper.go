@@ -95,9 +95,9 @@ func (k Keeper) Create(
 	}
 
 	// check if challenge amount is greater than minimum stake
-	// if amount.Amount.LT(game.DefaultParams().MinChallengeStake) {
-	// 	return 0, sdk.ErrInsufficientFunds("Does not meet minimum stake amount.")
-	// }
+	if amount.Amount.LT(k.minChallengeStake(ctx)) {
+		return 0, sdk.ErrInsufficientFunds("Does not meet minimum stake amount.")
+	}
 
 	// make sure creator hasn't already challenged
 	if k.challengeList.Includes(ctx, k, storyID, creator) {
@@ -232,4 +232,20 @@ func (k Keeper) TotalChallengeAmount(ctx sdk.Context, storyID int64) (
 	}
 
 	return totalAmount, nil
+}
+
+func (k Keeper) challengeThreshold(ctx sdk.Context, totalBackingAmount sdk.Coin) sdk.Coin {
+	// calculate challenge threshold amount (based on total backings)
+	totalBackingDec := sdk.NewDecFromInt(totalBackingAmount.Amount)
+	challengeThresholdAmount := totalBackingDec.
+		Mul(k.challengeToBackingRatio(ctx)).
+		TruncateInt()
+
+	// challenge threshold can't be less than min challenge stake
+	minChallengeThreshold := k.minChallengeThreshold(ctx)
+	if challengeThresholdAmount.LT(minChallengeThreshold) {
+		return sdk.NewCoin(totalBackingAmount.Denom, minChallengeThreshold)
+	}
+
+	return sdk.NewCoin(totalBackingAmount.Denom, challengeThresholdAmount)
 }
