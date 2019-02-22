@@ -49,6 +49,11 @@ func ParamTypeTable() params.TypeTable {
 	return params.NewTypeTable().RegisterParamSet(&Params{})
 }
 
+func (k Keeper) challengerRewardPoolShare(ctx sdk.Context) (res sdk.Dec) {
+	k.paramStore.Get(ctx, KeyChallengerRewardPoolShare, &res)
+	return
+}
+
 func (k Keeper) minQuorum(ctx sdk.Context) (res int) {
 	k.paramStore.Get(ctx, KeyQuorum, &res)
 	return
