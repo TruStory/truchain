@@ -6,7 +6,7 @@ import (
 
 // EndBlock is called at the end of every block tick
 func (k Keeper) EndBlock(ctx sdk.Context) sdk.Tags {
-	err := k.processVotingStoryList(ctx)
+	err := k.processVotingStoryQueue(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -17,7 +17,7 @@ func (k Keeper) EndBlock(ctx sdk.Context) sdk.Tags {
 // ============================================================================
 
 // Iterate voting story list to see if a validation game has ended
-func (k Keeper) processVotingStoryList(ctx sdk.Context) sdk.Error {
+func (k Keeper) processVotingStoryQueue(ctx sdk.Context) sdk.Error {
 	var storyID int64
 	k.votingStoryQueue(ctx).List.Iterate(&storyID, func(index uint64) bool {
 		quorum, err := k.quorum(ctx, storyID)
@@ -35,8 +35,7 @@ func (k Keeper) processVotingStoryList(ctx sdk.Context) sdk.Error {
 			panic(err)
 		}
 
-		votingEndTime := story.VotingStartTime.Add(k.votingDuration(ctx))
-		if ctx.BlockHeader().Time.Before(votingEndTime) {
+		if ctx.BlockHeader().Time.Before(story.VotingEndTime) {
 			// move to next story
 			return false
 		}

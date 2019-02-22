@@ -2,7 +2,6 @@ package voting
 
 import (
 	"fmt"
-	"time"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/params"
@@ -13,7 +12,6 @@ var (
 	KeyChallengerRewardPoolShare = []byte("challengerRewardPoolShare")
 	KeyMajorityPercent           = []byte("majorityPercent")
 	KeyQuorum                    = []byte("quorum")
-	KeyVotingDuration            = []byte("votingDuration")
 )
 
 // Params holds parameters for voting
@@ -21,7 +19,6 @@ type Params struct {
 	ChallengerRewardPoolShare sdk.Dec
 	MajorityPercent           sdk.Dec
 	Quorum                    int
-	VotingDuration            time.Duration
 }
 
 // DefaultParams is the default parameters for voting
@@ -30,7 +27,6 @@ func DefaultParams() Params {
 		ChallengerRewardPoolShare: sdk.NewDecWithPrec(75, 2), // 75%
 		MajorityPercent:           sdk.NewDecWithPrec(51, 2), // 51%
 		Quorum:                    3,
-		VotingDuration:            24 * time.Hour,
 	}
 }
 
@@ -40,7 +36,6 @@ func (p *Params) KeyValuePairs() params.KeyValuePairs {
 		{Key: KeyChallengerRewardPoolShare, Value: &p.ChallengerRewardPoolShare},
 		{Key: KeyMajorityPercent, Value: &p.MajorityPercent},
 		{Key: KeyQuorum, Value: &p.Quorum},
-		{Key: KeyVotingDuration, Value: &p.VotingDuration},
 	}
 }
 
@@ -61,11 +56,6 @@ func (k Keeper) minQuorum(ctx sdk.Context) (res int) {
 
 func (k Keeper) majorityPercent(ctx sdk.Context) (res sdk.Dec) {
 	k.paramStore.Get(ctx, KeyMajorityPercent, &res)
-	return
-}
-
-func (k Keeper) votingDuration(ctx sdk.Context) (res time.Duration) {
-	k.paramStore.Get(ctx, KeyVotingDuration, &res)
 	return
 }
 

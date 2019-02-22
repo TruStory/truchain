@@ -37,7 +37,6 @@ type ReadKeeper interface {
 	Stories(ctx sdk.Context) (stories []Story)
 	StoriesByCategoryID(ctx sdk.Context, catID int64) (stories []Story, err sdk.Error)
 	Story(ctx sdk.Context, storyID int64) (Story, sdk.Error)
-	ExpireDuration(ctx sdk.Context) (res time.Duration)
 }
 
 // WriteKeeper defines a module interface that facilities read/write access
@@ -100,6 +99,7 @@ func (k Keeper) StartVotingPeriod(ctx sdk.Context, storyID int64) sdk.Error {
 
 	story.State = Voting
 	story.VotingStartTime = ctx.BlockHeader().Time
+	story.VotingEndTime = ctx.BlockHeader().Time.Add(k.votingDuration(ctx))
 	k.UpdateStory(ctx, story)
 
 	// add story to challenged list
@@ -150,16 +150,18 @@ func (k Keeper) Create(
 	}
 
 	story := Story{
-		ID:         k.GetNextID(ctx),
-		Body:       body,
-		CategoryID: categoryID,
-		Creator:    creator,
-		ExpireTime: ctx.BlockHeader().Time.Add(k.ExpireDuration(ctx)),
-		Flagged:    false,
-		Source:     source,
-		State:      New,
-		Type:       storyType,
-		Timestamp:  app.NewTimestamp(ctx.BlockHeader()),
+		ID:              k.GetNextID(ctx),
+		Body:            body,
+		CategoryID:      categoryID,
+		Creator:         creator,
+		ExpireTime:      ctx.BlockHeader().Time.Add(k.expireDuration(ctx)),
+		Flagged:         false,
+		Source:          source,
+		State:           New,
+		Type:            storyType,
+		VotingStartTime: time.Time{},
+		VotingEndTime:   time.Time{},
+		Timestamp:       app.NewTimestamp(ctx.BlockHeader()),
 	}
 
 	k.setStory(ctx, story)
