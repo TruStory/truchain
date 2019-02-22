@@ -1,6 +1,9 @@
 package voting
 
 import (
+	"fmt"
+
+	app "github.com/TruStory/truchain/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
@@ -16,40 +19,61 @@ func (k Keeper) EndBlock(ctx sdk.Context) sdk.Tags {
 
 // ============================================================================
 
-// Iterate voting story list to see if a validation game has ended
+// Process voting story queue to see if a validation game has ended
 func (k Keeper) processVotingStoryQueue(ctx sdk.Context) sdk.Error {
+	votingStoryQueue := k.votingStoryQueue(ctx)
+
+	if votingStoryQueue.IsEmpty() {
+		return nil
+	}
+
 	var storyID int64
-	k.votingStoryQueue(ctx).List.Iterate(&storyID, func(index uint64) bool {
-		quorum, err := k.quorum(ctx, storyID)
+	peekErr := votingStoryQueue.Peek(&storyID)
+	if peekErr != nil {
+		panic(peekErr)
+	}
+
+	story, err := k.storyKeeper.Story(ctx, storyID)
+	if err != nil {
+		return err
+	}
+
+	if ctx.BlockHeader().Time.Before(story.VotingEndTime) {
+		// wait until next
+		return nil
+	}
+
+	// only left with voting ended stories..
+
+	quorum, err := k.quorum(ctx, storyID)
+	if err != nil {
+		return err
+	}
+
+	if quorum < k.minQuorum(ctx) {
+		votingStoryQueue.Pop()
+
+		err = k.storyKeeper.EndVotingPeriod(ctx, storyID, false, false)
 		if err != nil {
 			panic(err)
 		}
 
-		if quorum < k.minQuorum(ctx) {
-			// move to next story
-			return false
-		}
+		k.returnFunds(ctx, storyID)
 
-		story, err := k.storyKeeper.Story(ctx, storyID)
-		if err != nil {
-			panic(err)
-		}
+		// process next story
+		return k.processVotingStoryQueue(ctx)
+	}
 
-		if ctx.BlockHeader().Time.Before(story.VotingEndTime) {
-			// move to next story
-			return false
-		}
+	// only left with voting ended + met quorum stories
+	votingStoryQueue.Pop()
 
-		// only left with voting ended + met quorum stories
-		err = k.verifyStory(ctx, storyID)
-		if err != nil {
-			panic(err)
-		}
+	err = k.verifyStory(ctx, storyID)
+	if err != nil {
+		return err
+	}
 
-		return false
-	})
-
-	return nil
+	// process next story
+	return k.processVotingStoryQueue(ctx)
 }
 
 // quorum returns the total count of backings, challenges, votes
@@ -72,4 +96,43 @@ func (k Keeper) quorum(ctx sdk.Context, storyID int64) (total int, err sdk.Error
 	total = len(backings) + len(challenges) + len(tokenVotes)
 
 	return total, nil
+}
+
+func (k Keeper) returnFunds(ctx sdk.Context, storyID int64) sdk.Error {
+	logger := ctx.Logger().With("module", "voting")
+
+	// get challenges
+	challenges, err := k.challengeKeeper.ChallengesByStoryID(ctx, storyID)
+	if err != nil {
+		return err
+	}
+
+	// get token votes
+	tokenVotes, err := k.voteKeeper.TokenVotesByStoryID(ctx, storyID)
+	if err != nil {
+		return err
+	}
+
+	// collate votes
+	var votes []app.Voter
+	for _, v := range challenges {
+		votes = append(votes, v)
+	}
+	for _, v := range tokenVotes {
+		votes = append(votes, v)
+	}
+
+	// return funds
+	for _, v := range votes {
+		_, _, err = k.bankKeeper.AddCoins(
+			ctx, v.Creator(), sdk.Coins{v.Amount()})
+		if err != nil {
+			return err
+		}
+	}
+
+	logger.Info(fmt.Sprintf(
+		"Returned funds for %d users for story %d", len(votes), storyID))
+
+	return nil
 }

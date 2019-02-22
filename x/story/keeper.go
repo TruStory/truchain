@@ -51,7 +51,8 @@ type WriteKeeper interface {
 		source url.URL,
 		storyType Type) (int64, sdk.Error)
 	StartVotingPeriod(ctx sdk.Context, storyID int64) sdk.Error
-	EndVotingPeriod(ctx sdk.Context, storyID int64, confirmed bool) sdk.Error
+	EndVotingPeriod(
+		ctx sdk.Context, storyID int64, confirmed bool, quorumMet bool) sdk.Error
 	UpdateStory(ctx sdk.Context, story Story)
 	EndBlock(ctx sdk.Context) sdk.Tags
 	SetParams(ctx sdk.Context, params Params)
@@ -110,18 +111,24 @@ func (k Keeper) StartVotingPeriod(ctx sdk.Context, storyID int64) sdk.Error {
 }
 
 // EndVotingPeriod records the end of a validation game on a story
-func (k Keeper) EndVotingPeriod(ctx sdk.Context, storyID int64, confirmed bool) sdk.Error {
+func (k Keeper) EndVotingPeriod(
+	ctx sdk.Context, storyID int64, confirmed bool, quorumMet bool) sdk.Error {
+
 	story, err := k.Story(ctx, storyID)
 	if err != nil {
 		return err
 	}
 
-	// update story state
-	if confirmed {
-		story.State = Confirmed
+	if quorumMet {
+		if confirmed {
+			story.State = Confirmed
+		} else {
+			story.State = Rejected
+		}
 	} else {
-		story.State = Rejected
+		story.State = QuorumNotMet
 	}
+
 	story.VotingEndTime = ctx.BlockHeader().Time
 	k.UpdateStory(ctx, story)
 
