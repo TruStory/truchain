@@ -62,7 +62,7 @@ type TruChain struct {
 	keyMain              *sdk.KVStoreKey
 	keyStory             *sdk.KVStoreKey
 	keyStoryQueue        *sdk.KVStoreKey
-	keyVotingStoryList   *sdk.KVStoreKey
+	keyVotingStoryQueue  *sdk.KVStoreKey
 	keyExpiredStoryQueue *sdk.KVStoreKey
 	keyVote              *sdk.KVStoreKey
 	keyVoting            *sdk.KVStoreKey
@@ -122,7 +122,7 @@ func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *T
 		keyChallenge:         sdk.NewKVStoreKey(challenge.StoreKey),
 		keyExpiration:        sdk.NewKVStoreKey(expiration.StoreKey),
 		keyFee:               sdk.NewKVStoreKey("fee_collection"),
-		keyVotingStoryList:   sdk.NewKVStoreKey(story.VotingListStoreKey),
+		keyVotingStoryQueue:  sdk.NewKVStoreKey(story.VotingQueueStoreKey),
 		keyExpiredStoryQueue: sdk.NewKVStoreKey(story.ExpiredQueueStoreKey),
 		keyVote:              sdk.NewKVStoreKey(vote.StoreKey),
 		keyVoting:            sdk.NewKVStoreKey(voting.StoreKey),
@@ -163,7 +163,7 @@ func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *T
 		app.keyStory,
 		app.keyStoryQueue,
 		app.keyExpiredStoryQueue,
-		app.keyVotingStoryList,
+		app.keyVotingStoryQueue,
 		app.categoryKeeper,
 		app.paramsKeeper.Subspace(story.StoreKey),
 		app.codec,
@@ -179,7 +179,7 @@ func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *T
 
 	app.voteKeeper = vote.NewKeeper(
 		app.keyVote,
-		app.keyVotingStoryList,
+		app.keyVotingStoryQueue,
 		app.accountKeeper,
 		app.backingKeeper,
 		app.challengeKeeper,
@@ -210,7 +210,7 @@ func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *T
 
 	app.votingKeeper = voting.NewKeeper(
 		app.keyVoting,
-		app.keyVotingStoryList,
+		app.keyVotingStoryQueue,
 		app.accountKeeper,
 		app.backingKeeper,
 		app.challengeKeeper,
@@ -267,7 +267,7 @@ func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *T
 		app.keyStory,
 		app.keyStoryQueue,
 		app.keyExpiredStoryQueue,
-		app.keyVotingStoryList,
+		app.keyVotingStoryQueue,
 		app.keyVote,
 		app.keyVoting,
 	)

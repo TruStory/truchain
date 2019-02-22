@@ -21,8 +21,8 @@ const (
 	QueueStoreKey = "storyQueue"
 	// ExpiredQueueStoreKey is string representation of the store key for expired stories
 	ExpiredQueueStoreKey = "expiredStoryQueue"
-	// VotingListStoreKey is string representation of the store key for challenged stories
-	VotingListStoreKey = "votingStoryList"
+	// VotingQueueStoreKey is string representation of the store key for challenged stories
+	VotingQueueStoreKey = "votingStoryQueue"
 )
 
 // ReadKeeper defines a module interface that facilitates read only access
@@ -383,9 +383,9 @@ func (k Keeper) expiredStoryQueue(ctx sdk.Context) list.Queue {
 	return list.NewQueue(k.GetCodec(), store)
 }
 
-func (k Keeper) votingStoryList(ctx sdk.Context) list.List {
+func (k Keeper) votingStoryQueue(ctx sdk.Context) list.Queue {
 	store := ctx.KVStore(k.votingStoryListKey)
-	return list.NewList(k.GetCodec(), store)
+	return list.NewQueue(k.GetCodec(), store)
 }
 
 func (k Keeper) validate(ctx sdk.Context, body string) sdk.Error {

@@ -19,7 +19,7 @@ func (k Keeper) EndBlock(ctx sdk.Context) sdk.Tags {
 // Iterate voting story list to see if a validation game has ended
 func (k Keeper) processVotingStoryList(ctx sdk.Context) sdk.Error {
 	var storyID int64
-	k.votingStoryList(ctx).Iterate(&storyID, func(index uint64) bool {
+	k.votingStoryQueue(ctx).List.Iterate(&storyID, func(index uint64) bool {
 		quorum, err := k.quorum(ctx, storyID)
 		if err != nil {
 			panic(err)

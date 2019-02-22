@@ -37,7 +37,7 @@ type WriteKeeper interface {
 type Keeper struct {
 	app.Keeper
 
-	votingStoryListKey sdk.StoreKey
+	votingStoryQueueKey sdk.StoreKey
 
 	accountKeeper   auth.AccountKeeper
 	backingKeeper   backing.WriteKeeper
@@ -74,7 +74,7 @@ func NewKeeper(
 	}
 }
 
-func (k Keeper) votingStoryList(ctx sdk.Context) list.List {
-	store := ctx.KVStore(k.votingStoryListKey)
-	return list.NewList(k.GetCodec(), store)
+func (k Keeper) votingStoryQueue(ctx sdk.Context) list.Queue {
+	store := ctx.KVStore(k.votingStoryQueueKey)
+	return list.NewQueue(k.GetCodec(), store)
 }
