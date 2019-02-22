@@ -10,6 +10,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/params"
 
 	app "github.com/TruStory/truchain/types"
+	list "github.com/cosmos/cosmos-sdk/store"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	amino "github.com/tendermint/go-amino"
 )
@@ -36,7 +37,7 @@ type WriteKeeper interface {
 type Keeper struct {
 	app.Keeper
 
-	votingStoryQueueKey sdk.StoreKey
+	votingStoryListKey sdk.StoreKey
 
 	accountKeeper   auth.AccountKeeper
 	backingKeeper   backing.WriteKeeper
@@ -52,7 +53,7 @@ type Keeper struct {
 // NewKeeper creates a new keeper with write and read access
 func NewKeeper(
 	storeKey sdk.StoreKey,
-	votingStoryQueueKey sdk.StoreKey,
+	votingStoryListKey sdk.StoreKey,
 	accountKeeper auth.AccountKeeper,
 	backingKeeper backing.WriteKeeper,
 	challengeKeeper challenge.WriteKeeper,
@@ -64,7 +65,7 @@ func NewKeeper(
 
 	return Keeper{
 		app.NewKeeper(codec, storeKey),
-		votingStoryQueueKey,
+		votingStoryListKey,
 		accountKeeper,
 		backingKeeper,
 		challengeKeeper,
@@ -74,4 +75,9 @@ func NewKeeper(
 		paramStore.WithTypeTable(ParamTypeTable()),
 		app.NewUserList(storyKeeper.GetStoreKey()),
 	}
+}
+
+func (k Keeper) votingStoryList(ctx sdk.Context) list.List {
+	store := ctx.KVStore(k.votingStoryListKey)
+	return list.NewList(k.GetCodec(), store)
 }
