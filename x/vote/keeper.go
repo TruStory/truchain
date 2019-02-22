@@ -108,15 +108,14 @@ func (k Keeper) Create(
 		return 0, err
 	}
 
-	// make sure validation game has started
-	// TODO [shanev] fix me in https://github.com/TruStory/truchain/issues/387
-	// if currentStory.State != story.Voting {
-	// 	return 0, ErrGameNotStarted(storyID)
-	// }
+	// make sure voting has started
+	if currentStory.State != story.Voting {
+		return 0, ErrVotingNotStarted(storyID)
+	}
 
 	// check if this voter has already cast a vote
 	if k.voterList.Includes(ctx, k, currentStory.ID, creator) {
-		return 0, ErrDuplicateVoteForGame(currentStory.ID, creator)
+		return 0, ErrDuplicateVote(currentStory.ID, creator)
 	}
 
 	// check if user has the funds

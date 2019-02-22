@@ -14,7 +14,7 @@ const (
 
 	CodeNotFound           sdk.CodeType = 1201
 	CodeDuplicate          sdk.CodeType = 1202
-	CodeGameNotStarted     sdk.CodeType = 1203
+	CodeVotingNotStarted   sdk.CodeType = 1203
 	CodeUnknownVote        sdk.CodeType = 1204
 	CodeInvalidVote        sdk.CodeType = 1205
 	CodeRewardPoolNotEmpty sdk.CodeType = 1206
@@ -29,8 +29,8 @@ func ErrNotFound(id int64) sdk.Error {
 		"Vote with id "+fmt.Sprintf("%d", id)+" not found")
 }
 
-// ErrDuplicateVoteForGame throws when a vote already has been cast
-func ErrDuplicateVoteForGame(
+// ErrDuplicateVote throws when a vote already has been cast
+func ErrDuplicateVote(
 	gameID int64, user sdk.AccAddress) sdk.Error {
 
 	return sdk.NewError(
@@ -39,12 +39,12 @@ func ErrDuplicateVoteForGame(
 		"Vote for game "+fmt.Sprintf("%d", gameID)+" has already been cast by user "+user.String())
 }
 
-// ErrGameNotStarted is thrown when a vote is attempted on a story
+// ErrVotingNotStarted is thrown when a vote is attempted on a story
 // that hasn't begun the validation game yet
-func ErrGameNotStarted(storyID int64) sdk.Error {
+func ErrVotingNotStarted(storyID int64) sdk.Error {
 	return sdk.NewError(
 		DefaultCodespace,
-		CodeGameNotStarted,
+		CodeVotingNotStarted,
 		"Validation game not started for story: "+
 			fmt.Sprintf("%d", storyID))
 }
