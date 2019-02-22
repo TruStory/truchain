@@ -12,7 +12,6 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/bank"
 	amino "github.com/tendermint/go-amino"
-  services "github.com/TruStory/truchain/services"
 )
 
 const (
@@ -172,9 +171,6 @@ func (k Keeper) Create(
 
 	// add backing <-> story mapping
 	k.backingStoryList.Append(ctx, k, storyID, creator, backing.ID())
-
-  // add Push to notifier Queue
-  serices.PushNotify(push)
 
 	logger.Info(fmt.Sprintf(
 		"Backed story %d by user %s", storyID, creator.String()))

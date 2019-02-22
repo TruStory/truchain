@@ -14,6 +14,7 @@ import (
 	list "github.com/cosmos/cosmos-sdk/store"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	amino "github.com/tendermint/go-amino"
+  "github.com/TruStory/truchain/x/notifier"
 )
 
 const (
@@ -160,6 +161,13 @@ func (k Keeper) Create(
 	if err != nil {
 		return 0, err
 	}
+
+  // send notif to Story creator
+  _, err = notifier.NotifyStoryChallenged(storyID, argument)
+  if err != nil {
+    msg := fmt.Sprintf("Error NotifyStoryChallenged: %s", err)
+    logger.Error(msg)
+  }
 
 	msg := fmt.Sprintf("Challenged story %d with %s by %s",
 		storyID, amount.String(), creator.String())

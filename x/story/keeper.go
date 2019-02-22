@@ -36,7 +36,6 @@ type ReadKeeper interface {
 // WriteKeeper defines a module interface that facilities read/write access
 type WriteKeeper interface {
 	ReadKeeper
-  // [hschoenburg] TODO pushv1 hook
 
 	Create(
 		ctx sdk.Context,

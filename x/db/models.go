@@ -23,7 +23,11 @@ type Mutations interface {
 type Queries interface {
 	GenericQueries
 	TwitterProfileByAddress(addr string) (TwitterProfile, error)
+  DeviceTokenByAddress(addr string) (DeviceToken, error)
 }
+
+
+/////////////////// TWITTER PROFILE ///////////////////
 
 // TwitterProfile is the Twitter profile associated with an account
 type TwitterProfile struct {
@@ -63,6 +67,8 @@ func (c *Client) UpsertTwitterProfile(profile *TwitterProfile) error {
 	return err
 }
 
+/////////////////// DEVICE TOKEN  ///////////////////
+
 // DeviceToken is q device token associated with an account
 type DeviceToken struct {
 	ID      int64  `json:"id"`
@@ -70,18 +76,30 @@ type DeviceToken struct {
 	Token   string `json:"token"`
 }
 
-// DeviceToken implements `String`
 func (d DeviceToken) String() string {
 	return fmt.Sprintf("Device Token<%d %s %s>", d.ID, d.Address, d.Token)
 }
 
-// InsertDeviceToken implements `Datastore`.
-// Inserts a new DeviceToken for an address
 // Multiple tokens per address allow users to use multiple devices
-func (c *Client) InsertDeviceToken(token *DeviceToken) error {
-	_, err := c.Model(token).Insert()
+func (c *Client) InsertDeviceToken(deviceToken *DeviceToken) error {
+	_, err := c.Model(deviceToken).Insert()
 	return err
 }
+
+// Finds a Device Token by the given address
+func (c *Client) DeviceTokenByAddress(addr string) (DeviceToken, error) {
+	deviceToken := new(DeviceToken)
+	err := c.Model(deviceToken).Where("address = ?", addr).Select()
+	if err != nil {
+		return *deviceToken, err
+	}
+
+	return *deviceToken, nil
+}
+
+
+
+/////////////////// PUSH NOTIF ///////////////////
 
 // stores a push notif queued for delivery
 type PushNotif struct {
