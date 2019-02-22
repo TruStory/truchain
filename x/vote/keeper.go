@@ -47,8 +47,6 @@ type WriteKeeper interface {
 	Create(
 		ctx sdk.Context, storyID int64, amount sdk.Coin,
 		choice bool, argument string, creator sdk.AccAddress) (int64, sdk.Error)
-
-	NewResponseEndBlock(ctx sdk.Context) sdk.Tags
 }
 
 // Keeper data type storing keys to the key-value store

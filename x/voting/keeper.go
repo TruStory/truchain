@@ -1,0 +1,72 @@
+package voting
+
+import (
+	"github.com/TruStory/truchain/x/backing"
+	"github.com/TruStory/truchain/x/challenge"
+	"github.com/TruStory/truchain/x/story"
+	"github.com/TruStory/truchain/x/vote"
+	"github.com/cosmos/cosmos-sdk/x/auth"
+	"github.com/cosmos/cosmos-sdk/x/bank"
+
+	app "github.com/TruStory/truchain/types"
+	sdk "github.com/cosmos/cosmos-sdk/types"
+	amino "github.com/tendermint/go-amino"
+)
+
+const (
+	// StoreKey is string representation of the store key for voting
+	StoreKey = "voting"
+)
+
+// ReadKeeper defines a module interface that facilitates read only access to truchain data
+type ReadKeeper interface {
+	app.ReadKeeper
+}
+
+// WriteKeeper defines a module interface that facilities write only access to truchain data
+type WriteKeeper interface {
+	ReadKeeper
+
+	EndBlock(ctx sdk.Context) sdk.Tags
+}
+
+// Keeper data type storing keys to the key-value store
+type Keeper struct {
+	app.Keeper
+
+	votingStoryQueueKey sdk.StoreKey
+
+	accountKeeper   auth.AccountKeeper
+	backingKeeper   backing.WriteKeeper
+	challengeKeeper challenge.WriteKeeper
+	storyKeeper     story.WriteKeeper
+	voteKeeper      vote.WriteKeeper
+	bankKeeper      bank.Keeper
+
+	voterList app.UserList
+}
+
+// NewKeeper creates a new keeper with write and read access
+func NewKeeper(
+	storeKey sdk.StoreKey,
+	votingStoryQueueKey sdk.StoreKey,
+	accountKeeper auth.AccountKeeper,
+	backingKeeper backing.WriteKeeper,
+	challengeKeeper challenge.WriteKeeper,
+	storyKeeper story.WriteKeeper,
+	voteKeeper vote.WriteKeeper,
+	bankKeeper bank.Keeper,
+	codec *amino.Codec) Keeper {
+
+	return Keeper{
+		app.NewKeeper(codec, storeKey),
+		votingStoryQueueKey,
+		accountKeeper,
+		backingKeeper,
+		challengeKeeper,
+		storyKeeper,
+		voteKeeper,
+		bankKeeper,
+		app.NewUserList(storyKeeper.GetStoreKey()),
+	}
+}

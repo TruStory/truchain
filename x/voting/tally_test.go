@@ -1,4 +1,4 @@
-package vote
+package voting
 
 // func TestProcessGame(t *testing.T) {
 // 	ctx, _, k := fakeValidationGame()
