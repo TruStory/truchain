@@ -125,6 +125,7 @@ func mockDB() (sdk.Context, Keeper, c.Keeper) {
 		sk,
 		voteKeeper,
 		bankKeeper,
+		pk.Subspace(StoreKey),
 		codec)
 
 	return ctx, k, ck

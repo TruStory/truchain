@@ -4,6 +4,7 @@ import (
 	"github.com/TruStory/truchain/x/challenge"
 	"github.com/TruStory/truchain/x/expiration"
 	"github.com/TruStory/truchain/x/story"
+	"github.com/TruStory/truchain/x/voting"
 	"github.com/cosmos/cosmos-sdk/x/auth"
 	"github.com/cosmos/cosmos-sdk/x/bank"
 
@@ -21,6 +22,7 @@ type GenesisState struct {
 	ChallengeData  challenge.GenesisState  `json:"challenge"`
 	ExpirationData expiration.GenesisState `json:"expiration"`
 	StoryData      story.GenesisState      `json:"story"`
+	VotingData     voting.GenesisState     `json:"voting"`
 }
 
 // initChainer implements the custom application logic that the BaseApp will
@@ -56,6 +58,7 @@ func (app *TruChain) initChainer(ctx sdk.Context, req abci.RequestInitChain) abc
 	challenge.InitGenesis(ctx, app.challengeKeeper, genesisState.ChallengeData)
 	expiration.InitGenesis(ctx, app.expirationKeeper, genesisState.ExpirationData)
 	story.InitGenesis(ctx, app.storyKeeper, genesisState.StoryData)
+	voting.InitGenesis(ctx, app.votingKeeper, genesisState.VotingData)
 
 	return abci.ResponseInitChain{}
 }

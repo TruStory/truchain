@@ -7,6 +7,7 @@ import (
 	"github.com/TruStory/truchain/x/vote"
 	"github.com/cosmos/cosmos-sdk/x/auth"
 	"github.com/cosmos/cosmos-sdk/x/bank"
+	"github.com/cosmos/cosmos-sdk/x/params"
 
 	app "github.com/TruStory/truchain/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -28,6 +29,7 @@ type WriteKeeper interface {
 	ReadKeeper
 
 	EndBlock(ctx sdk.Context) sdk.Tags
+	SetParams(ctx sdk.Context, params Params)
 }
 
 // Keeper data type storing keys to the key-value store
@@ -42,6 +44,7 @@ type Keeper struct {
 	storyKeeper     story.WriteKeeper
 	voteKeeper      vote.WriteKeeper
 	bankKeeper      bank.Keeper
+	paramStore      params.Subspace
 
 	voterList app.UserList
 }
@@ -56,6 +59,7 @@ func NewKeeper(
 	storyKeeper story.WriteKeeper,
 	voteKeeper vote.WriteKeeper,
 	bankKeeper bank.Keeper,
+	paramStore params.Subspace,
 	codec *amino.Codec) Keeper {
 
 	return Keeper{
@@ -67,6 +71,7 @@ func NewKeeper(
 		storyKeeper,
 		voteKeeper,
 		bankKeeper,
+		paramStore.WithTypeTable(ParamTypeTable()),
 		app.NewUserList(storyKeeper.GetStoreKey()),
 	}
 }
