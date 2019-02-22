@@ -8,8 +8,8 @@ import (
 )
 
 func TestValidStartChallengeMsg(t *testing.T) {
-	ctx, _, sk, ck, _ := mockDB()
-	validStoryID := createFakeStory(ctx, sk, ck)
+	ctx, _, sk, _, _ := mockDB()
+	validStoryID := createFakeStory(ctx, sk)
 	validAmount := sdk.NewCoin("testcoin", sdk.NewInt(5))
 	validArugment := "I am against this story because, you know, just cuz."
 	validCreator := sdk.AccAddress([]byte{1, 2})

@@ -12,12 +12,12 @@ import (
 )
 
 func TestSubmitChallengeMsg(t *testing.T) {
-	ctx, k, sk, ck, bankKeeper := mockDB()
+	ctx, k, sk, _, bankKeeper := mockDB()
 
 	h := NewHandler(k)
 	assert.NotNil(t, h)
 
-	storyID := createFakeStory(ctx, sk, ck)
+	storyID := createFakeStory(ctx, sk)
 	amount := sdk.NewCoin(app.StakeDenom, sdk.NewInt(15000000000))
 	argument := "test argument"
 	creator := sdk.AccAddress([]byte{1, 2})
@@ -36,12 +36,12 @@ func TestSubmitChallengeMsg(t *testing.T) {
 }
 
 func TestSubmitChallengeMsg_ErrInsufficientFunds(t *testing.T) {
-	ctx, k, sk, ck, _ := mockDB()
+	ctx, k, sk, _, _ := mockDB()
 
 	h := NewHandler(k)
 	assert.NotNil(t, h)
 
-	storyID := createFakeStory(ctx, sk, ck)
+	storyID := createFakeStory(ctx, sk)
 	amount := sdk.NewCoin("testcoin", sdk.NewInt(5))
 	argument := "test argument"
 	creator := sdk.AccAddress([]byte{1, 2})
@@ -55,12 +55,12 @@ func TestSubmitChallengeMsg_ErrInsufficientFunds(t *testing.T) {
 }
 
 func TestSubmitChallengeMsg_ErrInsufficientChallengeAmount(t *testing.T) {
-	ctx, k, sk, ck, bankKeeper := mockDB()
+	ctx, k, sk, _, bankKeeper := mockDB()
 
 	h := NewHandler(k)
 	assert.NotNil(t, h)
 
-	storyID := createFakeStory(ctx, sk, ck)
+	storyID := createFakeStory(ctx, sk)
 	amount := sdk.NewCoin("trudex", sdk.NewInt(1))
 	argument := "test argument"
 	creator := sdk.AccAddress([]byte{1, 2})
