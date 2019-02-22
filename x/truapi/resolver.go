@@ -98,7 +98,7 @@ func (ta *TruAPI) backingsResolver(
 	return *backings
 }
 
-func (ta *TruAPI) backingTotalResolver(_ context.Context, q story.Story) sdk.Coin {
+func (ta *TruAPI) backingPoolResolver(_ context.Context, q story.Story) sdk.Coin {
 	res := ta.RunQuery("backings/totalAmountByStoryID", app.QueryByIDParams{ID: q.ID})
 
 	if res.Code != 0 {
@@ -108,6 +108,44 @@ func (ta *TruAPI) backingTotalResolver(_ context.Context, q story.Story) sdk.Coi
 
 	amount := new(sdk.Coin)
 	err := amino.UnmarshalJSON(res.Value, amount)
+	if err != nil {
+		panic(err)
+	}
+
+	return *amount
+}
+
+func (ta *TruAPI) challengePoolResolver(_ context.Context, q story.Story) sdk.Coin {
+	res := ta.RunQuery("challenges/totalAmountByStoryID", app.QueryByIDParams{ID: q.ID})
+
+	if res.Code != 0 {
+		fmt.Println("Resolver err: ", res)
+		return sdk.Coin{}
+	}
+
+	amount := new(sdk.Coin)
+	err := amino.UnmarshalJSON(res.Value, amount)
+	if err != nil {
+		panic(err)
+	}
+
+	return *amount
+}
+
+func (ta *TruAPI) votingPoolResolver(_ context.Context, q story.Story) sdk.Coin {
+
+	res := ta.RunQuery(
+		path.Join(vote.QueryPath, vote.QueryTotalVoteAmountByStoryID),
+		app.QueryByIDParams{ID: q.ID},
+	)
+
+	if res.Code != 0 {
+		fmt.Println("Resolver err: ", res)
+		return sdk.Coin{}
+	}
+
+	amount := new(sdk.Coin)
+	err := json.Unmarshal(res.Value, amount)
 	if err != nil {
 		panic(err)
 	}
@@ -322,25 +360,4 @@ func (ta *TruAPI) votesResolver(
 	}
 
 	return *tokenVotes
-}
-
-func (ta *TruAPI) votesTotalAmountResolver(_ context.Context, q story.Story) sdk.Coin {
-
-	res := ta.RunQuery(
-		path.Join(vote.QueryPath, vote.QueryTotalVoteAmountByStoryID),
-		app.QueryByIDParams{ID: q.ID},
-	)
-
-	if res.Code != 0 {
-		fmt.Println("Resolver err: ", res)
-		return sdk.Coin{}
-	}
-
-	amount := new(sdk.Coin)
-	err := json.Unmarshal(res.Value, amount)
-	if err != nil {
-		panic(err)
-	}
-
-	return *amount
 }
