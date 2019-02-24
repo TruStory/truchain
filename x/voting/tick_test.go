@@ -16,13 +16,6 @@ func TestEndBlock(t *testing.T) {
 	assert.Equal(t, sdk.Tags{}, tags)
 }
 
-func Test_processVotingStoryListNotMeetQuorum(t *testing.T) {
-	ctx, _, k := fakeValidationGame()
-
-	err := k.processVotingStoryQueue(ctx)
-	assert.Nil(t, err)
-}
-
 func Test_processVotingStoryListNotMeetVoteEndTime(t *testing.T) {
 	ctx, _, k := fakeValidationGame()
 
