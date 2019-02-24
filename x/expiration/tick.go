@@ -41,6 +41,7 @@ func (k Keeper) handleExpiredStories(ctx sdk.Context) sdk.Error {
 		return err
 	}
 
+	// TODO: don't do this twice.. check if quorum is not met
 	err = k.returnFundsToChallengers(ctx, storyID)
 	if err != nil {
 		return err

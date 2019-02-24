@@ -19,7 +19,7 @@ func (k Keeper) EndBlock(ctx sdk.Context) sdk.Tags {
 
 // ============================================================================
 
-// Process voting story queue to see if a validation game has ended
+// Recursively process voting story queue to see if voting has ended
 func (k Keeper) processVotingStoryQueue(ctx sdk.Context) sdk.Error {
 	votingStoryQueue := k.votingStoryQueue(ctx)
 
@@ -39,11 +39,13 @@ func (k Keeper) processVotingStoryQueue(ctx sdk.Context) sdk.Error {
 	}
 
 	if ctx.BlockHeader().Time.Before(story.VotingEndTime) {
-		// wait until next
+		// no stories to process
+		// check again after next block
 		return nil
 	}
 
-	// only left with voting ended stories..
+	// only left with voting ended stories that may or may not
+	// have met the quorum...
 
 	quorum, err := k.quorum(ctx, storyID)
 	if err != nil {
@@ -55,10 +57,13 @@ func (k Keeper) processVotingStoryQueue(ctx sdk.Context) sdk.Error {
 
 		err = k.storyKeeper.EndVotingPeriod(ctx, storyID, false, false)
 		if err != nil {
-			panic(err)
+			return err
 		}
 
-		k.returnFunds(ctx, storyID)
+		err = k.returnFunds(ctx, storyID)
+		if err != nil {
+			return err
+		}
 
 		// process next story
 		return k.processVotingStoryQueue(ctx)
@@ -100,6 +105,10 @@ func (k Keeper) quorum(ctx sdk.Context, storyID int64) (total int, err sdk.Error
 
 func (k Keeper) returnFunds(ctx sdk.Context, storyID int64) sdk.Error {
 	logger := ctx.Logger().With("module", "voting")
+
+	// TODO: do backers get back their principle too??
+	// check expiration time...
+	// basically, don't return funds twice...
 
 	// get challenges
 	challenges, err := k.challengeKeeper.ChallengesByStoryID(ctx, storyID)
