@@ -154,7 +154,7 @@ Most chain operations are executed based on changes to data. Lists and queues ar
 
 1. Story Queue
 
-A queue of all new stories that haven't expired or gone through voting yet.
+A queue of all new stories that haven't expired or gone through voting yet. These are stories in the pending state.
 
 2. Expired Story Queue
 

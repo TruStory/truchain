@@ -47,7 +47,7 @@ func (k Keeper) verifyStory(ctx sdk.Context, storyID int64) sdk.Error {
 	}
 
 	// update story state
-	err = k.storyKeeper.EndVotingPeriod(ctx, storyID, confirmed, true)
+	err = k.storyKeeper.EndVotingPeriod(ctx, storyID, confirmed)
 	if err != nil {
 		return err
 	}

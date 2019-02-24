@@ -11,7 +11,6 @@ import (
 var (
 	KeyChallengerRewardPoolShare = []byte("challengerRewardPoolShare")
 	KeyMajorityPercent           = []byte("majorityPercent")
-	KeyQuorum                    = []byte("quorum")
 )
 
 // Params holds parameters for voting
@@ -26,7 +25,6 @@ func DefaultParams() Params {
 	return Params{
 		ChallengerRewardPoolShare: sdk.NewDecWithPrec(75, 2), // 75%
 		MajorityPercent:           sdk.NewDecWithPrec(51, 2), // 51%
-		Quorum:                    3,
 	}
 }
 
@@ -35,7 +33,6 @@ func (p *Params) KeyValuePairs() params.KeyValuePairs {
 	return params.KeyValuePairs{
 		{Key: KeyChallengerRewardPoolShare, Value: &p.ChallengerRewardPoolShare},
 		{Key: KeyMajorityPercent, Value: &p.MajorityPercent},
-		{Key: KeyQuorum, Value: &p.Quorum},
 	}
 }
 
@@ -46,11 +43,6 @@ func ParamTypeTable() params.TypeTable {
 
 func (k Keeper) challengerRewardPoolShare(ctx sdk.Context) (res sdk.Dec) {
 	k.paramStore.Get(ctx, KeyChallengerRewardPoolShare, &res)
-	return
-}
-
-func (k Keeper) minQuorum(ctx sdk.Context) (res int) {
-	k.paramStore.Get(ctx, KeyQuorum, &res)
 	return
 }
 

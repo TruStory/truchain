@@ -1,9 +1,6 @@
 package voting
 
 import (
-	"fmt"
-
-	app "github.com/TruStory/truchain/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
@@ -44,32 +41,7 @@ func (k Keeper) processVotingStoryQueue(ctx sdk.Context) sdk.Error {
 		return nil
 	}
 
-	// only left with voting ended stories that may or may not
-	// have met the quorum...
-
-	quorum, err := k.quorum(ctx, storyID)
-	if err != nil {
-		return err
-	}
-
-	if quorum < k.minQuorum(ctx) {
-		votingStoryQueue.Pop()
-
-		err = k.storyKeeper.EndVotingPeriod(ctx, storyID, false, false)
-		if err != nil {
-			return err
-		}
-
-		err = k.returnFunds(ctx, storyID)
-		if err != nil {
-			return err
-		}
-
-		// process next story
-		return k.processVotingStoryQueue(ctx)
-	}
-
-	// only left with voting ended + met quorum stories
+	// only left with voting ended stories
 	votingStoryQueue.Pop()
 
 	err = k.verifyStory(ctx, storyID)
@@ -79,69 +51,4 @@ func (k Keeper) processVotingStoryQueue(ctx sdk.Context) sdk.Error {
 
 	// process next story
 	return k.processVotingStoryQueue(ctx)
-}
-
-// quorum returns the total count of backings, challenges, votes
-func (k Keeper) quorum(ctx sdk.Context, storyID int64) (total int, err sdk.Error) {
-	backings, err := k.backingKeeper.BackingsByStoryID(ctx, storyID)
-	if err != nil {
-		return
-	}
-
-	challenges, err := k.challengeKeeper.ChallengesByStoryID(ctx, storyID)
-	if err != nil {
-		return
-	}
-
-	tokenVotes, err := k.voteKeeper.TokenVotesByStoryID(ctx, storyID)
-	if err != nil {
-		return
-	}
-
-	total = len(backings) + len(challenges) + len(tokenVotes)
-
-	return total, nil
-}
-
-func (k Keeper) returnFunds(ctx sdk.Context, storyID int64) sdk.Error {
-	logger := ctx.Logger().With("module", "voting")
-
-	// TODO: do backers get back their principle too??
-	// check expiration time...
-	// basically, don't return funds twice...
-
-	// get challenges
-	challenges, err := k.challengeKeeper.ChallengesByStoryID(ctx, storyID)
-	if err != nil {
-		return err
-	}
-
-	// get token votes
-	tokenVotes, err := k.voteKeeper.TokenVotesByStoryID(ctx, storyID)
-	if err != nil {
-		return err
-	}
-
-	// collate votes
-	var votes []app.Voter
-	for _, v := range challenges {
-		votes = append(votes, v)
-	}
-	for _, v := range tokenVotes {
-		votes = append(votes, v)
-	}
-
-	// return funds
-	for _, v := range votes {
-		_, _, err = k.bankKeeper.AddCoins(
-			ctx, v.Creator(), sdk.Coins{v.Amount()})
-		if err != nil {
-			return err
-		}
-	}
-
-	logger.Info(fmt.Sprintf(
-		"Returned funds for %d users for story %d", len(votes), storyID))
-
-	return nil
 }
