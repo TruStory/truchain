@@ -12,7 +12,7 @@ import (
 func Test_handleExpiredStoriesEmptyQueue(t *testing.T) {
 	ctx, k, _, _, _, _ := mockDB()
 
-	err := k.handleExpiredStories(ctx)
+	err := k.processExpiredStoryQueue(ctx)
 	assert.Nil(t, err)
 }
 
@@ -38,7 +38,7 @@ func Test_handleExpiredStories(t *testing.T) {
 	// fake expired story queue
 	k.expiredStoryQueue(ctx).Push(storyID)
 
-	err = k.handleExpiredStories(ctx)
+	err = k.processExpiredStoryQueue(ctx)
 	assert.Nil(t, err)
 
 	// check expiration for backer
