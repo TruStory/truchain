@@ -41,9 +41,9 @@ func (k Keeper) processStoryQueue(ctx sdk.Context, storyQueue queue.Queue) sdk.E
 
 	logger.Info("Processing " + story.String())
 
-	// if the state of the story has changed to voting,
+	// if the state of the story has changed to challenged,
 	// add it to the voting story queue to be handled later
-	if story.State == Voting {
+	if story.State == Challenged {
 		logger.Info("Voting begun for " + story.String())
 		k.votingStoryQueue(ctx).Push(storyID)
 

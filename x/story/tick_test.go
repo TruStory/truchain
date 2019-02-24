@@ -26,7 +26,7 @@ func Test_processStoryQueue(t *testing.T) {
 	assert.Nil(t, err)
 
 	story, _ := storyKeeper.Story(ctx, 5)
-	assert.Equal(t, New, story.State)
+	assert.Equal(t, Pending, story.State)
 
 	// fake a future block time to expire story
 	expiredTime := time.Now().Add(DefaultParams().ExpireDuration)

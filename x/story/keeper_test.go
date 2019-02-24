@@ -26,7 +26,7 @@ func TestAddGetStory(t *testing.T) {
 		Body:       "Body of story.",
 		CategoryID: int64(1),
 		Creator:    sdk.AccAddress([]byte{1, 2}),
-		State:      New,
+		State:      Pending,
 		Type:       Default,
 	}
 
@@ -50,11 +50,11 @@ func TestChallenge(t *testing.T) {
 
 	storyID := createFakeStory(ctx, sk, ck)
 	story, _ := sk.Story(ctx, storyID)
-	assert.Equal(t, New, story.State, "state should match")
+	assert.Equal(t, Pending, story.State, "state should match")
 
 	sk.StartVotingPeriod(ctx, storyID)
 	story, _ = sk.Story(ctx, storyID)
-	assert.Equal(t, Voting, story.State, "state should match")
+	assert.Equal(t, Challenged, story.State, "state should match")
 }
 
 func TestUpdateStory(t *testing.T) {
@@ -63,7 +63,7 @@ func TestUpdateStory(t *testing.T) {
 	storyID := createFakeStory(ctx, sk, ck)
 	story, _ := sk.Story(ctx, storyID)
 
-	story.State = Voting
+	story.State = Challenged
 	story.Body = "akjdsfhadskf"
 
 	sk.UpdateStory(ctx, story)
@@ -100,9 +100,9 @@ func TestFeedWithCategory(t *testing.T) {
 	stories, _ := sk.FeedByCategoryID(ctx, 1)
 
 	assert.Equal(t, 5, len(stories))
-	assert.Equal(t, Voting, stories[0].State)
-	assert.Equal(t, Voting, stories[1].State)
-	assert.Equal(t, New, stories[2].State)
+	assert.Equal(t, Challenged, stories[0].State)
+	assert.Equal(t, Challenged, stories[1].State)
+	assert.Equal(t, Pending, stories[2].State)
 }
 
 func TestFeedTrending(t *testing.T) {
