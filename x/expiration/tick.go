@@ -16,7 +16,11 @@ func (k Keeper) EndBlock(ctx sdk.Context) sdk.Tags {
 	return sdk.EmptyTags()
 }
 
-// recursively process expired stories
+// processExpiredStoryQueue recursively process expired stories.
+// If a story id gets in this queue, it means that it never went
+// through a voting period. Therefore, rewards are distributed to
+// backers, and funds are returned to challengers. There are no
+// voters because the voting period never started.
 func (k Keeper) processExpiredStoryQueue(ctx sdk.Context) sdk.Error {
 	logger := ctx.Logger().With("module", "expiration")
 
@@ -41,7 +45,6 @@ func (k Keeper) processExpiredStoryQueue(ctx sdk.Context) sdk.Error {
 		return err
 	}
 
-	// TODO: don't do this twice.. check if quorum is not met
 	err = k.returnFundsToChallengers(ctx, storyID)
 	if err != nil {
 		return err
