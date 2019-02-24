@@ -57,12 +57,12 @@ func queryBackingAmountByStoryID(ctx sdk.Context, req abci.RequestQuery, k ReadK
 		return
 	}
 
-	backingPool, err := k.TotalBackingAmount(ctx, params.ID)
+	backingTotal, err := k.TotalBackingAmount(ctx, params.ID)
 	if err != nil {
 		return
 	}
 
-	return app.MustMarshal(backingPool), nil
+	return app.MustMarshal(backingTotal), nil
 }
 
 func queryByStoryID(
