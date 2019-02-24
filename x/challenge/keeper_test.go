@@ -180,5 +180,5 @@ func Test_checkThreshold(t *testing.T) {
 	assert.Nil(t, err)
 
 	story, _ := storyKeeper.Story(ctx, storyID)
-	assert.Equal(t, story.State.String(), "Voting")
+	assert.Equal(t, story.State.String(), "Challenged")
 }

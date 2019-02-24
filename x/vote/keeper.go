@@ -107,7 +107,7 @@ func (k Keeper) Create(
 	}
 
 	// make sure voting has started
-	if currentStory.State != story.Voting {
+	if currentStory.State != story.Challenged {
 		return 0, ErrVotingNotStarted(storyID)
 	}
 
