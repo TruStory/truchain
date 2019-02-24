@@ -9,7 +9,7 @@ import (
 
 // EndBlock is called at the end of every block
 func (k Keeper) EndBlock(ctx sdk.Context) sdk.Tags {
-	err := k.handleExpiredStories(ctx)
+	err := k.processExpiredStoryQueue(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -17,7 +17,7 @@ func (k Keeper) EndBlock(ctx sdk.Context) sdk.Tags {
 }
 
 // recursively process expired stories
-func (k Keeper) handleExpiredStories(ctx sdk.Context) sdk.Error {
+func (k Keeper) processExpiredStoryQueue(ctx sdk.Context) sdk.Error {
 	logger := ctx.Logger().With("module", "expiration")
 
 	expiredStoryQueue := k.expiredStoryQueue(ctx)
@@ -48,7 +48,7 @@ func (k Keeper) handleExpiredStories(ctx sdk.Context) sdk.Error {
 	}
 
 	// handle next expired story
-	return k.handleExpiredStories(ctx)
+	return k.processExpiredStoryQueue(ctx)
 }
 
 func (k Keeper) distributeEarningsToBackers(ctx sdk.Context, storyID int64) sdk.Error {
