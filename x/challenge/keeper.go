@@ -219,6 +219,7 @@ func (k Keeper) Tally(
 func (k Keeper) TotalChallengeAmount(ctx sdk.Context, storyID int64) (
 	totalCoin sdk.Coin, err sdk.Error) {
 
+	logger := ctx.Logger().With("module", "challenge")
 	totalAmount := sdk.NewCoin(app.StakeDenom, sdk.ZeroInt())
 
 	err = k.challengeList.Map(ctx, k, storyID, func(id int64) sdk.Error {
@@ -234,6 +235,8 @@ func (k Keeper) TotalChallengeAmount(ctx sdk.Context, storyID int64) (
 	if err != nil {
 		return
 	}
+
+	logger.Info(fmt.Sprintf("Total Challenge Amount %s", totalAmount))
 
 	return totalAmount, nil
 }
