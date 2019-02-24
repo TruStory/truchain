@@ -17,7 +17,6 @@ var (
 type Params struct {
 	ChallengerRewardPoolShare sdk.Dec
 	MajorityPercent           sdk.Dec
-	Quorum                    int
 }
 
 // DefaultParams is the default parameters for voting
