@@ -42,12 +42,3 @@ func Test_processVotingStoryListVerifyStory(t *testing.T) {
 	err := k.processVotingStoryQueue(ctx)
 	assert.Nil(t, err)
 }
-
-func Test_quorum(t *testing.T) {
-	ctx, votes, k := fakeValidationGame()
-
-	storyID := int64(1)
-	totalBCV, _ := k.quorum(ctx, storyID)
-
-	assert.Equal(t, len(votes.falseVotes)+len(votes.trueVotes), totalBCV)
-}
