@@ -99,7 +99,7 @@ func (ta *TruAPI) backingsResolver(
 }
 
 func (ta *TruAPI) backingPoolResolver(_ context.Context, q story.Story) sdk.Coin {
-	res := ta.RunQuery("backings/totalAmountByStoryID", app.QueryByIDParams{ID: q.ID})
+	res := ta.RunQuery(path.Join(backing.QueryPath, backing.QueryBackingAmountByStoryID), app.QueryByIDParams{ID: q.ID})
 
 	if res.Code != 0 {
 		fmt.Println("Resolver err: ", res)
@@ -116,7 +116,7 @@ func (ta *TruAPI) backingPoolResolver(_ context.Context, q story.Story) sdk.Coin
 }
 
 func (ta *TruAPI) challengePoolResolver(_ context.Context, q story.Story) sdk.Coin {
-	res := ta.RunQuery("challenges/totalAmountByStoryID", app.QueryByIDParams{ID: q.ID})
+	res := ta.RunQuery(path.Join(challenge.QueryPath, challenge.QueryChallengeAmountByStoryID), app.QueryByIDParams{ID: q.ID})
 
 	if res.Code != 0 {
 		fmt.Println("Resolver err: ", res)
