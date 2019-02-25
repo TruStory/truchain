@@ -77,12 +77,12 @@ func queryChallengeThresholdByStoryID(ctx sdk.Context, req abci.RequestQuery, k 
 		return
 	}
 
-	challengePool, err := k.ChallengeThreshold(ctx, params.ID)
+	challengeThreshold, err := k.ChallengeThreshold(ctx, params.ID)
 	if err != nil {
 		return
 	}
 
-	return app.MustMarshal(challengePool), nil
+	return app.MustMarshal(challengeThreshold), nil
 }
 
 func queryByStoryIDAndCreator(
