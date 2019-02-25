@@ -34,6 +34,7 @@ type ReadKeeper interface {
 	FeedByCategoryID(
 		ctx sdk.Context,
 		catID int64) (stories []Story, err sdk.Error)
+	GetParams(ctx sdk.Context) Params
 	Stories(ctx sdk.Context) (stories []Story)
 	StoriesByCategoryID(ctx sdk.Context, catID int64) (stories []Story, err sdk.Error)
 	Story(ctx sdk.Context, storyID int64) (Story, sdk.Error)

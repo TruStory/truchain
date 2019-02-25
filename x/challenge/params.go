@@ -45,6 +45,20 @@ func ParamTypeTable() params.TypeTable {
 	return params.NewTypeTable().RegisterParamSet(&Params{})
 }
 
+// GetParams gets the genesis params for the type
+func (k Keeper) GetParams(ctx sdk.Context) Params {
+	var paramSet Params
+	k.paramStore.GetParamSet(ctx, &paramSet)
+	return paramSet
+}
+
+// SetParams sets the params for the expiration module
+func (k Keeper) SetParams(ctx sdk.Context, params Params) {
+	logger := ctx.Logger().With("module", "challenge")
+	k.paramStore.SetParamSet(ctx, &params)
+	logger.Info(fmt.Sprintf("Loaded challenge module params: %+v", params))
+}
+
 func (k Keeper) challengeToBackingRatio(ctx sdk.Context) (res sdk.Dec) {
 	k.paramStore.Get(ctx, KeyChallengeToBackingRatio, &res)
 	return
@@ -58,11 +72,4 @@ func (k Keeper) minChallengeThreshold(ctx sdk.Context) (res sdk.Int) {
 func (k Keeper) minChallengeStake(ctx sdk.Context) (res sdk.Int) {
 	k.paramStore.Get(ctx, KeyMinChallengeStake, &res)
 	return
-}
-
-// SetParams sets the params for the expiration module
-func (k Keeper) SetParams(ctx sdk.Context, params Params) {
-	logger := ctx.Logger().With("module", "challenge")
-	k.paramStore.SetParamSet(ctx, &params)
-	logger.Info(fmt.Sprintf("Loaded challenge module params: %+v", params))
 }

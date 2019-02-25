@@ -31,6 +31,7 @@ type ReadKeeper interface {
 		ctx sdk.Context,
 		storyID int64,
 		creator sdk.AccAddress) (challenge Challenge, err sdk.Error)
+	GetParams(ctx sdk.Context) Params
 	Tally(ctx sdk.Context, storyID int64) (falseVotes []Challenge, err sdk.Error)
 	TotalChallengeAmount(ctx sdk.Context, storyID int64) (
 		totalCoin sdk.Coin, err sdk.Error)
