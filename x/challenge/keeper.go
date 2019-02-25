@@ -34,6 +34,7 @@ type ReadKeeper interface {
 	Tally(ctx sdk.Context, storyID int64) (falseVotes []Challenge, err sdk.Error)
 	TotalChallengeAmount(ctx sdk.Context, storyID int64) (
 		totalCoin sdk.Coin, err sdk.Error)
+	ChallengeThreshold(ctx sdk.Context, storyID int64) (sdk.Coin, sdk.Error)
 }
 
 // WriteKeeper defines a module interface that facilities write only access to truchain data
@@ -254,7 +255,10 @@ func (k Keeper) checkThreshold(ctx sdk.Context, storyID int64) sdk.Error {
 		return err
 	}
 
-	challengeThreshold := k.challengeThreshold(ctx, backingPool)
+	challengeThreshold, err := k.ChallengeThreshold(ctx, storyID)
+	if err != nil {
+		return err
+	}
 
 	logger.Info(fmt.Sprintf(
 		"Backing pool: %s, challenge pool: %s, threshold: %s",
@@ -273,9 +277,15 @@ func (k Keeper) checkThreshold(ctx sdk.Context, storyID int64) sdk.Error {
 	return nil
 }
 
-func (k Keeper) challengeThreshold(ctx sdk.Context, totalBackingAmount sdk.Coin) sdk.Coin {
+// ChallengeThreshold returns the challenge threshold for a story
+func (k Keeper) ChallengeThreshold(ctx sdk.Context, storyID int64) (sdk.Coin, sdk.Error) {
+	backingPool, err := k.backingKeeper.TotalBackingAmount(ctx, storyID)
+	if err != nil {
+		return sdk.NewCoin(app.StakeDenom, sdk.ZeroInt()), err
+	}
+
 	// calculate challenge threshold amount (based on total backings)
-	totalBackingDec := sdk.NewDecFromInt(totalBackingAmount.Amount)
+	totalBackingDec := sdk.NewDecFromInt(backingPool.Amount)
 	challengeThresholdAmount := totalBackingDec.
 		Mul(k.challengeToBackingRatio(ctx)).
 		TruncateInt()
@@ -283,8 +293,8 @@ func (k Keeper) challengeThreshold(ctx sdk.Context, totalBackingAmount sdk.Coin)
 	// challenge threshold can't be less than min challenge stake
 	minChallengeThreshold := k.minChallengeThreshold(ctx)
 	if challengeThresholdAmount.LT(minChallengeThreshold) {
-		return sdk.NewCoin(totalBackingAmount.Denom, minChallengeThreshold)
+		return sdk.NewCoin(backingPool.Denom, minChallengeThreshold), nil
 	}
 
-	return sdk.NewCoin(totalBackingAmount.Denom, challengeThresholdAmount)
+	return sdk.NewCoin(backingPool.Denom, challengeThresholdAmount), nil
 }

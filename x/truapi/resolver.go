@@ -228,7 +228,7 @@ func (ta *TruAPI) challengesResolver(
 }
 
 func (ta *TruAPI) challengeThresholdResolver(_ context.Context, q story.Story) sdk.Coin {
-	res := ta.RunQuery("games/challengeThresholdByStoryID", app.QueryByIDParams{ID: q.ID})
+	res := ta.RunQuery(path.Join(challenge.QueryPath, challenge.QueryChallengeThresholdByStoryID), app.QueryByIDParams{ID: q.ID})
 
 	if res.Code != 0 {
 		fmt.Println("Resolver err: ", res)
