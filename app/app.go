@@ -77,13 +77,14 @@ type TruChain struct {
 	paramsKeeper        params.Keeper
 
 	// access truchain multistore
-	backingKeeper    backing.WriteKeeper
-	categoryKeeper   category.WriteKeeper
-	challengeKeeper  challenge.WriteKeeper
-	expirationKeeper expiration.Keeper
-	storyKeeper      story.WriteKeeper
-	voteKeeper       vote.WriteKeeper
-	votingKeeper     voting.WriteKeeper
+	backingKeeper      backing.WriteKeeper
+	categoryKeeper     category.WriteKeeper
+	challengeKeeper    challenge.WriteKeeper
+	clientParamsKeeper clientParams.Keeper
+	expirationKeeper   expiration.Keeper
+	storyKeeper        story.WriteKeeper
+	voteKeeper         vote.WriteKeeper
+	votingKeeper       voting.WriteKeeper
 
 	// state to run api
 	blockCtx     *sdk.Context
@@ -221,6 +222,14 @@ func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *T
 		codec,
 	)
 
+	app.clientParamsKeeper = clientParams.NewKeeper(
+		app.backingKeeper,
+		app.challengeKeeper,
+		app.expirationKeeper,
+		app.storyKeeper,
+		app.votingKeeper,
+	)
+
 	// The AnteHandler handles signature verification and transaction pre-processing
 	// TODO [shanev]: see https://github.com/TruStory/truchain/issues/364
 	// Add this back after fixing issues with signature verification
@@ -245,7 +254,7 @@ func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *T
 		AddRoute(backing.QueryPath, backing.NewQuerier(app.backingKeeper)).
 		AddRoute(challenge.QueryPath, challenge.NewQuerier(app.challengeKeeper)).
 		AddRoute(vote.QueryPath, vote.NewQuerier(app.voteKeeper)).
-		AddRoute(clientParams.QueryPath, clientParams.NewQuerier())
+		AddRoute(clientParams.QueryPath, clientParams.NewQuerier(app.clientParamsKeeper))
 
 	// The initChainer handles translating the genesis.json file into initial state for the network
 	app.SetInitChainer(app.initChainer)

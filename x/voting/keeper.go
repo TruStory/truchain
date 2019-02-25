@@ -23,6 +23,8 @@ const (
 // ReadKeeper defines a module interface that facilitates read only access to truchain data
 type ReadKeeper interface {
 	app.ReadKeeper
+
+	GetParams(ctx sdk.Context) Params
 }
 
 // WriteKeeper defines a module interface that facilities write only access to truchain data

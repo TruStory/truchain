@@ -125,6 +125,20 @@ func (ta *TruAPI) RegisterResolvers() {
 		"backingPeriodWeight":    func(_ context.Context, p params.Params) string { return p.BackingPeriodWeight.String() },
 		"backingMinInterestRate": func(_ context.Context, p params.Params) string { return p.BackingMinInterestRate.String() },
 		"backingMaxInterestRate": func(_ context.Context, p params.Params) string { return p.BackingMaxInterestRate.String() },
+
+		"storyExpireDuration": func(_ context.Context, p params.Params) string { return p.StoryParams.ExpireDuration.String() },
+		"storyMinLength":      func(_ context.Context, p params.Params) int { return p.StoryParams.MinStoryLength },
+		"storyMaxLength":      func(_ context.Context, p params.Params) int { return p.StoryParams.MaxStoryLength },
+		"storyVotingDuration": func(_ context.Context, p params.Params) string { return p.StoryParams.VotingDuration.String() },
+
+		"challengeMinStake": func(_ context.Context, p params.Params) string { return p.ChallengeParams.MinChallengeStake.String() },
+		"challengeThresholdPercent": func(_ context.Context, p params.Params) string {
+			return p.ChallengeParams.ChallengeToBackingRatio.String()
+		},
+
+		"challengeRewardRatio": func(_ context.Context, p params.Params) string {
+			return p.VotingParams.ChallengerRewardPoolShare.String()
+		},
 	})
 
 	ta.GraphQLClient.RegisterQueryResolver("stories", ta.allStoriesResolver)
