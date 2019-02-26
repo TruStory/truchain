@@ -32,7 +32,7 @@ func TestCreateGetVote(t *testing.T) {
 	assert.Equal(t, voteID, vote.ID())
 }
 
-func TestInValidCreateVoteMsg(t *testing.T) {
+func TestInValidCreateVoteMsgArgumentTooShort(t *testing.T) {
 	ctx, k, ck := mockDB()
 
 	storyID := createFakeStory(ctx, k.storyKeeper, ck)
@@ -45,7 +45,24 @@ func TestInValidCreateVoteMsg(t *testing.T) {
 	argument := "too short"
 	_, err := k.Create(ctx, storyID, amount, true, argument, creator)
 	assert.NotNil(t, err)
-	assert.Equal(t, stake.ErrInvalidArgumentMsg(argument).Code(), err.Code())
+	assert.Equal(t, stake.ErrArgumentTooShortMsg(argument, len(argument)).Code(), err.Code())
+}
+
+func TestInValidCreateVoteMsgArgumentTooLong(t *testing.T) {
+	ctx, k, ck := mockDB()
+
+	storyID := createFakeStory(ctx, k.storyKeeper, ck)
+	amount := sdk.NewCoin(app.StakeDenom, sdk.NewInt(15000000000))
+	creator := sdk.AccAddress([]byte{1, 2})
+
+	// give user some funds
+	k.bankKeeper.AddCoins(ctx, creator, sdk.Coins{amount.Plus(amount)})
+
+	argument := "Escaping predators, digestion and other animal activities—including those of humans—require oxygen. But that essential ingredient is no longer so easy for marine life to obtain, several new studies reveal. In the past decade ocean oxygen levels have taken a dive—an alarming trend that is linked to climate change, says Andreas Oschlies, an oceanographer at the Helmholtz Center for Ocean Research Kiel in Germany, whose team tracks ocean oxygen levels worldwide. “We were surprised by the intensity of the changes we saw, how rapidly oxygen is going down in the ocean and how large the effects on marine ecosystems are,” he says. It is no surprise to scientists that warming oceans are losing oxygen, but the scale of the dip calls for urgent attention, Oschlies says. Oxygen levels in some tropical regions have dropped by a startling 40 percent in the last 50 years, some recent studies reveal. Levels have dropped more subtly elsewhere, with an average loss of 2 percent globally. Ocean animals large and small, however, respond to even slight changes in oxygen by seeking refuge in higher oxygen zones or by adjusting behavior, Oschlies and others in his field have found. These adjustments can expose animals to new predators or force them into food-scarce regions. Climate change already poses serious problems for marine life, such as ocean acidification, but deoxygenation is the most pressing issue facing sea animals today, Oschlies says. After all, he says, “they all have to breathe.”"
+	_, err := k.Create(ctx, storyID, amount, true, argument, creator)
+	assert.NotNil(t, err)
+	spew.Dump(err)
+	assert.Equal(t, stake.ErrArgumentTooLongMsg(len(argument)).Code(), err.Code())
 }
 
 func TestGetVotesByGameID(t *testing.T) {

@@ -28,8 +28,12 @@ func (k Keeper) ValidateArgument(ctx sdk.Context, argument string) sdk.Error {
 	minArgumentLength := k.GetParams(ctx).MinArgumentLength
 	maxArgumentLength := k.GetParams(ctx).MaxArgumentLength
 
-	if len > 0 && (len < minArgumentLength || len > maxArgumentLength) {
-		return ErrInvalidArgumentMsg(argument)
+	if len > 0 && (len < minArgumentLength) {
+		return ErrArgumentTooShortMsg(argument, minArgumentLength)
+	}
+
+	if len > 0 && (len > maxArgumentLength) {
+		return ErrArgumentTooLongMsg(maxArgumentLength)
 	}
 
 	return nil
