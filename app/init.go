@@ -1,15 +1,15 @@
 package app
 
 import (
+	"github.com/TruStory/truchain/x/category"
 	"github.com/TruStory/truchain/x/challenge"
 	"github.com/TruStory/truchain/x/expiration"
+	"github.com/TruStory/truchain/x/stake"
 	"github.com/TruStory/truchain/x/story"
 	"github.com/TruStory/truchain/x/voting"
+	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth"
 	"github.com/cosmos/cosmos-sdk/x/bank"
-
-	"github.com/TruStory/truchain/x/category"
-	sdk "github.com/cosmos/cosmos-sdk/types"
 	abci "github.com/tendermint/tendermint/abci/types"
 )
 
@@ -21,6 +21,7 @@ type GenesisState struct {
 	Categories     []category.Category     `json:"categories"`
 	ChallengeData  challenge.GenesisState  `json:"challenge"`
 	ExpirationData expiration.GenesisState `json:"expiration"`
+	StakeData      stake.GenesisState      `json:"stake"`
 	StoryData      story.GenesisState      `json:"story"`
 	VotingData     voting.GenesisState     `json:"voting"`
 }
@@ -57,6 +58,7 @@ func (app *TruChain) initChainer(ctx sdk.Context, req abci.RequestInitChain) abc
 	category.InitGenesis(ctx, app.categoryKeeper, genesisState.Categories)
 	challenge.InitGenesis(ctx, app.challengeKeeper, genesisState.ChallengeData)
 	expiration.InitGenesis(ctx, app.expirationKeeper, genesisState.ExpirationData)
+	stake.InitGenesis(ctx, app.stakeKeeper, genesisState.StakeData)
 	story.InitGenesis(ctx, app.storyKeeper, genesisState.StoryData)
 	voting.InitGenesis(ctx, app.votingKeeper, genesisState.VotingData)
 
