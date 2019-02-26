@@ -9,6 +9,7 @@ import (
 	"github.com/TruStory/truchain/x/backing"
 	"github.com/TruStory/truchain/x/category"
 	"github.com/TruStory/truchain/x/challenge"
+	"github.com/TruStory/truchain/x/stake"
 	"github.com/TruStory/truchain/x/story"
 	"github.com/cosmos/cosmos-sdk/store"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -87,8 +88,11 @@ func mockDB() (
 
 	story.InitGenesis(ctx, storyKeeper, story.DefaultGenesisState())
 
+	stakeKeeper := stake.NewKeeper(pk.Subspace(stake.StoreKey))
+
 	backingKeeper := backing.NewKeeper(
 		backingKey,
+		stakeKeeper,
 		storyKeeper,
 		bankKeeper,
 		categoryKeeper,

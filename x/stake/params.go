@@ -70,9 +70,9 @@ func (k Keeper) SetParams(ctx sdk.Context, params Params) {
 	logger.Info(fmt.Sprintf("Loaded staking module params: %+v", params))
 }
 
-// StakeMsg defines data common to backing, challenge, and
+// Msg defines data common to backing, challenge, and
 // token vote messages.
-type StakeMsg struct {
+type Msg struct {
 	StoryID  int64          `json:"story_id"`
 	Amount   sdk.Coin       `json:"amount"`
 	Argument string         `json:"argument,omitempty"`

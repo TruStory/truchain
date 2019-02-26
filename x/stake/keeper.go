@@ -4,7 +4,7 @@ import "github.com/cosmos/cosmos-sdk/x/params"
 
 const (
 	// StoreKey is string representation of the store key
-	StoreKey = "staking"
+	StoreKey = "stake"
 )
 
 // Keeper data type storing keys to the key-value store

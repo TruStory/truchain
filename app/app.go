@@ -180,6 +180,7 @@ func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *T
 
 	app.backingKeeper = backing.NewKeeper(
 		app.keyBacking,
+		app.stakeKeeper,
 		app.storyKeeper,
 		app.bankKeeper,
 		app.categoryKeeper,

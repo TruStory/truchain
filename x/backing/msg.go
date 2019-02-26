@@ -4,6 +4,7 @@ import (
 	"time"
 
 	app "github.com/TruStory/truchain/types"
+	"github.com/TruStory/truchain/x/stake"
 	"github.com/TruStory/truchain/x/story"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
@@ -11,7 +12,7 @@ import (
 // BackStoryMsg defines a message to back a story. It implements the
 // `Msg` interface which is required for transactions on Cosmos blockchains.
 type BackStoryMsg struct {
-	app.StakeMsg
+	stake.Msg
 
 	Duration time.Duration `json:"duration"`
 }
@@ -25,7 +26,7 @@ func NewBackStoryMsg(
 	duration time.Duration) BackStoryMsg {
 
 	// populate embedded vote msg struct
-	voteMsg := app.StakeMsg{
+	voteMsg := stake.Msg{
 		StoryID:  storyID,
 		Amount:   amount,
 		Argument: argument,

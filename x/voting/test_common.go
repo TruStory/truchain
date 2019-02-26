@@ -5,6 +5,7 @@ import (
 	"net/url"
 	"time"
 
+	"github.com/TruStory/truchain/x/stake"
 	"github.com/TruStory/truchain/x/vote"
 
 	"github.com/TruStory/truchain/x/backing"
@@ -88,8 +89,11 @@ func mockDB() (sdk.Context, Keeper, c.Keeper) {
 
 	story.InitGenesis(ctx, sk, story.DefaultGenesisState())
 
+	stakeKeeper := stake.NewKeeper(pk.Subspace(stake.StoreKey))
+
 	backingKeeper := backing.NewKeeper(
 		backingKey,
+		stakeKeeper,
 		sk,
 		bankKeeper,
 		ck,

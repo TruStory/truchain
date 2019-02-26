@@ -1,15 +1,15 @@
 package challenge
 
 import (
-	"github.com/TruStory/truchain/x/story"
-
 	app "github.com/TruStory/truchain/types"
+	"github.com/TruStory/truchain/x/stake"
+	"github.com/TruStory/truchain/x/story"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
 // CreateChallengeMsg defines a message to challenge a story
 type CreateChallengeMsg struct {
-	app.StakeMsg
+	stake.Msg
 }
 
 // NewCreateChallengeMsg creates a message to challenge a story
@@ -20,7 +20,7 @@ func NewCreateChallengeMsg(
 	creator sdk.AccAddress) CreateChallengeMsg {
 
 	// populate embedded vote msg struct
-	voteMsg := app.StakeMsg{
+	voteMsg := stake.Msg{
 		StoryID:  storyID,
 		Amount:   amount,
 		Argument: argument,
