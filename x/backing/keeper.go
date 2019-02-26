@@ -143,11 +143,10 @@ func (k Keeper) Create(
 	}
 
 	backing := Backing{
-		Vote:        vote,
-		Interest:    interest,
-		MaturesTime: time.Now().Add(duration),
-		Params:      params,
-		Period:      duration,
+		Vote:     vote,
+		Interest: interest,
+		Params:   params,
+		Period:   duration,
 	}
 	k.setBacking(ctx, backing)
 
@@ -163,11 +162,10 @@ func (k Keeper) Create(
 // Update updates an existing backing
 func (k Keeper) Update(ctx sdk.Context, backing Backing) {
 	newBacking := Backing{
-		Vote:        backing.Vote,
-		Interest:    backing.Interest,
-		MaturesTime: backing.MaturesTime,
-		Params:      backing.Params,
-		Period:      backing.Period,
+		Vote:     backing.Vote,
+		Interest: backing.Interest,
+		Params:   backing.Params,
+		Period:   backing.Period,
 	}
 
 	k.setBacking(ctx, newBacking)

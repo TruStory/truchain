@@ -64,10 +64,9 @@ func DefaultMsgParams() MsgParams {
 type Backing struct {
 	app.Vote `json:"vote"`
 
-	Interest    sdk.Coin      `json:"interest"`
-	MaturesTime time.Time     `json:"matures_time"`
-	Params      Params        `json:"params"`
-	Period      time.Duration `json:"period"`
+	Interest sdk.Coin      `json:"interest"`
+	Params   Params        `json:"params"`
+	Period   time.Duration `json:"period"`
 }
 
 // ID implements `Voter`
@@ -93,9 +92,4 @@ func (b Backing) Creator() sdk.AccAddress {
 // VoteChoice implements `Voter`
 func (b Backing) VoteChoice() bool {
 	return b.Vote.Vote
-}
-
-// HasMatured is true if a backing has matured
-func (b Backing) HasMatured(blockTime time.Time) bool {
-	return blockTime.After(b.MaturesTime)
 }
