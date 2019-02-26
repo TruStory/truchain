@@ -3,6 +3,8 @@ package vote
 import (
 	"fmt"
 
+	"github.com/TruStory/truchain/x/stake"
+
 	"github.com/TruStory/truchain/x/backing"
 	"github.com/TruStory/truchain/x/challenge"
 	"github.com/TruStory/truchain/x/story"
@@ -55,6 +57,7 @@ type Keeper struct {
 
 	votingStoryQueueKey sdk.StoreKey
 
+	stakeKeeper     stake.Keeper
 	accountKeeper   auth.AccountKeeper
 	backingKeeper   backing.WriteKeeper
 	challengeKeeper challenge.WriteKeeper
@@ -68,6 +71,7 @@ type Keeper struct {
 func NewKeeper(
 	storeKey sdk.StoreKey,
 	votingStoryQueueKey sdk.StoreKey,
+	stakeKeeper stake.Keeper,
 	accountKeeper auth.AccountKeeper,
 	backingKeeper backing.WriteKeeper,
 	challengeKeeper challenge.WriteKeeper,
@@ -78,6 +82,7 @@ func NewKeeper(
 	return Keeper{
 		app.NewKeeper(codec, storeKey),
 		votingStoryQueueKey,
+		stakeKeeper,
 		accountKeeper,
 		backingKeeper,
 		challengeKeeper,
@@ -95,6 +100,11 @@ func (k Keeper) Create(
 	choice bool, argument string, creator sdk.AccAddress) (int64, sdk.Error) {
 
 	logger := ctx.Logger().With("module", "vote")
+
+	err := k.stakeKeeper.ValidateArgument(ctx, argument)
+	if err != nil {
+		return 0, err
+	}
 
 	if amount.Denom != app.StakeDenom {
 		return 0, sdk.ErrInvalidCoins("Invalid voting token.")

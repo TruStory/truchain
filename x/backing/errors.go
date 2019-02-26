@@ -2,7 +2,6 @@ package backing
 
 import (
 	"fmt"
-	"time"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
@@ -11,16 +10,10 @@ import (
 const (
 	DefaultCodespace sdk.CodespaceType = "backing"
 
-	CodeInvalidPeriod sdk.CodeType = 901
-	CodeQueueEmpty    sdk.CodeType = 902
-	CodeNotFound      sdk.CodeType = 903
-	CodeDuplicate     sdk.CodeType = 904
+	CodeQueueEmpty sdk.CodeType = 902
+	CodeNotFound   sdk.CodeType = 903
+	CodeDuplicate  sdk.CodeType = 904
 )
-
-// ErrInvalidPeriod throws an error when backing period is invalid
-func ErrInvalidPeriod(period time.Duration) sdk.Error {
-	return sdk.NewError(DefaultCodespace, CodeInvalidPeriod, "Invalid backing period: "+period.String())
-}
 
 // ErrQueueEmpty throws an error when the searched Queue is not found
 func ErrQueueEmpty() sdk.Error {

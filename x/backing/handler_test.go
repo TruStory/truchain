@@ -2,7 +2,6 @@ package backing
 
 import (
 	"encoding/json"
-	"strings"
 	"testing"
 	"time"
 
@@ -11,26 +10,6 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/stretchr/testify/assert"
 )
-
-func TestBackStoryMsg_FailBasicValidation(t *testing.T) {
-	ctx, bk, _, _, _, _ := mockDB()
-
-	h := NewHandler(bk)
-	assert.NotNil(t, h)
-
-	storyID := int64(1)
-	amount, _ := sdk.ParseCoin("5trushane")
-	argument := "cool story brew"
-	creator := sdk.AccAddress([]byte{1, 2})
-	// duration := 5 * time.Hour
-	duration := 15 * time.Minute
-	msg := NewBackStoryMsg(storyID, amount, argument, creator, duration)
-	assert.NotNil(t, msg)
-
-	res := h(ctx, msg)
-	hasInvalidBackingPeriod := strings.Contains(res.Log, "901")
-	assert.True(t, hasInvalidBackingPeriod, "should return err code")
-}
 
 func TestBackStoryMsg_FailInsufficientFunds(t *testing.T) {
 	ctx, bk, _, _, _, _ := mockDB()

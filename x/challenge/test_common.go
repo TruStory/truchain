@@ -84,6 +84,7 @@ func mockDB() (sdk.Context, Keeper, story.Keeper, backing.Keeper, bank.Keeper) {
 	story.InitGenesis(ctx, sk, story.DefaultGenesisState())
 
 	stakeKeeper := stake.NewKeeper(pk.Subspace(stake.StoreKey))
+	stake.InitGenesis(ctx, stakeKeeper, stake.DefaultGenesisState())
 
 	backingKeeper := backing.NewKeeper(
 		backingKey,
@@ -96,6 +97,7 @@ func mockDB() (sdk.Context, Keeper, story.Keeper, backing.Keeper, bank.Keeper) {
 
 	k := NewKeeper(
 		challengeKey,
+		stakeKeeper,
 		backingKeeper,
 		bankKeeper,
 		sk,

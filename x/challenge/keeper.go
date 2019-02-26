@@ -3,6 +3,8 @@ package challenge
 import (
 	"fmt"
 
+	"github.com/TruStory/truchain/x/stake"
+
 	"github.com/TruStory/truchain/x/backing"
 
 	"github.com/cosmos/cosmos-sdk/x/bank"
@@ -52,6 +54,7 @@ type WriteKeeper interface {
 type Keeper struct {
 	app.Keeper
 
+	stakeKeeper   stake.Keeper
 	backingKeeper backing.ReadKeeper
 	bankKeeper    bank.Keeper
 	storyKeeper   story.WriteKeeper
@@ -63,6 +66,7 @@ type Keeper struct {
 // NewKeeper creates a new keeper with write and read access
 func NewKeeper(
 	storeKey sdk.StoreKey,
+	stakeKeeper stake.Keeper,
 	backingKeeper backing.ReadKeeper,
 	bankKeeper bank.Keeper,
 	storyKeeper story.WriteKeeper,
@@ -71,6 +75,7 @@ func NewKeeper(
 
 	return Keeper{
 		app.NewKeeper(codec, storeKey),
+		stakeKeeper,
 		backingKeeper,
 		bankKeeper,
 		storyKeeper,
@@ -87,6 +92,10 @@ func (k Keeper) Create(
 	creator sdk.AccAddress) (challengeID int64, err sdk.Error) {
 
 	logger := ctx.Logger().With("module", "challenge")
+
+	if err = k.stakeKeeper.ValidateArgument(ctx, argument); err != nil {
+		return 0, err
+	}
 
 	if amount.Denom != app.StakeDenom {
 		return 0, sdk.ErrInvalidCoins("Invalid backing token.")

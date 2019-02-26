@@ -190,6 +190,7 @@ func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *T
 	app.voteKeeper = vote.NewKeeper(
 		app.keyVote,
 		app.keyVotingStoryQueue,
+		app.stakeKeeper,
 		app.accountKeeper,
 		app.backingKeeper,
 		app.challengeKeeper,
@@ -200,6 +201,7 @@ func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *T
 
 	app.challengeKeeper = challenge.NewKeeper(
 		app.keyChallenge,
+		app.stakeKeeper,
 		app.backingKeeper,
 		app.bankKeeper,
 		app.storyKeeper,

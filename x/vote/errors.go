@@ -39,6 +39,6 @@ func ErrVotingNotStarted(storyID int64) sdk.Error {
 	return sdk.NewError(
 		DefaultCodespace,
 		CodeVotingNotStarted,
-		"Validation game not started for story: "+
+		"Voting not started for story: "+
 			fmt.Sprintf("%d", storyID))
 }
