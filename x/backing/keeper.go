@@ -135,7 +135,7 @@ func (k Keeper) Create(
 		ctx,
 		amount,
 		duration,
-		// TODO: will go away after...
+		// TODO [shanev]: will go away after https://github.com/TruStory/truchain/issues/339
 		30*24*time.Hour,
 		credDenom)
 
