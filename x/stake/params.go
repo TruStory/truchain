@@ -19,12 +19,12 @@ var (
 
 // Params holds parameters for voting
 type Params struct {
-	MinArgumentLength int
-	MaxArgumentLength int
-	MinInterestRate   sdk.Dec
-	MaxInterestRate   sdk.Dec
-	AmountWeight      sdk.Dec
-	PeriodWeight      sdk.Dec
+	MinArgumentLength int     `json:"min_argument_length"`
+	MaxArgumentLength int     `json:"max_argument_length"`
+	MinInterestRate   sdk.Dec `json:"min_interest_rate"`
+	MaxInterestRate   sdk.Dec `json:"max_interest_rate"`
+	AmountWeight      sdk.Dec `json:"amount_weight"`
+	PeriodWeight      sdk.Dec `json:"period_weight"`
 }
 
 // DefaultParams is the default parameters for voting
