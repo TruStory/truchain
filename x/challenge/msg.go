@@ -9,7 +9,7 @@ import (
 
 // CreateChallengeMsg defines a message to challenge a story
 type CreateChallengeMsg struct {
-	app.VoteStoryMsg
+	app.StakeMsg
 }
 
 // NewCreateChallengeMsg creates a message to challenge a story
@@ -20,7 +20,7 @@ func NewCreateChallengeMsg(
 	creator sdk.AccAddress) CreateChallengeMsg {
 
 	// populate embedded vote msg struct
-	voteMsg := app.VoteStoryMsg{
+	voteMsg := app.StakeMsg{
 		StoryID:  storyID,
 		Amount:   amount,
 		Argument: argument,

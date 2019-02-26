@@ -8,7 +8,7 @@ import (
 
 // CreateVoteMsg defines a message to create a vote
 type CreateVoteMsg struct {
-	app.VoteStoryMsg
+	app.StakeMsg
 
 	// explicit vote
 	Vote bool `json:"vote"`
@@ -23,7 +23,7 @@ func NewCreateVoteMsg(
 	vote bool) CreateVoteMsg {
 
 	// populate embedded vote msg struct
-	voteMsg := app.VoteStoryMsg{
+	voteMsg := app.StakeMsg{
 		StoryID:  storyID,
 		Amount:   amount,
 		Argument: argument,
