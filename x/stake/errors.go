@@ -1,6 +1,8 @@
 package stake
 
 import (
+	"fmt"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
@@ -8,11 +10,26 @@ import (
 const (
 	DefaultCodespace sdk.CodespaceType = "stake"
 
-	CodeInvalidArgument sdk.CodeType = 1501
+	CodeArgumentTooShort sdk.CodeType = 1501
+	CodeArgumentTooLong  sdk.CodeType = 1502
 )
 
-// ErrInvalidArgumentMsg creates an error when the searched entity is not found
-func ErrInvalidArgumentMsg(argument string) sdk.Error {
+// ErrArgumentTooShortMsg throws for an invalid argument
+func ErrArgumentTooShortMsg(argument string, len int) sdk.Error {
+	msg := "Argument too short: %s. Must be greater than %d characters."
+
 	return sdk.NewError(
-		DefaultCodespace, CodeInvalidArgument, "Invalid argument "+argument)
+		DefaultCodespace,
+		CodeArgumentTooShort,
+		fmt.Sprintf(msg, argument, len))
+}
+
+// ErrArgumentTooLongMsg throws for an invalid argument
+func ErrArgumentTooLongMsg(len int) sdk.Error {
+	msg := "Argument too long. Must be less than %d characters."
+
+	return sdk.NewError(
+		DefaultCodespace,
+		CodeArgumentTooLong,
+		fmt.Sprintf(msg, len))
 }
