@@ -121,10 +121,12 @@ func (ta *TruAPI) RegisterResolvers() {
 
 	ta.GraphQLClient.RegisterQueryResolver("params", ta.paramsResolver)
 	ta.GraphQLClient.RegisterObjectResolver("Params", params.Params{}, map[string]interface{}{
-		"backingAmountWeight":    func(_ context.Context, p params.Params) string { return p.BackingAmountWeight.String() },
-		"backingPeriodWeight":    func(_ context.Context, p params.Params) string { return p.BackingPeriodWeight.String() },
-		"backingMinInterestRate": func(_ context.Context, p params.Params) string { return p.BackingMinInterestRate.String() },
-		"backingMaxInterestRate": func(_ context.Context, p params.Params) string { return p.BackingMaxInterestRate.String() },
+		"amountWeight":      func(_ context.Context, p params.Params) string { return p.StakeParams.AmountWeight.String() },
+		"periodWeight":      func(_ context.Context, p params.Params) string { return p.StakeParams.PeriodWeight.String() },
+		"minInterestRate":   func(_ context.Context, p params.Params) string { return p.StakeParams.MinInterestRate.String() },
+		"maxInterestRate":   func(_ context.Context, p params.Params) string { return p.StakeParams.MaxInterestRate.String() },
+		"minArgumentLength": func(_ context.Context, p params.Params) int { return p.StakeParams.MinArgumentLength },
+		"maxArgumentLength": func(_ context.Context, p params.Params) int { return p.StakeParams.MaxArgumentLength },
 
 		"storyExpireDuration": func(_ context.Context, p params.Params) string { return p.StoryParams.ExpireDuration.String() },
 		"storyMinLength":      func(_ context.Context, p params.Params) int { return p.StoryParams.MinStoryLength },
