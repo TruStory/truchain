@@ -2,13 +2,14 @@ package vote
 
 import (
 	app "github.com/TruStory/truchain/types"
+	"github.com/TruStory/truchain/x/stake"
 	"github.com/TruStory/truchain/x/story"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
 // CreateVoteMsg defines a message to create a vote
 type CreateVoteMsg struct {
-	app.StakeMsg
+	stake.Msg
 
 	// explicit vote
 	Vote bool `json:"vote"`
@@ -23,7 +24,7 @@ func NewCreateVoteMsg(
 	vote bool) CreateVoteMsg {
 
 	// populate embedded vote msg struct
-	voteMsg := app.StakeMsg{
+	voteMsg := stake.Msg{
 		StoryID:  storyID,
 		Amount:   amount,
 		Argument: argument,

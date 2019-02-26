@@ -3,6 +3,8 @@ package backing
 import (
 	"net/url"
 
+	"github.com/TruStory/truchain/x/stake"
+
 	"github.com/TruStory/truchain/x/category"
 	"github.com/TruStory/truchain/x/story"
 	"github.com/cosmos/cosmos-sdk/store"
@@ -83,8 +85,11 @@ func mockDB() (
 
 	story.InitGenesis(ctx, sk, story.DefaultGenesisState())
 
+	stakeKeeper := stake.NewKeeper(pk.Subspace(stake.StoreKey))
+
 	bk := NewKeeper(
 		backingKey,
+		stakeKeeper,
 		sk,
 		bankKeeper,
 		ck,

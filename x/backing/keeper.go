@@ -6,6 +6,7 @@ import (
 
 	app "github.com/TruStory/truchain/types"
 	cat "github.com/TruStory/truchain/x/category"
+	"github.com/TruStory/truchain/x/stake"
 	"github.com/TruStory/truchain/x/story"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/bank"
@@ -61,6 +62,7 @@ type WriteKeeper interface {
 type Keeper struct {
 	app.Keeper
 
+	stakeKeeper    stake.Keeper
 	storyKeeper    story.WriteKeeper // read-write access to story store
 	bankKeeper     bank.Keeper       // read-write access coin store
 	categoryKeeper cat.ReadKeeper    // read access to category store
@@ -71,6 +73,7 @@ type Keeper struct {
 // NewKeeper creates a new keeper with write and read access
 func NewKeeper(
 	storeKey sdk.StoreKey,
+	stakeKeeper stake.Keeper,
 	storyKeeper story.WriteKeeper,
 	bankKeeper bank.Keeper,
 	categoryKeeper cat.ReadKeeper,
@@ -78,6 +81,7 @@ func NewKeeper(
 
 	return Keeper{
 		app.NewKeeper(codec, storeKey),
+		stakeKeeper,
 		storyKeeper,
 		bankKeeper,
 		categoryKeeper,
