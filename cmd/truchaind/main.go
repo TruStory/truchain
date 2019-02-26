@@ -6,6 +6,8 @@ import (
 	"io"
 	"os"
 
+	"github.com/TruStory/truchain/x/vote"
+
 	"github.com/TruStory/truchain/app"
 	"github.com/TruStory/truchain/x/category"
 	"github.com/TruStory/truchain/x/challenge"
@@ -102,6 +104,7 @@ func InitCmd(ctx *server.Context, cdc *codec.Codec) *cobra.Command {
 				ExpirationData: expiration.DefaultGenesisState(),
 				StakeData:      stake.DefaultGenesisState(),
 				StoryData:      story.DefaultGenesisState(),
+				VoteData:       vote.DefaultGenesisState(),
 				VotingData:     voting.DefaultGenesisState(),
 			}
 

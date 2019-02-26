@@ -5,13 +5,12 @@ import (
 	"github.com/TruStory/truchain/x/expiration"
 	"github.com/TruStory/truchain/x/stake"
 	"github.com/TruStory/truchain/x/story"
+	"github.com/TruStory/truchain/x/vote"
 	"github.com/TruStory/truchain/x/voting"
 )
 
 // MinBackingAmount : '1000000000',
 // MaxBackingAmount:  '100000000000',
-// AddStoryStake:     '10000000000',
-// VoteStake:         '10000000000',
 
 // Params defines defaults for a story
 type Params struct {
@@ -19,6 +18,7 @@ type Params struct {
 	ExpirationParams expiration.Params
 	StakeParams      stake.Params
 	StoryParams      story.Params
+	VoteParams       vote.Params
 	VotingParams     voting.Params
 }
 
@@ -29,6 +29,7 @@ func DefaultParams() Params {
 		ExpirationParams: expiration.DefaultParams(),
 		StakeParams:      stake.DefaultParams(),
 		StoryParams:      story.DefaultParams(),
+		VoteParams:       vote.DefaultParams(),
 		VotingParams:     voting.DefaultParams(),
 	}
 }
