@@ -25,10 +25,9 @@ func Test_handleExpiredStories(t *testing.T) {
 	argument := "test argument right here"
 	backer := fakeFundedCreator(ctx, bankKeeper)
 	challenger := fakeFundedCreator(ctx, bankKeeper)
-	duration := 5 * 24 * time.Hour
 
 	_, err := backingKeeper.Create(
-		ctx, storyID, amount, argument, backer, duration)
+		ctx, storyID, amount, argument, backer)
 	assert.Nil(t, err)
 
 	_, err = challengeKeeper.Create(

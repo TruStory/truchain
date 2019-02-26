@@ -50,8 +50,7 @@ type WriteKeeper interface {
 		storyID int64,
 		amount sdk.Coin,
 		argument string,
-		creator sdk.AccAddress,
-		duration time.Duration) (int64, sdk.Error)
+		creator sdk.AccAddress) (int64, sdk.Error)
 
 	Update(ctx sdk.Context, backing Backing)
 
@@ -97,8 +96,7 @@ func (k Keeper) Create(
 	storyID int64,
 	amount sdk.Coin,
 	argument string,
-	creator sdk.AccAddress,
-	duration time.Duration) (id int64, err sdk.Error) {
+	creator sdk.AccAddress) (id int64, err sdk.Error) {
 
 	logger := ctx.Logger().With("module", "backing")
 
@@ -134,7 +132,7 @@ func (k Keeper) Create(
 	interest := k.getInterest(
 		ctx,
 		amount,
-		duration,
+		24*time.Hour,
 		// TODO [shanev]: will go away after https://github.com/TruStory/truchain/issues/339
 		30*24*time.Hour,
 		credDenom)

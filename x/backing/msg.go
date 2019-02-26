@@ -1,8 +1,6 @@
 package backing
 
 import (
-	"time"
-
 	app "github.com/TruStory/truchain/types"
 	"github.com/TruStory/truchain/x/stake"
 	"github.com/TruStory/truchain/x/story"
@@ -13,8 +11,6 @@ import (
 // `Msg` interface which is required for transactions on Cosmos blockchains.
 type BackStoryMsg struct {
 	stake.Msg
-
-	Duration time.Duration `json:"duration"`
 }
 
 // NewBackStoryMsg creates a message to back a story
@@ -22,8 +18,7 @@ func NewBackStoryMsg(
 	storyID int64,
 	amount sdk.Coin,
 	argument string,
-	creator sdk.AccAddress,
-	duration time.Duration) BackStoryMsg {
+	creator sdk.AccAddress) BackStoryMsg {
 
 	// populate embedded vote msg struct
 	stakeMsg := stake.Msg{
@@ -33,7 +28,7 @@ func NewBackStoryMsg(
 		Creator:  creator,
 	}
 
-	return BackStoryMsg{stakeMsg, duration}
+	return BackStoryMsg{stakeMsg}
 }
 
 // Route implements Msg

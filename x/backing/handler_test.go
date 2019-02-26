@@ -3,7 +3,6 @@ package backing
 import (
 	"encoding/json"
 	"testing"
-	"time"
 
 	"github.com/TruStory/truchain/types"
 	app "github.com/TruStory/truchain/types"
@@ -21,9 +20,7 @@ func TestBackStoryMsg_FailInsufficientFunds(t *testing.T) {
 	amount := sdk.NewCoin(app.StakeDenom, sdk.NewInt(5000000))
 	argument := "cool story brew"
 	creator := sdk.AccAddress([]byte{1, 2})
-	// duration := 99 * time.Hour
-	duration := 24 * time.Hour
-	msg := NewBackStoryMsg(storyID, amount, argument, creator, duration)
+	msg := NewBackStoryMsg(storyID, amount, argument, creator)
 	assert.NotNil(t, msg)
 
 	res := h(ctx, msg)
@@ -42,9 +39,7 @@ func TestBackStoryMsg(t *testing.T) {
 	amount := sdk.NewCoin(app.StakeDenom, sdk.NewInt(5000000))
 	argument := "cool story brew"
 	creator := createFakeFundedAccount(ctx, am, sdk.Coins{amount})
-	// duration := 99 * time.Hour
-	duration := 24 * time.Hour
-	msg := NewBackStoryMsg(storyID, amount, argument, creator, duration)
+	msg := NewBackStoryMsg(storyID, amount, argument, creator)
 	assert.NotNil(t, msg)
 
 	res := h(ctx, msg)

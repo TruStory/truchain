@@ -40,9 +40,8 @@ func TestToggleVote(t *testing.T) {
 	amount, _ := sdk.ParseCoin("5trudex")
 	argument := "cool story brew"
 	creator := sdk.AccAddress([]byte{1, 2})
-	duration := 7 * time.Hour
 	bankKeeper.AddCoins(ctx, creator, sdk.Coins{amount})
-	backingID, _ := bk.Create(ctx, storyID, amount, argument, creator, duration)
+	backingID, _ := bk.Create(ctx, storyID, amount, argument, creator)
 
 	bk.ToggleVote(ctx, backingID)
 	b, _ := bk.Backing(ctx, backingID)
@@ -55,9 +54,8 @@ func TestGetBacking(t *testing.T) {
 	amount := sdk.NewCoin(app.StakeDenom, sdk.NewInt(5000000))
 	argument := "cool story brew.."
 	creator := sdk.AccAddress([]byte{1, 2})
-	duration := 7 * time.Hour
 	bankKeeper.AddCoins(ctx, creator, sdk.Coins{amount})
-	backingID, _ := bk.Create(ctx, storyID, amount, argument, creator, duration)
+	backingID, _ := bk.Create(ctx, storyID, amount, argument, creator)
 
 	b, err := bk.Backing(ctx, backingID)
 	assert.Nil(t, err)
@@ -69,16 +67,14 @@ func TestBackingsByStoryID(t *testing.T) {
 	storyID := createFakeStory(ctx, sk, ck)
 	amount := sdk.NewCoin(app.StakeDenom, sdk.NewInt(5000000))
 	argument := "cool story brew"
-	duration := 7 * time.Hour
-
 	creator := sdk.AccAddress([]byte{1, 2})
 	bankKeeper.AddCoins(ctx, creator, sdk.Coins{amount})
 
 	creator2 := sdk.AccAddress([]byte{2, 3})
 	bankKeeper.AddCoins(ctx, creator2, sdk.Coins{amount})
 
-	bk.Create(ctx, storyID, amount, argument, creator, duration)
-	bk.Create(ctx, storyID, amount, argument, creator2, duration)
+	bk.Create(ctx, storyID, amount, argument, creator)
+	bk.Create(ctx, storyID, amount, argument, creator2)
 
 	backings, _ := bk.BackingsByStoryID(ctx, storyID)
 	assert.Equal(t, 2, len(backings))
@@ -89,12 +85,10 @@ func TestBackingsByStoryIDAndCreator(t *testing.T) {
 	storyID := createFakeStory(ctx, sk, ck)
 	amount := sdk.NewCoin(app.StakeDenom, sdk.NewInt(5000000))
 	argument := "cool story brew"
-	duration := 7 * time.Hour
-
 	creator := sdk.AccAddress([]byte{1, 2})
 	bankKeeper.AddCoins(ctx, creator, sdk.Coins{amount})
 
-	bk.Create(ctx, storyID, amount, argument, creator, duration)
+	bk.Create(ctx, storyID, amount, argument, creator)
 
 	backing, _ := bk.BackingByStoryIDAndCreator(ctx, storyID, creator)
 	assert.Equal(t, int64(1), backing.ID())
@@ -106,15 +100,13 @@ func TestTally(t *testing.T) {
 
 	amount := sdk.NewCoin(app.StakeDenom, sdk.NewInt(5000000))
 	argument := "cool story brew"
-	duration := 7 * time.Hour
-
 	creator := sdk.AccAddress([]byte{1, 2})
 	bankKeeper.AddCoins(ctx, creator, sdk.Coins{amount})
-	k.Create(ctx, storyID, amount, argument, creator, duration)
+	k.Create(ctx, storyID, amount, argument, creator)
 
 	creator2 := sdk.AccAddress([]byte{2, 3})
 	bankKeeper.AddCoins(ctx, creator2, sdk.Coins{amount})
-	k.Create(ctx, storyID, amount, argument, creator2, duration)
+	k.Create(ctx, storyID, amount, argument, creator2)
 
 	yes, _, _ := k.Tally(ctx, storyID)
 
@@ -127,15 +119,14 @@ func TestTotalBacking(t *testing.T) {
 
 	amount := sdk.NewCoin(app.StakeDenom, sdk.NewInt(5000000))
 	argument := "cool story brew"
-	duration := 7 * time.Hour
 
 	creator := sdk.AccAddress([]byte{1, 2})
 	bankKeeper.AddCoins(ctx, creator, sdk.Coins{amount})
-	k.Create(ctx, storyID, amount, argument, creator, duration)
+	k.Create(ctx, storyID, amount, argument, creator)
 
 	creator2 := sdk.AccAddress([]byte{2, 3})
 	bankKeeper.AddCoins(ctx, creator2, sdk.Coins{amount})
-	k.Create(ctx, storyID, amount, argument, creator2, duration)
+	k.Create(ctx, storyID, amount, argument, creator2)
 
 	total, _ := k.TotalBackingAmount(ctx, storyID)
 
@@ -148,9 +139,7 @@ func TestNewBacking_ErrInsufficientFunds(t *testing.T) {
 	amount := sdk.NewCoin(app.StakeDenom, sdk.NewInt(5000000))
 	argument := "cool story brew"
 	creator := sdk.AccAddress([]byte{1, 2})
-	duration := 7 * time.Hour
-
-	_, err := bk.Create(ctx, storyID, amount, argument, creator, duration)
+	_, err := bk.Create(ctx, storyID, amount, argument, creator)
 	assert.NotNil(t, err)
 	assert.Equal(t, sdk.ErrInsufficientFunds("blah").Code(), err.Code(), "Should get error")
 }
@@ -161,10 +150,9 @@ func TestNewBacking(t *testing.T) {
 	amount := sdk.NewCoin(app.StakeDenom, sdk.NewInt(5000000))
 	argument := "cool story brew"
 	creator := sdk.AccAddress([]byte{1, 2})
-	duration := 7 * time.Hour
 	bankKeeper.AddCoins(ctx, creator, sdk.Coins{amount})
 
-	backingID, _ := bk.Create(ctx, storyID, amount, argument, creator, duration)
+	backingID, _ := bk.Create(ctx, storyID, amount, argument, creator)
 	assert.NotNil(t, backingID)
 }
 
@@ -174,14 +162,13 @@ func TestDuplicateBacking(t *testing.T) {
 	amount := sdk.NewCoin(app.StakeDenom, sdk.NewInt(5000000))
 	argument := "cool story brew"
 	creator := sdk.AccAddress([]byte{1, 2})
-	duration := 7 * time.Hour
 	bankKeeper.AddCoins(ctx, creator, sdk.Coins{amount})
 	bankKeeper.AddCoins(ctx, creator, sdk.Coins{amount})
 
-	backingID, _ := bk.Create(ctx, storyID, amount, argument, creator, duration)
+	backingID, _ := bk.Create(ctx, storyID, amount, argument, creator)
 	assert.NotNil(t, backingID)
 
-	_, err := bk.Create(ctx, storyID, amount, argument, creator, duration)
+	_, err := bk.Create(ctx, storyID, amount, argument, creator)
 	assert.Equal(t, ErrDuplicate(storyID, creator).Code(), err.Code())
 }
 
