@@ -138,6 +138,8 @@ func (ta *TruAPI) RegisterResolvers() {
 			return p.ChallengeParams.ChallengeToBackingRatio.String()
 		},
 
+		"voteStake": func(_ context.Context, p params.Params) string { return p.VoteParams.StakeAmount.String() },
+
 		"challengeRewardRatio": func(_ context.Context, p params.Params) string {
 			return p.VotingParams.ChallengerRewardPoolShare.String()
 		},

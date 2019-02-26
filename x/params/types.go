@@ -9,6 +9,7 @@ import (
 	"github.com/TruStory/truchain/x/voting"
 )
 
+// TODO [shanev]: these will be added by https://github.com/TruStory/truchain/issues/399
 // MinBackingAmount : '1000000000',
 // MaxBackingAmount:  '100000000000',
 
