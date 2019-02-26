@@ -1,12 +1,12 @@
 package params
 
 import (
-	"github.com/TruStory/truchain/x/voting"
-
 	"github.com/TruStory/truchain/x/backing"
 	"github.com/TruStory/truchain/x/challenge"
 	"github.com/TruStory/truchain/x/expiration"
+	"github.com/TruStory/truchain/x/stake"
 	"github.com/TruStory/truchain/x/story"
+	"github.com/TruStory/truchain/x/voting"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
@@ -20,6 +20,7 @@ type Keeper struct {
 	backingKeeper    backing.ReadKeeper
 	challengeKeeper  challenge.ReadKeeper
 	expirationKeeper expiration.Keeper
+	stakeKeeper      stake.Keeper
 	storyKeeper      story.ReadKeeper
 	votingKeeper     voting.ReadKeeper
 }
@@ -29,6 +30,7 @@ func NewKeeper(
 	backingKeeper backing.WriteKeeper,
 	challengeKeeper challenge.WriteKeeper,
 	expirationKeeper expiration.Keeper,
+	stakeKeeper stake.Keeper,
 	storyKeeper story.WriteKeeper,
 	votingKeeper voting.ReadKeeper) Keeper {
 
@@ -36,6 +38,7 @@ func NewKeeper(
 		backingKeeper,
 		challengeKeeper,
 		expirationKeeper,
+		stakeKeeper,
 		storyKeeper,
 		votingKeeper,
 	}
@@ -44,16 +47,24 @@ func NewKeeper(
 // Params returns all parameters for clients
 func (k Keeper) Params(ctx sdk.Context) Params {
 	return Params{
+		ChallengeParams: challenge.Params{
+			ChallengeToBackingRatio: k.challengeKeeper.GetParams(ctx).ChallengeToBackingRatio,
+			MinChallengeThreshold:   k.challengeKeeper.GetParams(ctx).MinChallengeThreshold,
+			MinChallengeStake:       k.challengeKeeper.GetParams(ctx).MinChallengeStake,
+		},
+		StakeParams: stake.Params{
+			MinArgumentLength: k.stakeKeeper.GetParams(ctx).MinArgumentLength,
+			MaxArgumentLength: k.stakeKeeper.GetParams(ctx).MaxArgumentLength,
+			MinInterestRate:   k.stakeKeeper.GetParams(ctx).MinInterestRate,
+			MaxInterestRate:   k.stakeKeeper.GetParams(ctx).MaxInterestRate,
+			AmountWeight:      k.stakeKeeper.GetParams(ctx).AmountWeight,
+			PeriodWeight:      k.stakeKeeper.GetParams(ctx).PeriodWeight,
+		},
 		StoryParams: story.Params{
 			ExpireDuration: k.storyKeeper.GetParams(ctx).ExpireDuration,
 			MinStoryLength: k.storyKeeper.GetParams(ctx).MinStoryLength,
 			MaxStoryLength: k.storyKeeper.GetParams(ctx).MaxStoryLength,
 			VotingDuration: k.storyKeeper.GetParams(ctx).VotingDuration,
-		},
-		ChallengeParams: challenge.Params{
-			ChallengeToBackingRatio: k.challengeKeeper.GetParams(ctx).ChallengeToBackingRatio,
-			MinChallengeThreshold:   k.challengeKeeper.GetParams(ctx).MinChallengeThreshold,
-			MinChallengeStake:       k.challengeKeeper.GetParams(ctx).MinChallengeStake,
 		},
 		VotingParams: voting.Params{
 			ChallengerRewardPoolShare: k.votingKeeper.GetParams(ctx).ChallengerRewardPoolShare,

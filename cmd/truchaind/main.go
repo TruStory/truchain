@@ -10,6 +10,7 @@ import (
 	"github.com/TruStory/truchain/x/category"
 	"github.com/TruStory/truchain/x/challenge"
 	"github.com/TruStory/truchain/x/expiration"
+	"github.com/TruStory/truchain/x/stake"
 	"github.com/TruStory/truchain/x/story"
 	"github.com/TruStory/truchain/x/voting"
 	"github.com/cosmos/cosmos-sdk/client"
@@ -99,6 +100,7 @@ func InitCmd(ctx *server.Context, cdc *codec.Codec) *cobra.Command {
 				Categories:     category.DefaultCategories(),
 				ChallengeData:  challenge.DefaultGenesisState(),
 				ExpirationData: expiration.DefaultGenesisState(),
+				StakeData:      stake.DefaultGenesisState(),
 				StoryData:      story.DefaultGenesisState(),
 				VotingData:     voting.DefaultGenesisState(),
 			}
