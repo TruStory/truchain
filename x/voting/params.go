@@ -15,8 +15,8 @@ var (
 
 // Params holds parameters for voting
 type Params struct {
-	ChallengerRewardPoolShare sdk.Dec
-	MajorityPercent           sdk.Dec
+	ChallengerRewardPoolShare sdk.Dec `json:"challenger_reward_pool_share"`
+	MajorityPercent           sdk.Dec `json:"majority_percent"`
 }
 
 // DefaultParams is the default parameters for voting
