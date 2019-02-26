@@ -134,6 +134,9 @@ func (ta *TruAPI) RegisterResolvers() {
 		"storyVotingDuration": func(_ context.Context, p params.Params) string { return p.StoryParams.VotingDuration.String() },
 
 		"challengeMinStake": func(_ context.Context, p params.Params) string { return p.ChallengeParams.MinChallengeStake.String() },
+		"challengeMinThreshold": func(_ context.Context, p params.Params) string {
+			return p.ChallengeParams.MinChallengeThreshold.String()
+		},
 		"challengeThresholdPercent": func(_ context.Context, p params.Params) string {
 			return p.ChallengeParams.ChallengeToBackingRatio.String()
 		},
