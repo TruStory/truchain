@@ -26,14 +26,14 @@ func NewBackStoryMsg(
 	duration time.Duration) BackStoryMsg {
 
 	// populate embedded vote msg struct
-	voteMsg := stake.Msg{
+	stakeMsg := stake.Msg{
 		StoryID:  storyID,
 		Amount:   amount,
 		Argument: argument,
 		Creator:  creator,
 	}
 
-	return BackStoryMsg{voteMsg, duration}
+	return BackStoryMsg{stakeMsg, duration}
 }
 
 // Route implements Msg

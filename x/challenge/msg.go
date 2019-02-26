@@ -20,14 +20,14 @@ func NewCreateChallengeMsg(
 	creator sdk.AccAddress) CreateChallengeMsg {
 
 	// populate embedded vote msg struct
-	voteMsg := stake.Msg{
+	stakeMsg := stake.Msg{
 		StoryID:  storyID,
 		Amount:   amount,
 		Argument: argument,
 		Creator:  creator,
 	}
 
-	return CreateChallengeMsg{voteMsg}
+	return CreateChallengeMsg{stakeMsg}
 }
 
 // Route implements Msg
