@@ -6,6 +6,7 @@ import (
 	"github.com/TruStory/truchain/x/expiration"
 	"github.com/TruStory/truchain/x/stake"
 	"github.com/TruStory/truchain/x/story"
+	"github.com/TruStory/truchain/x/vote"
 	"github.com/TruStory/truchain/x/voting"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth"
@@ -23,6 +24,7 @@ type GenesisState struct {
 	ExpirationData expiration.GenesisState `json:"expiration"`
 	StakeData      stake.GenesisState      `json:"stake"`
 	StoryData      story.GenesisState      `json:"story"`
+	VoteData       vote.GenesisState       `json:"vote"`
 	VotingData     voting.GenesisState     `json:"voting"`
 }
 
@@ -60,6 +62,7 @@ func (app *TruChain) initChainer(ctx sdk.Context, req abci.RequestInitChain) abc
 	expiration.InitGenesis(ctx, app.expirationKeeper, genesisState.ExpirationData)
 	stake.InitGenesis(ctx, app.stakeKeeper, genesisState.StakeData)
 	story.InitGenesis(ctx, app.storyKeeper, genesisState.StoryData)
+	vote.InitGenesis(ctx, app.voteKeeper, genesisState.VoteData)
 	voting.InitGenesis(ctx, app.votingKeeper, genesisState.VotingData)
 
 	return abci.ResponseInitChain{}

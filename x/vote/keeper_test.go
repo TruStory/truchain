@@ -6,6 +6,7 @@ import (
 	app "github.com/TruStory/truchain/types"
 	"github.com/TruStory/truchain/x/stake"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/davecgh/go-spew/spew"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -131,7 +132,7 @@ func TestCreateVote_ErrGameNotStarted(t *testing.T) {
 	ctx, k, ck := mockDB()
 
 	storyID := createFakeStory(ctx, k.storyKeeper, ck)
-	amount := sdk.NewCoin(app.StakeDenom, sdk.NewInt(5000000))
+	amount := sdk.NewCoin(app.StakeDenom, sdk.NewInt(50000000000000))
 	comment := "test comment is long enough"
 	creator := sdk.AccAddress([]byte{1, 2})
 
@@ -140,4 +141,19 @@ func TestCreateVote_ErrGameNotStarted(t *testing.T) {
 	_, err := k.Create(ctx, storyID, amount, vote, comment, creator)
 	assert.NotNil(t, err)
 	assert.Equal(t, ErrVotingNotStarted(storyID).Code(), err.Code())
+}
+
+func TestCreateVote_ErrBelowMinStake(t *testing.T) {
+	ctx, k, ck := mockDB()
+
+	storyID := createFakeStory(ctx, k.storyKeeper, ck)
+	amount := sdk.NewCoin(app.StakeDenom, sdk.NewInt(5000000))
+	comment := "test comment is long enough"
+	creator := sdk.AccAddress([]byte{1, 2})
+
+	vote := true
+
+	_, err := k.Create(ctx, storyID, amount, vote, comment, creator)
+	spew.Dump(err)
+	assert.NotNil(t, err)
 }

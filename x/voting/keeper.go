@@ -33,6 +33,7 @@ type WriteKeeper interface {
 
 	EndBlock(ctx sdk.Context) sdk.Tags
 	SetParams(ctx sdk.Context, params Params)
+	// InitGenesis(ctx sdk.Context, votingKeeper WriteKeeper, data GenesisState)
 }
 
 // Keeper data type storing keys to the key-value store

@@ -10,6 +10,7 @@ import (
 	"github.com/TruStory/truchain/x/story"
 	"github.com/cosmos/cosmos-sdk/x/auth"
 	"github.com/cosmos/cosmos-sdk/x/bank"
+	"github.com/cosmos/cosmos-sdk/x/params"
 
 	app "github.com/TruStory/truchain/types"
 	queue "github.com/cosmos/cosmos-sdk/store"
@@ -25,6 +26,8 @@ const (
 // ReadKeeper defines a module interface that facilitates read only access to truchain data
 type ReadKeeper interface {
 	app.ReadKeeper
+
+	GetParams(ctx sdk.Context) Params
 
 	Tally(ctx sdk.Context, storyID int64) (
 		trueVotes []TokenVote, falseVotes []TokenVote, err sdk.Error)
@@ -49,6 +52,7 @@ type WriteKeeper interface {
 	Create(
 		ctx sdk.Context, storyID int64, amount sdk.Coin,
 		choice bool, argument string, creator sdk.AccAddress) (int64, sdk.Error)
+	SetParams(ctx sdk.Context, params Params)
 }
 
 // Keeper data type storing keys to the key-value store
@@ -63,6 +67,7 @@ type Keeper struct {
 	challengeKeeper challenge.WriteKeeper
 	storyKeeper     story.WriteKeeper
 	bankKeeper      bank.Keeper
+	paramStore      params.Subspace
 
 	voterList app.UserList
 }
@@ -77,6 +82,7 @@ func NewKeeper(
 	challengeKeeper challenge.WriteKeeper,
 	storyKeeper story.WriteKeeper,
 	bankKeeper bank.Keeper,
+	paramStore params.Subspace,
 	codec *amino.Codec) Keeper {
 
 	return Keeper{
@@ -88,6 +94,7 @@ func NewKeeper(
 		challengeKeeper,
 		storyKeeper,
 		bankKeeper,
+		paramStore.WithTypeTable(ParamTypeTable()),
 		app.NewUserList(storyKeeper.GetStoreKey()),
 	}
 }
@@ -104,6 +111,11 @@ func (k Keeper) Create(
 	err := k.stakeKeeper.ValidateArgument(ctx, argument)
 	if err != nil {
 		return 0, err
+	}
+
+	minStake := k.GetParams(ctx).StakeAmount
+	if amount.IsLT(minStake) {
+		return 0, sdk.ErrInsufficientFunds("Below minimum stake.")
 	}
 
 	if amount.Denom != app.StakeDenom {

@@ -121,8 +121,10 @@ func mockDB() (sdk.Context, Keeper, c.Keeper) {
 		challengeKeeper,
 		sk,
 		bankKeeper,
+		pk.Subspace(vote.StoreKey),
 		codec,
 	)
+	vote.InitGenesis(ctx, voteKeeper, vote.DefaultGenesisState())
 
 	k := NewKeeper(
 		votingKey,
