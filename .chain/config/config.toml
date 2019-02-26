@@ -22,7 +22,7 @@ db_backend = "leveldb"
 db_dir = "data"
 
 # Output level for logging, including package level options
-log_level = "main:info,state:info,*:error,app:info,backing:info,category:info,challenge:info,expiration:info,story:info,vote:info,voting:info"
+log_level = "main:info,state:info,*:error,app:info,backing:info,category:info,challenge:info,expiration:info,stake:info,story:info,vote:info,voting:info"
 
 # Output format: 'plain' (colored text) or 'json'
 log_format = "plain"

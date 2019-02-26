@@ -65,9 +65,9 @@ func (k Keeper) GetParams(ctx sdk.Context) Params {
 
 // SetParams sets the params for the module
 func (k Keeper) SetParams(ctx sdk.Context, params Params) {
-	logger := ctx.Logger().With("module", "staking")
+	logger := ctx.Logger().With("module", "stake")
 	k.paramStore.SetParamSet(ctx, &params)
-	logger.Info(fmt.Sprintf("Loaded staking module params: %+v", params))
+	logger.Info(fmt.Sprintf("Loaded stake module params: %+v", params))
 }
 
 // Msg defines data common to backing, challenge, and
