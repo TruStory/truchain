@@ -2,7 +2,6 @@ package backing
 
 import (
 	"testing"
-	"time"
 
 	"github.com/TruStory/truchain/x/story"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -13,9 +12,8 @@ func TestValidBackMsg(t *testing.T) {
 	validStoryID := int64(1)
 	validStake := sdk.Coin{Denom: "trustake", Amount: sdk.NewInt(100)}
 	validCreator := sdk.AccAddress([]byte{1, 2})
-	validPeriod := 7 * time.Hour
 	validArgument := "valid argument"
-	msg := NewBackStoryMsg(validStoryID, validStake, validArgument, validCreator, validPeriod)
+	msg := NewBackStoryMsg(validStoryID, validStake, validArgument, validCreator)
 	err := msg.ValidateBasic()
 
 	assert.Nil(t, err)
@@ -29,9 +27,8 @@ func TestInvalidStoryIdBackMsg(t *testing.T) {
 	invalidStoryID := int64(-1)
 	validStake := sdk.Coin{Denom: "trustake", Amount: sdk.NewInt(100)}
 	validCreator := sdk.AccAddress([]byte{1, 2})
-	validPeriod := time.Duration(3 * 24 * time.Hour)
 	validArgument := "valid argument"
-	msg := NewBackStoryMsg(invalidStoryID, validStake, validArgument, validCreator, validPeriod)
+	msg := NewBackStoryMsg(invalidStoryID, validStake, validArgument, validCreator)
 	err := msg.ValidateBasic()
 
 	assert.Equal(t, story.CodeInvalidStoryID, err.Code(), err.Error())
@@ -41,9 +38,8 @@ func TestInvalidAddressBackMsg(t *testing.T) {
 	validStoryID := int64(1)
 	validStake := sdk.Coin{Denom: "trustake", Amount: sdk.NewInt(100)}
 	invalidCreator := sdk.AccAddress([]byte{})
-	validPeriod := time.Duration(3 * 24 * time.Hour)
 	validArgument := "valid argument"
-	msg := NewBackStoryMsg(validStoryID, validStake, validArgument, invalidCreator, validPeriod)
+	msg := NewBackStoryMsg(validStoryID, validStake, validArgument, invalidCreator)
 	err := msg.ValidateBasic()
 
 	assert.Equal(t, sdk.CodeInvalidAddress, err.Code(), err.Error())
@@ -53,9 +49,8 @@ func TestInValidStakeBackMsg(t *testing.T) {
 	validStoryID := int64(1)
 	invalidStake := sdk.Coin{Denom: "trustake", Amount: sdk.NewInt(0)}
 	validCreator := sdk.AccAddress([]byte{1, 2})
-	validPeriod := time.Duration(3 * 24 * time.Hour)
 	validArgument := "valid argument"
-	msg := NewBackStoryMsg(validStoryID, invalidStake, validArgument, validCreator, validPeriod)
+	msg := NewBackStoryMsg(validStoryID, invalidStake, validArgument, validCreator)
 	err := msg.ValidateBasic()
 
 	assert.Equal(t, sdk.CodeInsufficientFunds, err.Code(), err.Error())

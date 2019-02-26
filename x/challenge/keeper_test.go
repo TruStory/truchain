@@ -158,14 +158,13 @@ func Test_checkThreshold(t *testing.T) {
 	backer2 := fakeFundedCreator(ctx, bankKeeper)
 	challenger1 := fakeFundedCreator(ctx, bankKeeper)
 	challenger2 := fakeFundedCreator(ctx, bankKeeper)
-	duration := 5 * 24 * time.Hour
 
 	_, err := backingKeeper.Create(
-		ctx, storyID, amount, argument, backer1, duration)
+		ctx, storyID, amount, argument, backer1)
 	assert.Nil(t, err)
 
 	_, err = backingKeeper.Create(
-		ctx, storyID, amount, argument, backer2, duration)
+		ctx, storyID, amount, argument, backer2)
 	assert.Nil(t, err)
 
 	_, err = k.Create(
