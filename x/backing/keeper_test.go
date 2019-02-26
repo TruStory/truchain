@@ -185,29 +185,29 @@ func TestDuplicateBacking(t *testing.T) {
 	assert.Equal(t, ErrDuplicate(storyID, creator).Code(), err.Code())
 }
 
-// func Test_getInterest_MidAmountMidPeriod(t *testing.T) {
-// 	ctx, k, _, _, _, _ := mockDB()
-// 	// 500,000,000,000,000 nano / 10^9 = 500,000 trudex
-// 	cred := "trudex"
-// 	amount := sdk.NewCoin(cred, sdk.NewInt(500000000000000))
-// 	period := (7 / 2) * 24 * time.Hour
-// 	maxPeriod := 30 * 24 * time.Hour
+func Test_getInterest_MidAmountMidPeriod(t *testing.T) {
+	ctx, k, _, _, _, _ := mockDB()
+	// 500,000,000,000,000 nano / 10^9 = 500,000 trudex
+	cred := "trudex"
+	amount := sdk.NewCoin(cred, sdk.NewInt(500000000000000))
+	period := (7 / 2) * 24 * time.Hour
+	maxPeriod := 30 * 24 * time.Hour
 
-// 	interest := k.getInterest(ctx, amount, period, maxPeriod, cred)
-// 	assert.Equal(t, "trudex", interest.Denom)
-// 	assert.Equal(t, sdk.NewInt(22617857142857).String(), interest.Amount.String())
-// }
+	interest := k.getInterest(ctx, amount, period, maxPeriod, cred)
+	assert.Equal(t, "trudex", interest.Denom)
+	assert.Equal(t, sdk.NewInt(11660000000000).String(), interest.Amount.String())
+}
 
-// func Test_getInterest_MaxAmountMinPeriod(t *testing.T) {
-// 	ctx, k, _, _, _, _ := mockDB()
-// 	cred := "trudex"
-// 	amount := sdk.NewCoin(cred, sdk.NewInt(1000000000000000))
-// 	period := 7 * 24 * time.Hour
+func Test_getInterest_MaxAmountMinPeriod(t *testing.T) {
+	ctx, k, _, _, _, _ := mockDB()
+	cred := "trudex"
+	amount := sdk.NewCoin(cred, sdk.NewInt(1000000000000000))
+	period := 7 * 24 * time.Hour
 
-// 	interest := k.getInterest(
-// 		ctx, amount, period, 30*24*time.Hour, cred)
-// 	assert.Equal(t, interest.Amount.String(), sdk.NewInt(100000000000000).String())
-// }
+	interest := k.getInterest(
+		ctx, amount, period, 30*24*time.Hour, cred)
+	assert.Equal(t, interest.Amount.String(), sdk.NewInt(48863333333333).String())
+}
 
 func Test_getInterest_MinAmountMaxPeriod(t *testing.T) {
 	ctx, k, _, _, _, _ := mockDB()
@@ -219,30 +219,3 @@ func Test_getInterest_MinAmountMaxPeriod(t *testing.T) {
 		ctx, amount, period, 30*24*time.Hour, cred)
 	assert.Equal(t, interest.Amount.String(), sdk.NewInt(0).String())
 }
-
-// TODO FIX ME
-// func Test_getInterest_MaxAmountMaxPeriod(t *testing.T) {
-// 	ctx, k, _, _, _, _ := mockDB()
-// 	cred := "trudex"
-// 	amount := sdk.NewCoin("trudex", sdk.NewInt(1000000000000000))
-// 	// period := 90 * 24 * time.Hour
-// 	period := DefaultMsgParams().MaxPeriod
-// 	params := DefaultParams()
-// 	expected := sdk.NewDecFromInt(amount.Amount).Mul(params.MaxInterestRate)
-
-// 	interest := getInterest(
-// 		amount, period, DefaultMsgParams().MaxPeriod, cred, params)
-// 	assert.Equal(t, expected.RoundInt().String(), interest.Amount.String())
-// }
-
-// func Test_getInterest_MinAmountMinPeriod(t *testing.T) {
-// 	ctx, k, _, _, _, _ := mockDB()
-// 	cred := "trudex"
-// 	amount := sdk.NewCoin(cred, sdk.NewInt(0))
-// 	period := 3 * 24 * time.Hour
-// 	params := DefaultParams()
-
-// 	interest := getInterest(
-// 		amount, period, DefaultMsgParams().MaxPeriod, cred, params)
-// 	assert.Equal(t, interest.String(), "0trudex", "Interest is wrong")
-// }
