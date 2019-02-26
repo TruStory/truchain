@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	app "github.com/TruStory/truchain/types"
+	"github.com/TruStory/truchain/x/stake"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/stretchr/testify/assert"
 )
@@ -28,6 +29,22 @@ func TestCreateGetVote(t *testing.T) {
 
 	vote, _ := k.TokenVote(ctx, voteID)
 	assert.Equal(t, voteID, vote.ID())
+}
+
+func TestInValidCreateVoteMsg(t *testing.T) {
+	ctx, k, ck := mockDB()
+
+	storyID := createFakeStory(ctx, k.storyKeeper, ck)
+	amount := sdk.NewCoin(app.StakeDenom, sdk.NewInt(15000000000))
+	creator := sdk.AccAddress([]byte{1, 2})
+
+	// give user some funds
+	k.bankKeeper.AddCoins(ctx, creator, sdk.Coins{amount.Plus(amount)})
+
+	argument := "too short"
+	_, err := k.Create(ctx, storyID, amount, true, argument, creator)
+	assert.NotNil(t, err)
+	assert.Equal(t, stake.ErrInvalidArgumentMsg(argument).Code(), err.Code())
 }
 
 func TestGetVotesByGameID(t *testing.T) {

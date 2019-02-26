@@ -13,7 +13,7 @@ func TestValidBackMsg(t *testing.T) {
 	validStoryID := int64(1)
 	validStake := sdk.Coin{Denom: "trustake", Amount: sdk.NewInt(100)}
 	validCreator := sdk.AccAddress([]byte{1, 2})
-	validPeriod := DefaultMsgParams().MinPeriod
+	validPeriod := 7 * time.Hour
 	validArgument := "valid argument"
 	msg := NewBackStoryMsg(validStoryID, validStake, validArgument, validCreator, validPeriod)
 	err := msg.ValidateBasic()
@@ -59,28 +59,4 @@ func TestInValidStakeBackMsg(t *testing.T) {
 	err := msg.ValidateBasic()
 
 	assert.Equal(t, sdk.CodeInsufficientFunds, err.Code(), err.Error())
-}
-
-func TestInValidBackingPeriodBackMsg(t *testing.T) {
-	validStoryID := int64(1)
-	validStake := sdk.Coin{Denom: "trustake", Amount: sdk.NewInt(100)}
-	validCreator := sdk.AccAddress([]byte{1, 2})
-	invalidPeriod := time.Duration(0 * time.Hour)
-	validArgument := "valid argument"
-	msg := NewBackStoryMsg(validStoryID, validStake, validArgument, validCreator, invalidPeriod)
-	err := msg.ValidateBasic()
-
-	assert.Equal(t, CodeInvalidPeriod, err.Code(), err.Error())
-}
-
-func TestInValidBackingPeriod2BackMsg(t *testing.T) {
-	validStoryID := int64(1)
-	validStake := sdk.Coin{Denom: "trustake", Amount: sdk.NewInt(100)}
-	validCreator := sdk.AccAddress([]byte{1, 2})
-	invalidPeriod := time.Duration(366 * 24 * time.Hour)
-	validArgument := "valid argument"
-	msg := NewBackStoryMsg(validStoryID, validStake, validArgument, validCreator, invalidPeriod)
-	err := msg.ValidateBasic()
-
-	assert.Equal(t, CodeInvalidPeriod, err.Code(), err.Error())
 }

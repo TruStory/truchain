@@ -1,72 +1,15 @@
 package backing
 
 import (
-	"time"
-
 	app "github.com/TruStory/truchain/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
-
-// ============================================================================
-
-// Queue is a list of all backings
-type Queue []int64
-
-// IsEmpty checks if the queue is empty
-func (asq Queue) IsEmpty() bool {
-	if len(asq) == 0 {
-		return true
-	}
-	return false
-}
-
-// ============================================================================
-
-// Params holds data for backing interest calculations
-type Params struct {
-	AmountWeight    sdk.Dec
-	PeriodWeight    sdk.Dec
-	MinInterestRate sdk.Dec
-	MaxInterestRate sdk.Dec
-}
-
-// DefaultParams creates a new Params type with defaults
-func DefaultParams() Params {
-	return Params{
-		AmountWeight:    sdk.NewDecWithPrec(333, 3), // 33.3%
-		PeriodWeight:    sdk.NewDecWithPrec(667, 3), // 66.7%
-		MinInterestRate: sdk.ZeroDec(),              // 0%
-		MaxInterestRate: sdk.NewDecWithPrec(10, 2),  // 10%
-	}
-}
-
-// MsgParams holds default validation params
-type MsgParams struct {
-	MinArgumentLength int // min number of chars for argument
-	MaxArgumentLength int // max number of chars for argument
-	MinPeriod         time.Duration
-	MaxPeriod         time.Duration
-}
-
-// DefaultMsgParams creates a new MsgParams type with defaults
-func DefaultMsgParams() MsgParams {
-	return MsgParams{
-		MinArgumentLength: 10,
-		MaxArgumentLength: 1000,
-		// MinPeriod:         3 * 24 * time.Hour,  // 3 days
-		// MaxPeriod:         90 * 24 * time.Hour, // 90 days
-		MinPeriod: 24 * time.Hour,
-		MaxPeriod: 7 * 24 * time.Hour,
-	}
-}
 
 // Backing type
 type Backing struct {
 	app.Vote `json:"vote"`
 
-	Interest sdk.Coin      `json:"interest"`
-	Params   Params        `json:"params"`
-	Period   time.Duration `json:"period"`
+	Interest sdk.Coin `json:"interest"`
 }
 
 // ID implements `Voter`
