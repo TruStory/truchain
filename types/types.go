@@ -73,6 +73,7 @@ type Voter interface {
 	Amount() sdk.Coin
 	Creator() sdk.AccAddress
 	VoteChoice() bool
+	Timestamp() Timestamp
 }
 
 // Vote is a type that defines a vote on a story. It serves as an inner struct

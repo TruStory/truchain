@@ -34,3 +34,8 @@ func (c Challenge) Creator() sdk.AccAddress {
 func (c Challenge) VoteChoice() bool {
 	return c.Vote.Vote
 }
+
+// Timestamp implements `Voter.Timestamp`
+func (c Challenge) Timestamp() app.Timestamp {
+	return c.Vote.Timestamp
+}

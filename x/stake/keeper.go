@@ -57,8 +57,8 @@ func NewKeeper(truBankKeeper trubank.WriteKeeper, paramStore params.Subspace) Ke
 // 			backing.Creator().String()))
 // 	}
 
-// DistributeInterest distributes interest to backers and challengers
-func (k Keeper) DistributeInterest(
+// DistributePrincipalAndInterest distributes funds to backers and challengers
+func (k Keeper) DistributePrincipalAndInterest(
 	ctx sdk.Context, stakes []app.Voter, categoryID int64) sdk.Error {
 
 	for _, stake := range stakes {
@@ -67,6 +67,8 @@ func (k Keeper) DistributeInterest(
 		if err != nil {
 			return err
 		}
+		// mint interest earned and distribute
+		// period := ctx.BlockHeader().Time.Sub(stake.)
 	}
 
 	return nil
