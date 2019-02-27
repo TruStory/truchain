@@ -94,7 +94,7 @@ func (ta *TruAPI) RegisterResolvers() {
 		"interest":  func(ctx context.Context, q backing.Backing) sdk.Coin { return q.Interest },
 		"vote":      func(ctx context.Context, q backing.Backing) bool { return q.VoteChoice() },
 		"creator":   func(ctx context.Context, q backing.Backing) users.User { return getUser(ctx, q.Creator()) },
-		"timestamp": func(ctx context.Context, q backing.Backing) app.Timestamp { return q.Timestamp },
+		"timestamp": func(ctx context.Context, q backing.Backing) app.Timestamp { return q.Timestamp() },
 	})
 
 	ta.GraphQLClient.RegisterQueryResolver("categories", ta.allCategoriesResolver)
@@ -110,7 +110,7 @@ func (ta *TruAPI) RegisterResolvers() {
 		"argument":  func(ctx context.Context, q challenge.Challenge) string { return q.Argument },
 		"vote":      func(ctx context.Context, q challenge.Challenge) bool { return q.VoteChoice() },
 		"creator":   func(ctx context.Context, q challenge.Challenge) users.User { return getUser(ctx, q.Creator()) },
-		"timestamp": func(ctx context.Context, q challenge.Challenge) app.Timestamp { return q.Timestamp },
+		"timestamp": func(ctx context.Context, q challenge.Challenge) app.Timestamp { return q.Timestamp() },
 	})
 
 	ta.GraphQLClient.RegisterObjectResolver("Coin", sdk.Coin{}, map[string]interface{}{
@@ -186,7 +186,7 @@ func (ta *TruAPI) RegisterResolvers() {
 		"argument":  func(ctx context.Context, q vote.TokenVote) string { return q.Argument },
 		"vote":      func(ctx context.Context, q vote.TokenVote) bool { return q.VoteChoice() },
 		"creator":   func(ctx context.Context, q vote.TokenVote) users.User { return getUser(ctx, q.Creator()) },
-		"timestamp": func(ctx context.Context, q vote.TokenVote) app.Timestamp { return q.Timestamp },
+		"timestamp": func(ctx context.Context, q vote.TokenVote) app.Timestamp { return q.Timestamp() },
 	})
 
 	ta.GraphQLClient.BuildSchema()

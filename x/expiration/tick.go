@@ -75,7 +75,7 @@ func (k Keeper) distributeEarningsToBackers(ctx sdk.Context, storyID int64) sdk.
 		}
 
 		// give the interest earned to the user (in cred)
-		period := story.ExpireTime.Sub(backing.Timestamp.CreatedTime)
+		period := story.ExpireTime.Sub(backing.Timestamp().CreatedTime)
 		maxPeriod := story.ExpireTime.Sub(story.Timestamp.CreatedTime)
 		logger.Info(fmt.Sprintf(
 			"Backing period: %s, max period: %s", period, maxPeriod))

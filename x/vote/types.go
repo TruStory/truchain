@@ -34,3 +34,8 @@ func (v TokenVote) Creator() sdk.AccAddress {
 func (v TokenVote) VoteChoice() bool {
 	return v.Vote.Vote
 }
+
+// Timestamp implements `Voter.Timestamp`
+func (v TokenVote) Timestamp() app.Timestamp {
+	return v.Vote.Timestamp
+}
