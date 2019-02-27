@@ -4,10 +4,10 @@ import (
 	app "github.com/TruStory/truchain/types"
 	"github.com/TruStory/truchain/x/backing"
 	"github.com/TruStory/truchain/x/challenge"
+	"github.com/TruStory/truchain/x/stake"
 	"github.com/TruStory/truchain/x/story"
 	queue "github.com/cosmos/cosmos-sdk/store"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/cosmos/cosmos-sdk/x/bank"
 	"github.com/cosmos/cosmos-sdk/x/params"
 	amino "github.com/tendermint/go-amino"
 )
@@ -23,10 +23,10 @@ type Keeper struct {
 
 	expiredStoryQueueKey sdk.StoreKey
 
+	stakeKeeper     stake.Keeper
 	storyKeeper     story.WriteKeeper
 	backingKeeper   backing.WriteKeeper
 	challengeKeeper challenge.WriteKeeper
-	bankKeeper      bank.Keeper
 	paramStore      params.Subspace
 }
 
@@ -34,20 +34,20 @@ type Keeper struct {
 func NewKeeper(
 	storeKey sdk.StoreKey,
 	expiredStoryQueueKey sdk.StoreKey,
+	stakeKeeper stake.Keeper,
 	storyKeeper story.WriteKeeper,
 	backingKeeper backing.WriteKeeper,
 	challengeKeeper challenge.WriteKeeper,
-	bankKeeper bank.Keeper,
 	paramStore params.Subspace,
 	codec *amino.Codec) Keeper {
 
 	return Keeper{
 		app.NewKeeper(codec, storeKey),
 		expiredStoryQueueKey,
+		stakeKeeper,
 		storyKeeper,
 		backingKeeper,
 		challengeKeeper,
-		bankKeeper,
 		paramStore.WithTypeTable(ParamTypeTable()),
 	}
 }

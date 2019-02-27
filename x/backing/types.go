@@ -8,8 +8,6 @@ import (
 // Backing type
 type Backing struct {
 	app.Vote `json:"vote"`
-
-	Interest sdk.Coin `json:"interest"`
 }
 
 // ID implements `Voter.ID`
