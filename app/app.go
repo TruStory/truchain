@@ -16,6 +16,7 @@ import (
 	"github.com/TruStory/truchain/x/stake"
 	"github.com/TruStory/truchain/x/story"
 	"github.com/TruStory/truchain/x/truapi"
+	"github.com/TruStory/truchain/x/trubank"
 	"github.com/TruStory/truchain/x/users"
 	"github.com/TruStory/truchain/x/vote"
 	"github.com/TruStory/truchain/x/voting"
@@ -64,6 +65,7 @@ type TruChain struct {
 	keyStake             *sdk.KVStoreKey
 	keyStory             *sdk.KVStoreKey
 	keyStoryQueue        *sdk.KVStoreKey
+	keyTruBank           *sdk.KVStoreKey
 	keyVotingStoryQueue  *sdk.KVStoreKey
 	keyExpiredStoryQueue *sdk.KVStoreKey
 	keyVote              *sdk.KVStoreKey
@@ -86,6 +88,7 @@ type TruChain struct {
 	expirationKeeper   expiration.Keeper
 	storyKeeper        story.WriteKeeper
 	stakeKeeper        stake.Keeper
+	truBankKeeper      trubank.WriteKeeper
 	voteKeeper         vote.WriteKeeper
 	votingKeeper       voting.WriteKeeper
 
@@ -127,6 +130,7 @@ func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *T
 		keyExpiration:        sdk.NewKVStoreKey(expiration.StoreKey),
 		keyFee:               sdk.NewKVStoreKey("fee_collection"),
 		keyStake:             sdk.NewKVStoreKey(stake.StoreKey),
+		keyTruBank:           sdk.NewKVStoreKey(trubank.StoreKey),
 		keyVotingStoryQueue:  sdk.NewKVStoreKey(story.VotingQueueStoreKey),
 		keyExpiredStoryQueue: sdk.NewKVStoreKey(story.ExpiredQueueStoreKey),
 		keyVote:              sdk.NewKVStoreKey(vote.StoreKey),
@@ -174,7 +178,14 @@ func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *T
 		app.codec,
 	)
 
+	app.truBankKeeper = trubank.NewKeeper(
+		app.keyTruBank,
+		app.bankKeeper,
+		app.categoryKeeper,
+		app.codec)
+
 	app.stakeKeeper = stake.NewKeeper(
+		app.truBankKeeper,
 		app.paramsKeeper.Subspace(stake.StoreKey),
 	)
 
@@ -290,6 +301,7 @@ func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *T
 		app.keyStoryQueue,
 		app.keyExpiredStoryQueue,
 		app.keyVotingStoryQueue,
+		app.keyTruBank,
 		app.keyVote,
 		app.keyVoting,
 	)

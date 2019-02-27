@@ -11,6 +11,7 @@ import (
 	"github.com/TruStory/truchain/x/challenge"
 	"github.com/TruStory/truchain/x/stake"
 	"github.com/TruStory/truchain/x/story"
+	"github.com/TruStory/truchain/x/trubank"
 	"github.com/cosmos/cosmos-sdk/store"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth"
@@ -34,11 +35,11 @@ func mockDB() (
 	db := dbm.NewMemDB()
 
 	accKey := sdk.NewKVStoreKey(auth.StoreKey)
+	catKey := sdk.NewKVStoreKey(category.StoreKey)
 	storyKey := sdk.NewKVStoreKey(story.StoreKey)
 	storyQueueKey := sdk.NewKVStoreKey(story.QueueStoreKey)
 	expiredStoryQueueKey := sdk.NewKVStoreKey(story.ExpiredQueueStoreKey)
 	votingStoryQueueKey := sdk.NewKVStoreKey(story.VotingQueueStoreKey)
-	catKey := sdk.NewKVStoreKey(category.StoreKey)
 	backingKey := sdk.NewKVStoreKey(backing.StoreKey)
 	challengeKey := sdk.NewKVStoreKey(challenge.StoreKey)
 	distKey := sdk.NewKVStoreKey(StoreKey)
@@ -88,7 +89,18 @@ func mockDB() (
 
 	story.InitGenesis(ctx, storyKeeper, story.DefaultGenesisState())
 
-	stakeKeeper := stake.NewKeeper(pk.Subspace(stake.StoreKey))
+	truBankKey := sdk.NewKVStoreKey(trubank.StoreKey)
+	ms.MountStoreWithDB(truBankKey, sdk.StoreTypeIAVL, db)
+	truBankKeeper := trubank.NewKeeper(
+		truBankKey,
+		bankKeeper,
+		categoryKeeper,
+		codec)
+
+	stakeKeeper := stake.NewKeeper(
+		truBankKeeper,
+		pk.Subspace(stake.StoreKey),
+	)
 	stake.InitGenesis(ctx, stakeKeeper, stake.DefaultGenesisState())
 
 	backingKeeper := backing.NewKeeper(

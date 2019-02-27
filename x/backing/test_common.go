@@ -3,6 +3,8 @@ package backing
 import (
 	"net/url"
 
+	"github.com/TruStory/truchain/x/trubank"
+
 	"github.com/TruStory/truchain/x/stake"
 
 	"github.com/TruStory/truchain/x/category"
@@ -85,7 +87,19 @@ func mockDB() (
 
 	story.InitGenesis(ctx, sk, story.DefaultGenesisState())
 
-	stakeKeeper := stake.NewKeeper(pk.Subspace(stake.StoreKey))
+	truBankKey := sdk.NewKVStoreKey(trubank.StoreKey)
+	ms.MountStoreWithDB(truBankKey, sdk.StoreTypeIAVL, db)
+
+	truBankKeeper := trubank.NewKeeper(
+		truBankKey,
+		bankKeeper,
+		ck,
+		codec)
+
+	stakeKeeper := stake.NewKeeper(
+		truBankKeeper,
+		pk.Subspace(stake.StoreKey),
+	)
 	stake.InitGenesis(ctx, stakeKeeper, stake.DefaultGenesisState())
 
 	bk := NewKeeper(

@@ -24,9 +24,8 @@ type ReadKeeper interface {
 type WriteKeeper interface {
 	ReadKeeper
 
+	AddCoin(ctx sdk.Context, creator sdk.AccAddress, coin sdk.Coin) (coins sdk.Coins, err sdk.Error)
 	MintAndAddCoin(ctx sdk.Context, creator sdk.AccAddress, catID int64, amt sdk.Int) (sdk.Coins, sdk.Error)
-	NewCategoryCoin(toDenom string, from sdk.Coin) sdk.Coin
-	ExchangeCoinsBetweenDenoms(from sdk.Coin, toDenom string) sdk.Dec
 }
 
 // Keeper data type storing keys to the key-value store
@@ -49,6 +48,13 @@ func NewKeeper(
 		bankKeeper,
 		categoryKeeper,
 	}
+}
+
+// AddCoin wraps around adding coins via the bank keeper
+func (k Keeper) AddCoin(ctx sdk.Context, creator sdk.AccAddress, coin sdk.Coin) (coins sdk.Coins, err sdk.Error) {
+	coins, _, err = k.bankKeeper.AddCoins(ctx, creator, sdk.Coins{coin})
+
+	return coins, err
 }
 
 // MintAndAddCoin adds coins to a user's account and to the total category supply
@@ -84,16 +90,16 @@ func (k Keeper) MintAndAddCoin(
 
 // NewCategoryCoin creates a new category coin type
 func NewCategoryCoin(toDenom string, from sdk.Coin) sdk.Coin {
-	rate := ExchangeCoinsBetweenDenoms(from, toDenom)
+	rate := exchangeCoinsBetweenDenoms(from, toDenom)
 
 	return sdk.NewCoin(
 		toDenom,
 		sdk.NewDecFromInt(from.Amount).Mul(rate).TruncateInt())
 }
 
-// ExchangeCoinsBetweenDenoms exchanges coins from trustake to cred
+// exchangeCoinsBetweenDenoms exchanges coins from trustake to cred
 // TODO [Shane]: https://github.com/TruStory/truchain/issues/21
-func ExchangeCoinsBetweenDenoms(from sdk.Coin, toDenom string) sdk.Dec {
+func exchangeCoinsBetweenDenoms(from sdk.Coin, toDenom string) sdk.Dec {
 
 	if from.Denom == toDenom {
 		return sdk.NewDec(1)
