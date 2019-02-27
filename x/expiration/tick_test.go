@@ -37,6 +37,10 @@ func Test_handleExpiredStories(t *testing.T) {
 	// fake expired story queue
 	k.expiredStoryQueue(ctx).Push(storyID)
 
+	// fake future block time for expiration
+	expireTime := time.Now().Add(24 * time.Hour)
+	ctx = ctx.WithBlockHeader(abci.Header{Time: expireTime})
+
 	err = k.processExpiredStoryQueue(ctx)
 	assert.Nil(t, err)
 
@@ -46,5 +50,5 @@ func Test_handleExpiredStories(t *testing.T) {
 
 	// check balance for challenger
 	coins = bankKeeper.GetCoins(ctx, challenger)
-	assert.Equal(t, "2000000000000trusteak", coins.String())
+	assert.Equal(t, "6670crypto,2000000000000trusteak", coins.String())
 }

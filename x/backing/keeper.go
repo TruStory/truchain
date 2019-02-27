@@ -2,7 +2,6 @@ package backing
 
 import (
 	"fmt"
-	"time"
 
 	app "github.com/TruStory/truchain/types"
 	cat "github.com/TruStory/truchain/x/category"
@@ -123,20 +122,6 @@ func (k Keeper) Create(
 		return
 	}
 
-	credDenom, err := k.storyKeeper.CategoryDenom(ctx, storyID)
-	if err != nil {
-		return
-	}
-
-	// mint category coin from interest earned
-	interest := k.getInterest(
-		ctx,
-		amount,
-		24*time.Hour,
-		// TODO [shanev]: will go away after https://github.com/TruStory/truchain/issues/339
-		30*24*time.Hour,
-		credDenom)
-
 	vote := app.Vote{
 		ID:        k.GetNextID(ctx),
 		StoryID:   storyID,
@@ -148,8 +133,7 @@ func (k Keeper) Create(
 	}
 
 	backing := Backing{
-		Vote:     vote,
-		Interest: interest,
+		Vote: vote,
 	}
 	k.setBacking(ctx, backing)
 
@@ -165,8 +149,7 @@ func (k Keeper) Create(
 // Update updates an existing backing
 func (k Keeper) Update(ctx sdk.Context, backing Backing) {
 	newBacking := Backing{
-		Vote:     backing.Vote,
-		Interest: backing.Interest,
+		Vote: backing.Vote,
 	}
 
 	k.setBacking(ctx, newBacking)
@@ -281,53 +264,4 @@ func (k Keeper) setBacking(ctx sdk.Context, backing Backing) {
 	store.Set(
 		k.GetIDKey(backing.ID()),
 		k.GetCodec().MustMarshalBinaryLengthPrefixed(backing))
-}
-
-// ============================================================================
-
-// getInterest calcuates the interest for the backing
-func (k Keeper) getInterest(
-	ctx sdk.Context,
-	amount sdk.Coin,
-	period time.Duration,
-	maxPeriod time.Duration,
-	credDenom string) sdk.Coin {
-
-	// TODO: keep track of total supply
-	// https://github.com/TruStory/truchain/issues/22
-
-	totalSupply := sdk.NewDec(1000000000000000)
-
-	// inputs
-	maxAmount := totalSupply
-	amountWeight := k.stakeKeeper.GetParams(ctx).AmountWeight
-	periodWeight := k.stakeKeeper.GetParams(ctx).PeriodWeight
-	maxInterestRate := k.stakeKeeper.GetParams(ctx).MaxInterestRate
-
-	// type cast values to unitless decimals for math operations
-	periodDec := sdk.NewDec(int64(period))
-	maxPeriodDec := sdk.NewDec(int64(maxPeriod))
-	amountDec := sdk.NewDecFromInt(amount.Amount)
-
-	// normalize amount and period to 0 - 1
-	normalizedAmount := amountDec.Quo(maxAmount)
-	normalizedPeriod := periodDec.Quo(maxPeriodDec)
-
-	// apply weights to normalized amount and period
-	weightedAmount := normalizedAmount.Mul(amountWeight)
-	weightedPeriod := normalizedPeriod.Mul(periodWeight)
-
-	// calculate interest
-	minInterestRate := k.stakeKeeper.GetParams(ctx).MinInterestRate
-	interestRate := maxInterestRate.Mul(weightedAmount.Add(weightedPeriod))
-	// convert rate to a value
-	if interestRate.LT(minInterestRate) {
-		interestRate = minInterestRate
-	}
-	interest := amountDec.Mul(interestRate)
-
-	// return cred coin with rounded interest
-	cred := sdk.NewCoin(credDenom, interest.RoundInt())
-
-	return cred
 }

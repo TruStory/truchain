@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/TruStory/truchain/x/story"
+	"github.com/davecgh/go-spew/spew"
 
 	app "github.com/TruStory/truchain/types"
 	"github.com/TruStory/truchain/x/trubank"
@@ -62,8 +63,8 @@ func (k Keeper) DistributePrincipalAndInterest(
 		logger.Info(fmt.Sprintf(
 			"Distributed %s with interest %s for period %s to %s",
 			vote.Amount().String(),
-			period.String(),
 			interest.String(),
+			period.String(),
 			vote.Creator().String()))
 	}
 
@@ -105,6 +106,7 @@ func (k Keeper) interest(
 	periodWeight := k.GetParams(ctx).PeriodWeight
 	maxInterestRate := k.GetParams(ctx).MaxInterestRate
 	maxPeriod := k.storyKeeper.GetParams(ctx).ExpireDuration
+	spew.Dump(maxPeriod)
 
 	// type cast values to unitless decimals for math operations
 	periodDec := sdk.NewDec(int64(period))

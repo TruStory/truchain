@@ -225,10 +225,10 @@ func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *T
 	app.expirationKeeper = expiration.NewKeeper(
 		app.keyExpiration,
 		app.keyExpiredStoryQueue,
+		app.stakeKeeper,
 		app.storyKeeper,
 		app.backingKeeper,
 		app.challengeKeeper,
-		app.bankKeeper,
 		app.paramsKeeper.Subspace(expiration.StoreKey),
 		codec,
 	)
