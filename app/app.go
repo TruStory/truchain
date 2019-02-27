@@ -185,6 +185,7 @@ func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *T
 		app.codec)
 
 	app.stakeKeeper = stake.NewKeeper(
+		app.storyKeeper,
 		app.truBankKeeper,
 		app.paramsKeeper.Subspace(stake.StoreKey),
 	)
