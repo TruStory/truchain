@@ -97,6 +97,7 @@ func mockDB() (
 		codec)
 
 	stakeKeeper := stake.NewKeeper(
+		sk,
 		truBankKeeper,
 		pk.Subspace(stake.StoreKey),
 	)

@@ -1,7 +1,10 @@
 package stake
 
 import (
+	"fmt"
 	"time"
+
+	"github.com/TruStory/truchain/x/story"
 
 	app "github.com/TruStory/truchain/types"
 	"github.com/TruStory/truchain/x/trubank"
@@ -16,59 +19,52 @@ const (
 
 // Keeper data type storing keys to the key-value store
 type Keeper struct {
+	storyKeeper   story.ReadKeeper
 	truBankKeeper trubank.WriteKeeper
 	paramStore    params.Subspace
 }
 
 // NewKeeper creates a new keeper with write and read access
-func NewKeeper(truBankKeeper trubank.WriteKeeper, paramStore params.Subspace) Keeper {
+func NewKeeper(
+	storyKeeper story.ReadKeeper,
+	truBankKeeper trubank.WriteKeeper,
+	paramStore params.Subspace) Keeper {
+
 	return Keeper{
+		storyKeeper,
 		truBankKeeper,
 		paramStore.WithTypeTable(ParamTypeTable()),
 	}
 }
 
-// DistributeInterest distributes interest to backers and challengers
-// func (k Keeper) DistributeInterest(ctx sdk.Context, storyID int64) sdk.Error {
-// 	logger := ctx.Logger().With("module", "expiration")
-
-// 	for _, backing := range backings {
-// 		// give the principal back to the user (in trustake)
-// 		_, _, err := k.bankKeeper.AddCoins(ctx, backing.Creator(), sdk.Coins{backing.Amount()})
-// 		if err != nil {
-// 			return err
-// 		}
-// 		// give the interest earned to the user (in cred)
-// 		period := story.ExpireTime.Sub(backing.Timestamp.CreatedTime)
-// 		maxPeriod := story.ExpireTime.Sub(story.Timestamp.CreatedTime)
-// 		logger.Info(fmt.Sprintf(
-// 			"Backing period: %s, max period: %s", period, maxPeriod))
-
-// 		interest := k.interest(ctx, backing.Amount(), period, maxPeriod, denom)
-// 		_, _, err = k.bankKeeper.AddCoins(ctx, backing.Creator(), sdk.Coins{interest})
-// 		if err != nil {
-// 			return err
-// 		}
-
-// 		logger.Info(fmt.Sprintf(
-// 			"Distributed earnings of %s with interest of %s to %s",
-// 			backing.Amount().String(),
-// 			backing.Interest.String(),
-// 			backing.Creator().String()))
-// 	}
-
 // DistributePrincipalAndInterest distributes funds to backers and challengers
 func (k Keeper) DistributePrincipalAndInterest(
-	ctx sdk.Context, stakes []app.Voter, categoryID int64) sdk.Error {
+	ctx sdk.Context, votes []app.Voter, categoryID int64) sdk.Error {
 
-	for _, stake := range stakes {
+	logger := ctx.Logger().With("module", StoreKey)
+
+	for _, vote := range votes {
 		// give principal back to user in trustake
-		_, err := k.truBankKeeper.AddCoin(ctx, stake.Creator(), stake.Amount())
+		_, err := k.truBankKeeper.AddCoin(ctx, vote.Creator(), vote.Amount())
 		if err != nil {
 			return err
 		}
-		// mint interest earned and distribute
-		// period := ctx.BlockHeader().Time.Sub(stake.)
+		// mint interest earned in cred and distribute
+		period := ctx.BlockHeader().Time.Sub(vote.Timestamp().CreatedTime)
+		interest := k.interest(ctx, vote.Amount(), categoryID, period)
+
+		_, err = k.truBankKeeper.MintAndAddCoin(
+			ctx, vote.Creator(), categoryID, interest)
+		if err != nil {
+			return err
+		}
+
+		logger.Info(fmt.Sprintf(
+			"Distributed %s with interest %s for period %s to %s",
+			vote.Amount().String(),
+			period.String(),
+			interest.String(),
+			vote.Creator().String()))
 	}
 
 	return nil
@@ -91,12 +87,12 @@ func (k Keeper) ValidateArgument(ctx sdk.Context, argument string) sdk.Error {
 	return nil
 }
 
+// TODO: pass in category keeper so we can get total cred
 func (k Keeper) interest(
 	ctx sdk.Context,
 	amount sdk.Coin,
-	period time.Duration,
-	maxPeriod time.Duration,
-	credDenom string) sdk.Coin {
+	categoryID int64,
+	period time.Duration) sdk.Int {
 
 	// TODO: keep track of total supply
 	// https://github.com/TruStory/truchain/issues/22
@@ -108,6 +104,7 @@ func (k Keeper) interest(
 	amountWeight := k.GetParams(ctx).AmountWeight
 	periodWeight := k.GetParams(ctx).PeriodWeight
 	maxInterestRate := k.GetParams(ctx).MaxInterestRate
+	maxPeriod := k.storyKeeper.GetParams(ctx).ExpireDuration
 
 	// type cast values to unitless decimals for math operations
 	periodDec := sdk.NewDec(int64(period))
@@ -131,8 +128,5 @@ func (k Keeper) interest(
 	}
 	interest := amountDec.Mul(interestRate)
 
-	// return cred coin with rounded interest
-	cred := sdk.NewCoin(credDenom, interest.RoundInt())
-
-	return cred
+	return interest.RoundInt()
 }
