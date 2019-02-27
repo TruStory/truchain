@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/TruStory/truchain/x/stake"
+	"github.com/TruStory/truchain/x/trubank"
 	"github.com/TruStory/truchain/x/vote"
 
 	"github.com/TruStory/truchain/x/backing"
@@ -89,7 +90,18 @@ func mockDB() (sdk.Context, Keeper, c.Keeper) {
 
 	story.InitGenesis(ctx, sk, story.DefaultGenesisState())
 
-	stakeKeeper := stake.NewKeeper(pk.Subspace(stake.StoreKey))
+	truBankKey := sdk.NewKVStoreKey(trubank.StoreKey)
+	ms.MountStoreWithDB(truBankKey, sdk.StoreTypeIAVL, db)
+	truBankKeeper := trubank.NewKeeper(
+		truBankKey,
+		bankKeeper,
+		ck,
+		codec)
+
+	stakeKeeper := stake.NewKeeper(
+		truBankKeeper,
+		pk.Subspace(stake.StoreKey),
+	)
 	stake.InitGenesis(ctx, stakeKeeper, stake.DefaultGenesisState())
 
 	backingKeeper := backing.NewKeeper(

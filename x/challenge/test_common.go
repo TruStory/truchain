@@ -6,7 +6,9 @@ import (
 	"net/url"
 	"time"
 
+	"github.com/TruStory/truchain/x/category"
 	"github.com/TruStory/truchain/x/stake"
+	"github.com/TruStory/truchain/x/trubank"
 
 	"github.com/TruStory/truchain/x/backing"
 
@@ -29,10 +31,12 @@ func mockDB() (sdk.Context, Keeper, story.Keeper, backing.Keeper, bank.Keeper) {
 	db := dbm.NewMemDB()
 
 	accKey := sdk.NewKVStoreKey("acc")
+	catKey := sdk.NewKVStoreKey(category.StoreKey)
 	storyKey := sdk.NewKVStoreKey("stories")
 	storyQueueKey := sdk.NewKVStoreKey(story.QueueStoreKey)
+	stakeKey := sdk.NewKVStoreKey(stake.StoreKey)
+	truBankKey := sdk.NewKVStoreKey(trubank.StoreKey)
 	expiredStoryQueueKey := sdk.NewKVStoreKey(story.ExpiredQueueStoreKey)
-	catKey := sdk.NewKVStoreKey("categories")
 	challengeKey := sdk.NewKVStoreKey("challenges")
 	votingStoryQueueKey := sdk.NewKVStoreKey("gameQueue")
 	backingKey := sdk.NewKVStoreKey("backings")
@@ -41,10 +45,12 @@ func mockDB() (sdk.Context, Keeper, story.Keeper, backing.Keeper, bank.Keeper) {
 
 	ms := store.NewCommitMultiStore(db)
 	ms.MountStoreWithDB(accKey, sdk.StoreTypeIAVL, db)
+	ms.MountStoreWithDB(catKey, sdk.StoreTypeIAVL, db)
 	ms.MountStoreWithDB(storyKey, sdk.StoreTypeIAVL, db)
 	ms.MountStoreWithDB(storyQueueKey, sdk.StoreTypeIAVL, db)
+	ms.MountStoreWithDB(truBankKey, sdk.StoreTypeIAVL, db)
+	ms.MountStoreWithDB(stakeKey, sdk.StoreTypeIAVL, db)
 	ms.MountStoreWithDB(expiredStoryQueueKey, sdk.StoreTypeIAVL, db)
-	ms.MountStoreWithDB(catKey, sdk.StoreTypeIAVL, db)
 	ms.MountStoreWithDB(challengeKey, sdk.StoreTypeIAVL, db)
 	ms.MountStoreWithDB(votingStoryQueueKey, sdk.StoreTypeIAVL, db)
 	ms.MountStoreWithDB(backingKey, sdk.StoreTypeIAVL, db)
@@ -69,21 +75,29 @@ func mockDB() (sdk.Context, Keeper, story.Keeper, backing.Keeper, bank.Keeper) {
 		bank.DefaultCodespace,
 	)
 
-	ck := c.NewKeeper(catKey, codec)
-	c.InitGenesis(ctx, ck, c.DefaultCategories())
+	categoryKeeper := c.NewKeeper(catKey, codec)
+	c.InitGenesis(ctx, categoryKeeper, c.DefaultCategories())
 
 	sk := story.NewKeeper(
 		storyKey,
 		storyQueueKey,
 		expiredStoryQueueKey,
 		votingStoryQueueKey,
-		ck,
+		categoryKeeper,
 		pk.Subspace(story.StoreKey),
 		codec)
-
 	story.InitGenesis(ctx, sk, story.DefaultGenesisState())
 
-	stakeKeeper := stake.NewKeeper(pk.Subspace(stake.StoreKey))
+	truBankKeeper := trubank.NewKeeper(
+		truBankKey,
+		bankKeeper,
+		categoryKeeper,
+		codec)
+
+	stakeKeeper := stake.NewKeeper(
+		truBankKeeper,
+		pk.Subspace(stake.StoreKey),
+	)
 	stake.InitGenesis(ctx, stakeKeeper, stake.DefaultGenesisState())
 
 	backingKeeper := backing.NewKeeper(
@@ -91,7 +105,7 @@ func mockDB() (sdk.Context, Keeper, story.Keeper, backing.Keeper, bank.Keeper) {
 		stakeKeeper,
 		sk,
 		bankKeeper,
-		ck,
+		categoryKeeper,
 		codec,
 	)
 
