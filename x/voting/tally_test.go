@@ -22,11 +22,11 @@ func TestTally(t *testing.T) {
 }
 
 func TestRewardPool(t *testing.T) {
-	_, votes, _ := fakeValidationGame()
+	ctx, votes, k := fakeValidationGame()
 
 	expectedPool := sdk.NewCoin(app.StakeDenom, sdk.NewInt(5500000000000))
 
-	pool, _ := rewardPool(votes, true)
+	pool, _ := k.rewardPool(ctx, votes, true)
 	assert.Equal(t, expectedPool.String(), pool.String())
 }
 
@@ -60,27 +60,27 @@ func TestWeightedVote(t *testing.T) {
 }
 
 func TestConfirmedStoryRewardPool(t *testing.T) {
-	_, votes, _ := fakeValidationGame()
+	ctx, votes, k := fakeValidationGame()
 
 	pool := sdk.NewCoin(app.StakeDenom, sdk.ZeroInt())
 
-	confirmedPool(votes.falseVotes, &pool)
+	k.confirmedPool(ctx, votes.falseVotes, &pool)
 	assert.Equal(t, "5500000000000trusteak", pool.String())
 }
 
 func TestConfirmedStoryRewardPool2(t *testing.T) {
-	_, votes, _ := fakeValidationGame2()
+	ctx, votes, k := fakeValidationGame2()
 
 	pool := sdk.NewCoin(app.StakeDenom, sdk.ZeroInt())
 
-	confirmedPool(votes.falseVotes, &pool)
+	k.confirmedPool(ctx, votes.falseVotes, &pool)
 	assert.Equal(t, "265000000000trusteak", pool.String())
 }
 
 func TestDistributeRewardsConfirmed(t *testing.T) {
 	ctx, votes, k := fakeValidationGame()
 	pool := sdk.NewCoin(app.StakeDenom, sdk.ZeroInt())
-	confirmedPool(votes.falseVotes, &pool)
+	k.confirmedPool(ctx, votes.falseVotes, &pool)
 
 	cred := "trudex"
 
@@ -143,7 +143,7 @@ func TestDistributeRewardsConfirmed(t *testing.T) {
 func TestDistributeRewardsConfirmed2(t *testing.T) {
 	ctx, votes, k := fakeValidationGame2()
 	pool := sdk.NewCoin(app.StakeDenom, sdk.ZeroInt())
-	confirmedPool(votes.falseVotes, &pool)
+	k.confirmedPool(ctx, votes.falseVotes, &pool)
 
 	cred := "trudex"
 

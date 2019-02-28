@@ -52,7 +52,7 @@ func (k Keeper) DistributePrincipalAndInterest(
 		}
 		// mint interest earned in cred and distribute
 		period := ctx.BlockHeader().Time.Sub(vote.Timestamp().CreatedTime)
-		interest := k.interest(ctx, vote.Amount(), categoryID, period)
+		interest := k.Interest(ctx, vote.Amount(), categoryID, period)
 
 		_, err = k.truBankKeeper.MintAndAddCoin(
 			ctx, vote.Creator(), categoryID, interest)
@@ -89,7 +89,7 @@ func (k Keeper) ValidateArgument(ctx sdk.Context, argument string) sdk.Error {
 }
 
 // TODO: pass in category keeper so we can get total cred
-func (k Keeper) interest(
+func (k Keeper) Interest(
 	ctx sdk.Context,
 	amount sdk.Coin,
 	categoryID int64,

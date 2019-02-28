@@ -19,8 +19,8 @@ func rejectedPool(votes poll, pool *sdk.Coin) (err sdk.Error) {
 		case backing.Backing:
 			// forfeit backing and inflationary rewards, add to pool
 			// TODO [shanev]: do proper conversion when we know it, still 1:1
-			interestInTrustake := sdk.NewCoin(app.StakeDenom, v.Interest.Amount)
-			*pool = (*pool).Plus(v.Amount()).Plus(interestInTrustake)
+			// interestInTrustake := sdk.NewCoin(app.StakeDenom, v.Interest.Amount)
+			// *pool = (*pool).Plus(v.Amount()).Plus(interestInTrustake)
 
 		case tokenVote.TokenVote:
 			// add vote fee to reward pool
@@ -40,8 +40,8 @@ func rejectedPool(votes poll, pool *sdk.Coin) (err sdk.Error) {
 		case backing.Backing:
 			// slash inflationary rewards and add to pool, bad boy
 			// TODO [shanev]: do proper conversion when we know it, still 1:1
-			interestInTrustake := sdk.NewCoin(app.StakeDenom, v.Interest.Amount)
-			*pool = (*pool).Plus(interestInTrustake)
+			// interestInTrustake := sdk.NewCoin(app.StakeDenom, v.Interest.Amount)
+			// *pool = (*pool).Plus(interestInTrustake)
 
 		case challenge.Challenge:
 			// do nothing
