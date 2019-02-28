@@ -14,7 +14,7 @@ import (
 	"github.com/TruStory/truchain/x/challenge"
 
 	app "github.com/TruStory/truchain/types"
-	c "github.com/TruStory/truchain/x/category"
+	"github.com/TruStory/truchain/x/category"
 	"github.com/TruStory/truchain/x/story"
 	"github.com/cosmos/cosmos-sdk/store"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -28,7 +28,7 @@ import (
 	"github.com/tendermint/tendermint/libs/log"
 )
 
-func mockDB() (sdk.Context, Keeper, c.Keeper) {
+func mockDB() (sdk.Context, Keeper, category.Keeper) {
 
 	db := dbm.NewMemDB()
 	accKey := sdk.NewKVStoreKey("acc")
@@ -63,7 +63,6 @@ func mockDB() (sdk.Context, Keeper, c.Keeper) {
 	ms.MountStoreWithDB(transientParamsKey, sdk.StoreTypeTransient, db)
 	ms.LoadLatestVersion()
 
-	// header := abci.Header{Time: time.Now().Add(50 * 24 * time.Hour)}
 	header := abci.Header{Time: time.Now()}
 	ctx := sdk.NewContext(ms, header, false, log.NewNopLogger())
 
@@ -78,7 +77,9 @@ func mockDB() (sdk.Context, Keeper, c.Keeper) {
 		pk.Subspace(bank.DefaultParamspace),
 		bank.DefaultCodespace,
 	)
-	ck := c.NewKeeper(catKey, codec)
+	ck := category.NewKeeper(catKey, codec)
+	category.InitGenesis(ctx, ck, category.DefaultCategories())
+
 	sk := story.NewKeeper(
 		storyKey,
 		storyQueueKey,
@@ -145,9 +146,11 @@ func mockDB() (sdk.Context, Keeper, c.Keeper) {
 		am,
 		backingKeeper,
 		challengeKeeper,
+		stakeKeeper,
 		sk,
 		voteKeeper,
 		bankKeeper,
+		truBankKeeper,
 		pk.Subspace(StoreKey),
 		codec)
 	InitGenesis(ctx, k, DefaultGenesisState())
@@ -155,26 +158,16 @@ func mockDB() (sdk.Context, Keeper, c.Keeper) {
 	return ctx, k, ck
 }
 
-func createFakeStory(ctx sdk.Context, sk story.WriteKeeper, ck c.WriteKeeper) int64 {
+func createFakeStory(ctx sdk.Context, sk story.WriteKeeper, ck category.WriteKeeper) int64 {
 	body := "TruStory validators can be bootstrapped with a single genesis file."
-	cat := createFakeCategory(ctx, ck)
 	creator := sdk.AccAddress([]byte{1, 2})
 	storyType := story.Default
 	source := url.URL{}
+	categoryID := int64(1)
 
-	storyID, _ := sk.Create(ctx, body, cat.ID, creator, source, storyType)
+	storyID, _ := sk.Create(ctx, body, categoryID, creator, source, storyType)
 
 	return storyID
-}
-
-func createFakeCategory(ctx sdk.Context, ck c.WriteKeeper) c.Category {
-	existing, err := ck.GetCategory(ctx, 1)
-	if err == nil {
-		return existing
-	}
-	id := ck.Create(ctx, "decentralized exchanges", "trudex", "category for experts in decentralized exchanges")
-	cat, _ := ck.GetCategory(ctx, id)
-	return cat
 }
 
 func fakeFundedCreator(ctx sdk.Context, k bank.Keeper) sdk.AccAddress {
@@ -188,8 +181,7 @@ func fakeFundedCreator(ctx sdk.Context, k bank.Keeper) sdk.AccAddress {
 	return creator
 }
 
-func fakeValidationGame() (ctx sdk.Context, votes poll, k Keeper) {
-
+func fakeConfirmedGame() (ctx sdk.Context, votes poll, k Keeper) {
 	ctx, k, ck := mockDB()
 
 	storyID := createFakeStory(ctx, k.storyKeeper, ck)
@@ -209,12 +201,15 @@ func fakeValidationGame() (ctx sdk.Context, votes poll, k Keeper) {
 	// 1 Backer Switches to False (Backing Total goes down)
 
 	// GAME ENDS
-	// 6 TRUE VOTES (3 Backers, 3 True Voters)
-	// 5 FALSE VOTES (1 Changed Backer,3 Challengers, 1 False Voter)
-	// True Total = 3000 from Backers (since 1 switched) + 3000 from Voters = 6000 (before interest)
-	// False Total = 4000 from Challengers + 1000 from Voter = 5000
-	// Since Confirmed, only switched backer interest is added to the reward pool = 500
-	// Total Reward Pool = False Total (5000) + Switched Interest (500) = 5500
+	// 7 TRUE VOTES (4 Backers, 3 True Voters)
+	// 4 FALSE VOTES (3 Challengers, 1 False Voter)
+
+	// True Total = 4000 from Backers + 3000 from Voters = 7000 (before interest)
+	// False Total = 4000 from Challengers + 1000 from Voter = 5000 (before interest)
+
+	// Total Reward Pool = False Total (5000) + False Interest (266) = 5266
+	// 75% of pool = 3949
+	// 25% of pool = 1317
 
 	creator1 := fakeFundedCreator(ctx, k.bankKeeper)
 	creator2 := fakeFundedCreator(ctx, k.bankKeeper)
@@ -229,6 +224,8 @@ func fakeValidationGame() (ctx sdk.Context, votes poll, k Keeper) {
 	creator11 := fakeFundedCreator(ctx, k.bankKeeper)
 
 	// fake backings
+	// each should get back: 2000trusteak, 1054cred (from false voters)
+	// 1054cred = (3949 / 4) + 66.73
 	b1id, _ := k.backingKeeper.Create(ctx, storyID, amount, argument, creator1)
 	b2id, _ := k.backingKeeper.Create(ctx, storyID, amount, argument, creator2)
 	b3id, _ := k.backingKeeper.Create(ctx, storyID, amount, argument, creator3)
@@ -240,6 +237,8 @@ func fakeValidationGame() (ctx sdk.Context, votes poll, k Keeper) {
 	c3id, _ := k.challengeKeeper.Create(ctx, storyID, largeAmount, argument, creator10)
 
 	// fake votes (true)
+	// each should get back: 2000trusteak, 439cred (from false voters)
+	// 439cred = (1317 / 3)
 	v1id, _ := k.voteKeeper.Create(ctx, storyID, amount, true, argument, creator7)
 	v2id, _ := k.voteKeeper.Create(ctx, storyID, amount, true, argument, creator8)
 	v4id, _ := k.voteKeeper.Create(ctx, storyID, amount, true, argument, creator11)
@@ -248,22 +247,9 @@ func fakeValidationGame() (ctx sdk.Context, votes poll, k Keeper) {
 	v3id, _ := k.voteKeeper.Create(ctx, storyID, amount, false, argument, creator9)
 
 	b1, _ := k.backingKeeper.Backing(ctx, b1id)
-	// fake an interest
-	// cred := "trudex"
-	// b1.Interest = sdk.NewCoin(cred, sdk.NewInt(500000000000))
-	// k.backingKeeper.Update(ctx, b1)
-
 	b2, _ := k.backingKeeper.Backing(ctx, b2id)
-	// b2.Interest = sdk.NewCoin(cred, sdk.NewInt(500000000000))
-	// k.backingKeeper.Update(ctx, b2)
-
 	b3, _ := k.backingKeeper.Backing(ctx, b3id)
-	// b3.Interest = sdk.NewCoin(cred, sdk.NewInt(500000000000))
-	// k.backingKeeper.Update(ctx, b3)
-
 	b4, _ := k.backingKeeper.Backing(ctx, b4id)
-	// b4.Interest = sdk.NewCoin(cred, sdk.NewInt(500000000000))
-	// k.backingKeeper.Update(ctx, b4)
 	// change backing vote to FALSE
 	k.backingKeeper.ToggleVote(ctx, b4.ID())
 
@@ -311,17 +297,8 @@ func fakeValidationGame2() (ctx sdk.Context, votes poll, k Keeper) {
 	c3id, _ := k.challengeKeeper.Create(ctx, storyID, amount5, argument, creator10)
 
 	b1, _ := k.backingKeeper.Backing(ctx, b1id)
-	// cred := "trudex"
-	// b1.Interest = sdk.NewCoin(cred, sdk.NewInt(6670333000))
-	// k.backingKeeper.Update(ctx, b1)
-
 	b2, _ := k.backingKeeper.Backing(ctx, b2id)
-	// b2.Interest = sdk.NewCoin(cred, sdk.NewInt(3668600732))
-	// k.backingKeeper.Update(ctx, b2)
-
 	b3, _ := k.backingKeeper.Backing(ctx, b3id)
-	// b3.Interest = sdk.NewCoin(cred, sdk.NewInt(6670333000))
-	// k.backingKeeper.Update(ctx, b3)
 
 	c1, _ := k.challengeKeeper.Challenge(ctx, c1id)
 	c2, _ := k.challengeKeeper.Challenge(ctx, c2id)

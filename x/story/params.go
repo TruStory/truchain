@@ -28,6 +28,7 @@ type Params struct {
 func DefaultParams() Params {
 	return Params{
 		ExpireDuration: 24 * time.Hour,
+		// ExpireDuration: 30 * 24 * time.Hour,
 		MinStoryLength: 25,
 		MaxStoryLength: 350,
 		VotingDuration: 24 * time.Hour,

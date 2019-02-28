@@ -19,6 +19,11 @@ func (k Keeper) verifyStory(ctx sdk.Context, storyID int64) sdk.Error {
 		return err
 	}
 
+	story, err := k.storyKeeper.Story(ctx, storyID)
+	if err != nil {
+		return err
+	}
+
 	credDenom, err := k.storyKeeper.CategoryDenom(ctx, storyID)
 	if err != nil {
 		return err
@@ -33,7 +38,7 @@ func (k Keeper) verifyStory(ctx sdk.Context, storyID int64) sdk.Error {
 	logger.Info(fmt.Sprintf("Story confirmed: %t", confirmed))
 
 	// calculate reward pool
-	rewardPool, err := k.rewardPool(ctx, votes, confirmed)
+	rewardPool, err := k.rewardPool(ctx, votes, confirmed, story.CategoryID)
 	if err != nil {
 		return err
 	}
@@ -41,7 +46,7 @@ func (k Keeper) verifyStory(ctx sdk.Context, storyID int64) sdk.Error {
 	logger.Info(fmt.Sprintf("Reward pool: %v", rewardPool))
 
 	// distribute rewards
-	err = k.distributeRewards(ctx, rewardPool, votes, confirmed, credDenom)
+	err = k.distributeRewards(ctx, rewardPool, votes, confirmed, story.CategoryID)
 	if err != nil {
 		return err
 	}
@@ -58,7 +63,7 @@ func (k Keeper) verifyStory(ctx sdk.Context, storyID int64) sdk.Error {
 // tally backings, challenges, and token votes into two true and false slices
 func (k Keeper) tally(ctx sdk.Context, storyID int64) (votes poll, err sdk.Error) {
 
-	logger := ctx.Logger().With("module", "voting")
+	logger := ctx.Logger().With("module", StoreKey)
 	logger.Info("Tallying votes ...")
 
 	// tally backings
@@ -104,14 +109,14 @@ func (k Keeper) distributeRewards(
 	rewardPool sdk.Coin,
 	votes poll,
 	confirmed bool,
-	denom string) (err sdk.Error) {
+	categoryID int64) (err sdk.Error) {
 
-	logger := ctx.Logger().With("module", "voting")
+	logger := ctx.Logger().With("module", StoreKey)
 
 	if confirmed {
-		err = k.distributeRewardsConfirmed(ctx, votes, rewardPool, denom)
+		err = k.distributeRewardsConfirmed(ctx, votes, rewardPool, categoryID)
 	} else {
-		err = k.distributeRewardsRejected(ctx, votes, rewardPool, denom)
+		err = k.distributeRewardsRejected(ctx, votes, rewardPool, categoryID)
 	}
 	if err != nil {
 		return
@@ -184,7 +189,10 @@ func (k Keeper) weightedVote(
 }
 
 func (k Keeper) rewardPool(
-	ctx sdk.Context, votes poll, confirmed bool) (pool sdk.Coin, err sdk.Error) {
+	ctx sdk.Context,
+	votes poll,
+	confirmed bool,
+	categoryID int64) (pool sdk.Coin, err sdk.Error) {
 
 	// initialize an empty reward pool, false votes will always exist
 	// because challengers with implicit false votes will always exist
@@ -195,9 +203,9 @@ func (k Keeper) rewardPool(
 	pool = sdk.NewCoin(app.StakeDenom, sdk.ZeroInt())
 
 	if confirmed {
-		err = k.confirmedPool(ctx, votes.falseVotes, &pool)
+		err = k.confirmedPool(ctx, votes.falseVotes, &pool, categoryID)
 	} else {
-		err = rejectedPool(votes, &pool)
+		err = k.rejectedPool(ctx, votes, &pool, categoryID)
 	}
 	if err != nil {
 		return pool, err

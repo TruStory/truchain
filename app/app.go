@@ -239,9 +239,11 @@ func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *T
 		app.accountKeeper,
 		app.backingKeeper,
 		app.challengeKeeper,
+		app.stakeKeeper,
 		app.storyKeeper,
 		app.voteKeeper,
 		app.bankKeeper,
+		app.truBankKeeper,
 		app.paramsKeeper.Subspace(voting.StoreKey),
 		codec,
 	)
