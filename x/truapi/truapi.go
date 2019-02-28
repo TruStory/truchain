@@ -145,8 +145,13 @@ func (ta *TruAPI) RegisterResolvers() {
 
 		"voteStake": func(_ context.Context, p params.Params) string { return p.VoteParams.StakeAmount.String() },
 
+		"stakerRewardRatio": func(_ context.Context, p params.Params) string {
+			return p.VotingParams.StakerRewardPoolShare.String()
+		},
+
+		// Deprecated: replaced by "stakerRewardRatio"
 		"challengeRewardRatio": func(_ context.Context, p params.Params) string {
-			return p.VotingParams.ChallengerRewardPoolShare.String()
+			return p.VotingParams.StakerRewardPoolShare.String()
 		},
 	})
 

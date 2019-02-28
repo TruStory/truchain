@@ -2,47 +2,19 @@ package voting
 
 import (
 	"testing"
-	"time"
 
-	app "github.com/TruStory/truchain/types"
-	"github.com/TruStory/truchain/x/backing"
-	"github.com/TruStory/truchain/x/challenge"
-	tokenVote "github.com/TruStory/truchain/x/vote"
-	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/stretchr/testify/assert"
-	abci "github.com/tendermint/tendermint/abci/types"
 )
 
+// [CONFIRMED STORY] ==================================================
 func TestTally(t *testing.T) {
 	ctx, _, k := fakeConfirmedGame()
 
 	storyID := int64(1)
 	votes, _ := k.tally(ctx, storyID)
 
-	assert.Equal(t, 6, len(votes.trueVotes))
-	assert.Equal(t, 5, len(votes.falseVotes))
-}
-
-func TestRewardPool(t *testing.T) {
-	ctx, votes, k := fakeValidationGame()
-	categoryID := int64(1)
-
-	// fake future block time
-	interestStopTime := ctx.BlockHeader().Time.Add(24 * time.Hour)
-	ctx = ctx.WithBlockHeader(abci.Header{Time: interestStopTime})
-
-	pool, _ := k.rewardPool(ctx, votes, true, categoryID)
-	assert.Equal(t, "5066733300000trusteak", pool.String())
-}
-
-func TestDistributeRewards(t *testing.T) {
-	ctx, votes, k := fakeValidationGame()
-
-	pool := sdk.NewCoin(app.StakeDenom, sdk.NewInt(35))
-	categoryID := int64(1)
-
-	err := k.distributeRewards(ctx, pool, votes, true, categoryID)
-	assert.Nil(t, err)
+	assert.Equal(t, 7, len(votes.trueVotes))
+	assert.Equal(t, 4, len(votes.falseVotes))
 }
 
 func TestConfirmStory(t *testing.T) {
@@ -59,322 +31,40 @@ func TestWeightedVote(t *testing.T) {
 	falseWeights, _ := k.weightedVote(ctx, votes.falseVotes, "trudex")
 
 	// 1 preethi added each due to cold-start
-	assert.Equal(t, "6", trueWeights.String())
+	assert.Equal(t, "7", trueWeights.String())
 
 	// 1 preethi added each due to cold-start
-	assert.Equal(t, "5", falseWeights.String())
+	assert.Equal(t, "4", falseWeights.String())
 }
 
-func TestConfirmedStoryRewardPool(t *testing.T) {
-	ctx, votes, k := fakeValidationGame()
+// [REJECTED STORY] ==================================================
 
-	pool := sdk.NewCoin(app.StakeDenom, sdk.ZeroInt())
-	categoryID := int64(1)
+func TestTallyRejected(t *testing.T) {
+	ctx, _, k := fakeRejectedGame()
 
-	k.confirmedPool(ctx, votes.falseVotes, &pool, categoryID)
-	assert.Equal(t, "5000033300000trusteak", pool.String())
+	storyID := int64(1)
+	votes, _ := k.tally(ctx, storyID)
+
+	assert.Equal(t, 0, len(votes.trueVotes))
+	assert.Equal(t, 1, len(votes.falseVotes))
 }
 
-func TestConfirmedStoryRewardPool2(t *testing.T) {
-	ctx, votes, k := fakeValidationGame2()
+func TestRejectedStory(t *testing.T) {
+	ctx, votes, k := fakeRejectedGame()
 
-	pool := sdk.NewCoin(app.StakeDenom, sdk.ZeroInt())
-	categoryID := int64(1)
-
-	k.confirmedPool(ctx, votes.falseVotes, &pool, categoryID)
-	assert.Equal(t, "265000000000trusteak", pool.String())
+	confirmed, _ := k.confirmStory(ctx, votes, "crypto")
+	assert.False(t, confirmed)
 }
 
-func TestDistributeRewardsConfirmed(t *testing.T) {
-	ctx, votes, k := fakeValidationGame()
-	pool := sdk.NewCoin(app.StakeDenom, sdk.ZeroInt())
-	categoryID := int64(1)
-	cred := "crypto"
+func TestWeightedVoteRejected(t *testing.T) {
+	ctx, votes, k := fakeRejectedGame()
 
-	// fake future block time
-	interestStopTime := ctx.BlockHeader().Time.Add(24 * time.Hour)
-	ctx = ctx.WithBlockHeader(abci.Header{Time: interestStopTime})
+	trueWeights, _ := k.weightedVote(ctx, votes.trueVotes, "trudex")
+	falseWeights, _ := k.weightedVote(ctx, votes.falseVotes, "trudex")
 
-	k.confirmedPool(ctx, votes.falseVotes, &pool, categoryID)
-	err := k.distributeRewardsConfirmed(ctx, votes, pool, categoryID)
-	assert.Nil(t, err)
+	// 1 preethi added each due to cold-start
+	assert.Equal(t, "0", trueWeights.String())
 
-	coins := sdk.Coins{}
-
-	winningBacker1 := votes.trueVotes[0].(backing.Backing)
-	coins = k.bankKeeper.GetCoins(ctx, winningBacker1.Creator())
-	assert.Equal(t, "2000000000000", coins.AmountOf(app.StakeDenom).String())
-	assert.Equal(t, "911188850000", coins.AmountOf(cred).String())
-
-	winningBacker2 := votes.trueVotes[1].(backing.Backing)
-	coins = k.bankKeeper.GetCoins(ctx, winningBacker2.Creator())
-	assert.Equal(t, "2000000000000", coins.AmountOf(app.StakeDenom).String())
-	assert.Equal(t, "911188850000", coins.AmountOf(cred).String())
-
-	winningBacker3 := votes.trueVotes[2].(backing.Backing)
-	coins = k.bankKeeper.GetCoins(ctx, winningBacker3.Creator())
-	assert.Equal(t, "2000000000000", coins.AmountOf(app.StakeDenom).String())
-	assert.Equal(t, "911188850000", coins.AmountOf(cred).String())
-
-	winningVoter1 := votes.trueVotes[3].(tokenVote.TokenVote)
-	coins = k.bankKeeper.GetCoins(ctx, winningVoter1.Creator())
-	assert.Equal(t, "2000000000000", coins.AmountOf(app.StakeDenom).String())
-	assert.Equal(t, "844455550000", coins.AmountOf(cred).String())
-
-	winningVoter2 := votes.trueVotes[4].(tokenVote.TokenVote)
-	coins = k.bankKeeper.GetCoins(ctx, winningVoter2.Creator())
-	assert.Equal(t, "2000000000000", coins.AmountOf(app.StakeDenom).String())
-	assert.Equal(t, "844455550000", coins.AmountOf(cred).String())
-
-	losingBacker1 := votes.falseVotes[0].(backing.Backing)
-	coins = k.bankKeeper.GetCoins(ctx, losingBacker1.Creator())
-	assert.Equal(t, "2000000000000", coins.AmountOf(app.StakeDenom).String())
-	assert.Equal(t, "0", coins.AmountOf(cred).String())
-
-	losingChallenger1 := votes.falseVotes[1].(challenge.Challenge)
-	coins = k.bankKeeper.GetCoins(ctx, losingChallenger1.Creator())
-	assert.Equal(t, "1000000000000", coins.AmountOf(app.StakeDenom).String())
-	assert.Equal(t, "0", coins.AmountOf(cred).String())
-
-	losingChallenger2 := votes.falseVotes[2].(challenge.Challenge)
-	coins = k.bankKeeper.GetCoins(ctx, losingChallenger2.Creator())
-	assert.Equal(t, "1000000000000", coins.AmountOf(app.StakeDenom).String())
-	assert.Equal(t, "0", coins.AmountOf(cred).String())
-
-	losingChallenger3 := votes.falseVotes[3].(challenge.Challenge)
-	coins = k.bankKeeper.GetCoins(ctx, losingChallenger3.Creator())
-	assert.Equal(t, "0", coins.AmountOf(app.StakeDenom).String())
-	assert.Equal(t, "0", coins.AmountOf(cred).String())
-
-	losingVoter1 := votes.falseVotes[4].(tokenVote.TokenVote)
-	coins = k.bankKeeper.GetCoins(ctx, losingVoter1.Creator())
-	assert.Equal(t, "1000000000000", coins.AmountOf(app.StakeDenom).String())
-	assert.Equal(t, "0", coins.AmountOf(cred).String())
-}
-
-func TestDistributeRewardsConfirmed2(t *testing.T) {
-	ctx, votes, k := fakeValidationGame2()
-	pool := sdk.NewCoin(app.StakeDenom, sdk.ZeroInt())
-	categoryID := int64(1)
-	cred := "crypto"
-
-	// fake future block time
-	interestStopTime := ctx.BlockHeader().Time.Add(24 * time.Hour)
-	ctx = ctx.WithBlockHeader(abci.Header{Time: interestStopTime})
-
-	k.confirmedPool(ctx, votes.falseVotes, &pool, categoryID)
-	err := k.distributeRewardsConfirmed(ctx, votes, pool, categoryID)
-	assert.Nil(t, err)
-
-	coins := sdk.Coins{}
-
-	winningBacker1 := votes.trueVotes[0].(backing.Backing)
-	coins = k.bankKeeper.GetCoins(ctx, winningBacker1.Creator())
-	assert.Equal(t, "2000000000000", coins.AmountOf(app.StakeDenom).String())
-	assert.Equal(t, "95003666333", coins.AmountOf(cred).String())
-
-	winningBacker2 := votes.trueVotes[1].(backing.Backing)
-	coins = k.bankKeeper.GetCoins(ctx, winningBacker2.Creator())
-	assert.Equal(t, "2000000000000", coins.AmountOf(app.StakeDenom).String())
-	assert.Equal(t, "92001934065", coins.AmountOf(cred).String())
-
-	winningBacker3 := votes.trueVotes[2].(backing.Backing)
-	coins = k.bankKeeper.GetCoins(ctx, winningBacker3.Creator())
-	assert.Equal(t, "2000000000000", coins.AmountOf(app.StakeDenom).String())
-	assert.Equal(t, "95003666333", coins.AmountOf(cred).String())
-
-	losingChallenger1 := votes.falseVotes[0].(challenge.Challenge)
-	coins = k.bankKeeper.GetCoins(ctx, losingChallenger1.Creator())
-	assert.Equal(t, "1828000000000", coins.AmountOf(app.StakeDenom).String())
-	assert.Equal(t, "0", coins.AmountOf(cred).String())
-
-	losingChallenger2 := votes.falseVotes[1].(challenge.Challenge)
-	coins = k.bankKeeper.GetCoins(ctx, losingChallenger2.Creator())
-	assert.Equal(t, "1917000000000", coins.AmountOf(app.StakeDenom).String())
-	assert.Equal(t, "0", coins.AmountOf(cred).String())
-
-	losingChallenger3 := votes.falseVotes[2].(challenge.Challenge)
-	coins = k.bankKeeper.GetCoins(ctx, losingChallenger3.Creator())
-	assert.Equal(t, "1990000000000", coins.AmountOf(app.StakeDenom).String())
-	assert.Equal(t, "0", coins.AmountOf(cred).String())
-}
-
-func TestRejectedStoryRewardPool(t *testing.T) {
-	ctx, votes, k := fakeValidationGame()
-	categoryID := int64(1)
-	pool := sdk.NewCoin(app.StakeDenom, sdk.ZeroInt())
-
-	// fake future block time
-	interestStopTime := ctx.BlockHeader().Time.Add(24 * time.Hour)
-	ctx = ctx.WithBlockHeader(abci.Header{Time: interestStopTime})
-
-	k.rejectedPool(ctx, votes, &pool, categoryID)
-	assert.Equal(t, "3266933200000trusteak", pool.String())
-}
-
-func TestChallengerPool(t *testing.T) {
-	ctx, votes, k := fakeValidationGame()
-	pool := sdk.NewCoin(app.StakeDenom, sdk.ZeroInt())
-	categoryID := int64(1)
-
-	// fake future block time
-	interestStopTime := ctx.BlockHeader().Time.Add(24 * time.Hour)
-	ctx = ctx.WithBlockHeader(abci.Header{Time: interestStopTime})
-
-	k.rejectedPool(ctx, votes, &pool, categoryID)
-
-	coin := k.calculateChallengerPool(ctx, pool)
-	assert.Equal(t, "2450199900000trusteak", coin.String())
-}
-
-func TestVoterPool(t *testing.T) {
-	ctx, votes, k := fakeValidationGame()
-	pool := sdk.NewCoin(app.StakeDenom, sdk.ZeroInt())
-	categoryID := int64(1)
-
-	// fake future block time
-	interestStopTime := ctx.BlockHeader().Time.Add(24 * time.Hour)
-	ctx = ctx.WithBlockHeader(abci.Header{Time: interestStopTime})
-
-	k.rejectedPool(ctx, votes, &pool, categoryID)
-
-	coin := k.calculateVoterPool(ctx, pool)
-	assert.Equal(t, "816733300000trusteak", coin.String())
-}
-
-func TestCount(t *testing.T) {
-	ctx, votes, k := fakeValidationGame()
-	pool := sdk.NewCoin(app.StakeDenom, sdk.ZeroInt())
-	categoryID := int64(1)
-
-	// fake future block time
-	interestStopTime := ctx.BlockHeader().Time.Add(24 * time.Hour)
-	ctx = ctx.WithBlockHeader(abci.Header{Time: interestStopTime})
-
-	k.rejectedPool(ctx, votes, &pool, categoryID)
-
-	cAmount, cCount, vCount, _ := winnerInfo(votes.falseVotes)
-	assert.Equal(t, int64(4000000000000), cAmount.Int64())
-	assert.Equal(t, int64(3), cCount)
-	assert.Equal(t, int64(1), vCount)
-}
-
-func TestChallengerRewardAmount(t *testing.T) {
-	coin := challengerRewardAmount(
-		sdk.NewCoin("trudex", sdk.NewInt(1000000000000)),
-		sdk.NewInt(2000000000000),
-		sdk.NewCoin("trudex", sdk.NewInt(5250000000000)))
-
-	assert.Equal(t, "2625000000000", coin.String())
-}
-
-func TestChallengerRewardAmount2(t *testing.T) {
-	coin := challengerRewardAmount(
-		sdk.NewCoin("trudex", sdk.NewInt(1500000000000)),
-		sdk.NewInt(2000000000000),
-		sdk.NewCoin("trudex", sdk.NewInt(5250000000000)))
-
-	assert.Equal(t, "3937500000000", coin.String())
-}
-
-func TestChallengerRewardAmount3(t *testing.T) {
-	coin := challengerRewardAmount(
-		sdk.NewCoin("trudex", sdk.NewInt(500000000000)),
-		sdk.NewInt(2000000000000),
-		sdk.NewCoin("trudex", sdk.NewInt(5250000000000)))
-
-	assert.Equal(t, "1312500000000", coin.String())
-}
-
-func TestDistributeRewardsRejected(t *testing.T) {
-	ctx, votes, k := fakeValidationGame()
-	pool := sdk.NewCoin(app.StakeDenom, sdk.ZeroInt())
-	categoryID := int64(1)
-
-	// fake future block time
-	interestStopTime := ctx.BlockHeader().Time.Add(24 * time.Hour)
-	ctx = ctx.WithBlockHeader(abci.Header{Time: interestStopTime})
-
-	k.rejectedPool(ctx, votes, &pool, categoryID)
-	cred := "crypto"
-
-	err := k.distributeRewardsRejected(ctx, votes, pool, categoryID)
-	assert.Nil(t, err)
-
-	coins := sdk.Coins{}
-
-	winningBacker1 := votes.falseVotes[0].(backing.Backing)
-	coins = k.bankKeeper.GetCoins(ctx, winningBacker1.Creator())
-	assert.Equal(t, "2000000000000", coins.AmountOf(app.StakeDenom).String())
-
-	winningChallenger1 := votes.falseVotes[1].(challenge.Challenge)
-	coins = k.bankKeeper.GetCoins(ctx, winningChallenger1.Creator())
-	assert.Equal(t, "2000000000000", coins.AmountOf(app.StakeDenom).String())
-	assert.Equal(t, "679283275000", coins.AmountOf(cred).String())
-
-	winningChallenger2 := votes.falseVotes[2].(challenge.Challenge)
-	coins = k.bankKeeper.GetCoins(ctx, winningChallenger2.Creator())
-	assert.Equal(t, "2000000000000", coins.AmountOf(app.StakeDenom).String())
-	assert.Equal(t, "679283275000", coins.AmountOf(cred).String())
-
-	winningChallenger3 := votes.falseVotes[3].(challenge.Challenge)
-	coins = k.bankKeeper.GetCoins(ctx, winningChallenger3.Creator())
-	assert.Equal(t, "2000000000000", coins.AmountOf(app.StakeDenom).String())
-	assert.Equal(t, "1358633150000", coins.AmountOf(cred).String())
-
-	winningVoter1 := votes.falseVotes[4].(tokenVote.TokenVote)
-	coins = k.bankKeeper.GetCoins(ctx, winningVoter1.Creator())
-	assert.Equal(t, "2000000000000", coins.AmountOf(app.StakeDenom).String())
-	assert.Equal(t, "816733300000", coins.AmountOf(cred).String())
-
-	losingBacker1 := votes.trueVotes[0].(backing.Backing)
-	coins = k.bankKeeper.GetCoins(ctx, losingBacker1.Creator())
-	assert.Equal(t, "1000000000000", coins.AmountOf(app.StakeDenom).String())
-	assert.Equal(t, "0", coins.AmountOf(cred).String())
-
-	losingBacker2 := votes.trueVotes[1].(backing.Backing)
-	coins = k.bankKeeper.GetCoins(ctx, losingBacker2.Creator())
-	assert.Equal(t, "1000000000000", coins.AmountOf(app.StakeDenom).String())
-	assert.Equal(t, "0", coins.AmountOf(cred).String())
-
-	losingBacker3 := votes.trueVotes[2].(backing.Backing)
-	coins = k.bankKeeper.GetCoins(ctx, losingBacker3.Creator())
-	assert.Equal(t, "1000000000000", coins.AmountOf(app.StakeDenom).String())
-	assert.Equal(t, "0", coins.AmountOf(cred).String())
-
-	losingVoter1 := votes.trueVotes[3].(tokenVote.TokenVote)
-	coins = k.bankKeeper.GetCoins(ctx, losingVoter1.Creator())
-	assert.Equal(t, "1000000000000", coins.AmountOf(app.StakeDenom).String())
-	assert.Equal(t, "0", coins.AmountOf(cred).String())
-
-	losingVoter2 := votes.trueVotes[4].(tokenVote.TokenVote)
-	coins = k.bankKeeper.GetCoins(ctx, losingVoter2.Creator())
-	assert.Equal(t, "1000000000000", coins.AmountOf(app.StakeDenom).String())
-	assert.Equal(t, "0", coins.AmountOf(cred).String())
-}
-
-func TestCheckForEmptyPool(t *testing.T) {
-	pool, _ := sdk.ParseCoin("4trusteak")
-	voterCount := int64(10)
-	err := checkForEmptyPoolConfirmed(pool, voterCount)
-	assert.Nil(t, err)
-}
-
-func TestCheckForEmptyPool2(t *testing.T) {
-	pool, _ := sdk.ParseCoin("5trusteak")
-	voterCount := int64(10)
-	err := checkForEmptyPoolConfirmed(pool, voterCount)
-	assert.Nil(t, err)
-}
-
-func TestCheckForEmptyPool3(t *testing.T) {
-	pool, _ := sdk.ParseCoin("9trusteak")
-	voterCount := int64(10)
-	err := checkForEmptyPoolConfirmed(pool, voterCount)
-	assert.Nil(t, err)
-}
-
-func Test_voterRewardAmount(t *testing.T) {
-	pool, _ := sdk.ParseCoin("1trusteak")
-	assert.Equal(t, sdk.NewInt(0), voterRewardAmount(pool, 0))
+	// 1 preethi added each due to cold-start
+	assert.Equal(t, "1", falseWeights.String())
 }
