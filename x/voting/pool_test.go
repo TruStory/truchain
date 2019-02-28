@@ -9,6 +9,7 @@ import (
 	abci "github.com/tendermint/tendermint/abci/types"
 )
 
+// [CONFIRMED STORY] ==================================================
 func TestConfirmedRewardPool(t *testing.T) {
 	ctx, votes, k := fakeConfirmedGame()
 	categoryID := int64(1)
@@ -20,46 +21,6 @@ func TestConfirmedRewardPool(t *testing.T) {
 	pool, _ := k.rewardPool(ctx, votes, true, categoryID)
 	assert.Equal(t, "5266999800000trusteak", pool.String())
 }
-
-// func TestRejectedStoryRewardPool(t *testing.T) {
-// 	ctx, votes, k := fakeValidationGame()
-// 	categoryID := int64(1)
-
-// 	// fake future block time
-// 	interestStopTime := ctx.BlockHeader().Time.Add(24 * time.Hour)
-// 	ctx = ctx.WithBlockHeader(abci.Header{Time: interestStopTime})
-
-// 	pool, _ := k.rewardPool(ctx, votes, false, categoryID)
-// 	assert.Equal(t, "3266933200000trusteak", pool.String())
-// }
-
-// func TestRejectedStakerPool(t *testing.T) {
-// 	ctx, votes, k := fakeValidationGame()
-// 	categoryID := int64(1)
-
-// 	// fake future block time
-// 	interestStopTime := ctx.BlockHeader().Time.Add(24 * time.Hour)
-// 	ctx = ctx.WithBlockHeader(abci.Header{Time: interestStopTime})
-
-// 	pool, _ := k.rewardPool(ctx, votes, false, categoryID)
-
-// 	coin := k.calculateStakerPool(ctx, pool)
-// 	assert.Equal(t, "5450199900000trusteak", coin.String())
-// }
-
-// func TestRejectedVoterPool(t *testing.T) {
-// 	ctx, votes, k := fakeValidationGame()
-// 	categoryID := int64(1)
-
-// 	// fake future block time
-// 	interestStopTime := ctx.BlockHeader().Time.Add(24 * time.Hour)
-// 	ctx = ctx.WithBlockHeader(abci.Header{Time: interestStopTime})
-
-// 	pool, _ := k.rewardPool(ctx, votes, false, categoryID)
-
-// 	coin := k.calculateVoterPool(ctx, pool)
-// 	assert.Equal(t, "816733300000trusteak", coin.String())
-// }
 
 func TestStakerRewardAmount(t *testing.T) {
 	coin := stakerRewardAmount(
@@ -112,4 +73,46 @@ func TestCheckForEmptyPool3(t *testing.T) {
 func Test_voterRewardAmount(t *testing.T) {
 	pool, _ := sdk.ParseCoin("1trusteak")
 	assert.Equal(t, sdk.NewInt(0), voterRewardAmount(pool, 0))
+}
+
+// [REJECTED STORY] ==================================================
+
+func TestRejectedStoryRewardPool(t *testing.T) {
+	ctx, votes, k := fakeRejectedGame()
+	categoryID := int64(1)
+
+	// fake future block time
+	interestStopTime := ctx.BlockHeader().Time.Add(24 * time.Hour)
+	ctx = ctx.WithBlockHeader(abci.Header{Time: interestStopTime})
+
+	pool, _ := k.rewardPool(ctx, votes, false, categoryID)
+	assert.Equal(t, "0trusteak", pool.String())
+}
+
+func TestRejectedStakerPool(t *testing.T) {
+	ctx, votes, k := fakeRejectedGame()
+	categoryID := int64(1)
+
+	// fake future block time
+	interestStopTime := ctx.BlockHeader().Time.Add(24 * time.Hour)
+	ctx = ctx.WithBlockHeader(abci.Header{Time: interestStopTime})
+
+	pool, _ := k.rewardPool(ctx, votes, false, categoryID)
+
+	coin := k.calculateStakerPool(ctx, pool)
+	assert.Equal(t, "0trusteak", coin.String())
+}
+
+func TestRejectedVoterPool(t *testing.T) {
+	ctx, votes, k := fakeRejectedGame()
+	categoryID := int64(1)
+
+	// fake future block time
+	interestStopTime := ctx.BlockHeader().Time.Add(24 * time.Hour)
+	ctx = ctx.WithBlockHeader(abci.Header{Time: interestStopTime})
+
+	pool, _ := k.rewardPool(ctx, votes, false, categoryID)
+
+	coin := k.calculateVoterPool(ctx, pool)
+	assert.Equal(t, "0trusteak", coin.String())
 }

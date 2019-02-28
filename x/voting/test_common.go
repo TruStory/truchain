@@ -194,11 +194,15 @@ func fakeConfirmedGame() (ctx sdk.Context, votes poll, k Keeper) {
 	// game meets 100% challenge threshold
 	// total reward pool = 4000 (backers) + 4000 (challengers)
 
-	// total interest = 4 backers @ 500 each = 2000
+	// 4 backers, interest each for 24 hours = 66,733,300,000 = 66.73
+	// total interest = 266.92 shanev
+
+	// 2 challengers, interest each for 24 hours = 66,733,300,000 = 66.73
+	// 1 challengers, interest each for 24 hours = 66,733,300,000 = 66.73 *2 (double amount)
+	// total interest = 266.92 shanev
 
 	// VOTING BEGINS (New Voters)
 	// 3 True Votes @ 1000 each, 1 False Vote @ 1000 each
-	// 1 Backer Switches to False (Backing Total goes down)
 
 	// GAME ENDS
 	// 7 TRUE VOTES (4 Backers, 3 True Voters)
@@ -224,7 +228,7 @@ func fakeConfirmedGame() (ctx sdk.Context, votes poll, k Keeper) {
 	creator11 := fakeFundedCreator(ctx, k.bankKeeper)
 
 	// fake backings
-	// each should get back: 2000trusteak, 1054cred (from false voters)
+	// each should end up with: 2000trusteak, 1054cred (from false voters)
 	// 1054cred = (3949 / 4) + 66.73
 	b1id, _ := k.backingKeeper.Create(ctx, storyID, amount, argument, creator1)
 	b2id, _ := k.backingKeeper.Create(ctx, storyID, amount, argument, creator2)
@@ -232,26 +236,28 @@ func fakeConfirmedGame() (ctx sdk.Context, votes poll, k Keeper) {
 	b4id, _ := k.backingKeeper.Create(ctx, storyID, amount, argument, creator4)
 
 	// fake challenges
+	// c1 & c2 should end up with: 1000trusteak (they lost 1000trusteak in staking)
+	// and no interest (they lost)
+	// c3 should end up with 0trusteak (since they staked 2000trusteak)
 	c1id, _ := k.challengeKeeper.Create(ctx, storyID, amount, argument, creator5)
 	c2id, _ := k.challengeKeeper.Create(ctx, storyID, amount, argument, creator6)
 	c3id, _ := k.challengeKeeper.Create(ctx, storyID, largeAmount, argument, creator10)
 
 	// fake votes (true)
-	// each should get back: 2000trusteak, 439cred (from false voters)
+	// each should end up with: 2000trusteak, 439cred (from false voters)
 	// 439cred = (1317 / 3)
 	v1id, _ := k.voteKeeper.Create(ctx, storyID, amount, true, argument, creator7)
 	v2id, _ := k.voteKeeper.Create(ctx, storyID, amount, true, argument, creator8)
 	v4id, _ := k.voteKeeper.Create(ctx, storyID, amount, true, argument, creator11)
 
 	// fake votes(false)
+	// ends up with: 1000trusteak (lost 1000trusteak)
 	v3id, _ := k.voteKeeper.Create(ctx, storyID, amount, false, argument, creator9)
 
 	b1, _ := k.backingKeeper.Backing(ctx, b1id)
 	b2, _ := k.backingKeeper.Backing(ctx, b2id)
 	b3, _ := k.backingKeeper.Backing(ctx, b3id)
 	b4, _ := k.backingKeeper.Backing(ctx, b4id)
-	// change backing vote to FALSE
-	k.backingKeeper.ToggleVote(ctx, b4.ID())
 
 	c1, _ := k.challengeKeeper.Challenge(ctx, c1id)
 	c2, _ := k.challengeKeeper.Challenge(ctx, c2id)
@@ -262,50 +268,40 @@ func fakeConfirmedGame() (ctx sdk.Context, votes poll, k Keeper) {
 	v3, _ := k.voteKeeper.TokenVote(ctx, v3id)
 	v4, _ := k.voteKeeper.TokenVote(ctx, v4id)
 
-	votes.trueVotes = append(votes.trueVotes, b1, b2, b3, v1, v2, v4)
-	votes.falseVotes = append(votes.falseVotes, b4, c1, c2, c3, v3)
+	votes.trueVotes = append(votes.trueVotes, b1, b2, b3, b4, v1, v2, v4)
+	votes.falseVotes = append(votes.falseVotes, c1, c2, c3, v3)
 
 	return
 }
 
-func fakeValidationGame2() (ctx sdk.Context, votes poll, k Keeper) {
+func fakeRejectedGame() (ctx sdk.Context, votes poll, k Keeper) {
 	ctx, k, ck := mockDB()
 
 	storyID := createFakeStory(ctx, k.storyKeeper, ck)
-	amount1 := sdk.NewCoin(app.StakeDenom, sdk.NewInt(100000000000))
-	amount2 := sdk.NewCoin(app.StakeDenom, sdk.NewInt(55000000000))
-	amount3 := sdk.NewCoin(app.StakeDenom, sdk.NewInt(172000000000))
-	amount4 := sdk.NewCoin(app.StakeDenom, sdk.NewInt(83000000000))
-	amount5 := sdk.NewCoin(app.StakeDenom, sdk.NewInt(10000000000))
+	amount := sdk.NewCoin(app.StakeDenom, sdk.NewInt(1000000000000))
 	argument := "test argument"
 
-	creator1 := fakeFundedCreator(ctx, k.bankKeeper)
-	creator2 := fakeFundedCreator(ctx, k.bankKeeper)
-	creator3 := fakeFundedCreator(ctx, k.bankKeeper)
-	creator5 := fakeFundedCreator(ctx, k.bankKeeper)
-	creator6 := fakeFundedCreator(ctx, k.bankKeeper)
-	creator10 := fakeFundedCreator(ctx, k.bankKeeper)
+	// GAME SCENARIO (STORY WILL BE REJECTED)
+	// 1 challenger, interest for 24 hours = 66,733,300,000 = 66.73
 
-	// fake backings
-	b1id, _ := k.backingKeeper.Create(ctx, storyID, amount1, argument, creator1)
-	b2id, _ := k.backingKeeper.Create(ctx, storyID, amount2, argument, creator2)
-	b3id, _ := k.backingKeeper.Create(ctx, storyID, amount1, argument, creator3)
+	// GAME ENDS
+	// 0 TRUE VOTES
+	// 1 FALSE VOTES (1 Challenger)
+
+	// True Total = 0 (before interest)
+	// False Total = 1000 from Challenger = 1000 (before interest)
+
+	// Total Reward Pool = True Total (0) + True Interest (0) = 0
+	// 75% of pool = 0
+	// 25% of pool = 0
+
+	creator1 := fakeFundedCreator(ctx, k.bankKeeper)
 
 	// fake challenges
-	c1id, _ := k.challengeKeeper.Create(ctx, storyID, amount3, argument, creator5)
-	c2id, _ := k.challengeKeeper.Create(ctx, storyID, amount4, argument, creator6)
-	c3id, _ := k.challengeKeeper.Create(ctx, storyID, amount5, argument, creator10)
-
-	b1, _ := k.backingKeeper.Backing(ctx, b1id)
-	b2, _ := k.backingKeeper.Backing(ctx, b2id)
-	b3, _ := k.backingKeeper.Backing(ctx, b3id)
-
+	c1id, _ := k.challengeKeeper.Create(ctx, storyID, amount, argument, creator1)
 	c1, _ := k.challengeKeeper.Challenge(ctx, c1id)
-	c2, _ := k.challengeKeeper.Challenge(ctx, c2id)
-	c3, _ := k.challengeKeeper.Challenge(ctx, c3id)
 
-	votes.trueVotes = append(votes.trueVotes, b1, b2, b3)
-	votes.falseVotes = append(votes.falseVotes, c1, c2, c3)
+	votes.falseVotes = append(votes.falseVotes, c1)
 
 	return
 }

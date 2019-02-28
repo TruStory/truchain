@@ -67,8 +67,8 @@ func (k Keeper) Params(ctx sdk.Context) Params {
 			VotingDuration: k.storyKeeper.GetParams(ctx).VotingDuration,
 		},
 		VotingParams: voting.Params{
-			ChallengerRewardPoolShare: k.votingKeeper.GetParams(ctx).ChallengerRewardPoolShare,
-			MajorityPercent:           k.votingKeeper.GetParams(ctx).MajorityPercent,
+			StakerRewardPoolShare: k.votingKeeper.GetParams(ctx).StakerRewardPoolShare,
+			MajorityPercent:       k.votingKeeper.GetParams(ctx).MajorityPercent,
 		},
 	}
 }

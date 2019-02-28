@@ -9,28 +9,28 @@ import (
 
 // store keys for voting params
 var (
-	KeyChallengerRewardPoolShare = []byte("challengerRewardPoolShare")
-	KeyMajorityPercent           = []byte("majorityPercent")
+	KeyStakerRewardPoolShare = []byte("stakerRewardPoolShare")
+	KeyMajorityPercent       = []byte("majorityPercent")
 )
 
 // Params holds parameters for voting
 type Params struct {
-	ChallengerRewardPoolShare sdk.Dec `json:"challenger_reward_pool_share"`
-	MajorityPercent           sdk.Dec `json:"majority_percent"`
+	StakerRewardPoolShare sdk.Dec `json:"staker_reward_pool_share"`
+	MajorityPercent       sdk.Dec `json:"majority_percent"`
 }
 
 // DefaultParams is the default parameters for voting
 func DefaultParams() Params {
 	return Params{
-		ChallengerRewardPoolShare: sdk.NewDecWithPrec(75, 2), // 75%
-		MajorityPercent:           sdk.NewDecWithPrec(51, 2), // 51%
+		StakerRewardPoolShare: sdk.NewDecWithPrec(75, 2), // 75%
+		MajorityPercent:       sdk.NewDecWithPrec(51, 2), // 51%
 	}
 }
 
 // KeyValuePairs implements params.ParamSet
 func (p *Params) KeyValuePairs() params.KeyValuePairs {
 	return params.KeyValuePairs{
-		{Key: KeyChallengerRewardPoolShare, Value: &p.ChallengerRewardPoolShare},
+		{Key: KeyStakerRewardPoolShare, Value: &p.StakerRewardPoolShare},
 		{Key: KeyMajorityPercent, Value: &p.MajorityPercent},
 	}
 }
@@ -49,13 +49,13 @@ func (k Keeper) GetParams(ctx sdk.Context) Params {
 
 // SetParams sets the params for the expiration module
 func (k Keeper) SetParams(ctx sdk.Context, params Params) {
-	logger := ctx.Logger().With("module", "voting")
+	logger := ctx.Logger().With("module", StoreKey)
 	k.paramStore.SetParamSet(ctx, &params)
 	logger.Info(fmt.Sprintf("Loaded voting module params: %+v", params))
 }
 
-func (k Keeper) challengerRewardPoolShare(ctx sdk.Context) (res sdk.Dec) {
-	k.paramStore.Get(ctx, KeyChallengerRewardPoolShare, &res)
+func (k Keeper) stakerRewardPoolShare(ctx sdk.Context) (res sdk.Dec) {
+	k.paramStore.Get(ctx, KeyStakerRewardPoolShare, &res)
 	return
 }
 

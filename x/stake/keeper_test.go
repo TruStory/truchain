@@ -42,6 +42,7 @@ func Test_interest_MinAmountMaxPeriod(t *testing.T) {
 func Test_interest_MaxAmountMaxPeriod(t *testing.T) {
 	ctx, k := mockDB()
 	amount := sdk.NewCoin("crypto", sdk.NewInt(1000000000000000))
+	// amount := sdk.NewCoin("crypto", sdk.NewInt(1000000000000))
 	period := 24 * time.Hour
 	categoryID := int64(1)
 	maxInterestRate := k.GetParams(ctx).MaxInterestRate
