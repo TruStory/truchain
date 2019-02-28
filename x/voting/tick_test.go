@@ -10,14 +10,14 @@ import (
 )
 
 func TestEndBlock(t *testing.T) {
-	ctx, _, k := fakeValidationGame()
+	ctx, _, k := fakeConfirmedGame()
 
 	tags := k.EndBlock(ctx)
 	assert.Equal(t, sdk.Tags{}, tags)
 }
 
 func Test_processVotingStoryListNotMeetVoteEndTime(t *testing.T) {
-	ctx, _, k := fakeValidationGame()
+	ctx, _, k := fakeConfirmedGame()
 
 	k.votingStoryQueue(ctx).Push(int64(1))
 
@@ -26,7 +26,7 @@ func Test_processVotingStoryListNotMeetVoteEndTime(t *testing.T) {
 }
 
 func Test_processVotingStoryListVerifyStory(t *testing.T) {
-	ctx, _, k := fakeValidationGame()
+	ctx, _, k := fakeConfirmedGame()
 
 	k.votingStoryQueue(ctx).Push(int64(1))
 

@@ -64,7 +64,7 @@ func (k Keeper) MintAndAddCoin(
 	catID int64,
 	amt sdk.Int) (sdk.Coins, sdk.Error) {
 
-	logger := ctx.Logger().With("module", "trubank")
+	logger := ctx.Logger().With("module", StoreKey)
 
 	cat, err := k.categoryKeeper.GetCategory(ctx, catID)
 	if err != nil {

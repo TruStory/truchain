@@ -109,18 +109,19 @@ func TestTally(t *testing.T) {
 	bankKeeper.AddCoins(ctx, creator2, sdk.Coins{amount})
 
 	k.Create(ctx, storyID, amount, argument, creator)
-	k.Create(ctx, storyID, amount, argument, creator2)
+	_, err := k.Create(ctx, storyID, amount, argument, creator2)
+	assert.NotNil(t, err)
 
 	falseVotes, _ := k.Tally(ctx, storyID)
 
-	assert.Equal(t, 2, len(falseVotes))
+	assert.Equal(t, 1, len(falseVotes))
 }
 
 func TestNewChallenge_Duplicate(t *testing.T) {
 	ctx, k, sk, _, bankKeeper := mockDB()
 
 	storyID := createFakeStory(ctx, sk)
-	amount := sdk.NewCoin(app.StakeDenom, sdk.NewInt(50000000000))
+	amount := sdk.NewCoin(app.StakeDenom, sdk.NewInt(5))
 	argument := "test argument is long enough"
 	creator := sdk.AccAddress([]byte{1, 2})
 

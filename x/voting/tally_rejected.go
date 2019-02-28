@@ -10,17 +10,19 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
-func rejectedPool(votes poll, pool *sdk.Coin) (err sdk.Error) {
+func (k Keeper) rejectedPool(
+	ctx sdk.Context, votes poll, pool *sdk.Coin, categoryID int64) (err sdk.Error) {
 
 	// people who voted TRUE / lost the game
 	for _, vote := range votes.trueVotes {
 		switch v := vote.(type) {
 
 		case backing.Backing:
-			// forfeit backing and inflationary rewards, add to pool
-			// TODO [shanev]: do proper conversion when we know it, still 1:1
-			// interestInTrustake := sdk.NewCoin(app.StakeDenom, v.Interest.Amount)
-			// *pool = (*pool).Plus(v.Amount()).Plus(interestInTrustake)
+			// forfeit backing principal and interest, add to pool
+			period := ctx.BlockHeader().Time.Sub(v.Timestamp().CreatedTime)
+			interest := k.stakeKeeper.Interest(ctx, v.Amount(), categoryID, period)
+			interestCoin := sdk.NewCoin(app.StakeDenom, interest)
+			*pool = (*pool).Plus(interestCoin)
 
 		case tokenVote.TokenVote:
 			// add vote fee to reward pool
@@ -39,9 +41,10 @@ func rejectedPool(votes poll, pool *sdk.Coin) (err sdk.Error) {
 
 		case backing.Backing:
 			// slash inflationary rewards and add to pool, bad boy
-			// TODO [shanev]: do proper conversion when we know it, still 1:1
-			// interestInTrustake := sdk.NewCoin(app.StakeDenom, v.Interest.Amount)
-			// *pool = (*pool).Plus(interestInTrustake)
+			period := ctx.BlockHeader().Time.Sub(v.Timestamp().CreatedTime)
+			interest := k.stakeKeeper.Interest(ctx, v.Amount(), categoryID, period)
+			interestCoin := sdk.NewCoin(app.StakeDenom, interest)
+			*pool = (*pool).Plus(interestCoin)
 
 		case challenge.Challenge:
 			// do nothing
@@ -65,9 +68,9 @@ func (k Keeper) distributeRewardsRejected(
 	ctx sdk.Context,
 	votes poll,
 	pool sdk.Coin,
-	denom string) (err sdk.Error) {
+	categoryID int64) (err sdk.Error) {
 
-	logger := ctx.Logger().With("module", "voting")
+	logger := ctx.Logger().With("module", StoreKey)
 
 	// get the total challenger stake amount and voter count
 	challengerTotalAmount, challengerCount, voterCount, err :=
@@ -130,11 +133,10 @@ func (k Keeper) distributeRewardsRejected(
 
 		case challenge.Challenge:
 			// get back staked amount
-			_, _, err = k.bankKeeper.AddCoins(ctx, v.Creator(), sdk.Coins{v.Amount()})
+			err := k.stakeKeeper.DistributePrincipalAndInterest(ctx, []app.Voter{v}, categoryID)
 			if err != nil {
 				return err
 			}
-			logger.Info(fmt.Sprintf("Giving back original challenge stake: %v", v.Amount()))
 
 			// calculate reward (X% of pool, in proportion to stake)
 			rewardAmount := challengerRewardAmount(
@@ -147,9 +149,11 @@ func (k Keeper) distributeRewardsRejected(
 			pool = pool.Minus(rewardCoin)
 
 			// distribute reward in cred
-			cred := app.NewCategoryCoin(denom, rewardCoin)
-			_, _, err = k.bankKeeper.AddCoins(ctx, v.Creator(), sdk.Coins{cred})
-			logger.Info(fmt.Sprintf("Distributed challenge reward of: %v", cred))
+			_, err = k.truBankKeeper.MintAndAddCoin(ctx, v.Creator(), categoryID, rewardAmount)
+			if err != nil {
+				return err
+			}
+			logger.Info(fmt.Sprintf("Distributed reward %s to challenger", rewardCoin))
 
 		case tokenVote.TokenVote:
 			// get back original staked amount
@@ -166,9 +170,11 @@ func (k Keeper) distributeRewardsRejected(
 			pool = pool.Minus(rewardCoin)
 
 			// distribute reward in cred
-			cred := app.NewCategoryCoin(denom, rewardCoin)
-			_, _, err = k.bankKeeper.AddCoins(ctx, v.Creator(), sdk.Coins{cred})
-			logger.Info(fmt.Sprintf("Distributed vote reward of: %v", cred))
+			_, err = k.truBankKeeper.MintAndAddCoin(ctx, v.Creator(), categoryID, voterRewardAmount)
+			if err != nil {
+				return err
+			}
+			logger.Info(fmt.Sprintf("Distributed reward %s to voter", rewardCoin))
 
 		default:
 			err = ErrInvalidVote(v)

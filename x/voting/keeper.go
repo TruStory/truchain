@@ -3,7 +3,9 @@ package voting
 import (
 	"github.com/TruStory/truchain/x/backing"
 	"github.com/TruStory/truchain/x/challenge"
+	"github.com/TruStory/truchain/x/stake"
 	"github.com/TruStory/truchain/x/story"
+	"github.com/TruStory/truchain/x/trubank"
 	"github.com/TruStory/truchain/x/vote"
 	"github.com/cosmos/cosmos-sdk/x/auth"
 	"github.com/cosmos/cosmos-sdk/x/bank"
@@ -33,7 +35,6 @@ type WriteKeeper interface {
 
 	EndBlock(ctx sdk.Context) sdk.Tags
 	SetParams(ctx sdk.Context, params Params)
-	// InitGenesis(ctx sdk.Context, votingKeeper WriteKeeper, data GenesisState)
 }
 
 // Keeper data type storing keys to the key-value store
@@ -45,9 +46,11 @@ type Keeper struct {
 	accountKeeper   auth.AccountKeeper
 	backingKeeper   backing.WriteKeeper
 	challengeKeeper challenge.WriteKeeper
+	stakeKeeper     stake.Keeper
 	storyKeeper     story.WriteKeeper
 	voteKeeper      vote.WriteKeeper
 	bankKeeper      bank.Keeper
+	truBankKeeper   trubank.WriteKeeper
 	paramStore      params.Subspace
 }
 
@@ -58,9 +61,11 @@ func NewKeeper(
 	accountKeeper auth.AccountKeeper,
 	backingKeeper backing.WriteKeeper,
 	challengeKeeper challenge.WriteKeeper,
+	stakeKeeper stake.Keeper,
 	storyKeeper story.WriteKeeper,
 	voteKeeper vote.WriteKeeper,
 	bankKeeper bank.Keeper,
+	truBankKeeper trubank.WriteKeeper,
 	paramStore params.Subspace,
 	codec *amino.Codec) Keeper {
 
@@ -70,9 +75,11 @@ func NewKeeper(
 		accountKeeper,
 		backingKeeper,
 		challengeKeeper,
+		stakeKeeper,
 		storyKeeper,
 		voteKeeper,
 		bankKeeper,
+		truBankKeeper,
 		paramStore.WithTypeTable(ParamTypeTable()),
 	}
 }

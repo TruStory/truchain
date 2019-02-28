@@ -12,17 +12,20 @@ import (
 
 // calculate reward pool for a confirmed story
 func (k Keeper) confirmedPool(
-	ctx sdk.Context, falseVotes []app.Voter, pool *sdk.Coin) (err sdk.Error) {
+	ctx sdk.Context,
+	falseVotes []app.Voter,
+	pool *sdk.Coin,
+	categoryID int64) (err sdk.Error) {
 
 	for _, vote := range falseVotes {
 		switch v := vote.(type) {
 
 		case backing.Backing:
 			// slash inflationary rewards and add to pool
-			// TODO [shanev]: do proper conversion when we know it, still 1:1
-			// interestInTrustake := sdk.NewCoin(app.StakeDenom, v.Interest.Amount)
-			// *pool = (*pool).Plus(interestInTrustake)
-			// interest := k.sta
+			period := ctx.BlockHeader().Time.Sub(v.Timestamp().CreatedTime)
+			interest := k.stakeKeeper.Interest(ctx, v.Amount(), categoryID, period)
+			interestCoin := sdk.NewCoin(app.StakeDenom, interest)
+			*pool = (*pool).Plus(interestCoin)
 
 		case challenge.Challenge:
 			// add challenge amount to reward pool
@@ -46,18 +49,16 @@ func (k Keeper) distributeRewardsConfirmed(
 	ctx sdk.Context,
 	votes poll,
 	pool sdk.Coin,
-	denom string) (err sdk.Error) {
+	categoryID int64) (err sdk.Error) {
 
-	logger := ctx.Logger().With("module", "voting")
+	logger := ctx.Logger().With("module", StoreKey)
 
 	// determine pool share per voter
 	voterCount := int64(len(votes.trueVotes))
 	voterRewardAmount := voterRewardAmount(pool, voterCount)
 	rewardCoin := sdk.NewCoin(pool.Denom, voterRewardAmount)
-	cred := app.NewCategoryCoin(denom, rewardCoin)
 
-	logger.Info(fmt.Sprintf(
-		"Token voter reward amount: %s", voterRewardAmount))
+	logger.Info(fmt.Sprintf("Token voter reward amount: %s", voterRewardAmount))
 
 	// distribute reward to winners
 	for _, vote := range votes.trueVotes {
@@ -65,52 +66,38 @@ func (k Keeper) distributeRewardsConfirmed(
 
 		switch v := vote.(type) {
 		case backing.Backing:
-			// distribute backing principal and interest
-			_, _, err = k.bankKeeper.AddCoins(ctx, v.Creator(), sdk.Coins{v.Amount()})
+			err := k.stakeKeeper.DistributePrincipalAndInterest(ctx, []app.Voter{v}, categoryID)
 			if err != nil {
 				return err
 			}
-			logger.Info(fmt.Sprintf(
-				"Giving back original backing principal: %v", v.Amount()))
-
-			// _, _, err = k.bankKeeper.AddCoins(ctx, v.Creator(), sdk.Coins{v.Interest})
-			// if err != nil {
-			// 	return err
-			// }
-			// logger.Info(fmt.Sprintf(
-			// 	"Distributing backing interest: %v", v.Interest))
 
 			pool = pool.Minus(rewardCoin)
 
-			// distribute reward in cred
-			_, _, err = k.bankKeeper.AddCoins(ctx, v.Creator(), sdk.Coins{cred})
-			logger.Info(fmt.Sprintf(
-				"Distributed to backer a reward of: %v", cred))
+			_, err = k.truBankKeeper.MintAndAddCoin(ctx, v.Creator(), categoryID, voterRewardAmount)
+			if err != nil {
+				return err
+			}
+			logger.Info(fmt.Sprintf("Distributed reward %s to backer", rewardCoin))
 
 		case tokenVote.TokenVote:
-			// get back original staked amount in trustake
 			_, _, err = k.bankKeeper.AddCoins(ctx, v.Creator(), sdk.Coins{v.Amount()})
 			if err != nil {
 				return err
 			}
-			logger.Info(fmt.Sprintf(
-				"Giving back original vote amount: %v", v.Amount()))
+			logger.Info(fmt.Sprintf("Giving back original vote amount: %v", v.Amount()))
 
 			pool = pool.Minus(rewardCoin)
 
-			// distribute reward in cred
-			_, _, err = k.bankKeeper.AddCoins(ctx, v.Creator(), sdk.Coins{cred})
-			logger.Info(fmt.Sprintf(
-				"Distributed to voter a reward of: %v", cred))
+			_, err = k.truBankKeeper.MintAndAddCoin(ctx, v.Creator(), categoryID, voterRewardAmount)
+			if err != nil {
+				return err
+			}
+			logger.Info(fmt.Sprintf("Distributed reward %s to voter", rewardCoin))
 
 		default:
 			if err = ErrInvalidVote(v); err != nil {
 				return err
 			}
-		}
-
-		if err != nil {
-			return err
 		}
 	}
 
