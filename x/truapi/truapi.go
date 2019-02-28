@@ -91,10 +91,12 @@ func (ta *TruAPI) RegisterResolvers() {
 	ta.GraphQLClient.RegisterObjectResolver("Backing", backing.Backing{}, map[string]interface{}{
 		"amount":    func(ctx context.Context, q backing.Backing) sdk.Coin { return q.Amount() },
 		"argument":  func(ctx context.Context, q backing.Backing) string { return q.Argument },
-		"interest":  func(ctx context.Context, q backing.Backing) sdk.Coin { return q.Interest },
 		"vote":      func(ctx context.Context, q backing.Backing) bool { return q.VoteChoice() },
 		"creator":   func(ctx context.Context, q backing.Backing) users.User { return getUser(ctx, q.Creator()) },
 		"timestamp": func(ctx context.Context, q backing.Backing) app.Timestamp { return q.Timestamp() },
+
+		// Deprecated: interest is no longer saved in backing
+		"interest": func(ctx context.Context, q backing.Backing) sdk.Coin { return sdk.Coin{} },
 	})
 
 	ta.GraphQLClient.RegisterQueryResolver("categories", ta.allCategoriesResolver)

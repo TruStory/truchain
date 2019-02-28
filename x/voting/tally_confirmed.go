@@ -10,6 +10,38 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
+// calculate reward pool for a confirmed story
+func (k Keeper) confirmedPool(
+	ctx sdk.Context, falseVotes []app.Voter, pool *sdk.Coin) (err sdk.Error) {
+
+	for _, vote := range falseVotes {
+		switch v := vote.(type) {
+
+		case backing.Backing:
+			// slash inflationary rewards and add to pool
+			// TODO [shanev]: do proper conversion when we know it, still 1:1
+			// interestInTrustake := sdk.NewCoin(app.StakeDenom, v.Interest.Amount)
+			// *pool = (*pool).Plus(interestInTrustake)
+			// interest := k.sta
+
+		case challenge.Challenge:
+			// add challenge amount to reward pool
+			*pool = (*pool).Plus(v.Amount())
+
+		case tokenVote.TokenVote:
+			// add vote fee to reward pool
+			*pool = (*pool).Plus(v.Amount())
+
+		default:
+			if err = ErrInvalidVote(v); err != nil {
+				return err
+			}
+		}
+	}
+
+	return nil
+}
+
 func (k Keeper) distributeRewardsConfirmed(
 	ctx sdk.Context,
 	votes poll,
@@ -41,12 +73,12 @@ func (k Keeper) distributeRewardsConfirmed(
 			logger.Info(fmt.Sprintf(
 				"Giving back original backing principal: %v", v.Amount()))
 
-			_, _, err = k.bankKeeper.AddCoins(ctx, v.Creator(), sdk.Coins{v.Interest})
-			if err != nil {
-				return err
-			}
-			logger.Info(fmt.Sprintf(
-				"Distributing backing interest: %v", v.Interest))
+			// _, _, err = k.bankKeeper.AddCoins(ctx, v.Creator(), sdk.Coins{v.Interest})
+			// if err != nil {
+			// 	return err
+			// }
+			// logger.Info(fmt.Sprintf(
+			// 	"Distributing backing interest: %v", v.Interest))
 
 			pool = pool.Minus(rewardCoin)
 
@@ -118,36 +150,6 @@ func (k Keeper) distributeRewardsConfirmed(
 	err = checkForEmptyPoolConfirmed(pool, voterCount)
 	if err != nil {
 		return err
-	}
-
-	return nil
-}
-
-// calculate reward pool for a confirmed story
-func confirmedPool(falseVotes []app.Voter, pool *sdk.Coin) (err sdk.Error) {
-
-	for _, vote := range falseVotes {
-		switch v := vote.(type) {
-
-		case backing.Backing:
-			// slash inflationary rewards and add to pool
-			// TODO [shanev]: do proper conversion when we know it, still 1:1
-			interestInTrustake := sdk.NewCoin(app.StakeDenom, v.Interest.Amount)
-			*pool = (*pool).Plus(interestInTrustake)
-
-		case challenge.Challenge:
-			// add challenge amount to reward pool
-			*pool = (*pool).Plus(v.Amount())
-
-		case tokenVote.TokenVote:
-			// add vote fee to reward pool
-			*pool = (*pool).Plus(v.Amount())
-
-		default:
-			if err = ErrInvalidVote(v); err != nil {
-				return err
-			}
-		}
 	}
 
 	return nil

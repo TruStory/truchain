@@ -249,21 +249,21 @@ func fakeValidationGame() (ctx sdk.Context, votes poll, k Keeper) {
 
 	b1, _ := k.backingKeeper.Backing(ctx, b1id)
 	// fake an interest
-	cred := "trudex"
-	b1.Interest = sdk.NewCoin(cred, sdk.NewInt(500000000000))
-	k.backingKeeper.Update(ctx, b1)
+	// cred := "trudex"
+	// b1.Interest = sdk.NewCoin(cred, sdk.NewInt(500000000000))
+	// k.backingKeeper.Update(ctx, b1)
 
 	b2, _ := k.backingKeeper.Backing(ctx, b2id)
-	b2.Interest = sdk.NewCoin(cred, sdk.NewInt(500000000000))
-	k.backingKeeper.Update(ctx, b2)
+	// b2.Interest = sdk.NewCoin(cred, sdk.NewInt(500000000000))
+	// k.backingKeeper.Update(ctx, b2)
 
 	b3, _ := k.backingKeeper.Backing(ctx, b3id)
-	b3.Interest = sdk.NewCoin(cred, sdk.NewInt(500000000000))
-	k.backingKeeper.Update(ctx, b3)
+	// b3.Interest = sdk.NewCoin(cred, sdk.NewInt(500000000000))
+	// k.backingKeeper.Update(ctx, b3)
 
 	b4, _ := k.backingKeeper.Backing(ctx, b4id)
-	b4.Interest = sdk.NewCoin(cred, sdk.NewInt(500000000000))
-	k.backingKeeper.Update(ctx, b4)
+	// b4.Interest = sdk.NewCoin(cred, sdk.NewInt(500000000000))
+	// k.backingKeeper.Update(ctx, b4)
 	// change backing vote to FALSE
 	k.backingKeeper.ToggleVote(ctx, b4.ID())
 
@@ -311,17 +311,17 @@ func fakeValidationGame2() (ctx sdk.Context, votes poll, k Keeper) {
 	c3id, _ := k.challengeKeeper.Create(ctx, storyID, amount5, argument, creator10)
 
 	b1, _ := k.backingKeeper.Backing(ctx, b1id)
-	cred := "trudex"
-	b1.Interest = sdk.NewCoin(cred, sdk.NewInt(6670333000))
-	k.backingKeeper.Update(ctx, b1)
+	// cred := "trudex"
+	// b1.Interest = sdk.NewCoin(cred, sdk.NewInt(6670333000))
+	// k.backingKeeper.Update(ctx, b1)
 
 	b2, _ := k.backingKeeper.Backing(ctx, b2id)
-	b2.Interest = sdk.NewCoin(cred, sdk.NewInt(3668600732))
-	k.backingKeeper.Update(ctx, b2)
+	// b2.Interest = sdk.NewCoin(cred, sdk.NewInt(3668600732))
+	// k.backingKeeper.Update(ctx, b2)
 
 	b3, _ := k.backingKeeper.Backing(ctx, b3id)
-	b3.Interest = sdk.NewCoin(cred, sdk.NewInt(6670333000))
-	k.backingKeeper.Update(ctx, b3)
+	// b3.Interest = sdk.NewCoin(cred, sdk.NewInt(6670333000))
+	// k.backingKeeper.Update(ctx, b3)
 
 	c1, _ := k.challengeKeeper.Challenge(ctx, c1id)
 	c2, _ := k.challengeKeeper.Challenge(ctx, c2id)
