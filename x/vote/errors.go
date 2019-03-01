@@ -10,9 +10,10 @@ import (
 const (
 	DefaultCodespace sdk.CodespaceType = "vote"
 
-	CodeNotFound         sdk.CodeType = 1201
-	CodeDuplicate        sdk.CodeType = 1202
-	CodeVotingNotStarted sdk.CodeType = 1203
+	CodeNotFound          sdk.CodeType = 1201
+	CodeDuplicate         sdk.CodeType = 1202
+	CodeVotingNotStarted  sdk.CodeType = 1203
+	CodeInvalidStoryState sdk.CodeType = 1204
 )
 
 // ErrNotFound creates an error when the searched entity is not found
@@ -41,4 +42,12 @@ func ErrVotingNotStarted(storyID int64) sdk.Error {
 		CodeVotingNotStarted,
 		"Voting not started for story: "+
 			fmt.Sprintf("%d", storyID))
+}
+
+// ErrInvalidStoryState throws when story not challenged
+func ErrInvalidStoryState(state string) sdk.Error {
+	msg := "Story can only be voted on when it's Challenged. Current state is: %s"
+
+	return sdk.NewError(
+		DefaultCodespace, CodeInvalidStoryState, fmt.Sprintf(msg, state))
 }

@@ -7,16 +7,17 @@ import (
 	"github.com/TruStory/truchain/types"
 	app "github.com/TruStory/truchain/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/davecgh/go-spew/spew"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestBackStoryMsg_FailInsufficientFunds(t *testing.T) {
-	ctx, bk, _, _, _, _ := mockDB()
+	ctx, bk, sk, ck, _, _ := mockDB()
 
 	h := NewHandler(bk)
 	assert.NotNil(t, h)
 
-	storyID := int64(1)
+	storyID := createFakeStory(ctx, sk, ck)
 	amount := sdk.NewCoin(app.StakeDenom, sdk.NewInt(5000000))
 	argument := "cool story brew"
 	creator := sdk.AccAddress([]byte{1, 2})
@@ -24,6 +25,7 @@ func TestBackStoryMsg_FailInsufficientFunds(t *testing.T) {
 	assert.NotNil(t, msg)
 
 	res := h(ctx, msg)
+	spew.Dump(res)
 	assert.Equal(t, sdk.CodeInsufficientFunds, res.Code)
 	assert.Equal(t, sdk.CodespaceRoot, res.Codespace)
 

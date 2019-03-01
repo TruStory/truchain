@@ -106,7 +106,13 @@ func (k Keeper) Create(
 	ctx sdk.Context, storyID int64, amount sdk.Coin,
 	choice bool, argument string, creator sdk.AccAddress) (int64, sdk.Error) {
 
-	logger := ctx.Logger().With("module", "vote")
+	logger := ctx.Logger().With("module", StoreKey)
+
+	// TODO [shanev]: https://github.com/TruStory/truchain/issues/407
+	// err := k.validateStoryState(ctx, storyID)
+	// if err != nil {
+	// 	return 0, err
+	// }
 
 	err := k.stakeKeeper.ValidateArgument(ctx, argument)
 	if err != nil {
@@ -276,4 +282,17 @@ func (k Keeper) set(ctx sdk.Context, vote TokenVote) {
 	store.Set(
 		k.GetIDKey(vote.ID()),
 		k.GetCodec().MustMarshalBinaryLengthPrefixed(vote))
+}
+
+func (k Keeper) validateStoryState(ctx sdk.Context, storyID int64) sdk.Error {
+	s, err := k.storyKeeper.Story(ctx, storyID)
+	if err != nil {
+		return err
+	}
+
+	if s.State != story.Challenged {
+		return ErrInvalidStoryState(s.State.String())
+	}
+
+	return nil
 }
