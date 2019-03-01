@@ -16,6 +16,8 @@ func (k Keeper) rewardPool(
 	confirmed bool,
 	categoryID int64) (pool sdk.Coin, err sdk.Error) {
 
+	logger := ctx.Logger().With("module", StoreKey)
+
 	pool = sdk.NewCoin(app.StakeDenom, sdk.ZeroInt())
 
 	var losers []app.Voter
@@ -37,16 +39,17 @@ func (k Keeper) rewardPool(
 			// add stake + interest to reward pool
 			pool = pool.Plus(v.Amount()).Plus(interestCoin)
 
-			fmt.Printf(
-				"Added stake %s with %s interest to pool for staker\n",
-				v.Amount(), interestCoin)
+			logger.Info(fmt.Sprintf(
+				"Added stake %s with %s interest to pool for staker",
+				v.Amount(), interestCoin))
 
 		case tokenVote.TokenVote:
 
 			// add vote fee to reward pool
 			pool = pool.Plus(v.Amount())
 
-			fmt.Printf("Added stake %s to pool for voter\n", v.Amount())
+			logger.Info(fmt.Sprintf(
+				"Added stake %s to pool for voter", v.Amount()))
 		}
 	}
 
