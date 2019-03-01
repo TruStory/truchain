@@ -58,7 +58,7 @@ func TestNewGetChallengeUsingTruStake(t *testing.T) {
 	assert.Equal(t, amount, challenge.Amount())
 }
 
-func TestChallengesByGameID(t *testing.T) {
+func TestChallengesByStoryID(t *testing.T) {
 	ctx, k, sk, _, bankKeeper := mockDB()
 
 	storyID := createFakeStory(ctx, sk)
@@ -72,11 +72,12 @@ func TestChallengesByGameID(t *testing.T) {
 	bankKeeper.AddCoins(ctx, creator2, sdk.Coins{amount})
 
 	k.Create(ctx, storyID, amount, argument, creator)
-	k.Create(ctx, storyID, amount, argument, creator2)
+	_, err := k.Create(ctx, storyID, amount, argument, creator2)
+	assert.NotNil(t, err)
 
 	story, _ := sk.Story(ctx, storyID)
 	challenges, _ := k.ChallengesByStoryID(ctx, story.ID)
-	assert.Equal(t, 2, len(challenges))
+	assert.Equal(t, 1, len(challenges))
 }
 
 func TestChallengesByStoryIDAndCreator(t *testing.T) {

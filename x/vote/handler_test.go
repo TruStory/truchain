@@ -7,6 +7,7 @@ import (
 	"github.com/TruStory/truchain/types"
 	app "github.com/TruStory/truchain/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/davecgh/go-spew/spew"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -25,6 +26,7 @@ func TestCreateVoteMsg(t *testing.T) {
 
 	argument := "test argument"
 	_, err := k.challengeKeeper.Create(ctx, storyID, amount, argument, creator)
+	spew.Dump(err)
 	assert.Nil(t, err)
 
 	msg := NewCreateVoteMsg(storyID, amount, "valid comment", creator, true)

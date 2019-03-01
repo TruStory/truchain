@@ -10,8 +10,9 @@ import (
 const (
 	DefaultCodespace sdk.CodespaceType = "stake"
 
-	CodeArgumentTooShort sdk.CodeType = 1501
-	CodeArgumentTooLong  sdk.CodeType = 1502
+	CodeArgumentTooShort  sdk.CodeType = 1501
+	CodeArgumentTooLong   sdk.CodeType = 1502
+	CodeInvalidStoryState sdk.CodeType = 1503
 )
 
 // ErrArgumentTooShortMsg throws for an invalid argument
@@ -32,4 +33,12 @@ func ErrArgumentTooLongMsg(len int) sdk.Error {
 		DefaultCodespace,
 		CodeArgumentTooLong,
 		fmt.Sprintf(msg, len))
+}
+
+// ErrInvalidStoryState throws when story not pending
+func ErrInvalidStoryState(state string) sdk.Error {
+	msg := "Story can only be staked when it's pending. Current state is: %s"
+
+	return sdk.NewError(
+		DefaultCodespace, CodeInvalidStoryState, fmt.Sprintf(msg, state))
 }

@@ -141,7 +141,7 @@ func (k Keeper) Create(
 	source url.URL,
 	storyType Type) (int64, sdk.Error) {
 
-	logger := ctx.Logger().With("module", "story")
+	logger := ctx.Logger().With("module", StoreKey)
 
 	err := k.validate(ctx, body)
 	if err != nil {

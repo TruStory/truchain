@@ -97,7 +97,12 @@ func (k Keeper) Create(
 	argument string,
 	creator sdk.AccAddress) (id int64, err sdk.Error) {
 
-	logger := ctx.Logger().With("module", "backing")
+	logger := ctx.Logger().With("module", StoreKey)
+
+	err = k.stakeKeeper.ValidateStoryState(ctx, storyID)
+	if err != nil {
+		return 0, err
+	}
 
 	if err = k.stakeKeeper.ValidateArgument(ctx, argument); err != nil {
 		return 0, err

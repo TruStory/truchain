@@ -144,6 +144,10 @@ func createFakeStory(ctx sdk.Context, sk story.WriteKeeper, ck c.WriteKeeper) in
 	source := url.URL{}
 
 	storyID, _ := sk.Create(ctx, body, cat.ID, creator, source, storyType)
+	// TODO [shanev]: https://github.com/TruStory/truchain/issues/407
+	// s, _ := sk.Story(ctx, storyID)
+	// s.State = story.Challenged
+	// sk.UpdateStory(ctx, s)
 
 	return storyID
 }
