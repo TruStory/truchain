@@ -7,7 +7,6 @@ import (
 	"github.com/TruStory/truchain/types"
 	app "github.com/TruStory/truchain/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/davecgh/go-spew/spew"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -25,7 +24,6 @@ func TestBackStoryMsg_FailInsufficientFunds(t *testing.T) {
 	assert.NotNil(t, msg)
 
 	res := h(ctx, msg)
-	spew.Dump(res)
 	assert.Equal(t, sdk.CodeInsufficientFunds, res.Code)
 	assert.Equal(t, sdk.CodespaceRoot, res.Codespace)
 

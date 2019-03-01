@@ -39,12 +39,10 @@ func (k Keeper) distributeRewards(
 		// calculate reward pool for stakers (75% of pool)
 		stakerPool = k.calculateStakerPool(ctx, pool)
 		logger.Info(fmt.Sprintf("Staker reward pool: %v", stakerPool))
-		fmt.Printf("Staker reward pool: %v\n", stakerPool)
 
 		// calculate reward pool for voters (25% of pool)
 		voterPool = k.calculateVoterPool(ctx, pool)
 		logger.Info(fmt.Sprintf("Voter reward pool: %v", voterPool))
-		fmt.Printf("Voter reward pool: %v\n", voterPool)
 	}
 
 	// calculate voter reward amount
@@ -52,7 +50,6 @@ func (k Keeper) distributeRewards(
 
 	for _, vote := range winners {
 		logger.Info(fmt.Sprintf("Processing vote type: %T", vote))
-		fmt.Printf("Processing vote type: %T\n", vote)
 
 		switch v := vote.(type) {
 		case backing.Backing, challenge.Challenge:
@@ -77,7 +74,6 @@ func (k Keeper) distributeRewards(
 	}
 
 	logger.Info(fmt.Sprintf("Amount left in pool: %v", pool))
-	fmt.Printf("Amount left in pool: %v\n", pool)
 
 	err = checkForEmptyPool(pool, stakerCount+voterCount)
 	if err != nil {
@@ -114,7 +110,6 @@ func (k Keeper) rewardStaker(
 		return
 	}
 	logger.Info(fmt.Sprintf("Distributed reward %s to staker", rewardCoin))
-	fmt.Printf("Distributed reward %s to staker\n", rewardCoin)
 
 	return rewardCoin, nil
 }
@@ -133,7 +128,6 @@ func (k Keeper) rewardTokenVoter(
 		return
 	}
 	logger.Info(fmt.Sprintf("Giving back original vote stake: %v", staker.Amount()))
-	fmt.Printf("Giving back original vote stake: %v\n", staker.Amount())
 
 	// calculate reward (1-X% of pool, in equal proportions)
 	rewardCoin = sdk.NewCoin(app.StakeDenom, voterRewardAmount)
@@ -144,7 +138,6 @@ func (k Keeper) rewardTokenVoter(
 		return
 	}
 	logger.Info(fmt.Sprintf("Distributed reward %s to voter", rewardCoin))
-	fmt.Printf("Distributed reward %s to voter\n", rewardCoin)
 
 	return rewardCoin, nil
 }
