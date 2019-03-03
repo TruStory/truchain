@@ -99,7 +99,7 @@ func (k Keeper) StartVotingPeriod(ctx sdk.Context, storyID int64) sdk.Error {
 		return err
 	}
 
-	story.State = Challenged
+	story.Status = Challenged
 	story.VotingStartTime = ctx.BlockHeader().Time
 	story.VotingEndTime = ctx.BlockHeader().Time.Add(k.votingDuration(ctx))
 	k.UpdateStory(ctx, story)
@@ -121,9 +121,9 @@ func (k Keeper) EndVotingPeriod(
 	}
 
 	if confirmed {
-		story.State = Confirmed
+		story.Status = Confirmed
 	} else {
-		story.State = Rejected
+		story.Status = Rejected
 	}
 
 	story.VotingEndTime = ctx.BlockHeader().Time
@@ -161,7 +161,7 @@ func (k Keeper) Create(
 		ExpireTime:      ctx.BlockHeader().Time.Add(k.expireDuration(ctx)),
 		Flagged:         false,
 		Source:          source,
-		State:           Pending,
+		Status:          Pending,
 		Type:            storyType,
 		VotingStartTime: time.Time{},
 		VotingEndTime:   time.Time{},
@@ -297,7 +297,7 @@ func (k Keeper) UpdateStory(ctx sdk.Context, story Story) {
 		story.ExpireTime,
 		story.Flagged,
 		story.Source,
-		story.State,
+		story.Status,
 		story.Type,
 		story.VotingStartTime,
 		story.VotingEndTime,

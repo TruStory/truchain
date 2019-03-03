@@ -115,7 +115,7 @@ func (k Keeper) Create(
 	}
 
 	// make sure voting has started
-	if currentStory.State != story.Challenged {
+	if currentStory.Status != story.Challenged {
 		return 0, ErrVotingNotStarted(storyID)
 	}
 
@@ -284,8 +284,8 @@ func (k Keeper) validateStoryState(ctx sdk.Context, storyID int64) sdk.Error {
 		return err
 	}
 
-	if s.State != story.Challenged {
-		return ErrInvalidStoryState(s.State.String())
+	if s.Status != story.Challenged {
+		return ErrInvalidStoryState(s.Status.String())
 	}
 
 	return nil

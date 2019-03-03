@@ -41,9 +41,9 @@ func (k Keeper) processStoryQueue(ctx sdk.Context, storyQueue queue.Queue) sdk.E
 
 	logger.Info("Processing " + story.String())
 
-	// if the state of the story has changed to challenged,
+	// if the status of the story has changed to challenged,
 	// add it to the voting story queue to be handled later
-	if story.State == Challenged {
+	if story.Status == Challenged {
 		logger.Info("Voting begun for " + story.String())
 		k.votingStoryQueue(ctx).Push(storyID)
 
@@ -61,7 +61,7 @@ func (k Keeper) processStoryQueue(ctx sdk.Context, storyQueue queue.Queue) sdk.E
 	logger.Info(fmt.Sprintf("Handling expired: %d", story.ID))
 
 	storyQueue.Pop()
-	story.State = Expired
+	story.Status = Expired
 	k.UpdateStory(ctx, story)
 
 	// Push to the expired story queue, which gets handled in
