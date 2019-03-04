@@ -19,8 +19,8 @@ const (
 	StoreKey = "stories"
 	// PendingQueueStoreKey is string representation of the store key for pending story ids
 	PendingQueueStoreKey = "pendingStoryQueue"
-	// ExpiredQueueStoreKey is string representation of the store key for expired story ids
-	ExpiredQueueStoreKey = "expiredStoryQueue"
+	// ExpiringQueueStoreKey is string representation of the store key for expiring story ids
+	ExpiringQueueStoreKey = "expiringStoryQueue"
 	// ChallengedQueueStoreKey is string representation of the store key for challenged story ids
 	ChallengedQueueStoreKey = "challengedStoryQueue"
 )
@@ -63,19 +63,19 @@ type WriteKeeper interface {
 type Keeper struct {
 	app.Keeper
 
-	pendingStoryQueueKey sdk.StoreKey
-	expiredStoryQueueKey sdk.StoreKey
-	votingStoryListKey   sdk.StoreKey
-	categoryKeeper       category.ReadKeeper
-	paramStore           params.Subspace
+	pendingStoryQueueKey    sdk.StoreKey
+	expiringStoryQueueKey   sdk.StoreKey
+	challengedStoryQueueKey sdk.StoreKey
+	categoryKeeper          category.ReadKeeper
+	paramStore              params.Subspace
 }
 
 // NewKeeper creates a new keeper with write and read access
 func NewKeeper(
 	storeKey sdk.StoreKey,
 	pendingStoryQueueKey sdk.StoreKey,
-	expiredStoryQueueKey sdk.StoreKey,
-	votingStoryListKey sdk.StoreKey,
+	expiringStoryQueueKey sdk.StoreKey,
+	challengedStoryQueueKey sdk.StoreKey,
 	categoryKeeper category.ReadKeeper,
 	paramStore params.Subspace,
 	codec *amino.Codec) Keeper {
@@ -83,8 +83,8 @@ func NewKeeper(
 	return Keeper{
 		app.NewKeeper(codec, storeKey),
 		pendingStoryQueueKey,
-		expiredStoryQueueKey,
-		votingStoryListKey,
+		expiringStoryQueueKey,
+		challengedStoryQueueKey,
 		categoryKeeper,
 		paramStore.WithTypeTable(ParamTypeTable()),
 	}
@@ -384,13 +384,13 @@ func (k Keeper) pendingStoryQueue(ctx sdk.Context) list.Queue {
 	return list.NewQueue(k.GetCodec(), store)
 }
 
-func (k Keeper) expiredStoryQueue(ctx sdk.Context) list.Queue {
-	store := ctx.KVStore(k.expiredStoryQueueKey)
+func (k Keeper) expiringStoryQueue(ctx sdk.Context) list.Queue {
+	store := ctx.KVStore(k.expiringStoryQueueKey)
 	return list.NewQueue(k.GetCodec(), store)
 }
 
 func (k Keeper) challengedStoryQueue(ctx sdk.Context) list.Queue {
-	store := ctx.KVStore(k.votingStoryListKey)
+	store := ctx.KVStore(k.challengedStoryQueueKey)
 	return list.NewQueue(k.GetCodec(), store)
 }
 
