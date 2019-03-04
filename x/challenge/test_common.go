@@ -33,7 +33,7 @@ func mockDB() (sdk.Context, Keeper, story.Keeper, backing.Keeper, bank.Keeper) {
 	accKey := sdk.NewKVStoreKey("acc")
 	catKey := sdk.NewKVStoreKey(category.StoreKey)
 	storyKey := sdk.NewKVStoreKey("stories")
-	storyQueueKey := sdk.NewKVStoreKey(story.QueueStoreKey)
+	storyQueueKey := sdk.NewKVStoreKey(story.PendingQueueStoreKey)
 	stakeKey := sdk.NewKVStoreKey(stake.StoreKey)
 	truBankKey := sdk.NewKVStoreKey(trubank.StoreKey)
 	expiredStoryQueueKey := sdk.NewKVStoreKey(story.ExpiredQueueStoreKey)

@@ -19,7 +19,7 @@ func TestNewResponseEndBlock(t *testing.T) {
 func Test_processStoryQueue(t *testing.T) {
 	ctx, storyKeeper := fakeStories()
 
-	q := storyKeeper.storyQueue(ctx)
+	q := storyKeeper.pendingStoryQueue(ctx)
 	assert.Equal(t, uint64(3), q.List.Len())
 
 	err := storyKeeper.processStoryQueue(ctx, q)
