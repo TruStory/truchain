@@ -29,45 +29,43 @@ See the db module [README](x/db/README.md).
 
 ## Running
 
-1. Install dependencies
+### Install dependencies
 
-`make update_deps`
+```
+make update_deps
+```
 
-2. Buidl the binaries for the client apps:
+### Build binaries
 
-`make buidl`
-
-NOTE: On macOS Mojave, you might have to run `export CGO_ENABLED=1; export CC=gcc`.
+```
+make buidl
+```
 
 This creates:
 
 `bin/trucli`: TruStory command-line client and lite client
 
-`bin/truchaind`: TruStory server node
+`bin/truchaind`: TruStory blockchain daemon
 
 `trucli`, the light client, will ideally run on it's own machine. It will communicates with `truchaind` via RPC.
 
 `truchaind` will initially run as a single Cosmos node, but eventually as a zone of many nodes. It includes an HTTP server which handles all API requests.
 
-3. Registrar key
+### Create genesis file and setup private validator
+```
+make init
+make reset
+```
 
-The upper-case-hex encoding of the secp256k1 private key is located in `.chain/`
-
-This is the private key to the account added in step 3b.
-
-4. Copy genesis file and setup private validator
-
-Copy `genesis.json` from secrets repo into `.chain/config`.
-
-Run `make reset`. 
+This creates `genesis.json` in the chain config folder that contains all the initial parameters for bootstrapping a node. It resets the chain so it starts with a clean slate with block 1.
 
 Open the `genesis.json` file and in the "validators" section overwrite the "address" and "pub_key"->"value" fields with the corresponding values from `.chain/config/priv_validator.json`.
 
-5. Start blockchain
+### Start chain
 
-`make start`
-
-You can wipe the chain, build, and start using the alias `make restart`.
+```
+make start
+```
 
 ## GraphQL Queries
 You can reach your client at `http://localhost:3030/graphiql/`
@@ -150,26 +148,30 @@ All data in stores are binary encoded using [Amino](https://github.com/tendermin
 
 ### Reactive Architecture
 
-Most chain operations are executed based on changes to data. Lists and queues are checked every time a new block is produced:
+Most chain operations are executed based on changes to data. Worker queues are checked every time a new block is produced:
 
-1. Story Queue
+#### Pending Story Queue
 
 A queue of all new stories that haven't expired or gone through voting yet. These are stories in the pending state.
 
-2. Expired Story Queue
+#### Expiring Story Queue
 
 Stories that expire before going into voting are pushed into this list. The queue is processed after each block to distribute rewards to backers and return funds to challengers.
 
-3. Voting Story Queue
+#### Challenged Story Queue
 
 Handles the lifecycle of voting on a story (validation game). Upon completion of a voting game, funds are distributed to winners, and removed from losers.
 
 ## Testing
 
-`make test`
+```
+make test
+```
 
 If you run the tests your `./chain/.env` will be replaced. Make sure to replace it before running the client again.
 
 ## Generate Documentation
 
-`make doc`
+```
+make doc
+```
