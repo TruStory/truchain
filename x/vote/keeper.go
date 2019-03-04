@@ -108,13 +108,18 @@ func (k Keeper) Create(
 
 	logger := ctx.Logger().With("module", StoreKey)
 
-	// TODO [shanev]: https://github.com/TruStory/truchain/issues/407
-	// err := k.validateStoryState(ctx, storyID)
-	// if err != nil {
-	// 	return 0, err
-	// }
+	// get the story
+	currentStory, err := k.storyKeeper.Story(ctx, storyID)
+	if err != nil {
+		return 0, err
+	}
 
-	err := k.stakeKeeper.ValidateArgument(ctx, argument)
+	// make sure voting has started
+	if currentStory.State != story.Challenged {
+		return 0, ErrVotingNotStarted(storyID)
+	}
+
+	err = k.stakeKeeper.ValidateArgument(ctx, argument)
 	if err != nil {
 		return 0, err
 	}
@@ -126,17 +131,6 @@ func (k Keeper) Create(
 
 	if amount.Denom != app.StakeDenom {
 		return 0, sdk.ErrInvalidCoins("Invalid voting token.")
-	}
-
-	// get the story
-	currentStory, err := k.storyKeeper.Story(ctx, storyID)
-	if err != nil {
-		return 0, err
-	}
-
-	// make sure voting has started
-	if currentStory.State != story.Challenged {
-		return 0, ErrVotingNotStarted(storyID)
 	}
 
 	// check if this voter has already cast a vote
