@@ -39,7 +39,7 @@ func mockDB() (
 	storyKey := sdk.NewKVStoreKey(story.StoreKey)
 	storyQueueKey := sdk.NewKVStoreKey(story.PendingQueueStoreKey)
 	expiredStoryQueueKey := sdk.NewKVStoreKey(story.ExpiredQueueStoreKey)
-	votingStoryQueueKey := sdk.NewKVStoreKey(story.VotingQueueStoreKey)
+	votingStoryQueueKey := sdk.NewKVStoreKey(story.ChallengedQueueStoreKey)
 	backingKey := sdk.NewKVStoreKey(backing.StoreKey)
 	challengeKey := sdk.NewKVStoreKey(challenge.StoreKey)
 	distKey := sdk.NewKVStoreKey(StoreKey)

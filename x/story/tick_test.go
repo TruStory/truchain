@@ -22,7 +22,7 @@ func Test_processStoryQueue(t *testing.T) {
 	q := storyKeeper.pendingStoryQueue(ctx)
 	assert.Equal(t, uint64(3), q.List.Len())
 
-	err := storyKeeper.processStoryQueue(ctx, q)
+	err := storyKeeper.processPendingStoryQueue(ctx, q)
 	assert.Nil(t, err)
 
 	story, _ := storyKeeper.Story(ctx, 5)
@@ -32,7 +32,7 @@ func Test_processStoryQueue(t *testing.T) {
 	expiredTime := time.Now().Add(DefaultParams().ExpireDuration)
 	ctx = ctx.WithBlockHeader(abci.Header{Time: expiredTime})
 
-	err = storyKeeper.processStoryQueue(ctx, q)
+	err = storyKeeper.processPendingStoryQueue(ctx, q)
 	assert.Nil(t, err)
 
 	story, _ = storyKeeper.Story(ctx, 3)

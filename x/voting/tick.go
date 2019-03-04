@@ -18,14 +18,14 @@ func (k Keeper) EndBlock(ctx sdk.Context) sdk.Tags {
 
 // Recursively process voting story queue to see if voting has ended
 func (k Keeper) processVotingStoryQueue(ctx sdk.Context) sdk.Error {
-	votingStoryQueue := k.votingStoryQueue(ctx)
+	challengedStoryQueue := k.challengedStoryQueue(ctx)
 
-	if votingStoryQueue.IsEmpty() {
+	if challengedStoryQueue.IsEmpty() {
 		return nil
 	}
 
 	var storyID int64
-	peekErr := votingStoryQueue.Peek(&storyID)
+	peekErr := challengedStoryQueue.Peek(&storyID)
 	if peekErr != nil {
 		panic(peekErr)
 	}
@@ -42,7 +42,7 @@ func (k Keeper) processVotingStoryQueue(ctx sdk.Context) sdk.Error {
 	}
 
 	// only left with voting ended stories
-	votingStoryQueue.Pop()
+	challengedStoryQueue.Pop()
 
 	err = k.verifyStory(ctx, storyID)
 	if err != nil {
