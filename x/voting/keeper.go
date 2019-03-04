@@ -84,7 +84,7 @@ func NewKeeper(
 	}
 }
 
-func (k Keeper) votingStoryQueue(ctx sdk.Context) list.Queue {
+func (k Keeper) challengedStoryQueue(ctx sdk.Context) list.Queue {
 	store := ctx.KVStore(k.votingStoryQueueKey)
 	return list.NewQueue(k.GetCodec(), store)
 }
