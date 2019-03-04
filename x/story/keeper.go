@@ -17,8 +17,8 @@ import (
 const (
 	// StoreKey is string representation of the store key for stories
 	StoreKey = "stories"
-	// QueueStoreKey is string representation of the store key for backing list
-	QueueStoreKey = "storyQueue"
+	// PendingQueueStoreKey is string representation of the store key for pending story ids
+	PendingQueueStoreKey = "pendingStoryQueue"
 	// ExpiredQueueStoreKey is string representation of the store key for expired stories
 	ExpiredQueueStoreKey = "expiredStoryQueue"
 	// VotingQueueStoreKey is string representation of the store key for challenged stories
@@ -63,7 +63,7 @@ type WriteKeeper interface {
 type Keeper struct {
 	app.Keeper
 
-	storyQueueKey        sdk.StoreKey
+	pendingStoryQueueKey sdk.StoreKey
 	expiredStoryQueueKey sdk.StoreKey
 	votingStoryListKey   sdk.StoreKey
 	categoryKeeper       category.ReadKeeper
@@ -73,7 +73,7 @@ type Keeper struct {
 // NewKeeper creates a new keeper with write and read access
 func NewKeeper(
 	storeKey sdk.StoreKey,
-	storyQueueKey sdk.StoreKey,
+	pendingStoryQueueKey sdk.StoreKey,
 	expiredStoryQueueKey sdk.StoreKey,
 	votingStoryListKey sdk.StoreKey,
 	categoryKeeper category.ReadKeeper,
@@ -82,7 +82,7 @@ func NewKeeper(
 
 	return Keeper{
 		app.NewKeeper(codec, storeKey),
-		storyQueueKey,
+		pendingStoryQueueKey,
 		expiredStoryQueueKey,
 		votingStoryListKey,
 		categoryKeeper,
@@ -172,7 +172,7 @@ func (k Keeper) Create(
 	k.appendStoriesList(
 		ctx, storyIDsByCategoryKey(k, categoryID, story.Timestamp, false), story)
 
-	k.storyQueue(ctx).Push(story.ID)
+	k.pendingStoryQueue(ctx).Push(story.ID)
 
 	logger.Info("Created " + story.String())
 
@@ -379,8 +379,8 @@ func (k Keeper) storyIDsByCategoryID(
 	return storyIDs, nil
 }
 
-func (k Keeper) storyQueue(ctx sdk.Context) list.Queue {
-	store := ctx.KVStore(k.storyQueueKey)
+func (k Keeper) pendingStoryQueue(ctx sdk.Context) list.Queue {
+	store := ctx.KVStore(k.pendingStoryQueueKey)
 	return list.NewQueue(k.GetCodec(), store)
 }
 
