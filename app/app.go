@@ -67,7 +67,7 @@ type TruChain struct {
 	keyPendingStoryQueue    *sdk.KVStoreKey
 	keyTruBank              *sdk.KVStoreKey
 	keyChallengedStoryQueue *sdk.KVStoreKey
-	keyExpiredStoryQueue    *sdk.KVStoreKey
+	keyExpiringStoryQueue   *sdk.KVStoreKey
 	keyVote                 *sdk.KVStoreKey
 	keyVoting               *sdk.KVStoreKey
 	keyParams               *sdk.KVStoreKey
@@ -132,7 +132,7 @@ func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *T
 		keyStake:                sdk.NewKVStoreKey(stake.StoreKey),
 		keyTruBank:              sdk.NewKVStoreKey(trubank.StoreKey),
 		keyChallengedStoryQueue: sdk.NewKVStoreKey(story.ChallengedQueueStoreKey),
-		keyExpiredStoryQueue:    sdk.NewKVStoreKey(story.ExpiredQueueStoreKey),
+		keyExpiringStoryQueue:   sdk.NewKVStoreKey(story.ExpiringQueueStoreKey),
 		keyVote:                 sdk.NewKVStoreKey(vote.StoreKey),
 		keyVoting:               sdk.NewKVStoreKey(voting.StoreKey),
 		api:                     nil,
@@ -171,7 +171,7 @@ func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *T
 	app.storyKeeper = story.NewKeeper(
 		app.keyStory,
 		app.keyPendingStoryQueue,
-		app.keyExpiredStoryQueue,
+		app.keyExpiringStoryQueue,
 		app.keyChallengedStoryQueue,
 		app.categoryKeeper,
 		app.paramsKeeper.Subspace(story.StoreKey),
@@ -224,7 +224,7 @@ func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *T
 
 	app.expirationKeeper = expiration.NewKeeper(
 		app.keyExpiration,
-		app.keyExpiredStoryQueue,
+		app.keyExpiringStoryQueue,
 		app.stakeKeeper,
 		app.storyKeeper,
 		app.backingKeeper,
@@ -302,7 +302,7 @@ func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *T
 		app.keyMain,
 		app.keyStory,
 		app.keyPendingStoryQueue,
-		app.keyExpiredStoryQueue,
+		app.keyExpiringStoryQueue,
 		app.keyChallengedStoryQueue,
 		app.keyTruBank,
 		app.keyVote,

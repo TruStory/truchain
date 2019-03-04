@@ -52,7 +52,7 @@ func NewKeeper(
 	}
 }
 
-func (k Keeper) expiredStoryQueue(ctx sdk.Context) queue.Queue {
+func (k Keeper) expiringStoryQueue(ctx sdk.Context) queue.Queue {
 	store := ctx.KVStore(k.expiredStoryQueueKey)
 	return queue.NewQueue(k.GetCodec(), store)
 }
