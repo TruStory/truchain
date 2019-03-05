@@ -1343,7 +1343,7 @@
             "deprecationReason": "",
             "description": "",
             "isDeprecated": false,
-            "name": "state",
+            "name": "status",
             "type": {
               "kind": "NON_NULL",
               "name": "",
