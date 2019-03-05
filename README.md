@@ -43,11 +43,7 @@ make buidl
 
 This creates:
 
-`bin/trucli`: TruStory command-line client and lite client
-
 `bin/truchaind`: TruStory blockchain daemon
-
-`trucli`, the light client, will ideally run on it's own machine. It will communicates with `truchaind` via RPC.
 
 `truchaind` will initially run as a single Cosmos node, but eventually as a zone of many nodes. It includes an HTTP server which handles all API requests.
 
@@ -137,7 +133,7 @@ Each main feature of TruChain is implemented as a separate module that lives und
 
 Each module has it's own [README](x/README.md).
 
-### On-chain Data Store
+### Key-Value Storage
 
 Because the current Cosmos SDK data store is built on key-value storage, database operations are more explicit than a relational or even NoSQL database. Lists and queues must be made for data that needs to be retrieved.
 
@@ -147,7 +143,7 @@ Each module provides a `ReadKeeper`, `WriteKeeper`, and `ReadWriteKeeper`. Other
 
 All data in stores are binary encoded using [Amino](https://github.com/tendermint/go-amino) for efficient storage in a Merkle tree. Keepers handle marshalling and umarshalling data between its binary encoding and Go data type.
 
-### Reactive Architecture
+### Worker Queues
 
 Most chain operations are executed based on changes to data. Worker queues are checked every time a new block is produced:
 
