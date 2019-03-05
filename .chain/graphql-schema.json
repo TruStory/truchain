@@ -613,6 +613,22 @@
             "deprecationReason": "",
             "description": "",
             "isDeprecated": false,
+            "name": "stakeDenom",
+            "type": {
+              "kind": "NON_NULL",
+              "name": "",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "string",
+                "ofType": null
+              }
+            }
+          },
+          {
+            "args": [],
+            "deprecationReason": "",
+            "description": "",
+            "isDeprecated": false,
             "name": "stakeParams",
             "type": {
               "kind": "NON_NULL",
@@ -1328,6 +1344,22 @@
             "description": "",
             "isDeprecated": false,
             "name": "source",
+            "type": {
+              "kind": "NON_NULL",
+              "name": "",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "string",
+                "ofType": null
+              }
+            }
+          },
+          {
+            "args": [],
+            "deprecationReason": "",
+            "description": "",
+            "isDeprecated": false,
+            "name": "state",
             "type": {
               "kind": "NON_NULL",
               "name": "",
