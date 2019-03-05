@@ -21,7 +21,7 @@ func Test_processVotingStoryListNotMeetVoteEndTime(t *testing.T) {
 
 	k.challengedStoryQueue(ctx).Push(int64(1))
 
-	err := k.processChallengeStoryQueue(ctx)
+	err := k.processChallengedStoryQueue(ctx)
 	assert.Nil(t, err)
 }
 
@@ -32,6 +32,6 @@ func Test_processVotingStoryListVerifyStory(t *testing.T) {
 
 	ctx = ctx.WithBlockHeader(abci.Header{Time: time.Now().Add(50 * 24 * time.Hour)})
 
-	err := k.processChallengeStoryQueue(ctx)
+	err := k.processChallengedStoryQueue(ctx)
 	assert.Nil(t, err)
 }
