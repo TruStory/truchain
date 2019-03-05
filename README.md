@@ -55,6 +55,7 @@ This creates:
 
 ```
 make reset
+make init
 ```
 
 This creates `genesis.json` in the chain config folder that contains all the initial parameters for bootstrapping a node. It resets the chain so it starts with a clean slate with block 1.

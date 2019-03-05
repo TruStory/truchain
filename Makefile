@@ -26,9 +26,11 @@ doc:
 	@echo "--> Wait a few seconds and visit http://localhost:6060/pkg/github.com/TruStory/truchain/"
 	godoc -http=:6060
 
+init:
+	bin/truchaind --home $(CHAIN_DIR) init
+
 reset:
 	bin/truchaind --home $(CHAIN_DIR) unsafe-reset-all
-	bin/truchaind --home $(CHAIN_DIR) init
 
 restart: build_daemon reset start
 
