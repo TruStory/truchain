@@ -52,7 +52,7 @@ func (msg CreateVoteMsg) ValidateBasic() sdk.Error {
 		return story.ErrInvalidStoryID(msg.StoryID)
 	}
 	if msg.Amount.IsZero() == true {
-		return sdk.ErrInsufficientFunds("Invalid vote amount" + msg.Amount.String())
+		return sdk.ErrInsufficientFunds("Invalid vote amount: " + msg.Amount.String())
 	}
 	if len(msg.Creator) == 0 {
 		return sdk.ErrInvalidAddress("Invalid address: " + msg.Creator.String())
