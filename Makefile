@@ -14,7 +14,7 @@ benchmark:
 
 buidl: build
 
-build: build_cli build_daemon
+build: build_daemon
 
 build_cli:
 	go build -o bin/trucli cmd/trucli/main.go
