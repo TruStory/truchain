@@ -143,9 +143,9 @@ Each module provides a `ReadKeeper`, `WriteKeeper`, and `ReadWriteKeeper`. Other
 
 All data in stores are binary encoded using [Amino](https://github.com/tendermint/go-amino) for efficient storage in a Merkle tree. Keepers handle marshalling and umarshalling data between its binary encoding and Go data type.
 
-### Worker Queues
+### Block Handlers
 
-Most chain operations are executed based on changes to data. Worker queues are checked every time a new block is produced:
+Most chain operations are executed based on changes to data at certain block times. After each block (`EndBlock`), the following queues of story ids are checked:
 
 #### Pending Story Queue
 
