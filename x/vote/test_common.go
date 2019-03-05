@@ -136,7 +136,7 @@ func mockDB() (sdk.Context, Keeper, c.Keeper) {
 	return ctx, k, ck
 }
 
-func createFakeStory(ctx sdk.Context, sk story.WriteKeeper, ck c.WriteKeeper, st story.State) int64 {
+func createFakeStory(ctx sdk.Context, sk story.WriteKeeper, ck c.WriteKeeper, st story.Status) int64 {
 	body := "TruStory validators can be bootstrapped with a single genesis file."
 	cat := createFakeCategory(ctx, ck)
 	creator := sdk.AccAddress([]byte{1, 2})
@@ -145,7 +145,7 @@ func createFakeStory(ctx sdk.Context, sk story.WriteKeeper, ck c.WriteKeeper, st
 
 	storyID, _ := sk.Create(ctx, body, cat.ID, creator, source, storyType)
 	s, _ := sk.Story(ctx, storyID)
-	s.State = st
+	s.Status = st
 	sk.UpdateStory(ctx, s)
 
 	return storyID
