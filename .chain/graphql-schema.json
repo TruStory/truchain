@@ -1365,7 +1365,7 @@
               "name": "",
               "ofType": {
                 "kind": "SCALAR",
-                "name": "string",
+                "name": "int8",
                 "ofType": null
               }
             }
