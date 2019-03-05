@@ -52,8 +52,8 @@ This creates:
 `truchaind` will initially run as a single Cosmos node, but eventually as a zone of many nodes. It includes an HTTP server which handles all API requests.
 
 ### Create genesis file and setup private validator
+
 ```
-make init
 make reset
 ```
 

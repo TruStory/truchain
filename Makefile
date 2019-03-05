@@ -28,6 +28,7 @@ doc:
 
 reset:
 	bin/truchaind --home $(CHAIN_DIR) unsafe-reset-all
+	bin/truchaind --home $(CHAIN_DIR) init
 
 restart: build_daemon reset start
 
