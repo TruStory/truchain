@@ -169,6 +169,9 @@ func (ta *TruAPI) RegisterResolvers() {
 		"creator":            func(ctx context.Context, q story.Story) users.User { return getUser(ctx, q.Creator) },
 		"source":             func(ctx context.Context, q story.Story) string { return q.Source.String() },
 		"votes":              func(ctx context.Context, q story.Story) []vote.TokenVote { return getVotes(ctx, q.ID) },
+
+		// Deprecated: replaced by "status"
+		"state": func(ctx context.Context, q story.Story) string { return q.Status.String() },
 	})
 
 	ta.GraphQLClient.RegisterObjectResolver("TwitterProfile", db.TwitterProfile{}, map[string]interface{}{
