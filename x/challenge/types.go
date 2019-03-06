@@ -30,6 +30,16 @@ func (c Challenge) Creator() sdk.AccAddress {
 	return c.Vote.Creator
 }
 
+// Weight returns the challenge vote weight for that vote
+func (c Challenge) Weight() sdk.Int {
+	return c.Vote.Weight
+}
+
+// FullVote returns the vote for setter purposes
+func (c Challenge) FullVote() app.Vote {
+	return c.Vote
+}
+
 // VoteChoice implements `Voter`
 func (c Challenge) VoteChoice() bool {
 	return c.Vote.Vote

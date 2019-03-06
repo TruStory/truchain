@@ -1,6 +1,8 @@
 package voting
 
 import (
+	"fmt"
+
 	"github.com/TruStory/truchain/x/backing"
 	"github.com/TruStory/truchain/x/challenge"
 	"github.com/TruStory/truchain/x/stake"
@@ -27,6 +29,7 @@ type ReadKeeper interface {
 	app.ReadKeeper
 
 	GetParams(ctx sdk.Context) Params
+	GetVoteResultsByStoryID(ctx sdk.Context, storyID int64) (results VoteResults, err sdk.Error)
 }
 
 // WriteKeeper defines a module interface that facilities write only access to truchain data
@@ -48,7 +51,7 @@ type Keeper struct {
 	challengeKeeper challenge.WriteKeeper
 	stakeKeeper     stake.Keeper
 	storyKeeper     story.WriteKeeper
-	voteKeeper      vote.WriteKeeper
+	voteKeeper      vote.Keeper
 	bankKeeper      bank.Keeper
 	truBankKeeper   trubank.WriteKeeper
 	paramStore      params.Subspace
@@ -63,7 +66,7 @@ func NewKeeper(
 	challengeKeeper challenge.WriteKeeper,
 	stakeKeeper stake.Keeper,
 	storyKeeper story.WriteKeeper,
-	voteKeeper vote.WriteKeeper,
+	voteKeeper vote.Keeper,
 	bankKeeper bank.Keeper,
 	truBankKeeper trubank.WriteKeeper,
 	paramStore params.Subspace,
@@ -87,4 +90,30 @@ func NewKeeper(
 func (k Keeper) votingStoryQueue(ctx sdk.Context) list.Queue {
 	store := ctx.KVStore(k.votingStoryQueueKey)
 	return list.NewQueue(k.GetCodec(), store)
+}
+
+// saves a `Vote` in the KVStore
+func (k Keeper) set(ctx sdk.Context, results VoteResults) {
+	store := k.GetStore(ctx)
+	store.Set(
+		k.GetIDKey(results.ID),
+		k.GetCodec().MustMarshalBinaryLengthPrefixed(results))
+}
+
+// GetVoteResultsByStoryID gets the vote results for a story by a storyID
+func (k Keeper) GetVoteResultsByStoryID(
+	ctx sdk.Context, storyID int64) (results VoteResults, err sdk.Error) {
+
+	store := k.GetStore(ctx)
+	val := store.Get(k.GetIDKey(storyID))
+
+	logger := ctx.Logger().With("module", StoreKey)
+	logger.Info(fmt.Sprintf("Getting vote results for story %d", storyID))
+
+	if val == nil {
+		return results, ErrVoteResultsNotFound(storyID)
+	}
+	k.GetCodec().MustUnmarshalBinaryLengthPrefixed(val, &results)
+
+	return
 }

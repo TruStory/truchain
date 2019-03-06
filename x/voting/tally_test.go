@@ -20,7 +20,7 @@ func TestTally(t *testing.T) {
 func TestConfirmStory(t *testing.T) {
 	ctx, votes, k := fakeConfirmedGame()
 
-	confirmed, _ := k.confirmStory(ctx, votes, "trudex")
+	confirmed, _ := k.confirmStory(ctx, votes, "trudex", 1)
 	assert.True(t, confirmed)
 }
 
@@ -52,7 +52,7 @@ func TestTallyRejected(t *testing.T) {
 func TestRejectedStory(t *testing.T) {
 	ctx, votes, k := fakeRejectedGame()
 
-	confirmed, _ := k.confirmStory(ctx, votes, "crypto")
+	confirmed, _ := k.confirmStory(ctx, votes, "crypto", 1)
 	assert.False(t, confirmed)
 }
 

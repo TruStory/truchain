@@ -30,6 +30,16 @@ func (v TokenVote) Creator() sdk.AccAddress {
 	return v.Vote.Creator
 }
 
+// Weight implements `Voter`
+func (v TokenVote) Weight() sdk.Int {
+	return v.Vote.Weight
+}
+
+// FullVote returns the vote for setter purposes
+func (v TokenVote) FullVote() app.Vote {
+	return v.Vote
+}
+
 // VoteChoice implements `Voter`
 func (v TokenVote) VoteChoice() bool {
 	return v.Vote.Vote

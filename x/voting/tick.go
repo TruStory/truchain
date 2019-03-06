@@ -76,7 +76,7 @@ func (k Keeper) verifyStory(ctx sdk.Context, storyID int64) sdk.Error {
 	}
 
 	// check if story was confirmed
-	confirmed, err := k.confirmStory(ctx, votes, credDenom)
+	confirmed, err := k.confirmStory(ctx, votes, credDenom, storyID)
 	if err != nil {
 		return err
 	}

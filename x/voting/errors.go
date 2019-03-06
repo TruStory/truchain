@@ -1,6 +1,7 @@
 package voting
 
 import (
+	"fmt"
 	"reflect"
 	"strings"
 
@@ -11,8 +12,9 @@ import (
 const (
 	DefaultCodespace sdk.CodespaceType = "voting"
 
-	CodeUnknownVote        sdk.CodeType = 1301
-	CodeRewardPoolNotEmpty sdk.CodeType = 1302
+	CodeUnknownVote         sdk.CodeType = 1301
+	CodeRewardPoolNotEmpty  sdk.CodeType = 1302
+	CodeVoteResultsNotFound sdk.CodeType = 1303
 )
 
 // ErrInvalidVote returns an unknown Vote type error
@@ -31,4 +33,9 @@ func ErrNonEmptyRewardPool(amount sdk.Coin) sdk.Error {
 		DefaultCodespace,
 		CodeRewardPoolNotEmpty,
 		"Reward pool not empty: "+amount.String())
+}
+
+// ErrVoteResultsNotFound throws when vote results are not found for a story
+func ErrVoteResultsNotFound(storyID int64) sdk.Error {
+	return sdk.NewError(DefaultCodespace, CodeVoteResultsNotFound, "Vote results not found for "+fmt.Sprintf("%d", storyID))
 }

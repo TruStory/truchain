@@ -71,8 +71,10 @@ type Voter interface {
 	ID() int64
 	StoryID() int64
 	Amount() sdk.Coin
+	Weight() sdk.Int
 	Creator() sdk.AccAddress
 	VoteChoice() bool
+	FullVote() Vote
 	Timestamp() Timestamp
 }
 
@@ -83,6 +85,7 @@ type Vote struct {
 	StoryID   int64          `json:"story_id"`
 	Amount    sdk.Coin       `json:"amount"`
 	Argument  string         `json:"argument,omitempty"`
+	Weight    sdk.Int        `json:"weight"`
 	Creator   sdk.AccAddress `json:"creator"`
 	Vote      bool           `json:"vote"`
 	Timestamp Timestamp      `json:"timestamp"`
@@ -97,9 +100,10 @@ func NewVote(
 	id int64,
 	storyID int64,
 	amount sdk.Coin,
+	weight sdk.Int,
 	creator sdk.AccAddress,
 	vote bool,
 	timestamp Timestamp) Vote {
 
-	return Vote{id, storyID, amount, "", creator, vote, timestamp}
+	return Vote{id, storyID, amount, "", sdk.NewInt(0), creator, vote, timestamp}
 }

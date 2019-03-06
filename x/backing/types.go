@@ -30,6 +30,16 @@ func (b Backing) Creator() sdk.AccAddress {
 	return b.Vote.Creator
 }
 
+// Weight implements `Voter.Creator`
+func (b Backing) Weight() sdk.Int {
+	return b.Vote.Weight
+}
+
+// FullVote returns the vote for setter purposes
+func (b Backing) FullVote() app.Vote {
+	return b.Vote
+}
+
 // VoteChoice implements `Voter.VoteChoice`
 func (b Backing) VoteChoice() bool {
 	return b.Vote.Vote

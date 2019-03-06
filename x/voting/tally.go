@@ -2,6 +2,8 @@ package voting
 
 import (
 	app "github.com/TruStory/truchain/types"
+	"github.com/TruStory/truchain/x/backing"
+	"github.com/TruStory/truchain/x/challenge"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
@@ -51,7 +53,10 @@ func (k Keeper) tally(ctx sdk.Context, storyID int64) (votes poll, err sdk.Error
 
 // determine if a story is confirmed or rejected
 func (k Keeper) confirmStory(
-	ctx sdk.Context, votes poll, denom string) (confirmed bool, err sdk.Error) {
+	ctx sdk.Context, votes poll, denom string, storyID int64) (confirmed bool, err sdk.Error) {
+
+	logger := ctx.Logger().With("module", StoreKey)
+	logger.Info("Weighing votes ...")
 
 	// calculate weighted true votes
 	trueWeight, err := k.weightedVote(ctx, votes.trueVotes, denom)
@@ -69,6 +74,15 @@ func (k Keeper) confirmStory(
 	totalWeight := trueWeight.Add(falseWeight)
 	trueWeightDec := sdk.NewDecFromInt(trueWeight)
 	truePercentOfTotal := trueWeightDec.QuoInt(totalWeight)
+
+	voteResults := VoteResults{
+		ID:             storyID,
+		BackedCredTotal:  trueWeight,
+		ChallengedCredTotal: falseWeight,
+	}
+
+	logger.Info("Saving vote results ...")
+	k.set(ctx, voteResults)
 
 	// majority weight wins
 	if truePercentOfTotal.GTE(k.majorityPercent(ctx)) {
@@ -102,6 +116,21 @@ func (k Keeper) weightedVote(
 			// when there is a 0 cred balance so the vote
 			// is counted
 			credBalance = credBalance.Add(sdk.NewInt(1))
+		}
+
+		changedVote := vote.FullVote() // getter for the vote
+		changedVote.Weight = credBalance
+
+		switch vote.(type) {
+		case backing.Backing:
+			k.backingKeeper.UpdateVote(ctx, changedVote)
+			break
+		case challenge.Challenge:
+			k.challengeKeeper.UpdateVote(ctx, changedVote)
+			break
+		default:
+			k.voteKeeper.UpdateVote(ctx, changedVote)
+			break
 		}
 
 		weightedAmount = weightedAmount.Add(credBalance)

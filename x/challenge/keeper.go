@@ -47,6 +47,7 @@ type WriteKeeper interface {
 	Create(
 		ctx sdk.Context, storyID int64, amount sdk.Coin, argument string,
 		creator sdk.AccAddress) (int64, sdk.Error)
+	UpdateVote(ctx sdk.Context, vote app.Vote)
 	SetParams(ctx sdk.Context, params Params)
 }
 
@@ -125,6 +126,7 @@ func (k Keeper) Create(
 		StoryID:   storyID,
 		Amount:    amount,
 		Argument:  argument,
+		Weight:    sdk.NewInt(0),
 		Creator:   creator,
 		Vote:      false,
 		Timestamp: app.NewTimestamp(ctx.BlockHeader()),
@@ -312,4 +314,28 @@ func (k Keeper) ChallengeThreshold(ctx sdk.Context, storyID int64) (sdk.Coin, sd
 	}
 
 	return sdk.NewCoin(backingPool.Denom, challengeThresholdAmount), nil
+}
+
+// UpdateVote updates the challenge vote
+func (k Keeper) UpdateVote(ctx sdk.Context, vote app.Vote) {
+
+	newVote := app.Vote{
+		ID:        vote.ID,
+		StoryID:   vote.StoryID,
+		Amount:    vote.Amount,
+		Argument:  vote.Argument,
+		Weight:    vote.Weight,
+		Creator:   vote.Creator,
+		Vote:      vote.Vote,
+		Timestamp: vote.Timestamp.Update(ctx.BlockHeader()),
+	}
+
+	k.setChallenge(ctx, Challenge{newVote})
+}
+
+func (k Keeper) setChallenge(ctx sdk.Context, challenge Challenge) {
+	store := k.GetStore(ctx)
+	store.Set(
+		k.GetIDKey(challenge.ID()),
+		k.GetCodec().MustMarshalBinaryLengthPrefixed(challenge))
 }
