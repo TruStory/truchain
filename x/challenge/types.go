@@ -7,7 +7,7 @@ import (
 
 // Challenge defines a user's challenge on a story
 type Challenge struct {
-	app.Vote `json:"vote"`
+	*app.Vote `json:"vote"`
 }
 
 // ID implements `Voter`
@@ -36,9 +36,9 @@ func (c Challenge) Weight() sdk.Int {
 }
 
 // UpdateWeight returns the vote for setter purposes
-func (c *Challenge) UpdateWeight(credBalance sdk.Int) {
-	c.Vote.Weight = credBalance
-}
+// func (c *Challenge) UpdateWeight(credBalance sdk.Int) {
+// 	c.Vote.Weight = credBalance
+// }
 
 // VoteChoice implements `Voter`
 func (c Challenge) VoteChoice() bool {

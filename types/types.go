@@ -91,6 +91,10 @@ type Vote struct {
 	Timestamp Timestamp      `json:"timestamp"`
 }
 
+func (v *Vote) UpdateWeight(weight sdk.Int) {
+	v.Weight = weight
+}
+
 func (v Vote) String() string {
 	return fmt.Sprintf("Vote<%v %t>", v.Amount, v.Vote)
 }

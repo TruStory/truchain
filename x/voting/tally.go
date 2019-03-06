@@ -4,7 +4,7 @@ import (
 	app "github.com/TruStory/truchain/types"
 	"github.com/TruStory/truchain/x/backing"
 	"github.com/TruStory/truchain/x/challenge"
-	voteM "github.com/TruStory/truchain/x/vote"
+	truVote "github.com/TruStory/truchain/x/vote"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
@@ -104,12 +104,12 @@ func (k Keeper) weightedVote(
 
 	// iterate through BCVs
 	for _, vote := range votes {
-		v, ok := vote.(app.Voter)
-		if !ok {
-			return weightedAmount, ErrInvalidVote(v)
-		}
+		// v, ok := vote.(app.Voter)
+		// if !ok {
+		// 	return weightedAmount, ErrInvalidVote(v)
+		// }
 
-		user := k.accountKeeper.GetAccount(ctx, v.Creator())
+		user := k.accountKeeper.GetAccount(ctx, vote.Creator())
 		coins := user.GetCoins()
 		credBalance := coins.AmountOf(denom)
 		if credBalance.IsZero() {
@@ -121,16 +121,13 @@ func (k Keeper) weightedVote(
 
 		vote.UpdateWeight(credBalance)
 
-		switch vote.(type) {
+		switch v := vote.(type) {
 		case backing.Backing:
-			k.backingKeeper.Update(ctx, vote.(backing.Backing))
-			break
+			k.backingKeeper.Update(ctx, v)
 		case challenge.Challenge:
-			k.challengeKeeper.Update(ctx, vote.(challenge.Challenge))
-			break
-		default:
-			k.voteKeeper.Update(ctx, vote.(voteM.TokenVote))
-			break
+			k.challengeKeeper.Update(ctx, v)
+		case truVote.TokenVote:
+			k.voteKeeper.Update(ctx, v)
 		}
 
 		weightedAmount = weightedAmount.Add(credBalance)

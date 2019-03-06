@@ -160,7 +160,7 @@ func (k Keeper) Create(
 		Timestamp: app.NewTimestamp(ctx.BlockHeader()),
 	}
 
-	tokenVote := TokenVote{vote}
+	tokenVote := TokenVote{&vote}
 
 	// persist vote
 	k.set(ctx, tokenVote)
@@ -264,6 +264,16 @@ func (k Keeper) TotalVoteAmountByStoryID(ctx sdk.Context, storyID int64) (
 	return sdk.NewCoin(app.StakeDenom, totalAmount), nil
 }
 
+// Update updates the vote
+func (k Keeper) Update(ctx sdk.Context, vote TokenVote) {
+
+	newVote := TokenVote{
+		Vote: vote.Vote,
+	}
+
+	k.set(ctx, newVote)
+}
+
 // ============================================================================
 
 func (k Keeper) gameQueue(ctx sdk.Context) queue.Queue {
@@ -290,14 +300,4 @@ func (k Keeper) validateStoryState(ctx sdk.Context, storyID int64) sdk.Error {
 	}
 
 	return nil
-}
-
-// Update updates the vote
-func (k Keeper) Update(ctx sdk.Context, vote TokenVote) {
-
-	newVote := TokenVote{
-		Vote: vote.Vote,
-	}
-
-	k.set(ctx, newVote)
 }

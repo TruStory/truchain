@@ -7,7 +7,7 @@ import (
 
 // Backing type
 type Backing struct {
-	app.Vote `json:"vote"`
+	*app.Vote `json:"vote"`
 }
 
 // ID implements `Voter.ID`
@@ -35,10 +35,11 @@ func (b Backing) Weight() sdk.Int {
 	return b.Vote.Weight
 }
 
-// UpdateWeight returns the vote for setter purposes
-func (b *Backing) UpdateWeight(credBalance sdk.Int) {
-	b.Vote.Weight = credBalance
-}
+// UpdateWeight updates `Vote.Weight`
+// func (b *Backing) UpdateWeight(credBalance sdk.Int) {
+// 	// b.Vote.Weight = credBalance
+// 	b.UpdateWeight(credBalance)
+// }
 
 // VoteChoice implements `Voter.VoteChoice`
 func (b Backing) VoteChoice() bool {

@@ -138,7 +138,7 @@ func (k Keeper) Create(
 	}
 
 	backing := Backing{
-		Vote: vote,
+		Vote: &vote,
 	}
 	k.setBacking(ctx, backing)
 

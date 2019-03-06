@@ -6,6 +6,7 @@ import (
 
 	app "github.com/TruStory/truchain/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/davecgh/go-spew/spew"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -44,6 +45,7 @@ func TestToggleVote(t *testing.T) {
 
 	bk.ToggleVote(ctx, backingID)
 	b, _ := bk.Backing(ctx, backingID)
+	spew.Dump(b)
 	assert.False(t, b.VoteChoice())
 }
 

@@ -133,7 +133,7 @@ func (k Keeper) Create(
 	}
 
 	// create new challenge with embedded vote
-	challenge := Challenge{vote}
+	challenge := Challenge{&vote}
 
 	// persist challenge
 	k.GetStore(ctx).Set(

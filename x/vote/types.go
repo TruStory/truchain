@@ -7,7 +7,7 @@ import (
 
 // TokenVote defines a simple token vote on a story
 type TokenVote struct {
-	app.Vote `json:"vote"`
+	*app.Vote `json:"vote"`
 }
 
 // ID implements `Voter`
@@ -36,9 +36,9 @@ func (v TokenVote) Weight() sdk.Int {
 }
 
 // UpdateWeight returns the vote for setter purposes
-func (v *TokenVote) UpdateWeight(credBalance sdk.Int) {
-	v.Vote.Weight = credBalance
-}
+// func (v *TokenVote) UpdateWeight(credBalance sdk.Int) {
+// 	v.Vote.Weight = credBalance
+// }
 
 // VoteChoice implements `Voter`
 func (v TokenVote) VoteChoice() bool {
