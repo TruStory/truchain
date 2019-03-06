@@ -178,7 +178,7 @@ func TestCreateVote_ErrBelowMinStake(t *testing.T) {
 func TestUpdateVote_AddWeightOnTally(t *testing.T) {
 	ctx, k, ck := mockDB()
 
-	storyID := createFakeStory(ctx, k.storyKeeper, ck)
+	storyID := createFakeStory(ctx, k.storyKeeper, ck, 0)
 	amount := sdk.NewCoin(app.StakeDenom, sdk.NewInt(15000000000))
 	comment := "test comment is long enough"
 	creator := sdk.AccAddress([]byte{1, 2})
@@ -196,10 +196,9 @@ func TestUpdateVote_AddWeightOnTally(t *testing.T) {
 	vote, _ := k.TokenVotesByStoryIDAndCreator(ctx, storyID, creator)
 	assert.Equal(t, int64(1), vote.ID())
 
-	fullVote := vote.FullVote()
-	fullVote.Weight = sdk.NewInt(1000000000) // Cred balance of 1 Shanev for User
+	vote.UpdateWeight(sdk.NewInt(1000000000))
 
-	k.UpdateVote(ctx, fullVote)
+	k.Update(ctx, vote)
 	updatedVote, _ := k.TokenVotesByStoryIDAndCreator(ctx, storyID, creator)
 	assert.Equal(t, int64(1), updatedVote.ID())
 

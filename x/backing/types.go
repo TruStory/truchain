@@ -36,7 +36,7 @@ func (b Backing) Weight() sdk.Int {
 }
 
 // UpdateWeight returns the vote for setter purposes
-func (b Backing) UpdateWeight(credBalance sdk.Int) {
+func (b *Backing) UpdateWeight(credBalance sdk.Int) {
 	b.Vote.Weight = credBalance
 }
 
