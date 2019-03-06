@@ -8,7 +8,7 @@ import (
 
 // EndBlock is called at the end of every block tick
 func (k Keeper) EndBlock(ctx sdk.Context) sdk.Tags {
-	err := k.processVotingStoryQueue(ctx)
+	err := k.processChallengedStoryQueue(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -17,15 +17,15 @@ func (k Keeper) EndBlock(ctx sdk.Context) sdk.Tags {
 }
 
 // Recursively process voting story queue to see if voting has ended
-func (k Keeper) processVotingStoryQueue(ctx sdk.Context) sdk.Error {
-	votingStoryQueue := k.votingStoryQueue(ctx)
+func (k Keeper) processChallengedStoryQueue(ctx sdk.Context) sdk.Error {
+	challengedStoryQueue := k.challengedStoryQueue(ctx)
 
-	if votingStoryQueue.IsEmpty() {
+	if challengedStoryQueue.IsEmpty() {
 		return nil
 	}
 
 	var storyID int64
-	peekErr := votingStoryQueue.Peek(&storyID)
+	peekErr := challengedStoryQueue.Peek(&storyID)
 	if peekErr != nil {
 		panic(peekErr)
 	}
@@ -42,7 +42,7 @@ func (k Keeper) processVotingStoryQueue(ctx sdk.Context) sdk.Error {
 	}
 
 	// only left with voting ended stories
-	votingStoryQueue.Pop()
+	challengedStoryQueue.Pop()
 
 	err = k.verifyStory(ctx, storyID)
 	if err != nil {
@@ -50,7 +50,7 @@ func (k Keeper) processVotingStoryQueue(ctx sdk.Context) sdk.Error {
 	}
 
 	// process next story
-	return k.processVotingStoryQueue(ctx)
+	return k.processChallengedStoryQueue(ctx)
 }
 
 // tally votes and distribute rewards

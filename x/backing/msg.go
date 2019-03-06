@@ -51,7 +51,7 @@ func (msg BackStoryMsg) ValidateBasic() sdk.Error {
 		return sdk.ErrInvalidAddress("Invalid address: " + msg.Creator.String())
 	}
 	if msg.Amount.IsZero() == true {
-		return sdk.ErrInsufficientFunds("Invalid backing amount" + msg.Amount.String())
+		return sdk.ErrInsufficientFunds("Invalid backing amount: " + msg.Amount.String())
 	}
 
 	return nil

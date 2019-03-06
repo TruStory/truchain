@@ -19,22 +19,22 @@ func TestNewResponseEndBlock(t *testing.T) {
 func Test_processStoryQueue(t *testing.T) {
 	ctx, storyKeeper := fakeStories()
 
-	q := storyKeeper.storyQueue(ctx)
+	q := storyKeeper.pendingStoryQueue(ctx)
 	assert.Equal(t, uint64(3), q.List.Len())
 
-	err := storyKeeper.processStoryQueue(ctx, q)
+	err := storyKeeper.processPendingStoryQueue(ctx, q)
 	assert.Nil(t, err)
 
 	story, _ := storyKeeper.Story(ctx, 5)
-	assert.Equal(t, Pending, story.State)
+	assert.Equal(t, Pending, story.Status)
 
 	// fake a future block time to expire story
 	expiredTime := time.Now().Add(DefaultParams().ExpireDuration)
 	ctx = ctx.WithBlockHeader(abci.Header{Time: expiredTime})
 
-	err = storyKeeper.processStoryQueue(ctx, q)
+	err = storyKeeper.processPendingStoryQueue(ctx, q)
 	assert.Nil(t, err)
 
 	story, _ = storyKeeper.Story(ctx, 3)
-	assert.Equal(t, Expired, story.State)
+	assert.Equal(t, Expired, story.Status)
 }

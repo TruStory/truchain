@@ -9,7 +9,7 @@ import (
 
 // EndBlock is called at the end of every block tick
 func (k Keeper) EndBlock(ctx sdk.Context) sdk.Tags {
-	err := k.processStoryQueue(ctx, k.storyQueue(ctx))
+	err := k.processPendingStoryQueue(ctx, k.pendingStoryQueue(ctx))
 	if err != nil {
 		panic(err)
 	}
@@ -19,18 +19,18 @@ func (k Keeper) EndBlock(ctx sdk.Context) sdk.Tags {
 
 // ============================================================================
 
-// processStoryQueue checks to see if a story has expired. It checks the state of
+// processPendingStoryQueue checks to see if a story has expired. It checks the state of
 // a story, and pushes it's id to the appropriate queue (voting or expired) to
 // be handled later in another end blocker.
-func (k Keeper) processStoryQueue(ctx sdk.Context, storyQueue queue.Queue) sdk.Error {
+func (k Keeper) processPendingStoryQueue(ctx sdk.Context, pendingStoryQueue queue.Queue) sdk.Error {
 	logger := ctx.Logger().With("module", "story")
 
-	if storyQueue.IsEmpty() {
+	if pendingStoryQueue.IsEmpty() {
 		return nil
 	}
 
 	var storyID int64
-	if err := storyQueue.Peek(&storyID); err != nil {
+	if err := pendingStoryQueue.Peek(&storyID); err != nil {
 		panic(err)
 	}
 
@@ -41,15 +41,15 @@ func (k Keeper) processStoryQueue(ctx sdk.Context, storyQueue queue.Queue) sdk.E
 
 	logger.Info("Processing " + story.String())
 
-	// if the state of the story has changed to challenged,
+	// if the status of the story has changed to challenged,
 	// add it to the voting story queue to be handled later
-	if story.State == Challenged {
+	if story.Status == Challenged {
 		logger.Info("Voting begun for " + story.String())
-		k.votingStoryQueue(ctx).Push(storyID)
+		k.challengedStoryQueue(ctx).Push(storyID)
 
 		// pop and process next story
-		storyQueue.Pop()
-		return k.processStoryQueue(ctx, storyQueue)
+		pendingStoryQueue.Pop()
+		return k.processPendingStoryQueue(ctx, pendingStoryQueue)
 	}
 
 	if ctx.BlockHeader().Time.Before(story.ExpireTime) {
@@ -60,15 +60,15 @@ func (k Keeper) processStoryQueue(ctx sdk.Context, storyQueue queue.Queue) sdk.E
 
 	logger.Info(fmt.Sprintf("Handling expired: %d", story.ID))
 
-	storyQueue.Pop()
-	story.State = Expired
+	pendingStoryQueue.Pop()
+	story.Status = Expired
 	k.UpdateStory(ctx, story)
 
 	// Push to the expired story queue, which gets handled in
 	// the expiration module. At the end of each block, rewards
 	// are distributed to backers, and challengers are returned funds.
-	k.expiredStoryQueue(ctx).Push(storyID)
+	k.expiringStoryQueue(ctx).Push(storyID)
 
 	// check next story
-	return k.processStoryQueue(ctx, storyQueue)
+	return k.processPendingStoryQueue(ctx, pendingStoryQueue)
 }

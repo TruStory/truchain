@@ -24,22 +24,22 @@ func (k Keeper) EndBlock(ctx sdk.Context) sdk.Tags {
 func (k Keeper) processExpiredStoryQueue(ctx sdk.Context) sdk.Error {
 	logger := ctx.Logger().With("module", "expiration")
 
-	expiredStoryQueue := k.expiredStoryQueue(ctx)
+	expiringStoryQueue := k.expiringStoryQueue(ctx)
 
-	if expiredStoryQueue.IsEmpty() {
+	if expiringStoryQueue.IsEmpty() {
 		// done processing all expired stories
 		// terminate
 		return nil
 	}
 
 	var storyID int64
-	if err := expiredStoryQueue.Peek(&storyID); err != nil {
+	if err := expiringStoryQueue.Peek(&storyID); err != nil {
 		panic(err)
 	}
 
 	logger.Info(fmt.Sprintf("Handling expired story id: %d", storyID))
 
-	expiredStoryQueue.Pop()
+	expiringStoryQueue.Pop()
 
 	var votes []app.Voter
 

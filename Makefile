@@ -14,7 +14,7 @@ benchmark:
 
 buidl: build
 
-build: build_cli build_daemon
+build: build_daemon
 
 build_cli:
 	go build -o bin/trucli cmd/trucli/main.go
@@ -25,6 +25,9 @@ build_daemon:
 doc:
 	@echo "--> Wait a few seconds and visit http://localhost:6060/pkg/github.com/TruStory/truchain/"
 	godoc -http=:6060
+
+init:
+	bin/truchaind --home $(CHAIN_DIR) init
 
 reset:
 	bin/truchaind --home $(CHAIN_DIR) unsafe-reset-all

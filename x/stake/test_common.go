@@ -21,9 +21,9 @@ func mockDB() (sdk.Context, Keeper) {
 
 	accKey := sdk.NewKVStoreKey(auth.StoreKey)
 	storyKey := sdk.NewKVStoreKey(story.StoreKey)
-	storyQueueKey := sdk.NewKVStoreKey(story.QueueStoreKey)
-	expiredStoryQueueKey := sdk.NewKVStoreKey(story.ExpiredQueueStoreKey)
-	votingStoryQueueKey := sdk.NewKVStoreKey(story.VotingQueueStoreKey)
+	storyQueueKey := sdk.NewKVStoreKey(story.PendingQueueStoreKey)
+	expiredStoryQueueKey := sdk.NewKVStoreKey(story.ExpiringQueueStoreKey)
+	votingStoryQueueKey := sdk.NewKVStoreKey(story.ChallengedQueueStoreKey)
 	catKey := sdk.NewKVStoreKey(category.StoreKey)
 	paramsKey := sdk.NewKVStoreKey(params.StoreKey)
 	transientParamsKey := sdk.NewTransientStoreKey(params.TStoreKey)

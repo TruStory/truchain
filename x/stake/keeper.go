@@ -95,8 +95,8 @@ func (k Keeper) ValidateStoryState(ctx sdk.Context, storyID int64) sdk.Error {
 		return err
 	}
 
-	if s.State != story.Pending {
-		return ErrInvalidStoryState(s.State.String())
+	if s.Status != story.Pending {
+		return ErrInvalidStoryState(s.Status.String())
 	}
 
 	return nil
