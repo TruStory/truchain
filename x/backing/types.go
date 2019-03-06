@@ -1,6 +1,8 @@
 package backing
 
 import (
+	"fmt"
+
 	app "github.com/TruStory/truchain/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
@@ -43,4 +45,8 @@ func (b Backing) VoteChoice() bool {
 // Timestamp implements `Voter.Timestamp`
 func (b Backing) Timestamp() app.Timestamp {
 	return b.Vote.Timestamp
+}
+
+func (b Backing) String() string {
+	return fmt.Sprintf("Backing<%s>", b.Vote.String())
 }
