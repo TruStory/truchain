@@ -5,6 +5,8 @@ import (
 	"net/http"
 	"net/url"
 
+	"github.com/TruStory/truchain/x/voting"
+
 	app "github.com/TruStory/truchain/types"
 	"github.com/TruStory/truchain/x/backing"
 	"github.com/TruStory/truchain/x/category"
@@ -79,18 +81,22 @@ func (ta *TruAPI) RegisterResolvers() {
 		return ta.backingsResolver(ctx, app.QueryByIDParams{ID: storyID})
 	}
 
-	getChallenges := func(ctx context.Context, gameID int64) []challenge.Challenge {
-		return ta.challengesResolver(ctx, app.QueryByIDParams{ID: gameID})
+	getChallenges := func(ctx context.Context, storyID int64) []challenge.Challenge {
+		return ta.challengesResolver(ctx, app.QueryByIDParams{ID: storyID})
 	}
 
-	getVotes := func(ctx context.Context, gameID int64) []vote.TokenVote {
-		return ta.votesResolver(ctx, app.QueryByIDParams{ID: gameID})
+	getVotes := func(ctx context.Context, storyID int64) []vote.TokenVote {
+		return ta.votesResolver(ctx, app.QueryByIDParams{ID: storyID})
+	}
+	getVoteResults := func(ctx context.Context, storyID int64) voting.VoteResult {
+		return ta.voteResultsResolver(ctx, app.QueryByIDParams{ID: storyID})
 	}
 
 	ta.GraphQLClient.RegisterQueryResolver("backing", ta.backingResolver)
 	ta.GraphQLClient.RegisterObjectResolver("Backing", backing.Backing{}, map[string]interface{}{
 		"amount":    func(ctx context.Context, q backing.Backing) sdk.Coin { return q.Amount() },
 		"argument":  func(ctx context.Context, q backing.Backing) string { return q.Argument },
+		"weight":    func(ctx context.Context, q backing.Backing) string { return q.Weight().String() },
 		"vote":      func(ctx context.Context, q backing.Backing) bool { return q.VoteChoice() },
 		"creator":   func(ctx context.Context, q backing.Backing) users.User { return getUser(ctx, q.Creator()) },
 		"timestamp": func(ctx context.Context, q backing.Backing) app.Timestamp { return q.Timestamp() },
@@ -110,6 +116,7 @@ func (ta *TruAPI) RegisterResolvers() {
 	ta.GraphQLClient.RegisterObjectResolver("Challenge", challenge.Challenge{}, map[string]interface{}{
 		"amount":    func(ctx context.Context, q challenge.Challenge) sdk.Coin { return q.Amount() },
 		"argument":  func(ctx context.Context, q challenge.Challenge) string { return q.Argument },
+		"weight":    func(ctx context.Context, q challenge.Challenge) string { return q.Weight().String() },
 		"vote":      func(ctx context.Context, q challenge.Challenge) bool { return q.VoteChoice() },
 		"creator":   func(ctx context.Context, q challenge.Challenge) users.User { return getUser(ctx, q.Creator()) },
 		"timestamp": func(ctx context.Context, q challenge.Challenge) app.Timestamp { return q.Timestamp() },
@@ -171,9 +178,13 @@ func (ta *TruAPI) RegisterResolvers() {
 		"creator":            func(ctx context.Context, q story.Story) users.User { return getUser(ctx, q.Creator) },
 		"source":             func(ctx context.Context, q story.Story) string { return q.Source.String() },
 		"votes":              func(ctx context.Context, q story.Story) []vote.TokenVote { return getVotes(ctx, q.ID) },
+		"voteResults":        func(ctx context.Context, q story.Story) voting.VoteResult { return getVoteResults(ctx, q.ID) },
+		"state":              func(ctx context.Context, q story.Story) story.Status { return q.Status },
+	})
 
-		// Deprecated: replaced by "status"
-		"state": func(ctx context.Context, q story.Story) story.Status { return q.Status },
+	ta.GraphQLClient.RegisterObjectResolver("voteResults", voting.VoteResult{}, map[string]interface{}{
+		"backedCredTotal":     func(_ context.Context, q voting.VoteResult) string { return q.BackedCredTotal.String() },
+		"challengedCredTotal": func(_ context.Context, q voting.VoteResult) string { return q.ChallengedCredTotal.String() },
 	})
 
 	ta.GraphQLClient.RegisterObjectResolver("TwitterProfile", db.TwitterProfile{}, map[string]interface{}{
@@ -197,6 +208,7 @@ func (ta *TruAPI) RegisterResolvers() {
 		"amount":    func(ctx context.Context, q vote.TokenVote) sdk.Coin { return q.Amount() },
 		"argument":  func(ctx context.Context, q vote.TokenVote) string { return q.Argument },
 		"vote":      func(ctx context.Context, q vote.TokenVote) bool { return q.VoteChoice() },
+		"weight":    func(ctx context.Context, q vote.TokenVote) string { return q.Weight().String() },
 		"creator":   func(ctx context.Context, q vote.TokenVote) users.User { return getUser(ctx, q.Creator()) },
 		"timestamp": func(ctx context.Context, q vote.TokenVote) app.Timestamp { return q.Timestamp() },
 	})

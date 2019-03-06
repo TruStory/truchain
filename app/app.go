@@ -281,7 +281,8 @@ func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *T
 		AddRoute(backing.QueryPath, backing.NewQuerier(app.backingKeeper)).
 		AddRoute(challenge.QueryPath, challenge.NewQuerier(app.challengeKeeper)).
 		AddRoute(vote.QueryPath, vote.NewQuerier(app.voteKeeper)).
-		AddRoute(clientParams.QueryPath, clientParams.NewQuerier(app.clientParamsKeeper))
+		AddRoute(clientParams.QueryPath, clientParams.NewQuerier(app.clientParamsKeeper)).
+		AddRoute(voting.QueryPath, voting.NewQuerier(app.votingKeeper))
 
 	// The initChainer handles translating the genesis.json file into initial state for the network
 	app.SetInitChainer(app.initChainer)

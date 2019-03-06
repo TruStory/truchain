@@ -2,6 +2,9 @@ package voting
 
 import (
 	app "github.com/TruStory/truchain/types"
+	"github.com/TruStory/truchain/x/backing"
+	"github.com/TruStory/truchain/x/challenge"
+	truVote "github.com/TruStory/truchain/x/vote"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
@@ -51,7 +54,10 @@ func (k Keeper) tally(ctx sdk.Context, storyID int64) (votes poll, err sdk.Error
 
 // determine if a story is confirmed or rejected
 func (k Keeper) confirmStory(
-	ctx sdk.Context, votes poll, denom string) (confirmed bool, err sdk.Error) {
+	ctx sdk.Context, votes poll, denom string, storyID int64) (confirmed bool, err sdk.Error) {
+
+	logger := ctx.Logger().With("module", StoreKey)
+	logger.Info("Weighing votes ...")
 
 	// calculate weighted true votes
 	trueWeight, err := k.weightedVote(ctx, votes.trueVotes, denom)
@@ -69,6 +75,15 @@ func (k Keeper) confirmStory(
 	totalWeight := trueWeight.Add(falseWeight)
 	trueWeightDec := sdk.NewDecFromInt(trueWeight)
 	truePercentOfTotal := trueWeightDec.QuoInt(totalWeight)
+
+	voteResult := VoteResult{
+		ID:                  storyID,
+		BackedCredTotal:     trueWeight,
+		ChallengedCredTotal: falseWeight,
+	}
+
+	logger.Info("Saving vote results ...")
+	k.set(ctx, voteResult)
 
 	// majority weight wins
 	if truePercentOfTotal.GTE(k.majorityPercent(ctx)) {
@@ -89,12 +104,7 @@ func (k Keeper) weightedVote(
 
 	// iterate through BCVs
 	for _, vote := range votes {
-		v, ok := vote.(app.Voter)
-		if !ok {
-			return weightedAmount, ErrInvalidVote(v)
-		}
-
-		user := k.accountKeeper.GetAccount(ctx, v.Creator())
+		user := k.accountKeeper.GetAccount(ctx, vote.Creator())
 		coins := user.GetCoins()
 		credBalance := coins.AmountOf(denom)
 		if credBalance.IsZero() {
@@ -102,6 +112,17 @@ func (k Keeper) weightedVote(
 			// when there is a 0 cred balance so the vote
 			// is counted
 			credBalance = credBalance.Add(sdk.NewInt(1))
+		}
+
+		vote.UpdateWeight(credBalance)
+
+		switch v := vote.(type) {
+		case backing.Backing:
+			k.backingKeeper.Update(ctx, v)
+		case challenge.Challenge:
+			k.challengeKeeper.Update(ctx, v)
+		case truVote.TokenVote:
+			k.voteKeeper.Update(ctx, v)
 		}
 
 		weightedAmount = weightedAmount.Add(credBalance)

@@ -9,7 +9,7 @@ import (
 
 // Challenge defines a user's challenge on a story
 type Challenge struct {
-	app.Vote `json:"vote"`
+	*app.Vote `json:"vote"`
 }
 
 // ID implements `Voter`
@@ -30,6 +30,11 @@ func (c Challenge) Amount() sdk.Coin {
 // Creator implements `Voter`
 func (c Challenge) Creator() sdk.AccAddress {
 	return c.Vote.Creator
+}
+
+// Weight returns the challenge vote weight for that vote
+func (c Challenge) Weight() sdk.Int {
+	return c.Vote.Weight
 }
 
 // VoteChoice implements `Voter`

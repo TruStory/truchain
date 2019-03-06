@@ -7,6 +7,8 @@ import (
 	"path"
 	"sort"
 
+	"github.com/TruStory/truchain/x/voting"
+
 	app "github.com/TruStory/truchain/types"
 	"github.com/TruStory/truchain/x/backing"
 	"github.com/TruStory/truchain/x/category"
@@ -360,4 +362,24 @@ func (ta *TruAPI) votesResolver(
 	}
 
 	return *tokenVotes
+}
+
+func (ta *TruAPI) voteResultsResolver(
+	_ context.Context, q app.QueryByIDParams) voting.VoteResult {
+
+	res := ta.RunQuery(
+		path.Join(voting.QueryPath, voting.QueryVoteResultsByStoryID), q)
+
+	if res.Code != 0 {
+		fmt.Println("Resolver err: ", res)
+		return voting.VoteResult{}
+	}
+
+	voteResult := new(voting.VoteResult)
+	err := json.Unmarshal(res.Value, voteResult)
+	if err != nil {
+		panic(err)
+	}
+
+	return *voteResult
 }

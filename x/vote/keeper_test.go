@@ -174,3 +174,33 @@ func TestCreateVote_ErrBelowMinStake(t *testing.T) {
 	assert.NotNil(t, err)
 	assert.Equal(t, sdk.ErrInsufficientFunds("Below minimum stake.").Code(), err.Code())
 }
+
+func TestUpdateVote_AddWeightOnTally(t *testing.T) {
+	ctx, k, ck := mockDB()
+
+	storyID := createFakeStory(ctx, k.storyKeeper, ck, 0)
+	amount := sdk.NewCoin(app.StakeDenom, sdk.NewInt(15000000000))
+	comment := "test comment is long enough"
+	creator := sdk.AccAddress([]byte{1, 2})
+
+	// give user some funds
+	k.bankKeeper.AddCoins(ctx, creator, sdk.Coins{amount.Plus(amount)})
+
+	argument := "test argument"
+	_, err := k.challengeKeeper.Create(ctx, storyID, amount, argument, creator)
+	assert.Nil(t, err)
+
+	_, err1 := k.Create(ctx, storyID, amount, true, comment, creator)
+	assert.Nil(t, err1)
+
+	vote, _ := k.TokenVotesByStoryIDAndCreator(ctx, storyID, creator)
+	assert.Equal(t, int64(1), vote.ID())
+
+	vote.UpdateWeight(sdk.NewInt(1000000000))
+
+	k.Update(ctx, vote)
+	updatedVote, _ := k.TokenVotesByStoryIDAndCreator(ctx, storyID, creator)
+	assert.Equal(t, int64(1), updatedVote.ID())
+
+	assert.Equal(t, updatedVote.Weight().String(), "1000000000")
+}

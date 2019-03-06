@@ -33,7 +33,6 @@ type ReadKeeper interface {
 		trueVotes []TokenVote, falseVotes []TokenVote, err sdk.Error)
 
 	TokenVote(ctx sdk.Context, id int64) (vote TokenVote, err sdk.Error)
-
 	TokenVotesByStoryID(ctx sdk.Context, storyID int64) ([]TokenVote, sdk.Error)
 
 	TokenVotesByStoryIDAndCreator(
@@ -52,6 +51,7 @@ type WriteKeeper interface {
 	Create(
 		ctx sdk.Context, storyID int64, amount sdk.Coin,
 		choice bool, argument string, creator sdk.AccAddress) (int64, sdk.Error)
+	Update(ctx sdk.Context, vote TokenVote)
 	SetParams(ctx sdk.Context, params Params)
 }
 
@@ -154,12 +154,13 @@ func (k Keeper) Create(
 		ID:        k.GetNextID(ctx),
 		Amount:    amount,
 		Argument:  argument,
+		Weight:    sdk.NewInt(0),
 		Creator:   creator,
 		Vote:      choice,
 		Timestamp: app.NewTimestamp(ctx.BlockHeader()),
 	}
 
-	tokenVote := TokenVote{vote}
+	tokenVote := TokenVote{&vote}
 
 	// persist vote
 	k.set(ctx, tokenVote)
@@ -261,6 +262,16 @@ func (k Keeper) TotalVoteAmountByStoryID(ctx sdk.Context, storyID int64) (
 	}
 
 	return sdk.NewCoin(app.StakeDenom, totalAmount), nil
+}
+
+// Update updates the vote
+func (k Keeper) Update(ctx sdk.Context, vote TokenVote) {
+
+	newVote := TokenVote{
+		Vote: vote.Vote,
+	}
+
+	k.set(ctx, newVote)
 }
 
 // ============================================================================

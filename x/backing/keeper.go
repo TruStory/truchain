@@ -52,8 +52,6 @@ type WriteKeeper interface {
 		creator sdk.AccAddress) (int64, sdk.Error)
 
 	Update(ctx sdk.Context, backing Backing)
-
-	ToggleVote(ctx sdk.Context, backingID int64) (int64, sdk.Error)
 }
 
 // Keeper data type storing keys to the key-value store
@@ -132,13 +130,14 @@ func (k Keeper) Create(
 		StoryID:   storyID,
 		Amount:    amount,
 		Argument:  argument,
+		Weight:    sdk.NewInt(0),
 		Creator:   creator,
 		Vote:      true,
 		Timestamp: app.NewTimestamp(ctx.BlockHeader()),
 	}
 
 	backing := Backing{
-		Vote: vote,
+		Vote: &vote,
 	}
 	k.setBacking(ctx, backing)
 
@@ -158,19 +157,6 @@ func (k Keeper) Update(ctx sdk.Context, backing Backing) {
 	}
 
 	k.setBacking(ctx, newBacking)
-}
-
-// ToggleVote changes a true vote to false and vice versa
-func (k Keeper) ToggleVote(ctx sdk.Context, backingID int64) (int64, sdk.Error) {
-	backing, err := k.Backing(ctx, backingID)
-	if err != nil {
-		return 0, err
-	}
-
-	backing.Vote.Vote = !backing.VoteChoice()
-	k.Update(ctx, backing)
-
-	return backingID, nil
 }
 
 // Backing gets the backing at the current index from the KVStore

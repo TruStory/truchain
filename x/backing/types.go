@@ -9,7 +9,7 @@ import (
 
 // Backing type
 type Backing struct {
-	app.Vote `json:"vote"`
+	*app.Vote `json:"vote"`
 }
 
 // ID implements `Voter.ID`
@@ -30,6 +30,11 @@ func (b Backing) Amount() sdk.Coin {
 // Creator implements `Voter.Creator`
 func (b Backing) Creator() sdk.AccAddress {
 	return b.Vote.Creator
+}
+
+// Weight implements `Voter.Weight`
+func (b Backing) Weight() sdk.Int {
+	return b.Vote.Weight
 }
 
 // VoteChoice implements `Voter.VoteChoice`
