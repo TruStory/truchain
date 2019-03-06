@@ -12,9 +12,10 @@ type poll struct {
 	falseVotes []app.Voter
 }
 
-// VoteResults are the vote results for a story
-type VoteResults struct {
-	ID                  int64         `json:"id"` // StoryID
+// VoteResult are the vote results for a story
+type VoteResult struct {
+	// Here the ID is actually the StoryID
+	ID                  int64         `json:"id"`
 	BackedCredTotal     sdk.Int       `json:"backed_cred_total"`
 	ChallengedCredTotal sdk.Int       `json:"challenged_cred_total"`
 	Timestamp           app.Timestamp `json:"timestamp"`

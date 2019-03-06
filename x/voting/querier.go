@@ -38,10 +38,10 @@ func queryVoteResultsByStoryID(
 		return
 	}
 
-	voteResults, sdkErr := k.GetVoteResultsByStoryID(ctx, params.ID)
+	voteResult, sdkErr := k.GetVoteResultsByStoryID(ctx, params.ID)
 	if sdkErr != nil {
 		return
 	}
 
-	return app.MustMarshal(voteResults), nil
+	return app.MustMarshal(voteResult), nil
 }

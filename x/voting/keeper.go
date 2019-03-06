@@ -29,7 +29,7 @@ type ReadKeeper interface {
 	app.ReadKeeper
 
 	GetParams(ctx sdk.Context) Params
-	GetVoteResultsByStoryID(ctx sdk.Context, storyID int64) (results VoteResults, err sdk.Error)
+	GetVoteResultsByStoryID(ctx sdk.Context, storyID int64) (results VoteResult, err sdk.Error)
 }
 
 // WriteKeeper defines a module interface that facilities write only access to truchain data
@@ -93,7 +93,7 @@ func (k Keeper) challengedStoryQueue(ctx sdk.Context) list.Queue {
 }
 
 // saves a `Vote` in the KVStore
-func (k Keeper) set(ctx sdk.Context, results VoteResults) {
+func (k Keeper) set(ctx sdk.Context, results VoteResult) {
 	store := k.GetStore(ctx)
 	store.Set(
 		k.GetIDKey(results.ID),
@@ -102,7 +102,7 @@ func (k Keeper) set(ctx sdk.Context, results VoteResults) {
 
 // GetVoteResultsByStoryID gets the vote results for a story by a storyID
 func (k Keeper) GetVoteResultsByStoryID(
-	ctx sdk.Context, storyID int64) (results VoteResults, err sdk.Error) {
+	ctx sdk.Context, storyID int64) (results VoteResult, err sdk.Error) {
 
 	store := k.GetStore(ctx)
 	val := store.Get(k.GetIDKey(storyID))

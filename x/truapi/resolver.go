@@ -365,21 +365,21 @@ func (ta *TruAPI) votesResolver(
 }
 
 func (ta *TruAPI) voteResultsResolver(
-	_ context.Context, q app.QueryByIDParams) voting.VoteResults {
+	_ context.Context, q app.QueryByIDParams) voting.VoteResult {
 
 	res := ta.RunQuery(
 		path.Join(voting.QueryPath, voting.QueryVoteResultsByStoryID), q)
 
 	if res.Code != 0 {
 		fmt.Println("Resolver err: ", res)
-		return voting.VoteResults{}
+		return voting.VoteResult{}
 	}
 
-	voteResults := new(voting.VoteResults)
-	err := json.Unmarshal(res.Value, voteResults)
+	voteResult := new(voting.VoteResult)
+	err := json.Unmarshal(res.Value, voteResult)
 	if err != nil {
 		panic(err)
 	}
 
-	return *voteResults
+	return *voteResult
 }

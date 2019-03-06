@@ -76,14 +76,14 @@ func (k Keeper) confirmStory(
 	trueWeightDec := sdk.NewDecFromInt(trueWeight)
 	truePercentOfTotal := trueWeightDec.QuoInt(totalWeight)
 
-	voteResults := VoteResults{
+	voteResult := VoteResult{
 		ID:                  storyID,
 		BackedCredTotal:     trueWeight,
 		ChallengedCredTotal: falseWeight,
 	}
 
 	logger.Info("Saving vote results ...")
-	k.set(ctx, voteResults)
+	k.set(ctx, voteResult)
 
 	// majority weight wins
 	if truePercentOfTotal.GTE(k.majorityPercent(ctx)) {

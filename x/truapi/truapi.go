@@ -88,7 +88,7 @@ func (ta *TruAPI) RegisterResolvers() {
 	getVotes := func(ctx context.Context, storyID int64) []vote.TokenVote {
 		return ta.votesResolver(ctx, app.QueryByIDParams{ID: storyID})
 	}
-	getVoteResults := func(ctx context.Context, storyID int64) voting.VoteResults {
+	getVoteResults := func(ctx context.Context, storyID int64) voting.VoteResult {
 		return ta.voteResultsResolver(ctx, app.QueryByIDParams{ID: storyID})
 	}
 
@@ -178,13 +178,13 @@ func (ta *TruAPI) RegisterResolvers() {
 		"creator":            func(ctx context.Context, q story.Story) users.User { return getUser(ctx, q.Creator) },
 		"source":             func(ctx context.Context, q story.Story) string { return q.Source.String() },
 		"votes":              func(ctx context.Context, q story.Story) []vote.TokenVote { return getVotes(ctx, q.ID) },
-		"voteResults":        func(ctx context.Context, q story.Story) voting.VoteResults { return getVoteResults(ctx, q.ID) },
-    "state": func(ctx context.Context, q story.Story) story.Status { return q.Status },
+		"voteResults":        func(ctx context.Context, q story.Story) voting.VoteResult { return getVoteResults(ctx, q.ID) },
+		"state":              func(ctx context.Context, q story.Story) story.Status { return q.Status },
 	})
 
-	ta.GraphQLClient.RegisterObjectResolver("voteResults", voting.VoteResults{}, map[string]interface{}{
-		"backedCredTotal":     func(_ context.Context, q voting.VoteResults) string { return q.BackedCredTotal.String() },
-		"challengedCredTotal": func(_ context.Context, q voting.VoteResults) string { return q.ChallengedCredTotal.String() },
+	ta.GraphQLClient.RegisterObjectResolver("voteResults", voting.VoteResult{}, map[string]interface{}{
+		"backedCredTotal":     func(_ context.Context, q voting.VoteResult) string { return q.BackedCredTotal.String() },
+		"challengedCredTotal": func(_ context.Context, q voting.VoteResult) string { return q.ChallengedCredTotal.String() },
 	})
 
 	ta.GraphQLClient.RegisterObjectResolver("TwitterProfile", db.TwitterProfile{}, map[string]interface{}{
