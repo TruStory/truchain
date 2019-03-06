@@ -24,6 +24,16 @@ func TestDistributeRewards(t *testing.T) {
 	assert.Nil(t, err)
 }
 
+func TestDistributeRewardsNoStakers(t *testing.T) {
+	ctx, votes, k := fakeConfirmedGameNoStakers()
+
+	pool := sdk.NewCoin(app.StakeDenom, sdk.NewInt(35))
+	categoryID := int64(1)
+
+	err := k.distributeRewards(ctx, pool, votes, true, categoryID)
+	assert.Nil(t, err)
+}
+
 func TestDistributeRewardsConfirmed(t *testing.T) {
 	ctx, votes, k := fakeConfirmedGame()
 	categoryID := int64(1)
