@@ -89,7 +89,7 @@ type TruChain struct {
 	storyKeeper        story.WriteKeeper
 	stakeKeeper        stake.Keeper
 	truBankKeeper      trubank.WriteKeeper
-	voteKeeper         vote.Keeper
+	voteKeeper         vote.WriteKeeper
 	votingKeeper       voting.WriteKeeper
 
 	// state to run api

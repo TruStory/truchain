@@ -51,7 +51,7 @@ type Keeper struct {
 	challengeKeeper challenge.WriteKeeper
 	stakeKeeper     stake.Keeper
 	storyKeeper     story.WriteKeeper
-	voteKeeper      vote.Keeper
+	voteKeeper      vote.WriteKeeper
 	bankKeeper      bank.Keeper
 	truBankKeeper   trubank.WriteKeeper
 	paramStore      params.Subspace
@@ -66,7 +66,7 @@ func NewKeeper(
 	challengeKeeper challenge.WriteKeeper,
 	stakeKeeper stake.Keeper,
 	storyKeeper story.WriteKeeper,
-	voteKeeper vote.Keeper,
+	voteKeeper vote.WriteKeeper,
 	bankKeeper bank.Keeper,
 	truBankKeeper trubank.WriteKeeper,
 	paramStore params.Subspace,
