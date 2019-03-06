@@ -3,6 +3,8 @@ package vote
 import (
 	"testing"
 
+	"github.com/TruStory/truchain/x/story"
+
 	app "github.com/TruStory/truchain/types"
 	"github.com/TruStory/truchain/x/stake"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -12,7 +14,7 @@ import (
 func TestCreateGetVote(t *testing.T) {
 	ctx, k, ck := mockDB()
 
-	storyID := createFakeStory(ctx, k.storyKeeper, ck)
+	storyID := createFakeStory(ctx, k.storyKeeper, ck, story.Pending)
 	amount := sdk.NewCoin(app.StakeDenom, sdk.NewInt(15000000000))
 	comment := "test comment is long enough"
 	creator := sdk.AccAddress([]byte{1, 2})
@@ -34,7 +36,7 @@ func TestCreateGetVote(t *testing.T) {
 func TestInValidCreateVoteMsgArgumentTooShort(t *testing.T) {
 	ctx, k, ck := mockDB()
 
-	storyID := createFakeStory(ctx, k.storyKeeper, ck)
+	storyID := createFakeStory(ctx, k.storyKeeper, ck, story.Challenged)
 	amount := sdk.NewCoin(app.StakeDenom, sdk.NewInt(15000000000))
 	creator := sdk.AccAddress([]byte{1, 2})
 
@@ -50,7 +52,7 @@ func TestInValidCreateVoteMsgArgumentTooShort(t *testing.T) {
 func TestInValidCreateVoteMsgArgumentTooLong(t *testing.T) {
 	ctx, k, ck := mockDB()
 
-	storyID := createFakeStory(ctx, k.storyKeeper, ck)
+	storyID := createFakeStory(ctx, k.storyKeeper, ck, story.Challenged)
 	amount := sdk.NewCoin(app.StakeDenom, sdk.NewInt(15000000000))
 	creator := sdk.AccAddress([]byte{1, 2})
 
@@ -66,7 +68,7 @@ func TestInValidCreateVoteMsgArgumentTooLong(t *testing.T) {
 func TestGetVotesByGameID(t *testing.T) {
 	ctx, k, ck := mockDB()
 
-	storyID := createFakeStory(ctx, k.storyKeeper, ck)
+	storyID := createFakeStory(ctx, k.storyKeeper, ck, story.Pending)
 	amount := sdk.NewCoin(app.StakeDenom, sdk.NewInt(15000000000))
 	comment := "test comment is long enough"
 	creator := sdk.AccAddress([]byte{1, 2})
@@ -95,7 +97,7 @@ func TestGetVotesByGameID(t *testing.T) {
 func TestGetVotesByStoryIDAndCreator(t *testing.T) {
 	ctx, k, ck := mockDB()
 
-	storyID := createFakeStory(ctx, k.storyKeeper, ck)
+	storyID := createFakeStory(ctx, k.storyKeeper, ck, story.Pending)
 	amount := sdk.NewCoin(app.StakeDenom, sdk.NewInt(15000000000))
 	comment := "test comment is long enough"
 	creator := sdk.AccAddress([]byte{1, 2})
@@ -117,7 +119,7 @@ func TestGetVotesByStoryIDAndCreator(t *testing.T) {
 func TestTotalVoteAmountByGameID(t *testing.T) {
 	ctx, k, ck := mockDB()
 
-	storyID := createFakeStory(ctx, k.storyKeeper, ck)
+	storyID := createFakeStory(ctx, k.storyKeeper, ck, story.Pending)
 	amount := sdk.NewCoin(app.StakeDenom, sdk.NewInt(15000000000))
 	comment := "test comment is long enough"
 	creator := sdk.AccAddress([]byte{1, 2})
@@ -146,7 +148,7 @@ func TestTotalVoteAmountByGameID(t *testing.T) {
 func TestCreateVote_ErrGameNotStarted(t *testing.T) {
 	ctx, k, ck := mockDB()
 
-	storyID := createFakeStory(ctx, k.storyKeeper, ck)
+	storyID := createFakeStory(ctx, k.storyKeeper, ck, story.Pending)
 	amount := sdk.NewCoin(app.StakeDenom, sdk.NewInt(50000000000000))
 	comment := "test comment is long enough"
 	creator := sdk.AccAddress([]byte{1, 2})
@@ -161,7 +163,7 @@ func TestCreateVote_ErrGameNotStarted(t *testing.T) {
 func TestCreateVote_ErrBelowMinStake(t *testing.T) {
 	ctx, k, ck := mockDB()
 
-	storyID := createFakeStory(ctx, k.storyKeeper, ck)
+	storyID := createFakeStory(ctx, k.storyKeeper, ck, story.Challenged)
 	amount := sdk.NewCoin(app.StakeDenom, sdk.NewInt(5000000))
 	comment := "test comment is long enough"
 	creator := sdk.AccAddress([]byte{1, 2})
@@ -170,6 +172,7 @@ func TestCreateVote_ErrBelowMinStake(t *testing.T) {
 
 	_, err := k.Create(ctx, storyID, amount, vote, comment, creator)
 	assert.NotNil(t, err)
+	assert.Equal(t, sdk.ErrInsufficientFunds("Below minimum stake.").Code(), err.Code())
 }
 
 func TestUpdateVote_AddWeightOnTally(t *testing.T) {

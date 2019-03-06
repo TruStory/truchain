@@ -35,7 +35,7 @@ func Test_handleExpiredStories(t *testing.T) {
 	assert.Nil(t, err)
 
 	// fake expired story queue
-	k.expiredStoryQueue(ctx).Push(storyID)
+	k.expiringStoryQueue(ctx).Push(storyID)
 
 	// fake future block time for expiration
 	expireTime := time.Now().Add(24 * time.Hour)

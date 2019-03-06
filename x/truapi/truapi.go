@@ -156,6 +156,8 @@ func (ta *TruAPI) RegisterResolvers() {
 			return p.VotingParams.StakerRewardPoolShare.String()
 		},
 
+		"stakeDenom": func(_ context.Context, _ params.Params) string { return app.StakeDenom },
+
 		// Deprecated: replaced by "stakerRewardRatio"
 		"challengeRewardRatio": func(_ context.Context, p params.Params) string {
 			return p.VotingParams.StakerRewardPoolShare.String()
@@ -177,6 +179,7 @@ func (ta *TruAPI) RegisterResolvers() {
 		"source":             func(ctx context.Context, q story.Story) string { return q.Source.String() },
 		"votes":              func(ctx context.Context, q story.Story) []vote.TokenVote { return getVotes(ctx, q.ID) },
 		"voteResults":        func(ctx context.Context, q story.Story) voting.VoteResults { return getVoteResults(ctx, q.ID) },
+    "state": func(ctx context.Context, q story.Story) story.Status { return q.Status },
 	})
 
 	ta.GraphQLClient.RegisterObjectResolver("voteResults", voting.VoteResults{}, map[string]interface{}{

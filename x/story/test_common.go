@@ -19,9 +19,9 @@ func mockDB() (sdk.Context, Keeper, c.Keeper) {
 	db := dbm.NewMemDB()
 
 	storyKey := sdk.NewKVStoreKey("stories")
-	storyQueueKey := sdk.NewKVStoreKey("storyQueue")
-	expiredStoryQueueKey := sdk.NewKVStoreKey("expiredStoryQueue")
-	votingStoryQueueKey := sdk.NewKVStoreKey("votingStoryQueue")
+	storyQueueKey := sdk.NewKVStoreKey("pendingStoryQueue")
+	expiredStoryQueueKey := sdk.NewKVStoreKey("expiringStoryQueue")
+	votingStoryQueueKey := sdk.NewKVStoreKey("challengedStoryQueue")
 	catKey := sdk.NewKVStoreKey("categories")
 	challengeKey := sdk.NewKVStoreKey("challenges")
 	paramsKey := sdk.NewKVStoreKey(params.StoreKey)

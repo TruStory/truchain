@@ -11,12 +11,12 @@ import (
 
 // ============================================================================
 
-// State is a type that defines a story state
-type State int8
+// Status is a type that defines a story status
+type Status int8
 
-// List of acceptable story states
+// List of acceptable story statuses
 const (
-	Pending State = iota
+	Pending Status = iota
 	Challenged
 	Confirmed
 	Rejected
@@ -24,7 +24,7 @@ const (
 )
 
 // IsValid returns true if the value is listed in the enum definition, false otherwise.
-func (s State) IsValid() bool {
+func (s Status) IsValid() bool {
 	switch s {
 	case Pending, Challenged, Confirmed, Rejected, Expired:
 		return true
@@ -32,7 +32,7 @@ func (s State) IsValid() bool {
 	return false
 }
 
-func (s State) String() string {
+func (s Status) String() string {
 	return [...]string{"Pending", "Challenged", "Confirmed", "Rejected", "Expired"}[s]
 }
 
@@ -68,7 +68,7 @@ type Story struct {
 	ExpireTime      time.Time      `json:"expire_time"`
 	Flagged         bool           `json:"flagged,omitempty"`
 	Source          url.URL        `json:"source,omitempty"`
-	State           State          `json:"state"`
+	Status          Status         `json:"status"`
 	Type            Type           `json:"type"`
 	VotingStartTime time.Time      `json:"voting_start_time,omitempty"`
 	VotingEndTime   time.Time      `json:"voting_end_time,omitempty"`
@@ -78,5 +78,5 @@ type Story struct {
 func (s Story) String() string {
 	return fmt.Sprintf(
 		"Story <%d %s %s %d %s>",
-		s.ID, s.Body, s.ExpireTime, s.State, s.VotingEndTime)
+		s.ID, s.Body, s.ExpireTime, s.Status, s.VotingEndTime)
 }

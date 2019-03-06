@@ -3,6 +3,7 @@ package vote
 import (
 	"testing"
 
+	"github.com/TruStory/truchain/x/story"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/stretchr/testify/assert"
 )
@@ -10,7 +11,7 @@ import (
 func TestValidCreateVoteMsg(t *testing.T) {
 	ctx, k, ck := mockDB()
 
-	storyID := createFakeStory(ctx, k.storyKeeper, ck)
+	storyID := createFakeStory(ctx, k.storyKeeper, ck, story.Pending)
 	amount := sdk.NewCoin("testcoin", sdk.NewInt(5))
 	creator := sdk.AccAddress([]byte{1, 2})
 

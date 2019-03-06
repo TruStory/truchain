@@ -31,8 +31,8 @@ func mockDB() (sdk.Context, Keeper, c.Keeper) {
 	db := dbm.NewMemDB()
 	accKey := sdk.NewKVStoreKey("acc")
 	storyKey := sdk.NewKVStoreKey("stories")
-	storyQueueKey := sdk.NewKVStoreKey(story.QueueStoreKey)
-	expiredStoryQueueKey := sdk.NewKVStoreKey(story.ExpiredQueueStoreKey)
+	storyQueueKey := sdk.NewKVStoreKey(story.PendingQueueStoreKey)
+	expiredStoryQueueKey := sdk.NewKVStoreKey(story.ExpiringQueueStoreKey)
 	catKey := sdk.NewKVStoreKey("categories")
 	challengeKey := sdk.NewKVStoreKey("challenges")
 	gameKey := sdk.NewKVStoreKey("games")
@@ -136,7 +136,7 @@ func mockDB() (sdk.Context, Keeper, c.Keeper) {
 	return ctx, k, ck
 }
 
-func createFakeStory(ctx sdk.Context, sk story.WriteKeeper, ck c.WriteKeeper) int64 {
+func createFakeStory(ctx sdk.Context, sk story.WriteKeeper, ck c.WriteKeeper, st story.Status) int64 {
 	body := "TruStory validators can be bootstrapped with a single genesis file."
 	cat := createFakeCategory(ctx, ck)
 	creator := sdk.AccAddress([]byte{1, 2})
@@ -144,10 +144,9 @@ func createFakeStory(ctx sdk.Context, sk story.WriteKeeper, ck c.WriteKeeper) in
 	source := url.URL{}
 
 	storyID, _ := sk.Create(ctx, body, cat.ID, creator, source, storyType)
-	// TODO [shanev]: https://github.com/TruStory/truchain/issues/407
-	// s, _ := sk.Story(ctx, storyID)
-	// s.State = story.Challenged
-	// sk.UpdateStory(ctx, s)
+	s, _ := sk.Story(ctx, storyID)
+	s.Status = st
+	sk.UpdateStory(ctx, s)
 
 	return storyID
 }
