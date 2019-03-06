@@ -91,6 +91,7 @@ type Vote struct {
 	Timestamp Timestamp      `json:"timestamp"`
 }
 
+// UpdateWeight mutates the vote weight as a result of weighted voting
 func (v *Vote) UpdateWeight(weight sdk.Int) {
 	v.Weight = weight
 }

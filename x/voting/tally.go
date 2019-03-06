@@ -104,11 +104,6 @@ func (k Keeper) weightedVote(
 
 	// iterate through BCVs
 	for _, vote := range votes {
-		// v, ok := vote.(app.Voter)
-		// if !ok {
-		// 	return weightedAmount, ErrInvalidVote(v)
-		// }
-
 		user := k.accountKeeper.GetAccount(ctx, vote.Creator())
 		coins := user.GetCoins()
 		credBalance := coins.AmountOf(denom)

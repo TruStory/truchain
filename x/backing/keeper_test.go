@@ -6,7 +6,6 @@ import (
 
 	app "github.com/TruStory/truchain/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/davecgh/go-spew/spew"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -32,21 +31,6 @@ func TestGetBacking_ErrBackingNotFound(t *testing.T) {
 	_, err := bk.Backing(ctx, id)
 	assert.NotNil(t, err)
 	assert.Equal(t, ErrNotFound(id).Code(), err.Code(), "Should get error")
-}
-
-func TestToggleVote(t *testing.T) {
-	ctx, bk, sk, ck, bankKeeper, _ := mockDB()
-	storyID := createFakeStory(ctx, sk, ck)
-	amount, _ := sdk.ParseCoin("5trudex")
-	argument := "cool story brew"
-	creator := sdk.AccAddress([]byte{1, 2})
-	bankKeeper.AddCoins(ctx, creator, sdk.Coins{amount})
-	backingID, _ := bk.Create(ctx, storyID, amount, argument, creator)
-
-	bk.ToggleVote(ctx, backingID)
-	b, _ := bk.Backing(ctx, backingID)
-	spew.Dump(b)
-	assert.False(t, b.VoteChoice())
 }
 
 func TestGetBacking(t *testing.T) {

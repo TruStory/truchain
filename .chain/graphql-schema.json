@@ -2054,7 +2054,23 @@
             "deprecationReason": "",
             "description": "",
             "isDeprecated": false,
-            "name": "ChallengedCredTotal",
+            "name": "backedCredTotal",
+            "type": {
+              "kind": "NON_NULL",
+              "name": "",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "string",
+                "ofType": null
+              }
+            }
+          },
+          {
+            "args": [],
+            "deprecationReason": "",
+            "description": "",
+            "isDeprecated": false,
+            "name": "challengedCredTotal",
             "type": {
               "kind": "NON_NULL",
               "name": "",
@@ -2093,22 +2109,6 @@
               "ofType": {
                 "kind": "OBJECT",
                 "name": "Timestamp",
-                "ofType": null
-              }
-            }
-          },
-          {
-            "args": [],
-            "deprecationReason": "",
-            "description": "",
-            "isDeprecated": false,
-            "name": "BackedCredTotal",
-            "type": {
-              "kind": "NON_NULL",
-              "name": "",
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "string",
                 "ofType": null
               }
             }
