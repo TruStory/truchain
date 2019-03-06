@@ -31,19 +31,25 @@ func (k Keeper) distributeRewards(
 		return err
 	}
 
-	// staker pool is 100% of reward pool when no voters
-	stakerPool := pool
-	voterPool := sdk.NewCoin(app.StakeDenom, sdk.ZeroInt())
+	var stakerPool sdk.Coin
+	var voterPool sdk.Coin
 
-	if voterCount > 0 {
+	switch {
+	case stakerCount > 0 && voterCount == 0:
+		// staker pool is 100% of reward pool with no voters
+		stakerPool = pool
+	case stakerCount == 0 && voterCount > 0:
+		// voter pool is 100% of reward pool with no stakers
+		voterPool = pool
+	default:
 		// calculate reward pool for stakers (75% of pool)
 		stakerPool = k.calculateStakerPool(ctx, pool)
-		logger.Info(fmt.Sprintf("Staker reward pool: %v", stakerPool))
-
 		// calculate reward pool for voters (25% of pool)
 		voterPool = k.calculateVoterPool(ctx, pool)
-		logger.Info(fmt.Sprintf("Voter reward pool: %v", voterPool))
 	}
+
+	logger.Info(fmt.Sprintf("Staker reward pool: %v", stakerPool))
+	logger.Info(fmt.Sprintf("Voter reward pool: %v", voterPool))
 
 	// calculate voter reward amount
 	voterRewardAmount := voterRewardAmount(voterPool, voterCount)

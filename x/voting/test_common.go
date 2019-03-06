@@ -274,6 +274,33 @@ func fakeConfirmedGame() (ctx sdk.Context, votes poll, k Keeper) {
 	return
 }
 
+func fakeConfirmedGameNoStakers() (ctx sdk.Context, votes poll, k Keeper) {
+	ctx, k, ck := mockDB()
+
+	storyID := createFakeStory(ctx, k.storyKeeper, ck)
+	amount := sdk.NewCoin(app.StakeDenom, sdk.NewInt(1000000000000))
+	argument := "test argument"
+
+	creator1 := fakeFundedCreator(ctx, k.bankKeeper)
+	creator2 := fakeFundedCreator(ctx, k.bankKeeper)
+	creator3 := fakeFundedCreator(ctx, k.bankKeeper)
+
+	c1id, _ := k.challengeKeeper.Create(ctx, storyID, amount, argument, creator1)
+
+	v1id, _ := k.voteKeeper.Create(ctx, storyID, amount, true, argument, creator2)
+	v2id, _ := k.voteKeeper.Create(ctx, storyID, amount, true, argument, creator3)
+
+	c1, _ := k.challengeKeeper.Challenge(ctx, c1id)
+
+	v1, _ := k.voteKeeper.TokenVote(ctx, v1id)
+	v2, _ := k.voteKeeper.TokenVote(ctx, v2id)
+
+	votes.trueVotes = append(votes.trueVotes, v1, v2)
+	votes.falseVotes = append(votes.falseVotes, c1)
+
+	return
+}
+
 func fakeRejectedGame() (ctx sdk.Context, votes poll, k Keeper) {
 	ctx, k, ck := mockDB()
 
