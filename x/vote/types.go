@@ -35,9 +35,9 @@ func (v TokenVote) Weight() sdk.Int {
 	return v.Vote.Weight
 }
 
-// FullVote returns the vote for setter purposes
-func (v TokenVote) FullVote() app.Vote {
-	return v.Vote
+// UpdateWeight returns the vote for setter purposes
+func (v TokenVote) UpdateWeight(credBalance sdk.Int) {
+	v.Vote.Weight = credBalance
 }
 
 // VoteChoice implements `Voter`

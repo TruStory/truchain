@@ -74,7 +74,7 @@ type Voter interface {
 	Weight() sdk.Int
 	Creator() sdk.AccAddress
 	VoteChoice() bool
-	FullVote() Vote
+	UpdateWeight(sdk.Int)
 	Timestamp() Timestamp
 }
 
@@ -85,7 +85,7 @@ type Vote struct {
 	StoryID   int64          `json:"story_id"`
 	Amount    sdk.Coin       `json:"amount"`
 	Argument  string         `json:"argument,omitempty"`
-	Weight    sdk.Int        `json:"weight"`
+	Weight    sdk.Int        `json:"weight,omitempty"`
 	Creator   sdk.AccAddress `json:"creator"`
 	Vote      bool           `json:"vote"`
 	Timestamp Timestamp      `json:"timestamp"`

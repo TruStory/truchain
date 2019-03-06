@@ -14,10 +14,10 @@ type poll struct {
 
 // VoteResults are the vote results for a story
 type VoteResults struct {
-	ID                  int64         `json:"id,omitempty"`
-	BackedCredTotal     sdk.Int       `json:"backed_cred_total,omitempty"`
-	ChallengedCredTotal sdk.Int       `json:"challenged_cred_total,omitempty"`
-	Timestamp           app.Timestamp `json:"timestamp,omitempty"`
+	ID                  int64         `json:"id"` // StoryID
+	BackedCredTotal     sdk.Int       `json:"backed_cred_total"`
+	ChallengedCredTotal sdk.Int       `json:"challenged_cred_total"`
+	Timestamp           app.Timestamp `json:"timestamp"`
 }
 
 func (p poll) String() string {

@@ -35,9 +35,9 @@ func (c Challenge) Weight() sdk.Int {
 	return c.Vote.Weight
 }
 
-// FullVote returns the vote for setter purposes
-func (c Challenge) FullVote() app.Vote {
-	return c.Vote
+// UpdateWeight returns the vote for setter purposes
+func (c Challenge) UpdateWeight(credBalance sdk.Int) {
+	c.Vote.Weight = credBalance
 }
 
 // VoteChoice implements `Voter`

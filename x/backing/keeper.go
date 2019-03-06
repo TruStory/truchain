@@ -52,7 +52,6 @@ type WriteKeeper interface {
 		creator sdk.AccAddress) (int64, sdk.Error)
 
 	Update(ctx sdk.Context, backing Backing)
-	UpdateVote(ctx sdk.Context, vote app.Vote)
 	ToggleVote(ctx sdk.Context, backingID int64) (int64, sdk.Error)
 }
 
@@ -270,21 +269,4 @@ func (k Keeper) setBacking(ctx sdk.Context, backing Backing) {
 	store.Set(
 		k.GetIDKey(backing.ID()),
 		k.GetCodec().MustMarshalBinaryLengthPrefixed(backing))
-}
-
-// UpdateVote updates the implicit vote for a backer
-func (k Keeper) UpdateVote(ctx sdk.Context, vote app.Vote) {
-
-	newVote := app.Vote{
-		ID:        vote.ID,
-		StoryID:   vote.StoryID,
-		Amount:    vote.Amount,
-		Argument:  vote.Argument,
-		Weight:    vote.Weight,
-		Creator:   vote.Creator,
-		Vote:      vote.Vote,
-		Timestamp: vote.Timestamp.Update(ctx.BlockHeader()),
-	}
-
-	k.setBacking(ctx, Backing{newVote})
 }

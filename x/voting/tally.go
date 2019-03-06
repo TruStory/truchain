@@ -4,6 +4,7 @@ import (
 	app "github.com/TruStory/truchain/types"
 	"github.com/TruStory/truchain/x/backing"
 	"github.com/TruStory/truchain/x/challenge"
+	voteM "github.com/TruStory/truchain/x/vote"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
@@ -76,8 +77,8 @@ func (k Keeper) confirmStory(
 	truePercentOfTotal := trueWeightDec.QuoInt(totalWeight)
 
 	voteResults := VoteResults{
-		ID:             storyID,
-		BackedCredTotal:  trueWeight,
+		ID:                  storyID,
+		BackedCredTotal:     trueWeight,
 		ChallengedCredTotal: falseWeight,
 	}
 
@@ -118,18 +119,17 @@ func (k Keeper) weightedVote(
 			credBalance = credBalance.Add(sdk.NewInt(1))
 		}
 
-		changedVote := vote.FullVote() // getter for the vote
-		changedVote.Weight = credBalance
+		vote.UpdateWeight(credBalance)
 
 		switch vote.(type) {
 		case backing.Backing:
-			k.backingKeeper.UpdateVote(ctx, changedVote)
+			k.backingKeeper.Update(ctx, vote.(backing.Backing))
 			break
 		case challenge.Challenge:
-			k.challengeKeeper.UpdateVote(ctx, changedVote)
+			k.challengeKeeper.Update(ctx, vote.(challenge.Challenge))
 			break
 		default:
-			k.voteKeeper.UpdateVote(ctx, changedVote)
+			k.voteKeeper.Update(ctx, vote.(voteM.TokenVote))
 			break
 		}
 

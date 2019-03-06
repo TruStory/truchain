@@ -51,7 +51,7 @@ type WriteKeeper interface {
 	Create(
 		ctx sdk.Context, storyID int64, amount sdk.Coin,
 		choice bool, argument string, creator sdk.AccAddress) (int64, sdk.Error)
-	UpdateVote(ctx sdk.Context, vote app.Vote)
+	Update(ctx sdk.Context, vote TokenVote)
 	SetParams(ctx sdk.Context, params Params)
 }
 
@@ -298,19 +298,12 @@ func (k Keeper) validateStoryState(ctx sdk.Context, storyID int64) sdk.Error {
 	return nil
 }
 
-// UpdateVote updates the vote
-func (k Keeper) UpdateVote(ctx sdk.Context, vote app.Vote) {
+// Update updates the vote
+func (k Keeper) Update(ctx sdk.Context, vote TokenVote) {
 
-	newVote := app.Vote{
-		ID:        vote.ID,
-		StoryID:   vote.StoryID,
-		Amount:    vote.Amount,
-		Argument:  vote.Argument,
-		Weight:    vote.Weight,
-		Creator:   vote.Creator,
-		Vote:      vote.Vote,
-		Timestamp: vote.Timestamp.Update(ctx.BlockHeader()),
+	newVote := TokenVote{
+		Vote: vote.Vote,
 	}
 
-	k.set(ctx, TokenVote{newVote})
+	k.set(ctx, newVote)
 }
