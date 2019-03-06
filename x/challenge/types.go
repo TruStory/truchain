@@ -1,6 +1,8 @@
 package challenge
 
 import (
+	"fmt"
+
 	app "github.com/TruStory/truchain/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
@@ -38,4 +40,8 @@ func (c Challenge) VoteChoice() bool {
 // Timestamp implements `Voter.Timestamp`
 func (c Challenge) Timestamp() app.Timestamp {
 	return c.Vote.Timestamp
+}
+
+func (c Challenge) String() string {
+	return fmt.Sprintf("Challenge<%s>", c.Vote.String())
 }
