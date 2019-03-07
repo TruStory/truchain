@@ -57,6 +57,14 @@
   revision = "d4cc87b860166d00d6b5b9e0d3b3d71d6088d4d4"
 
 [[projects]]
+  digest = "1:166438587ed45ac211dab8a3ecebf4fa0c186d0db63430fb9127bbc2e5fcdc67"
+  name = "github.com/cenkalti/backoff"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "1e4cf3da559842a91afcb6ea6141451e6c30c618"
+  version = "v2.1.1"
+
+[[projects]]
   digest = "1:b720404704940ed9f4d549c405595057ca0facc1731fffb7d74c30b2b1a49fbd"
   name = "github.com/cosmos/cosmos-sdk"
   packages = [
@@ -136,6 +144,46 @@
   pruneopts = "UT"
   revision = "8991bc29aa16c548c550c7ff78260e27b9ab7c73"
   version = "v1.1.1"
+
+[[projects]]
+  branch = "master"
+  digest = "1:b051e524e209fba795cb073d79b2c418690fefb41a30ab9727882329744da24c"
+  name = "github.com/dghubble/go-twitter"
+  packages = ["twitter"]
+  pruneopts = "UT"
+  revision = "0022a70e9bee80163be82fdd74ac1d92bdebaf57"
+
+[[projects]]
+  digest = "1:99b681b5dd01cf6615b14b047ed29549fb38a1eb69b1371bf529e7ea42ee5579"
+  name = "github.com/dghubble/gologin"
+  packages = [
+    ".",
+    "internal",
+    "oauth1",
+    "twitter",
+  ]
+  pruneopts = "UT"
+  revision = "b583eae78663394885200708baf607a22b74fadf"
+  version = "v2.1.0"
+
+[[projects]]
+  digest = "1:ef9c9f584414d07ed375a40ca065812b5371e4e754a54989072b6d6aea997140"
+  name = "github.com/dghubble/oauth1"
+  packages = [
+    ".",
+    "twitter",
+  ]
+  pruneopts = "UT"
+  revision = "f0fe2bff8fbf301b33359ca431e4afc90390aab0"
+  version = "v0.5.0"
+
+[[projects]]
+  digest = "1:fba61d8584058169c5bd4625196f33077ba937f7131625d4440686c5e4cff380"
+  name = "github.com/dghubble/sling"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "e2624bf29a7de45ab0802b09aea94ca0a7815c5f"
+  version = "v1.2.0"
 
 [[projects]]
   digest = "1:fed20bf7f0da387c96d4cfc140a95572e5aba4bb984beb7de910e090ae39849b"
@@ -239,6 +287,14 @@
   packages = ["."]
   pruneopts = "UT"
   revision = "2e65f85255dbc3072edf28d6b5b8efc472979f5a"
+
+[[projects]]
+  digest = "1:a63cff6b5d8b95638bfe300385d93b2a6d9d687734b863da8e09dc834510a690"
+  name = "github.com/google/go-querystring"
+  packages = ["query"]
+  pruneopts = "UT"
+  revision = "44c6ddd0a2342c386950e880b658017258da92fc"
+  version = "v1.0.0"
 
 [[projects]]
   digest = "1:ca59b1175189b3f0e9f1793d2c350114be36eaabbe5b9f554b35edee1de50aea"
@@ -832,6 +888,9 @@
     "github.com/cosmos/cosmos-sdk/x/ibc",
     "github.com/cosmos/cosmos-sdk/x/params",
     "github.com/cosmos/cosmos-sdk/x/staking",
+    "github.com/dghubble/gologin/twitter",
+    "github.com/dghubble/oauth1",
+    "github.com/dghubble/oauth1/twitter",
     "github.com/go-pg/pg",
     "github.com/go-pg/pg/orm",
     "github.com/gorilla/mux",

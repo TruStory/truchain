@@ -55,6 +55,10 @@
   name = "github.com/oklog/ulid"
   version = "=v1.3.1"
 
+[[constraint]]
+  name = "github.com/dghubble/gologin"
+  version = "=v2.1.0"
+
 ## deps without releases:
 
 [[override]]
