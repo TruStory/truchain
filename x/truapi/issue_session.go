@@ -60,10 +60,11 @@ func IssueSession(ta *TruAPI) http.Handler {
 
 		// Saves the context in the cookie
 		cookie := http.Cookie{
-			Name:    "tru-twitter-id",
-			Value:   twitterProfile.Address,
-			Expires: time.Now().Add(365 * 24 * time.Hour),
-			Domain:  os.Getenv("COOKIE_HOST"),
+			Name:     "tru-twitter-id",
+			HttpOnly: true,
+			Value:    twitterProfile.Address,
+			Expires:  time.Now().Add(365 * 24 * time.Hour),
+			Domain:   os.Getenv("COOKIE_HOST"),
 		}
 		http.SetCookie(w, &cookie)
 		fmt.Printf("cookie: %v\n\n", os.Getenv("COOKIE_HOST"))
