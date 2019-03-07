@@ -4,8 +4,11 @@ import (
 	"context"
 	"net/http"
 	"net/url"
+	"os"
 
 	"github.com/TruStory/truchain/x/voting"
+	"github.com/dghubble/gologin/twitter"
+	"github.com/dghubble/oauth1"
 
 	app "github.com/TruStory/truchain/types"
 	"github.com/TruStory/truchain/x/backing"
@@ -19,6 +22,7 @@ import (
 	"github.com/TruStory/truchain/x/users"
 	"github.com/TruStory/truchain/x/vote"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	twitterOAuth1 "github.com/dghubble/oauth1/twitter"
 	thunder "github.com/samsarahq/thunder/graphql"
 	"github.com/samsarahq/thunder/graphql/graphiql"
 )
@@ -66,6 +70,21 @@ func (ta *TruAPI) RegisterRoutes() {
 	ta.HandleFunc("/graphql", ta.HandleGraphQL)
 	ta.HandleFunc("/presigned", ta.HandlePresigned)
 	ta.HandleFunc("/register", ta.HandleRegistration)
+
+	ta.RegisterOAuthRoutes()
+}
+
+// RegisterOAuthRoutes adds the proper routes needed for the oauth
+func (ta *TruAPI) RegisterOAuthRoutes() {
+	oauth1Config := &oauth1.Config{
+		ConsumerKey:    os.Getenv("TWITTER_API_KEY"),
+		ConsumerSecret: os.Getenv("TWITTER_API_SECRET"),
+		CallbackURL:    os.Getenv("CHAIN_HOST") + "/auth-twitter-callback",
+		Endpoint:       twitterOAuth1.AuthorizeEndpoint,
+	}
+
+	http.Handle("/auth-twitter", twitter.LoginHandler(oauth1Config, nil))
+	http.Handle("/auth-twitter-callback", twitter.CallbackHandler(oauth1Config, IssueSession(ta), nil))
 }
 
 // RegisterResolvers builds the app's GraphQL schema from resolvers (declared in `resolver.go`)
