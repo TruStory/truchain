@@ -52,13 +52,14 @@ func (ta *TruAPI) RegisterModels() {
 // RegisterRoutes applies the TruStory API routes to the `chttp.API` router
 func (ta *TruAPI) RegisterRoutes() {
 	// Register routes for Trustory React web app
-	fs := http.FileServer(http.Dir("web/static"))
+	fs := http.FileServer(http.Dir("build/static"))
 	http.Handle("/static/", http.StripPrefix("/static/", fs))
-	http.HandleFunc("/web/", func(w http.ResponseWriter, r *http.Request) {
-		http.ServeFile(w, r, "web/index.html")
+	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		http.ServeFile(w, r, "build/index.html")
 	})
 
 	ta.Use(chttp.JSONResponseMiddleware)
+	ta.Use(chttp.CORSMiddleware)
 	http.Handle("/graphql", thunder.Handler(ta.GraphQLClient.Schema))
 	http.Handle("/graphiql/", http.StripPrefix("/graphiql/", graphiql.Handler()))
 	ta.HandleFunc("/ping", ta.HandlePing)
