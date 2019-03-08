@@ -44,8 +44,13 @@ func (k Keeper) processPendingStoryQueue(ctx sdk.Context, pendingStoryQueue queu
 	// if the status of the story has changed to challenged,
 	// add it to the voting story queue to be handled later
 	if story.Status == Challenged {
-		logger.Info("Voting begun for " + story.String())
+		logger.Info("Voting began for " + story.String())
+		logger.Info(fmt.Sprintf(
+			"Challenged queue len: %d", k.challengedStoryQueue(ctx).List.Len()))
 		k.challengedStoryQueue(ctx).Push(storyID)
+		logger.Info(fmt.Sprintf(
+			"Pushed story id %d to challenge queue, len %d",
+			storyID, k.challengedStoryQueue(ctx).List.Len()))
 
 		// pop and process next story
 		pendingStoryQueue.Pop()
