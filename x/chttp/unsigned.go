@@ -28,6 +28,9 @@ func (a *API) NewUnsignedStdTx(r UnsignedRequest, keyPair db.KeyPair) (auth.StdT
 	privateKey := GetPrivateKeyObject(keyPair)
 
 	signature, err := privateKey.Sign(txHashBytes)
+	if err != nil {
+		panic(err)
+	}
 
 	presignedRequest := &PresignedRequest{
 		MsgTypes:   r.MsgTypes,
