@@ -89,8 +89,6 @@ func IssueSession(ta *TruAPI) http.Handler {
 			Domain:   os.Getenv("COOKIE_HOST"),
 		}
 		http.SetCookie(w, &cookie)
-		fmt.Printf("cookie: %v\n\n", os.Getenv("COOKIE_HOST"))
-		fmt.Printf("api key: %v\n\n", os.Getenv("TWITTER_API_KEY"))
 		http.Redirect(w, req, os.Getenv("OAUTH_SUCCESS_REDIR"), http.StatusFound)
 	}
 	return http.HandlerFunc(fn)
