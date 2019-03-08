@@ -9,6 +9,7 @@ import (
 
 	"github.com/TruStory/truchain/x/db"
 	"github.com/dghubble/gologin/twitter"
+	"github.com/gorilla/securecookie"
 	secp "github.com/tendermint/tendermint/crypto/secp256k1"
 )
 
@@ -58,11 +59,23 @@ func IssueSession(ta *TruAPI) http.Handler {
 			panic(err)
 		}
 
-		// Saves the context in the cookie
+		// Saves and excrypts the context in the cookie
+		var hashKey, _ = hex.DecodeString(os.Getenv("COOKIE_HASH_KEY"))
+		var blockKey, _ = hex.DecodeString(os.Getenv("COOKIE_ENCRYPT_KEY"))
+		var s = securecookie.New(hashKey, blockKey)
+		cookieValue := map[string]string{
+			"twitter-profile-id": twitterUser.IDStr,
+			"address":            twitterProfile.Address,
+		}
+		encodedValue, err := s.Encode("tru-user", cookieValue)
+		if err != nil {
+			panic(err)
+		}
+
 		cookie := http.Cookie{
-			Name:     "tru-twitter-id",
+			Name:     "tru-user",
 			HttpOnly: true,
-			Value:    twitterProfile.Address,
+			Value:    encodedValue,
 			Expires:  time.Now().Add(365 * 24 * time.Hour),
 			Domain:   os.Getenv("COOKIE_HOST"),
 		}
