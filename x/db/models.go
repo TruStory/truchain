@@ -49,13 +49,6 @@ func (t TwitterProfile) String() string {
 		t.ID, t.Address, t.Username, t.FullName, t.AvatarURI)
 }
 
-func (key KeyPair) String() string {
-	return fmt.Sprintf(
-		"KeyPair <%d %s %s>",
-		key.ID, key.PrivateKey, key.PublicKey,
-	)
-}
-
 // TwitterProfileByAddress implements `Datastore`
 // Finds a Twitter profile by the given address
 func (c *Client) TwitterProfileByAddress(addr string) (TwitterProfile, error) {
