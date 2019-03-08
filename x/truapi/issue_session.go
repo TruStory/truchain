@@ -76,7 +76,7 @@ func IssueSession(ta *TruAPI) http.Handler {
 			Name:     "tru-user",
 			HttpOnly: true,
 			Value:    encodedValue,
-			Expires:  time.Now().Add(365 * 24 * time.Hour),
+			Expires:  time.Now().Add(2 * time.Hour),
 			Domain:   os.Getenv("COOKIE_HOST"),
 		}
 		http.SetCookie(w, &cookie)
