@@ -45,7 +45,10 @@ func IssueSession(ta *TruAPI) http.Handler {
 		}
 
 		pubKeyBytes, _ := hex.DecodeString(keyPair.PublicKey)
-		addr, _, _, _ := (*(ta.App)).RegisterKey(pubKeyBytes, "secp256k1")
+		addr, _, _, err := (*(ta.App)).RegisterKey(pubKeyBytes, "secp256k1")
+		if err != nil {
+			panic(err)
+		}
 
 		twitterProfile := &db.TwitterProfile{
 			ID:        twitterUser.ID,
@@ -60,9 +63,15 @@ func IssueSession(ta *TruAPI) http.Handler {
 		}
 
 		// Saves and excrypts the context in the cookie
-		var hashKey, _ = hex.DecodeString(os.Getenv("COOKIE_HASH_KEY"))
-		var blockKey, _ = hex.DecodeString(os.Getenv("COOKIE_ENCRYPT_KEY"))
-		var s = securecookie.New(hashKey, blockKey)
+		hashKey, err := hex.DecodeString(os.Getenv("COOKIE_HASH_KEY"))
+		if err != nil {
+			panic(err)
+		}
+		blockKey, err := hex.DecodeString(os.Getenv("COOKIE_ENCRYPT_KEY"))
+		if err != nil {
+			panic(err)
+		}
+		s := securecookie.New(hashKey, blockKey)
 		cookieValue := map[string]string{
 			"twitter-profile-id": twitterUser.IDStr,
 			"address":            twitterProfile.Address,
