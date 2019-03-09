@@ -18,11 +18,15 @@ func (k Keeper) EndBlock(ctx sdk.Context) sdk.Tags {
 
 // Recursively process voting story queue to see if voting has ended
 func (k Keeper) processChallengedStoryQueue(ctx sdk.Context) sdk.Error {
+	logger := ctx.Logger().With("module", StoreKey)
+
 	challengedStoryQueue := k.challengedStoryQueue(ctx)
 
 	if challengedStoryQueue.IsEmpty() {
 		return nil
 	}
+
+	logger.Info("Processing challenged story queue...")
 
 	var storyID int64
 	peekErr := challengedStoryQueue.Peek(&storyID)
@@ -35,9 +39,14 @@ func (k Keeper) processChallengedStoryQueue(ctx sdk.Context) sdk.Error {
 		return err
 	}
 
+	logger.Info("Checking story " + story.String())
+
 	if ctx.BlockHeader().Time.Before(story.VotingEndTime) {
 		// no stories to process
 		// check again after next block
+		logger.Info("Current block time: " + ctx.BlockHeader().Time.String())
+		logger.Info(fmt.Sprintf("Story %s is still in voting period", story))
+
 		return nil
 	}
 
@@ -55,7 +64,7 @@ func (k Keeper) processChallengedStoryQueue(ctx sdk.Context) sdk.Error {
 
 // tally votes and distribute rewards
 func (k Keeper) verifyStory(ctx sdk.Context, storyID int64) sdk.Error {
-	logger := ctx.Logger().With("module", "voting")
+	logger := ctx.Logger().With("module", StoreKey)
 
 	logger.Info(fmt.Sprintf("Verifying story id: %d...", storyID))
 
