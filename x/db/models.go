@@ -1,6 +1,10 @@
 package db
 
-import "fmt"
+import (
+	"fmt"
+
+	"github.com/go-pg/pg"
+)
 
 // Datastore defines all operations on the DB
 // This interface can be mocked out for tests, etc.
@@ -19,6 +23,7 @@ type Mutations interface {
 type Queries interface {
 	GenericQueries
 	TwitterProfileByAddress(addr string) (TwitterProfile, error)
+	KeyPairByTwitterProfileID(id int64) (KeyPair, error)
 }
 
 // TwitterProfile is the Twitter profile associated with an account
@@ -28,6 +33,14 @@ type TwitterProfile struct {
 	Username  string `json:"username"`
 	FullName  string `json:"full_name"`
 	AvatarURI string `json:"avatar_uri"`
+}
+
+// KeyPair is the private key associated with an account
+type KeyPair struct {
+	ID               int64  `json:"id"`
+	TwitterProfileID int64  `json:"twitter_profile_id"`
+	PrivateKey       string `json:"private_key"`
+	PublicKey        string `json:"public_key"`
 }
 
 func (t TwitterProfile) String() string {
@@ -46,6 +59,22 @@ func (c *Client) TwitterProfileByAddress(addr string) (TwitterProfile, error) {
 	}
 
 	return *twitterProfile, nil
+}
+
+// KeyPairByTwitterProfileID returns the key-pair for the account
+func (c *Client) KeyPairByTwitterProfileID(id int64) (KeyPair, error) {
+	keyPair := new(KeyPair)
+	err := c.Model(keyPair).Where("twitter_profile_id = ?", id).First()
+
+	if err == pg.ErrNoRows {
+		return *keyPair, nil
+	}
+
+	if err != nil {
+		return *keyPair, err
+	}
+
+	return *keyPair, nil
 }
 
 // UpsertTwitterProfile implements `Datastore`.
