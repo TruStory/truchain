@@ -210,6 +210,11 @@ func (ta *TruAPI) RegisterResolvers() {
 		"votingEndTime":      func(_ context.Context, q story.Story) string { return formatTime(q.VotingEndTime) },
 	})
 
+	ta.GraphQLClient.RegisterObjectResolver("Timestamp", app.Timestamp{}, map[string]interface{}{
+		"createdTime": func(_ context.Context, t app.Timestamp) string { return formatTime(t.CreatedTime) },
+		"updatedTime": func(_ context.Context, t app.Timestamp) string { return formatTime(t.UpdatedTime) },
+	})
+
 	ta.GraphQLClient.RegisterObjectResolver("TwitterProfile", db.TwitterProfile{}, map[string]interface{}{
 		"id": func(_ context.Context, q db.TwitterProfile) string { return string(q.ID) },
 	})
