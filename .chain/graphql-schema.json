@@ -1548,16 +1548,6 @@
       {
         "description": "",
         "enumValues": [],
-        "fields": [],
-        "inputFields": [],
-        "interfaces": [],
-        "kind": "SCALAR",
-        "name": "Time",
-        "possibleTypes": []
-      },
-      {
-        "description": "",
-        "enumValues": [],
         "fields": [
           {
             "args": [],
@@ -1586,7 +1576,7 @@
               "name": "",
               "ofType": {
                 "kind": "SCALAR",
-                "name": "Time",
+                "name": "string",
                 "ofType": null
               }
             }
@@ -1618,7 +1608,7 @@
               "name": "",
               "ofType": {
                 "kind": "SCALAR",
-                "name": "Time",
+                "name": "string",
                 "ofType": null
               }
             }
