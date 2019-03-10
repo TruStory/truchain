@@ -1317,7 +1317,7 @@
               "name": "",
               "ofType": {
                 "kind": "SCALAR",
-                "name": "Time",
+                "name": "string",
                 "ofType": null
               }
             }
@@ -1501,7 +1501,7 @@
               "name": "",
               "ofType": {
                 "kind": "SCALAR",
-                "name": "Time",
+                "name": "string",
                 "ofType": null
               }
             }
@@ -1533,7 +1533,7 @@
               "name": "",
               "ofType": {
                 "kind": "SCALAR",
-                "name": "Time",
+                "name": "string",
                 "ofType": null
               }
             }
