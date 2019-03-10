@@ -202,11 +202,6 @@ func (ta *TruAPI) RegisterResolvers() {
 		"state":              func(ctx context.Context, q story.Story) story.Status { return q.Status },
 	})
 
-	ta.GraphQLClient.RegisterObjectResolver("voteResults", voting.VoteResult{}, map[string]interface{}{
-		"backedCredTotal":     func(_ context.Context, q voting.VoteResult) string { return q.BackedCredTotal.String() },
-		"challengedCredTotal": func(_ context.Context, q voting.VoteResult) string { return q.ChallengedCredTotal.String() },
-	})
-
 	ta.GraphQLClient.RegisterObjectResolver("TwitterProfile", db.TwitterProfile{}, map[string]interface{}{
 		"id": func(_ context.Context, q db.TwitterProfile) string { return string(q.ID) },
 	})
@@ -231,6 +226,11 @@ func (ta *TruAPI) RegisterResolvers() {
 		"weight":    func(ctx context.Context, q vote.TokenVote) string { return q.Weight().String() },
 		"creator":   func(ctx context.Context, q vote.TokenVote) users.User { return getUser(ctx, q.Creator()) },
 		"timestamp": func(ctx context.Context, q vote.TokenVote) app.Timestamp { return q.Timestamp() },
+	})
+
+	ta.GraphQLClient.RegisterObjectResolver("voteResults", voting.VoteResult{}, map[string]interface{}{
+		"backedCredTotal":     func(_ context.Context, q voting.VoteResult) string { return q.BackedCredTotal.String() },
+		"challengedCredTotal": func(_ context.Context, q voting.VoteResult) string { return q.ChallengedCredTotal.String() },
 	})
 
 	ta.GraphQLClient.BuildSchema()
