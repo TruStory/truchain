@@ -103,6 +103,14 @@ func NewKeeper(
 // ToggleVote toggles a vote for a given story id and account address
 func (k Keeper) ToggleVote(ctx sdk.Context, storyID int64, amount sdk.Coin, argument string, creator sdk.AccAddress) (int64, sdk.Error) {
 	logger := ctx.Logger().With("module", StoreKey).With("storyID", storyID)
+	s, err := k.storyKeeper.Story(ctx, storyID)
+	if err != nil {
+		return 0, err
+	}
+
+	if s.Status != story.Challenged {
+		return 0, ErrInvalidStoryState(s.Status.String())
+	}
 
 	// Check if user backed
 	b, err := k.backingKeeper.BackingByStoryIDAndCreator(ctx, storyID, creator)
@@ -147,8 +155,9 @@ func (k Keeper) ToggleVote(ctx sdk.Context, storyID int64, amount sdk.Coin, argu
 		return 0, err
 	}
 	if tv.Vote != nil {
-		logger.Info(fmt.Sprintf("Toggling token vote from %T fo %T", tv.Vote.Vote, !tv.Vote.Vote))
-		tv.Vote.Vote = !tv.Vote.Vote
+		choice := tv.VoteChoice()
+		logger.Info(fmt.Sprintf("toggling token vote from %T fo %T", choice, !choice))
+		tv.Vote.Vote = !choice
 		// Update the time when the vote was toggled
 		tv.Vote.Timestamp = app.NewTimestamp(ctx.BlockHeader())
 		k.Update(ctx, tv)
