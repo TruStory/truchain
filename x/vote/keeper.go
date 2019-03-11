@@ -52,6 +52,7 @@ type WriteKeeper interface {
 		ctx sdk.Context, storyID int64, amount sdk.Coin,
 		choice bool, argument string, creator sdk.AccAddress) (int64, sdk.Error)
 	Update(ctx sdk.Context, vote TokenVote)
+	ToggleVote(ctx sdk.Context, storyID int64, amount sdk.Coin, argument string, creator sdk.AccAddress) (int64, sdk.Error)
 	SetParams(ctx sdk.Context, params Params)
 }
 
@@ -97,6 +98,57 @@ func NewKeeper(
 		paramStore.WithTypeTable(ParamTypeTable()),
 		app.NewUserList(storyKeeper.GetStoreKey()),
 	}
+}
+
+// ToggleVote toggles a vote for a given story id and account address
+func (k Keeper) ToggleVote(ctx sdk.Context, storyID int64, amount sdk.Coin, argument string, creator sdk.AccAddress) (int64, sdk.Error) {
+	logger := ctx.Logger().With("module", StoreKey).With("storyID", storyID)
+
+	// Check if user backed
+	b, err := k.backingKeeper.BackingByStoryIDAndCreator(ctx, storyID, creator)
+	if err != nil && err.Code() != backing.CodeNotFound {
+		return 0, err
+	}
+	if b.Vote != nil && err == nil {
+		logger.Info("Toggling backing vote to challenge vote")
+		k.backingKeeper.Delete(ctx, b)
+		id, err := k.challengeKeeper.Create(ctx, storyID, b.Amount(), b.Argument, creator, true)
+		if err != nil {
+			return 0, err
+		}
+		return id, nil
+	}
+
+	// Check if user challenged
+	c, err := k.challengeKeeper.ChallengeByStoryIDAndCreator(ctx, storyID, creator)
+	// if err is different than not found
+	if err != nil && err.Code() != challenge.CodeNotFound {
+		return 0, err
+	}
+	if c.Vote != nil && err == nil {
+		logger.Info("Toggling challenge vote to backing vote")
+		k.challengeKeeper.Delete(ctx, c)
+		id, err := k.backingKeeper.Create(ctx, storyID, c.Amount(), c.Argument, creator, true)
+		if err != nil {
+			return 0, err
+		}
+		return id, nil
+	}
+
+	// Check if user has a token vote and toggle the vote value
+	tv, err := k.TokenVotesByStoryIDAndCreator(ctx, storyID, creator)
+	if err != nil {
+		return 0, err
+	}
+	if tv.Vote != nil {
+		logger.Info(fmt.Sprintf("Toggling token vote from %T fo %T", tv.Vote.Vote, !tv.Vote.Vote))
+		tv.Vote.Vote = !tv.Vote.Vote
+		// Update the time when the vote was toggled
+		tv.Vote.Timestamp = app.NewTimestamp(ctx.BlockHeader())
+		k.Update(ctx, tv)
+	}
+	return tv.ID(), nil
+
 }
 
 // ============================================================================

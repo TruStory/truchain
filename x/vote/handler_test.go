@@ -26,7 +26,7 @@ func TestCreateVoteMsg(t *testing.T) {
 	k.bankKeeper.AddCoins(ctx, creator, sdk.Coins{amount.Plus(amount)})
 
 	argument := "test argument"
-	_, err := k.challengeKeeper.Create(ctx, storyID, amount, argument, creator)
+	_, err := k.challengeKeeper.Create(ctx, storyID, amount, argument, creator, false)
 	assert.Nil(t, err)
 
 	msg := NewCreateVoteMsg(storyID, amount, "valid comment", creator, true)

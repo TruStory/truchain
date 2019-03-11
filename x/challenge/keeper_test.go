@@ -29,7 +29,7 @@ func TestNewGetChallenge(t *testing.T) {
 	// give user some funds
 	bankKeeper.AddCoins(ctx, creator, sdk.Coins{amount})
 
-	id, err := k.Create(ctx, storyID, amount, argument, creator)
+	id, err := k.Create(ctx, storyID, amount, argument, creator, false)
 	assert.Nil(t, err)
 
 	challenge, err := k.Challenge(ctx, id)
@@ -49,7 +49,7 @@ func TestNewGetChallengeUsingTruStake(t *testing.T) {
 	// give user some funds
 	bankKeeper.AddCoins(ctx, creator, sdk.Coins{amount})
 
-	id, err := k.Create(ctx, storyID, amount, argument, creator)
+	id, err := k.Create(ctx, storyID, amount, argument, creator, false)
 	assert.Nil(t, err)
 
 	challenge, err := k.Challenge(ctx, id)
@@ -71,8 +71,8 @@ func TestChallengesByStoryID(t *testing.T) {
 	creator2 := sdk.AccAddress([]byte{3, 4})
 	bankKeeper.AddCoins(ctx, creator2, sdk.Coins{amount})
 
-	k.Create(ctx, storyID, amount, argument, creator)
-	_, err := k.Create(ctx, storyID, amount, argument, creator2)
+	k.Create(ctx, storyID, amount, argument, creator, false)
+	_, err := k.Create(ctx, storyID, amount, argument, creator2, false)
 	assert.NotNil(t, err)
 
 	story, _ := sk.Story(ctx, storyID)
@@ -90,7 +90,7 @@ func TestChallengesByStoryIDAndCreator(t *testing.T) {
 	creator := sdk.AccAddress([]byte{1, 2})
 	bankKeeper.AddCoins(ctx, creator, sdk.Coins{amount})
 
-	k.Create(ctx, storyID, amount, argument, creator)
+	k.Create(ctx, storyID, amount, argument, creator, false)
 
 	challenge, _ := k.ChallengeByStoryIDAndCreator(ctx, storyID, creator)
 	assert.Equal(t, int64(1), challenge.ID())
@@ -109,8 +109,8 @@ func TestTally(t *testing.T) {
 	creator2 := sdk.AccAddress([]byte{3, 4})
 	bankKeeper.AddCoins(ctx, creator2, sdk.Coins{amount})
 
-	k.Create(ctx, storyID, amount, argument, creator)
-	_, err := k.Create(ctx, storyID, amount, argument, creator2)
+	k.Create(ctx, storyID, amount, argument, creator, false)
+	_, err := k.Create(ctx, storyID, amount, argument, creator2, false)
 	assert.NotNil(t, err)
 
 	falseVotes, _ := k.Tally(ctx, storyID)
@@ -129,10 +129,10 @@ func TestNewChallenge_Duplicate(t *testing.T) {
 	// give user some funds
 	bankKeeper.AddCoins(ctx, creator, sdk.Coins{amount.Plus(amount)})
 
-	_, err := k.Create(ctx, storyID, amount, argument, creator)
+	_, err := k.Create(ctx, storyID, amount, argument, creator, false)
 	assert.Nil(t, err)
 
-	_, err = k.Create(ctx, storyID, amount, argument, creator)
+	_, err = k.Create(ctx, storyID, amount, argument, creator, false)
 	assert.NotNil(t, err)
 	assert.Equal(t, ErrDuplicateChallenge(5, creator).Code(), err.Code())
 }
@@ -145,7 +145,7 @@ func TestNewChallenge_ErrIncorrectCategoryCoin(t *testing.T) {
 	argument := "test argument"
 	creator := sdk.AccAddress([]byte{1, 2})
 
-	_, err := k.Create(ctx, storyID, amount, argument, creator)
+	_, err := k.Create(ctx, storyID, amount, argument, creator, false)
 	assert.NotNil(t, err)
 }
 
@@ -162,19 +162,19 @@ func Test_checkThreshold(t *testing.T) {
 	challenger2 := fakeFundedCreator(ctx, bankKeeper)
 
 	_, err := backingKeeper.Create(
-		ctx, storyID, amount, argument, backer1)
+		ctx, storyID, amount, argument, backer1, false)
 	assert.Nil(t, err)
 
 	_, err = backingKeeper.Create(
-		ctx, storyID, amount, argument, backer2)
+		ctx, storyID, amount, argument, backer2, false)
 	assert.Nil(t, err)
 
 	_, err = k.Create(
-		ctx, storyID, amount, argument, challenger1)
+		ctx, storyID, amount, argument, challenger1, false)
 	assert.Nil(t, err)
 
 	_, err = k.Create(
-		ctx, storyID, amount, argument, challenger2)
+		ctx, storyID, amount, argument, challenger2, false)
 	assert.Nil(t, err)
 
 	err = k.checkThreshold(ctx, storyID)
@@ -182,4 +182,29 @@ func Test_checkThreshold(t *testing.T) {
 
 	story, _ := storyKeeper.Story(ctx, storyID)
 	assert.Equal(t, story.Status.String(), "Challenged")
+}
+
+func Test_ChallengeDelete(t *testing.T) {
+	ctx, k, storyKeeper, _, bankKeeper := mockDB()
+	ctx = ctx.WithBlockHeader(abci.Header{Time: time.Now()})
+	storyID := createFakeStory(ctx, storyKeeper)
+	amount := sdk.NewCoin("trusteak", sdk.NewInt(10000000000))
+	argument := "test argument right here"
+	challenger1 := fakeFundedCreator(ctx, bankKeeper)
+	totalCoins := bankKeeper.GetCoins(ctx, challenger1)
+
+	id, err := k.Create(
+		ctx, storyID, amount, argument, challenger1, false)
+	assert.NoError(t, err)
+
+	challenge, err := k.Challenge(ctx, id)
+	assert.NoError(t, err)
+	assert.NotNil(t, challenge.Vote)
+	assert.Equal(t, totalCoins.Minus(sdk.Coins{amount}), bankKeeper.GetCoins(ctx, challenger1), "coins should have been deducted")
+
+	k.Delete(ctx, challenge)
+
+	_, err = k.Challenge(ctx, id)
+	assert.Equal(t, CodeNotFound, err.Code())
+	assert.Equal(t, totalCoins, bankKeeper.GetCoins(ctx, challenger1), "coins should have been added back")
 }

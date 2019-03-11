@@ -23,7 +23,7 @@ func TestCreateGetVote(t *testing.T) {
 	k.bankKeeper.AddCoins(ctx, creator, sdk.Coins{amount.Plus(amount)})
 
 	argument := "test argument"
-	_, err := k.challengeKeeper.Create(ctx, storyID, amount, argument, creator)
+	_, err := k.challengeKeeper.Create(ctx, storyID, amount, argument, creator, false)
 	assert.Nil(t, err)
 
 	voteID, err := k.Create(ctx, storyID, amount, true, comment, creator)
@@ -79,7 +79,7 @@ func TestGetVotesByGameID(t *testing.T) {
 	k.bankKeeper.AddCoins(ctx, creator2, sdk.Coins{amount})
 
 	argument := "test argument"
-	_, err := k.challengeKeeper.Create(ctx, storyID, amount, argument, creator)
+	_, err := k.challengeKeeper.Create(ctx, storyID, amount, argument, creator, false)
 	assert.Nil(t, err)
 
 	_, err = k.Create(ctx, storyID, amount, true, comment, creator)
@@ -106,7 +106,7 @@ func TestGetVotesByStoryIDAndCreator(t *testing.T) {
 	k.bankKeeper.AddCoins(ctx, creator, sdk.Coins{amount.Plus(amount)})
 
 	argument := "test argument"
-	_, err := k.challengeKeeper.Create(ctx, storyID, amount, argument, creator)
+	_, err := k.challengeKeeper.Create(ctx, storyID, amount, argument, creator, false)
 	assert.Nil(t, err)
 
 	_, err = k.Create(ctx, storyID, amount, true, comment, creator)
@@ -130,7 +130,7 @@ func TestTotalVoteAmountByGameID(t *testing.T) {
 	k.bankKeeper.AddCoins(ctx, creator1, sdk.Coins{amount.Plus(amount)})
 
 	argument := "test argument"
-	_, err := k.challengeKeeper.Create(ctx, storyID, amount, argument, creator)
+	_, err := k.challengeKeeper.Create(ctx, storyID, amount, argument, creator, false)
 	assert.Nil(t, err)
 
 	// create votes
@@ -187,7 +187,7 @@ func TestUpdateVote_AddWeightOnTally(t *testing.T) {
 	k.bankKeeper.AddCoins(ctx, creator, sdk.Coins{amount.Plus(amount)})
 
 	argument := "test argument"
-	_, err := k.challengeKeeper.Create(ctx, storyID, amount, argument, creator)
+	_, err := k.challengeKeeper.Create(ctx, storyID, amount, argument, creator, false)
 	assert.Nil(t, err)
 
 	_, err1 := k.Create(ctx, storyID, amount, true, comment, creator)
