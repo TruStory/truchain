@@ -111,7 +111,10 @@ func (k Keeper) ToggleVote(ctx sdk.Context, storyID int64, amount sdk.Coin, argu
 	}
 	if b.Vote != nil && err == nil {
 		logger.Info("Toggling backing vote to challenge vote")
-		k.backingKeeper.Delete(ctx, b)
+		err = k.backingKeeper.Delete(ctx, b)
+		if err != nil {
+			return 0, err
+		}
 		id, err := k.challengeKeeper.Create(ctx, storyID, b.Amount(), b.Argument, creator, true)
 		if err != nil {
 			return 0, err
@@ -127,7 +130,10 @@ func (k Keeper) ToggleVote(ctx sdk.Context, storyID int64, amount sdk.Coin, argu
 	}
 	if c.Vote != nil && err == nil {
 		logger.Info("Toggling challenge vote to backing vote")
-		k.challengeKeeper.Delete(ctx, c)
+		err = k.challengeKeeper.Delete(ctx, c)
+		if err != nil {
+			return 0, err
+		}
 		id, err := k.backingKeeper.Create(ctx, storyID, c.Amount(), c.Argument, creator, true)
 		if err != nil {
 			return 0, err

@@ -50,7 +50,7 @@ type WriteKeeper interface {
 		amount sdk.Coin,
 		argument string,
 		creator sdk.AccAddress,
-		toggle bool) (int64, sdk.Error)
+		toggled bool) (int64, sdk.Error)
 	Update(ctx sdk.Context, backing Backing)
 	Delete(ctx sdk.Context, backing Backing) sdk.Error
 }
