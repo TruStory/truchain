@@ -357,5 +357,31 @@ func Test_ToggleVote_ChallengeState(t *testing.T) {
 	_, err = k.ToggleVote(ctx, storyID, amount, argument, creator)
 	assert.Error(t, err)
 	assert.Equal(t, CodeInvalidStoryState, err.Code())
+}
+
+func Test_Toggle_InvalidStoryID(t *testing.T) {
+	ctx, k, _ := mockDB()
+
+	amount := sdk.NewCoin(app.StakeDenom, sdk.NewInt(15000000000))
+
+	creator := sdk.AccAddress([]byte{1, 2})
+
+	argument := "test backing argument"
+	_, err := k.ToggleVote(ctx, 0, amount, argument, creator)
+	assert.Error(t, err)
+	assert.Equal(t, story.CodeStoryNotFound, err.Code())
+}
+
+func Test_Toggle_VoteNotFound(t *testing.T) {
+	ctx, k, ck := mockDB()
+
+	amount := sdk.NewCoin(app.StakeDenom, sdk.NewInt(15000000000))
+	storyID := createFakeStory(ctx, k.storyKeeper, ck, story.Challenged)
+	creator := sdk.AccAddress([]byte{1, 2})
+
+	argument := "test backing argument"
+	_, err := k.ToggleVote(ctx, storyID, amount, argument, creator)
+	assert.Error(t, err)
+	assert.Equal(t, CodeNotFound, err.Code())
 
 }

@@ -62,6 +62,7 @@ test: set_registrar set_env_vars go_test
 
 test_cover: set_registrar set_env_vars
 	@go test $(PACKAGES) -v -timeout 30m -race -coverprofile=coverage.txt -covermode=atomic
+	@go tool cover -html=coverage.txt
 
 update_deps:
 	@echo "--> Running dep ensure"
