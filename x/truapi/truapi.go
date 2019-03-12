@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"time"
 
 	"github.com/TruStory/truchain/x/voting"
 	"github.com/dghubble/gologin/twitter"
@@ -90,6 +91,10 @@ func (ta *TruAPI) RegisterOAuthRoutes() {
 
 // RegisterResolvers builds the app's GraphQL schema from resolvers (declared in `resolver.go`)
 func (ta *TruAPI) RegisterResolvers() {
+	formatTime := func(t time.Time) string {
+		return t.UTC().Format(time.UnixDate)
+	}
+
 	getUser := func(ctx context.Context, addr sdk.AccAddress) users.User {
 		res := ta.usersResolver(ctx, users.QueryUsersByAddressesParams{Addresses: []string{addr.String()}})
 		if len(res) > 0 {
@@ -201,11 +206,14 @@ func (ta *TruAPI) RegisterResolvers() {
 		"votes":              func(ctx context.Context, q story.Story) []vote.TokenVote { return getVotes(ctx, q.ID) },
 		"voteResults":        func(ctx context.Context, q story.Story) voting.VoteResult { return getVoteResults(ctx, q.ID) },
 		"state":              func(ctx context.Context, q story.Story) story.Status { return q.Status },
+		"expireTime":         func(_ context.Context, q story.Story) string { return formatTime(q.ExpireTime) },
+		"votingStartTime":    func(_ context.Context, q story.Story) string { return formatTime(q.VotingStartTime) },
+		"votingEndTime":      func(_ context.Context, q story.Story) string { return formatTime(q.VotingEndTime) },
 	})
 
-	ta.GraphQLClient.RegisterObjectResolver("voteResults", voting.VoteResult{}, map[string]interface{}{
-		"backedCredTotal":     func(_ context.Context, q voting.VoteResult) string { return q.BackedCredTotal.String() },
-		"challengedCredTotal": func(_ context.Context, q voting.VoteResult) string { return q.ChallengedCredTotal.String() },
+	ta.GraphQLClient.RegisterObjectResolver("Timestamp", app.Timestamp{}, map[string]interface{}{
+		"createdTime": func(_ context.Context, t app.Timestamp) string { return formatTime(t.CreatedTime) },
+		"updatedTime": func(_ context.Context, t app.Timestamp) string { return formatTime(t.UpdatedTime) },
 	})
 
 	ta.GraphQLClient.RegisterObjectResolver("TwitterProfile", db.TwitterProfile{}, map[string]interface{}{
@@ -232,6 +240,11 @@ func (ta *TruAPI) RegisterResolvers() {
 		"weight":    func(ctx context.Context, q vote.TokenVote) string { return q.Weight().String() },
 		"creator":   func(ctx context.Context, q vote.TokenVote) users.User { return getUser(ctx, q.Creator()) },
 		"timestamp": func(ctx context.Context, q vote.TokenVote) app.Timestamp { return q.Timestamp() },
+	})
+
+	ta.GraphQLClient.RegisterObjectResolver("voteResults", voting.VoteResult{}, map[string]interface{}{
+		"backedCredTotal":     func(_ context.Context, q voting.VoteResult) string { return q.BackedCredTotal.String() },
+		"challengedCredTotal": func(_ context.Context, q voting.VoteResult) string { return q.ChallengedCredTotal.String() },
 	})
 
 	ta.GraphQLClient.BuildSchema()

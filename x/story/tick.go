@@ -23,7 +23,7 @@ func (k Keeper) EndBlock(ctx sdk.Context) sdk.Tags {
 // a story, and pushes it's id to the appropriate queue (voting or expired) to
 // be handled later in another end blocker.
 func (k Keeper) processPendingStoryQueue(ctx sdk.Context, pendingStoryQueue queue.Queue) sdk.Error {
-	logger := ctx.Logger().With("module", "story")
+	logger := ctx.Logger().With("module", StoreKey)
 
 	if pendingStoryQueue.IsEmpty() {
 		return nil

@@ -287,7 +287,7 @@ func (k Keeper) Stories(ctx sdk.Context) (stories []Story) {
 
 // UpdateStory updates an existing story in the store
 func (k Keeper) UpdateStory(ctx sdk.Context, story Story) {
-	logger := ctx.Logger().With("module", "story")
+	logger := ctx.Logger().With("module", StoreKey)
 
 	newStory := Story{
 		story.ID,
