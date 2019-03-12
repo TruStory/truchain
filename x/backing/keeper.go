@@ -49,9 +49,10 @@ type WriteKeeper interface {
 		storyID int64,
 		amount sdk.Coin,
 		argument string,
-		creator sdk.AccAddress) (int64, sdk.Error)
-
+		creator sdk.AccAddress,
+		toggled bool) (int64, sdk.Error)
 	Update(ctx sdk.Context, backing Backing)
+	Delete(ctx sdk.Context, backing Backing) sdk.Error
 }
 
 // Keeper data type storing keys to the key-value store
@@ -93,11 +94,12 @@ func (k Keeper) Create(
 	storyID int64,
 	amount sdk.Coin,
 	argument string,
-	creator sdk.AccAddress) (id int64, err sdk.Error) {
+	creator sdk.AccAddress,
+	toggled bool) (id int64, err sdk.Error) {
 
 	logger := ctx.Logger().With("module", StoreKey)
 
-	err = k.stakeKeeper.ValidateStoryState(ctx, storyID)
+	err = k.stakeKeeper.ValidateStoryState(ctx, storyID, toggled)
 	if err != nil {
 		return 0, err
 	}
@@ -157,6 +159,30 @@ func (k Keeper) Update(ctx sdk.Context, backing Backing) {
 	}
 
 	k.setBacking(ctx, newBacking)
+}
+
+// Delete deletes a backing and restores coins to the user.
+func (k Keeper) Delete(ctx sdk.Context, backing Backing) sdk.Error {
+
+	backingIDKey := k.GetIDKey(backing.ID())
+
+	if !k.GetStore(ctx).Has(backingIDKey) {
+		return ErrNotFound(backing.ID())
+	}
+
+	// removes backing
+	k.GetStore(ctx).Delete(backingIDKey)
+
+	// restore coins
+	_, _, err := k.bankKeeper.AddCoins(ctx, backing.Creator(), []sdk.Coin{backing.Amount()})
+	if err != nil {
+		return err
+	}
+
+	// removes backing association from the backing list
+	k.backingStoryList.Delete(ctx, k, backing.StoryID(), backing.Creator())
+
+	return nil
 }
 
 // Backing gets the backing at the current index from the KVStore

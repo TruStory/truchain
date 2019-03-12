@@ -23,7 +23,7 @@ func TestCreateGetVote(t *testing.T) {
 	k.bankKeeper.AddCoins(ctx, creator, sdk.Coins{amount.Plus(amount)})
 
 	argument := "test argument"
-	_, err := k.challengeKeeper.Create(ctx, storyID, amount, argument, creator)
+	_, err := k.challengeKeeper.Create(ctx, storyID, amount, argument, creator, false)
 	assert.Nil(t, err)
 
 	voteID, err := k.Create(ctx, storyID, amount, true, comment, creator)
@@ -79,7 +79,7 @@ func TestGetVotesByGameID(t *testing.T) {
 	k.bankKeeper.AddCoins(ctx, creator2, sdk.Coins{amount})
 
 	argument := "test argument"
-	_, err := k.challengeKeeper.Create(ctx, storyID, amount, argument, creator)
+	_, err := k.challengeKeeper.Create(ctx, storyID, amount, argument, creator, false)
 	assert.Nil(t, err)
 
 	_, err = k.Create(ctx, storyID, amount, true, comment, creator)
@@ -106,7 +106,7 @@ func TestGetVotesByStoryIDAndCreator(t *testing.T) {
 	k.bankKeeper.AddCoins(ctx, creator, sdk.Coins{amount.Plus(amount)})
 
 	argument := "test argument"
-	_, err := k.challengeKeeper.Create(ctx, storyID, amount, argument, creator)
+	_, err := k.challengeKeeper.Create(ctx, storyID, amount, argument, creator, false)
 	assert.Nil(t, err)
 
 	_, err = k.Create(ctx, storyID, amount, true, comment, creator)
@@ -130,7 +130,7 @@ func TestTotalVoteAmountByGameID(t *testing.T) {
 	k.bankKeeper.AddCoins(ctx, creator1, sdk.Coins{amount.Plus(amount)})
 
 	argument := "test argument"
-	_, err := k.challengeKeeper.Create(ctx, storyID, amount, argument, creator)
+	_, err := k.challengeKeeper.Create(ctx, storyID, amount, argument, creator, false)
 	assert.Nil(t, err)
 
 	// create votes
@@ -187,7 +187,7 @@ func TestUpdateVote_AddWeightOnTally(t *testing.T) {
 	k.bankKeeper.AddCoins(ctx, creator, sdk.Coins{amount.Plus(amount)})
 
 	argument := "test argument"
-	_, err := k.challengeKeeper.Create(ctx, storyID, amount, argument, creator)
+	_, err := k.challengeKeeper.Create(ctx, storyID, amount, argument, creator, false)
 	assert.Nil(t, err)
 
 	_, err1 := k.Create(ctx, storyID, amount, true, comment, creator)
@@ -203,4 +203,159 @@ func TestUpdateVote_AddWeightOnTally(t *testing.T) {
 	assert.Equal(t, int64(1), updatedVote.ID())
 
 	assert.Equal(t, updatedVote.Weight().String(), "1000000000")
+}
+
+func Test_ToggleVote_ChallengeToBacking(t *testing.T) {
+	ctx, k, ck := mockDB()
+
+	storyID := createFakeStory(ctx, k.storyKeeper, ck, story.Pending)
+	amount := sdk.NewCoin(app.StakeDenom, sdk.NewInt(15000000000))
+
+	creator := sdk.AccAddress([]byte{1, 2})
+
+	// give user some funds
+	k.bankKeeper.AddCoins(ctx, creator, sdk.Coins{amount.Plus(amount)})
+
+	argument := "test argument"
+	_, err := k.challengeKeeper.Create(ctx, storyID, amount, argument, creator, false)
+	assert.Nil(t, err)
+
+	backingID, err := k.ToggleVote(ctx, storyID, amount, argument, creator)
+	assert.NoError(t, err)
+
+	b, err := k.backingKeeper.Backing(ctx, backingID)
+	assert.NoError(t, err)
+	assert.NotNil(t, b.Vote)
+}
+
+func Test_ToggleVote_BackingToChallenge(t *testing.T) {
+	ctx, k, ck := mockDB()
+
+	storyID := createFakeStory(ctx, k.storyKeeper, ck, story.Pending)
+	amount := sdk.NewCoin(app.StakeDenom, sdk.NewInt(15000000000))
+
+	creator := sdk.AccAddress([]byte{1, 2})
+	creator1 := sdk.AccAddress([]byte{2, 3})
+
+	// give user some funds
+	k.bankKeeper.AddCoins(ctx, creator, sdk.Coins{amount.Plus(amount)})
+	k.bankKeeper.AddCoins(ctx, creator1, sdk.Coins{amount.Plus(amount)})
+
+	argument := "test backing argument"
+	_, err := k.backingKeeper.Create(ctx, storyID, amount, argument, creator, false)
+	assert.Nil(t, err)
+
+	argument = "test  challenge argument"
+	_, err = k.challengeKeeper.Create(ctx, storyID, amount, argument, creator1, false)
+	assert.NoError(t, err)
+
+	s, err := k.storyKeeper.Story(ctx, storyID)
+	assert.NoError(t, err)
+
+	assert.Equal(t, story.Challenged, s.Status)
+
+	challengeID, err := k.ToggleVote(ctx, storyID, amount, argument, creator)
+	assert.NoError(t, err)
+
+	b, err := k.challengeKeeper.Challenge(ctx, challengeID)
+	assert.NoError(t, err)
+	assert.NotNil(t, b.Vote)
+}
+
+func Test_ToggleVote_TokenVote_FalseTrue(t *testing.T) {
+	ctx, k, ck := mockDB()
+
+	storyID := createFakeStory(ctx, k.storyKeeper, ck, story.Pending)
+	amount := sdk.NewCoin(app.StakeDenom, sdk.NewInt(15000000000))
+
+	creator := sdk.AccAddress([]byte{1, 2})
+	creator1 := sdk.AccAddress([]byte{2, 3})
+
+	// give user some funds
+	k.bankKeeper.AddCoins(ctx, creator, sdk.Coins{amount.Plus(amount)})
+	k.bankKeeper.AddCoins(ctx, creator1, sdk.Coins{amount.Plus(amount)})
+
+	argument := "test  challenge argument"
+	_, err := k.challengeKeeper.Create(ctx, storyID, amount, argument, creator, false)
+	assert.NoError(t, err)
+
+	// Test story switched to challenged state
+	s, err := k.storyKeeper.Story(ctx, storyID)
+	assert.NoError(t, err)
+	assert.Equal(t, story.Challenged, s.Status)
+
+	// Create Token vote
+	_, err = k.Create(ctx, storyID, amount, false, argument, creator1)
+	assert.NoError(t, err)
+
+	// Should return the ID of the token vote
+	tokenVoteID, err := k.ToggleVote(ctx, storyID, amount, argument, creator1)
+	assert.NoError(t, err)
+
+	b, err := k.TokenVote(ctx, tokenVoteID)
+	assert.NoError(t, err)
+	assert.NotNil(t, b.Vote)
+	assert.True(t, b.VoteChoice())
+}
+
+func Test_ToggleVote_TokenVote_TrueFalse(t *testing.T) {
+	ctx, k, ck := mockDB()
+
+	storyID := createFakeStory(ctx, k.storyKeeper, ck, story.Pending)
+	amount := sdk.NewCoin(app.StakeDenom, sdk.NewInt(15000000000))
+
+	creator := sdk.AccAddress([]byte{1, 2})
+	creator1 := sdk.AccAddress([]byte{2, 3})
+
+	// give user some funds
+	k.bankKeeper.AddCoins(ctx, creator, sdk.Coins{amount.Plus(amount)})
+	k.bankKeeper.AddCoins(ctx, creator1, sdk.Coins{amount.Plus(amount)})
+
+	argument := "test  challenge argument"
+	_, err := k.challengeKeeper.Create(ctx, storyID, amount, argument, creator, false)
+	assert.NoError(t, err)
+
+	// Test story switched to challenged state
+	s, err := k.storyKeeper.Story(ctx, storyID)
+	assert.NoError(t, err)
+	assert.Equal(t, story.Challenged, s.Status)
+
+	// Create Token vote
+	_, err = k.Create(ctx, storyID, amount, true, argument, creator1)
+	assert.NoError(t, err)
+
+	// Should return the ID of the token vote
+	tokenVoteID, err := k.ToggleVote(ctx, storyID, amount, argument, creator1)
+	assert.NoError(t, err)
+
+	b, err := k.TokenVote(ctx, tokenVoteID)
+	assert.NoError(t, err)
+	assert.NotNil(t, b.Vote)
+	assert.False(t, b.VoteChoice())
+}
+
+func Test_ToggleVote_ChallengeState(t *testing.T) {
+	ctx, k, ck := mockDB()
+
+	storyID := createFakeStory(ctx, k.storyKeeper, ck, story.Pending)
+	amount := sdk.NewCoin(app.StakeDenom, sdk.NewInt(15000000000))
+
+	creator := sdk.AccAddress([]byte{1, 2})
+
+	// give user some funds
+	k.bankKeeper.AddCoins(ctx, creator, sdk.Coins{amount.Plus(amount)})
+
+	argument := "test backing argument"
+	_, err := k.backingKeeper.Create(ctx, storyID, amount, argument, creator, false)
+	assert.Nil(t, err)
+
+	s, err := k.storyKeeper.Story(ctx, storyID)
+	assert.NoError(t, err)
+
+	assert.Equal(t, story.Pending, s.Status)
+
+	_, err = k.ToggleVote(ctx, storyID, amount, argument, creator)
+	assert.Error(t, err)
+	assert.Equal(t, CodeInvalidStoryState, err.Code())
+
 }

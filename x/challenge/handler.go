@@ -28,7 +28,7 @@ func handleCreateChallengeMsg(
 	}
 
 	id, err := k.Create(
-		ctx, msg.StoryID, msg.Amount, msg.Argument, msg.Creator)
+		ctx, msg.StoryID, msg.Amount, msg.Argument, msg.Creator, false)
 	if err != nil {
 		return err.Result()
 	}

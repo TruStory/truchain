@@ -27,11 +27,11 @@ func Test_handleExpiredStories(t *testing.T) {
 	challenger := fakeFundedCreator(ctx, bankKeeper)
 
 	_, err := backingKeeper.Create(
-		ctx, storyID, amount, argument, backer)
+		ctx, storyID, amount, argument, backer, false)
 	assert.Nil(t, err)
 
 	_, err = challengeKeeper.Create(
-		ctx, storyID, amount, argument, challenger)
+		ctx, storyID, amount, argument, challenger, false)
 	assert.Nil(t, err)
 
 	// fake expired story queue

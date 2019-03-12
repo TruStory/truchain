@@ -89,10 +89,14 @@ func (k Keeper) ValidateArgument(ctx sdk.Context, argument string) sdk.Error {
 }
 
 // ValidateStoryState makes sure only a pending story can be staked
-func (k Keeper) ValidateStoryState(ctx sdk.Context, storyID int64) sdk.Error {
+func (k Keeper) ValidateStoryState(ctx sdk.Context, storyID int64, toggled bool) sdk.Error {
 	s, err := k.storyKeeper.Story(ctx, storyID)
 	if err != nil {
 		return err
+	}
+
+	if toggled && s.Status == story.Challenged {
+		return nil
 	}
 
 	if s.Status != story.Pending {
