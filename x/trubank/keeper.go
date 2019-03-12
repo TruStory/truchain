@@ -30,7 +30,7 @@ type WriteKeeper interface {
 
 	AddCoin(ctx sdk.Context, creator sdk.AccAddress, coin sdk.Coin, storyID int64, transactionType TransactionType, referenceID int64) (coins sdk.Coins, err sdk.Error)
 	SubtractCoin(ctx sdk.Context, creator sdk.AccAddress, coin sdk.Coin, storyID int64, transactionType TransactionType, referenceID int64) (coins sdk.Coins, err sdk.Error)
-	MintAndAddCoin(ctx sdk.Context, creator sdk.AccAddress, catID int64, amt sdk.Int) (sdk.Coins, sdk.Error)
+	MintAndAddCoin(ctx sdk.Context, creator sdk.AccAddress, catID int64, storyID int64, amt sdk.Int) (sdk.Coins, sdk.Error)
 }
 
 // Keeper data type storing keys to the key-value store
@@ -104,6 +104,7 @@ func (k Keeper) MintAndAddCoin(
 	ctx sdk.Context,
 	creator sdk.AccAddress,
 	catID int64,
+	storyID int64,
 	amt sdk.Int) (sdk.Coins, sdk.Error) {
 
 	logger := ctx.Logger().With("module", StoreKey)
@@ -115,7 +116,7 @@ func (k Keeper) MintAndAddCoin(
 
 	coin := sdk.NewCoin(cat.Slug, amt)
 
-	coins, _, err := k.bankKeeper.AddCoins(ctx, creator, sdk.Coins{coin})
+	coins, err := k.AddCoin(ctx, creator, coin, storyID, Interest, 0)
 	if err != nil {
 		return nil, ErrTransferringCoinsToUser(creator)
 	}

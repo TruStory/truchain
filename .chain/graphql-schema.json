@@ -1655,7 +1655,7 @@
             "deprecationReason": "",
             "description": "",
             "isDeprecated": false,
-            "name": "created",
+            "name": "createdTime",
             "type": {
               "kind": "NON_NULL",
               "name": "",
@@ -1759,6 +1759,22 @@
             "deprecationReason": "",
             "description": "",
             "isDeprecated": false,
+            "name": "story",
+            "type": {
+              "kind": "NON_NULL",
+              "name": "",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "Story",
+                "ofType": null
+              }
+            }
+          },
+          {
+            "args": [],
+            "deprecationReason": "",
+            "description": "",
+            "isDeprecated": false,
             "name": "storyID",
             "type": {
               "kind": "NON_NULL",
@@ -1766,38 +1782,6 @@
               "ofType": {
                 "kind": "SCALAR",
                 "name": "int64",
-                "ofType": null
-              }
-            }
-          },
-          {
-            "args": [],
-            "deprecationReason": "",
-            "description": "",
-            "isDeprecated": false,
-            "name": "storyId",
-            "type": {
-              "kind": "NON_NULL",
-              "name": "",
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "int64",
-                "ofType": null
-              }
-            }
-          },
-          {
-            "args": [],
-            "deprecationReason": "",
-            "description": "",
-            "isDeprecated": false,
-            "name": "storyState",
-            "type": {
-              "kind": "NON_NULL",
-              "name": "",
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "int8",
                 "ofType": null
               }
             }
