@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"time"
 
 	trubank "github.com/TruStory/truchain/x/trubank"
 	"github.com/TruStory/truchain/x/voting"
@@ -231,7 +232,10 @@ func (ta *TruAPI) RegisterResolvers() {
 	})
 
 	ta.GraphQLClient.RegisterObjectResolver("Transactions", trubank.Transaction{}, map[string]interface{}{
-		"id": func(_ context.Context, q trubank.Transaction) int64 { return q.ID },
+		"id":              func(_ context.Context, q trubank.Transaction) int64 { return q.ID },
+		"transactionType": func(_ context.Context, q trubank.Transaction) trubank.TransactionType { return q.TransactionType },
+		"status":          func(_ context.Context, q trubank.Transaction) trubank.Status { return q.Status },
+		"created":         func(ctx context.Context, q trubank.Transaction) time.Time { return q.Timestamp.CreatedTime },
 	})
 
 	ta.GraphQLClient.RegisterObjectResolver("URL", url.URL{}, map[string]interface{}{

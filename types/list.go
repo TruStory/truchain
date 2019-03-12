@@ -72,6 +72,30 @@ func (l UserList) Map(
 	return nil
 }
 
+// MapByUser applies a function
+func (l UserList) MapByUser(
+	ctx sdk.Context, k WriteKeeper, keyID int64, user sdk.AccAddress, fn func(int64) sdk.Error) sdk.Error {
+
+	// get store
+	store := k.GetStore(ctx)
+
+	// builds prefix
+	prefix := l.typeByUserKey(ctx, k, keyID, user)
+
+	// iterates through keyspace to find all value ids
+	iter := sdk.KVStorePrefixIterator(store, prefix)
+	defer iter.Close()
+	for ; iter.Valid(); iter.Next() {
+		var id int64
+		k.GetCodec().MustUnmarshalBinaryBare(iter.Value(), &id)
+		if err := fn(id); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
 // ============================================================================
 
 // generates key "[foreignStoreKey]:id:[keyID]:[storeKey]:users:[user]"

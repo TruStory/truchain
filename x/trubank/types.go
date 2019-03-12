@@ -17,8 +17,8 @@ type Transaction struct {
 
 // TransactionDetails pulls back both the transaction and the vote object around it
 type TransactionDetails struct {
-	Transaction Transaction `json:"transaction"`
-	Details     *app.Vote   `json:"vote"`
+	Transaction
+	Details *app.Vote
 }
 
 // TransactionType defines the type of transaction
@@ -28,7 +28,7 @@ type TransactionType int8
 const (
 	Backing TransactionType = iota
 	Challenge
-	StoryCreation
+	// StoryCreation
 )
 
 // Status defines the status of the transaction

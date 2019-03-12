@@ -13,6 +13,10 @@ import (
 const (
 	// StoreKey is string representation of the store key for bank
 	StoreKey = "trubank"
+	// ListStoreKey is string representation of the store key for bank
+	ListStoreKey = "trubankList"
+	// KeyID is used for mapping the transactions to the user, and since 1:1, therefore does not need to be unique
+	KeyID = 1
 )
 
 // ReadKeeper defines a module interface that facilitates read only access
@@ -37,6 +41,7 @@ type Keeper struct {
 
 	bankKeeper     bank.Keeper
 	categoryKeeper cat.WriteKeeper
+	trubankList    app.UserList // transactions <-> story mappings
 }
 
 // NewKeeper creates a new keeper with write and read access
@@ -50,6 +55,7 @@ func NewKeeper(
 		app.NewKeeper(codec, storeKey),
 		bankKeeper,
 		categoryKeeper,
+		app.NewUserList(storeKey),
 	}
 }
 
@@ -67,6 +73,7 @@ func (k Keeper) AddCoin(ctx sdk.Context, creator sdk.AccAddress, coin sdk.Coin, 
 	}
 
 	k.setTransaction(ctx, transaction)
+	k.trubankList.Append(ctx, k, KeyID, creator, transaction.ID)
 
 	return coins, err
 }
@@ -85,6 +92,7 @@ func (k Keeper) SubtractCoin(ctx sdk.Context, creator sdk.AccAddress, coin sdk.C
 	}
 
 	k.setTransaction(ctx, transaction)
+	k.trubankList.Append(ctx, k, KeyID, creator, transaction.ID)
 
 	return coins, err
 }
@@ -148,24 +156,15 @@ func (k Keeper) setTransaction(ctx sdk.Context, transaction Transaction) {
 
 // TransactionsByCreator returns all the transactions for a user
 func (k Keeper) TransactionsByCreator(ctx sdk.Context, creator sdk.AccAddress) (transactions []Transaction, err sdk.Error) {
-	// get store
-	store := k.GetStore(ctx)
 
-	// builds prefix "trubank:creator:"
-	searchKey := fmt.Sprintf("%s:creator:", k.GetStoreKey().Name())
-	searchPrefix := []byte(searchKey)
-
-	// setup iterator
-	iter := sdk.KVStorePrefixIterator(store, searchPrefix)
-	defer iter.Close()
-
-	// iterates through keyspace to find all stories
-	for ; iter.Valid(); iter.Next() {
-		var transaction Transaction
-		k.GetCodec().MustUnmarshalBinaryLengthPrefixed(
-			iter.Value(), &transaction)
+	err = k.trubankList.MapByUser(ctx, k, KeyID, creator, func(transactionID int64) sdk.Error {
+		transaction, err := k.Transaction(ctx, transactionID)
+		if err != nil {
+			return err
+		}
 		transactions = append(transactions, transaction)
-	}
+		return nil
+	})
 
 	return
 }
