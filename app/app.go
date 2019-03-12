@@ -81,7 +81,7 @@ type TruChain struct {
 	paramsKeeper        params.Keeper
 
 	// access truchain multistore
-	backingKeeper      backing.WriteKeeper
+	backingKeeper      backing.Keeper
 	categoryKeeper     category.WriteKeeper
 	challengeKeeper    challenge.WriteKeeper
 	clientParamsKeeper clientParams.Keeper
