@@ -53,7 +53,7 @@ func (k Keeper) DistributePrincipalAndInterest(
 		}
 
 		// give principal back to user in trustake
-		_, err := k.truBankKeeper.AddCoin(ctx, vote.Creator(), vote.Amount(), storyID, typeOfVote, vote.ID(), 1)
+		_, err := k.truBankKeeper.AddCoin(ctx, vote.Creator(), vote.Amount(), storyID, typeOfVote, vote.ID())
 		if err != nil {
 			return err
 		}

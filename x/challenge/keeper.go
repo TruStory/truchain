@@ -148,7 +148,7 @@ func (k Keeper) Create(
 	k.challengeList.Append(ctx, k, storyID, creator, challenge.ID())
 
 	// deduct challenge amount from user
-	_, err = k.trubankKeeper.SubtractCoin(ctx, creator, amount, storyID, 1, challenge.ID(), 0)
+	_, err = k.trubankKeeper.SubtractCoin(ctx, creator, amount, storyID, 1, challenge.ID())
 	if err != nil {
 		return
 	}

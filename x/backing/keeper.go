@@ -143,7 +143,7 @@ func (k Keeper) Create(
 	k.backingStoryList.Append(ctx, k, storyID, creator, backing.ID())
 
 	// subtract principal from user
-	_, err = k.trubankKeeper.SubtractCoin(ctx, creator, amount, storyID, 0, backing.ID(), 0)
+	_, err = k.trubankKeeper.SubtractCoin(ctx, creator, amount, storyID, 0, backing.ID())
 	if err != nil {
 		return
 	}

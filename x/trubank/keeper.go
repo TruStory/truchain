@@ -30,8 +30,8 @@ type ReadKeeper interface {
 type WriteKeeper interface {
 	ReadKeeper
 
-	AddCoin(ctx sdk.Context, creator sdk.AccAddress, coin sdk.Coin, storyID int64, transactionType TransactionType, referenceID int64, status Status) (coins sdk.Coins, err sdk.Error)
-	SubtractCoin(ctx sdk.Context, creator sdk.AccAddress, coin sdk.Coin, storyID int64, transactionType TransactionType, referenceID int64, status Status) (coins sdk.Coins, err sdk.Error)
+	AddCoin(ctx sdk.Context, creator sdk.AccAddress, coin sdk.Coin, storyID int64, transactionType TransactionType, referenceID int64) (coins sdk.Coins, err sdk.Error)
+	SubtractCoin(ctx sdk.Context, creator sdk.AccAddress, coin sdk.Coin, storyID int64, transactionType TransactionType, referenceID int64) (coins sdk.Coins, err sdk.Error)
 	MintAndAddCoin(ctx sdk.Context, creator sdk.AccAddress, catID int64, amt sdk.Int) (sdk.Coins, sdk.Error)
 }
 
@@ -60,15 +60,17 @@ func NewKeeper(
 }
 
 // AddCoin wraps around adding coins via the bank keeper and adds the transaction
-func (k Keeper) AddCoin(ctx sdk.Context, creator sdk.AccAddress, coin sdk.Coin, storyID int64, transactionType TransactionType, referenceID int64, status Status) (coins sdk.Coins, err sdk.Error) {
+func (k Keeper) AddCoin(ctx sdk.Context, creator sdk.AccAddress, coin sdk.Coin, storyID int64, transactionType TransactionType, referenceID int64) (coins sdk.Coins, err sdk.Error) {
 	coins, _, err = k.bankKeeper.AddCoins(ctx, creator, sdk.Coins{coin})
 
 	transaction := Transaction{
 		ID:              k.GetNextID(ctx),
 		TransactionType: transactionType,
 		ReferenceID:     referenceID,
+		StoryID:         storyID,
+		Credit:          true,
+		Amount:          coin,
 		Creator:         creator,
-		Status:          status,
 		Timestamp:       app.NewTimestamp(ctx.BlockHeader()),
 	}
 
@@ -79,15 +81,17 @@ func (k Keeper) AddCoin(ctx sdk.Context, creator sdk.AccAddress, coin sdk.Coin, 
 }
 
 // SubtractCoin wraps around adding coins via the bank keeper and adds the transaction
-func (k Keeper) SubtractCoin(ctx sdk.Context, creator sdk.AccAddress, coin sdk.Coin, storyID int64, transactionType TransactionType, referenceID int64, status Status) (coins sdk.Coins, err sdk.Error) {
+func (k Keeper) SubtractCoin(ctx sdk.Context, creator sdk.AccAddress, coin sdk.Coin, storyID int64, transactionType TransactionType, referenceID int64) (coins sdk.Coins, err sdk.Error) {
 	coins, _, err = k.bankKeeper.SubtractCoins(ctx, creator, sdk.Coins{coin})
 
 	transaction := Transaction{
 		ID:              k.GetNextID(ctx),
 		TransactionType: transactionType,
 		ReferenceID:     referenceID,
+		StoryID:         storyID,
+		Credit:          false,
+		Amount:          coin,
 		Creator:         creator,
-		Status:          status,
 		Timestamp:       app.NewTimestamp(ctx.BlockHeader()),
 	}
 
@@ -162,6 +166,7 @@ func (k Keeper) TransactionsByCreator(ctx sdk.Context, creator sdk.AccAddress) (
 		if err != nil {
 			return err
 		}
+
 		transactions = append(transactions, transaction)
 		return nil
 	})

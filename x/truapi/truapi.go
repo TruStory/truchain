@@ -2,7 +2,6 @@ package truapi
 
 import (
 	"context"
-	"fmt"
 	"net/http"
 	"net/url"
 	"os"
@@ -116,9 +115,11 @@ func (ta *TruAPI) RegisterResolvers() {
 	}
 
 	getTransactions := func(ctx context.Context, creator string) []trubank.Transaction {
-		fmt.Printf("tried to get parameter for %s", creator)
-
 		return ta.transactionHistoryResolver(ctx, app.QueryByCreatorParams{Creator: creator})
+	}
+
+	getStory := func(ctx context.Context, storyID int64) story.Story {
+		return ta.storyResolver(ctx, story.QueryStoryByIDParams{ID: storyID})
 	}
 
 	ta.GraphQLClient.RegisterQueryResolver("backing", ta.backingResolver)
@@ -233,9 +234,15 @@ func (ta *TruAPI) RegisterResolvers() {
 
 	ta.GraphQLClient.RegisterObjectResolver("Transactions", trubank.Transaction{}, map[string]interface{}{
 		"id":              func(_ context.Context, q trubank.Transaction) int64 { return q.ID },
+		"storyId":         func(_ context.Context, q trubank.Transaction) int64 { return q.StoryID },
 		"transactionType": func(_ context.Context, q trubank.Transaction) trubank.TransactionType { return q.TransactionType },
-		"status":          func(_ context.Context, q trubank.Transaction) trubank.Status { return q.Status },
-		"created":         func(ctx context.Context, q trubank.Transaction) time.Time { return q.Timestamp.CreatedTime },
+		"credit":          func(_ context.Context, q trubank.Transaction) bool { return q.Credit },
+		"amount":          func(_ context.Context, q trubank.Transaction) sdk.Coin { return q.Amount },
+		"created":         func(_ context.Context, q trubank.Transaction) time.Time { return q.Timestamp.CreatedTime },
+		"storyState": func(ctx context.Context, q trubank.Transaction) story.Status {
+			story := getStory(ctx, q.StoryID)
+			return story.Status
+		},
 	})
 
 	ta.GraphQLClient.RegisterObjectResolver("URL", url.URL{}, map[string]interface{}{

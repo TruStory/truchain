@@ -9,16 +9,12 @@ import (
 type Transaction struct {
 	ID              int64           `json:"id"`
 	TransactionType TransactionType `json:"transaction_type"`
+	StoryID         int64           `json:"story_id"`
 	ReferenceID     int64           `json:"reference_id"`
+	Credit          bool            `json:"credit"`
+	Amount          sdk.Coin        `json:"amount"`
 	Creator         sdk.AccAddress  `json:"creator"`
-	Status          Status          `json:"status"`
 	Timestamp       app.Timestamp   `json:"timestamp"`
-}
-
-// TransactionDetails pulls back both the transaction and the vote object around it
-type TransactionDetails struct {
-	Transaction
-	Details *app.Vote
 }
 
 // TransactionType defines the type of transaction
@@ -29,13 +25,4 @@ const (
 	Backing TransactionType = iota
 	Challenge
 	// StoryCreation
-)
-
-// Status defines the status of the transaction
-type Status int8
-
-// List of the allowed statuses for a transaction
-const (
-	Pending Status = iota
-	Completed
 )
