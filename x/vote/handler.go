@@ -39,6 +39,9 @@ func handleCreateVoteMsg(
 }
 
 func handleToggleVoteMsg(ctx sdk.Context, k WriteKeeper, msg ToggleVoteMsg) sdk.Result {
+	if err := msg.ValidateBasic(); err != nil {
+		return err.Result()
+	}
 	id, err := k.ToggleVote(ctx, msg.StoryID, msg.Amount, msg.Argument, msg.Creator)
 	if err != nil {
 		return err.Result()
