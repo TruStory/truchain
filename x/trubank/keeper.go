@@ -15,8 +15,6 @@ const (
 	StoreKey = "trubank"
 	// ListStoreKey is string representation of the store key for bank
 	ListStoreKey = "trubankList"
-	// KeyID is used for mapping the transactions to the user, and since 1:1, therefore does not need to be unique
-	KeyID = 1
 )
 
 // ReadKeeper defines a module interface that facilitates read only access
@@ -75,7 +73,7 @@ func (k Keeper) AddCoin(ctx sdk.Context, creator sdk.AccAddress, coin sdk.Coin, 
 	}
 
 	k.setTransaction(ctx, transaction)
-	k.trubankList.Append(ctx, k, KeyID, creator, transaction.ID)
+	k.trubankList.AppendToUser(ctx, k, creator, transaction.ID)
 
 	return coins, err
 }
@@ -96,7 +94,7 @@ func (k Keeper) SubtractCoin(ctx sdk.Context, creator sdk.AccAddress, coin sdk.C
 	}
 
 	k.setTransaction(ctx, transaction)
-	k.trubankList.Append(ctx, k, KeyID, creator, transaction.ID)
+	k.trubankList.AppendToUser(ctx, k, creator, transaction.ID)
 
 	return coins, err
 }
@@ -161,7 +159,7 @@ func (k Keeper) setTransaction(ctx sdk.Context, transaction Transaction) {
 // TransactionsByCreator returns all the transactions for a user
 func (k Keeper) TransactionsByCreator(ctx sdk.Context, creator sdk.AccAddress) (transactions []Transaction, err sdk.Error) {
 
-	err = k.trubankList.MapByUser(ctx, k, KeyID, creator, func(transactionID int64) sdk.Error {
+	err = k.trubankList.MapByUser(ctx, k, creator, func(transactionID int64) sdk.Error {
 		transaction, err := k.Transaction(ctx, transactionID)
 		if err != nil {
 			return err
