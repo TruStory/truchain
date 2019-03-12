@@ -30,7 +30,14 @@ func (ta *TruAPI) HandleUnsigned(r *http.Request) chttp.Response {
 	}
 
 	// Get the user context
-	truUser := GetTruUserFromCookie(r)
+	truUser, err := GetTruUserFromCookie(r)
+	if err == http.ErrNoCookie {
+		return chttp.SimpleErrorResponse(401, err)
+	}
+	if err != nil {
+		panic(err)
+	}
+
 	twitterProfileID, err := strconv.ParseInt(truUser["twitter-profile-id"], 10, 64)
 	if err != nil {
 		panic(err)
@@ -65,28 +72,27 @@ func (ta *TruAPI) HandleUnsigned(r *http.Request) chttp.Response {
 }
 
 // GetTruUserFromCookie gets the user context from the request's cookie
-func GetTruUserFromCookie(r *http.Request) map[string]string {
+func GetTruUserFromCookie(r *http.Request) (map[string]string, error) {
 	truUser, err := r.Cookie("tru-user")
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 
 	hashKey, err := hex.DecodeString(os.Getenv("COOKIE_HASH_KEY"))
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 	blockKey, err := hex.DecodeString(os.Getenv("COOKIE_ENCRYPT_KEY"))
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 	var s = securecookie.New(hashKey, blockKey)
 
 	decodedTruUser := make(map[string]string)
 	err = s.Decode("tru-user", truUser.Value, &decodedTruUser)
-
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 
-	return decodedTruUser
+	return decodedTruUser, nil
 }
