@@ -77,6 +77,6 @@ type Story struct {
 
 func (s Story) String() string {
 	return fmt.Sprintf(
-		"Story <%d %s %s %d %s>",
-		s.ID, s.Body, s.ExpireTime, s.Status, s.VotingEndTime)
+		"Story <%d %s %s %s %d %s>",
+		s.ID, s.Body, s.Timestamp.CreatedTime, s.ExpireTime, s.Status, s.VotingEndTime)
 }
