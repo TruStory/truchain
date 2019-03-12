@@ -47,8 +47,9 @@ type WriteKeeper interface {
 
 	Create(
 		ctx sdk.Context, storyID int64, amount sdk.Coin, argument string,
-		creator sdk.AccAddress) (int64, sdk.Error)
+		creator sdk.AccAddress, toggled bool) (int64, sdk.Error)
 	Update(ctx sdk.Context, challenge Challenge)
+	Delete(ctx sdk.Context, challenge Challenge) sdk.Error
 	SetParams(ctx sdk.Context, params Params)
 }
 
@@ -94,11 +95,11 @@ func NewKeeper(
 // Create adds a new challenge on a story in the KVStore
 func (k Keeper) Create(
 	ctx sdk.Context, storyID int64, amount sdk.Coin, argument string,
-	creator sdk.AccAddress) (challengeID int64, err sdk.Error) {
+	creator sdk.AccAddress,
+	toggled bool) (challengeID int64, err sdk.Error) {
 
 	logger := ctx.Logger().With("module", StoreKey)
-
-	err = k.stakeKeeper.ValidateStoryState(ctx, storyID)
+	err = k.stakeKeeper.ValidateStoryState(ctx, storyID, toggled)
 	if err != nil {
 		return 0, err
 	}
@@ -115,7 +116,7 @@ func (k Keeper) Create(
 		return 0, sdk.ErrInsufficientFunds("Insufficient funds for challenge.")
 	}
 
-	if amount.Amount.LT(k.minChallengeStake(ctx)) {
+	if !toggled && amount.Amount.LT(k.minChallengeStake(ctx)) {
 		return 0, sdk.ErrInsufficientFunds("Does not meet minimum stake amount.")
 	}
 
@@ -266,6 +267,15 @@ func (k Keeper) TotalChallengeAmount(ctx sdk.Context, storyID int64) (
 func (k Keeper) checkThreshold(ctx sdk.Context, storyID int64) sdk.Error {
 	logger := ctx.Logger().With("module", "challenge")
 
+	// only check threshold if it is in pending state
+	s, err := k.storyKeeper.Story(ctx, storyID)
+	if err != nil {
+		return err
+	}
+	if s.Status != story.Pending {
+		return nil
+	}
+
 	backingPool, err := k.backingKeeper.TotalBackingAmount(ctx, storyID)
 	if err != nil {
 		return err
@@ -328,6 +338,30 @@ func (k Keeper) Update(ctx sdk.Context, challenge Challenge) {
 	}
 
 	k.setChallenge(ctx, newChallenge)
+}
+
+// Delete deletes a challenge and restores coins to the user.
+func (k Keeper) Delete(ctx sdk.Context, challenge Challenge) sdk.Error {
+	challengeIDKey := k.GetIDKey(challenge.ID())
+
+	if !k.GetStore(ctx).Has(challengeIDKey) {
+		return ErrNotFound(challenge.ID())
+	}
+
+	// removes challenge
+	k.GetStore(ctx).Delete(
+		k.GetIDKey(challenge.ID()))
+
+	// restore coins
+	_, _, err := k.bankKeeper.AddCoins(ctx, challenge.Creator(), []sdk.Coin{challenge.Amount()})
+	if err != nil {
+		return err
+	}
+
+	// removes challenge association from the backing list
+	k.challengeList.Delete(ctx, k, challenge.StoryID(), challenge.Creator())
+
+	return nil
 }
 
 func (k Keeper) setChallenge(ctx sdk.Context, challenge Challenge) {

@@ -22,10 +22,15 @@ func NewUserList(foreignStoreKey sdk.StoreKey) UserList {
 // Append adds a new key <-> value association
 func (l UserList) Append(
 	ctx sdk.Context, k WriteKeeper, keyID int64, user sdk.AccAddress, valueID int64) {
-
 	k.GetStore(ctx).Set(
 		l.typeByUserKey(ctx, k, keyID, user),
 		k.GetCodec().MustMarshalBinaryBare(valueID))
+}
+
+// Delete deletes a  key <-> value association from the underlying store.
+func (l UserList) Delete(
+	ctx sdk.Context, k WriteKeeper, keyID int64, user sdk.AccAddress) {
+	k.GetStore(ctx).Delete(l.typeByUserKey(ctx, k, keyID, user))
 }
 
 // Get gets a saved value id for the given key

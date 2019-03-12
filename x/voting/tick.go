@@ -39,13 +39,13 @@ func (k Keeper) processChallengedStoryQueue(ctx sdk.Context) sdk.Error {
 		return err
 	}
 
-	logger.Info("Checking story " + story.String())
+	logger.Info("Checking " + story.String())
 
 	if ctx.BlockHeader().Time.Before(story.VotingEndTime) {
 		// no stories to process
 		// check again after next block
 		logger.Info("Current block time: " + ctx.BlockHeader().Time.String())
-		logger.Info(fmt.Sprintf("Story %s is still in voting period", story))
+		logger.Info(fmt.Sprintf("Story %d still in voting period", storyID))
 
 		return nil
 	}

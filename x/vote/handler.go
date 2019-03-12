@@ -11,6 +11,8 @@ func NewHandler(k WriteKeeper) sdk.Handler {
 		switch msg := msg.(type) {
 		case CreateVoteMsg:
 			return handleCreateVoteMsg(ctx, k, msg)
+		case ToggleVoteMsg:
+			return handleToggleVoteMsg(ctx, k, msg)
 		default:
 			return app.ErrMsgHandler(msg)
 		}
@@ -33,5 +35,16 @@ func handleCreateVoteMsg(
 		return err.Result()
 	}
 
+	return app.Result(id)
+}
+
+func handleToggleVoteMsg(ctx sdk.Context, k WriteKeeper, msg ToggleVoteMsg) sdk.Result {
+	if err := msg.ValidateBasic(); err != nil {
+		return err.Result()
+	}
+	id, err := k.ToggleVote(ctx, msg.StoryID, msg.Amount, msg.Argument, msg.Creator)
+	if err != nil {
+		return err.Result()
+	}
 	return app.Result(id)
 }

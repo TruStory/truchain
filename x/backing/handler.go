@@ -29,7 +29,8 @@ func handleBackStoryMsg(ctx sdk.Context, k WriteKeeper, msg BackStoryMsg) sdk.Re
 		msg.StoryID,
 		msg.Amount,
 		msg.Argument,
-		msg.Creator)
+		msg.Creator,
+		false)
 	if err != nil {
 		return err.Result()
 	}

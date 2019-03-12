@@ -1317,7 +1317,7 @@
               "name": "",
               "ofType": {
                 "kind": "SCALAR",
-                "name": "Time",
+                "name": "string",
                 "ofType": null
               }
             }
@@ -1501,7 +1501,7 @@
               "name": "",
               "ofType": {
                 "kind": "SCALAR",
-                "name": "Time",
+                "name": "string",
                 "ofType": null
               }
             }
@@ -1533,7 +1533,7 @@
               "name": "",
               "ofType": {
                 "kind": "SCALAR",
-                "name": "Time",
+                "name": "string",
                 "ofType": null
               }
             }
@@ -1543,16 +1543,6 @@
         "interfaces": [],
         "kind": "OBJECT",
         "name": "Story",
-        "possibleTypes": []
-      },
-      {
-        "description": "",
-        "enumValues": [],
-        "fields": [],
-        "inputFields": [],
-        "interfaces": [],
-        "kind": "SCALAR",
-        "name": "Time",
         "possibleTypes": []
       },
       {
@@ -1586,7 +1576,7 @@
               "name": "",
               "ofType": {
                 "kind": "SCALAR",
-                "name": "Time",
+                "name": "string",
                 "ofType": null
               }
             }
@@ -1618,7 +1608,7 @@
               "name": "",
               "ofType": {
                 "kind": "SCALAR",
-                "name": "Time",
+                "name": "string",
                 "ofType": null
               }
             }
