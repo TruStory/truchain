@@ -7,6 +7,7 @@ import (
 
 	"github.com/TruStory/truchain/x/backing"
 
+	trubank "github.com/TruStory/truchain/x/trubank"
 	"github.com/cosmos/cosmos-sdk/x/bank"
 	"github.com/cosmos/cosmos-sdk/x/params"
 
@@ -58,6 +59,7 @@ type Keeper struct {
 	stakeKeeper   stake.Keeper
 	backingKeeper backing.ReadKeeper
 	bankKeeper    bank.Keeper
+	trubankKeeper trubank.Keeper
 	storyKeeper   story.WriteKeeper
 	paramStore    params.Subspace
 
@@ -69,6 +71,7 @@ func NewKeeper(
 	storeKey sdk.StoreKey,
 	stakeKeeper stake.Keeper,
 	backingKeeper backing.ReadKeeper,
+	trubankKeeper trubank.Keeper,
 	bankKeeper bank.Keeper,
 	storyKeeper story.WriteKeeper,
 	paramStore params.Subspace,
@@ -79,6 +82,7 @@ func NewKeeper(
 		stakeKeeper,
 		backingKeeper,
 		bankKeeper,
+		trubankKeeper,
 		storyKeeper,
 		paramStore.WithTypeTable(ParamTypeTable()),
 		app.NewUserList(storyKeeper.GetStoreKey()),
@@ -144,9 +148,9 @@ func (k Keeper) Create(
 	k.challengeList.Append(ctx, k, storyID, creator, challenge.ID())
 
 	// deduct challenge amount from user
-	_, _, err = k.bankKeeper.SubtractCoins(ctx, creator, sdk.Coins{amount})
+	_, err = k.trubankKeeper.SubtractCoin(ctx, creator, amount, storyID, 1, challenge.ID(), 0)
 	if err != nil {
-		return 0, err
+		return
 	}
 
 	err = k.checkThreshold(ctx, storyID)

@@ -2,10 +2,12 @@ package truapi
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"net/url"
 	"os"
 
+	trubank "github.com/TruStory/truchain/x/trubank"
 	"github.com/TruStory/truchain/x/voting"
 	"github.com/dghubble/gologin/twitter"
 	"github.com/dghubble/oauth1"
@@ -110,6 +112,12 @@ func (ta *TruAPI) RegisterResolvers() {
 	}
 	getVoteResults := func(ctx context.Context, storyID int64) voting.VoteResult {
 		return ta.voteResultsResolver(ctx, app.QueryByIDParams{ID: storyID})
+	}
+
+	getTransactions := func(ctx context.Context, creator string) []trubank.Transaction {
+		fmt.Printf("tried to get parameter for %s", creator)
+
+		return ta.transactionHistoryResolver(ctx, app.QueryByCreatorParams{Creator: creator})
 	}
 
 	ta.GraphQLClient.RegisterQueryResolver("backing", ta.backingResolver)
@@ -217,6 +225,13 @@ func (ta *TruAPI) RegisterResolvers() {
 		"coins":          func(_ context.Context, q users.User) sdk.Coins { return q.Coins },
 		"pubkey":         func(_ context.Context, q users.User) string { return q.Pubkey.String() },
 		"twitterProfile": ta.twitterProfileResolver,
+		"transactions": func(ctx context.Context, q users.User) []trubank.Transaction {
+			return getTransactions(ctx, q.Address)
+		},
+	})
+
+	ta.GraphQLClient.RegisterObjectResolver("Transactions", trubank.Transaction{}, map[string]interface{}{
+		"id": func(_ context.Context, q trubank.Transaction) int64 { return q.ID },
 	})
 
 	ta.GraphQLClient.RegisterObjectResolver("URL", url.URL{}, map[string]interface{}{

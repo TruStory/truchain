@@ -108,6 +108,7 @@ func mockDB() (
 		stakeKeeper,
 		sk,
 		bankKeeper,
+		truBankKeeper,
 		ck,
 		codec,
 	)

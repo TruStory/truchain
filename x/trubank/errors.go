@@ -12,6 +12,7 @@ const (
 
 	CodeErrorAddingCoinsToUser     sdk.CodeType = 1201
 	CodeErrorAddingCoinsToCategory sdk.CodeType = 1202
+	CodeErrorTransactionNotFound   sdk.CodeType = 1203
 )
 
 // ErrTransferringCoinsToUser throws an error when the category is invalid
@@ -22,4 +23,9 @@ func ErrTransferringCoinsToUser(creator sdk.AccAddress) sdk.Error {
 // ErrTransferringCoinsToCategory throws an error when a category msg is invalid
 func ErrTransferringCoinsToCategory(id int64) sdk.Error {
 	return sdk.NewError(DefaultCodespace, CodeErrorAddingCoinsToCategory, "Coins could not be added to category "+fmt.Sprintf("%d", id))
+}
+
+// ErrTransactionNotFound throws an error when a transaction was not found
+func ErrTransactionNotFound(id int64) sdk.Error {
+	return sdk.NewError(DefaultCodespace, CodeErrorTransactionNotFound, "There was no transaction found with and id of "+fmt.Sprintf("%d", id))
 }

@@ -109,6 +109,7 @@ func mockDB() (
 		stakeKeeper,
 		storyKeeper,
 		bankKeeper,
+		truBankKeeper,
 		categoryKeeper,
 		codec,
 	)
@@ -117,6 +118,7 @@ func mockDB() (
 		challengeKey,
 		stakeKeeper,
 		backingKeeper,
+		truBankKeeper,
 		bankKeeper,
 		storyKeeper,
 		pk.Subspace(challenge.StoreKey),

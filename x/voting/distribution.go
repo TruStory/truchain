@@ -15,7 +15,8 @@ func (k Keeper) distributeRewards(
 	pool sdk.Coin,
 	votes poll,
 	confirmed bool,
-	categoryID int64) sdk.Error {
+	categoryID int64,
+	storyID int64) sdk.Error {
 
 	logger := ctx.Logger().With("module", StoreKey)
 
@@ -60,7 +61,7 @@ func (k Keeper) distributeRewards(
 		switch v := vote.(type) {
 		case backing.Backing, challenge.Challenge:
 			rewardCoin, err := k.rewardStaker(
-				ctx, v, stakerTotalAmount, stakerPool, categoryID)
+				ctx, v, stakerTotalAmount, stakerPool, categoryID, storyID)
 			if err != nil {
 				return err
 			}
@@ -94,12 +95,13 @@ func (k Keeper) rewardStaker(
 	staker app.Voter,
 	stakerTotalAmount sdk.Int,
 	stakerPool sdk.Coin,
-	categoryID int64) (rewardCoin sdk.Coin, err sdk.Error) {
+	categoryID int64,
+	storyID int64) (rewardCoin sdk.Coin, err sdk.Error) {
 
 	logger := ctx.Logger().With("module", StoreKey)
 
 	// get back staked amount
-	err = k.stakeKeeper.DistributePrincipalAndInterest(ctx, []app.Voter{staker}, categoryID)
+	err = k.stakeKeeper.DistributePrincipalAndInterest(ctx, []app.Voter{staker}, categoryID, storyID)
 	if err != nil {
 		return
 	}

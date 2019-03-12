@@ -111,6 +111,7 @@ func mockDB() (sdk.Context, Keeper, category.Keeper) {
 		stakeKeeper,
 		sk,
 		bankKeeper,
+		truBankKeeper,
 		ck,
 		codec,
 	)
@@ -119,6 +120,7 @@ func mockDB() (sdk.Context, Keeper, category.Keeper) {
 		challengeKey,
 		stakeKeeper,
 		backingKeeper,
+		truBankKeeper,
 		bankKeeper,
 		sk,
 		pk.Subspace(challenge.StoreKey),

@@ -18,13 +18,16 @@ const (
 // ReadKeeper defines a module interface that facilitates read only access
 type ReadKeeper interface {
 	app.ReadKeeper
+
+	TransactionsByCreator(ctx sdk.Context, creator sdk.AccAddress) (transactions []Transaction, err sdk.Error)
 }
 
 // WriteKeeper defines a module interface that facilities write only access
 type WriteKeeper interface {
 	ReadKeeper
 
-	AddCoin(ctx sdk.Context, creator sdk.AccAddress, coin sdk.Coin) (coins sdk.Coins, err sdk.Error)
+	AddCoin(ctx sdk.Context, creator sdk.AccAddress, coin sdk.Coin, storyID int64, transactionType TransactionType, referenceID int64, status Status) (coins sdk.Coins, err sdk.Error)
+	SubtractCoin(ctx sdk.Context, creator sdk.AccAddress, coin sdk.Coin, storyID int64, transactionType TransactionType, referenceID int64, status Status) (coins sdk.Coins, err sdk.Error)
 	MintAndAddCoin(ctx sdk.Context, creator sdk.AccAddress, catID int64, amt sdk.Int) (sdk.Coins, sdk.Error)
 }
 
@@ -50,9 +53,38 @@ func NewKeeper(
 	}
 }
 
-// AddCoin wraps around adding coins via the bank keeper
-func (k Keeper) AddCoin(ctx sdk.Context, creator sdk.AccAddress, coin sdk.Coin) (coins sdk.Coins, err sdk.Error) {
+// AddCoin wraps around adding coins via the bank keeper and adds the transaction
+func (k Keeper) AddCoin(ctx sdk.Context, creator sdk.AccAddress, coin sdk.Coin, storyID int64, transactionType TransactionType, referenceID int64, status Status) (coins sdk.Coins, err sdk.Error) {
 	coins, _, err = k.bankKeeper.AddCoins(ctx, creator, sdk.Coins{coin})
+
+	transaction := Transaction{
+		ID:              k.GetNextID(ctx),
+		TransactionType: transactionType,
+		ReferenceID:     referenceID,
+		Creator:         creator,
+		Status:          status,
+		Timestamp:       app.NewTimestamp(ctx.BlockHeader()),
+	}
+
+	k.setTransaction(ctx, transaction)
+
+	return coins, err
+}
+
+// SubtractCoin wraps around adding coins via the bank keeper and adds the transaction
+func (k Keeper) SubtractCoin(ctx sdk.Context, creator sdk.AccAddress, coin sdk.Coin, storyID int64, transactionType TransactionType, referenceID int64, status Status) (coins sdk.Coins, err sdk.Error) {
+	coins, _, err = k.bankKeeper.SubtractCoins(ctx, creator, sdk.Coins{coin})
+
+	transaction := Transaction{
+		ID:              k.GetNextID(ctx),
+		TransactionType: transactionType,
+		ReferenceID:     referenceID,
+		Creator:         creator,
+		Status:          status,
+		Timestamp:       app.NewTimestamp(ctx.BlockHeader()),
+	}
+
+	k.setTransaction(ctx, transaction)
 
 	return coins, err
 }
@@ -105,4 +137,49 @@ func exchangeCoinsBetweenDenoms(from sdk.Coin, toDenom string) sdk.Dec {
 		return sdk.NewDec(1)
 	}
 	return sdk.NewDec(1)
+}
+
+func (k Keeper) setTransaction(ctx sdk.Context, transaction Transaction) {
+	store := k.GetStore(ctx)
+	store.Set(
+		k.GetIDKey(transaction.ID),
+		k.GetCodec().MustMarshalBinaryLengthPrefixed(transaction))
+}
+
+// TransactionsByCreator returns all the transactions for a user
+func (k Keeper) TransactionsByCreator(ctx sdk.Context, creator sdk.AccAddress) (transactions []Transaction, err sdk.Error) {
+	// get store
+	store := k.GetStore(ctx)
+
+	// builds prefix "trubank:creator:"
+	searchKey := fmt.Sprintf("%s:creator:", k.GetStoreKey().Name())
+	searchPrefix := []byte(searchKey)
+
+	// setup iterator
+	iter := sdk.KVStorePrefixIterator(store, searchPrefix)
+	defer iter.Close()
+
+	// iterates through keyspace to find all stories
+	for ; iter.Valid(); iter.Next() {
+		var transaction Transaction
+		k.GetCodec().MustUnmarshalBinaryLengthPrefixed(
+			iter.Value(), &transaction)
+		transactions = append(transactions, transaction)
+	}
+
+	return
+}
+
+// Transaction returns a single transaction from the K-V Store
+func (k Keeper) Transaction(
+	ctx sdk.Context, transactionID int64) (transaction Transaction, err sdk.Error) {
+
+	store := k.GetStore(ctx)
+	val := store.Get(k.GetIDKey(transactionID))
+	if val == nil {
+		return transaction, ErrTransactionNotFound(transactionID)
+	}
+	k.GetCodec().MustUnmarshalBinaryLengthPrefixed(val, &transaction)
+
+	return
 }

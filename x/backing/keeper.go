@@ -7,6 +7,7 @@ import (
 	cat "github.com/TruStory/truchain/x/category"
 	"github.com/TruStory/truchain/x/stake"
 	"github.com/TruStory/truchain/x/story"
+	trubank "github.com/TruStory/truchain/x/trubank"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/bank"
 	amino "github.com/tendermint/go-amino"
@@ -61,6 +62,7 @@ type Keeper struct {
 	stakeKeeper    stake.Keeper
 	storyKeeper    story.WriteKeeper // read-write access to story store
 	bankKeeper     bank.Keeper       // read-write access coin store
+	trubankKeeper  trubank.Keeper    // read-write access coin store
 	categoryKeeper cat.ReadKeeper    // read access to category store
 
 	backingStoryList app.UserList // backings <-> story mappings
@@ -72,6 +74,7 @@ func NewKeeper(
 	stakeKeeper stake.Keeper,
 	storyKeeper story.WriteKeeper,
 	bankKeeper bank.Keeper,
+	trubankKeeper trubank.Keeper,
 	categoryKeeper cat.ReadKeeper,
 	codec *amino.Codec) Keeper {
 
@@ -80,6 +83,7 @@ func NewKeeper(
 		stakeKeeper,
 		storyKeeper,
 		bankKeeper,
+		trubankKeeper,
 		categoryKeeper,
 		app.NewUserList(storyKeeper.GetStoreKey()),
 	}
@@ -119,12 +123,6 @@ func (k Keeper) Create(
 		return 0, ErrDuplicate(storyID, creator)
 	}
 
-	// subtract principal from user
-	_, _, err = k.bankKeeper.SubtractCoins(ctx, creator, sdk.Coins{amount})
-	if err != nil {
-		return
-	}
-
 	vote := app.Vote{
 		ID:        k.GetNextID(ctx),
 		StoryID:   storyID,
@@ -143,6 +141,12 @@ func (k Keeper) Create(
 
 	// add backing <-> story mapping
 	k.backingStoryList.Append(ctx, k, storyID, creator, backing.ID())
+
+	// subtract principal from user
+	_, err = k.trubankKeeper.SubtractCoin(ctx, creator, amount, storyID, 0, backing.ID(), 0)
+	if err != nil {
+		return
+	}
 
 	logger.Info(fmt.Sprintf(
 		"Backed story %d by user %s", storyID, creator.String()))

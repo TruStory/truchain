@@ -16,6 +16,7 @@ import (
 	"github.com/TruStory/truchain/x/db"
 	"github.com/TruStory/truchain/x/params"
 	"github.com/TruStory/truchain/x/story"
+	trubank "github.com/TruStory/truchain/x/trubank"
 	"github.com/TruStory/truchain/x/users"
 	"github.com/TruStory/truchain/x/vote"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -382,4 +383,24 @@ func (ta *TruAPI) voteResultsResolver(
 	}
 
 	return *voteResult
+}
+
+func (ta *TruAPI) transactionHistoryResolver(
+	_ context.Context, q app.QueryByCreatorParams) []trubank.Transaction {
+
+	res := ta.RunQuery(
+		path.Join(trubank.QueryPath, trubank.QueryTransactionsByCreator), q)
+
+	if res.Code != 0 {
+		fmt.Println("Resolver err: ", res)
+		return []trubank.Transaction{}
+	}
+
+	transactions := new([]trubank.Transaction)
+	err := json.Unmarshal(res.Value, transactions)
+	if err != nil {
+		panic(err)
+	}
+
+	return *transactions
 }

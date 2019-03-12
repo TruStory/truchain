@@ -101,7 +101,7 @@ func (k Keeper) verifyStory(ctx sdk.Context, storyID int64) sdk.Error {
 	logger.Info(fmt.Sprintf("Reward pool: %v", rewardPool))
 
 	// distribute rewards
-	err = k.distributeRewards(ctx, rewardPool, votes, confirmed, story.CategoryID)
+	err = k.distributeRewards(ctx, rewardPool, votes, confirmed, story.CategoryID, storyID)
 	if err != nil {
 		return err
 	}
