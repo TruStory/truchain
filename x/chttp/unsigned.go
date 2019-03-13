@@ -1,11 +1,15 @@
 package chttp
 
 import (
+	"crypto/ecdsa"
+	"crypto/sha256"
 	"encoding/hex"
+	"fmt"
+	"math/big"
 
 	"github.com/TruStory/truchain/x/db"
 	"github.com/cosmos/cosmos-sdk/x/auth"
-	secp "github.com/tendermint/tendermint/crypto/secp256k1"
+	ethsecp "github.com/ethereum/go-ethereum/crypto/secp256k1"
 	tcmn "github.com/tendermint/tendermint/libs/common"
 )
 
@@ -19,10 +23,16 @@ type UnsignedRequest struct {
 // NewUnsignedStdTx parses an `UnsignedRequest` into an `auth.StdTx`
 func (a *API) NewUnsignedStdTx(r UnsignedRequest, keyPair db.KeyPair) (auth.StdTx, error) {
 
+	// Hashing the tx
+	hasher := sha256.New()
+	hasher.Write([]byte(r.TxHash))
+	hash := hasher.Sum(nil)
+
 	// Signing the hash
-	txHashBytes := []byte(r.TxHash)
 	privateKey := GetPrivateKeyObject(keyPair)
-	signature, err := privateKey.Sign(txHashBytes)
+	privateKeyBytes, _ := hex.DecodeString(fmt.Sprintf("%x", privateKey.D))
+	publicKeyBytes, _ := hex.DecodeString(fmt.Sprintf("%x", ethsecp.CompressPubkey(privateKey.PublicKey.X, privateKey.PublicKey.Y)))
+	signature, err := ethsecp.Sign(hash, privateKeyBytes)
 	if err != nil {
 		panic(err)
 	}
@@ -31,7 +41,7 @@ func (a *API) NewUnsignedStdTx(r UnsignedRequest, keyPair db.KeyPair) (auth.StdT
 		MsgTypes:   r.MsgTypes,
 		Tx:         r.Tx,
 		PubKeyAlgo: "secp256k1",
-		PubKey:     privateKey.PubKey().Bytes(),
+		PubKey:     publicKeyBytes,
 		Signature:  signature,
 	}
 
@@ -39,15 +49,28 @@ func (a *API) NewUnsignedStdTx(r UnsignedRequest, keyPair db.KeyPair) (auth.StdT
 }
 
 // GetPrivateKeyObject returns the secp's object encapsulating the private key
-func GetPrivateKeyObject(keyPair db.KeyPair) secp.PrivKeySecp256k1 {
-	privateKey32Bytes := [32]byte{}
-	privateKeyBytes, err := hex.DecodeString(keyPair.PrivateKey)
-	if err != nil {
-		panic(err)
-	}
+func GetPrivateKeyObject(keyPair db.KeyPair) *ecdsa.PrivateKey {
+	privateKeyHex, _ := hex.DecodeString(keyPair.PrivateKey)
+	privateKeyInt := big.NewInt(0)
+	privateKeyInt.SetBytes(privateKeyHex)
 
-	// make it of the fixed length of 32 bytes
-	copy(privateKey32Bytes[:], privateKeyBytes)
+	privateKeyObj := new(ecdsa.PrivateKey)
+	privateKeyObj.PublicKey.Curve = ethsecp.S256()
+	privateKeyObj.D = privateKeyInt
+	privateKeyObj.PublicKey.X, privateKeyObj.PublicKey.Y = privateKeyObj.PublicKey.Curve.ScalarBaseMult(privateKeyInt.Bytes())
 
-	return secp.PrivKeySecp256k1(privateKey32Bytes)
+	return privateKeyObj
 }
+
+// func GetPrivateKeyObject(keyPair db.KeyPair) secp.PrivKeySecp256k1 {
+// 	privateKey32Bytes := [32]byte{}
+// 	privateKeyBytes, err := hex.DecodeString(keyPair.PrivateKey)
+// 	if err != nil {
+// 		panic(err)
+// 	}
+
+// 	// make it of the fixed length of 32 bytes
+// 	copy(privateKey32Bytes[:], privateKeyBytes)
+
+// 	return secp.PrivKeySecp256k1(privateKey32Bytes)
+// }

@@ -2,6 +2,7 @@ package truapi
 
 import (
 	"encoding/hex"
+	"fmt"
 	"net/http"
 	"os"
 	"time"
@@ -43,17 +44,18 @@ func IssueSession(ta *TruAPI) http.Handler {
 		// If not available, create new
 		if keyPair.ID == 0 {
 			// privKey, err := ecdsa.GenerateKey(ethsecp.S256(), rand.Reader)
-			// if err != nil {
-			// 	panic(err)
-			// }
+			if err != nil {
+				panic(err)
+			}
 
 			keyPair := &db.KeyPair{
 				TwitterProfileID: twitterUser.ID,
 				// PrivateKey:       fmt.Sprintf("%x", privKey.D),
-				// PublicKey:        fmt.Sprintf("%x", privKey.PubKey().Bytes()),
-				PrivateKey: "274CB4377D10823E7BE92307FC9A3FD6F28CCBAB9195405EBC3382F5D378A6F7",
-				PublicKey:  "02CD2B5105FBAE523891AEF5110DE4D50B79480F81A0CEAEA3A7C844B8451AE213",
+				// PublicKey:        fmt.Sprintf("%x", ethsecp.CompressPubkey(privKey.PublicKey.X, privKey.PublicKey.Y)),
+				PrivateKey: "9c5bb8943ecccfeed0b001f36fbd451691387c3a4e05080d3b1ab18a3daaadac",
+				PublicKey:  "03A9051E223B2AABD38F258F6B168214A4D4A285C8F5B7760E473E5BE4AAE13AA0",
 			}
+			fmt.Printf("KeyPair: %v -- %v\n", keyPair.PrivateKey, keyPair.PublicKey)
 			err = ta.DBClient.Add(keyPair)
 			if err != nil {
 				panic(err)
