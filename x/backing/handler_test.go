@@ -45,7 +45,7 @@ func TestBackStoryMsg(t *testing.T) {
 
 	res := h(ctx, msg)
 
-	pushData := new(PushData)
+	pushData := new(app.PushData)
 	_ = json.Unmarshal(res.Data, &pushData)
 
 	assert.Equal(t, int64(1), pushData.ID)

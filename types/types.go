@@ -39,6 +39,13 @@ var RegistrationFee = auth.StdFee{
 	Gas:    20000,
 }
 
+// PushData defines data for a push notification
+type PushData struct {
+	ID   int64          `json:"id"`
+	From sdk.AccAddress `json:"from,omitempty"`
+	To   sdk.AccAddress `json:"to,omitempty"`
+}
+
 // Timestamp records the timestamp for a type
 type Timestamp struct {
 	CreatedBlock int64     `json:"created_block,omitempty"`
