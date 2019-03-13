@@ -19,14 +19,9 @@ type UnsignedRequest struct {
 // NewUnsignedStdTx parses an `UnsignedRequest` into an `auth.StdTx`
 func (a *API) NewUnsignedStdTx(r UnsignedRequest, keyPair db.KeyPair) (auth.StdTx, error) {
 
-	txHashBytes, err := hex.DecodeString(r.TxHash)
-	if err != nil {
-		panic(err)
-	}
-
 	// Signing the hash
+	txHashBytes := []byte(r.TxHash)
 	privateKey := GetPrivateKeyObject(keyPair)
-
 	signature, err := privateKey.Sign(txHashBytes)
 	if err != nil {
 		panic(err)
