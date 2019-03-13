@@ -11,7 +11,6 @@ type Transaction struct {
 	TransactionType TransactionType `json:"transaction_type"`
 	StoryID         int64           `json:"story_id"`
 	ReferenceID     int64           `json:"reference_id"`
-	Credit          bool            `json:"credit"`
 	Amount          sdk.Coin        `json:"amount"`
 	Creator         sdk.AccAddress  `json:"creator"`
 	Timestamp       app.Timestamp   `json:"timestamp"`

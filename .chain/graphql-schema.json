@@ -1695,22 +1695,6 @@
             "deprecationReason": "",
             "description": "",
             "isDeprecated": false,
-            "name": "credit",
-            "type": {
-              "kind": "NON_NULL",
-              "name": "",
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "bool",
-                "ofType": null
-              }
-            }
-          },
-          {
-            "args": [],
-            "deprecationReason": "",
-            "description": "",
-            "isDeprecated": false,
             "name": "iD",
             "type": {
               "kind": "NON_NULL",

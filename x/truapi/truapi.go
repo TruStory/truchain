@@ -242,7 +242,6 @@ func (ta *TruAPI) RegisterResolvers() {
 	ta.GraphQLClient.RegisterObjectResolver("Transactions", trubank.Transaction{}, map[string]interface{}{
 		"id":              func(_ context.Context, q trubank.Transaction) int64 { return q.ID },
 		"transactionType": func(_ context.Context, q trubank.Transaction) trubank.TransactionType { return q.TransactionType },
-		"credit":          func(_ context.Context, q trubank.Transaction) bool { return q.Credit },
 		"amount":          func(_ context.Context, q trubank.Transaction) sdk.Coin { return q.Amount },
 		"createdTime":     func(_ context.Context, q trubank.Transaction) time.Time { return q.Timestamp.CreatedTime },
 		"story": func(ctx context.Context, q trubank.Transaction) story.Story {

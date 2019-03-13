@@ -66,7 +66,6 @@ func (k Keeper) AddCoin(ctx sdk.Context, creator sdk.AccAddress, coin sdk.Coin, 
 		TransactionType: transactionType,
 		ReferenceID:     referenceID,
 		StoryID:         storyID,
-		Credit:          true,
 		Amount:          coin,
 		Creator:         creator,
 		Timestamp:       app.NewTimestamp(ctx.BlockHeader()),
@@ -82,12 +81,13 @@ func (k Keeper) AddCoin(ctx sdk.Context, creator sdk.AccAddress, coin sdk.Coin, 
 func (k Keeper) SubtractCoin(ctx sdk.Context, creator sdk.AccAddress, coin sdk.Coin, storyID int64, transactionType TransactionType, referenceID int64) (coins sdk.Coins, err sdk.Error) {
 	coins, _, err = k.bankKeeper.SubtractCoins(ctx, creator, sdk.Coins{coin})
 
+	coin.Amount = coin.Amount.Mul(sdk.NewInt(-1))
+
 	transaction := Transaction{
 		ID:              k.GetNextID(ctx),
 		TransactionType: transactionType,
 		ReferenceID:     referenceID,
 		StoryID:         storyID,
-		Credit:          false,
 		Amount:          coin,
 		Creator:         creator,
 		Timestamp:       app.NewTimestamp(ctx.BlockHeader()),
