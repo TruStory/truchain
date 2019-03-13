@@ -16,13 +16,13 @@ func TestNewResponseEndBlock(t *testing.T) {
 	assert.Equal(t, sdk.Tags{}, tags)
 }
 
-func Test_processStoryQueue(t *testing.T) {
+func Test_processStoryList(t *testing.T) {
 	ctx, storyKeeper := fakeStories()
 
-	q := storyKeeper.pendingStoryQueue(ctx)
-	assert.Equal(t, uint64(3), q.List.Len())
+	l := storyKeeper.pendingStoryList(ctx)
+	assert.Equal(t, uint64(3), l.Len())
 
-	err := storyKeeper.processPendingStoryQueue(ctx, q)
+	err := storyKeeper.processPendingStoryList(ctx, l)
 	assert.Nil(t, err)
 
 	story, _ := storyKeeper.Story(ctx, 5)
@@ -32,7 +32,7 @@ func Test_processStoryQueue(t *testing.T) {
 	expiredTime := time.Now().Add(DefaultParams().ExpireDuration)
 	ctx = ctx.WithBlockHeader(abci.Header{Time: expiredTime})
 
-	err = storyKeeper.processPendingStoryQueue(ctx, q)
+	err = storyKeeper.processPendingStoryList(ctx, l)
 	assert.Nil(t, err)
 
 	story, _ = storyKeeper.Story(ctx, 3)
