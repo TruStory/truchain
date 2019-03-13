@@ -23,6 +23,9 @@ type TransactionType int8
 const (
 	Backing TransactionType = iota
 	Challenge
+	BackingReturned
+	ChallengeReturned
+	RewardPool
 	Interest
 	// StoryCreation
 )

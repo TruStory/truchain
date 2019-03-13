@@ -47,9 +47,9 @@ func (k Keeper) DistributePrincipalAndInterest(
 		var typeOfVote trubank.TransactionType
 
 		if vote.VoteChoice() {
-			typeOfVote = 0
+			typeOfVote = 2
 		} else {
-			typeOfVote = 1
+			typeOfVote = 3
 		}
 
 		// give principal back to user in trustake
