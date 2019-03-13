@@ -2,7 +2,6 @@ package truapi
 
 import (
 	"encoding/hex"
-	"fmt"
 	"net/http"
 	"os"
 	"time"
@@ -10,7 +9,6 @@ import (
 	"github.com/TruStory/truchain/x/db"
 	"github.com/dghubble/gologin/twitter"
 	"github.com/gorilla/securecookie"
-	secp "github.com/tendermint/tendermint/crypto/secp256k1"
 )
 
 // IssueSession creates a session and redirects the logged in user to the correct page
@@ -44,12 +42,17 @@ func IssueSession(ta *TruAPI) http.Handler {
 
 		// If not available, create new
 		if keyPair.ID == 0 {
-			privKey := secp.GenPrivKey()
+			// privKey, err := ecdsa.GenerateKey(ethsecp.S256(), rand.Reader)
+			// if err != nil {
+			// 	panic(err)
+			// }
 
 			keyPair := &db.KeyPair{
 				TwitterProfileID: twitterUser.ID,
-				PrivateKey:       fmt.Sprintf("%x", privKey),
-				PublicKey:        fmt.Sprintf("%x", privKey.PubKey().Bytes()),
+				// PrivateKey:       fmt.Sprintf("%x", privKey.D),
+				// PublicKey:        fmt.Sprintf("%x", privKey.PubKey().Bytes()),
+				PrivateKey: "274CB4377D10823E7BE92307FC9A3FD6F28CCBAB9195405EBC3382F5D378A6F7",
+				PublicKey:  "02CD2B5105FBAE523891AEF5110DE4D50B79480F81A0CEAEA3A7C844B8451AE213",
 			}
 			err = ta.DBClient.Add(keyPair)
 			if err != nil {

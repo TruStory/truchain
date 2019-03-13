@@ -260,7 +260,7 @@ func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *T
 	// The AnteHandler handles signature verification and transaction pre-processing
 	// TODO [shanev]: see https://github.com/TruStory/truchain/issues/364
 	// Add this back after fixing issues with signature verification
-	// app.SetAnteHandler(auth.NewAnteHandler(app.accountKeeper, app.feeCollectionKeeper))
+	app.SetAnteHandler(auth.NewAnteHandler(app.accountKeeper, app.feeCollectionKeeper))
 
 	// The app.Router is the main transaction router where each module registers its routes
 	app.Router().
