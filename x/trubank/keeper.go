@@ -109,6 +109,10 @@ func (k Keeper) MintAndAddCoin(
 
 	logger := ctx.Logger().With("module", StoreKey)
 
+	if amt.IsZero() {
+		return sdk.Coins{}, nil
+	}
+
 	cat, err := k.categoryKeeper.GetCategory(ctx, catID)
 	if err != nil {
 		return sdk.Coins{}, err
