@@ -1,7 +1,7 @@
 package backing
 
 import (
-	"fmt"
+	"encoding/json"
 
 	app "github.com/TruStory/truchain/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -37,22 +37,22 @@ func handleBackStoryMsg(ctx sdk.Context, k Keeper, msg BackStoryMsg) sdk.Result 
 		return err.Result()
 	}
 
-	pushBody := fmt.Sprintf("%s backed your story for %s", msg.Creator, msg.Amount)
-
-	story, err := k.storyKeeper.Story(ctx, msg.StoryID)
-	if err != nil {
-		return err.Result()
-	}
+	// story, err := k.storyKeeper.Story(ctx, msg.StoryID)
+	// if err != nil {
+	// 	return err.Result()
+	// }
 
 	tags := sdk.NewTags(
-		"push.type", []byte("normal"),
-		"push.body", []byte(pushBody),
-		"push.from", msg.Creator.Bytes(),
-		"push.to", story.Creator.Bytes(),
+		"tru.event", []byte("Push"),
+		// "push.body", []byte(pushBody),
+		// "push.from", msg.Creator.Bytes(),
+		// "push.to", story.Creator.Bytes(),
 	)
 
+	bz, _ := json.Marshal(app.IDResult{ID: id})
+
 	return sdk.Result{
-		Data: k.GetCodec().MustMarshalBinaryLengthPrefixed(id),
+		Data: bz,
 		Tags: tags,
 	}
 }
