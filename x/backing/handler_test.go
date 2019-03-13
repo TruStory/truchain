@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"testing"
 
-	"github.com/TruStory/truchain/types"
 	app "github.com/TruStory/truchain/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/stretchr/testify/assert"
@@ -36,6 +35,8 @@ func TestBackStoryMsg(t *testing.T) {
 	assert.NotNil(t, h)
 
 	storyID := createFakeStory(ctx, sk, ck)
+	storyCreator := sdk.AccAddress([]byte{1, 2})
+
 	amount := sdk.NewCoin(app.StakeDenom, sdk.NewInt(5000000))
 	argument := "cool story brew"
 	creator := createFakeFundedAccount(ctx, am, sdk.Coins{amount})
@@ -44,15 +45,12 @@ func TestBackStoryMsg(t *testing.T) {
 
 	res := h(ctx, msg)
 
-	idres := new(types.IDResult)
-	_ = json.Unmarshal(res.Data, &idres)
+	pushData := new(PushData)
+	_ = json.Unmarshal(res.Data, &pushData)
 
-	// spew.Dump(res)
-
-	// id := new(int64)
-	// bk.GetCodec().MustUnmarshalBinaryBare(res.Data, id)
-
-	assert.Equal(t, int64(1), idres.ID, "incorrect result backing id")
+	assert.Equal(t, int64(1), pushData.ID)
+	assert.Equal(t, creator, pushData.From)
+	assert.Equal(t, storyCreator, pushData.To)
 	assert.True(t, res.IsOK())
 }
 

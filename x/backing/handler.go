@@ -21,6 +21,12 @@ func NewHandler(k Keeper) sdk.Handler {
 
 // ============================================================================
 
+type PushData struct {
+	ID   int64          `json:"id"`
+	From sdk.AccAddress `json:"from,omitempty"`
+	To   sdk.AccAddress `json:"to,omitempty"`
+}
+
 func handleBackStoryMsg(ctx sdk.Context, k Keeper, msg BackStoryMsg) sdk.Result {
 	if err := msg.ValidateBasic(); err != nil {
 		return err.Result()
@@ -37,19 +43,25 @@ func handleBackStoryMsg(ctx sdk.Context, k Keeper, msg BackStoryMsg) sdk.Result 
 		return err.Result()
 	}
 
-	// story, err := k.storyKeeper.Story(ctx, msg.StoryID)
-	// if err != nil {
-	// 	return err.Result()
-	// }
+	story, err := k.storyKeeper.Story(ctx, msg.StoryID)
+	if err != nil {
+		return err.Result()
+	}
+
+	pushData := PushData{
+		ID:   id,
+		From: msg.Creator,
+		To:   story.Creator,
+	}
 
 	tags := sdk.NewTags(
 		"tru.event", []byte("Push"),
-		// "push.body", []byte(pushBody),
-		// "push.from", msg.Creator.Bytes(),
-		// "push.to", story.Creator.Bytes(),
 	)
 
-	bz, _ := json.Marshal(app.IDResult{ID: id})
+	bz, jsonErr := json.Marshal(pushData)
+	if jsonErr != nil {
+		panic(jsonErr)
+	}
 
 	return sdk.Result{
 		Data: bz,
