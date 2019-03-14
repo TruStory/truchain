@@ -7,8 +7,6 @@ import (
 	"path"
 	"sort"
 
-	"github.com/davecgh/go-spew/spew"
-
 	"github.com/TruStory/truchain/x/voting"
 
 	app "github.com/TruStory/truchain/types"
@@ -403,8 +401,6 @@ func (ta *TruAPI) transactionHistoryResolver(
 	if err != nil {
 		panic(err)
 	}
-
-	spew.Dump(transactions)
 
 	return *transactions
 }
