@@ -49,7 +49,7 @@ func IssueSession(ta *TruAPI) http.Handler {
 				panic(err)
 			}
 			// We are converting the private key of the new key pair in hex string,
-			// then back to byte slice, and finally regenerating the private (supressed) and public key from it.
+			// then back to byte slice, and finally regenerating the private (suppressed) and public key from it.
 			// This way, it returns the kind of public key that cosmos understands.
 			_, pubKey := btcec.PrivKeyFromBytes(btcec.S256(), []byte(fmt.Sprintf("%x", newKeyPair.Serialize())))
 
