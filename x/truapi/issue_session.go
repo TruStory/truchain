@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/TruStory/truchain/x/db"
+	"github.com/btcsuite/btcd/btcec"
 	"github.com/dghubble/gologin/twitter"
 	"github.com/gorilla/securecookie"
 )
@@ -43,19 +44,20 @@ func IssueSession(ta *TruAPI) http.Handler {
 
 		// If not available, create new
 		if keyPair.ID == 0 {
-			// privKey, err := ecdsa.GenerateKey(ethsecp.S256(), rand.Reader)
+			newKeyPair, _ := btcec.NewPrivateKey(btcec.S256())
 			if err != nil {
 				panic(err)
 			}
+			// We are converting the private key of the new key pair in hex string,
+			// then back to byte slice, and finally regenerating the private (supressed) and public key from it.
+			// This way, it returns the kind of public key that cosmos understands.
+			_, pubKey := btcec.PrivKeyFromBytes(btcec.S256(), []byte(fmt.Sprintf("%x", newKeyPair.Serialize())))
 
 			keyPair := &db.KeyPair{
 				TwitterProfileID: twitterUser.ID,
-				// PrivateKey:       fmt.Sprintf("%x", privKey.D),
-				// PublicKey:        fmt.Sprintf("%x", ethsecp.CompressPubkey(privKey.PublicKey.X, privKey.PublicKey.Y)),
-				PrivateKey: "9c5bb8943ecccfeed0b001f36fbd451691387c3a4e05080d3b1ab18a3daaadac",
-				PublicKey:  "03A9051E223B2AABD38F258F6B168214A4D4A285C8F5B7760E473E5BE4AAE13AA0",
+				PrivateKey:       fmt.Sprintf("%x", newKeyPair.Serialize()),
+				PublicKey:        fmt.Sprintf("%x", pubKey.SerializeCompressed()),
 			}
-			fmt.Printf("KeyPair: %v -- %v\n", keyPair.PrivateKey, keyPair.PublicKey)
 			err = ta.DBClient.Add(keyPair)
 			if err != nil {
 				panic(err)
