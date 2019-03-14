@@ -62,7 +62,7 @@ func (k Keeper) DistributePrincipalAndInterest(
 		interest := k.Interest(ctx, vote.Amount(), categoryID, period)
 
 		_, err = k.truBankKeeper.MintAndAddCoin(
-			ctx, vote.Creator(), categoryID, storyID, interest)
+			ctx, vote.Creator(), categoryID, storyID, 5, interest)
 		if err != nil {
 			return err
 		}

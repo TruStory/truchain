@@ -131,6 +131,7 @@ func mockDB() (sdk.Context, Keeper, c.Keeper) {
 		challengeKeeper,
 		sk,
 		bankKeeper,
+		truBankKeeper,
 		pk.Subspace(StoreKey),
 		codec)
 	InitGenesis(ctx, k, DefaultGenesisState())

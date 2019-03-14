@@ -137,6 +137,7 @@ func mockDB() (sdk.Context, Keeper, category.Keeper) {
 		challengeKeeper,
 		sk,
 		bankKeeper,
+		truBankKeeper,
 		pk.Subspace(vote.StoreKey),
 		codec,
 	)
