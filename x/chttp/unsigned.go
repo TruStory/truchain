@@ -12,14 +12,14 @@ import (
 type UnsignedRequest struct {
 	MsgTypes []string      `json:"msg_types"`
 	Tx       tcmn.HexBytes `json:"tx"`
-	TxHash   string        `json:"tx_hash"`
+	TxRaw    string        `json:"tx_raw"`
 }
 
 // NewUnsignedStdTx parses an `UnsignedRequest` into an `auth.StdTx`
 func (a *API) NewUnsignedStdTx(r UnsignedRequest, keyPair db.KeyPair) (auth.StdTx, error) {
 
 	// Hashing the tx
-	hash := tmcrypto.Sha256([]byte(r.TxHash))
+	hash := tmcrypto.Sha256([]byte(r.TxRaw))
 
 	// Signing the hash
 	privateKey := GetPrivateKeyObject(keyPair)
