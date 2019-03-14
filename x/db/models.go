@@ -22,6 +22,7 @@ type Mutations interface {
 // Queries read from the database
 type Queries interface {
 	GenericQueries
+	TwitterProfileByID(id int64) (TwitterProfile, error)
 	TwitterProfileByAddress(addr string) (TwitterProfile, error)
 	KeyPairByTwitterProfileID(id int64) (KeyPair, error)
 }
@@ -47,6 +48,23 @@ func (t TwitterProfile) String() string {
 	return fmt.Sprintf(
 		"Twitter Profile<%d %s %s %s %s>",
 		t.ID, t.Address, t.Username, t.FullName, t.AvatarURI)
+}
+
+// TwitterProfileByID implements `Datastore`
+// Finds a Twitter profile by the given twitter profile id
+func (c *Client) TwitterProfileByID(id int64) (TwitterProfile, error) {
+	twitterProfile := new(TwitterProfile)
+	err := c.Model(twitterProfile).Where("id = ?", id).Select()
+
+	if err == pg.ErrNoRows {
+		return *twitterProfile, nil
+	}
+
+	if err != nil {
+		return *twitterProfile, err
+	}
+
+	return *twitterProfile, nil
 }
 
 // TwitterProfileByAddress implements `Datastore`
