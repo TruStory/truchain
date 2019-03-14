@@ -62,8 +62,8 @@ type Keeper struct {
 
 	stakeKeeper    stake.Keeper
 	storyKeeper    story.WriteKeeper // read-write access to story store
-	bankKeeper     bank.Keeper       // read-write access coin store
-	trubankKeeper  trubank.Keeper    // read-write access coin store
+	bankKeeper     bank.Keeper       // read-write access bank store
+	trubankKeeper  trubank.Keeper    // read-write access trubank store
 	categoryKeeper cat.ReadKeeper    // read access to category store
 
 	backingStoryList app.UserList // backings <-> story mappings
@@ -145,7 +145,7 @@ func (k Keeper) Create(
 	k.backingStoryList.Append(ctx, k, storyID, creator, backing.ID())
 
 	// subtract principal from user
-	_, err = k.trubankKeeper.SubtractCoin(ctx, creator, amount, storyID, 0, backing.ID())
+	_, err = k.trubankKeeper.SubtractCoin(ctx, creator, amount, storyID, trubank.Backing, backing.ID())
 	if err != nil {
 		return
 	}

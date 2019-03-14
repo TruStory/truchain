@@ -385,7 +385,7 @@ func (ta *TruAPI) voteResultsResolver(
 	return *voteResult
 }
 
-func (ta *TruAPI) transactionHistoryResolver(
+func (ta *TruAPI) transactionsResolver(
 	_ context.Context, q app.QueryByCreatorParams) []trubank.Transaction {
 
 	res := ta.RunQuery(

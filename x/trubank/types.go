@@ -27,5 +27,4 @@ const (
 	ChallengeReturned
 	RewardPool
 	Interest
-	// StoryCreation
 )

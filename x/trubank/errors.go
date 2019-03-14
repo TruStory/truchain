@@ -27,5 +27,5 @@ func ErrTransferringCoinsToCategory(id int64) sdk.Error {
 
 // ErrTransactionNotFound throws an error when a transaction was not found
 func ErrTransactionNotFound(id int64) sdk.Error {
-	return sdk.NewError(DefaultCodespace, CodeErrorTransactionNotFound, "There was no transaction found with and id of "+fmt.Sprintf("%d", id))
+	return sdk.NewError(DefaultCodespace, CodeErrorTransactionNotFound, "There was no transaction found with an id of "+fmt.Sprintf("%d", id))
 }

@@ -44,12 +44,9 @@ func (k Keeper) DistributePrincipalAndInterest(
 	logger := ctx.Logger().With("module", StoreKey)
 
 	for _, vote := range votes {
-		var typeOfVote trubank.TransactionType
-
+		typeOfVote := trubank.ChallengeReturned
 		if vote.VoteChoice() {
 			typeOfVote = trubank.BackingReturned
-		} else {
-			typeOfVote = trubank.ChallengeReturned
 		}
 
 		// give principal back to user in trustake

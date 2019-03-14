@@ -119,7 +119,7 @@ func (ta *TruAPI) RegisterResolvers() {
 	}
 
 	getTransactions := func(ctx context.Context, creator string) []trubank.Transaction {
-		return ta.transactionHistoryResolver(ctx, app.QueryByCreatorParams{Creator: creator})
+		return ta.transactionsResolver(ctx, app.QueryByCreatorParams{Creator: creator})
 	}
 
 	getStory := func(ctx context.Context, storyID int64) story.Story {

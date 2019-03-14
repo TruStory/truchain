@@ -39,7 +39,7 @@ type Keeper struct {
 
 	bankKeeper     bank.Keeper
 	categoryKeeper cat.WriteKeeper
-	trubankList    app.UserList // transactions <-> story mappings
+	trubankList    app.UserList // transactions <-> user mappings
 }
 
 // NewKeeper creates a new keeper with write and read access
@@ -77,7 +77,7 @@ func (k Keeper) AddCoin(ctx sdk.Context, creator sdk.AccAddress, coin sdk.Coin, 
 	return coins, err
 }
 
-// SubtractCoin wraps around substracting coins via the bank keeper and adds the transaction
+// SubtractCoin wraps around subtracting coins via the bank keeper and adds the transaction
 func (k Keeper) SubtractCoin(ctx sdk.Context, creator sdk.AccAddress, coin sdk.Coin, storyID int64, transactionType TransactionType, referenceID int64) (coins sdk.Coins, err sdk.Error) {
 	coins, _, err = k.bankKeeper.SubtractCoins(ctx, creator, sdk.Coins{coin})
 
