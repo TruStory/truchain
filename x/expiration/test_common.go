@@ -45,6 +45,7 @@ func mockDB() (
 	distKey := sdk.NewKVStoreKey(StoreKey)
 	paramsKey := sdk.NewKVStoreKey(params.StoreKey)
 	transientParamsKey := sdk.NewTransientStoreKey(params.TStoreKey)
+	truBankKey := sdk.NewKVStoreKey(trubank.StoreKey)
 
 	ms := store.NewCommitMultiStore(db)
 	ms.MountStoreWithDB(accKey, sdk.StoreTypeIAVL, db)
@@ -58,6 +59,7 @@ func mockDB() (
 	ms.MountStoreWithDB(distKey, sdk.StoreTypeIAVL, db)
 	ms.MountStoreWithDB(paramsKey, sdk.StoreTypeIAVL, db)
 	ms.MountStoreWithDB(transientParamsKey, sdk.StoreTypeTransient, db)
+	ms.MountStoreWithDB(truBankKey, sdk.StoreTypeIAVL, db)
 	ms.LoadLatestVersion()
 
 	ctx := sdk.NewContext(ms, abci.Header{}, false, log.NewNopLogger())
@@ -89,8 +91,6 @@ func mockDB() (
 
 	story.InitGenesis(ctx, storyKeeper, story.DefaultGenesisState())
 
-	truBankKey := sdk.NewKVStoreKey(trubank.StoreKey)
-	ms.MountStoreWithDB(truBankKey, sdk.StoreTypeIAVL, db)
 	truBankKeeper := trubank.NewKeeper(
 		truBankKey,
 		bankKeeper,

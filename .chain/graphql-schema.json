@@ -1695,6 +1695,22 @@
             "deprecationReason": "",
             "description": "",
             "isDeprecated": false,
+            "name": "groupID",
+            "type": {
+              "kind": "NON_NULL",
+              "name": "",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "int64",
+                "ofType": null
+              }
+            }
+          },
+          {
+            "args": [],
+            "deprecationReason": "",
+            "description": "",
+            "isDeprecated": false,
             "name": "iD",
             "type": {
               "kind": "NON_NULL",
@@ -1750,22 +1766,6 @@
               "ofType": {
                 "kind": "OBJECT",
                 "name": "Story",
-                "ofType": null
-              }
-            }
-          },
-          {
-            "args": [],
-            "deprecationReason": "",
-            "description": "",
-            "isDeprecated": false,
-            "name": "storyID",
-            "type": {
-              "kind": "NON_NULL",
-              "name": "",
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "int64",
                 "ofType": null
               }
             }
