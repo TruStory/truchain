@@ -1,15 +1,10 @@
 package chttp
 
 import (
-	"crypto/ecdsa"
-	"crypto/sha256"
-	"encoding/hex"
-	"fmt"
-	"math/big"
-
 	"github.com/TruStory/truchain/x/db"
+	"github.com/btcsuite/btcd/btcec"
 	"github.com/cosmos/cosmos-sdk/x/auth"
-	ethsecp "github.com/ethereum/go-ethereum/crypto/secp256k1"
+	tmcrypto "github.com/tendermint/tendermint/crypto"
 	tcmn "github.com/tendermint/tendermint/libs/common"
 )
 
@@ -24,53 +19,41 @@ type UnsignedRequest struct {
 func (a *API) NewUnsignedStdTx(r UnsignedRequest, keyPair db.KeyPair) (auth.StdTx, error) {
 
 	// Hashing the tx
-	hasher := sha256.New()
-	hasher.Write([]byte(r.TxHash))
-	hash := hasher.Sum(nil)
+	hash := tmcrypto.Sha256([]byte(r.TxHash))
 
 	// Signing the hash
 	privateKey := GetPrivateKeyObject(keyPair)
-	privateKeyBytes, _ := hex.DecodeString(fmt.Sprintf("%x", privateKey.D))
-	publicKeyBytes, _ := hex.DecodeString(fmt.Sprintf("%x", ethsecp.CompressPubkey(privateKey.PublicKey.X, privateKey.PublicKey.Y)))
-	signature, err := ethsecp.Sign(hash, privateKeyBytes)
+	signature, err := privateKey.Sign(hash)
 	if err != nil {
 		panic(err)
 	}
+	signatureBytes := serializeSig(signature)
 
 	presignedRequest := &PresignedRequest{
 		MsgTypes:   r.MsgTypes,
 		Tx:         r.Tx,
 		PubKeyAlgo: "secp256k1",
-		PubKey:     publicKeyBytes,
-		Signature:  signature,
+		PubKey:     privateKey.PubKey().SerializeCompressed(),
+		Signature:  signatureBytes,
 	}
 
 	return a.NewPresignedStdTx(*presignedRequest)
 }
 
 // GetPrivateKeyObject returns the secp's object encapsulating the private key
-func GetPrivateKeyObject(keyPair db.KeyPair) *ecdsa.PrivateKey {
-	privateKeyHex, _ := hex.DecodeString(keyPair.PrivateKey)
-	privateKeyInt := big.NewInt(0)
-	privateKeyInt.SetBytes(privateKeyHex)
+func GetPrivateKeyObject(keyPair db.KeyPair) *btcec.PrivateKey {
+	privKey, _ := btcec.PrivKeyFromBytes(btcec.S256(), []byte(keyPair.PrivateKey))
 
-	privateKeyObj := new(ecdsa.PrivateKey)
-	privateKeyObj.PublicKey.Curve = ethsecp.S256()
-	privateKeyObj.D = privateKeyInt
-	privateKeyObj.PublicKey.X, privateKeyObj.PublicKey.Y = privateKeyObj.PublicKey.Curve.ScalarBaseMult(privateKeyInt.Bytes())
-
-	return privateKeyObj
+	return privKey
 }
 
-// func GetPrivateKeyObject(keyPair db.KeyPair) secp.PrivKeySecp256k1 {
-// 	privateKey32Bytes := [32]byte{}
-// 	privateKeyBytes, err := hex.DecodeString(keyPair.PrivateKey)
-// 	if err != nil {
-// 		panic(err)
-// 	}
-
-// 	// make it of the fixed length of 32 bytes
-// 	copy(privateKey32Bytes[:], privateKeyBytes)
-
-// 	return secp.PrivKeySecp256k1(privateKey32Bytes)
-// }
+// returns the signature in the R||S format for tendermint
+func serializeSig(sig *btcec.Signature) []byte {
+	rBytes := sig.R.Bytes()
+	sBytes := sig.S.Bytes()
+	sigBytes := make([]byte, 64)
+	// 0 pad the byte arrays from the left if they aren't big enough.
+	copy(sigBytes[32-len(rBytes):32], rBytes)
+	copy(sigBytes[64-len(sBytes):64], sBytes)
+	return sigBytes
+}
