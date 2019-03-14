@@ -47,9 +47,9 @@ func (k Keeper) DistributePrincipalAndInterest(
 		var typeOfVote trubank.TransactionType
 
 		if vote.VoteChoice() {
-			typeOfVote = 2
+			typeOfVote = trubank.BackingReturned
 		} else {
-			typeOfVote = 3
+			typeOfVote = trubank.ChallengeReturned
 		}
 
 		// give principal back to user in trustake
@@ -62,7 +62,7 @@ func (k Keeper) DistributePrincipalAndInterest(
 		interest := k.Interest(ctx, vote.Amount(), categoryID, period)
 
 		_, err = k.truBankKeeper.MintAndAddCoin(
-			ctx, vote.Creator(), categoryID, storyID, 5, interest)
+			ctx, vote.Creator(), categoryID, storyID, trubank.Interest, interest)
 		if err != nil {
 			return err
 		}

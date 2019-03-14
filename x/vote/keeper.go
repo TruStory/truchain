@@ -230,9 +230,9 @@ func (k Keeper) Create(
 	var typeOfVote trubank.TransactionType
 
 	if choice {
-		typeOfVote = 0
+		typeOfVote = trubank.Backing
 	} else {
-		typeOfVote = 1
+		typeOfVote = trubank.Challenge
 	}
 
 	// deduct challenge amount from user

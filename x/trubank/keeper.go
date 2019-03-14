@@ -77,7 +77,7 @@ func (k Keeper) AddCoin(ctx sdk.Context, creator sdk.AccAddress, coin sdk.Coin, 
 	return coins, err
 }
 
-// SubtractCoin wraps around adding coins via the bank keeper and adds the transaction
+// SubtractCoin wraps around substracting coins via the bank keeper and adds the transaction
 func (k Keeper) SubtractCoin(ctx sdk.Context, creator sdk.AccAddress, coin sdk.Coin, storyID int64, transactionType TransactionType, referenceID int64) (coins sdk.Coins, err sdk.Error) {
 	coins, _, err = k.bankKeeper.SubtractCoins(ctx, creator, sdk.Coins{coin})
 

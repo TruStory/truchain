@@ -114,7 +114,7 @@ func (k Keeper) rewardStaker(
 	rewardCoin = sdk.NewCoin(app.StakeDenom, rewardAmount)
 
 	// distribute reward in cred
-	_, err = k.truBankKeeper.MintAndAddCoin(ctx, staker.Creator(), categoryID, storyID, 4, rewardAmount)
+	_, err = k.truBankKeeper.MintAndAddCoin(ctx, staker.Creator(), categoryID, storyID, trubank.RewardPool, rewardAmount)
 	if err != nil {
 		return
 	}
@@ -134,9 +134,9 @@ func (k Keeper) rewardTokenVoter(
 
 	var typeOfVote trubank.TransactionType
 	if staker.VoteChoice() {
-		typeOfVote = 2
+		typeOfVote = trubank.BackingReturned
 	} else {
-		typeOfVote = 3
+		typeOfVote = trubank.ChallengeReturned
 	}
 
 	// give principal back to user in trustake
