@@ -245,7 +245,7 @@ func (ta *TruAPI) RegisterResolvers() {
 		"amount":          func(_ context.Context, q trubank.Transaction) sdk.Coin { return q.Amount },
 		"createdTime":     func(_ context.Context, q trubank.Transaction) time.Time { return q.Timestamp.CreatedTime },
 		"story": func(ctx context.Context, q trubank.Transaction) story.Story {
-			return getStory(ctx, q.StoryID)
+			return getStory(ctx, q.GroupID)
 		},
 	})
 

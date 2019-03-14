@@ -9,7 +9,7 @@ import (
 type Transaction struct {
 	ID              int64           `json:"id"`
 	TransactionType TransactionType `json:"transaction_type"`
-	StoryID         int64           `json:"story_id"`
+	GroupID         int64           `json:"group_id"`
 	ReferenceID     int64           `json:"reference_id"`
 	Amount          sdk.Coin        `json:"amount"`
 	Creator         sdk.AccAddress  `json:"creator"`
