@@ -10,7 +10,7 @@ type Transaction struct {
 	ID              int64           `json:"id"`
 	TransactionType TransactionType `json:"transaction_type"`
 	GroupID         int64           `json:"group_id"`
-	ReferenceID     int64           `json:"reference_id"`
+	ReferenceID     int64           `json:"reference_id,omitempty"`
 	Amount          sdk.Coin        `json:"amount"`
 	Creator         sdk.AccAddress  `json:"creator"`
 	Timestamp       app.Timestamp   `json:"timestamp"`
