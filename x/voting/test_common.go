@@ -33,7 +33,7 @@ func mockDB() (sdk.Context, Keeper, category.Keeper) {
 	db := dbm.NewMemDB()
 	accKey := sdk.NewKVStoreKey("acc")
 	storyKey := sdk.NewKVStoreKey("stories")
-	storyQueueKey := sdk.NewKVStoreKey(story.PendingQueueStoreKey)
+	storyListKey := sdk.NewKVStoreKey(story.PendingListStoreKey)
 	expiredStoryQueueKey := sdk.NewKVStoreKey(story.ExpiringQueueStoreKey)
 	catKey := sdk.NewKVStoreKey("categories")
 	challengeKey := sdk.NewKVStoreKey("challenges")
@@ -49,7 +49,7 @@ func mockDB() (sdk.Context, Keeper, category.Keeper) {
 	ms := store.NewCommitMultiStore(db)
 	ms.MountStoreWithDB(accKey, sdk.StoreTypeIAVL, db)
 	ms.MountStoreWithDB(storyKey, sdk.StoreTypeIAVL, db)
-	ms.MountStoreWithDB(storyQueueKey, sdk.StoreTypeIAVL, db)
+	ms.MountStoreWithDB(storyListKey, sdk.StoreTypeIAVL, db)
 	ms.MountStoreWithDB(expiredStoryQueueKey, sdk.StoreTypeIAVL, db)
 	ms.MountStoreWithDB(catKey, sdk.StoreTypeIAVL, db)
 	ms.MountStoreWithDB(challengeKey, sdk.StoreTypeIAVL, db)
@@ -82,7 +82,7 @@ func mockDB() (sdk.Context, Keeper, category.Keeper) {
 
 	sk := story.NewKeeper(
 		storyKey,
-		storyQueueKey,
+		storyListKey,
 		expiredStoryQueueKey,
 		votingStoryQueueKey,
 		ck,
@@ -230,18 +230,18 @@ func fakeConfirmedGame() (ctx sdk.Context, votes poll, k Keeper) {
 	// fake backings
 	// each should end up with: 2000trusteak, 1054cred (from false voters)
 	// 1054cred = (3949 / 4) + 66.73
-	b1id, _ := k.backingKeeper.Create(ctx, storyID, amount, argument, creator1)
-	b2id, _ := k.backingKeeper.Create(ctx, storyID, amount, argument, creator2)
-	b3id, _ := k.backingKeeper.Create(ctx, storyID, amount, argument, creator3)
-	b4id, _ := k.backingKeeper.Create(ctx, storyID, amount, argument, creator4)
+	b1id, _ := k.backingKeeper.Create(ctx, storyID, amount, argument, creator1, false)
+	b2id, _ := k.backingKeeper.Create(ctx, storyID, amount, argument, creator2, false)
+	b3id, _ := k.backingKeeper.Create(ctx, storyID, amount, argument, creator3, false)
+	b4id, _ := k.backingKeeper.Create(ctx, storyID, amount, argument, creator4, false)
 
 	// fake challenges
 	// c1 & c2 should end up with: 1000trusteak (they lost 1000trusteak in staking)
 	// and no interest (they lost)
 	// c3 should end up with 0trusteak (since they staked 2000trusteak)
-	c1id, _ := k.challengeKeeper.Create(ctx, storyID, amount, argument, creator5)
-	c2id, _ := k.challengeKeeper.Create(ctx, storyID, amount, argument, creator6)
-	c3id, _ := k.challengeKeeper.Create(ctx, storyID, largeAmount, argument, creator10)
+	c1id, _ := k.challengeKeeper.Create(ctx, storyID, amount, argument, creator5, false)
+	c2id, _ := k.challengeKeeper.Create(ctx, storyID, amount, argument, creator6, false)
+	c3id, _ := k.challengeKeeper.Create(ctx, storyID, largeAmount, argument, creator10, false)
 
 	// fake votes (true)
 	// each should end up with: 2000trusteak, 439cred (from false voters)
@@ -285,7 +285,7 @@ func fakeConfirmedGameNoStakers() (ctx sdk.Context, votes poll, k Keeper) {
 	creator2 := fakeFundedCreator(ctx, k.bankKeeper)
 	creator3 := fakeFundedCreator(ctx, k.bankKeeper)
 
-	c1id, _ := k.challengeKeeper.Create(ctx, storyID, amount, argument, creator1)
+	c1id, _ := k.challengeKeeper.Create(ctx, storyID, amount, argument, creator1, false)
 
 	v1id, _ := k.voteKeeper.Create(ctx, storyID, amount, true, argument, creator2)
 	v2id, _ := k.voteKeeper.Create(ctx, storyID, amount, true, argument, creator3)
@@ -325,7 +325,7 @@ func fakeRejectedGame() (ctx sdk.Context, votes poll, k Keeper) {
 	creator1 := fakeFundedCreator(ctx, k.bankKeeper)
 
 	// fake challenges
-	c1id, _ := k.challengeKeeper.Create(ctx, storyID, amount, argument, creator1)
+	c1id, _ := k.challengeKeeper.Create(ctx, storyID, amount, argument, creator1, false)
 	c1, _ := k.challengeKeeper.Challenge(ctx, c1id)
 
 	votes.falseVotes = append(votes.falseVotes, c1)

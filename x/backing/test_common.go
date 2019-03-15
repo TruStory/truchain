@@ -35,7 +35,7 @@ func mockDB() (
 
 	accKey := sdk.NewKVStoreKey(auth.StoreKey)
 	storyKey := sdk.NewKVStoreKey(story.StoreKey)
-	storyQueueKey := sdk.NewKVStoreKey(story.PendingQueueStoreKey)
+	stroyListKey := sdk.NewKVStoreKey(story.PendingListStoreKey)
 	expiredStoryQueueKey := sdk.NewKVStoreKey(story.ExpiringQueueStoreKey)
 	votingStoryQueueKey := sdk.NewKVStoreKey(story.ChallengedQueueStoreKey)
 	catKey := sdk.NewKVStoreKey(category.StoreKey)
@@ -48,7 +48,7 @@ func mockDB() (
 	ms := store.NewCommitMultiStore(db)
 	ms.MountStoreWithDB(accKey, sdk.StoreTypeIAVL, db)
 	ms.MountStoreWithDB(storyKey, sdk.StoreTypeIAVL, db)
-	ms.MountStoreWithDB(storyQueueKey, sdk.StoreTypeIAVL, db)
+	ms.MountStoreWithDB(stroyListKey, sdk.StoreTypeIAVL, db)
 	ms.MountStoreWithDB(expiredStoryQueueKey, sdk.StoreTypeIAVL, db)
 	ms.MountStoreWithDB(catKey, sdk.StoreTypeIAVL, db)
 	ms.MountStoreWithDB(backingKey, sdk.StoreTypeIAVL, db)
@@ -78,7 +78,7 @@ func mockDB() (
 
 	sk := story.NewKeeper(
 		storyKey,
-		storyQueueKey,
+		stroyListKey,
 		expiredStoryQueueKey,
 		votingStoryQueueKey,
 		ck,

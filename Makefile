@@ -35,7 +35,7 @@ reset:
 restart: build_daemon reset start
 
 start:
-	bin/truchaind --home $(CHAIN_DIR) --log_level "main:info,state:info,*:error,app:info,backing:info,category:info,challenge:info,expiration:info,stake:info,story:info,vote:info,voting:info" start
+	bin/truchaind --home $(CHAIN_DIR) --log_level "main:info,state:info,*:error,app:info,backing:info,category:info,challenge:info,expiration:info,stake:info,stories:info,vote:info,voting:info" start
 
 check:
 	gometalinter ./...
@@ -62,6 +62,7 @@ test: set_registrar set_env_vars go_test
 
 test_cover: set_registrar set_env_vars
 	@go test $(PACKAGES) -v -timeout 30m -race -coverprofile=coverage.txt -covermode=atomic
+	@go tool cover -html=coverage.txt
 
 update_deps:
 	@echo "--> Running dep ensure"

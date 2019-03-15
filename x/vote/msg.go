@@ -64,3 +64,54 @@ func (msg CreateVoteMsg) ValidateBasic() sdk.Error {
 func (msg CreateVoteMsg) GetSigners() []sdk.AccAddress {
 	return app.GetSigners(msg.Creator)
 }
+
+// ToggleVoteMsg represents a message to change a vote
+type ToggleVoteMsg struct {
+	stake.Msg
+}
+
+// NewToggleVoteMsg creates a message to toggle vote.
+func NewToggleVoteMsg(
+	storyID int64,
+	amount sdk.Coin,
+	argument string,
+	creator sdk.AccAddress,
+	vote bool) ToggleVoteMsg {
+
+	voteMsg := stake.Msg{
+		StoryID:  storyID,
+		Amount:   amount,
+		Argument: argument,
+		Creator:  creator,
+	}
+
+	return ToggleVoteMsg{voteMsg}
+}
+
+// Route implements Msg
+func (msg ToggleVoteMsg) Route() string { return app.GetRoute(msg) }
+
+// Type implements Msg
+func (msg ToggleVoteMsg) Type() string { return app.GetType(msg) }
+
+// GetSignBytes implements Msg. Story creator should sign this message.
+// Serializes Msg into JSON bytes for transport.
+func (msg ToggleVoteMsg) GetSignBytes() []byte {
+	return app.MustGetSignBytes(msg)
+}
+
+// ValidateBasic implements Msg
+func (msg ToggleVoteMsg) ValidateBasic() sdk.Error {
+	if msg.StoryID == 0 {
+		return story.ErrInvalidStoryID(msg.StoryID)
+	}
+	if len(msg.Creator) == 0 {
+		return sdk.ErrInvalidAddress("Invalid address: " + msg.Creator.String())
+	}
+	return nil
+}
+
+// GetSigners implements Msg. Story creator is the only signer of this message.
+func (msg ToggleVoteMsg) GetSigners() []sdk.AccAddress {
+	return app.GetSigners(msg.Creator)
+}
