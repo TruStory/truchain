@@ -46,6 +46,7 @@ func TestTransactionsByCreator(t *testing.T) {
 	assert.Nil(t, err)
 
 	transactions, err := k.TransactionsByCreator(ctx, creator)
+	assert.Nil(t, err)
 
 	assert.NotEmpty(t, transactions)
 	assert.Len(t, transactions, 2)
@@ -63,6 +64,7 @@ func TestTransactionNotAddedIfZeroCoins(t *testing.T) {
 	assert.Nil(t, err)
 
 	transactions, err := k.TransactionsByCreator(ctx, creator)
+	assert.Nil(t, err)
 
 	assert.Len(t, transactions, 0)
 }
