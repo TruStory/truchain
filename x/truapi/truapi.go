@@ -76,6 +76,8 @@ func (ta *TruAPI) RegisterRoutes() {
 	ta.HandleFunc("/unsigned", ta.HandleUnsigned)
 	ta.HandleFunc("/register", ta.HandleRegistration)
 
+	ta.HandleFunc("/user", ta.HandleUserDetails)
+
 	ta.RegisterOAuthRoutes()
 }
 
