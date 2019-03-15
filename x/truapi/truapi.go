@@ -53,6 +53,10 @@ func (ta *TruAPI) RegisterModels() {
 	if err != nil {
 		panic(err)
 	}
+	err = ta.DBClient.RegisterModel(&db.KeyPair{})
+	if err != nil {
+		panic(err)
+	}
 }
 
 // RegisterRoutes applies the TruStory API routes to the `chttp.API` router
