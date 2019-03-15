@@ -7,6 +7,7 @@ import (
 	"os"
 	"time"
 
+	trubank "github.com/TruStory/truchain/x/trubank"
 	"github.com/TruStory/truchain/x/voting"
 	"github.com/dghubble/gologin/twitter"
 	"github.com/dghubble/oauth1"
@@ -122,6 +123,14 @@ func (ta *TruAPI) RegisterResolvers() {
 		return ta.voteResultsResolver(ctx, app.QueryByIDParams{ID: storyID})
 	}
 
+	getTransactions := func(ctx context.Context, creator string) []trubank.Transaction {
+		return ta.transactionsResolver(ctx, app.QueryByCreatorParams{Creator: creator})
+	}
+
+	getStory := func(ctx context.Context, storyID int64) story.Story {
+		return ta.storyResolver(ctx, story.QueryStoryByIDParams{ID: storyID})
+	}
+
 	ta.GraphQLClient.RegisterQueryResolver("backing", ta.backingResolver)
 	ta.GraphQLClient.RegisterObjectResolver("Backing", backing.Backing{}, map[string]interface{}{
 		"amount":    func(ctx context.Context, q backing.Backing) sdk.Coin { return q.Amount() },
@@ -230,6 +239,19 @@ func (ta *TruAPI) RegisterResolvers() {
 		"coins":          func(_ context.Context, q users.User) sdk.Coins { return q.Coins },
 		"pubkey":         func(_ context.Context, q users.User) string { return q.Pubkey.String() },
 		"twitterProfile": ta.twitterProfileResolver,
+		"transactions": func(ctx context.Context, q users.User) []trubank.Transaction {
+			return getTransactions(ctx, q.Address)
+		},
+	})
+
+	ta.GraphQLClient.RegisterObjectResolver("Transactions", trubank.Transaction{}, map[string]interface{}{
+		"id":              func(_ context.Context, q trubank.Transaction) int64 { return q.ID },
+		"transactionType": func(_ context.Context, q trubank.Transaction) trubank.TransactionType { return q.TransactionType },
+		"amount":          func(_ context.Context, q trubank.Transaction) sdk.Coin { return q.Amount },
+		"createdTime":     func(_ context.Context, q trubank.Transaction) time.Time { return q.Timestamp.CreatedTime },
+		"story": func(ctx context.Context, q trubank.Transaction) story.Story {
+			return getStory(ctx, q.GroupID)
+		},
 	})
 
 	ta.GraphQLClient.RegisterObjectResolver("URL", url.URL{}, map[string]interface{}{

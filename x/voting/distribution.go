@@ -6,6 +6,7 @@ import (
 	app "github.com/TruStory/truchain/types"
 	"github.com/TruStory/truchain/x/backing"
 	"github.com/TruStory/truchain/x/challenge"
+	"github.com/TruStory/truchain/x/trubank"
 	tokenVote "github.com/TruStory/truchain/x/vote"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
@@ -15,7 +16,8 @@ func (k Keeper) distributeRewards(
 	pool sdk.Coin,
 	votes poll,
 	confirmed bool,
-	categoryID int64) sdk.Error {
+	categoryID int64,
+	storyID int64) sdk.Error {
 
 	logger := ctx.Logger().With("module", StoreKey)
 
@@ -111,7 +113,7 @@ func (k Keeper) rewardStaker(
 	rewardCoin = sdk.NewCoin(app.StakeDenom, rewardAmount)
 
 	// distribute reward in cred
-	_, err = k.truBankKeeper.MintAndAddCoin(ctx, staker.Creator(), categoryID, rewardAmount)
+	_, err = k.truBankKeeper.MintAndAddCoin(ctx, staker.Creator(), categoryID, staker.StoryID(), trubank.RewardPool, rewardAmount)
 	if err != nil {
 		return
 	}
@@ -128,18 +130,24 @@ func (k Keeper) rewardTokenVoter(
 
 	logger := ctx.Logger().With("module", StoreKey)
 
-	// get back original staked amount
-	_, _, err = k.bankKeeper.AddCoins(ctx, staker.Creator(), sdk.Coins{staker.Amount()})
+	typeOfVote := trubank.ChallengeReturned
+	if staker.VoteChoice() {
+		typeOfVote = trubank.BackingReturned
+	}
+
+	// give principal back to user in trustake
+	_, err = k.truBankKeeper.AddCoin(ctx, staker.Creator(), staker.Amount(), staker.StoryID(), typeOfVote, staker.ID())
 	if err != nil {
 		return
 	}
+
 	logger.Info(fmt.Sprintf("Giving back original vote stake: %v", staker.Amount()))
 
 	// calculate reward (1-X% of pool, in equal proportions)
 	rewardCoin = sdk.NewCoin(app.StakeDenom, voterRewardAmount)
 
 	// distribute reward in cred
-	_, err = k.truBankKeeper.MintAndAddCoin(ctx, staker.Creator(), categoryID, voterRewardAmount)
+	_, err = k.truBankKeeper.MintAndAddCoin(ctx, staker.Creator(), categoryID, staker.StoryID(), trubank.RewardPool, voterRewardAmount)
 	if err != nil {
 		return
 	}

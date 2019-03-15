@@ -105,3 +105,61 @@ func (l UserList) typeByUserSubspaceKey(
 
 	return []byte(key)
 }
+
+// USER QUERY FUNCTIONS
+
+// AppendToUser adds a new user+value <-> value association
+func (l UserList) AppendToUser(
+	ctx sdk.Context, k WriteKeeper, user sdk.AccAddress, valueID int64) {
+	k.GetStore(ctx).Set(
+		l.userAndValueKey(ctx, k, user, valueID),
+		k.GetCodec().MustMarshalBinaryBare(valueID))
+}
+
+// userAndValueKey generates a key with "[foreignStoreKey]:user:[user]:value[valueID]" to create quickly queriable user:value -> value associations
+func (l UserList) userAndValueKey(
+	ctx sdk.Context, k WriteKeeper, user sdk.AccAddress, valueID int64) []byte {
+
+	key := fmt.Sprintf(
+		"%s:user:%s:value:%d",
+		l.foreignStoreKey.Name(),
+		user.String(),
+		valueID)
+
+	return []byte(key)
+}
+
+func (l UserList) userAndValuePrefix(
+	ctx sdk.Context, k WriteKeeper, user sdk.AccAddress) []byte {
+
+	key := fmt.Sprintf(
+		"%s:user:%s",
+		l.foreignStoreKey.Name(),
+		user.String())
+
+	return []byte(key)
+}
+
+// MapByUser applies a function
+func (l UserList) MapByUser(
+	ctx sdk.Context, k WriteKeeper, user sdk.AccAddress, fn func(int64) sdk.Error) sdk.Error {
+
+	// get store
+	store := k.GetStore(ctx)
+
+	// builds prefix
+	prefix := l.userAndValuePrefix(ctx, k, user)
+
+	// iterates through keyspace to find all value ids
+	iter := sdk.KVStorePrefixIterator(store, prefix)
+	defer iter.Close()
+	for ; iter.Valid(); iter.Next() {
+		var id int64
+		k.GetCodec().MustUnmarshalBinaryBare(iter.Value(), &id)
+		if err := fn(id); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}

@@ -1548,6 +1548,16 @@
       {
         "description": "",
         "enumValues": [],
+        "fields": [],
+        "inputFields": [],
+        "interfaces": [],
+        "kind": "SCALAR",
+        "name": "Time",
+        "possibleTypes": []
+      },
+      {
+        "description": "",
+        "enumValues": [],
         "fields": [
           {
             "args": [],
@@ -1618,6 +1628,185 @@
         "interfaces": [],
         "kind": "OBJECT",
         "name": "Timestamp",
+        "possibleTypes": []
+      },
+      {
+        "description": "",
+        "enumValues": [],
+        "fields": [
+          {
+            "args": [],
+            "deprecationReason": "",
+            "description": "",
+            "isDeprecated": false,
+            "name": "amount",
+            "type": {
+              "kind": "NON_NULL",
+              "name": "",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "Coin",
+                "ofType": null
+              }
+            }
+          },
+          {
+            "args": [],
+            "deprecationReason": "",
+            "description": "",
+            "isDeprecated": false,
+            "name": "createdTime",
+            "type": {
+              "kind": "NON_NULL",
+              "name": "",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Time",
+                "ofType": null
+              }
+            }
+          },
+          {
+            "args": [],
+            "deprecationReason": "",
+            "description": "",
+            "isDeprecated": false,
+            "name": "creator",
+            "type": {
+              "kind": "NON_NULL",
+              "name": "",
+              "ofType": {
+                "kind": "LIST",
+                "name": "",
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "name": "",
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "uint8",
+                    "ofType": null
+                  }
+                }
+              }
+            }
+          },
+          {
+            "args": [],
+            "deprecationReason": "",
+            "description": "",
+            "isDeprecated": false,
+            "name": "groupID",
+            "type": {
+              "kind": "NON_NULL",
+              "name": "",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "int64",
+                "ofType": null
+              }
+            }
+          },
+          {
+            "args": [],
+            "deprecationReason": "",
+            "description": "",
+            "isDeprecated": false,
+            "name": "iD",
+            "type": {
+              "kind": "NON_NULL",
+              "name": "",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "int64",
+                "ofType": null
+              }
+            }
+          },
+          {
+            "args": [],
+            "deprecationReason": "",
+            "description": "",
+            "isDeprecated": false,
+            "name": "id",
+            "type": {
+              "kind": "NON_NULL",
+              "name": "",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "int64",
+                "ofType": null
+              }
+            }
+          },
+          {
+            "args": [],
+            "deprecationReason": "",
+            "description": "",
+            "isDeprecated": false,
+            "name": "referenceID",
+            "type": {
+              "kind": "NON_NULL",
+              "name": "",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "int64",
+                "ofType": null
+              }
+            }
+          },
+          {
+            "args": [],
+            "deprecationReason": "",
+            "description": "",
+            "isDeprecated": false,
+            "name": "story",
+            "type": {
+              "kind": "NON_NULL",
+              "name": "",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "Story",
+                "ofType": null
+              }
+            }
+          },
+          {
+            "args": [],
+            "deprecationReason": "",
+            "description": "",
+            "isDeprecated": false,
+            "name": "timestamp",
+            "type": {
+              "kind": "NON_NULL",
+              "name": "",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "Timestamp",
+                "ofType": null
+              }
+            }
+          },
+          {
+            "args": [],
+            "deprecationReason": "",
+            "description": "",
+            "isDeprecated": false,
+            "name": "transactionType",
+            "type": {
+              "kind": "NON_NULL",
+              "name": "",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "int8",
+                "ofType": null
+              }
+            }
+          }
+        ],
+        "inputFields": [],
+        "interfaces": [],
+        "kind": "OBJECT",
+        "name": "Transactions",
         "possibleTypes": []
       },
       {
@@ -1840,6 +2029,30 @@
             "deprecationReason": "",
             "description": "",
             "isDeprecated": false,
+            "name": "transactions",
+            "type": {
+              "kind": "NON_NULL",
+              "name": "",
+              "ofType": {
+                "kind": "LIST",
+                "name": "",
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "name": "",
+                  "ofType": {
+                    "kind": "OBJECT",
+                    "name": "Transactions",
+                    "ofType": null
+                  }
+                }
+              }
+            }
+          },
+          {
+            "args": [],
+            "deprecationReason": "",
+            "description": "",
+            "isDeprecated": false,
             "name": "twitterProfile",
             "type": {
               "kind": "NON_NULL",
@@ -2033,6 +2246,16 @@
         "interfaces": [],
         "kind": "SCALAR",
         "name": "uint64",
+        "possibleTypes": []
+      },
+      {
+        "description": "",
+        "enumValues": [],
+        "fields": [],
+        "inputFields": [],
+        "interfaces": [],
+        "kind": "SCALAR",
+        "name": "uint8",
         "possibleTypes": []
       },
       {

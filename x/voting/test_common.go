@@ -45,6 +45,7 @@ func mockDB() (sdk.Context, Keeper, category.Keeper) {
 	backingKey := sdk.NewKVStoreKey("backing")
 	paramsKey := sdk.NewKVStoreKey(sdkparams.StoreKey)
 	transientParamsKey := sdk.NewTransientStoreKey(sdkparams.TStoreKey)
+	truBankKey := sdk.NewKVStoreKey(trubank.StoreKey)
 
 	ms := store.NewCommitMultiStore(db)
 	ms.MountStoreWithDB(accKey, sdk.StoreTypeIAVL, db)
@@ -61,6 +62,7 @@ func mockDB() (sdk.Context, Keeper, category.Keeper) {
 	ms.MountStoreWithDB(backingKey, sdk.StoreTypeIAVL, db)
 	ms.MountStoreWithDB(paramsKey, sdk.StoreTypeIAVL, db)
 	ms.MountStoreWithDB(transientParamsKey, sdk.StoreTypeTransient, db)
+	ms.MountStoreWithDB(truBankKey, sdk.StoreTypeIAVL, db)
 	ms.LoadLatestVersion()
 
 	header := abci.Header{Time: time.Now()}
@@ -91,8 +93,6 @@ func mockDB() (sdk.Context, Keeper, category.Keeper) {
 
 	story.InitGenesis(ctx, sk, story.DefaultGenesisState())
 
-	truBankKey := sdk.NewKVStoreKey(trubank.StoreKey)
-	ms.MountStoreWithDB(truBankKey, sdk.StoreTypeIAVL, db)
 	truBankKeeper := trubank.NewKeeper(
 		truBankKey,
 		bankKeeper,
@@ -111,6 +111,7 @@ func mockDB() (sdk.Context, Keeper, category.Keeper) {
 		stakeKeeper,
 		sk,
 		bankKeeper,
+		truBankKeeper,
 		ck,
 		codec,
 	)
@@ -119,6 +120,7 @@ func mockDB() (sdk.Context, Keeper, category.Keeper) {
 		challengeKey,
 		stakeKeeper,
 		backingKeeper,
+		truBankKeeper,
 		bankKeeper,
 		sk,
 		pk.Subspace(challenge.StoreKey),
@@ -135,6 +137,7 @@ func mockDB() (sdk.Context, Keeper, category.Keeper) {
 		challengeKeeper,
 		sk,
 		bankKeeper,
+		truBankKeeper,
 		pk.Subspace(vote.StoreKey),
 		codec,
 	)

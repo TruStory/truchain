@@ -7,7 +7,7 @@ import (
 	"github.com/TruStory/truchain/x/story"
 
 	app "github.com/TruStory/truchain/types"
-	"github.com/TruStory/truchain/x/trubank"
+	trubank "github.com/TruStory/truchain/x/trubank"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/params"
 )
@@ -44,8 +44,13 @@ func (k Keeper) DistributePrincipalAndInterest(
 	logger := ctx.Logger().With("module", StoreKey)
 
 	for _, vote := range votes {
+		typeOfVote := trubank.ChallengeReturned
+		if vote.VoteChoice() {
+			typeOfVote = trubank.BackingReturned
+		}
+
 		// give principal back to user in trustake
-		_, err := k.truBankKeeper.AddCoin(ctx, vote.Creator(), vote.Amount())
+		_, err := k.truBankKeeper.AddCoin(ctx, vote.Creator(), vote.Amount(), vote.StoryID(), typeOfVote, vote.ID())
 		if err != nil {
 			return err
 		}
@@ -54,7 +59,7 @@ func (k Keeper) DistributePrincipalAndInterest(
 		interest := k.Interest(ctx, vote.Amount(), categoryID, period)
 
 		_, err = k.truBankKeeper.MintAndAddCoin(
-			ctx, vote.Creator(), categoryID, interest)
+			ctx, vote.Creator(), categoryID, vote.StoryID(), trubank.Interest, interest)
 		if err != nil {
 			return err
 		}

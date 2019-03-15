@@ -20,7 +20,7 @@ func TestDistributeRewards(t *testing.T) {
 	pool := sdk.NewCoin(app.StakeDenom, sdk.NewInt(35))
 	categoryID := int64(1)
 
-	err := k.distributeRewards(ctx, pool, votes, true, categoryID)
+	err := k.distributeRewards(ctx, pool, votes, true, categoryID, 0)
 	assert.Nil(t, err)
 }
 
@@ -30,7 +30,7 @@ func TestDistributeRewardsNoStakers(t *testing.T) {
 	pool := sdk.NewCoin(app.StakeDenom, sdk.NewInt(35))
 	categoryID := int64(1)
 
-	err := k.distributeRewards(ctx, pool, votes, true, categoryID)
+	err := k.distributeRewards(ctx, pool, votes, true, categoryID, 0)
 	assert.Nil(t, err)
 }
 
@@ -44,7 +44,7 @@ func TestDistributeRewardsConfirmed(t *testing.T) {
 	ctx = ctx.WithBlockHeader(abci.Header{Time: interestStopTime})
 
 	pool, _ := k.rewardPool(ctx, votes, true, categoryID)
-	err := k.distributeRewards(ctx, pool, votes, true, categoryID)
+	err := k.distributeRewards(ctx, pool, votes, true, categoryID, 0)
 	assert.Nil(t, err)
 
 	coins := sdk.Coins{}
@@ -126,7 +126,7 @@ func TestDistributeRewardsRejected(t *testing.T) {
 	ctx = ctx.WithBlockHeader(abci.Header{Time: interestStopTime})
 
 	pool, _ := k.rewardPool(ctx, votes, false, categoryID)
-	err := k.distributeRewards(ctx, pool, votes, false, categoryID)
+	err := k.distributeRewards(ctx, pool, votes, false, categoryID, 0)
 	assert.Nil(t, err)
 
 	coins := sdk.Coins{}
