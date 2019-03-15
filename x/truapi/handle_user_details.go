@@ -17,6 +17,9 @@ func (ta *TruAPI) HandleUserDetails(r *http.Request) chttp.Response {
 
 	// Get the user context
 	truUser, err := GetTruUserFromCookie(r)
+	if err == http.ErrNoCookie {
+		return chttp.SimpleErrorResponse(401, err)
+	}
 	if err != nil {
 		panic(err)
 	}
