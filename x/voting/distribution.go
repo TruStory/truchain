@@ -62,7 +62,7 @@ func (k Keeper) distributeRewards(
 		switch v := vote.(type) {
 		case backing.Backing, challenge.Challenge:
 			rewardCoin, err := k.rewardStaker(
-				ctx, v, stakerTotalAmount, stakerPool, categoryID, storyID)
+				ctx, v, stakerTotalAmount, stakerPool, categoryID)
 			if err != nil {
 				return err
 			}
@@ -71,7 +71,7 @@ func (k Keeper) distributeRewards(
 			pool = pool.Minus(rewardCoin)
 
 		case tokenVote.TokenVote:
-			rewardCoin, err := k.rewardTokenVoter(ctx, v, voterRewardAmount, categoryID, storyID)
+			rewardCoin, err := k.rewardTokenVoter(ctx, v, voterRewardAmount, categoryID)
 			if err != nil {
 				return err
 			}
@@ -96,13 +96,12 @@ func (k Keeper) rewardStaker(
 	staker app.Voter,
 	stakerTotalAmount sdk.Int,
 	stakerPool sdk.Coin,
-	categoryID int64,
-	storyID int64) (rewardCoin sdk.Coin, err sdk.Error) {
+	categoryID int64) (rewardCoin sdk.Coin, err sdk.Error) {
 
 	logger := ctx.Logger().With("module", StoreKey)
 
 	// get back staked amount
-	err = k.stakeKeeper.DistributePrincipalAndInterest(ctx, []app.Voter{staker}, categoryID, storyID)
+	err = k.stakeKeeper.DistributePrincipalAndInterest(ctx, []app.Voter{staker}, categoryID)
 	if err != nil {
 		return
 	}
@@ -114,7 +113,7 @@ func (k Keeper) rewardStaker(
 	rewardCoin = sdk.NewCoin(app.StakeDenom, rewardAmount)
 
 	// distribute reward in cred
-	_, err = k.truBankKeeper.MintAndAddCoin(ctx, staker.Creator(), categoryID, storyID, trubank.RewardPool, rewardAmount)
+	_, err = k.truBankKeeper.MintAndAddCoin(ctx, staker.Creator(), categoryID, staker.StoryID(), trubank.RewardPool, rewardAmount)
 	if err != nil {
 		return
 	}
@@ -127,8 +126,7 @@ func (k Keeper) rewardTokenVoter(
 	ctx sdk.Context,
 	staker app.Voter,
 	voterRewardAmount sdk.Int,
-	categoryID int64,
-	storyID int64) (rewardCoin sdk.Coin, err sdk.Error) {
+	categoryID int64) (rewardCoin sdk.Coin, err sdk.Error) {
 
 	logger := ctx.Logger().With("module", StoreKey)
 
@@ -138,7 +136,7 @@ func (k Keeper) rewardTokenVoter(
 	}
 
 	// give principal back to user in trustake
-	_, err = k.truBankKeeper.AddCoin(ctx, staker.Creator(), staker.Amount(), storyID, typeOfVote, staker.ID())
+	_, err = k.truBankKeeper.AddCoin(ctx, staker.Creator(), staker.Amount(), staker.StoryID(), typeOfVote, staker.ID())
 	if err != nil {
 		return
 	}
@@ -149,7 +147,7 @@ func (k Keeper) rewardTokenVoter(
 	rewardCoin = sdk.NewCoin(app.StakeDenom, voterRewardAmount)
 
 	// distribute reward in cred
-	_, err = k.truBankKeeper.MintAndAddCoin(ctx, staker.Creator(), categoryID, storyID, trubank.RewardPool, voterRewardAmount)
+	_, err = k.truBankKeeper.MintAndAddCoin(ctx, staker.Creator(), categoryID, staker.StoryID(), trubank.RewardPool, voterRewardAmount)
 	if err != nil {
 		return
 	}

@@ -353,7 +353,7 @@ func (k Keeper) Delete(ctx sdk.Context, challenge Challenge) sdk.Error {
 		k.GetIDKey(challenge.ID()))
 
 	// restore coins
-	_, _, err := k.bankKeeper.AddCoins(ctx, challenge.Creator(), []sdk.Coin{challenge.Amount()})
+	_, err := k.trubankKeeper.AddCoin(ctx, challenge.Creator(), challenge.Amount(), challenge.StoryID(), trubank.ChallengeReturned, challenge.ID())
 	if err != nil {
 		return err
 	}

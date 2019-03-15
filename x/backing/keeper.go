@@ -177,8 +177,7 @@ func (k Keeper) Delete(ctx sdk.Context, backing Backing) sdk.Error {
 	// removes backing
 	k.GetStore(ctx).Delete(backingIDKey)
 
-	// restore coins
-	_, _, err := k.bankKeeper.AddCoins(ctx, backing.Creator(), []sdk.Coin{backing.Amount()})
+	_, err := k.trubankKeeper.AddCoin(ctx, backing.Creator(), backing.Amount(), backing.StoryID(), trubank.BackingReturned, backing.ID())
 	if err != nil {
 		return err
 	}

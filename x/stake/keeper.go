@@ -39,7 +39,7 @@ func NewKeeper(
 
 // DistributePrincipalAndInterest distributes funds to backers and challengers
 func (k Keeper) DistributePrincipalAndInterest(
-	ctx sdk.Context, votes []app.Voter, categoryID int64, storyID int64) sdk.Error {
+	ctx sdk.Context, votes []app.Voter, categoryID int64) sdk.Error {
 
 	logger := ctx.Logger().With("module", StoreKey)
 
@@ -50,7 +50,7 @@ func (k Keeper) DistributePrincipalAndInterest(
 		}
 
 		// give principal back to user in trustake
-		_, err := k.truBankKeeper.AddCoin(ctx, vote.Creator(), vote.Amount(), storyID, typeOfVote, vote.ID())
+		_, err := k.truBankKeeper.AddCoin(ctx, vote.Creator(), vote.Amount(), vote.StoryID(), typeOfVote, vote.ID())
 		if err != nil {
 			return err
 		}
@@ -59,7 +59,7 @@ func (k Keeper) DistributePrincipalAndInterest(
 		interest := k.Interest(ctx, vote.Amount(), categoryID, period)
 
 		_, err = k.truBankKeeper.MintAndAddCoin(
-			ctx, vote.Creator(), categoryID, storyID, trubank.Interest, interest)
+			ctx, vote.Creator(), categoryID, vote.StoryID(), trubank.Interest, interest)
 		if err != nil {
 			return err
 		}
