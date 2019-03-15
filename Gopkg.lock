@@ -883,6 +883,7 @@
   analyzer-name = "dep"
   analyzer-version = 1
   input-imports = [
+    "github.com/btcsuite/btcd/btcec",
     "github.com/cosmos/cosmos-sdk/baseapp",
     "github.com/cosmos/cosmos-sdk/client",
     "github.com/cosmos/cosmos-sdk/client/keys",
@@ -904,9 +905,11 @@
     "github.com/cosmos/cosmos-sdk/x/ibc",
     "github.com/cosmos/cosmos-sdk/x/params",
     "github.com/cosmos/cosmos-sdk/x/staking",
+    "github.com/dghubble/go-twitter/twitter",
     "github.com/dghubble/gologin/twitter",
     "github.com/dghubble/oauth1",
     "github.com/dghubble/oauth1/twitter",
+    "github.com/ethereum/go-ethereum/crypto/secp256k1",
     "github.com/go-pg/pg",
     "github.com/go-pg/pg/orm",
     "github.com/gorilla/mux",

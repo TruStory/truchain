@@ -1,16 +1,13 @@
 package truapi
 
 import (
-	"encoding/hex"
-	"fmt"
 	"net/http"
 	"os"
 	"time"
 
+	"github.com/TruStory/truchain/x/cookies"
 	"github.com/TruStory/truchain/x/db"
-	"github.com/btcsuite/btcd/btcec"
 	"github.com/dghubble/gologin/twitter"
-	"github.com/gorilla/securecookie"
 )
 
 // IssueSession creates a session and redirects the logged in user to the correct page
@@ -23,55 +20,10 @@ func IssueSession(ta *TruAPI) http.Handler {
 			return
 		}
 
-		// NOTE: DATABASE TRANSACTION COULD BE USED IN HERE
-
-		// Fetch the user, if already exists
-		currentTwitterProfile, err := ta.DBClient.TwitterProfileByID(twitterUser.ID)
+		addr, err := CalibrateUser(ta, twitterUser)
 		if err != nil {
-			panic(err)
-		}
-		// if user exists,
-		var addr string
-		if currentTwitterProfile.ID != 0 {
-			addr = currentTwitterProfile.Address
-		}
-
-		// Fetch keypair of the user, if already exists
-		keyPair, err := ta.DBClient.KeyPairByTwitterProfileID(twitterUser.ID)
-		if err != nil {
-			panic(err)
-		}
-
-		// If not available, create new
-		if keyPair.ID == 0 {
-			newKeyPair, _ := btcec.NewPrivateKey(btcec.S256())
-			if err != nil {
-				panic(err)
-			}
-			// We are converting the private key of the new key pair in hex string,
-			// then back to byte slice, and finally regenerating the private (suppressed) and public key from it.
-			// This way, it returns the kind of public key that cosmos understands.
-			_, pubKey := btcec.PrivKeyFromBytes(btcec.S256(), []byte(fmt.Sprintf("%x", newKeyPair.Serialize())))
-
-			keyPair := &db.KeyPair{
-				TwitterProfileID: twitterUser.ID,
-				PrivateKey:       fmt.Sprintf("%x", newKeyPair.Serialize()),
-				PublicKey:        fmt.Sprintf("%x", pubKey.SerializeCompressed()),
-			}
-			err = ta.DBClient.Add(keyPair)
-			if err != nil {
-				panic(err)
-			}
-
-			// Register with cosmos only if it wasn't registered before.
-			if currentTwitterProfile.ID == 0 {
-				pubKeyBytes, _ := hex.DecodeString(keyPair.PublicKey)
-				newAddr, _, _, err := (*(ta.App)).RegisterKey(pubKeyBytes, "secp256k1")
-				if err != nil {
-					panic(err)
-				}
-				addr = newAddr.String()
-			}
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
 		}
 
 		twitterProfile := &db.TwitterProfile{
@@ -84,32 +36,18 @@ func IssueSession(ta *TruAPI) http.Handler {
 		// upserting the twitter profile
 		err = ta.DBClient.UpsertTwitterProfile(twitterProfile)
 		if err != nil {
-			panic(err)
+			http.Error(w, err.Error(), http.StatusInternalServerError)
 		}
 
-		// Saves and excrypts the context in the cookie
-		hashKey, err := hex.DecodeString(os.Getenv("COOKIE_HASH_KEY"))
+		cookieValue, err := cookies.SetUserToCookie(twitterProfile)
 		if err != nil {
-			panic(err)
-		}
-		blockKey, err := hex.DecodeString(os.Getenv("COOKIE_ENCRYPT_KEY"))
-		if err != nil {
-			panic(err)
-		}
-		s := securecookie.New(hashKey, blockKey)
-		cookieValue := map[string]string{
-			"twitter-profile-id": twitterUser.IDStr,
-			"address":            twitterProfile.Address,
-		}
-		encodedValue, err := s.Encode("tru-user", cookieValue)
-		if err != nil {
-			panic(err)
+			http.Error(w, err.Error(), http.StatusInternalServerError)
 		}
 
 		cookie := http.Cookie{
 			Name:     "tru-user",
 			HttpOnly: true,
-			Value:    encodedValue,
+			Value:    cookieValue,
 			Expires:  time.Now().Add(2 * time.Hour),
 			Domain:   os.Getenv("COOKIE_HOST"),
 		}

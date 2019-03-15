@@ -71,8 +71,9 @@ func (ta *TruAPI) RegisterRoutes() {
 	api.Handle("/ping", WrapHandler(ta.HandlePing))
 	api.Handle("/graphql", WrapHandler(ta.HandleGraphQL))
 	api.Handle("/presigned", WrapHandler(ta.HandlePresigned))
-	api.Handle("/unsigned", WrapHandler(ta.HandlePresigned))
+	api.Handle("/unsigned", WrapHandler(ta.HandleUnsigned))
 	api.Handle("/register", WrapHandler(ta.HandleRegistration))
+	api.Handle("/user", WrapHandler(ta.HandleUserDetails))
 
 	ta.RegisterOAuthRoutes()
 
@@ -106,6 +107,7 @@ func (ta *TruAPI) RegisterOAuthRoutes() {
 
 	ta.Handle("/auth-twitter", twitter.LoginHandler(oauth1Config, nil))
 	ta.Handle("/auth-twitter-callback", twitter.CallbackHandler(oauth1Config, IssueSession(ta), nil))
+	ta.Handle("/auth-logout", Logout())
 }
 
 // RegisterResolvers builds the app's GraphQL schema from resolvers (declared in `resolver.go`)
