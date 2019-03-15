@@ -8,9 +8,9 @@ import (
 	"time"
 
 	"github.com/TruStory/truchain/x/db"
+	"github.com/btcsuite/btcd/btcec"
 	"github.com/dghubble/gologin/twitter"
 	"github.com/gorilla/securecookie"
-	secp "github.com/tendermint/tendermint/crypto/secp256k1"
 )
 
 // IssueSession creates a session and redirects the logged in user to the correct page
@@ -44,12 +44,19 @@ func IssueSession(ta *TruAPI) http.Handler {
 
 		// If not available, create new
 		if keyPair.ID == 0 {
-			privKey := secp.GenPrivKey()
+			newKeyPair, _ := btcec.NewPrivateKey(btcec.S256())
+			if err != nil {
+				panic(err)
+			}
+			// We are converting the private key of the new key pair in hex string,
+			// then back to byte slice, and finally regenerating the private (suppressed) and public key from it.
+			// This way, it returns the kind of public key that cosmos understands.
+			_, pubKey := btcec.PrivKeyFromBytes(btcec.S256(), []byte(fmt.Sprintf("%x", newKeyPair.Serialize())))
 
 			keyPair := &db.KeyPair{
 				TwitterProfileID: twitterUser.ID,
-				PrivateKey:       fmt.Sprintf("%x", privKey),
-				PublicKey:        fmt.Sprintf("%x", privKey.PubKey().Bytes()),
+				PrivateKey:       fmt.Sprintf("%x", newKeyPair.Serialize()),
+				PublicKey:        fmt.Sprintf("%x", pubKey.SerializeCompressed()),
 			}
 			err = ta.DBClient.Add(keyPair)
 			if err != nil {
