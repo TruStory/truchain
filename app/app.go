@@ -64,7 +64,7 @@ type TruChain struct {
 	keyMain                 *sdk.KVStoreKey
 	keyStake                *sdk.KVStoreKey
 	keyStory                *sdk.KVStoreKey
-	keyPendingStoryQueue    *sdk.KVStoreKey
+	keyPendingStoryList     *sdk.KVStoreKey
 	keyTruBank              *sdk.KVStoreKey
 	keyChallengedStoryQueue *sdk.KVStoreKey
 	keyExpiringStoryQueue   *sdk.KVStoreKey
@@ -123,7 +123,7 @@ func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *T
 		keyAccount:              sdk.NewKVStoreKey("acc"),
 		keyIBC:                  sdk.NewKVStoreKey("ibc"),
 		keyStory:                sdk.NewKVStoreKey(story.StoreKey),
-		keyPendingStoryQueue:    sdk.NewKVStoreKey(story.PendingQueueStoreKey),
+		keyPendingStoryList:     sdk.NewKVStoreKey(story.PendingListStoreKey),
 		keyCategory:             sdk.NewKVStoreKey(category.StoreKey),
 		keyBacking:              sdk.NewKVStoreKey(backing.StoreKey),
 		keyChallenge:            sdk.NewKVStoreKey(challenge.StoreKey),
@@ -170,7 +170,7 @@ func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *T
 
 	app.storyKeeper = story.NewKeeper(
 		app.keyStory,
-		app.keyPendingStoryQueue,
+		app.keyPendingStoryList,
 		app.keyExpiringStoryQueue,
 		app.keyChallengedStoryQueue,
 		app.categoryKeeper,
@@ -198,7 +198,15 @@ func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *T
 		app.categoryKeeper,
 		codec,
 	)
-
+	app.challengeKeeper = challenge.NewKeeper(
+		app.keyChallenge,
+		app.stakeKeeper,
+		app.backingKeeper,
+		app.bankKeeper,
+		app.storyKeeper,
+		app.paramsKeeper.Subspace(challenge.StoreKey),
+		codec,
+	)
 	app.voteKeeper = vote.NewKeeper(
 		app.keyVote,
 		app.keyChallengedStoryQueue,
@@ -209,16 +217,6 @@ func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *T
 		app.storyKeeper,
 		app.bankKeeper,
 		app.paramsKeeper.Subspace(vote.StoreKey),
-		codec,
-	)
-
-	app.challengeKeeper = challenge.NewKeeper(
-		app.keyChallenge,
-		app.stakeKeeper,
-		app.backingKeeper,
-		app.bankKeeper,
-		app.storyKeeper,
-		app.paramsKeeper.Subspace(challenge.StoreKey),
 		codec,
 	)
 
@@ -302,7 +300,7 @@ func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *T
 		app.keyIBC,
 		app.keyMain,
 		app.keyStory,
-		app.keyPendingStoryQueue,
+		app.keyPendingStoryList,
 		app.keyExpiringStoryQueue,
 		app.keyChallengedStoryQueue,
 		app.keyTruBank,
