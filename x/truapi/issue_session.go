@@ -23,7 +23,20 @@ func IssueSession(ta *TruAPI) http.Handler {
 			return
 		}
 
-		// Fetch keypair of the user
+		// NOTE: DATABASE TRANSACTION COULD BE USED IN HERE
+
+		// Fetch the user, if already exists
+		currentTwitterProfile, err := ta.DBClient.TwitterProfileByID(twitterUser.ID)
+		if err != nil {
+			panic(err)
+		}
+		// if user exists,
+		var addr string
+		if currentTwitterProfile.ID != 0 {
+			addr = currentTwitterProfile.Address
+		}
+
+		// Fetch keypair of the user, if already exists
 		keyPair, err := ta.DBClient.KeyPairByTwitterProfileID(twitterUser.ID)
 		if err != nil {
 			panic(err)
@@ -42,21 +55,26 @@ func IssueSession(ta *TruAPI) http.Handler {
 			if err != nil {
 				panic(err)
 			}
-		}
 
-		pubKeyBytes, _ := hex.DecodeString(keyPair.PublicKey)
-		addr, _, _, err := (*(ta.App)).RegisterKey(pubKeyBytes, "secp256k1")
-		if err != nil {
-			panic(err)
+			// Register with cosmos only if it wasn't registered before.
+			if currentTwitterProfile.ID == 0 {
+				pubKeyBytes, _ := hex.DecodeString(keyPair.PublicKey)
+				newAddr, _, _, err := (*(ta.App)).RegisterKey(pubKeyBytes, "secp256k1")
+				if err != nil {
+					panic(err)
+				}
+				addr = newAddr.String()
+			}
 		}
 
 		twitterProfile := &db.TwitterProfile{
 			ID:        twitterUser.ID,
-			Address:   addr.String(),
+			Address:   addr,
 			Username:  twitterUser.ScreenName,
 			FullName:  twitterUser.Name,
 			AvatarURI: twitterUser.ProfileImageURL,
 		}
+		// upserting the twitter profile
 		err = ta.DBClient.UpsertTwitterProfile(twitterProfile)
 		if err != nil {
 			panic(err)

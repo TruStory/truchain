@@ -71,6 +71,7 @@ func (ta *TruAPI) RegisterRoutes() {
 	ta.HandleFunc("/ping", ta.HandlePing)
 	ta.HandleFunc("/graphql", ta.HandleGraphQL)
 	ta.HandleFunc("/presigned", ta.HandlePresigned)
+	ta.HandleFunc("/unsigned", ta.HandleUnsigned)
 	ta.HandleFunc("/register", ta.HandleRegistration)
 
 	ta.RegisterOAuthRoutes()
