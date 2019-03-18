@@ -4,12 +4,13 @@ import (
 	"fmt"
 
 	app "github.com/TruStory/truchain/types"
+	"github.com/TruStory/truchain/x/stake"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
 // Backing type
 type Backing struct {
-	*app.Vote `json:"vote"`
+	*stake.Vote `json:"vote"`
 }
 
 // ID implements `Voter.ID`

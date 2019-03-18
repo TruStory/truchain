@@ -3,6 +3,8 @@ package vote
 import (
 	"fmt"
 
+	"github.com/TruStory/truchain/x/argument"
+
 	"github.com/TruStory/truchain/x/stake"
 	"github.com/TruStory/truchain/x/trubank"
 
@@ -63,6 +65,7 @@ type Keeper struct {
 
 	votingStoryQueueKey sdk.StoreKey
 
+	argumentKeeper  argument.Keeper
 	stakeKeeper     stake.Keeper
 	accountKeeper   auth.AccountKeeper
 	backingKeeper   backing.WriteKeeper
@@ -79,6 +82,7 @@ type Keeper struct {
 func NewKeeper(
 	storeKey sdk.StoreKey,
 	votingStoryQueueKey sdk.StoreKey,
+	argumentKeeper argument.Keeper,
 	stakeKeeper stake.Keeper,
 	accountKeeper auth.AccountKeeper,
 	backingKeeper backing.WriteKeeper,
@@ -92,6 +96,7 @@ func NewKeeper(
 	return Keeper{
 		app.NewKeeper(codec, storeKey),
 		votingStoryQueueKey,
+		argumentKeeper,
 		stakeKeeper,
 		accountKeeper,
 		backingKeeper,
@@ -127,7 +132,11 @@ func (k Keeper) ToggleVote(ctx sdk.Context, storyID int64, amount sdk.Coin, argu
 		if err != nil {
 			return 0, err
 		}
-		id, err := k.challengeKeeper.Create(ctx, storyID, b.Amount(), b.Argument, creator, true)
+		argument, err := k.argumentKeeper.Argument(ctx, b.ArgumentID)
+		if err != nil {
+			return 0, sdk.ErrInternal("Invalid argument ID")
+		}
+		id, err := k.challengeKeeper.Create(ctx, storyID, b.Amount(), argument.Body, creator, true)
 		if err != nil {
 			return 0, err
 		}
@@ -146,7 +155,11 @@ func (k Keeper) ToggleVote(ctx sdk.Context, storyID int64, amount sdk.Coin, argu
 		if err != nil {
 			return 0, err
 		}
-		id, err := k.backingKeeper.Create(ctx, storyID, c.Amount(), c.Argument, creator, true)
+		argument, err := k.argumentKeeper.Argument(ctx, c.ArgumentID)
+		if err != nil {
+			return 0, sdk.ErrInternal("Invalid argument ID")
+		}
+		id, err := k.backingKeeper.Create(ctx, storyID, c.Amount(), argument.Body, creator, true)
 		if err != nil {
 			return 0, err
 		}
@@ -214,15 +227,25 @@ func (k Keeper) Create(
 		return 0, sdk.ErrInsufficientFunds("Insufficient funds to vote on story.")
 	}
 
+	stakeID := k.GetNextID(ctx)
+
+	argumentID := int64(0)
+	if len(argument) > 0 {
+		argumentID, err = k.argumentKeeper.Create(ctx, stakeID, argument)
+		if err != nil {
+			return 0, sdk.ErrInternal("Error creating argument")
+		}
+	}
+
 	// create a new vote
-	vote := app.Vote{
-		ID:        k.GetNextID(ctx),
-		Amount:    amount,
-		Argument:  argument,
-		Weight:    sdk.NewInt(0),
-		Creator:   creator,
-		Vote:      choice,
-		Timestamp: app.NewTimestamp(ctx.BlockHeader()),
+	vote := stake.Vote{
+		ID:         stakeID,
+		Amount:     amount,
+		ArgumentID: argumentID,
+		Weight:     sdk.NewInt(0),
+		Creator:    creator,
+		Vote:       choice,
+		Timestamp:  app.NewTimestamp(ctx.BlockHeader()),
 	}
 
 	tokenVote := TokenVote{&vote}

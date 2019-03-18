@@ -6,6 +6,7 @@ import (
 	app "github.com/TruStory/truchain/types"
 	"github.com/TruStory/truchain/x/backing"
 	"github.com/TruStory/truchain/x/challenge"
+	"github.com/TruStory/truchain/x/stake"
 	tokenVote "github.com/TruStory/truchain/x/vote"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
@@ -20,7 +21,7 @@ func (k Keeper) rewardPool(
 
 	pool = sdk.NewCoin(app.StakeDenom, sdk.ZeroInt())
 
-	var losers []app.Voter
+	var losers []stake.Voter
 	if confirmed {
 		losers = votes.falseVotes
 	} else {

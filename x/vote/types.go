@@ -2,12 +2,13 @@ package vote
 
 import (
 	app "github.com/TruStory/truchain/types"
+	"github.com/TruStory/truchain/x/stake"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
 // TokenVote defines a simple token vote on a story
 type TokenVote struct {
-	*app.Vote `json:"vote"`
+	*stake.Vote `json:"vote"`
 }
 
 // ID implements `Voter`

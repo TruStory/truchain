@@ -6,6 +6,7 @@ import (
 	"net/url"
 	"time"
 
+	"github.com/TruStory/truchain/x/argument"
 	"github.com/TruStory/truchain/x/backing"
 	"github.com/TruStory/truchain/x/category"
 	"github.com/TruStory/truchain/x/challenge"
@@ -36,6 +37,7 @@ func mockDB() (
 
 	accKey := sdk.NewKVStoreKey(auth.StoreKey)
 	catKey := sdk.NewKVStoreKey(category.StoreKey)
+	argumentKey := sdk.NewKVStoreKey(argument.StoreKey)
 	storyKey := sdk.NewKVStoreKey(story.StoreKey)
 	storyListKey := sdk.NewKVStoreKey(story.PendingListStoreKey)
 	expiredStoryQueueKey := sdk.NewKVStoreKey(story.ExpiringQueueStoreKey)
@@ -49,6 +51,7 @@ func mockDB() (
 
 	ms := store.NewCommitMultiStore(db)
 	ms.MountStoreWithDB(accKey, sdk.StoreTypeIAVL, db)
+	ms.MountStoreWithDB(argumentKey, sdk.StoreTypeIAVL, db)
 	ms.MountStoreWithDB(storyKey, sdk.StoreTypeIAVL, db)
 	ms.MountStoreWithDB(storyListKey, sdk.StoreTypeIAVL, db)
 	ms.MountStoreWithDB(expiredStoryQueueKey, sdk.StoreTypeIAVL, db)
@@ -104,8 +107,14 @@ func mockDB() (
 	)
 	stake.InitGenesis(ctx, stakeKeeper, stake.DefaultGenesisState())
 
+	argumentKeeper := argument.NewKeeper(
+		argumentKey,
+		storyKeeper,
+		codec)
+
 	backingKeeper := backing.NewKeeper(
 		backingKey,
+		argumentKeeper,
 		stakeKeeper,
 		storyKeeper,
 		bankKeeper,
@@ -116,6 +125,7 @@ func mockDB() (
 
 	challengeKeeper := challenge.NewKeeper(
 		challengeKey,
+		argumentKeeper,
 		stakeKeeper,
 		backingKeeper,
 		truBankKeeper,

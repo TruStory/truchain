@@ -3,6 +3,7 @@ package challenge
 import (
 	"fmt"
 
+	"github.com/TruStory/truchain/x/argument"
 	"github.com/TruStory/truchain/x/stake"
 
 	"github.com/TruStory/truchain/x/backing"
@@ -51,18 +52,20 @@ type WriteKeeper interface {
 	Update(ctx sdk.Context, challenge Challenge)
 	Delete(ctx sdk.Context, challenge Challenge) sdk.Error
 	SetParams(ctx sdk.Context, params Params)
+	LikeArgument(ctx sdk.Context, argumentID int64, creator sdk.AccAddress, amount sdk.Coin) (int64, sdk.Error)
 }
 
 // Keeper data type storing keys to the key-value store
 type Keeper struct {
 	app.Keeper
 
-	stakeKeeper   stake.Keeper
-	backingKeeper backing.ReadKeeper
-	bankKeeper    bank.Keeper
-	trubankKeeper trubank.Keeper
-	storyKeeper   story.WriteKeeper
-	paramStore    params.Subspace
+	argumentKeeper argument.Keeper
+	stakeKeeper    stake.Keeper
+	backingKeeper  backing.ReadKeeper
+	bankKeeper     bank.Keeper
+	trubankKeeper  trubank.Keeper
+	storyKeeper    story.WriteKeeper
+	paramStore     params.Subspace
 
 	challengeList app.UserList // challenge <-> story mappings
 }
@@ -70,6 +73,7 @@ type Keeper struct {
 // NewKeeper creates a new keeper with write and read access
 func NewKeeper(
 	storeKey sdk.StoreKey,
+	argumentKeeper argument.Keeper,
 	stakeKeeper stake.Keeper,
 	backingKeeper backing.ReadKeeper,
 	trubankKeeper trubank.Keeper,
@@ -80,6 +84,7 @@ func NewKeeper(
 
 	return Keeper{
 		app.NewKeeper(codec, storeKey),
+		argumentKeeper,
 		stakeKeeper,
 		backingKeeper,
 		bankKeeper,
@@ -99,6 +104,12 @@ func (k Keeper) Create(
 	toggled bool) (challengeID int64, err sdk.Error) {
 
 	logger := ctx.Logger().With("module", StoreKey)
+
+	err = k.stakeKeeper.ValidateAmount(ctx, amount)
+	if err != nil {
+		return 0, err
+	}
+
 	err = k.stakeKeeper.ValidateStoryState(ctx, storyID, toggled)
 	if err != nil {
 		return 0, err
@@ -125,16 +136,26 @@ func (k Keeper) Create(
 		return 0, ErrDuplicateChallenge(storyID, creator)
 	}
 
+	stakeID := k.GetNextID(ctx)
+
+	argumentID := int64(0)
+	if len(argument) > 0 {
+		argumentID, err = k.argumentKeeper.Create(ctx, stakeID, argument)
+		if err != nil {
+			return 0, sdk.ErrInternal("Error creating argument")
+		}
+	}
+
 	// create implicit false vote
-	vote := app.Vote{
-		ID:        k.GetNextID(ctx),
-		StoryID:   storyID,
-		Amount:    amount,
-		Argument:  argument,
-		Weight:    sdk.NewInt(0),
-		Creator:   creator,
-		Vote:      false,
-		Timestamp: app.NewTimestamp(ctx.BlockHeader()),
+	vote := stake.Vote{
+		ID:         k.GetNextID(ctx),
+		StoryID:    storyID,
+		Amount:     amount,
+		ArgumentID: argumentID,
+		Weight:     sdk.NewInt(0),
+		Creator:    creator,
+		Vote:       false,
+		Timestamp:  app.NewTimestamp(ctx.BlockHeader()),
 	}
 
 	// create new challenge with embedded vote
@@ -154,10 +175,10 @@ func (k Keeper) Create(
 		return
 	}
 
-	err = k.checkThreshold(ctx, storyID)
-	if err != nil {
-		return 0, err
-	}
+	// err = k.checkThreshold(ctx, storyID)
+	// if err != nil {
+	// 	return 0, err
+	// }
 
 	msg := fmt.Sprintf("Challenged story %d with %s by %s",
 		storyID, amount.String(), creator.String())
@@ -215,6 +236,41 @@ func (k Keeper) ChallengeByStoryIDAndCreator(
 	challenge, err = k.Challenge(ctx, challengeID)
 
 	return
+}
+
+// LikeArgument likes and argument
+func (k Keeper) LikeArgument(ctx sdk.Context, argumentID int64, creator sdk.AccAddress, amount sdk.Coin) (int64, sdk.Error) {
+	k.argumentKeeper.RegisterLike(ctx, argumentID, creator)
+
+	argument, err := k.argumentKeeper.Argument(ctx, argumentID)
+	if err != nil {
+		return 0, sdk.ErrInternal("error getting argument")
+	}
+
+	challenge, err := k.Challenge(ctx, argument.StakeID)
+	if err != nil {
+		return 0, sdk.ErrInternal("error getting challenge")
+	}
+
+	story, err := k.storyKeeper.Story(ctx, challenge.StoryID())
+	if err != nil {
+		return 0, sdk.ErrInternal("can't get story")
+	}
+
+	challengeID, err := k.Create(ctx, story.ID, amount, "", creator, false)
+	if err != nil {
+		return 0, sdk.ErrInternal("cannot create challenge")
+	}
+
+	// amount of cred for a like
+	cred := sdk.NewInt(1 * app.Shanev)
+
+	_, err = k.trubankKeeper.MintAndAddCoin(ctx, challenge.Creator(), story.CategoryID, story.ID, trubank.Like, cred)
+	if err != nil {
+		return 0, sdk.ErrInternal("cant mint coins")
+	}
+
+	return challengeID, nil
 }
 
 // Tally challenges for voting

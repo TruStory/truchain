@@ -1,9 +1,9 @@
 package voting
 
 import (
-	app "github.com/TruStory/truchain/types"
 	"github.com/TruStory/truchain/x/backing"
 	"github.com/TruStory/truchain/x/challenge"
+	"github.com/TruStory/truchain/x/stake"
 	truVote "github.com/TruStory/truchain/x/vote"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
@@ -97,7 +97,7 @@ func (k Keeper) confirmStory(
 
 // calculate weighted vote based on user's cred balance
 func (k Keeper) weightedVote(
-	ctx sdk.Context, votes []app.Voter, denom string) (
+	ctx sdk.Context, votes []stake.Voter, denom string) (
 	weightedAmount sdk.Int, err sdk.Error) {
 
 	weightedAmount = sdk.ZeroInt()

@@ -13,6 +13,7 @@ import (
 	"github.com/TruStory/truchain/x/backing"
 
 	app "github.com/TruStory/truchain/types"
+	"github.com/TruStory/truchain/x/argument"
 	c "github.com/TruStory/truchain/x/category"
 	"github.com/TruStory/truchain/x/story"
 	"github.com/cosmos/cosmos-sdk/store"
@@ -31,6 +32,7 @@ func mockDB() (sdk.Context, Keeper, story.Keeper, backing.Keeper, bank.Keeper) {
 	db := dbm.NewMemDB()
 
 	accKey := sdk.NewKVStoreKey("acc")
+	argumentKey := sdk.NewKVStoreKey(argument.StoreKey)
 	catKey := sdk.NewKVStoreKey(category.StoreKey)
 	storyKey := sdk.NewKVStoreKey("stories")
 	storyListKey := sdk.NewKVStoreKey(story.PendingListStoreKey)
@@ -45,6 +47,7 @@ func mockDB() (sdk.Context, Keeper, story.Keeper, backing.Keeper, bank.Keeper) {
 
 	ms := store.NewCommitMultiStore(db)
 	ms.MountStoreWithDB(accKey, sdk.StoreTypeIAVL, db)
+	ms.MountStoreWithDB(argumentKey, sdk.StoreTypeIAVL, db)
 	ms.MountStoreWithDB(catKey, sdk.StoreTypeIAVL, db)
 	ms.MountStoreWithDB(storyKey, sdk.StoreTypeIAVL, db)
 	ms.MountStoreWithDB(storyListKey, sdk.StoreTypeIAVL, db)
@@ -101,8 +104,14 @@ func mockDB() (sdk.Context, Keeper, story.Keeper, backing.Keeper, bank.Keeper) {
 	)
 	stake.InitGenesis(ctx, stakeKeeper, stake.DefaultGenesisState())
 
+	argumentKeeper := argument.NewKeeper(
+		argumentKey,
+		sk,
+		codec)
+
 	backingKeeper := backing.NewKeeper(
 		backingKey,
+		argumentKeeper,
 		stakeKeeper,
 		sk,
 		bankKeeper,
@@ -113,6 +122,7 @@ func mockDB() (sdk.Context, Keeper, story.Keeper, backing.Keeper, bank.Keeper) {
 
 	k := NewKeeper(
 		challengeKey,
+		argumentKeeper,
 		stakeKeeper,
 		backingKeeper,
 		truBankKeeper,

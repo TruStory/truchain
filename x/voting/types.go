@@ -4,12 +4,13 @@ import (
 	"fmt"
 
 	app "github.com/TruStory/truchain/types"
+	"github.com/TruStory/truchain/x/stake"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
 type poll struct {
-	trueVotes  []app.Voter
-	falseVotes []app.Voter
+	trueVotes  []stake.Voter
+	falseVotes []stake.Voter
 }
 
 // VoteResult are the vote results for a story

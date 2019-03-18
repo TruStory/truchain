@@ -6,7 +6,6 @@ import (
 
 	"github.com/TruStory/truchain/x/story"
 
-	app "github.com/TruStory/truchain/types"
 	trubank "github.com/TruStory/truchain/x/trubank"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/params"
@@ -39,7 +38,7 @@ func NewKeeper(
 
 // DistributePrincipalAndInterest distributes funds to backers and challengers
 func (k Keeper) DistributePrincipalAndInterest(
-	ctx sdk.Context, votes []app.Voter, categoryID int64) sdk.Error {
+	ctx sdk.Context, votes []Voter, categoryID int64) sdk.Error {
 
 	logger := ctx.Logger().With("module", StoreKey)
 
@@ -71,6 +70,17 @@ func (k Keeper) DistributePrincipalAndInterest(
 			interest.String(),
 			period.String(),
 			vote.Creator().String()))
+	}
+
+	return nil
+}
+
+// ValidateAmount validates the length of an argument
+func (k Keeper) ValidateAmount(ctx sdk.Context, amount sdk.Coin) sdk.Error {
+	maxAmount := k.GetParams(ctx).MaxAmount
+
+	if maxAmount.IsLT(amount) {
+		return sdk.ErrInternal("Stake amount is over the max allowed.")
 	}
 
 	return nil

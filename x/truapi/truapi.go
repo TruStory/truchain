@@ -9,6 +9,8 @@ import (
 	"path/filepath"
 	"time"
 
+	"github.com/TruStory/truchain/x/argument"
+
 	trubank "github.com/TruStory/truchain/x/trubank"
 	"github.com/TruStory/truchain/x/voting"
 	"github.com/dghubble/gologin/twitter"
@@ -151,10 +153,14 @@ func (ta *TruAPI) RegisterResolvers() {
 		return ta.storyResolver(ctx, story.QueryStoryByIDParams{ID: storyID})
 	}
 
+	getArgument := func(ctx context.Context, argumentID int64) argument.Argument {
+		return ta.argumentResolver(ctx, app.QueryByIDParams{ID: argumentID})
+	}
+
 	ta.GraphQLClient.RegisterQueryResolver("backing", ta.backingResolver)
 	ta.GraphQLClient.RegisterObjectResolver("Backing", backing.Backing{}, map[string]interface{}{
 		"amount":    func(ctx context.Context, q backing.Backing) sdk.Coin { return q.Amount() },
-		"argument":  func(ctx context.Context, q backing.Backing) string { return q.Argument },
+		"argument":  func(ctx context.Context, q backing.Backing) argument.Argument { return getArgument(ctx, q.ArgumentID) },
 		"weight":    func(ctx context.Context, q backing.Backing) string { return q.Weight().String() },
 		"vote":      func(ctx context.Context, q backing.Backing) bool { return q.VoteChoice() },
 		"creator":   func(ctx context.Context, q backing.Backing) users.User { return getUser(ctx, q.Creator()) },
@@ -173,8 +179,10 @@ func (ta *TruAPI) RegisterResolvers() {
 
 	ta.GraphQLClient.RegisterQueryResolver("challenge", ta.challengeResolver)
 	ta.GraphQLClient.RegisterObjectResolver("Challenge", challenge.Challenge{}, map[string]interface{}{
-		"amount":    func(ctx context.Context, q challenge.Challenge) sdk.Coin { return q.Amount() },
-		"argument":  func(ctx context.Context, q challenge.Challenge) string { return q.Argument },
+		"amount": func(ctx context.Context, q challenge.Challenge) sdk.Coin { return q.Amount() },
+		"argument": func(ctx context.Context, q challenge.Challenge) argument.Argument {
+			return getArgument(ctx, q.ArgumentID)
+		},
 		"weight":    func(ctx context.Context, q challenge.Challenge) string { return q.Weight().String() },
 		"vote":      func(ctx context.Context, q challenge.Challenge) bool { return q.VoteChoice() },
 		"creator":   func(ctx context.Context, q challenge.Challenge) users.User { return getUser(ctx, q.Creator()) },
@@ -281,7 +289,7 @@ func (ta *TruAPI) RegisterResolvers() {
 	ta.GraphQLClient.RegisterQueryResolver("vote", ta.voteResolver)
 	ta.GraphQLClient.RegisterObjectResolver("Vote", vote.TokenVote{}, map[string]interface{}{
 		"amount":    func(ctx context.Context, q vote.TokenVote) sdk.Coin { return q.Amount() },
-		"argument":  func(ctx context.Context, q vote.TokenVote) string { return q.Argument },
+		"argument":  func(ctx context.Context, q vote.TokenVote) argument.Argument { return getArgument(ctx, q.ArgumentID) },
 		"vote":      func(ctx context.Context, q vote.TokenVote) bool { return q.VoteChoice() },
 		"weight":    func(ctx context.Context, q vote.TokenVote) string { return q.Weight().String() },
 		"creator":   func(ctx context.Context, q vote.TokenVote) users.User { return getUser(ctx, q.Creator()) },

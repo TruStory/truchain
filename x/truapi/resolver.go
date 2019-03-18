@@ -7,6 +7,8 @@ import (
 	"path"
 	"sort"
 
+	"github.com/TruStory/truchain/x/argument"
+
 	"github.com/TruStory/truchain/x/voting"
 
 	app "github.com/TruStory/truchain/types"
@@ -61,6 +63,28 @@ func (ta *TruAPI) allStoriesResolver(ctx context.Context, q struct{}) []story.St
 	}
 
 	return *stories
+}
+
+func (ta *TruAPI) argumentResolver(
+	_ context.Context, q app.QueryByIDParams) argument.Argument {
+
+	res := ta.RunQuery(
+		path.Join(argument.QueryPath, argument.QueryArgumentByID),
+		app.QueryByIDParams{ID: q.ID},
+	)
+
+	if res.Code != 0 {
+		fmt.Println("Resolver err: ", res)
+		return argument.Argument{}
+	}
+
+	argument := new(argument.Argument)
+	err := json.Unmarshal(res.Value, argument)
+	if err != nil {
+		panic(err)
+	}
+
+	return *argument
 }
 
 func (ta *TruAPI) backingResolver(

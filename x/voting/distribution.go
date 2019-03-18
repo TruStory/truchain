@@ -6,6 +6,7 @@ import (
 	app "github.com/TruStory/truchain/types"
 	"github.com/TruStory/truchain/x/backing"
 	"github.com/TruStory/truchain/x/challenge"
+	"github.com/TruStory/truchain/x/stake"
 	"github.com/TruStory/truchain/x/trubank"
 	tokenVote "github.com/TruStory/truchain/x/vote"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -21,7 +22,7 @@ func (k Keeper) distributeRewards(
 
 	logger := ctx.Logger().With("module", StoreKey)
 
-	var winners []app.Voter
+	var winners []stake.Voter
 	if confirmed {
 		winners = votes.trueVotes
 	} else {
@@ -93,7 +94,7 @@ func (k Keeper) distributeRewards(
 
 func (k Keeper) rewardStaker(
 	ctx sdk.Context,
-	staker app.Voter,
+	staker stake.Voter,
 	stakerTotalAmount sdk.Int,
 	stakerPool sdk.Coin,
 	categoryID int64) (rewardCoin sdk.Coin, err sdk.Error) {
@@ -101,7 +102,7 @@ func (k Keeper) rewardStaker(
 	logger := ctx.Logger().With("module", StoreKey)
 
 	// get back staked amount
-	err = k.stakeKeeper.DistributePrincipalAndInterest(ctx, []app.Voter{staker}, categoryID)
+	err = k.stakeKeeper.DistributePrincipalAndInterest(ctx, []stake.Voter{staker}, categoryID)
 	if err != nil {
 		return
 	}
@@ -124,7 +125,7 @@ func (k Keeper) rewardStaker(
 
 func (k Keeper) rewardTokenVoter(
 	ctx sdk.Context,
-	staker app.Voter,
+	staker stake.Voter,
 	voterRewardAmount sdk.Int,
 	categoryID int64) (rewardCoin sdk.Coin, err sdk.Error) {
 
@@ -158,7 +159,7 @@ func (k Keeper) rewardTokenVoter(
 
 // winnerInfo returns data needed to calculate the reward pool
 func winnerInfo(
-	winners []app.Voter) (
+	winners []stake.Voter) (
 	stakerTotalAmount sdk.Int,
 	stakerCount int64,
 	voterCount int64,

@@ -6,13 +6,13 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
-// Category errors reserve 1200 ~ 1299.
+// TruBank errors reserve 1400 ~ 1499.
 const (
 	DefaultCodespace sdk.CodespaceType = "tbank"
 
-	CodeErrorAddingCoinsToUser     sdk.CodeType = 1201
-	CodeErrorAddingCoinsToCategory sdk.CodeType = 1202
-	CodeErrorTransactionNotFound   sdk.CodeType = 1203
+	CodeErrorAddingCoinsToUser     sdk.CodeType = 1401
+	CodeErrorAddingCoinsToCategory sdk.CodeType = 1402
+	CodeErrorTransactionNotFound   sdk.CodeType = 1403
 )
 
 // ErrTransferringCoinsToUser throws an error when the category is invalid

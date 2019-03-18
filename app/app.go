@@ -8,6 +8,7 @@ import (
 	"path/filepath"
 
 	"github.com/TruStory/truchain/types"
+	"github.com/TruStory/truchain/x/argument"
 	"github.com/TruStory/truchain/x/backing"
 	"github.com/TruStory/truchain/x/category"
 	"github.com/TruStory/truchain/x/challenge"
@@ -55,6 +56,7 @@ type TruChain struct {
 
 	// keys to access the multistore
 	keyAccount              *sdk.KVStoreKey
+	keyArgument             *sdk.KVStoreKey
 	keyBacking              *sdk.KVStoreKey
 	keyCategory             *sdk.KVStoreKey
 	keyChallenge            *sdk.KVStoreKey
@@ -81,6 +83,7 @@ type TruChain struct {
 	paramsKeeper        params.Keeper
 
 	// access truchain multistore
+	argumentKeeper     argument.Keeper
 	backingKeeper      backing.WriteKeeper
 	categoryKeeper     category.WriteKeeper
 	challengeKeeper    challenge.WriteKeeper
@@ -122,6 +125,7 @@ func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *T
 		keyMain:                 sdk.NewKVStoreKey("main"),
 		keyAccount:              sdk.NewKVStoreKey("acc"),
 		keyIBC:                  sdk.NewKVStoreKey("ibc"),
+		keyArgument:             sdk.NewKVStoreKey(argument.StoreKey),
 		keyStory:                sdk.NewKVStoreKey(story.StoreKey),
 		keyPendingStoryList:     sdk.NewKVStoreKey(story.PendingListStoreKey),
 		keyCategory:             sdk.NewKVStoreKey(category.StoreKey),
@@ -178,6 +182,11 @@ func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *T
 		app.codec,
 	)
 
+	app.argumentKeeper = argument.NewKeeper(
+		app.keyArgument,
+		app.storyKeeper,
+		app.codec)
+
 	app.truBankKeeper = trubank.NewKeeper(
 		app.keyTruBank,
 		app.bankKeeper,
@@ -192,6 +201,7 @@ func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *T
 
 	app.backingKeeper = backing.NewKeeper(
 		app.keyBacking,
+		app.argumentKeeper,
 		app.stakeKeeper,
 		app.storyKeeper,
 		app.bankKeeper,
@@ -202,6 +212,7 @@ func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *T
 
 	app.challengeKeeper = challenge.NewKeeper(
 		app.keyChallenge,
+		app.argumentKeeper,
 		app.stakeKeeper,
 		app.backingKeeper,
 		app.truBankKeeper,
@@ -214,6 +225,7 @@ func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *T
 	app.voteKeeper = vote.NewKeeper(
 		app.keyVote,
 		app.keyChallengedStoryQueue,
+		app.argumentKeeper,
 		app.stakeKeeper,
 		app.accountKeeper,
 		app.backingKeeper,
@@ -269,6 +281,7 @@ func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *T
 	app.Router().
 		AddRoute("bank", bank.NewHandler(app.bankKeeper)).
 		AddRoute("ibc", ibc.NewHandler(app.ibcMapper, app.bankKeeper)).
+		AddRoute(argument.StoreKey, argument.NewHandler(app.argumentKeeper)).
 		AddRoute("story", story.NewHandler(app.storyKeeper)).
 		AddRoute("category", category.NewHandler(app.categoryKeeper)).
 		AddRoute("backing", backing.NewHandler(app.backingKeeper)).
@@ -278,6 +291,7 @@ func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *T
 
 	// The app.QueryRouter is the main query router where each module registers its routes
 	app.QueryRouter().
+		AddRoute(argument.QueryPath, argument.NewQuerier(app.argumentKeeper)).
 		AddRoute(story.QueryPath, story.NewQuerier(app.storyKeeper)).
 		AddRoute(category.QueryPath, category.NewQuerier(app.categoryKeeper)).
 		AddRoute(users.QueryPath, users.NewQuerier(codec, app.accountKeeper)).
@@ -312,6 +326,7 @@ func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *T
 		app.keyTruBank,
 		app.keyVote,
 		app.keyVoting,
+		app.keyArgument,
 	)
 
 	app.MountStoresTransient(app.tkeyParams)
@@ -353,6 +368,7 @@ func MakeCodec() *codec.Codec {
 	ibc.RegisterCodec(cdc)
 
 	// register msg types
+	argument.RegisterAmino(cdc)
 	story.RegisterAmino(cdc)
 	backing.RegisterAmino(cdc)
 	category.RegisterAmino(cdc)
@@ -391,7 +407,7 @@ func (app *TruChain) BeginBlocker(ctx sdk.Context, req abci.RequestBeginBlock) a
 func (app *TruChain) EndBlocker(ctx sdk.Context, _ abci.RequestEndBlock) abci.ResponseEndBlock {
 	app.storyKeeper.EndBlock(ctx)
 	app.expirationKeeper.EndBlock(ctx)
-	app.votingKeeper.EndBlock(ctx)
+	// app.votingKeeper.EndBlock(ctx)
 
 	return abci.ResponseEndBlock{}
 }

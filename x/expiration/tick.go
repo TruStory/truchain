@@ -3,7 +3,7 @@ package expiration
 import (
 	"fmt"
 
-	app "github.com/TruStory/truchain/types"
+	"github.com/TruStory/truchain/x/stake"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
@@ -41,7 +41,7 @@ func (k Keeper) processExpiredStoryQueue(ctx sdk.Context) sdk.Error {
 
 	expiringStoryQueue.Pop()
 
-	var votes []app.Voter
+	var votes []stake.Voter
 
 	backings, err := k.backingKeeper.BackingsByStoryID(ctx, storyID)
 	if err != nil {

@@ -3,12 +3,14 @@ package stake
 import (
 	"fmt"
 
+	app "github.com/TruStory/truchain/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/params"
 )
 
 // store keys for voting params
 var (
+	KeyMaxAmount         = []byte("maxAmount")
 	KeyMinArgumentLength = []byte("minArgumentLength")
 	KeyMaxArgumentLength = []byte("maxArgumentLength")
 	KeyMinInterestRate   = []byte("minInterestRate")
@@ -19,17 +21,19 @@ var (
 
 // Params holds parameters for voting
 type Params struct {
-	MinArgumentLength int     `json:"min_argument_length"`
-	MaxArgumentLength int     `json:"max_argument_length"`
-	MinInterestRate   sdk.Dec `json:"min_interest_rate"`
-	MaxInterestRate   sdk.Dec `json:"max_interest_rate"`
-	AmountWeight      sdk.Dec `json:"amount_weight"`
-	PeriodWeight      sdk.Dec `json:"period_weight"`
+	MaxAmount         sdk.Coin `json:"max_amount"`
+	MinArgumentLength int      `json:"min_argument_length"`
+	MaxArgumentLength int      `json:"max_argument_length"`
+	MinInterestRate   sdk.Dec  `json:"min_interest_rate"`
+	MaxInterestRate   sdk.Dec  `json:"max_interest_rate"`
+	AmountWeight      sdk.Dec  `json:"amount_weight"`
+	PeriodWeight      sdk.Dec  `json:"period_weight"`
 }
 
 // DefaultParams is the default parameters for voting
 func DefaultParams() Params {
 	return Params{
+		MaxAmount:         sdk.NewCoin(app.StakeDenom, sdk.NewInt(100*app.Shanev)),
 		MinArgumentLength: 10,
 		MaxArgumentLength: 1000,
 		AmountWeight:      sdk.NewDecWithPrec(333, 3), // 33.3%
@@ -42,6 +46,7 @@ func DefaultParams() Params {
 // KeyValuePairs implements params.ParamSet
 func (p *Params) KeyValuePairs() params.KeyValuePairs {
 	return params.KeyValuePairs{
+		{Key: KeyMaxAmount, Value: &p.MaxAmount},
 		{Key: KeyMinArgumentLength, Value: &p.MinArgumentLength},
 		{Key: KeyMaxArgumentLength, Value: &p.MaxArgumentLength},
 		{Key: KeyMinInterestRate, Value: &p.MinInterestRate},
@@ -65,7 +70,7 @@ func (k Keeper) GetParams(ctx sdk.Context) Params {
 
 // SetParams sets the params for the module
 func (k Keeper) SetParams(ctx sdk.Context, params Params) {
-	logger := ctx.Logger().With("module", "stake")
+	logger := ctx.Logger().With("module", StoreKey)
 	k.paramStore.SetParamSet(ctx, &params)
 	logger.Info(fmt.Sprintf("Loaded stake module params: %+v", params))
 }
