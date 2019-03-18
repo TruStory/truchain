@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/TruStory/truchain/x/stake"
+	"github.com/TruStory/truchain/x/trubank"
 
 	"github.com/TruStory/truchain/x/backing"
 	"github.com/TruStory/truchain/x/challenge"
@@ -68,6 +69,7 @@ type Keeper struct {
 	challengeKeeper challenge.WriteKeeper
 	storyKeeper     story.WriteKeeper
 	bankKeeper      bank.Keeper
+	trubankKeeper   trubank.Keeper
 	paramStore      params.Subspace
 
 	voterList app.UserList
@@ -83,6 +85,7 @@ func NewKeeper(
 	challengeKeeper challenge.WriteKeeper,
 	storyKeeper story.WriteKeeper,
 	bankKeeper bank.Keeper,
+	trubankKeeper trubank.Keeper,
 	paramStore params.Subspace,
 	codec *amino.Codec) Keeper {
 
@@ -95,6 +98,7 @@ func NewKeeper(
 		challengeKeeper,
 		storyKeeper,
 		bankKeeper,
+		trubankKeeper,
 		paramStore.WithTypeTable(ParamTypeTable()),
 		app.NewUserList(storyKeeper.GetStoreKey()),
 	}
@@ -210,12 +214,6 @@ func (k Keeper) Create(
 		return 0, sdk.ErrInsufficientFunds("Insufficient funds to vote on story.")
 	}
 
-	// deduct vote fee from user
-	_, _, err = k.bankKeeper.SubtractCoins(ctx, creator, sdk.Coins{amount})
-	if err != nil {
-		return 0, err
-	}
-
 	// create a new vote
 	vote := app.Vote{
 		ID:        k.GetNextID(ctx),
@@ -228,6 +226,17 @@ func (k Keeper) Create(
 	}
 
 	tokenVote := TokenVote{&vote}
+
+	typeOfVote := trubank.Challenge
+	if choice {
+		typeOfVote = trubank.Backing
+	}
+
+	// deduct challenge amount from user
+	_, err = k.trubankKeeper.SubtractCoin(ctx, creator, amount, storyID, typeOfVote, tokenVote.ID())
+	if err != nil {
+		return 0, err
+	}
 
 	// persist vote
 	k.set(ctx, tokenVote)

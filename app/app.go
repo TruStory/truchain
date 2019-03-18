@@ -16,7 +16,7 @@ import (
 	"github.com/TruStory/truchain/x/stake"
 	"github.com/TruStory/truchain/x/story"
 	"github.com/TruStory/truchain/x/truapi"
-	"github.com/TruStory/truchain/x/trubank"
+	trubank "github.com/TruStory/truchain/x/trubank"
 	"github.com/TruStory/truchain/x/users"
 	"github.com/TruStory/truchain/x/vote"
 	"github.com/TruStory/truchain/x/voting"
@@ -88,7 +88,7 @@ type TruChain struct {
 	expirationKeeper   expiration.Keeper
 	storyKeeper        story.WriteKeeper
 	stakeKeeper        stake.Keeper
-	truBankKeeper      trubank.WriteKeeper
+	truBankKeeper      trubank.Keeper
 	voteKeeper         vote.WriteKeeper
 	votingKeeper       voting.WriteKeeper
 
@@ -195,18 +195,22 @@ func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *T
 		app.stakeKeeper,
 		app.storyKeeper,
 		app.bankKeeper,
+		app.truBankKeeper,
 		app.categoryKeeper,
 		codec,
 	)
+
 	app.challengeKeeper = challenge.NewKeeper(
 		app.keyChallenge,
 		app.stakeKeeper,
 		app.backingKeeper,
+		app.truBankKeeper,
 		app.bankKeeper,
 		app.storyKeeper,
 		app.paramsKeeper.Subspace(challenge.StoreKey),
 		codec,
 	)
+
 	app.voteKeeper = vote.NewKeeper(
 		app.keyVote,
 		app.keyChallengedStoryQueue,
@@ -216,6 +220,7 @@ func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *T
 		app.challengeKeeper,
 		app.storyKeeper,
 		app.bankKeeper,
+		app.truBankKeeper,
 		app.paramsKeeper.Subspace(vote.StoreKey),
 		codec,
 	)
@@ -280,7 +285,8 @@ func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *T
 		AddRoute(challenge.QueryPath, challenge.NewQuerier(app.challengeKeeper)).
 		AddRoute(vote.QueryPath, vote.NewQuerier(app.voteKeeper)).
 		AddRoute(clientParams.QueryPath, clientParams.NewQuerier(app.clientParamsKeeper)).
-		AddRoute(voting.QueryPath, voting.NewQuerier(app.votingKeeper))
+		AddRoute(voting.QueryPath, voting.NewQuerier(app.votingKeeper)).
+		AddRoute(trubank.QueryPath, trubank.NewQuerier(app.truBankKeeper))
 
 	// The initChainer handles translating the genesis.json file into initial state for the network
 	app.SetInitChainer(app.initChainer)

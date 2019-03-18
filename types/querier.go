@@ -22,6 +22,11 @@ type QueryByStoryIDAndCreatorParams struct {
 	Creator string
 }
 
+// QueryByCreatorParams returns the query params for getting any query by the creator
+type QueryByCreatorParams struct {
+	Creator string
+}
+
 // UnmarshalQueryParams unmarshals the request query from a client
 func UnmarshalQueryParams(req abci.RequestQuery, params interface{}) (sdkErr sdk.Error) {
 	parseErr := json.Unmarshal(req.Data, params)
