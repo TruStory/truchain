@@ -72,10 +72,10 @@ func (a *API) ListenAndServe(addr string) error {
 	if !letsEncryptEnabled {
 		return http.ListenAndServe(addr, a.router)
 	}
-	return a.listenAndServe()
+	return a.listenAndServeTLS()
 }
 
-func (a *API) listenAndServe() error {
+func (a *API) listenAndServeTLS() error {
 	host := os.Getenv("CHAIN_HOST")
 	certDir := os.Getenv("CHAIN_LETS_ENCRYPT_CACHE_DIR")
 	if certDir == "" {
