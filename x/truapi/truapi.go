@@ -5,6 +5,8 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"path"
+	"path/filepath"
 	"time"
 
 	trubank "github.com/TruStory/truchain/x/trubank"
@@ -25,8 +27,6 @@ import (
 	"github.com/TruStory/truchain/x/vote"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	twitterOAuth1 "github.com/dghubble/oauth1/twitter"
-	thunder "github.com/samsarahq/thunder/graphql"
-	"github.com/samsarahq/thunder/graphql/graphiql"
 )
 
 // TruAPI implements an HTTP server for TruStory functionality using `chttp.API`
@@ -59,26 +59,41 @@ func (ta *TruAPI) RegisterModels() {
 	}
 }
 
+// WrapHandler wraps a chttp.Handler and returns a standar http.Handler
+func WrapHandler(h chttp.Handler) http.Handler {
+	return h.HandlerFunc()
+}
+
 // RegisterRoutes applies the TruStory API routes to the `chttp.API` router
 func (ta *TruAPI) RegisterRoutes() {
-	// Register routes for Trustory React web app
-	fs := http.FileServer(http.Dir("build/static"))
-	http.Handle("/static/", http.StripPrefix("/static/", fs))
-	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		http.ServeFile(w, r, "build/index.html")
-	})
-
-	ta.Use(chttp.JSONResponseMiddleware)
-	ta.Use(chttp.CORSMiddleware)
-	http.Handle("/graphql", thunder.Handler(ta.GraphQLClient.Schema))
-	http.Handle("/graphiql/", http.StripPrefix("/graphiql/", graphiql.Handler()))
-	ta.HandleFunc("/ping", ta.HandlePing)
-	ta.HandleFunc("/graphql", ta.HandleGraphQL)
-	ta.HandleFunc("/presigned", ta.HandlePresigned)
-	ta.HandleFunc("/unsigned", ta.HandleUnsigned)
-	ta.HandleFunc("/register", ta.HandleRegistration)
+	api := ta.Subrouter("/api/v1")
+	api.Use(chttp.JSONResponseMiddleware)
+	api.Use(chttp.CORSMiddleware)
+	api.Handle("/ping", WrapHandler(ta.HandlePing))
+	api.Handle("/graphql", WrapHandler(ta.HandleGraphQL))
+	api.Handle("/presigned", WrapHandler(ta.HandlePresigned))
+	api.Handle("/unsigned", WrapHandler(ta.HandlePresigned))
+	api.Handle("/register", WrapHandler(ta.HandleRegistration))
 
 	ta.RegisterOAuthRoutes()
+
+	// Register routes for Trustory React web app
+
+	appDir := os.Getenv("CHAIN_APP_DIR")
+	if appDir == "" {
+		appDir = "build"
+	}
+	fs := http.FileServer(http.Dir(appDir))
+
+	ta.PathPrefix("/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// if it is not requesting a file with a valid extension serve the index
+		if filepath.Ext(path.Base(r.URL.Path)) == "" {
+			w.Header().Add("Content-Type", "text/html")
+			http.ServeFile(w, r, filepath.Join(appDir, "index.html"))
+			return
+		}
+		fs.ServeHTTP(w, r)
+	}))
 }
 
 // RegisterOAuthRoutes adds the proper routes needed for the oauth
@@ -90,8 +105,8 @@ func (ta *TruAPI) RegisterOAuthRoutes() {
 		Endpoint:       twitterOAuth1.AuthorizeEndpoint,
 	}
 
-	http.Handle("/auth-twitter", twitter.LoginHandler(oauth1Config, nil))
-	http.Handle("/auth-twitter-callback", twitter.CallbackHandler(oauth1Config, IssueSession(ta), nil))
+	ta.Handle("/auth-twitter", twitter.LoginHandler(oauth1Config, nil))
+	ta.Handle("/auth-twitter-callback", twitter.CallbackHandler(oauth1Config, IssueSession(ta), nil))
 }
 
 // RegisterResolvers builds the app's GraphQL schema from resolvers (declared in `resolver.go`)
