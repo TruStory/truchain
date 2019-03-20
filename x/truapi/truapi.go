@@ -68,7 +68,6 @@ func WrapHandler(h chttp.Handler) http.Handler {
 func (ta *TruAPI) RegisterRoutes() {
 	api := ta.Subrouter("/api/v1")
 	api.Use(chttp.JSONResponseMiddleware)
-	api.Use(chttp.CORSMiddleware)
 	api.Handle("/ping", WrapHandler(ta.HandlePing))
 	api.Handle("/graphql", WrapHandler(ta.HandleGraphQL))
 	api.Handle("/presigned", WrapHandler(ta.HandlePresigned))
@@ -79,7 +78,7 @@ func (ta *TruAPI) RegisterRoutes() {
 
 	// Register routes for Trustory React web app
 
-	appDir := os.Getenv("CHAIN_APP_DIR")
+	appDir := os.Getenv("CHAIN_WEB_DIR")
 	if appDir == "" {
 		appDir = "build"
 	}
