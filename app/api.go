@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"log"
 	"math/rand"
+	"net"
 	"net/http"
 	"time"
 
@@ -50,7 +51,7 @@ func (app *TruChain) startAPI() {
 	app.api.RegisterRoutes()
 	app.api.GraphQLClient.GenerateSchema()
 	app.api.RegisterModels()
-	log.Fatal(app.api.ListenAndServe(types.Hostname + ":" + types.Portname))
+	log.Fatal(app.api.ListenAndServe(net.JoinHostPort(types.Hostname, types.Portname)))
 }
 
 // RegisterKey generates a new address/account for a public key

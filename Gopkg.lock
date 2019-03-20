@@ -528,15 +528,13 @@
   version = "v1.6.0"
 
 [[projects]]
-  digest = "1:b579c92271e8cbaf43662ea9b19b036e283565b345d94f10a9f683b8b31abc0f"
+  digest = "1:c7fd35ab0fb23ad0fb999ae43ace47b1b76518513a7b6ae87a6b26547913bf5e"
   name = "github.com/samsarahq/thunder"
   packages = [
     "batch",
     "concurrencylimiter",
     "diff",
     "graphql",
-    "graphql/graphiql",
-    "graphql/graphiql/statik",
     "graphql/introspection",
     "graphql/schemabuilder",
     "internal",
@@ -732,9 +730,11 @@
   version = "v0.9.3"
 
 [[projects]]
-  digest = "1:6f6dc6060c4e9ba73cf28aa88f12a69a030d3d19d518ef8e931879eaa099628d"
+  digest = "1:708d0c9f07d923aacc6b03531146dd38ddc337354fde068091b0c3da6e949c8e"
   name = "golang.org/x/crypto"
   packages = [
+    "acme",
+    "acme/autocert",
     "bcrypt",
     "blowfish",
     "chacha20poly1305",
@@ -772,6 +772,14 @@
   ]
   pruneopts = "UT"
   revision = "292b43bbf7cb8d35ddf40f8d5100ef3837cced3f"
+
+[[projects]]
+  branch = "master"
+  digest = "1:b521f10a2d8fa85c04a8ef4e62f2d1e14d303599a55d64dabf9f5a02f84d35eb"
+  name = "golang.org/x/sync"
+  packages = ["errgroup"]
+  pruneopts = "UT"
+  revision = "e225da77a7e68af35c70ccbf71af2b83e6acac3c"
 
 [[projects]]
   branch = "master"
@@ -907,7 +915,6 @@
     "github.com/oklog/ulid",
     "github.com/samsarahq/thunder/batch",
     "github.com/samsarahq/thunder/graphql",
-    "github.com/samsarahq/thunder/graphql/graphiql",
     "github.com/samsarahq/thunder/graphql/introspection",
     "github.com/samsarahq/thunder/graphql/schemabuilder",
     "github.com/samsarahq/thunder/reactive",
@@ -929,6 +936,8 @@
     "github.com/tendermint/tendermint/rpc/core/types",
     "github.com/tendermint/tendermint/types",
     "github.com/tendermint/tmlibs/cli",
+    "golang.org/x/crypto/acme/autocert",
+    "golang.org/x/sync/errgroup",
   ]
   solver-name = "gps-cdcl"
   solver-version = 1

@@ -22,6 +22,9 @@ build_cli:
 build_daemon:
 	go build -o bin/truchaind cmd/truchaind/main.go
 
+build_linux:
+	GOOS=linux GOARCH=amd64 go build -o bin/truchaind cmd/truchaind/main.go
+
 doc:
 	@echo "--> Wait a few seconds and visit http://localhost:6060/pkg/github.com/TruStory/truchain/"
 	godoc -http=:6060
