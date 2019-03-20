@@ -56,7 +56,7 @@ func (a *API) PathPrefix(path string, handler http.Handler) {
 	})
 }
 
-// Handle registes a http.Handler
+// Handle registers a http.Handler
 func (a *API) Handle(path string, handler http.Handler) {
 	a.router.Handle(path, handler)
 }
