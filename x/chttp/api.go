@@ -98,25 +98,16 @@ func (a *API) listenAndServeTLS() error {
 
 	g, ctx := errgroup.WithContext(context.Background())
 	g.Go(func() error {
-		err := httpServer.ListenAndServe()
-		if err != nil {
-			ctx.Err()
-		}
-		return err
-
+		return httpServer.ListenAndServe()
 	})
 	g.Go(func() error {
-		err := secureServer.ListenAndServeTLS("", "")
-		if err != nil {
-			ctx.Err()
-		}
-		return err
+		return secureServer.ListenAndServeTLS("", "")
 	})
 	g.Go(func() error {
 		select {
 		case <-ctx.Done():
-			httpServer.Shutdown(ctx)
-			secureServer.Shutdown(ctx)
+			_ = httpServer.Shutdown(ctx)
+			_ = secureServer.Shutdown(ctx)
 			return nil
 		}
 	})
