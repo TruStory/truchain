@@ -47,8 +47,13 @@ type WriteKeeper interface {
 	ReadKeeper
 
 	Create(
-		ctx sdk.Context, storyID int64, amount sdk.Coin, argument string,
-		creator sdk.AccAddress, toggled bool) (int64, sdk.Error)
+		ctx sdk.Context,
+		storyID int64,
+		amount sdk.Coin,
+		argumentID int64,
+		argument string,
+		creator sdk.AccAddress,
+		toggled bool) (int64, sdk.Error)
 	Update(ctx sdk.Context, challenge Challenge)
 	Delete(ctx sdk.Context, challenge Challenge) sdk.Error
 	SetParams(ctx sdk.Context, params Params)
@@ -99,7 +104,11 @@ func NewKeeper(
 
 // Create adds a new challenge on a story in the KVStore
 func (k Keeper) Create(
-	ctx sdk.Context, storyID int64, amount sdk.Coin, argument string,
+	ctx sdk.Context,
+	storyID int64,
+	amount sdk.Coin,
+	argumentID int64,
+	argument string,
 	creator sdk.AccAddress,
 	toggled bool) (challengeID int64, err sdk.Error) {
 
@@ -112,10 +121,6 @@ func (k Keeper) Create(
 
 	err = k.stakeKeeper.ValidateStoryState(ctx, storyID, toggled)
 	if err != nil {
-		return 0, err
-	}
-
-	if err = k.stakeKeeper.ValidateArgument(ctx, argument); err != nil {
 		return 0, err
 	}
 
@@ -138,8 +143,8 @@ func (k Keeper) Create(
 
 	stakeID := k.GetNextID(ctx)
 
-	argumentID := int64(0)
-	if len(argument) > 0 {
+	// creates an argument if it doesn't exist (new backing, not a like)
+	if argumentID == 0 {
 		argumentID, err = k.argumentKeeper.Create(ctx, stakeID, argument)
 		if err != nil {
 			return 0, sdk.ErrInternal("Error creating argument")
@@ -257,7 +262,7 @@ func (k Keeper) LikeArgument(ctx sdk.Context, argumentID int64, creator sdk.AccA
 		return 0, sdk.ErrInternal("can't get story")
 	}
 
-	challengeID, err := k.Create(ctx, story.ID, amount, "", creator, false)
+	challengeID, err := k.Create(ctx, story.ID, amount, argumentID, "", creator, false)
 	if err != nil {
 		return 0, sdk.ErrInternal("cannot create challenge")
 	}

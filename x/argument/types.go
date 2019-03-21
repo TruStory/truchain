@@ -2,6 +2,7 @@ package argument
 
 import (
 	app "github.com/TruStory/truchain/types"
+	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
 // Argument for a story
@@ -10,8 +11,7 @@ type Argument struct {
 	StoryID int64 `json:"story_id"`
 
 	// association with backing or challenge
-	StakeID   int64       `json:"stake_id"`
-	StakeType interface{} `json:"stake_type"`
+	StakeID int64 `json:"stake_id"`
 
 	Body      string        `json:"body"`
 	Timestamp app.Timestamp `json:"timestamp"`
@@ -20,5 +20,6 @@ type Argument struct {
 // Like for an argument
 type Like struct {
 	ArgumentID int64
+	Creator    sdk.AccAddress
 	Timestamp  app.Timestamp
 }

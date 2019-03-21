@@ -42,7 +42,7 @@ func TestGetBacking(t *testing.T) {
 	argument := "cool story brew.."
 	creator := sdk.AccAddress([]byte{1, 2})
 	bankKeeper.AddCoins(ctx, creator, sdk.Coins{amount})
-	backingID, _ := bk.Create(ctx, storyID, amount, argument, creator, false)
+	backingID, _ := bk.Create(ctx, storyID, amount, 0, argument, creator, false)
 
 	b, err := bk.Backing(ctx, backingID)
 	assert.Nil(t, err)
@@ -60,8 +60,8 @@ func TestBackingsByStoryID(t *testing.T) {
 	creator2 := sdk.AccAddress([]byte{2, 3})
 	bankKeeper.AddCoins(ctx, creator2, sdk.Coins{amount})
 
-	bk.Create(ctx, storyID, amount, argument, creator, false)
-	bk.Create(ctx, storyID, amount, argument, creator2, false)
+	bk.Create(ctx, storyID, amount, 0, argument, creator, false)
+	bk.Create(ctx, storyID, amount, 0, argument, creator2, false)
 
 	backings, _ := bk.BackingsByStoryID(ctx, storyID)
 	assert.Equal(t, 2, len(backings))
@@ -75,7 +75,7 @@ func TestBackingsByStoryIDAndCreator(t *testing.T) {
 	creator := sdk.AccAddress([]byte{1, 2})
 	bankKeeper.AddCoins(ctx, creator, sdk.Coins{amount})
 
-	bk.Create(ctx, storyID, amount, argument, creator, false)
+	bk.Create(ctx, storyID, amount, 0, argument, creator, false)
 
 	backing, _ := bk.BackingByStoryIDAndCreator(ctx, storyID, creator)
 	assert.Equal(t, int64(1), backing.ID())
@@ -89,11 +89,11 @@ func TestTally(t *testing.T) {
 	argument := "cool story brew"
 	creator := sdk.AccAddress([]byte{1, 2})
 	bankKeeper.AddCoins(ctx, creator, sdk.Coins{amount})
-	k.Create(ctx, storyID, amount, argument, creator, false)
+	k.Create(ctx, storyID, amount, 0, argument, creator, false)
 
 	creator2 := sdk.AccAddress([]byte{2, 3})
 	bankKeeper.AddCoins(ctx, creator2, sdk.Coins{amount})
-	k.Create(ctx, storyID, amount, argument, creator2, false)
+	k.Create(ctx, storyID, amount, 0, argument, creator2, false)
 
 	yes, _, _ := k.Tally(ctx, storyID)
 
@@ -109,11 +109,11 @@ func TestTotalBacking(t *testing.T) {
 
 	creator := sdk.AccAddress([]byte{1, 2})
 	bankKeeper.AddCoins(ctx, creator, sdk.Coins{amount})
-	k.Create(ctx, storyID, amount, argument, creator, false)
+	k.Create(ctx, storyID, amount, 0, argument, creator, false)
 
 	creator2 := sdk.AccAddress([]byte{2, 3})
 	bankKeeper.AddCoins(ctx, creator2, sdk.Coins{amount})
-	k.Create(ctx, storyID, amount, argument, creator2, false)
+	k.Create(ctx, storyID, amount, 0, argument, creator2, false)
 
 	total, _ := k.TotalBackingAmount(ctx, storyID)
 
@@ -126,7 +126,7 @@ func TestNewBacking_ErrInsufficientFunds(t *testing.T) {
 	amount := sdk.NewCoin(app.StakeDenom, sdk.NewInt(5000000))
 	argument := "cool story brew"
 	creator := sdk.AccAddress([]byte{1, 2})
-	_, err := bk.Create(ctx, storyID, amount, argument, creator, false)
+	_, err := bk.Create(ctx, storyID, amount, 0, argument, creator, false)
 	assert.NotNil(t, err)
 	assert.Equal(t, sdk.ErrInsufficientFunds("blah").Code(), err.Code(), "Should get error")
 }
@@ -139,7 +139,7 @@ func TestNewBacking(t *testing.T) {
 	creator := sdk.AccAddress([]byte{1, 2})
 	bankKeeper.AddCoins(ctx, creator, sdk.Coins{amount})
 
-	backingID, _ := bk.Create(ctx, storyID, amount, argument, creator, false)
+	backingID, _ := bk.Create(ctx, storyID, amount, 0, argument, creator, false)
 	assert.NotNil(t, backingID)
 }
 
@@ -152,9 +152,9 @@ func TestDuplicateBacking(t *testing.T) {
 	bankKeeper.AddCoins(ctx, creator, sdk.Coins{amount})
 	bankKeeper.AddCoins(ctx, creator, sdk.Coins{amount})
 
-	backingID, _ := bk.Create(ctx, storyID, amount, argument, creator, false)
+	backingID, _ := bk.Create(ctx, storyID, amount, 0, argument, creator, false)
 	assert.NotNil(t, backingID)
-	_, err := bk.Create(ctx, storyID, amount, argument, creator, false)
+	_, err := bk.Create(ctx, storyID, amount, 0, argument, creator, false)
 	assert.Equal(t, ErrDuplicate(storyID, creator).Code(), err.Code())
 }
 
@@ -168,7 +168,7 @@ func Test_BackingDelete(t *testing.T) {
 	backer := createFakeFundedAccount(ctx, am, totalCoins)
 
 	id, err := k.Create(
-		ctx, storyID, amount, argument, backer, false)
+		ctx, storyID, amount, 0, argument, backer, false)
 	assert.NoError(t, err)
 
 	backing, err := k.Backing(ctx, id)

@@ -115,23 +115,6 @@ func (k Keeper) ValidateAmount(ctx sdk.Context, amount sdk.Coin) sdk.Error {
 	return nil
 }
 
-// ValidateArgument validates the length of an argument
-func (k Keeper) ValidateArgument(ctx sdk.Context, argument string) sdk.Error {
-	len := len([]rune(argument))
-	minArgumentLength := k.GetParams(ctx).MinArgumentLength
-	maxArgumentLength := k.GetParams(ctx).MaxArgumentLength
-
-	if len > 0 && (len < minArgumentLength) {
-		return ErrArgumentTooShortMsg(argument, minArgumentLength)
-	}
-
-	if len > 0 && (len > maxArgumentLength) {
-		return ErrArgumentTooLongMsg(maxArgumentLength)
-	}
-
-	return nil
-}
-
 // ValidateStoryState makes sure only a pending story can be staked
 func (k Keeper) ValidateStoryState(ctx sdk.Context, storyID int64, toggled bool) sdk.Error {
 	s, err := k.storyKeeper.Story(ctx, storyID)

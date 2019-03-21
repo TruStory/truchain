@@ -6,16 +6,14 @@ import (
 	"net/url"
 	"time"
 
-	"github.com/TruStory/truchain/x/category"
-	"github.com/TruStory/truchain/x/stake"
-	"github.com/TruStory/truchain/x/trubank"
-
-	"github.com/TruStory/truchain/x/backing"
-
 	app "github.com/TruStory/truchain/types"
 	"github.com/TruStory/truchain/x/argument"
+	"github.com/TruStory/truchain/x/backing"
+	"github.com/TruStory/truchain/x/category"
 	c "github.com/TruStory/truchain/x/category"
+	"github.com/TruStory/truchain/x/stake"
 	"github.com/TruStory/truchain/x/story"
+	"github.com/TruStory/truchain/x/trubank"
 	"github.com/cosmos/cosmos-sdk/store"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth"
@@ -107,6 +105,7 @@ func mockDB() (sdk.Context, Keeper, story.Keeper, backing.Keeper, bank.Keeper) {
 	argumentKeeper := argument.NewKeeper(
 		argumentKey,
 		sk,
+		pk.Subspace(argument.StoreKey),
 		codec)
 
 	backingKeeper := backing.NewKeeper(

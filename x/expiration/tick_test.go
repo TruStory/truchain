@@ -27,7 +27,7 @@ func Test_handleExpiredStories(t *testing.T) {
 	challenger := fakeFundedCreator(ctx, bankKeeper)
 
 	_, err := backingKeeper.Create(
-		ctx, storyID, amount, argument, backer, false)
+		ctx, storyID, amount, 0, argument, backer, false)
 	assert.Nil(t, err)
 
 	_, err = challengeKeeper.Create(

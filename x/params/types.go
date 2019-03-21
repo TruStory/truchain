@@ -1,12 +1,11 @@
 package params
 
 import (
+	"github.com/TruStory/truchain/x/argument"
 	"github.com/TruStory/truchain/x/challenge"
 	"github.com/TruStory/truchain/x/expiration"
 	"github.com/TruStory/truchain/x/stake"
 	"github.com/TruStory/truchain/x/story"
-	"github.com/TruStory/truchain/x/vote"
-	"github.com/TruStory/truchain/x/voting"
 )
 
 // TODO [shanev]: these will be added by https://github.com/TruStory/truchain/issues/399
@@ -15,22 +14,20 @@ import (
 
 // Params defines defaults for a story
 type Params struct {
+	ArgumentParams   argument.Params
 	ChallengeParams  challenge.Params
 	ExpirationParams expiration.Params
 	StakeParams      stake.Params
 	StoryParams      story.Params
-	VoteParams       vote.Params
-	VotingParams     voting.Params
 }
 
 // DefaultParams creates the default params
 func DefaultParams() Params {
 	return Params{
+		ArgumentParams:   argument.DefaultParams(),
 		ChallengeParams:  challenge.DefaultParams(),
 		ExpirationParams: expiration.DefaultParams(),
 		StakeParams:      stake.DefaultParams(),
 		StoryParams:      story.DefaultParams(),
-		VoteParams:       vote.DefaultParams(),
-		VotingParams:     voting.DefaultParams(),
 	}
 }

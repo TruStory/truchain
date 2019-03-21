@@ -61,3 +61,57 @@ func (msg CreateChallengeMsg) ValidateBasic() sdk.Error {
 func (msg CreateChallengeMsg) GetSigners() []sdk.AccAddress {
 	return app.GetSigners(msg.Creator)
 }
+
+// LikeChallengeArgumentMsg represents a like on a backing message
+type LikeChallengeArgumentMsg struct {
+	ArgumentID int64          `json:"argument_id"`
+	Creator    sdk.AccAddress `json:"creator"`
+	Amount     sdk.Coin       `json:"amount"`
+}
+
+// NewLikeChallengeArgumentMsg constructs a new like argument message
+func NewLikeChallengeArgumentMsg(
+	argumentID int64,
+	creator sdk.AccAddress,
+	amount sdk.Coin) LikeChallengeArgumentMsg {
+
+	return LikeChallengeArgumentMsg{
+		ArgumentID: argumentID,
+		Creator:    creator,
+		Amount:     amount,
+	}
+}
+
+// GetSignBytes implements Msg.GetSignBytes()
+func (msg LikeChallengeArgumentMsg) GetSignBytes() []byte {
+	return app.MustGetSignBytes(msg)
+}
+
+// GetSigners implements Msg.GetSigners()
+func (msg LikeChallengeArgumentMsg) GetSigners() []sdk.AccAddress {
+	return app.GetSigners(msg.Creator)
+}
+
+// Route implements Msg.Route()
+func (msg LikeChallengeArgumentMsg) Route() string { return app.GetRoute(msg) }
+
+// Type implements Msg.Type()
+func (msg LikeChallengeArgumentMsg) Type() string { return app.GetType(msg) }
+
+// ValidateBasic implements Msg.ValidateBasic()
+func (msg LikeChallengeArgumentMsg) ValidateBasic() sdk.Error {
+	if msg.ArgumentID == 0 {
+		// return ErrInvalidArgumentID()
+		return sdk.ErrInternal("Invalid argument id")
+	}
+
+	if len(msg.Creator) == 0 {
+		return sdk.ErrInvalidAddress("Invalid address: " + msg.Creator.String())
+	}
+
+	if !msg.Amount.IsPositive() {
+		return sdk.ErrInsufficientFunds("Invalid staking amount")
+	}
+
+	return nil
+}

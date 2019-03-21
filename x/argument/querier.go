@@ -8,8 +8,9 @@ import (
 
 // query endpoints supported by the truchain Querier
 const (
-	QueryPath         = "arguments"
-	QueryArgumentByID = "id"
+	QueryPath              = "arguments"
+	QueryArgumentByID      = "id"
+	QueryLikesByArgumentID = "likesByArgumentID"
 )
 
 // NewQuerier returns a function that handles queries on the KVStore
@@ -18,6 +19,8 @@ func NewQuerier(k Keeper) sdk.Querier {
 		switch path[0] {
 		case QueryArgumentByID:
 			return k.queryArgumentByID(ctx, req)
+		case QueryLikesByArgumentID:
+			return k.queryLikesByArgumentID(ctx, req)
 		default:
 			return nil, sdk.ErrUnknownRequest("Unknown truchain query endpoint")
 		}
@@ -37,4 +40,20 @@ func (k Keeper) queryArgumentByID(ctx sdk.Context, req abci.RequestQuery) (res [
 	}
 
 	return app.MustMarshal(argument), nil
+}
+
+func (k Keeper) queryLikesByArgumentID(ctx sdk.Context, req abci.RequestQuery) (res []byte, err sdk.Error) {
+	params := app.QueryByIDParams{}
+
+	err = app.UnmarshalQueryParams(req, &params)
+	if err != nil {
+		return
+	}
+
+	likes, err := k.LikesByArgumentID(ctx, params.ID)
+	if err != nil {
+		return
+	}
+
+	return app.MustMarshal(likes), nil
 }

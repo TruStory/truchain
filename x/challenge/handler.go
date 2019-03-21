@@ -2,7 +2,6 @@ package challenge
 
 import (
 	app "github.com/TruStory/truchain/types"
-	"github.com/TruStory/truchain/x/argument"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
@@ -12,7 +11,7 @@ func NewHandler(k WriteKeeper) sdk.Handler {
 		switch msg := msg.(type) {
 		case CreateChallengeMsg:
 			return handleCreateChallengeMsg(ctx, k, msg)
-		case argument.LikeArgumentMsg:
+		case LikeChallengeArgumentMsg:
 			return handleLikeArgumentMsg(ctx, k, msg)
 		default:
 			return app.ErrMsgHandler(msg)
@@ -29,7 +28,7 @@ func handleCreateChallengeMsg(
 	}
 
 	id, err := k.Create(
-		ctx, msg.StoryID, msg.Amount, msg.Argument, msg.Creator, false)
+		ctx, msg.StoryID, msg.Amount, 0, msg.Argument, msg.Creator, false)
 	if err != nil {
 		return err.Result()
 	}
@@ -37,7 +36,7 @@ func handleCreateChallengeMsg(
 	return app.Result(id)
 }
 
-func handleLikeArgumentMsg(ctx sdk.Context, k WriteKeeper, msg argument.LikeArgumentMsg) sdk.Result {
+func handleLikeArgumentMsg(ctx sdk.Context, k WriteKeeper, msg LikeChallengeArgumentMsg) sdk.Result {
 	if err := msg.ValidateBasic(); err != nil {
 		return err.Result()
 	}

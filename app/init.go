@@ -1,13 +1,12 @@
 package app
 
 import (
+	"github.com/TruStory/truchain/x/argument"
 	"github.com/TruStory/truchain/x/category"
 	"github.com/TruStory/truchain/x/challenge"
 	"github.com/TruStory/truchain/x/expiration"
 	"github.com/TruStory/truchain/x/stake"
 	"github.com/TruStory/truchain/x/story"
-	"github.com/TruStory/truchain/x/vote"
-	"github.com/TruStory/truchain/x/voting"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth"
 	"github.com/cosmos/cosmos-sdk/x/bank"
@@ -16,6 +15,7 @@ import (
 
 // GenesisState reflects the genesis state of the application.
 type GenesisState struct {
+	ArgumentData   argument.GenesisState   `json:"argument"`
 	AuthData       auth.GenesisState       `json:"auth"`
 	BankData       bank.GenesisState       `json:"bank"`
 	Accounts       []*auth.BaseAccount     `json:"accounts"`
@@ -24,8 +24,6 @@ type GenesisState struct {
 	ExpirationData expiration.GenesisState `json:"expiration"`
 	StakeData      stake.GenesisState      `json:"stake"`
 	StoryData      story.GenesisState      `json:"story"`
-	VoteData       vote.GenesisState       `json:"vote"`
-	VotingData     voting.GenesisState     `json:"voting"`
 }
 
 // initChainer implements the custom application logic that the BaseApp will
@@ -55,6 +53,7 @@ func (app *TruChain) initChainer(ctx sdk.Context, req abci.RequestInitChain) abc
 		app.accountKeeper.SetAccount(ctx, acc)
 	}
 
+	argument.InitGenesis(ctx, app.argumentKeeper, genesisState.ArgumentData)
 	auth.InitGenesis(ctx, app.accountKeeper, app.feeCollectionKeeper, genesisState.AuthData)
 	bank.InitGenesis(ctx, app.bankKeeper, genesisState.BankData)
 	category.InitGenesis(ctx, app.categoryKeeper, genesisState.Categories)
@@ -62,8 +61,6 @@ func (app *TruChain) initChainer(ctx sdk.Context, req abci.RequestInitChain) abc
 	expiration.InitGenesis(ctx, app.expirationKeeper, genesisState.ExpirationData)
 	stake.InitGenesis(ctx, app.stakeKeeper, genesisState.StakeData)
 	story.InitGenesis(ctx, app.storyKeeper, genesisState.StoryData)
-	vote.InitGenesis(ctx, app.voteKeeper, genesisState.VoteData)
-	voting.InitGenesis(ctx, app.votingKeeper, genesisState.VotingData)
 
 	return abci.ResponseInitChain{}
 }

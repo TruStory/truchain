@@ -110,6 +110,7 @@ func mockDB() (
 	argumentKeeper := argument.NewKeeper(
 		argumentKey,
 		storyKeeper,
+		pk.Subspace(argument.StoreKey),
 		codec)
 
 	backingKeeper := backing.NewKeeper(

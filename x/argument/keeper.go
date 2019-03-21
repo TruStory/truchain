@@ -8,14 +8,12 @@ import (
 
 	app "github.com/TruStory/truchain/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/cosmos/cosmos-sdk/x/params"
 )
 
 const (
 	// StoreKey is string representation of the store key
 	StoreKey = "argument"
-
-	// LikeStoreKey is a string representation of the like store
-	// LikeStoreKey = "likes"
 )
 
 // Keeper stores keys and other keepers needed to read/write arguments
@@ -23,17 +21,20 @@ type Keeper struct {
 	app.Keeper
 
 	storyKeeper story.WriteKeeper
+	paramStore  params.Subspace
 }
 
 // NewKeeper constructs a new argument keeper
 func NewKeeper(
 	storeKey sdk.StoreKey,
 	storyKeeper story.WriteKeeper,
+	paramStore params.Subspace,
 	codec *amino.Codec) Keeper {
 
 	return Keeper{
 		app.NewKeeper(codec, storeKey),
 		storyKeeper,
+		paramStore.WithTypeTable(ParamTypeTable()),
 	}
 }
 
@@ -48,13 +49,15 @@ func (k Keeper) Create(
 	stakeID int64,
 	body string) (int64, sdk.Error) {
 
-	// TODO: validate body
+	err := k.validateArgument(ctx, body)
+	if err != nil {
+		return 0, err
+	}
 
 	arg := Argument{
 		ID:        k.GetNextID(ctx),
 		StoryID:   0,
 		StakeID:   stakeID,
-		StakeType: nil,
 		Body:      body,
 		Timestamp: app.NewTimestamp(ctx.BlockHeader()),
 	}
@@ -66,9 +69,9 @@ func (k Keeper) Create(
 
 // RegisterLike registers a like for the argument
 func (k Keeper) RegisterLike(ctx sdk.Context, argumentID int64, creator sdk.AccAddress) sdk.Error {
-
 	like := Like{
 		ArgumentID: argumentID,
+		Creator:    creator,
 		Timestamp:  app.NewTimestamp(ctx.BlockHeader()),
 	}
 
@@ -80,6 +83,25 @@ func (k Keeper) RegisterLike(ctx sdk.Context, argumentID int64, creator sdk.AccA
 		k.GetCodec().MustMarshalBinaryLengthPrefixed(like))
 
 	return nil
+}
+
+// LikesByArgumentID returns likes for a given argument id
+func (k Keeper) LikesByArgumentID(ctx sdk.Context, argumentID int64) (likes []Like, err sdk.Error) {
+	// iterate through prefix argument:id:[ID]:creator:
+	searchPrefix := fmt.Sprintf(
+		"%s:id:%d:creator:",
+		k.GetStoreKey().Name(),
+		argumentID,
+	)
+
+	err = k.EachPrefix(ctx, searchPrefix, func(val []byte) bool {
+		var like Like
+		k.GetCodec().MustUnmarshalBinaryLengthPrefixed(val, &like)
+		likes = append(likes, like)
+		return true
+	})
+
+	return
 }
 
 func (k Keeper) setArgument(ctx sdk.Context, argument Argument) {
@@ -98,4 +120,20 @@ func (k Keeper) argumentIDByCreatorKey(argumentID int64, creator sdk.AccAddress)
 	)
 
 	return []byte(key)
+}
+
+func (k Keeper) validateArgument(ctx sdk.Context, argument string) sdk.Error {
+	len := len([]rune(argument))
+	minArgumentLength := k.GetParams(ctx).MinArgumentLength
+	maxArgumentLength := k.GetParams(ctx).MaxArgumentLength
+
+	if len > 0 && (len < minArgumentLength) {
+		return ErrArgumentTooShortMsg(argument, minArgumentLength)
+	}
+
+	if len > 0 && (len > maxArgumentLength) {
+		return ErrArgumentTooLongMsg(maxArgumentLength)
+	}
+
+	return nil
 }

@@ -19,8 +19,6 @@ import (
 	"github.com/TruStory/truchain/x/truapi"
 	trubank "github.com/TruStory/truchain/x/trubank"
 	"github.com/TruStory/truchain/x/users"
-	"github.com/TruStory/truchain/x/vote"
-	"github.com/TruStory/truchain/x/voting"
 	bam "github.com/cosmos/cosmos-sdk/baseapp"
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -70,8 +68,6 @@ type TruChain struct {
 	keyTruBank              *sdk.KVStoreKey
 	keyChallengedStoryQueue *sdk.KVStoreKey
 	keyExpiringStoryQueue   *sdk.KVStoreKey
-	keyVote                 *sdk.KVStoreKey
-	keyVoting               *sdk.KVStoreKey
 	keyParams               *sdk.KVStoreKey
 	tkeyParams              *sdk.TransientStoreKey
 
@@ -92,8 +88,6 @@ type TruChain struct {
 	storyKeeper        story.WriteKeeper
 	stakeKeeper        stake.Keeper
 	truBankKeeper      trubank.Keeper
-	voteKeeper         vote.WriteKeeper
-	votingKeeper       voting.WriteKeeper
 
 	// state to run api
 	blockCtx     *sdk.Context
@@ -137,8 +131,6 @@ func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *T
 		keyTruBank:              sdk.NewKVStoreKey(trubank.StoreKey),
 		keyChallengedStoryQueue: sdk.NewKVStoreKey(story.ChallengedQueueStoreKey),
 		keyExpiringStoryQueue:   sdk.NewKVStoreKey(story.ExpiringQueueStoreKey),
-		keyVote:                 sdk.NewKVStoreKey(vote.StoreKey),
-		keyVoting:               sdk.NewKVStoreKey(voting.StoreKey),
 		api:                     nil,
 		apiStarted:              false,
 		blockCtx:                nil,
@@ -185,6 +177,7 @@ func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *T
 	app.argumentKeeper = argument.NewKeeper(
 		app.keyArgument,
 		app.storyKeeper,
+		app.paramsKeeper.Subspace(argument.StoreKey),
 		app.codec)
 
 	app.truBankKeeper = trubank.NewKeeper(
@@ -222,21 +215,6 @@ func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *T
 		codec,
 	)
 
-	app.voteKeeper = vote.NewKeeper(
-		app.keyVote,
-		app.keyChallengedStoryQueue,
-		app.argumentKeeper,
-		app.stakeKeeper,
-		app.accountKeeper,
-		app.backingKeeper,
-		app.challengeKeeper,
-		app.storyKeeper,
-		app.bankKeeper,
-		app.truBankKeeper,
-		app.paramsKeeper.Subspace(vote.StoreKey),
-		codec,
-	)
-
 	app.expirationKeeper = expiration.NewKeeper(
 		app.keyExpiration,
 		app.keyExpiringStoryQueue,
@@ -248,28 +226,13 @@ func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *T
 		codec,
 	)
 
-	app.votingKeeper = voting.NewKeeper(
-		app.keyVoting,
-		app.keyChallengedStoryQueue,
-		app.accountKeeper,
-		app.backingKeeper,
-		app.challengeKeeper,
-		app.stakeKeeper,
-		app.storyKeeper,
-		app.voteKeeper,
-		app.bankKeeper,
-		app.truBankKeeper,
-		app.paramsKeeper.Subspace(voting.StoreKey),
-		codec,
-	)
-
 	app.clientParamsKeeper = clientParams.NewKeeper(
+		app.argumentKeeper,
 		app.backingKeeper,
 		app.challengeKeeper,
 		app.expirationKeeper,
 		app.stakeKeeper,
 		app.storyKeeper,
-		app.votingKeeper,
 	)
 
 	// The AnteHandler handles signature verification and transaction pre-processing
@@ -285,7 +248,6 @@ func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *T
 		AddRoute("category", category.NewHandler(app.categoryKeeper)).
 		AddRoute("backing", backing.NewHandler(app.backingKeeper)).
 		AddRoute("challenge", challenge.NewHandler(app.challengeKeeper)).
-		AddRoute("vote", vote.NewHandler(app.voteKeeper)).
 		AddRoute("users", users.NewHandler(app.accountKeeper))
 
 	// The app.QueryRouter is the main query router where each module registers its routes
@@ -296,9 +258,7 @@ func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *T
 		AddRoute(users.QueryPath, users.NewQuerier(codec, app.accountKeeper)).
 		AddRoute(backing.QueryPath, backing.NewQuerier(app.backingKeeper)).
 		AddRoute(challenge.QueryPath, challenge.NewQuerier(app.challengeKeeper)).
-		AddRoute(vote.QueryPath, vote.NewQuerier(app.voteKeeper)).
 		AddRoute(clientParams.QueryPath, clientParams.NewQuerier(app.clientParamsKeeper)).
-		AddRoute(voting.QueryPath, voting.NewQuerier(app.votingKeeper)).
 		AddRoute(trubank.QueryPath, trubank.NewQuerier(app.truBankKeeper))
 
 	// The initChainer handles translating the genesis.json file into initial state for the network
@@ -323,8 +283,6 @@ func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *T
 		app.keyExpiringStoryQueue,
 		app.keyChallengedStoryQueue,
 		app.keyTruBank,
-		app.keyVote,
-		app.keyVoting,
 		app.keyArgument,
 	)
 
@@ -367,12 +325,10 @@ func MakeCodec() *codec.Codec {
 	ibc.RegisterCodec(cdc)
 
 	// register msg types
-	argument.RegisterAmino(cdc)
 	story.RegisterAmino(cdc)
 	backing.RegisterAmino(cdc)
 	category.RegisterAmino(cdc)
 	challenge.RegisterAmino(cdc)
-	vote.RegisterAmino(cdc)
 	users.RegisterAmino(cdc)
 
 	// register other types
@@ -437,7 +393,6 @@ func (app *TruChain) ExportAppStateAndValidators() (appState json.RawMessage, va
 		Categories:     category.DefaultCategories(),
 		ExpirationData: expiration.DefaultGenesisState(),
 		StoryData:      story.DefaultGenesisState(),
-		VotingData:     voting.DefaultGenesisState(),
 	}
 
 	appState, err = codec.MarshalJSONIndent(app.codec, genState)
