@@ -8,15 +8,13 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
-	"strconv"
-	"time"
 
 	"github.com/TruStory/truchain/x/chttp"
+	"github.com/TruStory/truchain/x/cookies"
 	"github.com/TruStory/truchain/x/db"
 	"github.com/btcsuite/btcd/btcec"
 	"github.com/dghubble/go-twitter/twitter"
 	"github.com/dghubble/oauth1"
-	"github.com/gorilla/securecookie"
 )
 
 // RegistrationRequest is a JSON request body representing a twitter profile that a user wishes to register
@@ -75,7 +73,7 @@ func (ta *TruAPI) HandleRegistration(r *http.Request) chttp.Response {
 		return chttp.SimpleErrorResponse(400, err)
 	}
 
-	cookieValue, err := TruUserCookie(twitterProfile)
+	cookieValue, err := cookies.SetUserToCookie(twitterProfile)
 	if err != nil {
 		return chttp.SimpleErrorResponse(400, err)
 	}
@@ -143,31 +141,6 @@ func CalibrateUser(ta *TruAPI, twitterUser *twitter.User) (string, error) {
 	}
 
 	return addr, nil
-}
-
-// TruUserCookie takes a user and encodes it into a cookie value.
-func TruUserCookie(twitterProfile *db.TwitterProfile) (string, error) {
-	// Saves and excrypts the context in the cookie
-	hashKey, err := hex.DecodeString(os.Getenv("COOKIE_HASH_KEY"))
-	if err != nil {
-		return "", err
-	}
-	blockKey, err := hex.DecodeString(os.Getenv("COOKIE_ENCRYPT_KEY"))
-	if err != nil {
-		return "", err
-	}
-	s := securecookie.New(hashKey, blockKey)
-	cookieValue := map[string]string{
-		"twitter-profile-id": strconv.FormatInt(twitterProfile.ID, 10),
-		"address":            twitterProfile.Address,
-		"created_at":         strconv.FormatInt(time.Now().Unix(), 10),
-	}
-	encodedValue, err := s.Encode("tru-user", cookieValue)
-	if err != nil {
-		return "", err
-	}
-
-	return encodedValue, nil
 }
 
 func getTwitterUser(authToken string, authTokenSecret string) (*twitter.User, error) {

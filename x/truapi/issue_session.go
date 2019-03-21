@@ -5,6 +5,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/TruStory/truchain/x/cookies"
 	"github.com/TruStory/truchain/x/db"
 	"github.com/dghubble/gologin/twitter"
 )
@@ -38,7 +39,7 @@ func IssueSession(ta *TruAPI) http.Handler {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 		}
 
-		cookieValue, err := TruUserCookie(twitterProfile)
+		cookieValue, err := cookies.SetUserToCookie(twitterProfile)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 		}
