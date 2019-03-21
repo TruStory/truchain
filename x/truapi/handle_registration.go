@@ -30,9 +30,6 @@ type RegistrationResponse struct {
 	Fullname string `json:"fullname"`
 	Address  string `json:"address"`
 	Cookie   string `json:"cookie"`
-	// AccountNumber uint64    `json:"account_number"`
-	// Sequence      uint64    `json:"sequence"`
-	// Coins         sdk.Coins `json:"coins"`
 }
 
 // HandleRegistration takes a `RegistrationRequest` and returns a `RegistrationResponse`
