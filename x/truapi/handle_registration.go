@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"os"
 	"strconv"
+	"time"
 
 	"github.com/TruStory/truchain/x/chttp"
 	"github.com/TruStory/truchain/x/db"
@@ -30,6 +31,7 @@ type RegistrationResponse struct {
 	Username string `json:"username"`
 	Fullname string `json:"fullname"`
 	Address  string `json:"address"`
+	Cookie   string `json:"cookie"`
 	// AccountNumber uint64    `json:"account_number"`
 	// Sequence      uint64    `json:"sequence"`
 	// Coins         sdk.Coins `json:"coins"`
@@ -73,11 +75,17 @@ func (ta *TruAPI) HandleRegistration(r *http.Request) chttp.Response {
 		return chttp.SimpleErrorResponse(400, err)
 	}
 
+	cookieValue, err := TruUserCookie(twitterProfile)
+	if err != nil {
+		return chttp.SimpleErrorResponse(400, err)
+	}
+
 	responseBytes, _ := json.Marshal(RegistrationResponse{
 		UserID:   twitterUser.IDStr,
 		Username: twitterUser.ScreenName,
 		Fullname: twitterUser.Name,
 		Address:  addr,
+		Cookie:   cookieValue,
 	})
 
 	return chttp.SimpleResponse(201, responseBytes)
@@ -152,6 +160,7 @@ func TruUserCookie(twitterProfile *db.TwitterProfile) (string, error) {
 	cookieValue := map[string]string{
 		"twitter-profile-id": strconv.FormatInt(twitterProfile.ID, 10),
 		"address":            twitterProfile.Address,
+		"created_at":         strconv.FormatInt(time.Now().Unix(), 10),
 	}
 	encodedValue, err := s.Encode("tru-user", cookieValue)
 	if err != nil {
