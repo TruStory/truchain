@@ -147,8 +147,8 @@ func (ta *TruAPI) RegisterResolvers() {
 	}
 
 	ta.GraphQLClient.RegisterObjectResolver("Argument", argument.Argument{}, map[string]interface{}{
-		"id": func(_ context.Context, q argument.Argument) int64 { return q.ID },
-		// "creator":    func(ctx context.Context, q argument.Argument) users.User { return getUser(ctx, q.) },
+		"id":        func(_ context.Context, q argument.Argument) int64 { return q.ID },
+		"creator":   func(ctx context.Context, q argument.Argument) users.User { return getUser(ctx, q.Creator) },
 		"body":      func(_ context.Context, q argument.Argument) string { return q.Body },
 		"storyId":   func(_ context.Context, q argument.Argument) int64 { return q.StoryID },
 		"likes":     ta.likesObjectResolver,
@@ -227,19 +227,18 @@ func (ta *TruAPI) RegisterResolvers() {
 	ta.GraphQLClient.RegisterQueryResolver("stories", ta.allStoriesResolver)
 	ta.GraphQLClient.RegisterQueryResolver("story", ta.storyResolver)
 	ta.GraphQLClient.RegisterObjectResolver("Story", story.Story{}, map[string]interface{}{
-		"id":                 func(_ context.Context, q story.Story) int64 { return q.ID },
-		"backings":           func(ctx context.Context, q story.Story) []backing.Backing { return getBackings(ctx, q.ID) },
-		"challenges":         func(ctx context.Context, q story.Story) []challenge.Challenge { return getChallenges(ctx, q.ID) },
-		"backingPool":        ta.backingPoolResolver,
-		"challengePool":      ta.challengePoolResolver,
-		"challengeThreshold": ta.challengeThresholdResolver,
-		"category":           ta.storyCategoryResolver,
-		"creator":            func(ctx context.Context, q story.Story) users.User { return getUser(ctx, q.Creator) },
-		"source":             func(ctx context.Context, q story.Story) string { return q.Source.String() },
-		"state":              func(ctx context.Context, q story.Story) story.Status { return q.Status },
-		"expireTime":         func(_ context.Context, q story.Story) string { return formatTime(q.ExpireTime) },
-		"votingStartTime":    func(_ context.Context, q story.Story) string { return formatTime(q.VotingStartTime) },
-		"votingEndTime":      func(_ context.Context, q story.Story) string { return formatTime(q.VotingEndTime) },
+		"id":              func(_ context.Context, q story.Story) int64 { return q.ID },
+		"backings":        func(ctx context.Context, q story.Story) []backing.Backing { return getBackings(ctx, q.ID) },
+		"challenges":      func(ctx context.Context, q story.Story) []challenge.Challenge { return getChallenges(ctx, q.ID) },
+		"backingPool":     ta.backingPoolResolver,
+		"challengePool":   ta.challengePoolResolver,
+		"category":        ta.storyCategoryResolver,
+		"creator":         func(ctx context.Context, q story.Story) users.User { return getUser(ctx, q.Creator) },
+		"source":          func(ctx context.Context, q story.Story) string { return q.Source.String() },
+		"state":           func(ctx context.Context, q story.Story) story.Status { return q.Status },
+		"expireTime":      func(_ context.Context, q story.Story) string { return formatTime(q.ExpireTime) },
+		"votingStartTime": func(_ context.Context, q story.Story) string { return formatTime(q.VotingStartTime) },
+		"votingEndTime":   func(_ context.Context, q story.Story) string { return formatTime(q.VotingEndTime) },
 	})
 
 	ta.GraphQLClient.RegisterObjectResolver("Timestamp", app.Timestamp{}, map[string]interface{}{

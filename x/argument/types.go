@@ -13,8 +13,9 @@ type Argument struct {
 	// association with backing or challenge
 	StakeID int64 `json:"stake_id"`
 
-	Body      string        `json:"body"`
-	Timestamp app.Timestamp `json:"timestamp"`
+	Body      string         `json:"body"`
+	Creator   sdk.AccAddress `json:"creator"`
+	Timestamp app.Timestamp  `json:"timestamp"`
 }
 
 // Like for an argument

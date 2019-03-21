@@ -149,41 +149,6 @@ func TestNewChallenge_ErrIncorrectCategoryCoin(t *testing.T) {
 	assert.NotNil(t, err)
 }
 
-func Test_checkThreshold(t *testing.T) {
-	ctx, k, storyKeeper, backingKeeper, bankKeeper := mockDB()
-
-	ctx = ctx.WithBlockHeader(abci.Header{Time: time.Now()})
-	storyID := createFakeStory(ctx, storyKeeper)
-	amount := sdk.NewCoin("trusteak", sdk.NewInt(10000000000))
-	argument := "test argument right here"
-	backer1 := fakeFundedCreator(ctx, bankKeeper)
-	backer2 := fakeFundedCreator(ctx, bankKeeper)
-	challenger1 := fakeFundedCreator(ctx, bankKeeper)
-	challenger2 := fakeFundedCreator(ctx, bankKeeper)
-
-	_, err := backingKeeper.Create(
-		ctx, storyID, amount, 0, argument, backer1, false)
-	assert.Nil(t, err)
-
-	_, err = backingKeeper.Create(
-		ctx, storyID, amount, 0, argument, backer2, false)
-	assert.Nil(t, err)
-
-	_, err = k.Create(
-		ctx, storyID, amount, 0, argument, challenger1, false)
-	assert.Nil(t, err)
-
-	_, err = k.Create(
-		ctx, storyID, amount, 0, argument, challenger2, false)
-	assert.Nil(t, err)
-
-	err = k.checkThreshold(ctx, storyID)
-	assert.Nil(t, err)
-
-	story, _ := storyKeeper.Story(ctx, storyID)
-	assert.Equal(t, story.Status.String(), "Challenged")
-}
-
 func Test_ChallengeDelete(t *testing.T) {
 	ctx, k, storyKeeper, _, bankKeeper := mockDB()
 	ctx = ctx.WithBlockHeader(abci.Header{Time: time.Now()})

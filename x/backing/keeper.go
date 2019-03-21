@@ -137,7 +137,7 @@ func (k Keeper) Create(
 
 	// creates an argument if it doesn't exist (new backing, not a like)
 	if argumentID == 0 {
-		argumentID, err = k.argumentKeeper.Create(ctx, stakeID, argument)
+		argumentID, err = k.argumentKeeper.Create(ctx, stakeID, storyID, argument, creator)
 		if err != nil {
 			return 0, sdk.ErrInternal("Error creating argument")
 		}
@@ -180,22 +180,22 @@ func (k Keeper) LikeArgument(ctx sdk.Context, argumentID int64, creator sdk.AccA
 
 	argument, err := k.argumentKeeper.Argument(ctx, argumentID)
 	if err != nil {
-		return 0, sdk.ErrInternal("error getting argument")
+		return 0, err
 	}
 
 	backing, err := k.Backing(ctx, argument.StakeID)
 	if err != nil {
-		return 0, sdk.ErrInternal("error getting backing")
+		return 0, err
 	}
 
 	story, err := k.storyKeeper.Story(ctx, backing.StoryID())
 	if err != nil {
-		return 0, sdk.ErrInternal("can't get story")
+		return 0, err
 	}
 
 	backingID, err := k.Create(ctx, story.ID, amount, argumentID, "", creator, false)
 	if err != nil {
-		return 0, sdk.ErrInternal("cannot create backing")
+		return 0, err
 	}
 
 	// amount of cred for a like
@@ -203,7 +203,7 @@ func (k Keeper) LikeArgument(ctx sdk.Context, argumentID int64, creator sdk.AccA
 
 	_, err = k.trubankKeeper.MintAndAddCoin(ctx, backing.Creator(), story.CategoryID, story.ID, trubank.Like, cred)
 	if err != nil {
-		return 0, sdk.ErrInternal("cant mint coins")
+		return 0, err
 	}
 
 	return backingID, nil

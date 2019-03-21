@@ -245,30 +245,6 @@ func (ta *TruAPI) challengesResolver(
 	return *challenges
 }
 
-func (ta *TruAPI) challengeThresholdResolver(_ context.Context, q story.Story) sdk.Coin {
-	res := ta.RunQuery(path.Join(challenge.QueryPath, challenge.QueryChallengeThresholdByStoryID), app.QueryByIDParams{ID: q.ID})
-
-	if res.Code != 0 {
-		fmt.Println("Resolver err: ", res)
-		return sdk.Coin{}
-	}
-
-	amount := new(sdk.Coin)
-	err := json.Unmarshal(res.Value, amount)
-	if err != nil {
-		panic(err)
-	}
-
-	// Round up to next Shanev so we don't deal with precision
-	remainder := amount.Amount.Mod(sdk.NewInt(app.Shanev))
-	if !remainder.IsZero() {
-		roundedUp := amount.Amount.Sub(remainder).Add(sdk.NewInt(app.Shanev))
-		return sdk.NewCoin(amount.Denom, roundedUp)
-	}
-
-	return *amount
-}
-
 func (ta *TruAPI) paramsResolver(_ context.Context) params.Params {
 	res := ta.RunQuery("params", nil)
 

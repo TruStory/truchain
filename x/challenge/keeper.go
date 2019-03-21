@@ -39,7 +39,6 @@ type ReadKeeper interface {
 	Tally(ctx sdk.Context, storyID int64) (falseVotes []Challenge, err sdk.Error)
 	TotalChallengeAmount(ctx sdk.Context, storyID int64) (
 		totalCoin sdk.Coin, err sdk.Error)
-	ChallengeThreshold(ctx sdk.Context, storyID int64) (sdk.Coin, sdk.Error)
 }
 
 // WriteKeeper defines a module interface that facilities write only access to truchain data
@@ -145,7 +144,7 @@ func (k Keeper) Create(
 
 	// creates an argument if it doesn't exist (new backing, not a like)
 	if argumentID == 0 {
-		argumentID, err = k.argumentKeeper.Create(ctx, stakeID, argument)
+		argumentID, err = k.argumentKeeper.Create(ctx, stakeID, storyID, argument, creator)
 		if err != nil {
 			return 0, sdk.ErrInternal("Error creating argument")
 		}
@@ -179,11 +178,6 @@ func (k Keeper) Create(
 	if err != nil {
 		return
 	}
-
-	// err = k.checkThreshold(ctx, storyID)
-	// if err != nil {
-	// 	return 0, err
-	// }
 
 	msg := fmt.Sprintf("Challenged story %d with %s by %s",
 		storyID, amount.String(), creator.String())
@@ -249,22 +243,22 @@ func (k Keeper) LikeArgument(ctx sdk.Context, argumentID int64, creator sdk.AccA
 
 	argument, err := k.argumentKeeper.Argument(ctx, argumentID)
 	if err != nil {
-		return 0, sdk.ErrInternal("error getting argument")
+		return 0, err
 	}
 
 	challenge, err := k.Challenge(ctx, argument.StakeID)
 	if err != nil {
-		return 0, sdk.ErrInternal("error getting challenge")
+		return 0, err
 	}
 
 	story, err := k.storyKeeper.Story(ctx, challenge.StoryID())
 	if err != nil {
-		return 0, sdk.ErrInternal("can't get story")
+		return 0, err
 	}
 
 	challengeID, err := k.Create(ctx, story.ID, amount, argumentID, "", creator, false)
 	if err != nil {
-		return 0, sdk.ErrInternal("cannot create challenge")
+		return 0, err
 	}
 
 	// amount of cred for a like
@@ -272,7 +266,7 @@ func (k Keeper) LikeArgument(ctx sdk.Context, argumentID int64, creator sdk.AccA
 
 	_, err = k.trubankKeeper.MintAndAddCoin(ctx, challenge.Creator(), story.CategoryID, story.ID, trubank.Like, cred)
 	if err != nil {
-		return 0, sdk.ErrInternal("cant mint coins")
+		return 0, err
 	}
 
 	return challengeID, nil
@@ -325,75 +319,8 @@ func (k Keeper) TotalChallengeAmount(ctx sdk.Context, storyID int64) (
 	return totalAmount, nil
 }
 
-func (k Keeper) checkThreshold(ctx sdk.Context, storyID int64) sdk.Error {
-	logger := ctx.Logger().With("module", "challenge")
-
-	// only check threshold if it is in pending state
-	s, err := k.storyKeeper.Story(ctx, storyID)
-	if err != nil {
-		return err
-	}
-	if s.Status != story.Pending {
-		return nil
-	}
-
-	backingPool, err := k.backingKeeper.TotalBackingAmount(ctx, storyID)
-	if err != nil {
-		return err
-	}
-
-	challengePool, err := k.TotalChallengeAmount(ctx, storyID)
-	if err != nil {
-		return err
-	}
-
-	challengeThreshold, err := k.ChallengeThreshold(ctx, storyID)
-	if err != nil {
-		return err
-	}
-
-	logger.Info(fmt.Sprintf(
-		"Backing pool: %s, challenge pool: %s, threshold: %s",
-		backingPool, challengePool, challengeThreshold))
-
-	if challengePool.IsGTE(challengeThreshold) {
-		err := k.storyKeeper.StartVotingPeriod(ctx, storyID)
-		if err != nil {
-			return err
-		}
-
-		logger.Info(fmt.Sprintf(
-			"Challenge threshold met. Voting started for story %d", storyID))
-	}
-
-	return nil
-}
-
-// ChallengeThreshold returns the challenge threshold for a story
-func (k Keeper) ChallengeThreshold(ctx sdk.Context, storyID int64) (sdk.Coin, sdk.Error) {
-	backingPool, err := k.backingKeeper.TotalBackingAmount(ctx, storyID)
-	if err != nil {
-		return sdk.NewCoin(app.StakeDenom, sdk.ZeroInt()), err
-	}
-
-	// calculate challenge threshold amount (based on total backings)
-	totalBackingDec := sdk.NewDecFromInt(backingPool.Amount)
-	challengeThresholdAmount := totalBackingDec.
-		Mul(k.challengeToBackingRatio(ctx)).
-		TruncateInt()
-
-	// challenge threshold can't be less than min challenge stake
-	minChallengeThreshold := k.minChallengeThreshold(ctx)
-	if challengeThresholdAmount.LT(minChallengeThreshold) {
-		return sdk.NewCoin(backingPool.Denom, minChallengeThreshold), nil
-	}
-
-	return sdk.NewCoin(backingPool.Denom, challengeThresholdAmount), nil
-}
-
 // Update updates the challenge vote
 func (k Keeper) Update(ctx sdk.Context, challenge Challenge) {
-
 	newChallenge := Challenge{
 		Vote: challenge.Vote,
 	}

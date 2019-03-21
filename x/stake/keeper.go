@@ -109,7 +109,7 @@ func (k Keeper) ValidateAmount(ctx sdk.Context, amount sdk.Coin) sdk.Error {
 	maxAmount := k.GetParams(ctx).MaxAmount
 
 	if maxAmount.IsLT(amount) {
-		return sdk.ErrInternal("Stake amount is over the max allowed.")
+		return ErrInvalidStakeAmount()
 	}
 
 	return nil

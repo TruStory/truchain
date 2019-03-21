@@ -33,6 +33,22 @@
             "deprecationReason": "",
             "description": "",
             "isDeprecated": false,
+            "name": "creator",
+            "type": {
+              "kind": "NON_NULL",
+              "name": "",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "User",
+                "ofType": null
+              }
+            }
+          },
+          {
+            "args": [],
+            "deprecationReason": "",
+            "description": "",
+            "isDeprecated": false,
             "name": "iD",
             "type": {
               "kind": "NON_NULL",
@@ -691,6 +707,22 @@
             "deprecationReason": "",
             "description": "",
             "isDeprecated": false,
+            "name": "argumentParams",
+            "type": {
+              "kind": "NON_NULL",
+              "name": "",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "Params",
+                "ofType": null
+              }
+            }
+          },
+          {
+            "args": [],
+            "deprecationReason": "",
+            "description": "",
+            "isDeprecated": false,
             "name": "challengeMinStake",
             "type": {
               "kind": "NON_NULL",
@@ -730,22 +762,6 @@
               "ofType": {
                 "kind": "OBJECT",
                 "name": "Params",
-                "ofType": null
-              }
-            }
-          },
-          {
-            "args": [],
-            "deprecationReason": "",
-            "description": "",
-            "isDeprecated": false,
-            "name": "challengeRewardRatio",
-            "type": {
-              "kind": "NON_NULL",
-              "name": "",
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "string",
                 "ofType": null
               }
             }
@@ -899,22 +915,6 @@
             "deprecationReason": "",
             "description": "",
             "isDeprecated": false,
-            "name": "stakerRewardRatio",
-            "type": {
-              "kind": "NON_NULL",
-              "name": "",
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "string",
-                "ofType": null
-              }
-            }
-          },
-          {
-            "args": [],
-            "deprecationReason": "",
-            "description": "",
-            "isDeprecated": false,
             "name": "storyExpireDuration",
             "type": {
               "kind": "NON_NULL",
@@ -986,54 +986,6 @@
               "ofType": {
                 "kind": "SCALAR",
                 "name": "string",
-                "ofType": null
-              }
-            }
-          },
-          {
-            "args": [],
-            "deprecationReason": "",
-            "description": "",
-            "isDeprecated": false,
-            "name": "voteParams",
-            "type": {
-              "kind": "NON_NULL",
-              "name": "",
-              "ofType": {
-                "kind": "OBJECT",
-                "name": "Params",
-                "ofType": null
-              }
-            }
-          },
-          {
-            "args": [],
-            "deprecationReason": "",
-            "description": "",
-            "isDeprecated": false,
-            "name": "voteStake",
-            "type": {
-              "kind": "NON_NULL",
-              "name": "",
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "string",
-                "ofType": null
-              }
-            }
-          },
-          {
-            "args": [],
-            "deprecationReason": "",
-            "description": "",
-            "isDeprecated": false,
-            "name": "votingParams",
-            "type": {
-              "kind": "NON_NULL",
-              "name": "",
-              "ofType": {
-                "kind": "OBJECT",
-                "name": "Params",
                 "ofType": null
               }
             }
@@ -1309,51 +1261,6 @@
                     "ofType": null
                   }
                 }
-              }
-            }
-          },
-          {
-            "args": [
-              {
-                "defaultValue": null,
-                "description": "",
-                "name": "creator",
-                "type": {
-                  "kind": "NON_NULL",
-                  "name": "",
-                  "ofType": {
-                    "kind": "SCALAR",
-                    "name": "string",
-                    "ofType": null
-                  }
-                }
-              },
-              {
-                "defaultValue": null,
-                "description": "",
-                "name": "storyID",
-                "type": {
-                  "kind": "NON_NULL",
-                  "name": "",
-                  "ofType": {
-                    "kind": "SCALAR",
-                    "name": "int64",
-                    "ofType": null
-                  }
-                }
-              }
-            ],
-            "deprecationReason": "",
-            "description": "",
-            "isDeprecated": false,
-            "name": "vote",
-            "type": {
-              "kind": "NON_NULL",
-              "name": "",
-              "ofType": {
-                "kind": "OBJECT",
-                "name": "Vote",
-                "ofType": null
               }
             }
           }
@@ -1677,46 +1584,6 @@
             "deprecationReason": "",
             "description": "",
             "isDeprecated": false,
-            "name": "voteResults",
-            "type": {
-              "kind": "NON_NULL",
-              "name": "",
-              "ofType": {
-                "kind": "OBJECT",
-                "name": "voteResults",
-                "ofType": null
-              }
-            }
-          },
-          {
-            "args": [],
-            "deprecationReason": "",
-            "description": "",
-            "isDeprecated": false,
-            "name": "votes",
-            "type": {
-              "kind": "NON_NULL",
-              "name": "",
-              "ofType": {
-                "kind": "LIST",
-                "name": "",
-                "ofType": {
-                  "kind": "NON_NULL",
-                  "name": "",
-                  "ofType": {
-                    "kind": "OBJECT",
-                    "name": "Vote",
-                    "ofType": null
-                  }
-                }
-              }
-            }
-          },
-          {
-            "args": [],
-            "deprecationReason": "",
-            "description": "",
-            "isDeprecated": false,
             "name": "votingEndTime",
             "type": {
               "kind": "NON_NULL",
@@ -1724,22 +1591,6 @@
               "ofType": {
                 "kind": "SCALAR",
                 "name": "string",
-                "ofType": null
-              }
-            }
-          },
-          {
-            "args": [],
-            "deprecationReason": "",
-            "description": "",
-            "isDeprecated": false,
-            "name": "votingPool",
-            "type": {
-              "kind": "NON_NULL",
-              "name": "",
-              "ofType": {
-                "kind": "OBJECT",
-                "name": "Coin",
                 "ofType": null
               }
             }
@@ -2296,113 +2147,6 @@
       {
         "description": "",
         "enumValues": [],
-        "fields": [
-          {
-            "args": [],
-            "deprecationReason": "",
-            "description": "",
-            "isDeprecated": false,
-            "name": "amount",
-            "type": {
-              "kind": "NON_NULL",
-              "name": "",
-              "ofType": {
-                "kind": "OBJECT",
-                "name": "Coin",
-                "ofType": null
-              }
-            }
-          },
-          {
-            "args": [],
-            "deprecationReason": "",
-            "description": "",
-            "isDeprecated": false,
-            "name": "argument",
-            "type": {
-              "kind": "NON_NULL",
-              "name": "",
-              "ofType": {
-                "kind": "OBJECT",
-                "name": "Argument",
-                "ofType": null
-              }
-            }
-          },
-          {
-            "args": [],
-            "deprecationReason": "",
-            "description": "",
-            "isDeprecated": false,
-            "name": "creator",
-            "type": {
-              "kind": "NON_NULL",
-              "name": "",
-              "ofType": {
-                "kind": "OBJECT",
-                "name": "User",
-                "ofType": null
-              }
-            }
-          },
-          {
-            "args": [],
-            "deprecationReason": "",
-            "description": "",
-            "isDeprecated": false,
-            "name": "timestamp",
-            "type": {
-              "kind": "NON_NULL",
-              "name": "",
-              "ofType": {
-                "kind": "OBJECT",
-                "name": "Timestamp",
-                "ofType": null
-              }
-            }
-          },
-          {
-            "args": [],
-            "deprecationReason": "",
-            "description": "",
-            "isDeprecated": false,
-            "name": "vote",
-            "type": {
-              "kind": "NON_NULL",
-              "name": "",
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "bool",
-                "ofType": null
-              }
-            }
-          },
-          {
-            "args": [],
-            "deprecationReason": "",
-            "description": "",
-            "isDeprecated": false,
-            "name": "weight",
-            "type": {
-              "kind": "NON_NULL",
-              "name": "",
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "string",
-                "ofType": null
-              }
-            }
-          }
-        ],
-        "inputFields": [],
-        "interfaces": [],
-        "kind": "OBJECT",
-        "name": "Vote",
-        "possibleTypes": []
-      },
-      {
-        "description": "",
-        "enumValues": [],
         "fields": [],
         "inputFields": [],
         "interfaces": [],
@@ -2478,81 +2222,6 @@
         "interfaces": [],
         "kind": "SCALAR",
         "name": "uint8",
-        "possibleTypes": []
-      },
-      {
-        "description": "",
-        "enumValues": [],
-        "fields": [
-          {
-            "args": [],
-            "deprecationReason": "",
-            "description": "",
-            "isDeprecated": false,
-            "name": "backedCredTotal",
-            "type": {
-              "kind": "NON_NULL",
-              "name": "",
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "string",
-                "ofType": null
-              }
-            }
-          },
-          {
-            "args": [],
-            "deprecationReason": "",
-            "description": "",
-            "isDeprecated": false,
-            "name": "challengedCredTotal",
-            "type": {
-              "kind": "NON_NULL",
-              "name": "",
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "string",
-                "ofType": null
-              }
-            }
-          },
-          {
-            "args": [],
-            "deprecationReason": "",
-            "description": "",
-            "isDeprecated": false,
-            "name": "iD",
-            "type": {
-              "kind": "NON_NULL",
-              "name": "",
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "int64",
-                "ofType": null
-              }
-            }
-          },
-          {
-            "args": [],
-            "deprecationReason": "",
-            "description": "",
-            "isDeprecated": false,
-            "name": "timestamp",
-            "type": {
-              "kind": "NON_NULL",
-              "name": "",
-              "ofType": {
-                "kind": "OBJECT",
-                "name": "Timestamp",
-                "ofType": null
-              }
-            }
-          }
-        ],
-        "inputFields": [],
-        "interfaces": [],
-        "kind": "OBJECT",
-        "name": "voteResults",
         "possibleTypes": []
       }
     ]

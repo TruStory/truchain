@@ -10,7 +10,8 @@ import (
 const (
 	DefaultCodespace sdk.CodespaceType = StoreKey
 
-	CodeInvalidStoryState sdk.CodeType = 1601
+	CodeInvalidStoryState  sdk.CodeType = 1601
+	CodeInvalidStakeAmount sdk.CodeType = 1602
 )
 
 // ErrInvalidStoryState throws when story not pending
@@ -19,4 +20,12 @@ func ErrInvalidStoryState(state string) sdk.Error {
 
 	return sdk.NewError(
 		DefaultCodespace, CodeInvalidStoryState, fmt.Sprintf(msg, state))
+}
+
+// ErrInvalidStakeAmount throws when stake is too large
+func ErrInvalidStakeAmount() sdk.Error {
+	return sdk.NewError(
+		DefaultCodespace,
+		CodeInvalidStakeAmount,
+		fmt.Sprintf("Stake amount is over the max allowed."))
 }

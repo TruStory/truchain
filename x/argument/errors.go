@@ -11,13 +11,19 @@ const (
 	DefaultCodespace sdk.CodespaceType = "argument"
 
 	CodeInvalidArgumentID sdk.CodeType = 1501
-	CodeArgumentTooShort  sdk.CodeType = 1502
-	CodeArgumentTooLong   sdk.CodeType = 1503
+	CodeNotFound          sdk.CodeType = 1502
+	CodeArgumentTooShort  sdk.CodeType = 1503
+	CodeArgumentTooLong   sdk.CodeType = 1504
 )
 
 // ErrInvalidArgumentID throws an error on invalid title
 func ErrInvalidArgumentID() sdk.Error {
 	return sdk.NewError(DefaultCodespace, CodeInvalidArgumentID, "Invalid argument ID")
+}
+
+// ErrNotFound throws when an argument by id is not found
+func ErrNotFound(id int64) sdk.Error {
+	return sdk.NewError(DefaultCodespace, CodeNotFound, fmt.Sprintf("Invalid argument ID %d", id))
 }
 
 // ErrArgumentTooShortMsg throws for an invalid argument

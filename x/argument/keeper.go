@@ -39,15 +39,24 @@ func NewKeeper(
 }
 
 // Argument returns the argument for the given id
-func (k Keeper) Argument(ctx sdk.Context, id int64) (Argument, sdk.Error) {
-	return Argument{}, nil
+func (k Keeper) Argument(ctx sdk.Context, id int64) (argument Argument, err sdk.Error) {
+	store := k.GetStore(ctx)
+	bz := store.Get(k.GetIDKey(id))
+	if bz == nil {
+		return argument, ErrNotFound(id)
+	}
+	k.GetCodec().MustUnmarshalBinaryLengthPrefixed(bz, &argument)
+
+	return
 }
 
 // Create stores a new argument in the argument store
 func (k Keeper) Create(
 	ctx sdk.Context,
 	stakeID int64,
-	body string) (int64, sdk.Error) {
+	storyID int64,
+	body string,
+	creator sdk.AccAddress) (int64, sdk.Error) {
 
 	err := k.validateArgument(ctx, body)
 	if err != nil {
@@ -56,9 +65,10 @@ func (k Keeper) Create(
 
 	arg := Argument{
 		ID:        k.GetNextID(ctx),
-		StoryID:   0,
+		StoryID:   storyID,
 		StakeID:   stakeID,
 		Body:      body,
+		Creator:   creator,
 		Timestamp: app.NewTimestamp(ctx.BlockHeader()),
 	}
 
@@ -76,10 +86,10 @@ func (k Keeper) RegisterLike(ctx sdk.Context, argumentID int64, creator sdk.AccA
 	}
 
 	// append argument <-> like association
-	// argument:id:[ID]:creator:[0xdeadbeef] = Like{}
+	// argument:id:[ID]:likes:creator:[0xdeadbeef] = Like{}
 	store := k.GetStore(ctx)
 	store.Set(
-		k.argumentIDByCreatorKey(argumentID, creator),
+		k.likesKey(argumentID, creator),
 		k.GetCodec().MustMarshalBinaryLengthPrefixed(like))
 
 	return nil
@@ -87,9 +97,9 @@ func (k Keeper) RegisterLike(ctx sdk.Context, argumentID int64, creator sdk.AccA
 
 // LikesByArgumentID returns likes for a given argument id
 func (k Keeper) LikesByArgumentID(ctx sdk.Context, argumentID int64) (likes []Like, err sdk.Error) {
-	// iterate through prefix argument:id:[ID]:creator:
+	// iterate through prefix argument:id:[ID]:likes:creator:
 	searchPrefix := fmt.Sprintf(
-		"%s:id:%d:creator:",
+		"%s:id:%d:likes:creator:",
 		k.GetStoreKey().Name(),
 		argumentID,
 	)
@@ -111,9 +121,9 @@ func (k Keeper) setArgument(ctx sdk.Context, argument Argument) {
 		k.GetCodec().MustMarshalBinaryLengthPrefixed(argument))
 }
 
-func (k Keeper) argumentIDByCreatorKey(argumentID int64, creator sdk.AccAddress) []byte {
+func (k Keeper) likesKey(argumentID int64, creator sdk.AccAddress) []byte {
 	key := fmt.Sprintf(
-		"%s:id:%d:creator:%s",
+		"%s:id:%d:likes:creator:%s",
 		k.GetStoreKey().Name(),
 		argumentID,
 		creator.String(),
