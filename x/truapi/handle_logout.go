@@ -6,7 +6,7 @@ import (
 	"time"
 )
 
-// Logout creates a session and redirects the logged in user to the correct page
+// Logout deletes a session and redirects the logged in user to the correct page
 func Logout() http.Handler {
 	fn := func(w http.ResponseWriter, req *http.Request) {
 		cookie := http.Cookie{
