@@ -281,7 +281,6 @@ func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *T
 	app.Router().
 		AddRoute("bank", bank.NewHandler(app.bankKeeper)).
 		AddRoute("ibc", ibc.NewHandler(app.ibcMapper, app.bankKeeper)).
-		AddRoute(argument.StoreKey, argument.NewHandler(app.argumentKeeper)).
 		AddRoute("story", story.NewHandler(app.storyKeeper)).
 		AddRoute("category", category.NewHandler(app.categoryKeeper)).
 		AddRoute("backing", backing.NewHandler(app.backingKeeper)).

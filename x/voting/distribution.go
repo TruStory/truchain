@@ -102,10 +102,10 @@ func (k Keeper) rewardStaker(
 	logger := ctx.Logger().With("module", StoreKey)
 
 	// get back staked amount
-	err = k.stakeKeeper.DistributePrincipalAndInterest(ctx, []stake.Voter{staker}, categoryID)
-	if err != nil {
-		return
-	}
+	// err = k.stakeKeeper.DistributePrincipalAndInterest(ctx, []stake.Voter{staker}, categoryID)
+	// if err != nil {
+	// 	return
+	// }
 
 	// calculate reward (X% of pool, in proportion to stake)
 	rewardAmount := stakerRewardAmount(staker.Amount(), stakerTotalAmount, stakerPool)

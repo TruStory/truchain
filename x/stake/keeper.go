@@ -6,6 +6,7 @@ import (
 
 	"github.com/TruStory/truchain/x/story"
 
+	app "github.com/TruStory/truchain/types"
 	trubank "github.com/TruStory/truchain/x/trubank"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/params"
@@ -36,40 +37,68 @@ func NewKeeper(
 	}
 }
 
-// DistributePrincipalAndInterest distributes funds to backers and challengers
-func (k Keeper) DistributePrincipalAndInterest(
-	ctx sdk.Context, votes []Voter, categoryID int64) sdk.Error {
+// RedistributeStake distributes stake according to story resolution
+//
+// Example:
+// true: 100, 100, 100
+// false: 100
+// true wins
+// total pool: 400
+// win pool: 300
+// lose pool: 100
+// winner eq: total pool * (stake amount / total win pool)
+// winners: 400 * (100/300) = 133.33
+func (k Keeper) RedistributeStake(ctx sdk.Context, votes []Voter) sdk.Error {
+	var truePool, falsePool, rewardPool sdk.Int
+	for _, v := range votes {
+		voteStake := v.Amount().Amount
+		rewardPool = rewardPool.Add(voteStake)
+		if v.VoteChoice() == true {
+			truePool = truePool.Add(voteStake)
+		} else {
+			falsePool = falsePool.Add(voteStake)
+		}
+	}
 
+	// TOOD: add majority param
+	winPool := falsePool
+	if truePool.GT(falsePool) {
+		winPool = truePool
+		for _, v := range votes {
+			if v.VoteChoice() == true {
+				err := k.rewardStaker(ctx, v, winPool, rewardPool)
+				if err != nil {
+					return err
+				}
+			}
+		}
+	} else {
+		for _, v := range votes {
+			if v.VoteChoice() == false {
+				err := k.rewardStaker(ctx, v, winPool, rewardPool)
+				if err != nil {
+					return err
+				}
+			}
+		}
+	}
+
+	return nil
+}
+
+// DistributeInterest distributes interest for staking
+func (k Keeper) DistributeInterest(ctx sdk.Context, votes []Voter) sdk.Error {
 	logger := ctx.Logger().With("module", StoreKey)
 
-	for _, vote := range votes {
-		typeOfVote := trubank.ChallengeReturned
-		if vote.VoteChoice() {
-			typeOfVote = trubank.BackingReturned
-		}
-
-		// give principal back to user in trustake
-		_, err := k.truBankKeeper.AddCoin(ctx, vote.Creator(), vote.Amount(), vote.StoryID(), typeOfVote, vote.ID())
+	for _, v := range votes {
+		period := ctx.BlockHeader().Time.Sub(v.Timestamp().CreatedTime)
+		interest := k.interest(ctx, v.Amount(), period)
+		interestCoin := sdk.NewCoin(app.StakeDenom, interest)
+		_, err := k.truBankKeeper.AddCoin(ctx, v.Creator(), interestCoin, v.StoryID(), trubank.Interest, 0)
 		if err != nil {
 			return err
 		}
-		// mint interest earned in cred and distribute
-		period := ctx.BlockHeader().Time.Sub(vote.Timestamp().CreatedTime)
-		interest := k.Interest(ctx, vote.Amount(), categoryID, period)
-
-		_, err = k.truBankKeeper.MintAndAddCoin(
-			ctx, vote.Creator(), categoryID, vote.StoryID(), trubank.Interest, interest)
-		if err != nil {
-			return err
-		}
-
-		logger.Info(fmt.Sprintf(
-			"Distributed %T %s with interest %s for period %s to %s",
-			vote,
-			vote.Amount().String(),
-			interest.String(),
-			period.String(),
-			vote.Creator().String()))
+		logger.Info(fmt.Sprintf("Distributed interest %s to %s", interestCoin, v.Creator()))
 	}
 
 	return nil
@@ -122,10 +151,9 @@ func (k Keeper) ValidateStoryState(ctx sdk.Context, storyID int64, toggled bool)
 }
 
 // Interest calculates interest for staked amount
-func (k Keeper) Interest(
+func (k Keeper) interest(
 	ctx sdk.Context,
 	amount sdk.Coin,
-	categoryID int64,
 	period time.Duration) sdk.Int {
 
 	// TODO: keep track of total supply
@@ -163,4 +191,27 @@ func (k Keeper) Interest(
 	interest := amountDec.Mul(interestRate)
 
 	return interest.RoundInt()
+}
+
+// distribute stake proportionally to winner
+func (k Keeper) rewardStaker(ctx sdk.Context, staker Voter, winPool sdk.Int, rewardPool sdk.Int) sdk.Error {
+	rewardAmount := rewardAmount(staker.Amount().Amount, winPool, rewardPool)
+	rewardCoin := sdk.NewCoin(app.StakeDenom, rewardAmount)
+	_, err := k.truBankKeeper.AddCoin(ctx, staker.Creator(), rewardCoin, staker.StoryID(), trubank.StakeReward, 0)
+	if err != nil {
+		return err
+	}
+
+	logger := ctx.Logger().With("module", StoreKey)
+	logger.Info(fmt.Sprintf("Distributed stake reward %s to %s", rewardCoin, staker.Creator()))
+
+	return nil
+}
+
+// reward stake = reward pool * (stake amount / winner pool)
+func rewardAmount(stakeAmount sdk.Int, winPool sdk.Int, rewardPool sdk.Int) sdk.Int {
+	return sdk.NewDecFromInt(rewardPool).
+		MulInt(stakeAmount).
+		QuoInt(winPool).
+		TruncateInt()
 }

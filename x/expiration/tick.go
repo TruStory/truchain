@@ -59,12 +59,12 @@ func (k Keeper) processExpiredStoryQueue(ctx sdk.Context) sdk.Error {
 		votes = append(votes, challenge)
 	}
 
-	story, err := k.storyKeeper.Story(ctx, storyID)
+	err = k.stakeKeeper.RedistributeStake(ctx, votes)
 	if err != nil {
 		return err
 	}
 
-	err = k.stakeKeeper.DistributePrincipalAndInterest(ctx, votes, story.CategoryID)
+	err = k.stakeKeeper.DistributeInterest(ctx, votes)
 	if err != nil {
 		return err
 	}

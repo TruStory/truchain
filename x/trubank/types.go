@@ -28,4 +28,5 @@ const (
 	RewardPool
 	Interest
 	Like
+	StakeReward
 )

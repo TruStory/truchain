@@ -33,16 +33,16 @@ func (k Keeper) rewardPool(
 
 		case backing.Backing, challenge.Challenge:
 
-			period := ctx.BlockHeader().Time.Sub(v.Timestamp().CreatedTime)
-			interest := k.stakeKeeper.Interest(ctx, v.Amount(), categoryID, period)
-			interestCoin := sdk.NewCoin(app.StakeDenom, interest)
+			// period := ctx.BlockHeader().Time.Sub(v.Timestamp().CreatedTime)
+			// interest := k.stakeKeeper.Interest(ctx, v.Amount(), period)
+			// interestCoin := sdk.NewCoin(app.StakeDenom, interest)
 
-			// add stake + interest to reward pool
-			pool = pool.Plus(v.Amount()).Plus(interestCoin)
+			// // add stake + interest to reward pool
+			// pool = pool.Plus(v.Amount()).Plus(interestCoin)
 
-			logger.Info(fmt.Sprintf(
-				"Added stake %s with %s interest to pool for staker",
-				v.Amount(), interestCoin))
+			// logger.Info(fmt.Sprintf(
+			// 	"Added stake %s with %s interest to pool for staker",
+			// 	v.Amount(), interestCoin))
 
 		case tokenVote.TokenVote:
 
