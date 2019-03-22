@@ -25,11 +25,11 @@ type RegistrationRequest struct {
 
 // RegistrationResponse is a JSON response body representing the result of registering a key
 type RegistrationResponse struct {
-	UserID   string `json:"userId"`
-	Username string `json:"username"`
-	Fullname string `json:"fullname"`
-	Address  string `json:"address"`
-	Cookie   string `json:"authenticationCookie"`
+	UserID               string `json:"userId"`
+	Username             string `json:"username"`
+	Fullname             string `json:"fullname"`
+	Address              string `json:"address"`
+	AuthenticationCookie string `json:"authenticationCookie"`
 }
 
 // HandleRegistration takes a `RegistrationRequest` and returns a `RegistrationResponse`
@@ -52,6 +52,11 @@ func (ta *TruAPI) HandleRegistration(r *http.Request) chttp.Response {
 		return chttp.SimpleErrorResponse(400, err)
 	}
 
+	return RegisterTwitterUser(ta, twitterUser)
+}
+
+// RegisterTwitterUser registers a new twitter user
+func RegisterTwitterUser(ta *TruAPI, twitterUser *twitter.User) chttp.Response {
 	addr, err := CalibrateUser(ta, twitterUser)
 	if err != nil {
 		return chttp.SimpleErrorResponse(400, err)
@@ -76,11 +81,11 @@ func (ta *TruAPI) HandleRegistration(r *http.Request) chttp.Response {
 	}
 
 	responseBytes, _ := json.Marshal(RegistrationResponse{
-		UserID:   twitterUser.IDStr,
-		Username: twitterUser.ScreenName,
-		Fullname: twitterUser.Name,
-		Address:  addr,
-		Cookie:   cookieValue,
+		UserID:               twitterUser.IDStr,
+		Username:             twitterUser.ScreenName,
+		Fullname:             twitterUser.Name,
+		Address:              addr,
+		AuthenticationCookie: cookieValue,
 	})
 
 	return chttp.SimpleResponse(201, responseBytes)
