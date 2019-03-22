@@ -2,6 +2,7 @@ package challenge
 
 import (
 	app "github.com/TruStory/truchain/types"
+	"github.com/TruStory/truchain/x/argument"
 	"github.com/TruStory/truchain/x/stake"
 	"github.com/TruStory/truchain/x/story"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -101,8 +102,7 @@ func (msg LikeChallengeArgumentMsg) Type() string { return app.GetType(msg) }
 // ValidateBasic implements Msg.ValidateBasic()
 func (msg LikeChallengeArgumentMsg) ValidateBasic() sdk.Error {
 	if msg.ArgumentID == 0 {
-		// return ErrInvalidArgumentID()
-		return sdk.ErrInternal("Invalid argument id")
+		return argument.ErrInvalidArgumentID()
 	}
 
 	if len(msg.Creator) == 0 {
