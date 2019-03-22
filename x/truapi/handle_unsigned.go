@@ -1,17 +1,14 @@
 package truapi
 
 import (
-	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"io/ioutil"
 	"net/http"
-	"os"
-	"strconv"
 
 	"github.com/TruStory/truchain/x/chttp"
-	"github.com/gorilla/securecookie"
+	"github.com/TruStory/truchain/x/truapi/cookies"
 )
 
 // HandleUnsigned takes a `HandleUnsignedRequest` and returns a `HandleUnsignedResponse`
@@ -29,22 +26,17 @@ func (ta *TruAPI) HandleUnsigned(r *http.Request) chttp.Response {
 		return chttp.SimpleErrorResponse(400, err)
 	}
 
-	// Get the user context
-	truUser, err := GetTruUserFromCookie(r)
+	// Get the authenticated user
+	user, err := cookies.GetAuthenticatedUser(r)
 	if err == http.ErrNoCookie {
 		return chttp.SimpleErrorResponse(401, err)
 	}
 	if err != nil {
-		panic(err)
-	}
-
-	twitterProfileID, err := strconv.ParseInt(truUser["twitter-profile-id"], 10, 64)
-	if err != nil {
-		panic(err)
+		return chttp.SimpleErrorResponse(401, err)
 	}
 
 	// Fetch keypair of the user
-	keyPair, err := ta.DBClient.KeyPairByTwitterProfileID(twitterProfileID)
+	keyPair, err := ta.DBClient.KeyPairByTwitterProfileID(user.TwitterProfileID)
 	if err != nil {
 		return chttp.SimpleErrorResponse(400, err)
 	}
@@ -69,30 +61,4 @@ func (ta *TruAPI) HandleUnsigned(r *http.Request) chttp.Response {
 	resBytes, _ := json.Marshal(res)
 
 	return chttp.SimpleResponse(200, resBytes)
-}
-
-// GetTruUserFromCookie gets the user context from the request's cookie
-func GetTruUserFromCookie(r *http.Request) (map[string]string, error) {
-	truUser, err := r.Cookie("tru-user")
-	if err != nil {
-		return nil, err
-	}
-
-	hashKey, err := hex.DecodeString(os.Getenv("COOKIE_HASH_KEY"))
-	if err != nil {
-		return nil, err
-	}
-	blockKey, err := hex.DecodeString(os.Getenv("COOKIE_ENCRYPT_KEY"))
-	if err != nil {
-		return nil, err
-	}
-	var s = securecookie.New(hashKey, blockKey)
-
-	decodedTruUser := make(map[string]string)
-	err = s.Decode("tru-user", truUser.Value, &decodedTruUser)
-	if err != nil {
-		return nil, err
-	}
-
-	return decodedTruUser, nil
 }
