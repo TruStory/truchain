@@ -3,6 +3,7 @@ package truapi
 import (
 	"net/http"
 	"os"
+	"strings"
 
 	"github.com/TruStory/truchain/x/db"
 	"github.com/TruStory/truchain/x/truapi/cookies"
@@ -30,7 +31,7 @@ func IssueSession(ta *TruAPI) http.Handler {
 			Address:   addr,
 			Username:  twitterUser.ScreenName,
 			FullName:  twitterUser.Name,
-			AvatarURI: twitterUser.ProfileImageURL,
+			AvatarURI: strings.Replace(twitterUser.ProfileImageURL, "_normal", "_bigger", 1),
 		}
 		// upserting the twitter profile
 		err = ta.DBClient.UpsertTwitterProfile(twitterProfile)

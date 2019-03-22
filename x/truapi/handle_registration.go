@@ -8,6 +8,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
+	"strings"
 
 	"github.com/TruStory/truchain/x/chttp"
 	"github.com/TruStory/truchain/x/db"
@@ -67,7 +68,7 @@ func RegisterTwitterUser(ta *TruAPI, twitterUser *twitter.User) chttp.Response {
 		Address:   addr,
 		Username:  twitterUser.ScreenName,
 		FullName:  twitterUser.Name,
-		AvatarURI: twitterUser.ProfileImageURL,
+		AvatarURI: strings.Replace(twitterUser.ProfileImageURL, "_normal", "_bigger", 1),
 	}
 
 	err = ta.DBClient.UpsertTwitterProfile(twitterProfile)

@@ -26,7 +26,7 @@ func getMockTwitterUser() *twitter.User {
 		IDStr:           strconv.FormatInt(int64(id), 10),
 		ScreenName:      "trustory_engineering",
 		Name:            "Trustory Engineering",
-		ProfileImageURL: "https://pbs.twimg.com/profile_images/999336936572567552/SY65rL1h.jpg",
+		ProfileImageURL: "https://pbs.twimg.com/profile_images/999336936572567552/SY65rL1h_bigger.jpg",
 	}
 
 	return mocked
