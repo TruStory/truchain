@@ -22,8 +22,6 @@ func mockDB() (sdk.Context, Keeper) {
 	accKey := sdk.NewKVStoreKey(auth.StoreKey)
 	storyKey := sdk.NewKVStoreKey(story.StoreKey)
 	storyListKey := sdk.NewKVStoreKey(story.PendingListStoreKey)
-	expiredStoryQueueKey := sdk.NewKVStoreKey(story.ExpiringQueueStoreKey)
-	votingStoryQueueKey := sdk.NewKVStoreKey(story.ChallengedQueueStoreKey)
 	catKey := sdk.NewKVStoreKey(category.StoreKey)
 	paramsKey := sdk.NewKVStoreKey(params.StoreKey)
 	transientParamsKey := sdk.NewTransientStoreKey(params.TStoreKey)
@@ -32,9 +30,7 @@ func mockDB() (sdk.Context, Keeper) {
 	ms.MountStoreWithDB(accKey, sdk.StoreTypeIAVL, db)
 	ms.MountStoreWithDB(storyKey, sdk.StoreTypeIAVL, db)
 	ms.MountStoreWithDB(storyListKey, sdk.StoreTypeIAVL, db)
-	ms.MountStoreWithDB(expiredStoryQueueKey, sdk.StoreTypeIAVL, db)
 	ms.MountStoreWithDB(catKey, sdk.StoreTypeIAVL, db)
-	ms.MountStoreWithDB(votingStoryQueueKey, sdk.StoreTypeIAVL, db)
 	ms.MountStoreWithDB(paramsKey, sdk.StoreTypeIAVL, db)
 	ms.MountStoreWithDB(transientParamsKey, sdk.StoreTypeTransient, db)
 	ms.LoadLatestVersion()
@@ -58,8 +54,6 @@ func mockDB() (sdk.Context, Keeper) {
 	storyKeeper := story.NewKeeper(
 		storyKey,
 		storyListKey,
-		expiredStoryQueueKey,
-		votingStoryQueueKey,
 		ck,
 		pk.Subspace(story.StoreKey),
 		codec)

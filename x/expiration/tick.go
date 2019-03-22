@@ -9,37 +9,49 @@ import (
 
 // EndBlock is called at the end of every block
 func (k Keeper) EndBlock(ctx sdk.Context) sdk.Tags {
-	err := k.processExpiredStoryQueue(ctx)
+	err := k.processStoryQueue(ctx)
 	if err != nil {
 		panic(err)
 	}
 	return sdk.EmptyTags()
 }
 
-// processExpiredStoryQueue recursively process expired stories.
+// processStoryQueue recursively process expired stories.
 // If a story id gets in this queue, it means that it never went
 // through a voting period. Therefore, rewards are distributed to
 // backers, and funds are returned to challengers. There are no
 // voters because the voting period never started.
-func (k Keeper) processExpiredStoryQueue(ctx sdk.Context) sdk.Error {
-	logger := ctx.Logger().With("module", "expiration")
+func (k Keeper) processStoryQueue(ctx sdk.Context) sdk.Error {
+	logger := ctx.Logger().With("module", StoreKey)
 
-	expiringStoryQueue := k.expiringStoryQueue(ctx)
+	storyQueue := k.storyQueue(ctx)
 
-	if expiringStoryQueue.IsEmpty() {
+	if storyQueue.IsEmpty() {
 		// done processing all expired stories
-		// terminate
+		// terminatex
 		return nil
 	}
 
 	var storyID int64
-	if err := expiringStoryQueue.Peek(&storyID); err != nil {
+	if err := storyQueue.Peek(&storyID); err != nil {
 		panic(err)
+	}
+
+	story, err := k.storyKeeper.Story(ctx, storyID)
+	if err != nil {
+		return err
+	}
+
+	logger.Info(fmt.Sprintf("Checking %s", story))
+
+	if ctx.BlockHeader().Time.Before(story.ExpireTime) {
+		// return and wait until next block to check if story has expired
+		return nil
 	}
 
 	logger.Info(fmt.Sprintf("Handling expired story id: %d", storyID))
 
-	expiringStoryQueue.Pop()
+	storyQueue.Pop()
 
 	var votes []stake.Voter
 
@@ -70,5 +82,5 @@ func (k Keeper) processExpiredStoryQueue(ctx sdk.Context) sdk.Error {
 	}
 
 	// handle next expired story
-	return k.processExpiredStoryQueue(ctx)
+	return k.processStoryQueue(ctx)
 }

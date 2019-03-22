@@ -152,7 +152,7 @@ func (k Keeper) Create(
 
 	// create implicit false vote
 	vote := stake.Vote{
-		ID:         k.GetNextID(ctx),
+		ID:         stakeID,
 		StoryID:    storyID,
 		Amount:     amount,
 		ArgumentID: argumentID,

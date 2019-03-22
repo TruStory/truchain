@@ -19,10 +19,6 @@ const (
 	StoreKey = "stories"
 	// PendingListStoreKey is string representation of the store key for pending story ids
 	PendingListStoreKey = "pendingStoryList"
-	// ExpiringQueueStoreKey is string representation of the store key for expiring story ids
-	ExpiringQueueStoreKey = "expiringStoryQueue"
-	// ChallengedQueueStoreKey is string representation of the store key for challenged story ids
-	ChallengedQueueStoreKey = "challengedStoryQueue"
 )
 
 // ReadKeeper defines a module interface that facilitates read only access
@@ -51,11 +47,7 @@ type WriteKeeper interface {
 		creator sdk.AccAddress,
 		source url.URL,
 		storyType Type) (int64, sdk.Error)
-	StartVotingPeriod(ctx sdk.Context, storyID int64) sdk.Error
-	EndVotingPeriod(
-		ctx sdk.Context, storyID int64, confirmed bool) sdk.Error
 	UpdateStory(ctx sdk.Context, story Story)
-	EndBlock(ctx sdk.Context) sdk.Tags
 	SetParams(ctx sdk.Context, params Params)
 }
 
@@ -63,19 +55,15 @@ type WriteKeeper interface {
 type Keeper struct {
 	app.Keeper
 
-	pendingStoryListKey     sdk.StoreKey
-	expiringStoryQueueKey   sdk.StoreKey
-	challengedStoryQueueKey sdk.StoreKey
-	categoryKeeper          category.ReadKeeper
-	paramStore              params.Subspace
+	pendingStoryListKey sdk.StoreKey
+	categoryKeeper      category.ReadKeeper
+	paramStore          params.Subspace
 }
 
 // NewKeeper creates a new keeper with write and read access
 func NewKeeper(
 	storeKey sdk.StoreKey,
 	pendingStoryListKey sdk.StoreKey,
-	expiringStoryQueueKey sdk.StoreKey,
-	challengedStoryQueueKey sdk.StoreKey,
 	categoryKeeper category.ReadKeeper,
 	paramStore params.Subspace,
 	codec *amino.Codec) Keeper {
@@ -83,53 +71,9 @@ func NewKeeper(
 	return Keeper{
 		app.NewKeeper(codec, storeKey),
 		pendingStoryListKey,
-		expiringStoryQueueKey,
-		challengedStoryQueueKey,
 		categoryKeeper,
 		paramStore.WithTypeTable(ParamTypeTable()),
 	}
-}
-
-// ============================================================================
-
-// StartVotingPeriod updates story to indicate a voting period
-func (k Keeper) StartVotingPeriod(ctx sdk.Context, storyID int64) sdk.Error {
-	story, err := k.Story(ctx, storyID)
-	if err != nil {
-		return err
-	}
-
-	story.Status = Challenged
-	story.VotingStartTime = ctx.BlockHeader().Time
-	story.VotingEndTime = ctx.BlockHeader().Time.Add(k.votingDuration(ctx))
-	k.UpdateStory(ctx, story)
-
-	// add story to challenged list
-	k.appendStoriesList(
-		ctx, storyIDsByCategoryKey(k, story.CategoryID, story.Timestamp, true), story)
-
-	return nil
-}
-
-// EndVotingPeriod records the end of a validation game on a story
-func (k Keeper) EndVotingPeriod(
-	ctx sdk.Context, storyID int64, confirmed bool) sdk.Error {
-
-	story, err := k.Story(ctx, storyID)
-	if err != nil {
-		return err
-	}
-
-	if confirmed {
-		story.Status = Confirmed
-	} else {
-		story.Status = Rejected
-	}
-
-	story.VotingEndTime = ctx.BlockHeader().Time
-	k.UpdateStory(ctx, story)
-
-	return nil
 }
 
 // Create adds a story to the key-value store
@@ -309,8 +253,6 @@ func (k Keeper) UpdateStory(ctx sdk.Context, story Story) {
 	logger.Info("Updated " + newStory.String())
 }
 
-// ============================================================================
-
 func (k Keeper) appendStoriesList(
 	ctx sdk.Context, key []byte, story Story) {
 
@@ -382,16 +324,6 @@ func (k Keeper) storyIDsByCategoryID(
 func (k Keeper) pendingStoryList(ctx sdk.Context) list.List {
 	store := ctx.KVStore(k.pendingStoryListKey)
 	return list.NewList(k.GetCodec(), store)
-}
-
-func (k Keeper) expiringStoryQueue(ctx sdk.Context) list.Queue {
-	store := ctx.KVStore(k.expiringStoryQueueKey)
-	return list.NewQueue(k.GetCodec(), store)
-}
-
-func (k Keeper) challengedStoryQueue(ctx sdk.Context) list.Queue {
-	store := ctx.KVStore(k.challengedStoryQueueKey)
-	return list.NewQueue(k.GetCodec(), store)
 }
 
 func (k Keeper) validate(ctx sdk.Context, body string) sdk.Error {

@@ -17,23 +17,20 @@ type Status int8
 // List of acceptable story statuses
 const (
 	Pending Status = iota
-	Challenged
-	Confirmed
-	Rejected
 	Expired
 )
 
 // IsValid returns true if the value is listed in the enum definition, false otherwise.
 func (s Status) IsValid() bool {
 	switch s {
-	case Pending, Challenged, Confirmed, Rejected, Expired:
+	case Pending, Expired:
 		return true
 	}
 	return false
 }
 
 func (s Status) String() string {
-	return [...]string{"Pending", "Challenged", "Confirmed", "Rejected", "Expired"}[s]
+	return [...]string{"Pending", "Expired"}[s]
 }
 
 // Type is a type that defines a story type

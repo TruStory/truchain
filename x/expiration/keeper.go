@@ -21,7 +21,7 @@ const (
 type Keeper struct {
 	app.Keeper
 
-	expiredStoryQueueKey sdk.StoreKey
+	storyQueueKey sdk.StoreKey
 
 	stakeKeeper     stake.Keeper
 	storyKeeper     story.WriteKeeper
@@ -33,7 +33,7 @@ type Keeper struct {
 // NewKeeper creates a new keeper with write and read access
 func NewKeeper(
 	storeKey sdk.StoreKey,
-	expiredStoryQueueKey sdk.StoreKey,
+	storyQueueKey sdk.StoreKey,
 	stakeKeeper stake.Keeper,
 	storyKeeper story.WriteKeeper,
 	backingKeeper backing.WriteKeeper,
@@ -43,7 +43,7 @@ func NewKeeper(
 
 	return Keeper{
 		app.NewKeeper(codec, storeKey),
-		expiredStoryQueueKey,
+		storyQueueKey,
 		stakeKeeper,
 		storyKeeper,
 		backingKeeper,
@@ -52,7 +52,7 @@ func NewKeeper(
 	}
 }
 
-func (k Keeper) expiringStoryQueue(ctx sdk.Context) queue.Queue {
-	store := ctx.KVStore(k.expiredStoryQueueKey)
+func (k Keeper) storyQueue(ctx sdk.Context) queue.Queue {
+	store := ctx.KVStore(k.storyQueueKey)
 	return queue.NewQueue(k.GetCodec(), store)
 }

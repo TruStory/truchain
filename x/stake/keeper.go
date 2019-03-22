@@ -122,10 +122,6 @@ func (k Keeper) ValidateStoryState(ctx sdk.Context, storyID int64, toggled bool)
 		return err
 	}
 
-	if toggled && s.Status == story.Challenged {
-		return nil
-	}
-
 	if s.Status != story.Pending {
 		return ErrInvalidStoryState(s.Status.String())
 	}

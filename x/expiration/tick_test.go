@@ -12,7 +12,7 @@ import (
 func Test_handleExpiredStoriesEmptyQueue(t *testing.T) {
 	ctx, k, _, _, _, _ := mockDB()
 
-	err := k.processExpiredStoryQueue(ctx)
+	err := k.processStoryQueue(ctx)
 	assert.Nil(t, err)
 }
 
@@ -31,17 +31,17 @@ func Test_handleExpiredStories(t *testing.T) {
 	assert.Nil(t, err)
 
 	_, err = challengeKeeper.Create(
-		ctx, storyID, amount, argument, challenger, false)
+		ctx, storyID, amount, 0, argument, challenger, false)
 	assert.Nil(t, err)
 
 	// fake expired story queue
-	k.expiringStoryQueue(ctx).Push(storyID)
+	k.storyQueue(ctx).Push(storyID)
 
 	// fake future block time for expiration
 	expireTime := time.Now().Add(24 * time.Hour)
 	ctx = ctx.WithBlockHeader(abci.Header{Time: expireTime})
 
-	err = k.processExpiredStoryQueue(ctx)
+	err = k.processStoryQueue(ctx)
 	assert.Nil(t, err)
 
 	// check expiration for backer

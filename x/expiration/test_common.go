@@ -40,8 +40,6 @@ func mockDB() (
 	argumentKey := sdk.NewKVStoreKey(argument.StoreKey)
 	storyKey := sdk.NewKVStoreKey(story.StoreKey)
 	storyListKey := sdk.NewKVStoreKey(story.PendingListStoreKey)
-	expiredStoryQueueKey := sdk.NewKVStoreKey(story.ExpiringQueueStoreKey)
-	votingStoryQueueKey := sdk.NewKVStoreKey(story.ChallengedQueueStoreKey)
 	backingKey := sdk.NewKVStoreKey(backing.StoreKey)
 	challengeKey := sdk.NewKVStoreKey(challenge.StoreKey)
 	distKey := sdk.NewKVStoreKey(StoreKey)
@@ -54,10 +52,8 @@ func mockDB() (
 	ms.MountStoreWithDB(argumentKey, sdk.StoreTypeIAVL, db)
 	ms.MountStoreWithDB(storyKey, sdk.StoreTypeIAVL, db)
 	ms.MountStoreWithDB(storyListKey, sdk.StoreTypeIAVL, db)
-	ms.MountStoreWithDB(expiredStoryQueueKey, sdk.StoreTypeIAVL, db)
 	ms.MountStoreWithDB(catKey, sdk.StoreTypeIAVL, db)
 	ms.MountStoreWithDB(backingKey, sdk.StoreTypeIAVL, db)
-	ms.MountStoreWithDB(votingStoryQueueKey, sdk.StoreTypeIAVL, db)
 	ms.MountStoreWithDB(challengeKey, sdk.StoreTypeIAVL, db)
 	ms.MountStoreWithDB(distKey, sdk.StoreTypeIAVL, db)
 	ms.MountStoreWithDB(paramsKey, sdk.StoreTypeIAVL, db)
@@ -86,8 +82,6 @@ func mockDB() (
 	storyKeeper := story.NewKeeper(
 		storyKey,
 		storyListKey,
-		expiredStoryQueueKey,
-		votingStoryQueueKey,
 		categoryKeeper,
 		pk.Subspace(story.StoreKey),
 		codec)
@@ -139,7 +133,7 @@ func mockDB() (
 
 	expirationKeeper := NewKeeper(
 		distKey,
-		expiredStoryQueueKey,
+		storyListKey,
 		stakeKeeper,
 		storyKeeper,
 		backingKeeper,

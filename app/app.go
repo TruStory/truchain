@@ -53,23 +53,21 @@ type TruChain struct {
 	codec *codec.Codec
 
 	// keys to access the multistore
-	keyAccount              *sdk.KVStoreKey
-	keyArgument             *sdk.KVStoreKey
-	keyBacking              *sdk.KVStoreKey
-	keyCategory             *sdk.KVStoreKey
-	keyChallenge            *sdk.KVStoreKey
-	keyExpiration           *sdk.KVStoreKey
-	keyFee                  *sdk.KVStoreKey
-	keyIBC                  *sdk.KVStoreKey
-	keyMain                 *sdk.KVStoreKey
-	keyStake                *sdk.KVStoreKey
-	keyStory                *sdk.KVStoreKey
-	keyPendingStoryList     *sdk.KVStoreKey
-	keyTruBank              *sdk.KVStoreKey
-	keyChallengedStoryQueue *sdk.KVStoreKey
-	keyExpiringStoryQueue   *sdk.KVStoreKey
-	keyParams               *sdk.KVStoreKey
-	tkeyParams              *sdk.TransientStoreKey
+	keyAccount    *sdk.KVStoreKey
+	keyArgument   *sdk.KVStoreKey
+	keyBacking    *sdk.KVStoreKey
+	keyCategory   *sdk.KVStoreKey
+	keyChallenge  *sdk.KVStoreKey
+	keyExpiration *sdk.KVStoreKey
+	keyFee        *sdk.KVStoreKey
+	keyIBC        *sdk.KVStoreKey
+	keyMain       *sdk.KVStoreKey
+	keyStake      *sdk.KVStoreKey
+	keyStory      *sdk.KVStoreKey
+	keyStoryQueue *sdk.KVStoreKey
+	keyTruBank    *sdk.KVStoreKey
+	keyParams     *sdk.KVStoreKey
+	tkeyParams    *sdk.TransientStoreKey
 
 	// manage getting and setting accounts
 	accountKeeper       auth.AccountKeeper
@@ -116,26 +114,24 @@ func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *T
 		keyParams:  sdk.NewKVStoreKey("params"),
 		tkeyParams: sdk.NewTransientStoreKey("transient_params"),
 
-		keyMain:                 sdk.NewKVStoreKey("main"),
-		keyAccount:              sdk.NewKVStoreKey("acc"),
-		keyIBC:                  sdk.NewKVStoreKey("ibc"),
-		keyArgument:             sdk.NewKVStoreKey(argument.StoreKey),
-		keyStory:                sdk.NewKVStoreKey(story.StoreKey),
-		keyPendingStoryList:     sdk.NewKVStoreKey(story.PendingListStoreKey),
-		keyCategory:             sdk.NewKVStoreKey(category.StoreKey),
-		keyBacking:              sdk.NewKVStoreKey(backing.StoreKey),
-		keyChallenge:            sdk.NewKVStoreKey(challenge.StoreKey),
-		keyExpiration:           sdk.NewKVStoreKey(expiration.StoreKey),
-		keyFee:                  sdk.NewKVStoreKey("fee_collection"),
-		keyStake:                sdk.NewKVStoreKey(stake.StoreKey),
-		keyTruBank:              sdk.NewKVStoreKey(trubank.StoreKey),
-		keyChallengedStoryQueue: sdk.NewKVStoreKey(story.ChallengedQueueStoreKey),
-		keyExpiringStoryQueue:   sdk.NewKVStoreKey(story.ExpiringQueueStoreKey),
-		api:                     nil,
-		apiStarted:              false,
-		blockCtx:                nil,
-		blockHeader:             abci.Header{},
-		registrarKey:            loadRegistrarKey(),
+		keyMain:       sdk.NewKVStoreKey("main"),
+		keyAccount:    sdk.NewKVStoreKey("acc"),
+		keyIBC:        sdk.NewKVStoreKey("ibc"),
+		keyArgument:   sdk.NewKVStoreKey(argument.StoreKey),
+		keyStory:      sdk.NewKVStoreKey(story.StoreKey),
+		keyStoryQueue: sdk.NewKVStoreKey(story.PendingListStoreKey),
+		keyCategory:   sdk.NewKVStoreKey(category.StoreKey),
+		keyBacking:    sdk.NewKVStoreKey(backing.StoreKey),
+		keyChallenge:  sdk.NewKVStoreKey(challenge.StoreKey),
+		keyExpiration: sdk.NewKVStoreKey(expiration.StoreKey),
+		keyFee:        sdk.NewKVStoreKey("fee_collection"),
+		keyStake:      sdk.NewKVStoreKey(stake.StoreKey),
+		keyTruBank:    sdk.NewKVStoreKey(trubank.StoreKey),
+		api:           nil,
+		apiStarted:    false,
+		blockCtx:      nil,
+		blockHeader:   abci.Header{},
+		registrarKey:  loadRegistrarKey(),
 	}
 
 	// The ParamsKeeper handles parameter storage for the application
@@ -166,9 +162,7 @@ func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *T
 
 	app.storyKeeper = story.NewKeeper(
 		app.keyStory,
-		app.keyPendingStoryList,
-		app.keyExpiringStoryQueue,
-		app.keyChallengedStoryQueue,
+		app.keyStoryQueue,
 		app.categoryKeeper,
 		app.paramsKeeper.Subspace(story.StoreKey),
 		app.codec,
@@ -217,7 +211,7 @@ func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *T
 
 	app.expirationKeeper = expiration.NewKeeper(
 		app.keyExpiration,
-		app.keyExpiringStoryQueue,
+		app.keyStoryQueue,
 		app.stakeKeeper,
 		app.storyKeeper,
 		app.backingKeeper,
@@ -279,9 +273,7 @@ func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *T
 		app.keyIBC,
 		app.keyMain,
 		app.keyStory,
-		app.keyPendingStoryList,
-		app.keyExpiringStoryQueue,
-		app.keyChallengedStoryQueue,
+		app.keyStoryQueue,
 		app.keyTruBank,
 		app.keyArgument,
 	)
@@ -360,9 +352,7 @@ func (app *TruChain) BeginBlocker(ctx sdk.Context, req abci.RequestBeginBlock) a
 // EndBlocker reflects logic to run after all TXs are processed by the
 // application.
 func (app *TruChain) EndBlocker(ctx sdk.Context, _ abci.RequestEndBlock) abci.ResponseEndBlock {
-	app.storyKeeper.EndBlock(ctx)
 	app.expirationKeeper.EndBlock(ctx)
-	// app.votingKeeper.EndBlock(ctx)
 
 	return abci.ResponseEndBlock{}
 }

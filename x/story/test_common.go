@@ -49,8 +49,6 @@ func mockDB() (sdk.Context, Keeper, c.Keeper) {
 	sk := NewKeeper(
 		storyKey,
 		storyListKey,
-		expiredStoryQueueKey,
-		votingStoryQueueKey,
 		ck,
 		pk.Subspace(StoreKey),
 		codec)
