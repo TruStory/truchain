@@ -143,7 +143,7 @@ func (k Keeper) Create(
 	stakeID := k.GetNextID(ctx)
 
 	// creates an argument if it doesn't exist (new backing, not a like)
-	if argumentID == 0 {
+	if len(argument) > 0 {
 		argumentID, err = k.argumentKeeper.Create(ctx, stakeID, storyID, argument, creator)
 		if err != nil {
 			return 0, sdk.ErrInternal("Error creating argument")
