@@ -25,11 +25,11 @@ type RegistrationRequest struct {
 
 // RegistrationResponse is a JSON response body representing the result of registering a key
 type RegistrationResponse struct {
-	UserID   string `json:"user_id"`
+	UserID   string `json:"userId"`
 	Username string `json:"username"`
 	Fullname string `json:"fullname"`
 	Address  string `json:"address"`
-	Cookie   string `json:"cookie"`
+	Cookie   string `json:"authenticationCookie"`
 }
 
 // HandleRegistration takes a `RegistrationRequest` and returns a `RegistrationResponse`
