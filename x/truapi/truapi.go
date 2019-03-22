@@ -105,7 +105,7 @@ func (ta *TruAPI) RegisterOAuthRoutes() {
 	oauth1Config := &oauth1.Config{
 		ConsumerKey:    os.Getenv("TWITTER_API_KEY"),
 		ConsumerSecret: os.Getenv("TWITTER_API_SECRET"),
-		CallbackURL:    os.Getenv("CHAIN_HOST") + "/auth-twitter-callback",
+		CallbackURL:    os.Getenv("CHAIN_OAUTH_CALLBACK"),
 		Endpoint:       twitterOAuth1.AuthorizeEndpoint,
 	}
 
