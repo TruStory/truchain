@@ -39,7 +39,7 @@ func GetLoginCookie(twitterProfile *db.TwitterProfile) (*http.Cookie, error) {
 		HttpOnly: true,
 		Value:    value,
 		Expires:  time.Now().Add(time.Duration(AuthenticationExpiry) * time.Hour),
-		Domain:   os.Getenv("COOKIE_HOST"),
+		Domain:   os.Getenv("CHAIN_HOST"),
 	}
 
 	return &cookie, nil
@@ -53,7 +53,7 @@ func GetLogoutCookie() *http.Cookie {
 		HttpOnly: true,
 		Value:    "",
 		Expires:  time.Now(),
-		Domain:   os.Getenv("COOKIE_HOST"),
+		Domain:   os.Getenv("CHAIN_HOST"),
 		MaxAge:   0,
 	}
 
