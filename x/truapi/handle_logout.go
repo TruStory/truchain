@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/TruStory/truchain/x/cookies"
+	"github.com/TruStory/truchain/x/truapi/cookies"
 )
 
 // Logout deletes a session and redirects the logged in user to the correct page

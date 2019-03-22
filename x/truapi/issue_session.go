@@ -4,8 +4,8 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/TruStory/truchain/x/cookies"
 	"github.com/TruStory/truchain/x/db"
+	"github.com/TruStory/truchain/x/truapi/cookies"
 	"github.com/dghubble/gologin/twitter"
 )
 

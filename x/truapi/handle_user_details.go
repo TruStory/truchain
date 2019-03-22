@@ -5,7 +5,7 @@ import (
 	"net/http"
 
 	"github.com/TruStory/truchain/x/chttp"
-	"github.com/TruStory/truchain/x/cookies"
+	"github.com/TruStory/truchain/x/truapi/cookies"
 )
 
 // UserResponse is a JSON response body representing the result of User

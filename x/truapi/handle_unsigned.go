@@ -8,7 +8,7 @@ import (
 	"net/http"
 
 	"github.com/TruStory/truchain/x/chttp"
-	"github.com/TruStory/truchain/x/cookies"
+	"github.com/TruStory/truchain/x/truapi/cookies"
 )
 
 // HandleUnsigned takes a `HandleUnsignedRequest` and returns a `HandleUnsignedResponse`

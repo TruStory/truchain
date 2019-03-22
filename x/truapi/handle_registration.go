@@ -10,8 +10,8 @@ import (
 	"os"
 
 	"github.com/TruStory/truchain/x/chttp"
-	"github.com/TruStory/truchain/x/cookies"
 	"github.com/TruStory/truchain/x/db"
+	"github.com/TruStory/truchain/x/truapi/cookies"
 	"github.com/btcsuite/btcd/btcec"
 	"github.com/dghubble/go-twitter/twitter"
 	"github.com/dghubble/oauth1"
