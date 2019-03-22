@@ -73,8 +73,11 @@ func (ta *TruAPI) RegisterRoutes() {
 	api.Handle("/presigned", WrapHandler(ta.HandlePresigned))
 	api.Handle("/unsigned", WrapHandler(ta.HandleUnsigned))
 	api.Handle("/register", WrapHandler(ta.HandleRegistration))
-	api.Handle("/mock_register", WrapHandler(ta.HandleMockRegistration))
 	api.Handle("/user", WrapHandler(ta.HandleUserDetails))
+
+	if os.Getenv("MOCK_REGISTRATION") == "true" {
+		api.Handle("/mock_register", WrapHandler(ta.HandleMockRegistration))
+	}
 
 	ta.RegisterOAuthRoutes()
 

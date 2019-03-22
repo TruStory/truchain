@@ -17,7 +17,7 @@ const (
 
 	// AuthenticationExpiry is the period for which,
 	// the logged in user must be considered authenticated
-	AuthenticationExpiry int64 = 2 // in hours
+	AuthenticationExpiry int64 = 72 // in hours
 )
 
 // AuthenticatedUser denotes the data structure of the data inside the encrypted cookie
