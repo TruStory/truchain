@@ -146,7 +146,7 @@ func (k Keeper) Create(
 	if len(argument) > 0 {
 		argumentID, err = k.argumentKeeper.Create(ctx, stakeID, storyID, argument, creator)
 		if err != nil {
-			return 0, sdk.ErrInternal("Error creating argument")
+			return 0, err
 		}
 	}
 
