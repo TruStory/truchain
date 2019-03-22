@@ -8,8 +8,10 @@ import (
 )
 
 var supported = chttp.MsgTypes{
-	"SubmitStoryMsg":     story.SubmitStoryMsg{},
-	"BackStoryMsg":       backing.BackStoryMsg{},
-	"CreateChallengeMsg": challenge.CreateChallengeMsg{},
-	"FlagStoryMsg":       story.FlagStoryMsg{},
+	"SubmitStoryMsg":           story.SubmitStoryMsg{},
+	"BackStoryMsg":             backing.BackStoryMsg{},
+	"LikeBackingArgumentMsg":   backing.LikeBackingArgumentMsg{},
+	"CreateChallengeMsg":       challenge.CreateChallengeMsg{},
+	"LikeChallengeArgumentMsg": challenge.LikeChallengeArgumentMsg{},
+	"FlagStoryMsg":             story.FlagStoryMsg{},
 }
