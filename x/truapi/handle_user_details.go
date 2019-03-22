@@ -15,9 +15,7 @@ type UserResponse struct {
 
 // HandleUserDetails takes a `UserRequest` and returns a `UserResponse`
 func (ta *TruAPI) HandleUserDetails(r *http.Request) chttp.Response {
-
-	// Get the user context
-	truUser, err := cookies.GetUserFromCookie(r)
+	user, err := cookies.GetAuthenticatedUser(r)
 	if err == http.ErrNoCookie {
 		return chttp.SimpleErrorResponse(401, err)
 	}
@@ -26,7 +24,7 @@ func (ta *TruAPI) HandleUserDetails(r *http.Request) chttp.Response {
 	}
 
 	responseBytes, _ := json.Marshal(UserResponse{
-		Address: truUser["address"],
+		Address: user.Address,
 	})
 
 	return chttp.SimpleResponse(200, responseBytes)

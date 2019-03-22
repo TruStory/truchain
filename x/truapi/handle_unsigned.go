@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
-	"strconv"
 
 	"github.com/TruStory/truchain/x/chttp"
 	"github.com/TruStory/truchain/x/cookies"
@@ -27,22 +26,17 @@ func (ta *TruAPI) HandleUnsigned(r *http.Request) chttp.Response {
 		return chttp.SimpleErrorResponse(400, err)
 	}
 
-	// Get the user context
-	truUser, err := cookies.GetUserFromCookie(r)
+	// Get the authenticated user
+	user, err := cookies.GetAuthenticatedUser(r)
 	if err == http.ErrNoCookie {
 		return chttp.SimpleErrorResponse(401, err)
 	}
 	if err != nil {
-		panic(err)
-	}
-
-	twitterProfileID, err := strconv.ParseInt(truUser["twitter-profile-id"], 10, 64)
-	if err != nil {
-		panic(err)
+		return chttp.SimpleErrorResponse(401, err)
 	}
 
 	// Fetch keypair of the user
-	keyPair, err := ta.DBClient.KeyPairByTwitterProfileID(twitterProfileID)
+	keyPair, err := ta.DBClient.KeyPairByTwitterProfileID(user.TwitterProfileID)
 	if err != nil {
 		return chttp.SimpleErrorResponse(400, err)
 	}

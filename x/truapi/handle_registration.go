@@ -70,7 +70,7 @@ func (ta *TruAPI) HandleRegistration(r *http.Request) chttp.Response {
 		return chttp.SimpleErrorResponse(400, err)
 	}
 
-	cookieValue, err := cookies.SetUserToCookie(twitterProfile)
+	cookieValue, err := cookies.MakeLoginCookieValue(twitterProfile)
 	if err != nil {
 		return chttp.SimpleErrorResponse(400, err)
 	}

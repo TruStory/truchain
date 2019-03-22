@@ -5,69 +5,126 @@ import (
 	"errors"
 	"net/http"
 	"os"
-	"strconv"
 	"time"
 
 	"github.com/TruStory/truchain/x/db"
 	"github.com/gorilla/securecookie"
 )
 
-// GetUserFromCookie gets the user context from the request's cookie
-func GetUserFromCookie(r *http.Request) (map[string]string, error) {
-	truUser, err := r.Cookie("tru-user")
+const (
+	// UserCookieName contains the name of the cookie that stores the user
+	UserCookieName string = "tru-user"
+
+	// AuthenticationExpiry is the period for which,
+	// the logged in user must be considered authenticated
+	AuthenticationExpiry int64 = 2 // in hours
+)
+
+// AuthenticatedUser denotes the data structure of the data inside the encrypted cookie
+type AuthenticatedUser struct {
+	TwitterProfileID int64
+	Address          string
+	AuthenticatedAt  int64
+}
+
+// GetLoginCookie returns the http cookie that authenticates and identifies the given user
+func GetLoginCookie(twitterProfile *db.TwitterProfile) (*http.Cookie, error) {
+	value, err := MakeLoginCookieValue(twitterProfile)
 	if err != nil {
 		return nil, err
 	}
 
-	hashKey, err := hex.DecodeString(os.Getenv("COOKIE_HASH_KEY"))
-	if err != nil {
-		return nil, err
-	}
-	blockKey, err := hex.DecodeString(os.Getenv("COOKIE_ENCRYPT_KEY"))
-	if err != nil {
-		return nil, err
-	}
-	var s = securecookie.New(hashKey, blockKey)
-
-	decodedTruUser := make(map[string]string)
-	err = s.Decode("tru-user", truUser.Value, &decodedTruUser)
-	if err != nil {
-		return nil, err
+	cookie := http.Cookie{
+		Name:     UserCookieName,
+		HttpOnly: true,
+		Value:    value,
+		Expires:  time.Now().Add(time.Duration(AuthenticationExpiry) * time.Hour),
+		Domain:   os.Getenv("COOKIE_HOST"),
 	}
 
-	// if the cookie is stale
-	cookieTime, err := strconv.ParseInt(decodedTruUser["created_at"], 10, 64)
+	return &cookie, nil
+}
+
+// GetLogoutCookie returns the http cookie that overrides
+// the login cookie to practically delete it.
+func GetLogoutCookie() *http.Cookie {
+	cookie := http.Cookie{
+		Name:     UserCookieName,
+		HttpOnly: true,
+		Value:    "",
+		Expires:  time.Now(),
+		Domain:   os.Getenv("COOKIE_HOST"),
+		MaxAge:   0,
+	}
+
+	return &cookie
+}
+
+// GetAuthenticatedUser gets the user from the request's http cookie
+func GetAuthenticatedUser(r *http.Request) (*AuthenticatedUser, error) {
+	cookie, err := r.Cookie(UserCookieName)
 	if err != nil {
 		return nil, err
 	}
-	if time.Unix(cookieTime, 0).Before(time.Now().Add(-2 * time.Hour)) {
+
+	s, err := getSecureCookieInstance()
+	if err != nil {
+		return nil, err
+	}
+
+	user := &AuthenticatedUser{}
+	err = s.Decode(UserCookieName, cookie.Value, &user)
+	if err != nil {
+		return nil, err
+	}
+
+	if isStale(user) {
 		return nil, errors.New("Stale cookie found")
 	}
 
-	return decodedTruUser, nil
+	return user, nil
 }
 
-// SetUserToCookie takes a user and encodes it into a cookie value.
-func SetUserToCookie(twitterProfile *db.TwitterProfile) (string, error) {
-	// Saves and excrypts the context in the cookie
-	hashKey, err := hex.DecodeString(os.Getenv("COOKIE_HASH_KEY"))
+// MakeLoginCookieValue takes a user and encodes it into a cookie value.
+func MakeLoginCookieValue(twitterProfile *db.TwitterProfile) (string, error) {
+	s, err := getSecureCookieInstance()
 	if err != nil {
 		return "", err
 	}
-	blockKey, err := hex.DecodeString(os.Getenv("COOKIE_ENCRYPT_KEY"))
-	if err != nil {
-		return "", err
+
+	cookieValue := &AuthenticatedUser{
+		TwitterProfileID: twitterProfile.ID,
+		Address:          twitterProfile.Address,
+		AuthenticatedAt:  time.Now().Unix(),
 	}
-	s := securecookie.New(hashKey, blockKey)
-	cookieValue := map[string]string{
-		"twitter-profile-id": strconv.FormatInt(twitterProfile.ID, 10),
-		"address":            twitterProfile.Address,
-		"created_at":         strconv.FormatInt(time.Now().Unix(), 10),
-	}
-	encodedValue, err := s.Encode("tru-user", cookieValue)
+	encodedValue, err := s.Encode(UserCookieName, cookieValue)
 	if err != nil {
 		return "", err
 	}
 
 	return encodedValue, nil
+}
+
+// isStale returns whether the cookie older than what is accepted
+func isStale(user *AuthenticatedUser) bool {
+	return time.
+		// if the authentication time...
+		Unix(user.AuthenticatedAt, 0).
+		// ...exists before in past...
+		Before(
+			// ...than the valid period.
+			time.Now().Add(time.Duration(-1*AuthenticationExpiry) * time.Hour))
+}
+
+func getSecureCookieInstance() (*securecookie.SecureCookie, error) {
+	// Saves and excrypts the context in the cookie
+	hashKey, err := hex.DecodeString(os.Getenv("COOKIE_HASH_KEY"))
+	if err != nil {
+		return nil, err
+	}
+	blockKey, err := hex.DecodeString(os.Getenv("COOKIE_ENCRYPT_KEY"))
+	if err != nil {
+		return nil, err
+	}
+	return securecookie.New(hashKey, blockKey), nil
 }

@@ -3,7 +3,6 @@ package truapi
 import (
 	"net/http"
 	"os"
-	"time"
 
 	"github.com/TruStory/truchain/x/cookies"
 	"github.com/TruStory/truchain/x/db"
@@ -39,19 +38,11 @@ func IssueSession(ta *TruAPI) http.Handler {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 		}
 
-		cookieValue, err := cookies.SetUserToCookie(twitterProfile)
+		cookie, err := cookies.GetLoginCookie(twitterProfile)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 		}
-
-		cookie := http.Cookie{
-			Name:     "tru-user",
-			HttpOnly: true,
-			Value:    cookieValue,
-			Expires:  time.Now().Add(2 * time.Hour),
-			Domain:   os.Getenv("COOKIE_HOST"),
-		}
-		http.SetCookie(w, &cookie)
+		http.SetCookie(w, cookie)
 		http.Redirect(w, req, os.Getenv("OAUTH_SUCCESS_REDIR"), http.StatusFound)
 	}
 	return http.HandlerFunc(fn)
