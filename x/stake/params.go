@@ -70,3 +70,7 @@ func (k Keeper) SetParams(ctx sdk.Context, params Params) {
 	k.paramStore.SetParamSet(ctx, &params)
 	logger.Info(fmt.Sprintf("Loaded stake module params: %+v", params))
 }
+
+func (k Keeper) majorityPercent(ctx sdk.Context) sdk.Dec {
+	return k.GetParams(ctx).MajorityPercent
+}

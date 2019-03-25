@@ -49,7 +49,9 @@ func NewKeeper(
 // winner eq: total pool * (stake amount / total win pool)
 // winners: 400 * (100/300) = 133.33
 func (k Keeper) RedistributeStake(ctx sdk.Context, votes []Voter) sdk.Error {
-	var truePool, falsePool, rewardPool sdk.Int
+	truePool := sdk.ZeroInt()
+	falsePool := sdk.ZeroInt()
+	rewardPool := sdk.ZeroInt()
 	for _, v := range votes {
 		voteStake := v.Amount().Amount
 		rewardPool = rewardPool.Add(voteStake)
@@ -60,9 +62,15 @@ func (k Keeper) RedistributeStake(ctx sdk.Context, votes []Voter) sdk.Error {
 		}
 	}
 
-	// TOOD: add majority param
 	winPool := falsePool
-	if truePool.GT(falsePool) {
+	totalPool := truePool.Add(falsePool)
+	truePoolDec := sdk.NewDecFromInt(truePool)
+	truePoolPercentOfTotalPool := truePoolDec.QuoInt(totalPool)
+	falsePoolDec := sdk.NewDecFromInt(falsePool)
+	falsePoolPercentOfTotalPool := falsePoolDec.QuoInt(totalPool)
+
+	if truePoolPercentOfTotalPool.GTE(k.majorityPercent(ctx)) {
+		// true pool >= 51% total pool
 		winPool = truePool
 		for _, v := range votes {
 			if v.VoteChoice() == true {
@@ -72,13 +80,26 @@ func (k Keeper) RedistributeStake(ctx sdk.Context, votes []Voter) sdk.Error {
 				}
 			}
 		}
-	} else {
+	} else if falsePoolPercentOfTotalPool.GTE(k.majorityPercent(ctx)) {
+		// false pool >= 51% total pool
 		for _, v := range votes {
 			if v.VoteChoice() == false {
 				err := k.rewardStaker(ctx, v, winPool, rewardPool)
 				if err != nil {
 					return err
 				}
+			}
+		}
+	} else {
+		// 51% majority not met, return stake
+		for _, v := range votes {
+			transactionType := trubank.BackingReturned
+			if v.VoteChoice() == false {
+				transactionType = trubank.ChallengeReturned
+			}
+			_, err := k.truBankKeeper.AddCoin(ctx, v.Creator(), v.Amount(), v.StoryID(), transactionType, 0)
+			if err != nil {
+				return err
 			}
 		}
 	}
@@ -176,7 +197,7 @@ func (k Keeper) interest(
 func (k Keeper) rewardStaker(ctx sdk.Context, staker Voter, winPool sdk.Int, rewardPool sdk.Int) sdk.Error {
 	rewardAmount := rewardAmount(staker.Amount().Amount, winPool, rewardPool)
 	rewardCoin := sdk.NewCoin(app.StakeDenom, rewardAmount)
-	_, err := k.truBankKeeper.AddCoin(ctx, staker.Creator(), rewardCoin, staker.StoryID(), trubank.StakeReward, 0)
+	_, err := k.truBankKeeper.AddCoin(ctx, staker.Creator(), rewardCoin, staker.StoryID(), trubank.RewardPool, 0)
 	if err != nil {
 		return err
 	}

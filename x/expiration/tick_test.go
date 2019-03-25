@@ -4,6 +4,7 @@ import (
 	"testing"
 	"time"
 
+	app "github.com/TruStory/truchain/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/stretchr/testify/assert"
 	abci "github.com/tendermint/tendermint/abci/types"
@@ -21,7 +22,7 @@ func Test_handleExpiredStories(t *testing.T) {
 
 	ctx = ctx.WithBlockHeader(abci.Header{Time: time.Now()})
 	storyID := createFakeStory(ctx, storyKeeper)
-	amount := sdk.NewCoin("trusteak", sdk.NewInt(100000))
+	amount := sdk.NewCoin("trusteak", sdk.NewInt(10*app.Shanev))
 	argument := "test argument right here"
 	backer := fakeFundedCreator(ctx, bankKeeper)
 	challenger := fakeFundedCreator(ctx, bankKeeper)
@@ -38,7 +39,8 @@ func Test_handleExpiredStories(t *testing.T) {
 	k.storyQueue(ctx).Push(storyID)
 
 	// fake future block time for expiration
-	expireTime := time.Now().Add(24 * time.Hour)
+	// expireTime := time.Now().Add(24 * time.Hour)
+	expireTime := time.Now().Add(1 * time.Hour)
 	ctx = ctx.WithBlockHeader(abci.Header{Time: expireTime})
 
 	err = k.processStoryQueue(ctx)
@@ -46,9 +48,9 @@ func Test_handleExpiredStories(t *testing.T) {
 
 	// check expiration for backer
 	coins := bankKeeper.GetCoins(ctx, backer)
-	assert.Equal(t, "6670crypto,2000000000000trusteak", coins.String())
+	assert.Equal(t, "1999999913340trusteak", coins.String())
 
 	// check balance for challenger
 	coins = bankKeeper.GetCoins(ctx, challenger)
-	assert.Equal(t, "6670crypto,2000000000000trusteak", coins.String())
+	assert.Equal(t, "2000000313340trusteak", coins.String())
 }

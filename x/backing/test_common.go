@@ -104,6 +104,7 @@ func mockDB() (
 		sk,
 		pk.Subspace(argument.StoreKey),
 		codec)
+	argument.InitGenesis(ctx, argumentKeeper, argument.DefaultGenesisState())
 
 	bk := NewKeeper(
 		backingKey,

@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/TruStory/truchain/x/stake"
+	"github.com/TruStory/truchain/x/story"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
@@ -37,14 +38,14 @@ func (k Keeper) processStoryQueue(ctx sdk.Context) sdk.Error {
 		panic(err)
 	}
 
-	story, err := k.storyKeeper.Story(ctx, storyID)
+	currentStory, err := k.storyKeeper.Story(ctx, storyID)
 	if err != nil {
 		return err
 	}
 
-	logger.Info(fmt.Sprintf("Checking %s", story))
+	logger.Info(fmt.Sprintf("Checking %s", currentStory))
 
-	if ctx.BlockHeader().Time.Before(story.ExpireTime) {
+	if ctx.BlockHeader().Time.Before(currentStory.ExpireTime) {
 		// return and wait until next block to check if story has expired
 		return nil
 	}
@@ -80,6 +81,9 @@ func (k Keeper) processStoryQueue(ctx sdk.Context) sdk.Error {
 	if err != nil {
 		return err
 	}
+
+	currentStory.Status = story.Expired
+	k.storyKeeper.UpdateStory(ctx, currentStory)
 
 	// handle next expired story
 	return k.processStoryQueue(ctx)

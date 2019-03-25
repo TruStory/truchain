@@ -72,8 +72,6 @@ func TestChallengesByStoryID(t *testing.T) {
 	bankKeeper.AddCoins(ctx, creator2, sdk.Coins{amount})
 
 	k.Create(ctx, storyID, amount, 0, argument, creator, false)
-	_, err := k.Create(ctx, storyID, amount, 0, argument, creator2, false)
-	assert.NotNil(t, err)
 
 	story, _ := sk.Story(ctx, storyID)
 	challenges, _ := k.ChallengesByStoryID(ctx, story.ID)
@@ -110,9 +108,6 @@ func TestTally(t *testing.T) {
 	bankKeeper.AddCoins(ctx, creator2, sdk.Coins{amount})
 
 	k.Create(ctx, storyID, amount, 0, argument, creator, false)
-	_, err := k.Create(ctx, storyID, amount, 0, argument, creator2, false)
-	assert.NotNil(t, err)
-
 	falseVotes, _ := k.Tally(ctx, storyID)
 
 	assert.Equal(t, 1, len(falseVotes))
