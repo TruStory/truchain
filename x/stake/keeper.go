@@ -125,10 +125,9 @@ func (k Keeper) DistributeInterest(ctx sdk.Context, votes []Voter) sdk.Error {
 	return nil
 }
 
-// ValidateAmount validates the length of an argument
+// ValidateAmount validates the stake amount
 func (k Keeper) ValidateAmount(ctx sdk.Context, amount sdk.Coin) sdk.Error {
 	maxAmount := k.GetParams(ctx).MaxAmount
-
 	if maxAmount.IsLT(amount) {
 		return ErrInvalidStakeAmount()
 	}

@@ -17,11 +17,6 @@ func (k Keeper) EndBlock(ctx sdk.Context) sdk.Tags {
 	return sdk.EmptyTags()
 }
 
-// processStoryQueue recursively process expired stories.
-// If a story id gets in this queue, it means that it never went
-// through a voting period. Therefore, rewards are distributed to
-// backers, and funds are returned to challengers. There are no
-// voters because the voting period never started.
 func (k Keeper) processStoryQueue(ctx sdk.Context) sdk.Error {
 	logger := ctx.Logger().With("module", StoreKey)
 
@@ -29,7 +24,7 @@ func (k Keeper) processStoryQueue(ctx sdk.Context) sdk.Error {
 
 	if storyQueue.IsEmpty() {
 		// done processing all expired stories
-		// terminatex
+		// terminate
 		return nil
 	}
 
@@ -72,14 +67,16 @@ func (k Keeper) processStoryQueue(ctx sdk.Context) sdk.Error {
 		votes = append(votes, challenge)
 	}
 
-	err = k.stakeKeeper.RedistributeStake(ctx, votes)
-	if err != nil {
-		return err
-	}
+	if len(votes) > 0 {
+		err = k.stakeKeeper.RedistributeStake(ctx, votes)
+		if err != nil {
+			return err
+		}
 
-	err = k.stakeKeeper.DistributeInterest(ctx, votes)
-	if err != nil {
-		return err
+		err = k.stakeKeeper.DistributeInterest(ctx, votes)
+		if err != nil {
+			return err
+		}
 	}
 
 	currentStory.Status = story.Expired

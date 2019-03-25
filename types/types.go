@@ -31,6 +31,9 @@ var InitialCredAmount = sdk.NewInt(1000000000)
 // InitialTruStake is an `sdk.Coins` representing the balance a new user is granted upon registration
 var InitialTruStake = sdk.Coin{Amount: sdk.NewInt(1000000000000), Denom: StakeDenom}
 
+// LikeCredAmount is the amount of cred for a like action
+var LikeCredAmount = sdk.NewInt(1 * Shanev)
+
 // RegistrationFee is an `auth.StdFee` representing the coin and gas cost of registering a new account
 // TODO: Use more accurate gas estimate [notduncansmith]
 var RegistrationFee = auth.StdFee{

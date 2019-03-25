@@ -3,12 +3,10 @@ package backing
 import (
 	"math"
 	"testing"
-	"time"
 
 	app "github.com/TruStory/truchain/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/stretchr/testify/assert"
-	abci "github.com/tendermint/tendermint/abci/types"
 )
 
 var fiver = sdk.Coin{
@@ -81,25 +79,6 @@ func TestBackingsByStoryIDAndCreator(t *testing.T) {
 	assert.Equal(t, int64(1), backing.ID())
 }
 
-func TestTally(t *testing.T) {
-	ctx, k, sk, ck, bankKeeper, _ := mockDB()
-	storyID := createFakeStory(ctx, sk, ck)
-
-	amount := sdk.NewCoin(app.StakeDenom, sdk.NewInt(5000000))
-	argument := "cool story brew"
-	creator := sdk.AccAddress([]byte{1, 2})
-	bankKeeper.AddCoins(ctx, creator, sdk.Coins{amount})
-	k.Create(ctx, storyID, amount, 0, argument, creator, false)
-
-	creator2 := sdk.AccAddress([]byte{2, 3})
-	bankKeeper.AddCoins(ctx, creator2, sdk.Coins{amount})
-	k.Create(ctx, storyID, amount, 0, argument, creator2, false)
-
-	yes, _, _ := k.Tally(ctx, storyID)
-
-	assert.Equal(t, 2, len(yes))
-}
-
 func TestTotalBacking(t *testing.T) {
 	ctx, k, sk, ck, bankKeeper, _ := mockDB()
 	storyID := createFakeStory(ctx, sk, ck)
@@ -156,29 +135,4 @@ func TestDuplicateBacking(t *testing.T) {
 	assert.NotNil(t, backingID)
 	_, err := bk.Create(ctx, storyID, amount, 0, argument, creator, false)
 	assert.Equal(t, ErrDuplicate(storyID, creator).Code(), err.Code())
-}
-
-func Test_BackingDelete(t *testing.T) {
-	ctx, k, storyKeeper, ck, bankKeeper, am := mockDB()
-	ctx = ctx.WithBlockHeader(abci.Header{Time: time.Now()})
-	storyID := createFakeStory(ctx, storyKeeper, ck)
-	amount := sdk.NewCoin("trusteak", sdk.NewInt(10000000000))
-	argument := "test argument right here"
-	totalCoins := sdk.Coins{sdk.NewCoin(app.StakeDenom, sdk.NewInt(2000000000000))}
-	backer := createFakeFundedAccount(ctx, am, totalCoins)
-
-	id, err := k.Create(
-		ctx, storyID, amount, 0, argument, backer, false)
-	assert.NoError(t, err)
-
-	backing, err := k.Backing(ctx, id)
-	assert.NoError(t, err)
-	assert.NotNil(t, backing.Vote)
-	assert.Equal(t, totalCoins.Minus(sdk.Coins{amount}), bankKeeper.GetCoins(ctx, backer), "coins should have been deducted")
-
-	k.Delete(ctx, backing)
-
-	_, err = k.Backing(ctx, id)
-	assert.Equal(t, CodeNotFound, err.Code())
-	assert.Equal(t, totalCoins, bankKeeper.GetCoins(ctx, backer), "coins should have been added back")
 }

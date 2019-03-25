@@ -1,11 +1,6 @@
 package argument
 
 import (
-	"crypto/rand"
-	"fmt"
-	"net/url"
-	"time"
-
 	"github.com/TruStory/truchain/x/category"
 	"github.com/TruStory/truchain/x/stake"
 	"github.com/TruStory/truchain/x/story"
@@ -95,30 +90,7 @@ func mockDB() (
 		storyKeeper,
 		pk.Subspace(StoreKey),
 		codec)
+	InitGenesis(ctx, argumentKeeper, DefaultGenesisState())
 
 	return ctx, argumentKeeper, storyKeeper, bankKeeper
-}
-
-func createFakeStory(ctx sdk.Context, sk story.WriteKeeper) int64 {
-	body := "TruStory can be goverened by it's stakeholders."
-	creator := sdk.AccAddress([]byte{1, 2})
-	storyType := story.Default
-	source := url.URL{}
-
-	ctx = ctx.WithBlockHeader(abci.Header{Time: time.Now().UTC()})
-	catID := int64(1)
-	storyID, err := sk.Create(ctx, body, catID, creator, source, storyType)
-	fmt.Println(err)
-
-	return storyID
-}
-
-func fakeFundedCreator(ctx sdk.Context, k bank.Keeper) sdk.AccAddress {
-	bz := make([]byte, 4)
-	rand.Read(bz)
-	creator := sdk.AccAddress(bz)
-	amount := sdk.NewCoin("trusteak", sdk.NewInt(2000000000000))
-	k.AddCoins(ctx, creator, sdk.Coins{amount})
-
-	return creator
 }

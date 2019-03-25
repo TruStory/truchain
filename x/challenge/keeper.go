@@ -36,7 +36,6 @@ type ReadKeeper interface {
 		storyID int64,
 		creator sdk.AccAddress) (challenge Challenge, err sdk.Error)
 	GetParams(ctx sdk.Context) Params
-	Tally(ctx sdk.Context, storyID int64) (falseVotes []Challenge, err sdk.Error)
 	TotalChallengeAmount(ctx sdk.Context, storyID int64) (
 		totalCoin sdk.Coin, err sdk.Error)
 }
@@ -53,8 +52,6 @@ type WriteKeeper interface {
 		argument string,
 		creator sdk.AccAddress,
 		toggled bool) (int64, sdk.Error)
-	Update(ctx sdk.Context, challenge Challenge)
-	Delete(ctx sdk.Context, challenge Challenge) sdk.Error
 	SetParams(ctx sdk.Context, params Params)
 	LikeArgument(ctx sdk.Context, argumentID int64, creator sdk.AccAddress, amount sdk.Coin) (int64, sdk.Error)
 }
@@ -142,12 +139,9 @@ func (k Keeper) Create(
 
 	stakeID := k.GetNextID(ctx)
 
-	// creates an argument if it doesn't exist (new backing, not a like)
-	if len(argument) > 0 {
-		argumentID, err = k.argumentKeeper.Create(ctx, stakeID, storyID, argument, creator)
-		if err != nil {
-			return 0, err
-		}
+	argumentID, err = k.argumentKeeper.Create(ctx, stakeID, storyID, argumentID, argument, creator)
+	if err != nil {
+		return 0, err
 	}
 
 	// create implicit false vote
@@ -156,7 +150,6 @@ func (k Keeper) Create(
 		StoryID:    storyID,
 		Amount:     amount,
 		ArgumentID: argumentID,
-		Weight:     sdk.NewInt(0),
 		Creator:    creator,
 		Vote:       false,
 		Timestamp:  app.NewTimestamp(ctx.BlockHeader()),
@@ -261,36 +254,18 @@ func (k Keeper) LikeArgument(ctx sdk.Context, argumentID int64, creator sdk.AccA
 		return 0, err
 	}
 
-	// amount of cred for a like
-	cred := sdk.NewInt(1 * app.Shanev)
-
-	_, err = k.trubankKeeper.MintAndAddCoin(ctx, challenge.Creator(), story.CategoryID, story.ID, trubank.Like, cred)
+	_, err = k.trubankKeeper.MintAndAddCoin(
+		ctx,
+		challenge.Creator(),
+		story.CategoryID,
+		story.ID,
+		trubank.Like,
+		app.LikeCredAmount)
 	if err != nil {
 		return 0, err
 	}
 
 	return challengeID, nil
-}
-
-// Tally challenges for voting
-func (k Keeper) Tally(
-	ctx sdk.Context, storyID int64) (falseVotes []Challenge, err sdk.Error) {
-
-	err = k.challengeList.Map(ctx, k, storyID, func(challengeID int64) sdk.Error {
-		challenge, err := k.Challenge(ctx, challengeID)
-		if err != nil {
-			return err
-		}
-
-		if challenge.VoteChoice() == true {
-			return ErrInvalidVote()
-		}
-		falseVotes = append(falseVotes, challenge)
-
-		return nil
-	})
-
-	return
 }
 
 // TotalChallengeAmount returns the total of all backings
@@ -317,39 +292,6 @@ func (k Keeper) TotalChallengeAmount(ctx sdk.Context, storyID int64) (
 	logger.Info(fmt.Sprintf("Total Challenge Amount %s", totalAmount))
 
 	return totalAmount, nil
-}
-
-// Update updates the challenge vote
-func (k Keeper) Update(ctx sdk.Context, challenge Challenge) {
-	newChallenge := Challenge{
-		Vote: challenge.Vote,
-	}
-
-	k.setChallenge(ctx, newChallenge)
-}
-
-// Delete deletes a challenge and restores coins to the user.
-func (k Keeper) Delete(ctx sdk.Context, challenge Challenge) sdk.Error {
-	challengeIDKey := k.GetIDKey(challenge.ID())
-
-	if !k.GetStore(ctx).Has(challengeIDKey) {
-		return ErrNotFound(challenge.ID())
-	}
-
-	// removes challenge
-	k.GetStore(ctx).Delete(
-		k.GetIDKey(challenge.ID()))
-
-	// restore coins
-	_, err := k.trubankKeeper.AddCoin(ctx, challenge.Creator(), challenge.Amount(), challenge.StoryID(), trubank.ChallengeReturned, challenge.ID())
-	if err != nil {
-		return err
-	}
-
-	// removes challenge association from the backing list
-	k.challengeList.Delete(ctx, k, challenge.StoryID(), challenge.Creator())
-
-	return nil
 }
 
 func (k Keeper) setChallenge(ctx sdk.Context, challenge Challenge) {

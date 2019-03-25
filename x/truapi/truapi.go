@@ -2,6 +2,7 @@ package truapi
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"net/url"
 	"os"
@@ -165,7 +166,6 @@ func (ta *TruAPI) RegisterResolvers() {
 	ta.GraphQLClient.RegisterObjectResolver("Backing", backing.Backing{}, map[string]interface{}{
 		"amount":    func(ctx context.Context, q backing.Backing) sdk.Coin { return q.Amount() },
 		"argument":  func(ctx context.Context, q backing.Backing) argument.Argument { return getArgument(ctx, q.ArgumentID) },
-		"weight":    func(ctx context.Context, q backing.Backing) string { return q.Weight().String() },
 		"vote":      func(ctx context.Context, q backing.Backing) bool { return q.VoteChoice() },
 		"creator":   func(ctx context.Context, q backing.Backing) users.User { return getUser(ctx, q.Creator()) },
 		"timestamp": func(ctx context.Context, q backing.Backing) app.Timestamp { return q.Timestamp() },
@@ -187,7 +187,6 @@ func (ta *TruAPI) RegisterResolvers() {
 		"argument": func(ctx context.Context, q challenge.Challenge) argument.Argument {
 			return getArgument(ctx, q.ArgumentID)
 		},
-		"weight":    func(ctx context.Context, q challenge.Challenge) string { return q.Weight().String() },
 		"vote":      func(ctx context.Context, q challenge.Challenge) bool { return q.VoteChoice() },
 		"creator":   func(ctx context.Context, q challenge.Challenge) users.User { return getUser(ctx, q.Creator()) },
 		"timestamp": func(ctx context.Context, q challenge.Challenge) app.Timestamp { return q.Timestamp() },
@@ -207,8 +206,9 @@ func (ta *TruAPI) RegisterResolvers() {
 		"maxInterestRate":   func(_ context.Context, p params.Params) string { return p.StakeParams.MaxInterestRate.String() },
 		"minArgumentLength": func(_ context.Context, p params.Params) int { return p.ArgumentParams.MinArgumentLength },
 		"maxArgumentLength": func(_ context.Context, p params.Params) int { return p.ArgumentParams.MaxArgumentLength },
-
-		"storyExpireDuration": func(_ context.Context, p params.Params) string { return p.StoryParams.ExpireDuration.String() },
+		"storyExpireDuration": func(_ context.Context, p params.Params) string {
+			return fmt.Sprintf("%d", p.StoryParams.ExpireDuration)
+		},
 		"storyMinLength":      func(_ context.Context, p params.Params) int { return p.StoryParams.MinStoryLength },
 		"storyMaxLength":      func(_ context.Context, p params.Params) int { return p.StoryParams.MaxStoryLength },
 		"storyVotingDuration": func(_ context.Context, p params.Params) string { return p.StoryParams.VotingDuration.String() },

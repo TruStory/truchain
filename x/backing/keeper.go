@@ -35,9 +35,6 @@ type ReadKeeper interface {
 	BackingsByStoryID(
 		ctx sdk.Context, storyID int64) (backings []Backing, err sdk.Error)
 
-	Tally(ctx sdk.Context, storyID int64) (
-		trueVotes []Backing, falseVotes []Backing, err sdk.Error)
-
 	TotalBackingAmount(
 		ctx sdk.Context, storyID int64) (totalAmount sdk.Coin, err sdk.Error)
 }
@@ -54,8 +51,6 @@ type WriteKeeper interface {
 		argument string,
 		creator sdk.AccAddress,
 		toggled bool) (int64, sdk.Error)
-	Update(ctx sdk.Context, backing Backing)
-	Delete(ctx sdk.Context, backing Backing) sdk.Error
 	LikeArgument(ctx sdk.Context, argumentID int64, creator sdk.AccAddress, amount sdk.Coin) (int64, sdk.Error)
 }
 
@@ -135,12 +130,9 @@ func (k Keeper) Create(
 
 	stakeID := k.GetNextID(ctx)
 
-	// creates an argument if it doesn't exist (new backing, not a like)
-	if len(argument) > 0 {
-		argumentID, err = k.argumentKeeper.Create(ctx, stakeID, storyID, argument, creator)
-		if err != nil {
-			return 0, err
-		}
+	argumentID, err = k.argumentKeeper.Create(ctx, stakeID, storyID, argumentID, argument, creator)
+	if err != nil {
+		return 0, err
 	}
 
 	vote := stake.Vote{
@@ -148,7 +140,6 @@ func (k Keeper) Create(
 		StoryID:    storyID,
 		Amount:     amount,
 		ArgumentID: argumentID,
-		Weight:     sdk.NewInt(0),
 		Creator:    creator,
 		Vote:       true,
 		Timestamp:  app.NewTimestamp(ctx.BlockHeader()),
@@ -168,8 +159,7 @@ func (k Keeper) Create(
 		return
 	}
 
-	logger.Info(fmt.Sprintf(
-		"Backed story %d by user %s", storyID, creator.String()))
+	logger.Info(fmt.Sprintf("Backed story %d by user %s", storyID, creator))
 
 	return backing.ID(), nil
 }
@@ -198,47 +188,18 @@ func (k Keeper) LikeArgument(ctx sdk.Context, argumentID int64, creator sdk.AccA
 		return 0, err
 	}
 
-	// amount of cred for a like
-	cred := sdk.NewInt(1 * app.Shanev)
-
-	_, err = k.trubankKeeper.MintAndAddCoin(ctx, backing.Creator(), story.CategoryID, story.ID, trubank.Like, cred)
+	_, err = k.trubankKeeper.MintAndAddCoin(
+		ctx,
+		backing.Creator(),
+		story.CategoryID,
+		story.ID,
+		trubank.Like,
+		app.LikeCredAmount)
 	if err != nil {
 		return 0, err
 	}
 
 	return backingID, nil
-}
-
-// Update updates an existing backing
-func (k Keeper) Update(ctx sdk.Context, backing Backing) {
-	newBacking := Backing{
-		Vote: backing.Vote,
-	}
-
-	k.setBacking(ctx, newBacking)
-}
-
-// Delete deletes a backing and restores coins to the user.
-func (k Keeper) Delete(ctx sdk.Context, backing Backing) sdk.Error {
-
-	backingIDKey := k.GetIDKey(backing.ID())
-
-	if !k.GetStore(ctx).Has(backingIDKey) {
-		return ErrNotFound(backing.ID())
-	}
-
-	// removes backing
-	k.GetStore(ctx).Delete(backingIDKey)
-
-	_, err := k.trubankKeeper.AddCoin(ctx, backing.Creator(), backing.Amount(), backing.StoryID(), trubank.BackingReturned, backing.ID())
-	if err != nil {
-		return err
-	}
-
-	// removes backing association from the backing list
-	k.backingStoryList.Delete(ctx, k, backing.StoryID(), backing.Creator())
-
-	return nil
 }
 
 // Backing gets the backing at the current index from the KVStore
@@ -280,28 +241,6 @@ func (k Keeper) BackingByStoryIDAndCreator(
 
 	backingID := k.backingStoryList.Get(ctx, k, storyID, creator)
 	backing, err = k.Backing(ctx, backingID)
-
-	return
-}
-
-// Tally backings for voting
-func (k Keeper) Tally(
-	ctx sdk.Context, storyID int64) (
-	trueVotes []Backing, falseVotes []Backing, err sdk.Error) {
-
-	err = k.backingStoryList.Map(ctx, k, storyID, func(backingID int64) sdk.Error {
-		backing, err := k.Backing(ctx, backingID)
-		if err != nil {
-			return err
-		}
-		if backing.VoteChoice() == true {
-			trueVotes = append(trueVotes, backing)
-		} else {
-			falseVotes = append(falseVotes, backing)
-		}
-
-		return nil
-	})
 
 	return
 }

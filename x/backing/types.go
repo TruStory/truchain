@@ -33,11 +33,6 @@ func (b Backing) Creator() sdk.AccAddress {
 	return b.Vote.Creator
 }
 
-// Weight implements `Voter.Weight`
-func (b Backing) Weight() sdk.Int {
-	return b.Vote.Weight
-}
-
 // VoteChoice implements `Voter.VoteChoice`
 func (b Backing) VoteChoice() bool {
 	return b.Vote.Vote

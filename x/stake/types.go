@@ -22,10 +22,8 @@ type Voter interface {
 	ID() int64
 	StoryID() int64
 	Amount() sdk.Coin
-	Weight() sdk.Int
 	Creator() sdk.AccAddress
 	VoteChoice() bool
-	UpdateWeight(sdk.Int)
 	Timestamp() app.Timestamp
 }
 
@@ -36,30 +34,11 @@ type Vote struct {
 	StoryID    int64          `json:"story_id"`
 	Amount     sdk.Coin       `json:"amount"`
 	ArgumentID int64          `json:"argument_id,omitempty"`
-	Weight     sdk.Int        `json:"weight,omitempty"`
 	Creator    sdk.AccAddress `json:"creator"`
 	Vote       bool           `json:"vote"`
 	Timestamp  app.Timestamp  `json:"timestamp"`
 }
 
-// UpdateWeight mutates the vote weight as a result of weighted voting
-func (v *Vote) UpdateWeight(weight sdk.Int) {
-	v.Weight = weight
-}
-
 func (v Vote) String() string {
 	return fmt.Sprintf("Vote<%v %t>", v.Amount, v.Vote)
-}
-
-// NewVote creates a new Vote type with defaults
-func NewVote(
-	id int64,
-	storyID int64,
-	amount sdk.Coin,
-	weight sdk.Int,
-	creator sdk.AccAddress,
-	vote bool,
-	timestamp app.Timestamp) Vote {
-
-	return Vote{id, storyID, amount, 0, sdk.NewInt(0), creator, vote, timestamp}
 }

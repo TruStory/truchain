@@ -14,6 +14,7 @@ const (
 	CodeNotFound          sdk.CodeType = 1502
 	CodeArgumentTooShort  sdk.CodeType = 1503
 	CodeArgumentTooLong   sdk.CodeType = 1504
+	CodeInvalid           sdk.CodeType = 1505
 )
 
 // ErrInvalidArgumentID throws an error on invalid title
@@ -44,4 +45,9 @@ func ErrArgumentTooLongMsg(len int) sdk.Error {
 		DefaultCodespace,
 		CodeArgumentTooLong,
 		fmt.Sprintf(msg, len))
+}
+
+// ErrInvalidArgument throws when are argument is invalid
+func ErrInvalidArgument(msg string) sdk.Error {
+	return sdk.NewError(DefaultCodespace, CodeInvalid, "Invalid argument: "+msg)
 }

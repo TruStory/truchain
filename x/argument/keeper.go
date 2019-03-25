@@ -55,10 +55,20 @@ func (k Keeper) Create(
 	ctx sdk.Context,
 	stakeID int64,
 	storyID int64,
+	argumentID int64,
 	body string,
 	creator sdk.AccAddress) (int64, sdk.Error) {
 
-	err := k.validateArgument(ctx, body)
+	switch {
+	case len(body) == 0 && argumentID == 0:
+		return 0, ErrInvalidArgument("Must have either body or argumentID")
+	case len(body) > 0 && argumentID > 0:
+		return 0, ErrInvalidArgument("Cannot have both body and argumentID")
+	case len(body) == 0 && argumentID > 0:
+		return argumentID, nil
+	}
+
+	err := k.validateArgumentBody(ctx, body)
 	if err != nil {
 		return 0, err
 	}
@@ -132,7 +142,7 @@ func (k Keeper) likesKey(argumentID int64, creator sdk.AccAddress) []byte {
 	return []byte(key)
 }
 
-func (k Keeper) validateArgument(ctx sdk.Context, argument string) sdk.Error {
+func (k Keeper) validateArgumentBody(ctx sdk.Context, argument string) sdk.Error {
 	len := len([]rune(argument))
 	minArgumentLength := k.GetParams(ctx).MinArgumentLength
 	maxArgumentLength := k.GetParams(ctx).MaxArgumentLength

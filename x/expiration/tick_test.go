@@ -39,8 +39,7 @@ func Test_handleExpiredStories(t *testing.T) {
 	k.storyQueue(ctx).Push(storyID)
 
 	// fake future block time for expiration
-	// expireTime := time.Now().Add(24 * time.Hour)
-	expireTime := time.Now().Add(1 * time.Hour)
+	expireTime := time.Now().Add(100 * time.Hour)
 	ctx = ctx.WithBlockHeader(abci.Header{Time: expireTime})
 
 	err = k.processStoryQueue(ctx)
@@ -48,9 +47,10 @@ func Test_handleExpiredStories(t *testing.T) {
 
 	// check expiration for backer
 	coins := bankKeeper.GetCoins(ctx, backer)
-	assert.Equal(t, "1999999913340trusteak", coins.String())
+	expectedCoin := sdk.NewCoin("trusteak", sdk.NewInt(20*app.Shanev))
+	assert.True(t, coins.IsAllGT(sdk.Coins{expectedCoin}))
 
 	// check balance for challenger
 	coins = bankKeeper.GetCoins(ctx, challenger)
-	assert.Equal(t, "2000000313340trusteak", coins.String())
+	assert.True(t, coins.IsAllGT(sdk.Coins{expectedCoin}))
 }

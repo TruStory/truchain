@@ -70,7 +70,7 @@ func (k Keeper) minInterestRate(ctx sdk.Context) (res sdk.Dec) {
 
 // SetParams sets the params for the expiration module
 func (k Keeper) SetParams(ctx sdk.Context, params Params) {
-	logger := ctx.Logger().With("module", "expiration")
+	logger := ctx.Logger().With("module", StoreKey)
 	k.paramStore.SetParamSet(ctx, &params)
 	logger.Info(fmt.Sprintf("Loaded expiration module params: %+v", params))
 }
