@@ -70,7 +70,7 @@ test_cover: set_registrar set_env_vars
 update_deps:
 	@echo "--> Running dep ensure"
 	@rm -rf .vendor-new
-	@dep ensure -v
+	@dep ensure -v -vendor-only
 
 .PHONY: benchmark buidl build check dep_graph test test_cover update_deps
 
