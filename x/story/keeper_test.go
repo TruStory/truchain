@@ -45,32 +45,18 @@ func TestAddGetStory(t *testing.T) {
 	assert.Equal(t, "trudex", coinName)
 }
 
-func TestChallenge(t *testing.T) {
-	ctx, sk, ck := mockDB()
-
-	storyID := createFakeStory(ctx, sk, ck)
-	story, _ := sk.Story(ctx, storyID)
-	assert.Equal(t, Pending, story.Status, "state should match")
-
-	sk.StartVotingPeriod(ctx, storyID)
-	story, _ = sk.Story(ctx, storyID)
-	assert.Equal(t, Challenged, story.Status, "state should match")
-}
-
 func TestUpdateStory(t *testing.T) {
 	ctx, sk, ck := mockDB()
 
 	storyID := createFakeStory(ctx, sk, ck)
 	story, _ := sk.Story(ctx, storyID)
 
-	story.Status = Challenged
 	story.Body = "akjdsfhadskf"
 
 	sk.UpdateStory(ctx, story)
 	updatedStory, _ := sk.Story(ctx, storyID)
 
 	assert.Equal(t, story.Body, updatedStory.Body, "should match")
-	assert.Equal(t, story.Status, updatedStory.Status, "should match")
 }
 
 func TestGetStoriesWithCategory(t *testing.T) {
@@ -94,14 +80,9 @@ func TestFeedWithCategory(t *testing.T) {
 		createFakeStory(ctx, sk, ck)
 	}
 
-	sk.StartVotingPeriod(ctx, 2)
-	sk.StartVotingPeriod(ctx, 4)
-
 	stories, _ := sk.FeedByCategoryID(ctx, 1)
 
 	assert.Equal(t, 5, len(stories))
-	assert.Equal(t, Challenged, stories[0].Status)
-	assert.Equal(t, Challenged, stories[1].Status)
 	assert.Equal(t, Pending, stories[2].Status)
 }
 

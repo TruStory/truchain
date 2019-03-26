@@ -3,45 +3,53 @@ package expiration
 import (
 	"fmt"
 
-	app "github.com/TruStory/truchain/types"
+	"github.com/TruStory/truchain/x/stake"
+	"github.com/TruStory/truchain/x/story"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
 // EndBlock is called at the end of every block
 func (k Keeper) EndBlock(ctx sdk.Context) sdk.Tags {
-	err := k.processExpiredStoryQueue(ctx)
+	err := k.processStoryQueue(ctx)
 	if err != nil {
 		panic(err)
 	}
 	return sdk.EmptyTags()
 }
 
-// processExpiredStoryQueue recursively process expired stories.
-// If a story id gets in this queue, it means that it never went
-// through a voting period. Therefore, rewards are distributed to
-// backers, and funds are returned to challengers. There are no
-// voters because the voting period never started.
-func (k Keeper) processExpiredStoryQueue(ctx sdk.Context) sdk.Error {
-	logger := ctx.Logger().With("module", "expiration")
+func (k Keeper) processStoryQueue(ctx sdk.Context) sdk.Error {
+	logger := ctx.Logger().With("module", StoreKey)
 
-	expiringStoryQueue := k.expiringStoryQueue(ctx)
+	storyQueue := k.storyQueue(ctx)
 
-	if expiringStoryQueue.IsEmpty() {
+	if storyQueue.IsEmpty() {
 		// done processing all expired stories
 		// terminate
 		return nil
 	}
 
 	var storyID int64
-	if err := expiringStoryQueue.Peek(&storyID); err != nil {
+	if err := storyQueue.Peek(&storyID); err != nil {
 		panic(err)
+	}
+
+	currentStory, err := k.storyKeeper.Story(ctx, storyID)
+	if err != nil {
+		return err
+	}
+
+	logger.Info(fmt.Sprintf("Checking %s", currentStory))
+
+	if ctx.BlockHeader().Time.Before(currentStory.ExpireTime) {
+		// return and wait until next block to check if story has expired
+		return nil
 	}
 
 	logger.Info(fmt.Sprintf("Handling expired story id: %d", storyID))
 
-	expiringStoryQueue.Pop()
+	storyQueue.Pop()
 
-	var votes []app.Voter
+	var votes []stake.Voter
 
 	backings, err := k.backingKeeper.BackingsByStoryID(ctx, storyID)
 	if err != nil {
@@ -59,16 +67,21 @@ func (k Keeper) processExpiredStoryQueue(ctx sdk.Context) sdk.Error {
 		votes = append(votes, challenge)
 	}
 
-	story, err := k.storyKeeper.Story(ctx, storyID)
-	if err != nil {
-		return err
+	if len(votes) > 0 {
+		err = k.stakeKeeper.RedistributeStake(ctx, votes)
+		if err != nil {
+			return err
+		}
+
+		err = k.stakeKeeper.DistributeInterest(ctx, votes)
+		if err != nil {
+			return err
+		}
 	}
 
-	err = k.stakeKeeper.DistributePrincipalAndInterest(ctx, votes, story.CategoryID)
-	if err != nil {
-		return err
-	}
+	currentStory.Status = story.Expired
+	k.storyKeeper.UpdateStory(ctx, currentStory)
 
 	// handle next expired story
-	return k.processExpiredStoryQueue(ctx)
+	return k.processStoryQueue(ctx)
 }

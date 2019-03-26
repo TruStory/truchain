@@ -1,4 +1,4 @@
-package vote
+package argument
 
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -16,7 +16,7 @@ func DefaultGenesisState() GenesisState {
 	}
 }
 
-// InitGenesis initializes state from genesis file
-func InitGenesis(ctx sdk.Context, voteKeeper WriteKeeper, data GenesisState) {
-	voteKeeper.SetParams(ctx, data.Params)
+// InitGenesis initializes argument state from genesis file
+func InitGenesis(ctx sdk.Context, argumentKeeper Keeper, data GenesisState) {
+	argumentKeeper.SetParams(ctx, data.Params)
 }

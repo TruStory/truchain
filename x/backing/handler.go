@@ -11,13 +11,13 @@ func NewHandler(k WriteKeeper) sdk.Handler {
 		switch msg := msg.(type) {
 		case BackStoryMsg:
 			return handleBackStoryMsg(ctx, k, msg)
+		case LikeBackingArgumentMsg:
+			return handleLikeArgumentMsg(ctx, k, msg)
 		default:
 			return app.ErrMsgHandler(msg)
 		}
 	}
 }
-
-// ============================================================================
 
 func handleBackStoryMsg(ctx sdk.Context, k WriteKeeper, msg BackStoryMsg) sdk.Result {
 	if err := msg.ValidateBasic(); err != nil {
@@ -28,12 +28,25 @@ func handleBackStoryMsg(ctx sdk.Context, k WriteKeeper, msg BackStoryMsg) sdk.Re
 		ctx,
 		msg.StoryID,
 		msg.Amount,
+		0,
 		msg.Argument,
-		msg.Creator,
-		false)
+		msg.Creator)
 	if err != nil {
 		return err.Result()
 	}
 
 	return app.Result(id)
+}
+
+func handleLikeArgumentMsg(ctx sdk.Context, k WriteKeeper, msg LikeBackingArgumentMsg) sdk.Result {
+	if err := msg.ValidateBasic(); err != nil {
+		return err.Result()
+	}
+
+	backingID, err := k.LikeArgument(ctx, msg.ArgumentID, msg.Creator, msg.Amount)
+	if err != nil {
+		return err.Result()
+	}
+
+	return app.Result(backingID)
 }

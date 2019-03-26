@@ -27,4 +27,5 @@ const (
 	ChallengeReturned
 	RewardPool
 	Interest
+	Like
 )

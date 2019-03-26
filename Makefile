@@ -1,6 +1,6 @@
 PACKAGES=$(shell go list ./...)
 
-MODULES = backing category challenge expiration stake story vote voting
+MODULES = argument backing category challenge expiration stake story
 
 CHAIN_DIR = ./.chain
 
@@ -38,7 +38,7 @@ reset:
 restart: build_daemon reset start
 
 start:
-	bin/truchaind --home $(CHAIN_DIR) --log_level "main:info,state:info,*:error,app:info,backing:info,category:info,challenge:info,expiration:info,stake:info,stories:info,vote:info,voting:info" start
+	bin/truchaind --home $(CHAIN_DIR) --log_level "main:info,state:info,*:error,app:info,argument:info,backing:info,category:info,challenge:info,expiration:info,stake:info,stories:info" start
 
 check:
 	gometalinter ./...

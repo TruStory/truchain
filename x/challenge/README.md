@@ -4,14 +4,12 @@
 
 ## Keeper
 
-### Dependencies
-* story keeper
-
 ### Stores
 * "challenges"
     *  keyspace
         * `"challenges:id:5"` -> `Challenge`
-        * `"games:id:[GameID]:challenges:user:[AccAddress]"` -> `[ChallengeID]`
+        * `"stories:id:[StoryID]:challenges:user:[AccAddress]"` -> `[ChallengeID]`
+            * mapping of challengers for each story
 
 ## Notes
 

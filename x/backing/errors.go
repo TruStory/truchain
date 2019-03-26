@@ -10,15 +10,9 @@ import (
 const (
 	DefaultCodespace sdk.CodespaceType = "backing"
 
-	CodeQueueEmpty sdk.CodeType = 902
-	CodeNotFound   sdk.CodeType = 903
-	CodeDuplicate  sdk.CodeType = 904
+	CodeNotFound  sdk.CodeType = 901
+	CodeDuplicate sdk.CodeType = 902
 )
-
-// ErrQueueEmpty throws an error when the searched Queue is not found
-func ErrQueueEmpty() sdk.Error {
-	return sdk.NewError(DefaultCodespace, CodeQueueEmpty, "Backing queue is empty")
-}
 
 // ErrNotFound throws an error when the searched backing is not found
 func ErrNotFound(id int64) sdk.Error {

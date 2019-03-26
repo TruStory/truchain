@@ -6,15 +6,13 @@ import (
 	"io"
 	"os"
 
-	"github.com/TruStory/truchain/x/vote"
-
 	"github.com/TruStory/truchain/app"
+	"github.com/TruStory/truchain/x/argument"
 	"github.com/TruStory/truchain/x/category"
 	"github.com/TruStory/truchain/x/challenge"
 	"github.com/TruStory/truchain/x/expiration"
 	"github.com/TruStory/truchain/x/stake"
 	"github.com/TruStory/truchain/x/story"
-	"github.com/TruStory/truchain/x/voting"
 	"github.com/cosmos/cosmos-sdk/client"
 	gaiaInit "github.com/cosmos/cosmos-sdk/cmd/gaia/init"
 	"github.com/cosmos/cosmos-sdk/codec"
@@ -95,8 +93,8 @@ func InitCmd(ctx *server.Context, cdc *codec.Codec) *cobra.Command {
 			if !viper.GetBool(flagOverwrite) && common.FileExists(genFile) {
 				return fmt.Errorf("genesis.json file already exists: %v", genFile)
 			}
-
 			genesis := app.GenesisState{
+				ArgumentData:   argument.DefaultGenesisState(),
 				AuthData:       auth.DefaultGenesisState(),
 				BankData:       bank.DefaultGenesisState(),
 				Categories:     category.DefaultCategories(),
@@ -104,8 +102,6 @@ func InitCmd(ctx *server.Context, cdc *codec.Codec) *cobra.Command {
 				ExpirationData: expiration.DefaultGenesisState(),
 				StakeData:      stake.DefaultGenesisState(),
 				StoryData:      story.DefaultGenesisState(),
-				VoteData:       vote.DefaultGenesisState(),
-				VotingData:     voting.DefaultGenesisState(),
 			}
 
 			appState, err = codec.MarshalJSONIndent(cdc, genesis)

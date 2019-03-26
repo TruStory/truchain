@@ -4,12 +4,13 @@ import (
 	"fmt"
 
 	app "github.com/TruStory/truchain/types"
+	"github.com/TruStory/truchain/x/stake"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
 // Backing type
 type Backing struct {
-	*app.Vote `json:"vote"`
+	*stake.Vote `json:"vote"`
 }
 
 // ID implements `Voter.ID`
@@ -30,11 +31,6 @@ func (b Backing) Amount() sdk.Coin {
 // Creator implements `Voter.Creator`
 func (b Backing) Creator() sdk.AccAddress {
 	return b.Vote.Creator
-}
-
-// Weight implements `Voter.Weight`
-func (b Backing) Weight() sdk.Int {
-	return b.Vote.Weight
 }
 
 // VoteChoice implements `Voter.VoteChoice`

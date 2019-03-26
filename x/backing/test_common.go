@@ -3,6 +3,7 @@ package backing
 import (
 	"net/url"
 
+	"github.com/TruStory/truchain/x/argument"
 	"github.com/TruStory/truchain/x/trubank"
 
 	"github.com/TruStory/truchain/x/stake"
@@ -34,10 +35,9 @@ func mockDB() (
 	db := dbm.NewMemDB()
 
 	accKey := sdk.NewKVStoreKey(auth.StoreKey)
+	argumentKey := sdk.NewKVStoreKey(argument.StoreKey)
 	storyKey := sdk.NewKVStoreKey(story.StoreKey)
-	stroyListKey := sdk.NewKVStoreKey(story.PendingListStoreKey)
-	expiredStoryQueueKey := sdk.NewKVStoreKey(story.ExpiringQueueStoreKey)
-	votingStoryQueueKey := sdk.NewKVStoreKey(story.ChallengedQueueStoreKey)
+	stroyListKey := sdk.NewKVStoreKey(story.QueueStoreKey)
 	catKey := sdk.NewKVStoreKey(category.StoreKey)
 	backingKey := sdk.NewKVStoreKey(StoreKey)
 	pendingGameListKey := sdk.NewKVStoreKey("pendingGameList")
@@ -48,13 +48,12 @@ func mockDB() (
 
 	ms := store.NewCommitMultiStore(db)
 	ms.MountStoreWithDB(accKey, sdk.StoreTypeIAVL, db)
+	ms.MountStoreWithDB(argumentKey, sdk.StoreTypeIAVL, db)
 	ms.MountStoreWithDB(storyKey, sdk.StoreTypeIAVL, db)
 	ms.MountStoreWithDB(stroyListKey, sdk.StoreTypeIAVL, db)
-	ms.MountStoreWithDB(expiredStoryQueueKey, sdk.StoreTypeIAVL, db)
 	ms.MountStoreWithDB(catKey, sdk.StoreTypeIAVL, db)
 	ms.MountStoreWithDB(backingKey, sdk.StoreTypeIAVL, db)
 	ms.MountStoreWithDB(pendingGameListKey, sdk.StoreTypeIAVL, db)
-	ms.MountStoreWithDB(votingStoryQueueKey, sdk.StoreTypeIAVL, db)
 	ms.MountStoreWithDB(challengeKey, sdk.StoreTypeIAVL, db)
 	ms.MountStoreWithDB(paramsKey, sdk.StoreTypeIAVL, db)
 	ms.MountStoreWithDB(transientParamsKey, sdk.StoreTypeTransient, db)
@@ -81,8 +80,6 @@ func mockDB() (
 	sk := story.NewKeeper(
 		storyKey,
 		stroyListKey,
-		expiredStoryQueueKey,
-		votingStoryQueueKey,
 		ck,
 		pk.Subspace(story.StoreKey),
 		codec)
@@ -102,8 +99,16 @@ func mockDB() (
 	)
 	stake.InitGenesis(ctx, stakeKeeper, stake.DefaultGenesisState())
 
+	argumentKeeper := argument.NewKeeper(
+		argumentKey,
+		sk,
+		pk.Subspace(argument.StoreKey),
+		codec)
+	argument.InitGenesis(ctx, argumentKeeper, argument.DefaultGenesisState())
+
 	bk := NewKeeper(
 		backingKey,
+		argumentKeeper,
 		stakeKeeper,
 		sk,
 		bankKeeper,

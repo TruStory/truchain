@@ -1,34 +1,37 @@
-package vote
+package argument
 
 import (
 	"fmt"
 
-	app "github.com/TruStory/truchain/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/params"
 )
 
-// store keys for vote params
+// store keys for argument params
 var (
-	KeyStakeAmount = []byte("stakeAmount")
+	KeyMinArgumentLength = []byte("minArgumentLength")
+	KeyMaxArgumentLength = []byte("maxArgumentLength")
 )
 
 // Params holds parameters for voting
 type Params struct {
-	StakeAmount sdk.Coin `json:"stake_amount"`
+	MinArgumentLength int `json:"min_argument_length"`
+	MaxArgumentLength int `json:"max_argument_length"`
 }
 
 // DefaultParams is the default parameters for voting
 func DefaultParams() Params {
 	return Params{
-		StakeAmount: sdk.NewCoin(app.StakeDenom, sdk.NewInt(10*app.Shanev)),
+		MinArgumentLength: 10,
+		MaxArgumentLength: 1000,
 	}
 }
 
 // KeyValuePairs implements params.ParamSet
 func (p *Params) KeyValuePairs() params.KeyValuePairs {
 	return params.KeyValuePairs{
-		{Key: KeyStakeAmount, Value: &p.StakeAmount},
+		{Key: KeyMinArgumentLength, Value: &p.MinArgumentLength},
+		{Key: KeyMaxArgumentLength, Value: &p.MaxArgumentLength},
 	}
 }
 
@@ -46,7 +49,7 @@ func (k Keeper) GetParams(ctx sdk.Context) Params {
 
 // SetParams sets the params for the module
 func (k Keeper) SetParams(ctx sdk.Context, params Params) {
-	logger := ctx.Logger().With("module", "vote")
+	logger := ctx.Logger().With("module", StoreKey)
 	k.paramStore.SetParamSet(ctx, &params)
-	logger.Info(fmt.Sprintf("Loaded vote module params: %+v", params))
+	logger.Info(fmt.Sprintf("Loaded argument module params: %+v", params))
 }

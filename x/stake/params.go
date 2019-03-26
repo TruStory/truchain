@@ -3,51 +3,52 @@ package stake
 import (
 	"fmt"
 
+	app "github.com/TruStory/truchain/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/params"
 )
 
 // store keys for voting params
 var (
-	KeyMinArgumentLength = []byte("minArgumentLength")
-	KeyMaxArgumentLength = []byte("maxArgumentLength")
-	KeyMinInterestRate   = []byte("minInterestRate")
-	KeyMaxInterestRate   = []byte("maxInterestRate")
-	KeyAmountWeight      = []byte("amountWeight")
-	KeyPeriodWeight      = []byte("periodWeight")
+	KeyMaxAmount       = []byte("maxAmount")
+	KeyMinInterestRate = []byte("minInterestRate")
+	KeyMaxInterestRate = []byte("maxInterestRate")
+	KeyMajorityPercent = []byte("majorityPercent")
+	KeyAmountWeight    = []byte("amountWeight")
+	KeyPeriodWeight    = []byte("periodWeight")
 )
 
 // Params holds parameters for voting
 type Params struct {
-	MinArgumentLength int     `json:"min_argument_length"`
-	MaxArgumentLength int     `json:"max_argument_length"`
-	MinInterestRate   sdk.Dec `json:"min_interest_rate"`
-	MaxInterestRate   sdk.Dec `json:"max_interest_rate"`
-	AmountWeight      sdk.Dec `json:"amount_weight"`
-	PeriodWeight      sdk.Dec `json:"period_weight"`
+	MaxAmount       sdk.Coin `json:"max_amount"`
+	MinInterestRate sdk.Dec  `json:"min_interest_rate"`
+	MaxInterestRate sdk.Dec  `json:"max_interest_rate"`
+	MajorityPercent sdk.Dec  `json:"majority_percent"`
+	AmountWeight    sdk.Dec  `json:"amount_weight"`
+	PeriodWeight    sdk.Dec  `json:"period_weight"`
 }
 
 // DefaultParams is the default parameters for voting
 func DefaultParams() Params {
 	return Params{
-		MinArgumentLength: 10,
-		MaxArgumentLength: 1000,
-		AmountWeight:      sdk.NewDecWithPrec(333, 3), // 33.3%
-		PeriodWeight:      sdk.NewDecWithPrec(667, 3), // 66.7%
-		MinInterestRate:   sdk.ZeroDec(),              // 0%
-		MaxInterestRate:   sdk.NewDecWithPrec(10, 2),  // 10%
+		MaxAmount:       sdk.NewCoin(app.StakeDenom, sdk.NewInt(100*app.Shanev)),
+		AmountWeight:    sdk.NewDecWithPrec(333, 3), // 33.3%
+		PeriodWeight:    sdk.NewDecWithPrec(667, 3), // 66.7%
+		MinInterestRate: sdk.ZeroDec(),              // 0%
+		MaxInterestRate: sdk.NewDecWithPrec(10, 2),  // 10%
+		MajorityPercent: sdk.NewDecWithPrec(51, 2),  // 51%
 	}
 }
 
 // KeyValuePairs implements params.ParamSet
 func (p *Params) KeyValuePairs() params.KeyValuePairs {
 	return params.KeyValuePairs{
-		{Key: KeyMinArgumentLength, Value: &p.MinArgumentLength},
-		{Key: KeyMaxArgumentLength, Value: &p.MaxArgumentLength},
+		{Key: KeyMaxAmount, Value: &p.MaxAmount},
 		{Key: KeyMinInterestRate, Value: &p.MinInterestRate},
 		{Key: KeyMaxInterestRate, Value: &p.MaxInterestRate},
 		{Key: KeyAmountWeight, Value: &p.AmountWeight},
 		{Key: KeyPeriodWeight, Value: &p.PeriodWeight},
+		{Key: KeyMajorityPercent, Value: &p.MajorityPercent},
 	}
 }
 
@@ -65,7 +66,11 @@ func (k Keeper) GetParams(ctx sdk.Context) Params {
 
 // SetParams sets the params for the module
 func (k Keeper) SetParams(ctx sdk.Context, params Params) {
-	logger := ctx.Logger().With("module", "stake")
+	logger := ctx.Logger().With("module", StoreKey)
 	k.paramStore.SetParamSet(ctx, &params)
 	logger.Info(fmt.Sprintf("Loaded stake module params: %+v", params))
+}
+
+func (k Keeper) majorityPercent(ctx sdk.Context) sdk.Dec {
+	return k.GetParams(ctx).MajorityPercent
 }

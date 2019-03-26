@@ -1,7 +1,6 @@
 package types
 
 import (
-	"fmt"
 	"time"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -31,6 +30,9 @@ var InitialCredAmount = sdk.NewInt(1000000000)
 
 // InitialTruStake is an `sdk.Coins` representing the balance a new user is granted upon registration
 var InitialTruStake = sdk.Coin{Amount: sdk.NewInt(1000000000000), Denom: StakeDenom}
+
+// LikeCredAmount is the amount of cred for a like action
+var LikeCredAmount = sdk.NewInt(1 * Shanev)
 
 // RegistrationFee is an `auth.StdFee` representing the coin and gas cost of registering a new account
 // TODO: Use more accurate gas estimate [notduncansmith]
@@ -63,52 +65,4 @@ func (t Timestamp) Update(blockHeader abci.Header) Timestamp {
 	t.UpdatedTime = blockHeader.Time
 
 	return t
-}
-
-// Voter defines an interface for any kind of voter. It should be implemented
-// by any type that has voting capabilities, implicit or explicit.
-type Voter interface {
-	ID() int64
-	StoryID() int64
-	Amount() sdk.Coin
-	Weight() sdk.Int
-	Creator() sdk.AccAddress
-	VoteChoice() bool
-	UpdateWeight(sdk.Int)
-	Timestamp() Timestamp
-}
-
-// Vote is a type that defines a vote on a story. It serves as an inner struct
-// for `Backing`, `Challenge`, and `TokenVote`, containing common fields.
-type Vote struct {
-	ID        int64          `json:"id"`
-	StoryID   int64          `json:"story_id"`
-	Amount    sdk.Coin       `json:"amount"`
-	Argument  string         `json:"argument,omitempty"`
-	Weight    sdk.Int        `json:"weight,omitempty"`
-	Creator   sdk.AccAddress `json:"creator"`
-	Vote      bool           `json:"vote"`
-	Timestamp Timestamp      `json:"timestamp"`
-}
-
-// UpdateWeight mutates the vote weight as a result of weighted voting
-func (v *Vote) UpdateWeight(weight sdk.Int) {
-	v.Weight = weight
-}
-
-func (v Vote) String() string {
-	return fmt.Sprintf("Vote<%v %t>", v.Amount, v.Vote)
-}
-
-// NewVote creates a new Vote type with defaults
-func NewVote(
-	id int64,
-	storyID int64,
-	amount sdk.Coin,
-	weight sdk.Int,
-	creator sdk.AccAddress,
-	vote bool,
-	timestamp Timestamp) Vote {
-
-	return Vote{id, storyID, amount, "", sdk.NewInt(0), creator, vote, timestamp}
 }

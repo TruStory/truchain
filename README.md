@@ -65,20 +65,38 @@ make start
 ```
 
 ## GraphQL Queries
-You can reach your client at `http://localhost:3030/graphiql/`
+You can reach your client at `http://localhost:1337/api/v1/graphql/`
 
 Sample query:
-```
-query StoriesQuery {
+```graphql
+{
   stories {
+    id
     body
-    creator {
-      address
-    }
-    argument
-    source
-    game {
-      votingEndTime
+    backings {
+      amount {
+        amount
+      }
+      argument {
+        id
+        creator {
+          address
+        }
+        timestamp {
+          createdTime
+        }
+        storyId
+        body
+        likes {
+          argumentID
+          creator {
+            address
+          }
+          timestamp {
+            createdTime
+          }
+        }
+      }
     }
   }
 }
@@ -147,17 +165,9 @@ All data in stores are binary encoded using [Amino](https://github.com/tendermin
 
 Most chain operations are executed based on changes to data at certain block times. After each block (`EndBlock`), the following queues of story ids are checked:
 
-#### Pending Story Queue
+#### Story Queue
 
-A queue of all new stories that haven't expired or gone through voting yet. These are stories in the pending state.
-
-#### Expiring Story Queue
-
-Stories that expire before going into voting are pushed into this list. The queue is processed after each block to distribute rewards to backers and return funds to challengers.
-
-#### Challenged Story Queue
-
-Handles the lifecycle of voting on a story (validation game). Upon completion of a voting game, funds are distributed to winners, and removed from losers.
+A queue of all new stories that haven't expired. These are stories in the pending state. When they expire they are handled in [`x/expiration`](x/expiration/README.md), where rewards and interested are distributed.
 
 ## Testing
 

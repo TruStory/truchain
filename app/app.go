@@ -8,6 +8,7 @@ import (
 	"path/filepath"
 
 	"github.com/TruStory/truchain/types"
+	"github.com/TruStory/truchain/x/argument"
 	"github.com/TruStory/truchain/x/backing"
 	"github.com/TruStory/truchain/x/category"
 	"github.com/TruStory/truchain/x/challenge"
@@ -18,8 +19,6 @@ import (
 	"github.com/TruStory/truchain/x/truapi"
 	trubank "github.com/TruStory/truchain/x/trubank"
 	"github.com/TruStory/truchain/x/users"
-	"github.com/TruStory/truchain/x/vote"
-	"github.com/TruStory/truchain/x/voting"
 	bam "github.com/cosmos/cosmos-sdk/baseapp"
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -54,24 +53,21 @@ type TruChain struct {
 	codec *codec.Codec
 
 	// keys to access the multistore
-	keyAccount              *sdk.KVStoreKey
-	keyBacking              *sdk.KVStoreKey
-	keyCategory             *sdk.KVStoreKey
-	keyChallenge            *sdk.KVStoreKey
-	keyExpiration           *sdk.KVStoreKey
-	keyFee                  *sdk.KVStoreKey
-	keyIBC                  *sdk.KVStoreKey
-	keyMain                 *sdk.KVStoreKey
-	keyStake                *sdk.KVStoreKey
-	keyStory                *sdk.KVStoreKey
-	keyPendingStoryList     *sdk.KVStoreKey
-	keyTruBank              *sdk.KVStoreKey
-	keyChallengedStoryQueue *sdk.KVStoreKey
-	keyExpiringStoryQueue   *sdk.KVStoreKey
-	keyVote                 *sdk.KVStoreKey
-	keyVoting               *sdk.KVStoreKey
-	keyParams               *sdk.KVStoreKey
-	tkeyParams              *sdk.TransientStoreKey
+	keyAccount    *sdk.KVStoreKey
+	keyArgument   *sdk.KVStoreKey
+	keyBacking    *sdk.KVStoreKey
+	keyCategory   *sdk.KVStoreKey
+	keyChallenge  *sdk.KVStoreKey
+	keyExpiration *sdk.KVStoreKey
+	keyFee        *sdk.KVStoreKey
+	keyIBC        *sdk.KVStoreKey
+	keyMain       *sdk.KVStoreKey
+	keyStake      *sdk.KVStoreKey
+	keyStory      *sdk.KVStoreKey
+	keyStoryQueue *sdk.KVStoreKey
+	keyTruBank    *sdk.KVStoreKey
+	keyParams     *sdk.KVStoreKey
+	tkeyParams    *sdk.TransientStoreKey
 
 	// manage getting and setting accounts
 	accountKeeper       auth.AccountKeeper
@@ -81,6 +77,7 @@ type TruChain struct {
 	paramsKeeper        params.Keeper
 
 	// access truchain multistore
+	argumentKeeper     argument.Keeper
 	backingKeeper      backing.WriteKeeper
 	categoryKeeper     category.WriteKeeper
 	challengeKeeper    challenge.WriteKeeper
@@ -89,8 +86,6 @@ type TruChain struct {
 	storyKeeper        story.WriteKeeper
 	stakeKeeper        stake.Keeper
 	truBankKeeper      trubank.Keeper
-	voteKeeper         vote.WriteKeeper
-	votingKeeper       voting.WriteKeeper
 
 	// state to run api
 	blockCtx     *sdk.Context
@@ -119,27 +114,24 @@ func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *T
 		keyParams:  sdk.NewKVStoreKey("params"),
 		tkeyParams: sdk.NewTransientStoreKey("transient_params"),
 
-		keyMain:                 sdk.NewKVStoreKey("main"),
-		keyAccount:              sdk.NewKVStoreKey("acc"),
-		keyIBC:                  sdk.NewKVStoreKey("ibc"),
-		keyStory:                sdk.NewKVStoreKey(story.StoreKey),
-		keyPendingStoryList:     sdk.NewKVStoreKey(story.PendingListStoreKey),
-		keyCategory:             sdk.NewKVStoreKey(category.StoreKey),
-		keyBacking:              sdk.NewKVStoreKey(backing.StoreKey),
-		keyChallenge:            sdk.NewKVStoreKey(challenge.StoreKey),
-		keyExpiration:           sdk.NewKVStoreKey(expiration.StoreKey),
-		keyFee:                  sdk.NewKVStoreKey("fee_collection"),
-		keyStake:                sdk.NewKVStoreKey(stake.StoreKey),
-		keyTruBank:              sdk.NewKVStoreKey(trubank.StoreKey),
-		keyChallengedStoryQueue: sdk.NewKVStoreKey(story.ChallengedQueueStoreKey),
-		keyExpiringStoryQueue:   sdk.NewKVStoreKey(story.ExpiringQueueStoreKey),
-		keyVote:                 sdk.NewKVStoreKey(vote.StoreKey),
-		keyVoting:               sdk.NewKVStoreKey(voting.StoreKey),
-		api:                     nil,
-		apiStarted:              false,
-		blockCtx:                nil,
-		blockHeader:             abci.Header{},
-		registrarKey:            loadRegistrarKey(),
+		keyMain:       sdk.NewKVStoreKey("main"),
+		keyAccount:    sdk.NewKVStoreKey("acc"),
+		keyIBC:        sdk.NewKVStoreKey("ibc"),
+		keyArgument:   sdk.NewKVStoreKey(argument.StoreKey),
+		keyStory:      sdk.NewKVStoreKey(story.StoreKey),
+		keyStoryQueue: sdk.NewKVStoreKey(story.QueueStoreKey),
+		keyCategory:   sdk.NewKVStoreKey(category.StoreKey),
+		keyBacking:    sdk.NewKVStoreKey(backing.StoreKey),
+		keyChallenge:  sdk.NewKVStoreKey(challenge.StoreKey),
+		keyExpiration: sdk.NewKVStoreKey(expiration.StoreKey),
+		keyFee:        sdk.NewKVStoreKey("fee_collection"),
+		keyStake:      sdk.NewKVStoreKey(stake.StoreKey),
+		keyTruBank:    sdk.NewKVStoreKey(trubank.StoreKey),
+		api:           nil,
+		apiStarted:    false,
+		blockCtx:      nil,
+		blockHeader:   abci.Header{},
+		registrarKey:  loadRegistrarKey(),
 	}
 
 	// The ParamsKeeper handles parameter storage for the application
@@ -170,13 +162,17 @@ func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *T
 
 	app.storyKeeper = story.NewKeeper(
 		app.keyStory,
-		app.keyPendingStoryList,
-		app.keyExpiringStoryQueue,
-		app.keyChallengedStoryQueue,
+		app.keyStoryQueue,
 		app.categoryKeeper,
 		app.paramsKeeper.Subspace(story.StoreKey),
 		app.codec,
 	)
+
+	app.argumentKeeper = argument.NewKeeper(
+		app.keyArgument,
+		app.storyKeeper,
+		app.paramsKeeper.Subspace(argument.StoreKey),
+		app.codec)
 
 	app.truBankKeeper = trubank.NewKeeper(
 		app.keyTruBank,
@@ -192,6 +188,7 @@ func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *T
 
 	app.backingKeeper = backing.NewKeeper(
 		app.keyBacking,
+		app.argumentKeeper,
 		app.stakeKeeper,
 		app.storyKeeper,
 		app.bankKeeper,
@@ -202,6 +199,7 @@ func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *T
 
 	app.challengeKeeper = challenge.NewKeeper(
 		app.keyChallenge,
+		app.argumentKeeper,
 		app.stakeKeeper,
 		app.backingKeeper,
 		app.truBankKeeper,
@@ -211,23 +209,9 @@ func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *T
 		codec,
 	)
 
-	app.voteKeeper = vote.NewKeeper(
-		app.keyVote,
-		app.keyChallengedStoryQueue,
-		app.stakeKeeper,
-		app.accountKeeper,
-		app.backingKeeper,
-		app.challengeKeeper,
-		app.storyKeeper,
-		app.bankKeeper,
-		app.truBankKeeper,
-		app.paramsKeeper.Subspace(vote.StoreKey),
-		codec,
-	)
-
 	app.expirationKeeper = expiration.NewKeeper(
 		app.keyExpiration,
-		app.keyExpiringStoryQueue,
+		app.keyStoryQueue,
 		app.stakeKeeper,
 		app.storyKeeper,
 		app.backingKeeper,
@@ -236,28 +220,13 @@ func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *T
 		codec,
 	)
 
-	app.votingKeeper = voting.NewKeeper(
-		app.keyVoting,
-		app.keyChallengedStoryQueue,
-		app.accountKeeper,
-		app.backingKeeper,
-		app.challengeKeeper,
-		app.stakeKeeper,
-		app.storyKeeper,
-		app.voteKeeper,
-		app.bankKeeper,
-		app.truBankKeeper,
-		app.paramsKeeper.Subspace(voting.StoreKey),
-		codec,
-	)
-
 	app.clientParamsKeeper = clientParams.NewKeeper(
+		app.argumentKeeper,
 		app.backingKeeper,
 		app.challengeKeeper,
 		app.expirationKeeper,
 		app.stakeKeeper,
 		app.storyKeeper,
-		app.votingKeeper,
 	)
 
 	// The AnteHandler handles signature verification and transaction pre-processing
@@ -273,19 +242,17 @@ func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *T
 		AddRoute("category", category.NewHandler(app.categoryKeeper)).
 		AddRoute("backing", backing.NewHandler(app.backingKeeper)).
 		AddRoute("challenge", challenge.NewHandler(app.challengeKeeper)).
-		AddRoute("vote", vote.NewHandler(app.voteKeeper)).
 		AddRoute("users", users.NewHandler(app.accountKeeper))
 
 	// The app.QueryRouter is the main query router where each module registers its routes
 	app.QueryRouter().
+		AddRoute(argument.QueryPath, argument.NewQuerier(app.argumentKeeper)).
 		AddRoute(story.QueryPath, story.NewQuerier(app.storyKeeper)).
 		AddRoute(category.QueryPath, category.NewQuerier(app.categoryKeeper)).
 		AddRoute(users.QueryPath, users.NewQuerier(codec, app.accountKeeper)).
 		AddRoute(backing.QueryPath, backing.NewQuerier(app.backingKeeper)).
 		AddRoute(challenge.QueryPath, challenge.NewQuerier(app.challengeKeeper)).
-		AddRoute(vote.QueryPath, vote.NewQuerier(app.voteKeeper)).
 		AddRoute(clientParams.QueryPath, clientParams.NewQuerier(app.clientParamsKeeper)).
-		AddRoute(voting.QueryPath, voting.NewQuerier(app.votingKeeper)).
 		AddRoute(trubank.QueryPath, trubank.NewQuerier(app.truBankKeeper))
 
 	// The initChainer handles translating the genesis.json file into initial state for the network
@@ -306,12 +273,9 @@ func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *T
 		app.keyIBC,
 		app.keyMain,
 		app.keyStory,
-		app.keyPendingStoryList,
-		app.keyExpiringStoryQueue,
-		app.keyChallengedStoryQueue,
+		app.keyStoryQueue,
 		app.keyTruBank,
-		app.keyVote,
-		app.keyVoting,
+		app.keyArgument,
 	)
 
 	app.MountStoresTransient(app.tkeyParams)
@@ -357,7 +321,6 @@ func MakeCodec() *codec.Codec {
 	backing.RegisterAmino(cdc)
 	category.RegisterAmino(cdc)
 	challenge.RegisterAmino(cdc)
-	vote.RegisterAmino(cdc)
 	users.RegisterAmino(cdc)
 
 	// register other types
@@ -389,9 +352,7 @@ func (app *TruChain) BeginBlocker(ctx sdk.Context, req abci.RequestBeginBlock) a
 // EndBlocker reflects logic to run after all TXs are processed by the
 // application.
 func (app *TruChain) EndBlocker(ctx sdk.Context, _ abci.RequestEndBlock) abci.ResponseEndBlock {
-	app.storyKeeper.EndBlock(ctx)
 	app.expirationKeeper.EndBlock(ctx)
-	app.votingKeeper.EndBlock(ctx)
 
 	return abci.ResponseEndBlock{}
 }
@@ -422,7 +383,6 @@ func (app *TruChain) ExportAppStateAndValidators() (appState json.RawMessage, va
 		Categories:     category.DefaultCategories(),
 		ExpirationData: expiration.DefaultGenesisState(),
 		StoryData:      story.DefaultGenesisState(),
-		VotingData:     voting.DefaultGenesisState(),
 	}
 
 	appState, err = codec.MarshalJSONIndent(app.codec, genState)

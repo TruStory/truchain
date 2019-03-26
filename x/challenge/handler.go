@@ -11,13 +11,13 @@ func NewHandler(k WriteKeeper) sdk.Handler {
 		switch msg := msg.(type) {
 		case CreateChallengeMsg:
 			return handleCreateChallengeMsg(ctx, k, msg)
+		case LikeChallengeArgumentMsg:
+			return handleLikeArgumentMsg(ctx, k, msg)
 		default:
 			return app.ErrMsgHandler(msg)
 		}
 	}
 }
-
-// ============================================================================
 
 // handles a message to create a challenge
 func handleCreateChallengeMsg(
@@ -28,10 +28,23 @@ func handleCreateChallengeMsg(
 	}
 
 	id, err := k.Create(
-		ctx, msg.StoryID, msg.Amount, msg.Argument, msg.Creator, false)
+		ctx, msg.StoryID, msg.Amount, 0, msg.Argument, msg.Creator)
 	if err != nil {
 		return err.Result()
 	}
 
 	return app.Result(id)
+}
+
+func handleLikeArgumentMsg(ctx sdk.Context, k WriteKeeper, msg LikeChallengeArgumentMsg) sdk.Result {
+	if err := msg.ValidateBasic(); err != nil {
+		return err.Result()
+	}
+
+	challengeID, err := k.LikeArgument(ctx, msg.ArgumentID, msg.Creator, msg.Amount)
+	if err != nil {
+		return err.Result()
+	}
+
+	return app.Result(challengeID)
 }

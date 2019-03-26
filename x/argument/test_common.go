@@ -1,7 +1,8 @@
-package stake
+package argument
 
 import (
 	"github.com/TruStory/truchain/x/category"
+	"github.com/TruStory/truchain/x/stake"
 	"github.com/TruStory/truchain/x/story"
 	"github.com/TruStory/truchain/x/trubank"
 	"github.com/cosmos/cosmos-sdk/store"
@@ -16,25 +17,32 @@ import (
 	"github.com/tendermint/tendermint/libs/log"
 )
 
-func mockDB() (sdk.Context, Keeper) {
+func mockDB() (
+	sdk.Context,
+	Keeper,
+	story.Keeper,
+	bank.Keeper) {
+
 	db := dbm.NewMemDB()
 
 	accKey := sdk.NewKVStoreKey(auth.StoreKey)
+	catKey := sdk.NewKVStoreKey(category.StoreKey)
+	argumentKey := sdk.NewKVStoreKey(StoreKey)
 	storyKey := sdk.NewKVStoreKey(story.StoreKey)
 	storyListKey := sdk.NewKVStoreKey(story.QueueStoreKey)
-	catKey := sdk.NewKVStoreKey(category.StoreKey)
-	truBankKey := sdk.NewKVStoreKey(trubank.StoreKey)
 	paramsKey := sdk.NewKVStoreKey(params.StoreKey)
 	transientParamsKey := sdk.NewTransientStoreKey(params.TStoreKey)
+	truBankKey := sdk.NewKVStoreKey(trubank.StoreKey)
 
 	ms := store.NewCommitMultiStore(db)
 	ms.MountStoreWithDB(accKey, sdk.StoreTypeIAVL, db)
+	ms.MountStoreWithDB(argumentKey, sdk.StoreTypeIAVL, db)
 	ms.MountStoreWithDB(storyKey, sdk.StoreTypeIAVL, db)
 	ms.MountStoreWithDB(storyListKey, sdk.StoreTypeIAVL, db)
 	ms.MountStoreWithDB(catKey, sdk.StoreTypeIAVL, db)
-	ms.MountStoreWithDB(truBankKey, sdk.StoreTypeIAVL, db)
 	ms.MountStoreWithDB(paramsKey, sdk.StoreTypeIAVL, db)
 	ms.MountStoreWithDB(transientParamsKey, sdk.StoreTypeTransient, db)
+	ms.MountStoreWithDB(truBankKey, sdk.StoreTypeIAVL, db)
 	ms.LoadLatestVersion()
 
 	ctx := sdk.NewContext(ms, abci.Header{}, false, log.NewNopLogger())
@@ -44,7 +52,8 @@ func mockDB() (sdk.Context, Keeper) {
 	codec.RegisterInterface((*auth.Account)(nil), nil)
 	codec.RegisterConcrete(&auth.BaseAccount{}, "auth/Account", nil)
 
-	ck := category.NewKeeper(catKey, codec)
+	categoryKeeper := category.NewKeeper(catKey, codec)
+	category.InitGenesis(ctx, categoryKeeper, category.DefaultCategories())
 
 	pk := params.NewKeeper(codec, paramsKey, transientParamsKey)
 	am := auth.NewAccountKeeper(codec, accKey, pk.Subspace(auth.DefaultParamspace), auth.ProtoBaseAccount)
@@ -56,7 +65,7 @@ func mockDB() (sdk.Context, Keeper) {
 	storyKeeper := story.NewKeeper(
 		storyKey,
 		storyListKey,
-		ck,
+		categoryKeeper,
 		pk.Subspace(story.StoreKey),
 		codec)
 
@@ -65,15 +74,22 @@ func mockDB() (sdk.Context, Keeper) {
 	truBankKeeper := trubank.NewKeeper(
 		truBankKey,
 		bankKeeper,
-		ck,
+		categoryKeeper,
 		codec)
 
-	stakeKeeper := NewKeeper(
+	stakeKeeper := stake.NewKeeper(
 		storyKeeper,
 		truBankKeeper,
-		pk.Subspace(StoreKey),
+		pk.Subspace(stake.StoreKey),
 	)
-	InitGenesis(ctx, stakeKeeper, DefaultGenesisState())
+	stake.InitGenesis(ctx, stakeKeeper, stake.DefaultGenesisState())
 
-	return ctx, stakeKeeper
+	argumentKeeper := NewKeeper(
+		argumentKey,
+		storyKeeper,
+		pk.Subspace(StoreKey),
+		codec)
+	InitGenesis(ctx, argumentKeeper, DefaultGenesisState())
+
+	return ctx, argumentKeeper, storyKeeper, bankKeeper
 }

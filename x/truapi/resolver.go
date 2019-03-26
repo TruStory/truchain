@@ -7,9 +7,8 @@ import (
 	"path"
 	"sort"
 
-	"github.com/TruStory/truchain/x/voting"
-
 	app "github.com/TruStory/truchain/types"
+	"github.com/TruStory/truchain/x/argument"
 	"github.com/TruStory/truchain/x/backing"
 	"github.com/TruStory/truchain/x/category"
 	"github.com/TruStory/truchain/x/challenge"
@@ -18,7 +17,6 @@ import (
 	"github.com/TruStory/truchain/x/story"
 	trubank "github.com/TruStory/truchain/x/trubank"
 	"github.com/TruStory/truchain/x/users"
-	"github.com/TruStory/truchain/x/vote"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	amino "github.com/tendermint/go-amino"
 )
@@ -61,6 +59,44 @@ func (ta *TruAPI) allStoriesResolver(ctx context.Context, q struct{}) []story.St
 	}
 
 	return *stories
+}
+
+func (ta *TruAPI) argumentResolver(_ context.Context, q app.QueryByIDParams) argument.Argument {
+	res := ta.RunQuery(
+		path.Join(argument.QueryPath, argument.QueryArgumentByID),
+		app.QueryByIDParams{ID: q.ID},
+	)
+
+	if res.Code != 0 {
+		fmt.Println("Resolver err: ", res)
+		return argument.Argument{}
+	}
+
+	argument := new(argument.Argument)
+	err := json.Unmarshal(res.Value, argument)
+	if err != nil {
+		panic(err)
+	}
+
+	return *argument
+}
+
+func (ta *TruAPI) likesObjectResolver(_ context.Context, q argument.Argument) []argument.Like {
+	query := path.Join(argument.QueryPath, argument.QueryLikesByArgumentID)
+	res := ta.RunQuery(query, app.QueryByIDParams{ID: q.ID})
+
+	if res.Code != 0 {
+		fmt.Println("Resolver err: ", res)
+		return []argument.Like{}
+	}
+
+	likes := new([]argument.Like)
+	err := json.Unmarshal(res.Value, likes)
+	if err != nil {
+		panic(err)
+	}
+
+	return *likes
 }
 
 func (ta *TruAPI) backingResolver(
@@ -128,27 +164,6 @@ func (ta *TruAPI) challengePoolResolver(_ context.Context, q story.Story) sdk.Co
 
 	amount := new(sdk.Coin)
 	err := amino.UnmarshalJSON(res.Value, amount)
-	if err != nil {
-		panic(err)
-	}
-
-	return *amount
-}
-
-func (ta *TruAPI) votingPoolResolver(_ context.Context, q story.Story) sdk.Coin {
-
-	res := ta.RunQuery(
-		path.Join(vote.QueryPath, vote.QueryTotalVoteAmountByStoryID),
-		app.QueryByIDParams{ID: q.ID},
-	)
-
-	if res.Code != 0 {
-		fmt.Println("Resolver err: ", res)
-		return sdk.Coin{}
-	}
-
-	amount := new(sdk.Coin)
-	err := json.Unmarshal(res.Value, amount)
 	if err != nil {
 		panic(err)
 	}
@@ -230,30 +245,6 @@ func (ta *TruAPI) challengesResolver(
 	return *challenges
 }
 
-func (ta *TruAPI) challengeThresholdResolver(_ context.Context, q story.Story) sdk.Coin {
-	res := ta.RunQuery(path.Join(challenge.QueryPath, challenge.QueryChallengeThresholdByStoryID), app.QueryByIDParams{ID: q.ID})
-
-	if res.Code != 0 {
-		fmt.Println("Resolver err: ", res)
-		return sdk.Coin{}
-	}
-
-	amount := new(sdk.Coin)
-	err := json.Unmarshal(res.Value, amount)
-	if err != nil {
-		panic(err)
-	}
-
-	// Round up to next Shanev so we don't deal with precision
-	remainder := amount.Amount.Mod(sdk.NewInt(app.Shanev))
-	if !remainder.IsZero() {
-		roundedUp := amount.Amount.Sub(remainder).Add(sdk.NewInt(app.Shanev))
-		return sdk.NewCoin(amount.Denom, roundedUp)
-	}
-
-	return *amount
-}
-
 func (ta *TruAPI) paramsResolver(_ context.Context) params.Params {
 	res := ta.RunQuery("params", nil)
 
@@ -324,65 +315,6 @@ func (ta *TruAPI) usersResolver(ctx context.Context, q users.QueryUsersByAddress
 	}
 
 	return *u
-}
-
-func (ta *TruAPI) voteResolver(
-	_ context.Context, q app.QueryByStoryIDAndCreatorParams) vote.TokenVote {
-
-	res := ta.RunQuery("votes/storyIDAndCreator", q)
-
-	if res.Code != 0 {
-		fmt.Println("Resolver err: ", res)
-		return vote.TokenVote{}
-	}
-
-	tokenVote := new(vote.TokenVote)
-	err := json.Unmarshal(res.Value, tokenVote)
-	if err != nil {
-		panic(err)
-	}
-
-	return *tokenVote
-}
-
-func (ta *TruAPI) votesResolver(
-	_ context.Context, q app.QueryByIDParams) []vote.TokenVote {
-
-	res := ta.RunQuery(
-		path.Join(vote.QueryPath, vote.QueryByStoryID), q)
-
-	if res.Code != 0 {
-		fmt.Println("Resolver err: ", res)
-		return []vote.TokenVote{}
-	}
-
-	tokenVotes := new([]vote.TokenVote)
-	err := json.Unmarshal(res.Value, tokenVotes)
-	if err != nil {
-		panic(err)
-	}
-
-	return *tokenVotes
-}
-
-func (ta *TruAPI) voteResultsResolver(
-	_ context.Context, q app.QueryByIDParams) voting.VoteResult {
-
-	res := ta.RunQuery(
-		path.Join(voting.QueryPath, voting.QueryVoteResultsByStoryID), q)
-
-	if res.Code != 0 {
-		fmt.Println("Resolver err: ", res)
-		return voting.VoteResult{}
-	}
-
-	voteResult := new(voting.VoteResult)
-	err := json.Unmarshal(res.Value, voteResult)
-	if err != nil {
-		panic(err)
-	}
-
-	return *voteResult
 }
 
 func (ta *TruAPI) transactionsResolver(
