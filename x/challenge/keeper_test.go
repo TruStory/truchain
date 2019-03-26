@@ -27,7 +27,7 @@ func TestNewGetChallenge(t *testing.T) {
 	// give user some funds
 	bankKeeper.AddCoins(ctx, creator, sdk.Coins{amount})
 
-	id, err := k.Create(ctx, storyID, amount, 0, argument, creator, false)
+	id, err := k.Create(ctx, storyID, amount, 0, argument, creator)
 	assert.Nil(t, err)
 
 	challenge, err := k.Challenge(ctx, id)
@@ -47,7 +47,7 @@ func TestNewGetChallengeUsingTruStake(t *testing.T) {
 	// give user some funds
 	bankKeeper.AddCoins(ctx, creator, sdk.Coins{amount})
 
-	id, err := k.Create(ctx, storyID, amount, 0, argument, creator, false)
+	id, err := k.Create(ctx, storyID, amount, 0, argument, creator)
 	assert.Nil(t, err)
 
 	challenge, err := k.Challenge(ctx, id)
@@ -69,7 +69,7 @@ func TestChallengesByStoryID(t *testing.T) {
 	creator2 := sdk.AccAddress([]byte{3, 4})
 	bankKeeper.AddCoins(ctx, creator2, sdk.Coins{amount})
 
-	k.Create(ctx, storyID, amount, 0, argument, creator, false)
+	k.Create(ctx, storyID, amount, 0, argument, creator)
 
 	story, _ := sk.Story(ctx, storyID)
 	challenges, _ := k.ChallengesByStoryID(ctx, story.ID)
@@ -86,7 +86,7 @@ func TestChallengesByStoryIDAndCreator(t *testing.T) {
 	creator := sdk.AccAddress([]byte{1, 2})
 	bankKeeper.AddCoins(ctx, creator, sdk.Coins{amount})
 
-	k.Create(ctx, storyID, amount, 0, argument, creator, false)
+	k.Create(ctx, storyID, amount, 0, argument, creator)
 
 	challenge, _ := k.ChallengeByStoryIDAndCreator(ctx, storyID, creator)
 	assert.Equal(t, int64(1), challenge.ID())
@@ -103,10 +103,10 @@ func TestNewChallenge_Duplicate(t *testing.T) {
 	// give user some funds
 	bankKeeper.AddCoins(ctx, creator, sdk.Coins{amount.Plus(amount)})
 
-	_, err := k.Create(ctx, storyID, amount, 0, argument, creator, false)
+	_, err := k.Create(ctx, storyID, amount, 0, argument, creator)
 	assert.Nil(t, err)
 
-	_, err = k.Create(ctx, storyID, amount, 0, argument, creator, false)
+	_, err = k.Create(ctx, storyID, amount, 0, argument, creator)
 	assert.NotNil(t, err)
 	assert.Equal(t, ErrDuplicateChallenge(5, creator).Code(), err.Code())
 }
@@ -119,6 +119,6 @@ func TestNewChallenge_ErrIncorrectCategoryCoin(t *testing.T) {
 	argument := "test argument"
 	creator := sdk.AccAddress([]byte{1, 2})
 
-	_, err := k.Create(ctx, storyID, amount, 0, argument, creator, false)
+	_, err := k.Create(ctx, storyID, amount, 0, argument, creator)
 	assert.NotNil(t, err)
 }

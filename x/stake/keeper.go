@@ -138,7 +138,7 @@ func (k Keeper) ValidateAmount(ctx sdk.Context, amount sdk.Coin) sdk.Error {
 }
 
 // ValidateStoryState makes sure only a pending story can be staked
-func (k Keeper) ValidateStoryState(ctx sdk.Context, storyID int64, toggled bool) sdk.Error {
+func (k Keeper) ValidateStoryState(ctx sdk.Context, storyID int64) sdk.Error {
 	s, err := k.storyKeeper.Story(ctx, storyID)
 	if err != nil {
 		return err

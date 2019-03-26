@@ -50,8 +50,7 @@ type WriteKeeper interface {
 		amount sdk.Coin,
 		argumentID int64,
 		argument string,
-		creator sdk.AccAddress,
-		toggled bool) (int64, sdk.Error)
+		creator sdk.AccAddress) (int64, sdk.Error)
 	SetParams(ctx sdk.Context, params Params)
 	LikeArgument(ctx sdk.Context, argumentID int64, creator sdk.AccAddress, amount sdk.Coin) (int64, sdk.Error)
 }
@@ -105,8 +104,7 @@ func (k Keeper) Create(
 	amount sdk.Coin,
 	argumentID int64,
 	argument string,
-	creator sdk.AccAddress,
-	toggled bool) (challengeID int64, err sdk.Error) {
+	creator sdk.AccAddress) (challengeID int64, err sdk.Error) {
 
 	logger := ctx.Logger().With("module", StoreKey)
 
@@ -115,7 +113,7 @@ func (k Keeper) Create(
 		return 0, err
 	}
 
-	err = k.stakeKeeper.ValidateStoryState(ctx, storyID, toggled)
+	err = k.stakeKeeper.ValidateStoryState(ctx, storyID)
 	if err != nil {
 		return 0, err
 	}
@@ -128,7 +126,7 @@ func (k Keeper) Create(
 		return 0, sdk.ErrInsufficientFunds("Insufficient funds for challenge.")
 	}
 
-	if !toggled && amount.Amount.LT(k.minChallengeStake(ctx)) {
+	if amount.Amount.LT(k.minChallengeStake(ctx)) {
 		return 0, sdk.ErrInsufficientFunds("Does not meet minimum stake amount.")
 	}
 
@@ -252,7 +250,7 @@ func (k Keeper) LikeArgument(ctx sdk.Context, argumentID int64, creator sdk.AccA
 		return 0, err
 	}
 
-	challengeID, err := k.Create(ctx, story.ID, amount, argumentID, "", creator, false)
+	challengeID, err := k.Create(ctx, story.ID, amount, argumentID, "", creator)
 	if err != nil {
 		return 0, err
 	}

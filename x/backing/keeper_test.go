@@ -40,7 +40,7 @@ func TestGetBacking(t *testing.T) {
 	argument := "cool story brew.."
 	creator := sdk.AccAddress([]byte{1, 2})
 	bankKeeper.AddCoins(ctx, creator, sdk.Coins{amount})
-	backingID, _ := bk.Create(ctx, storyID, amount, 0, argument, creator, false)
+	backingID, _ := bk.Create(ctx, storyID, amount, 0, argument, creator)
 
 	b, err := bk.Backing(ctx, backingID)
 	assert.Nil(t, err)
@@ -58,8 +58,8 @@ func TestBackingsByStoryID(t *testing.T) {
 	creator2 := sdk.AccAddress([]byte{2, 3})
 	bankKeeper.AddCoins(ctx, creator2, sdk.Coins{amount})
 
-	bk.Create(ctx, storyID, amount, 0, argument, creator, false)
-	bk.Create(ctx, storyID, amount, 0, argument, creator2, false)
+	bk.Create(ctx, storyID, amount, 0, argument, creator)
+	bk.Create(ctx, storyID, amount, 0, argument, creator2)
 
 	backings, _ := bk.BackingsByStoryID(ctx, storyID)
 	assert.Equal(t, 2, len(backings))
@@ -73,7 +73,7 @@ func TestBackingsByStoryIDAndCreator(t *testing.T) {
 	creator := sdk.AccAddress([]byte{1, 2})
 	bankKeeper.AddCoins(ctx, creator, sdk.Coins{amount})
 
-	bk.Create(ctx, storyID, amount, 0, argument, creator, false)
+	bk.Create(ctx, storyID, amount, 0, argument, creator)
 
 	backing, _ := bk.BackingByStoryIDAndCreator(ctx, storyID, creator)
 	assert.Equal(t, int64(1), backing.ID())
@@ -88,11 +88,11 @@ func TestTotalBacking(t *testing.T) {
 
 	creator := sdk.AccAddress([]byte{1, 2})
 	bankKeeper.AddCoins(ctx, creator, sdk.Coins{amount})
-	k.Create(ctx, storyID, amount, 0, argument, creator, false)
+	k.Create(ctx, storyID, amount, 0, argument, creator)
 
 	creator2 := sdk.AccAddress([]byte{2, 3})
 	bankKeeper.AddCoins(ctx, creator2, sdk.Coins{amount})
-	k.Create(ctx, storyID, amount, 0, argument, creator2, false)
+	k.Create(ctx, storyID, amount, 0, argument, creator2)
 
 	total, _ := k.TotalBackingAmount(ctx, storyID)
 
@@ -105,7 +105,7 @@ func TestNewBacking_ErrInsufficientFunds(t *testing.T) {
 	amount := sdk.NewCoin(app.StakeDenom, sdk.NewInt(5000000))
 	argument := "cool story brew"
 	creator := sdk.AccAddress([]byte{1, 2})
-	_, err := bk.Create(ctx, storyID, amount, 0, argument, creator, false)
+	_, err := bk.Create(ctx, storyID, amount, 0, argument, creator)
 	assert.NotNil(t, err)
 	assert.Equal(t, sdk.ErrInsufficientFunds("blah").Code(), err.Code(), "Should get error")
 }
@@ -118,7 +118,7 @@ func TestNewBacking(t *testing.T) {
 	creator := sdk.AccAddress([]byte{1, 2})
 	bankKeeper.AddCoins(ctx, creator, sdk.Coins{amount})
 
-	backingID, _ := bk.Create(ctx, storyID, amount, 0, argument, creator, false)
+	backingID, _ := bk.Create(ctx, storyID, amount, 0, argument, creator)
 	assert.NotNil(t, backingID)
 }
 
@@ -131,8 +131,8 @@ func TestDuplicateBacking(t *testing.T) {
 	bankKeeper.AddCoins(ctx, creator, sdk.Coins{amount})
 	bankKeeper.AddCoins(ctx, creator, sdk.Coins{amount})
 
-	backingID, _ := bk.Create(ctx, storyID, amount, 0, argument, creator, false)
+	backingID, _ := bk.Create(ctx, storyID, amount, 0, argument, creator)
 	assert.NotNil(t, backingID)
-	_, err := bk.Create(ctx, storyID, amount, 0, argument, creator, false)
+	_, err := bk.Create(ctx, storyID, amount, 0, argument, creator)
 	assert.Equal(t, ErrDuplicate(storyID, creator).Code(), err.Code())
 }

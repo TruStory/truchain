@@ -49,8 +49,7 @@ type WriteKeeper interface {
 		amount sdk.Coin,
 		argumentID int64,
 		argument string,
-		creator sdk.AccAddress,
-		toggled bool) (int64, sdk.Error)
+		creator sdk.AccAddress) (int64, sdk.Error)
 	LikeArgument(ctx sdk.Context, argumentID int64, creator sdk.AccAddress, amount sdk.Coin) (int64, sdk.Error)
 }
 
@@ -100,8 +99,7 @@ func (k Keeper) Create(
 	amount sdk.Coin,
 	argumentID int64,
 	argument string,
-	creator sdk.AccAddress,
-	toggled bool) (id int64, err sdk.Error) {
+	creator sdk.AccAddress) (id int64, err sdk.Error) {
 
 	logger := ctx.Logger().With("module", StoreKey)
 
@@ -110,7 +108,7 @@ func (k Keeper) Create(
 		return 0, err
 	}
 
-	err = k.stakeKeeper.ValidateStoryState(ctx, storyID, toggled)
+	err = k.stakeKeeper.ValidateStoryState(ctx, storyID)
 	if err != nil {
 		return 0, err
 	}
@@ -186,7 +184,7 @@ func (k Keeper) LikeArgument(ctx sdk.Context, argumentID int64, creator sdk.AccA
 		return 0, err
 	}
 
-	backingID, err := k.Create(ctx, story.ID, amount, argumentID, "", creator, false)
+	backingID, err := k.Create(ctx, story.ID, amount, argumentID, "", creator)
 	if err != nil {
 		return 0, err
 	}
