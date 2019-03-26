@@ -22,7 +22,7 @@ type Params struct {
 // DefaultParams is the default parameters for voting
 func DefaultParams() Params {
 	return Params{
-		MinArgumentLength: 0,
+		MinArgumentLength: 10,
 		MaxArgumentLength: 1000,
 	}
 }

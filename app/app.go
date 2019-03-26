@@ -119,7 +119,7 @@ func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *T
 		keyIBC:        sdk.NewKVStoreKey("ibc"),
 		keyArgument:   sdk.NewKVStoreKey(argument.StoreKey),
 		keyStory:      sdk.NewKVStoreKey(story.StoreKey),
-		keyStoryQueue: sdk.NewKVStoreKey(story.PendingListStoreKey),
+		keyStoryQueue: sdk.NewKVStoreKey(story.QueueStoreKey),
 		keyCategory:   sdk.NewKVStoreKey(category.StoreKey),
 		keyBacking:    sdk.NewKVStoreKey(backing.StoreKey),
 		keyChallenge:  sdk.NewKVStoreKey(challenge.StoreKey),

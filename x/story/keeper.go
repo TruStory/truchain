@@ -17,8 +17,8 @@ import (
 const (
 	// StoreKey is string representation of the store key for stories
 	StoreKey = "stories"
-	// PendingListStoreKey is string representation of the store key for pending story ids
-	PendingListStoreKey = "pendingStoryList"
+	// QueueStoreKey is string representation of the store key for pending story ids
+	QueueStoreKey = "storyQueue"
 )
 
 // ReadKeeper defines a module interface that facilitates read only access

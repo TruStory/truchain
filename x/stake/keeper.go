@@ -64,8 +64,10 @@ func (k Keeper) RedistributeStake(ctx sdk.Context, votes []Voter) sdk.Error {
 
 	winPool := falsePool
 	totalPool := truePool.Add(falsePool)
+
 	truePoolDec := sdk.NewDecFromInt(truePool)
 	truePoolPercentOfTotalPool := truePoolDec.QuoInt(totalPool)
+
 	falsePoolDec := sdk.NewDecFromInt(falsePool)
 	falsePoolPercentOfTotalPool := falsePoolDec.QuoInt(totalPool)
 
@@ -129,7 +131,7 @@ func (k Keeper) DistributeInterest(ctx sdk.Context, votes []Voter) sdk.Error {
 func (k Keeper) ValidateAmount(ctx sdk.Context, amount sdk.Coin) sdk.Error {
 	maxAmount := k.GetParams(ctx).MaxAmount
 	if maxAmount.IsLT(amount) {
-		return ErrInvalidStakeAmount()
+		return ErrOverMaxAmount()
 	}
 
 	return nil

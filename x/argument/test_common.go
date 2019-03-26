@@ -29,7 +29,7 @@ func mockDB() (
 	catKey := sdk.NewKVStoreKey(category.StoreKey)
 	argumentKey := sdk.NewKVStoreKey(StoreKey)
 	storyKey := sdk.NewKVStoreKey(story.StoreKey)
-	storyListKey := sdk.NewKVStoreKey(story.PendingListStoreKey)
+	storyListKey := sdk.NewKVStoreKey(story.QueueStoreKey)
 	paramsKey := sdk.NewKVStoreKey(params.StoreKey)
 	transientParamsKey := sdk.NewTransientStoreKey(params.TStoreKey)
 	truBankKey := sdk.NewKVStoreKey(trubank.StoreKey)
@@ -49,7 +49,6 @@ func mockDB() (
 
 	codec := amino.NewCodec()
 	cryptoAmino.RegisterAmino(codec)
-	// RegisterAmino(codec)
 	codec.RegisterInterface((*auth.Account)(nil), nil)
 	codec.RegisterConcrete(&auth.BaseAccount{}, "auth/Account", nil)
 

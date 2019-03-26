@@ -39,7 +39,7 @@ func mockDB() (
 	catKey := sdk.NewKVStoreKey(category.StoreKey)
 	argumentKey := sdk.NewKVStoreKey(argument.StoreKey)
 	storyKey := sdk.NewKVStoreKey(story.StoreKey)
-	storyListKey := sdk.NewKVStoreKey(story.PendingListStoreKey)
+	storyListKey := sdk.NewKVStoreKey(story.QueueStoreKey)
 	backingKey := sdk.NewKVStoreKey(backing.StoreKey)
 	challengeKey := sdk.NewKVStoreKey(challenge.StoreKey)
 	distKey := sdk.NewKVStoreKey(StoreKey)

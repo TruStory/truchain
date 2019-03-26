@@ -22,8 +22,8 @@ func ErrInvalidStoryState(state string) sdk.Error {
 		DefaultCodespace, CodeInvalidStoryState, fmt.Sprintf(msg, state))
 }
 
-// ErrInvalidStakeAmount throws when stake is too large
-func ErrInvalidStakeAmount() sdk.Error {
+// ErrOverMaxAmount throws when stake is too large
+func ErrOverMaxAmount() sdk.Error {
 	return sdk.NewError(
 		DefaultCodespace,
 		CodeInvalidStakeAmount,

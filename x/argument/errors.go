@@ -10,16 +10,16 @@ import (
 const (
 	DefaultCodespace sdk.CodespaceType = "argument"
 
-	CodeInvalidArgumentID sdk.CodeType = 1501
-	CodeNotFound          sdk.CodeType = 1502
-	CodeArgumentTooShort  sdk.CodeType = 1503
-	CodeArgumentTooLong   sdk.CodeType = 1504
-	CodeInvalid           sdk.CodeType = 1505
+	CodeInvalidID    sdk.CodeType = 1501
+	CodeNotFound     sdk.CodeType = 1502
+	CodeBodyTooShort sdk.CodeType = 1503
+	CodeBodyTooLong  sdk.CodeType = 1504
+	CodeInvalid      sdk.CodeType = 1505
 )
 
 // ErrInvalidArgumentID throws an error on invalid title
 func ErrInvalidArgumentID() sdk.Error {
-	return sdk.NewError(DefaultCodespace, CodeInvalidArgumentID, "Invalid argument ID")
+	return sdk.NewError(DefaultCodespace, CodeInvalidID, "Invalid argument ID")
 }
 
 // ErrNotFound throws when an argument by id is not found
@@ -29,21 +29,21 @@ func ErrNotFound(id int64) sdk.Error {
 
 // ErrArgumentTooShortMsg throws for an invalid argument
 func ErrArgumentTooShortMsg(argument string, len int) sdk.Error {
-	msg := "Argument too short: %s. Must be greater than %d characters."
+	msg := "Argument body too short: %s. Must be greater than %d characters."
 
 	return sdk.NewError(
 		DefaultCodespace,
-		CodeArgumentTooShort,
+		CodeBodyTooShort,
 		fmt.Sprintf(msg, argument, len))
 }
 
 // ErrArgumentTooLongMsg throws for an invalid argument
 func ErrArgumentTooLongMsg(len int) sdk.Error {
-	msg := "Argument too long. Must be less than %d characters."
+	msg := "Argument body too long. Must be less than %d characters."
 
 	return sdk.NewError(
 		DefaultCodespace,
-		CodeArgumentTooLong,
+		CodeBodyTooLong,
 		fmt.Sprintf(msg, len))
 }
 

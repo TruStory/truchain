@@ -3,12 +3,11 @@ package argument
 import (
 	"fmt"
 
-	"github.com/TruStory/truchain/x/story"
-	amino "github.com/tendermint/go-amino"
-
 	app "github.com/TruStory/truchain/types"
+	"github.com/TruStory/truchain/x/story"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/params"
+	amino "github.com/tendermint/go-amino"
 )
 
 const (
