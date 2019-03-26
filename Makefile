@@ -1,6 +1,6 @@
 PACKAGES=$(shell go list ./...)
 
-MODULES = backing category challenge expiration stake story vote voting
+MODULES = argument backing category challenge expiration stake story
 
 CHAIN_DIR = ./.chain
 
