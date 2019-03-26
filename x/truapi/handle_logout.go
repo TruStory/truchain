@@ -12,7 +12,7 @@ func Logout() http.Handler {
 	fn := func(w http.ResponseWriter, req *http.Request) {
 		cookie := cookies.GetLogoutCookie()
 		http.SetCookie(w, cookie)
-		http.Redirect(w, req, os.Getenv("OAUTH_SUCCESS_REDIR"), http.StatusFound)
+		http.Redirect(w, req, os.Getenv("AUTH_LOGOUT_REDIR"), http.StatusFound)
 	}
 	return http.HandlerFunc(fn)
 }

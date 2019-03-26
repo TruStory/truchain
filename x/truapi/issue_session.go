@@ -44,7 +44,7 @@ func IssueSession(ta *TruAPI) http.Handler {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 		}
 		http.SetCookie(w, cookie)
-		http.Redirect(w, req, os.Getenv("OAUTH_SUCCESS_REDIR"), http.StatusFound)
+		http.Redirect(w, req, os.Getenv("AUTH_LOGIN_REDIR"), http.StatusFound)
 	}
 	return http.HandlerFunc(fn)
 }
