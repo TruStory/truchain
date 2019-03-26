@@ -232,7 +232,10 @@ func (k Keeper) ChallengeByStoryIDAndCreator(
 
 // LikeArgument likes and argument
 func (k Keeper) LikeArgument(ctx sdk.Context, argumentID int64, creator sdk.AccAddress, amount sdk.Coin) (int64, sdk.Error) {
-	k.argumentKeeper.RegisterLike(ctx, argumentID, creator)
+	err := k.argumentKeeper.RegisterLike(ctx, argumentID, creator)
+	if err != nil {
+		return 0, err
+	}
 
 	argument, err := k.argumentKeeper.Argument(ctx, argumentID)
 	if err != nil {
