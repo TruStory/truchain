@@ -147,7 +147,7 @@ func (k Keeper) validateArgumentBody(ctx sdk.Context, argument string) sdk.Error
 	maxArgumentLength := k.GetParams(ctx).MaxArgumentLength
 
 	if len > 0 && (len < minArgumentLength) {
-		return ErrArgumentTooShortMsg(argument, minArgumentLength)
+		return ErrArgumentTooShortMsg(minArgumentLength)
 	}
 
 	if len > 0 && (len > maxArgumentLength) {

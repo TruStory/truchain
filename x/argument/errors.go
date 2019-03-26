@@ -28,13 +28,13 @@ func ErrNotFound(id int64) sdk.Error {
 }
 
 // ErrArgumentTooShortMsg throws for an invalid argument
-func ErrArgumentTooShortMsg(argument string, len int) sdk.Error {
-	msg := "Argument body too short: %s. Must be greater than %d characters."
+func ErrArgumentTooShortMsg(len int) sdk.Error {
+	msg := "Argument body too short. Must be greater than %d characters."
 
 	return sdk.NewError(
 		DefaultCodespace,
 		CodeBodyTooShort,
-		fmt.Sprintf(msg, argument, len))
+		fmt.Sprintf(msg, len))
 }
 
 // ErrArgumentTooLongMsg throws for an invalid argument
