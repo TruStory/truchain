@@ -7,7 +7,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/params"
 )
 
-// store keys for voting params
+// store keys for argument params
 var (
 	KeyMinArgumentLength = []byte("minArgumentLength")
 	KeyMaxArgumentLength = []byte("maxArgumentLength")
