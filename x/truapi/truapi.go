@@ -56,6 +56,10 @@ func (ta *TruAPI) RegisterModels() {
 	if err != nil {
 		panic(err)
 	}
+	err = ta.DBClient.RegisterModel(&db.DeviceToken{})
+	if err != nil {
+		panic(err)
+	}
 }
 
 // WrapHandler wraps a chttp.Handler and returns a standar http.Handler
@@ -73,6 +77,7 @@ func (ta *TruAPI) RegisterRoutes() {
 	api.Handle("/unsigned", WrapHandler(ta.HandleUnsigned))
 	api.Handle("/register", WrapHandler(ta.HandleRegistration))
 	api.Handle("/user", WrapHandler(ta.HandleUserDetails))
+	api.HandleFunc("/deviceToken", ta.HandleDeviceTokenRegistration)
 
 	if os.Getenv("MOCK_REGISTRATION") == "true" {
 		api.Handle("/mock_register", WrapHandler(ta.HandleMockRegistration))
