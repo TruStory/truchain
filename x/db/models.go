@@ -121,7 +121,7 @@ func (c *Client) UpsertTwitterProfile(profile *TwitterProfile) error {
 }
 
 // UpsertDeviceToken implements `Datastore`.
-// Updates an existing Twitter profile or creates a new one.
+// Updates an existing DeviceToken or creates a new one.
 func (c *Client) UpsertDeviceToken(token *DeviceToken) error {
 	_, err := c.TwitterProfileByAddress(token.Address)
 	if err == pg.ErrNoRows {
