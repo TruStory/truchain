@@ -17,6 +17,7 @@ type Datastore interface {
 type Mutations interface {
 	GenericMutations
 	UpsertTwitterProfile(profile *TwitterProfile) error
+	UpsertDeviceToken(token *DeviceToken) error
 }
 
 // Queries read from the database
@@ -25,6 +26,7 @@ type Queries interface {
 	TwitterProfileByID(id int64) (TwitterProfile, error)
 	TwitterProfileByAddress(addr string) (TwitterProfile, error)
 	KeyPairByTwitterProfileID(id int64) (KeyPair, error)
+	DeviceTokensByAddress(addr string) ([]DeviceToken, error)
 }
 
 // TwitterProfile is the Twitter profile associated with an account
@@ -42,6 +44,18 @@ type KeyPair struct {
 	TwitterProfileID int64  `json:"twitter_profile_id"`
 	PrivateKey       string `json:"private_key"`
 	PublicKey        string `json:"public_key"`
+}
+
+// DeviceToken is the association between a cosmos address and a device token used for
+// push notifications.
+type DeviceToken struct {
+	ID int64 `json:"id"`
+	// Address is the cosmos address
+	Address string `json:"address"  sql:"unique:device_address_token,notnull"`
+	// Token represents the DeviceToken (iOS), RegistrationId (android)
+	Token string `json:"token"  sql:"unique:device_address_token,notnull"`
+	// Platform indicates to which platform the token belongs to : android, ios
+	Platform string `json:"platform"  sql:"unique:device_address_token,notnull"`
 }
 
 func (t TwitterProfile) String() string {
@@ -104,4 +118,34 @@ func (c *Client) UpsertTwitterProfile(profile *TwitterProfile) error {
 		Insert()
 
 	return err
+}
+
+// UpsertDeviceToken implements `Datastore`.
+// Updates an existing Twitter profile or creates a new one.
+func (c *Client) UpsertDeviceToken(token *DeviceToken) error {
+	_, err := c.TwitterProfileByAddress(token.Address)
+	if err == pg.ErrNoRows {
+		return ErrInvalidAddress
+	}
+	if err != nil {
+		return err
+	}
+	_, err = c.Model(token).
+		Where("address = ? ", token.Address).
+		Where("token = ?", token.Token).
+		Where("platform = ?", token.Platform).
+		OnConflict("DO NOTHING").
+		SelectOrInsert()
+	return err
+}
+
+// DeviceTokensByAddress implements `Datastore`
+// Finds a Device Tokens by the given address
+func (c *Client) DeviceTokensByAddress(addr string) ([]DeviceToken, error) {
+	deviceTokens := make([]DeviceToken, 0)
+	err := c.Model(&deviceTokens).Where("address = ?", addr).Select()
+	if err != nil {
+		return nil, err
+	}
+	return deviceTokens, nil
 }
