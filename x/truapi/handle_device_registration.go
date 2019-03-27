@@ -17,8 +17,9 @@ type DeviceTokenRegistrationRequest struct {
 	Token    string `json:"token"`
 }
 
-// HandleDeviceTokenRegistration takes a `DeviceTokenRegistrationRequest` and returns a `PingResponse`
+// HandleDeviceTokenRegistration takes a `DeviceTokenRegistrationRequest` and returns a `DeviceToken`
 func (ta *TruAPI) HandleDeviceTokenRegistration(w http.ResponseWriter, r *http.Request) {
+	// check if request comes from an authenticated user.
 	auth, err := cookies.GetAuthenticatedUser(r)
 	if err != nil {
 		render.Error(w, r, err.Error(), http.StatusBadRequest)
