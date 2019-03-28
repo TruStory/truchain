@@ -55,7 +55,7 @@ func HandleOAuthFailure(ta *TruAPI) http.Handler {
 	fn := func(w http.ResponseWriter, req *http.Request) {
 		// if the authorization was purposefully denied by the user
 		if req.FormValue("denied") != "" {
-			http.Redirect(w, req, os.Getenv("AUTH_LOGIN_DENIED_REDIR"), http.StatusFound)
+			http.Redirect(w, req, os.Getenv("AUTH_DENIED_REDIR"), http.StatusFound)
 			return
 		}
 
