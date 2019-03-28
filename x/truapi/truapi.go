@@ -226,9 +226,9 @@ func (ta *TruAPI) RegisterResolvers() {
 		// Deprecated
 		"storyMinLength":            func(_ context.Context, p params.Params) int { return p.StoryParams.MinStoryLength },
 		"storyMaxLength":            func(_ context.Context, p params.Params) int { return p.StoryParams.MaxStoryLength },
-		"storyVotingDuration":       func(_ context.Context, p params.Params) string { return "" },
-		"challengeMinThreshold":     func(_ context.Context, p params.Params) string { return "" },
-		"challengeThresholdPercent": func(_ context.Context, p params.Params) string { return "" },
+		"storyVotingDuration":       func(_ context.Context, p params.Params) string { return "0" },
+		"challengeMinThreshold":     func(_ context.Context, p params.Params) string { return "0" },
+		"challengeThresholdPercent": func(_ context.Context, p params.Params) string { return "0" },
 	})
 
 	ta.GraphQLClient.RegisterQueryResolver("stories", ta.allStoriesResolver)
