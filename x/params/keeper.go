@@ -52,11 +52,10 @@ func (k Keeper) Params(ctx sdk.Context) Params {
 			MaxArgumentLength: k.argumentKeeper.GetParams(ctx).MaxArgumentLength,
 		},
 		ChallengeParams: challenge.Params{
-			ChallengeToBackingRatio: k.challengeKeeper.GetParams(ctx).ChallengeToBackingRatio,
-			MinChallengeThreshold:   k.challengeKeeper.GetParams(ctx).MinChallengeThreshold,
-			MinChallengeStake:       k.challengeKeeper.GetParams(ctx).MinChallengeStake,
+			MinChallengeStake: k.challengeKeeper.GetParams(ctx).MinChallengeStake,
 		},
 		StakeParams: stake.Params{
+			MaxAmount:       k.stakeKeeper.GetParams(ctx).MaxAmount,
 			MinInterestRate: k.stakeKeeper.GetParams(ctx).MinInterestRate,
 			MaxInterestRate: k.stakeKeeper.GetParams(ctx).MaxInterestRate,
 			MajorityPercent: k.stakeKeeper.GetParams(ctx).MajorityPercent,
@@ -67,7 +66,6 @@ func (k Keeper) Params(ctx sdk.Context) Params {
 			ExpireDuration: k.storyKeeper.GetParams(ctx).ExpireDuration,
 			MinStoryLength: k.storyKeeper.GetParams(ctx).MinStoryLength,
 			MaxStoryLength: k.storyKeeper.GetParams(ctx).MaxStoryLength,
-			VotingDuration: k.storyKeeper.GetParams(ctx).VotingDuration,
 		},
 	}
 }

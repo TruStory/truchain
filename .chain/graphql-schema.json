@@ -755,6 +755,38 @@
             "deprecationReason": "",
             "description": "",
             "isDeprecated": false,
+            "name": "claimMaxLength",
+            "type": {
+              "kind": "NON_NULL",
+              "name": "",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "int",
+                "ofType": null
+              }
+            }
+          },
+          {
+            "args": [],
+            "deprecationReason": "",
+            "description": "",
+            "isDeprecated": false,
+            "name": "claimMinLength",
+            "type": {
+              "kind": "NON_NULL",
+              "name": "",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "int",
+                "ofType": null
+              }
+            }
+          },
+          {
+            "args": [],
+            "deprecationReason": "",
+            "description": "",
+            "isDeprecated": false,
             "name": "expirationParams",
             "type": {
               "kind": "NON_NULL",
@@ -788,6 +820,22 @@
             "description": "",
             "isDeprecated": false,
             "name": "maxInterestRate",
+            "type": {
+              "kind": "NON_NULL",
+              "name": "",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "string",
+                "ofType": null
+              }
+            }
+          },
+          {
+            "args": [],
+            "deprecationReason": "",
+            "description": "",
+            "isDeprecated": false,
+            "name": "maxStakeAmount",
             "type": {
               "kind": "NON_NULL",
               "name": "",
