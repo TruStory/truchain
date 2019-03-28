@@ -205,28 +205,30 @@ func (ta *TruAPI) RegisterResolvers() {
 
 	ta.GraphQLClient.RegisterQueryResolver("params", ta.paramsResolver)
 	ta.GraphQLClient.RegisterObjectResolver("Params", params.Params{}, map[string]interface{}{
-		"amountWeight":      func(_ context.Context, p params.Params) string { return p.StakeParams.AmountWeight.String() },
-		"periodWeight":      func(_ context.Context, p params.Params) string { return p.StakeParams.PeriodWeight.String() },
-		"minInterestRate":   func(_ context.Context, p params.Params) string { return p.StakeParams.MinInterestRate.String() },
-		"maxInterestRate":   func(_ context.Context, p params.Params) string { return p.StakeParams.MaxInterestRate.String() },
+		"amountWeight":    func(_ context.Context, p params.Params) string { return p.StakeParams.AmountWeight.String() },
+		"periodWeight":    func(_ context.Context, p params.Params) string { return p.StakeParams.PeriodWeight.String() },
+		"minInterestRate": func(_ context.Context, p params.Params) string { return p.StakeParams.MinInterestRate.String() },
+		"maxInterestRate": func(_ context.Context, p params.Params) string { return p.StakeParams.MaxInterestRate.String() },
+		"maxStakeAmount":  func(_ context.Context, p params.Params) string { return p.StakeParams.MaxAmount.Amount.String() },
+
 		"minArgumentLength": func(_ context.Context, p params.Params) int { return p.ArgumentParams.MinArgumentLength },
 		"maxArgumentLength": func(_ context.Context, p params.Params) int { return p.ArgumentParams.MaxArgumentLength },
+
 		"storyExpireDuration": func(_ context.Context, p params.Params) string {
 			return fmt.Sprintf("%d", p.StoryParams.ExpireDuration)
 		},
-		"storyMinLength":      func(_ context.Context, p params.Params) int { return p.StoryParams.MinStoryLength },
-		"storyMaxLength":      func(_ context.Context, p params.Params) int { return p.StoryParams.MaxStoryLength },
-		"storyVotingDuration": func(_ context.Context, p params.Params) string { return p.StoryParams.VotingDuration.String() },
+		"claimMinLength": func(_ context.Context, p params.Params) int { return p.StoryParams.MinStoryLength },
+		"claimMaxLength": func(_ context.Context, p params.Params) int { return p.StoryParams.MaxStoryLength },
 
 		"challengeMinStake": func(_ context.Context, p params.Params) string { return p.ChallengeParams.MinChallengeStake.String() },
-		"challengeMinThreshold": func(_ context.Context, p params.Params) string {
-			return p.ChallengeParams.MinChallengeThreshold.String()
-		},
-		"challengeThresholdPercent": func(_ context.Context, p params.Params) string {
-			return p.ChallengeParams.ChallengeToBackingRatio.String()
-		},
+		"stakeDenom":        func(_ context.Context, _ params.Params) string { return app.StakeDenom },
 
-		"stakeDenom": func(_ context.Context, _ params.Params) string { return app.StakeDenom },
+		// Deprecated
+		"storyMinLength":            func(_ context.Context, p params.Params) int { return p.StoryParams.MinStoryLength },
+		"storyMaxLength":            func(_ context.Context, p params.Params) int { return p.StoryParams.MaxStoryLength },
+		"storyVotingDuration":       func(_ context.Context, p params.Params) string { return "" },
+		"challengeMinThreshold":     func(_ context.Context, p params.Params) string { return "" },
+		"challengeThresholdPercent": func(_ context.Context, p params.Params) string { return "" },
 	})
 
 	ta.GraphQLClient.RegisterQueryResolver("stories", ta.allStoriesResolver)
