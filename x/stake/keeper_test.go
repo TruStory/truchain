@@ -4,6 +4,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/TruStory/truchain/x/story"
 	"github.com/TruStory/truchain/x/trubank"
 
 	app "github.com/TruStory/truchain/types"
@@ -278,4 +279,53 @@ func Test_interest_MaxAmountMaxPeriod(t *testing.T) {
 
 	interest := k.interest(ctx, amount, period)
 	assert.Equal(t, expected.RoundInt().String(), interest.String())
+}
+
+func Test_interest_ZeroAmountWeight(t *testing.T) {
+	ctx, k := mockDB()
+	params := Params{
+		MaxAmount:       k.GetParams(ctx).MaxAmount,
+		MinInterestRate: k.GetParams(ctx).MinInterestRate,
+		MaxInterestRate: k.GetParams(ctx).MaxInterestRate,
+		MajorityPercent: k.GetParams(ctx).MajorityPercent,
+		AmountWeight:    sdk.ZeroDec(),
+		PeriodWeight:    sdk.NewDec(1),
+	}
+	k.SetParams(ctx, params)
+
+	storyParams := story.Params{
+		ExpireDuration: 72 * time.Hour,
+		MinStoryLength: 25,
+		MaxStoryLength: 350,
+	}
+	storyWriteKeeper := k.storyKeeper.(story.WriteKeeper)
+	storyWriteKeeper.SetParams(ctx, storyParams)
+
+	// 10000000000 amount
+	//           0 interest
+	amount := sdk.NewCoin("crypto", sdk.NewInt(10*app.Shanev))
+	period := 0 * time.Hour
+	interest := k.interest(ctx, amount, period)
+	assert.Equal(t, sdk.NewInt(0).String(), interest.String())
+
+	// 10000000000 amount
+	//   333333333 interest
+	amount = sdk.NewCoin("crypto", sdk.NewInt(10*app.Shanev))
+	period = 24 * time.Hour
+	interest = k.interest(ctx, amount, period)
+	assert.Equal(t, sdk.NewInt(333333333).String(), interest.String())
+
+	// 10000000000 amount
+	//   666666667 interest
+	amount = sdk.NewCoin("crypto", sdk.NewInt(10*app.Shanev))
+	period = 48 * time.Hour
+	interest = k.interest(ctx, amount, period)
+	assert.Equal(t, sdk.NewInt(666666667).String(), interest.String())
+
+	// 10000000000 amount
+	//  1000000000 interest
+	amount = sdk.NewCoin("crypto", sdk.NewInt(10*app.Shanev))
+	period = 72 * time.Hour
+	interest = k.interest(ctx, amount, period)
+	assert.Equal(t, sdk.NewInt(1000000000).String(), interest.String())
 }
