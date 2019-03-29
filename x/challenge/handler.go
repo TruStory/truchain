@@ -55,14 +55,14 @@ func handleLikeArgumentMsg(ctx sdk.Context, k Keeper, msg LikeChallengeArgumentM
 	return result(ctx, k, challenge.StoryID(), challengeID, msg.Creator)
 }
 
-func result(ctx sdk.Context, k Keeper, storyID, backingID int64, backer sdk.AccAddress) sdk.Result {
+func result(ctx sdk.Context, k Keeper, storyID, challengeID int64, backer sdk.AccAddress) sdk.Result {
 	story, err := k.storyKeeper.Story(ctx, storyID)
 	if err != nil {
 		return err.Result()
 	}
 
 	resultData := app.StakeNotificationResult{
-		MsgResult: app.MsgResult{ID: backingID},
+		MsgResult: app.MsgResult{ID: challengeID},
 		StoryID:   storyID,
 		From:      backer,
 		To:        story.Creator,
