@@ -55,9 +55,9 @@ type MsgResult struct {
 // StakeNotificationResult defines data for a stake push notification
 type StakeNotificationResult struct {
 	MsgResult
-
-	From sdk.AccAddress `json:"from,omitempty"`
-	To   sdk.AccAddress `json:"to,omitempty"`
+	StoryID int64          `json:"story_id"`
+	From    sdk.AccAddress `json:"from,omitempty"`
+	To      sdk.AccAddress `json:"to,omitempty"`
 }
 
 // CompletedStory defines a story result.
