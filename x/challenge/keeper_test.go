@@ -122,3 +122,27 @@ func TestNewChallenge_ErrIncorrectCategoryCoin(t *testing.T) {
 	_, err := k.Create(ctx, storyID, amount, 0, argument, creator)
 	assert.NotNil(t, err)
 }
+
+func Test_ChallengersByStoryID(t *testing.T) {
+	ctx, k, sk, _, bankKeeper := mockDB()
+
+	storyID := createFakeStory(ctx, sk)
+	amount := sdk.NewCoin(app.StakeDenom, sdk.NewInt(15000000000))
+	argument := "test argument is long enough"
+	creator := sdk.AccAddress([]byte{1, 2})
+	creator2 := sdk.AccAddress([]byte{1, 2, 3, 4})
+
+	// give user some funds
+	bankKeeper.AddCoins(ctx, creator, sdk.Coins{amount})
+	bankKeeper.AddCoins(ctx, creator2, sdk.Coins{amount})
+
+	_, err := k.Create(ctx, storyID, amount, 0, argument, creator)
+	assert.Nil(t, err)
+
+	_, err = k.Create(ctx, storyID, amount, 0, argument, creator2)
+	assert.Nil(t, err)
+
+	challengers, err := k.ChallengersByStoryID(ctx, storyID)
+	assert.Nil(t, err)
+	assert.Subset(t, []sdk.Address{creator, creator2}, challengers)
+}

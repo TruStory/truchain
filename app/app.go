@@ -78,9 +78,9 @@ type TruChain struct {
 
 	// access truchain multistore
 	argumentKeeper     argument.Keeper
-	backingKeeper      backing.WriteKeeper
+	backingKeeper      backing.Keeper
 	categoryKeeper     category.WriteKeeper
-	challengeKeeper    challenge.WriteKeeper
+	challengeKeeper    challenge.Keeper
 	clientParamsKeeper clientParams.Keeper
 	expirationKeeper   expiration.Keeper
 	storyKeeper        story.WriteKeeper
@@ -352,9 +352,9 @@ func (app *TruChain) BeginBlocker(ctx sdk.Context, req abci.RequestBeginBlock) a
 // EndBlocker reflects logic to run after all TXs are processed by the
 // application.
 func (app *TruChain) EndBlocker(ctx sdk.Context, _ abci.RequestEndBlock) abci.ResponseEndBlock {
-	app.expirationKeeper.EndBlock(ctx)
+	tags := app.expirationKeeper.EndBlock(ctx)
 
-	return abci.ResponseEndBlock{}
+	return abci.ResponseEndBlock{Tags: tags}
 }
 
 // ExportAppStateAndValidators implements custom application logic that exposes

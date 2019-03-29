@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"testing"
 
-	"github.com/TruStory/truchain/types"
 	app "github.com/TruStory/truchain/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/stretchr/testify/assert"
@@ -43,10 +42,17 @@ func TestBackStoryMsg(t *testing.T) {
 	assert.NotNil(t, msg)
 
 	res := h(ctx, msg)
-	idres := new(types.IDResult)
-	_ = json.Unmarshal(res.Data, &idres)
+	result := &app.StakeNotificationResult{}
+	_ = json.Unmarshal(res.Data, result)
 
-	assert.Equal(t, int64(1), idres.ID, "incorrect result backing id")
+	expected := &app.StakeNotificationResult{
+		MsgResult: app.MsgResult{ID: int64(1)},
+		StoryID:   storyID,
+		From:      creator,
+		To:        sdk.AccAddress([]byte{1, 2}),
+	}
+
+	assert.Equal(t, expected, result)
 }
 
 func TestByzantineMsg(t *testing.T) {

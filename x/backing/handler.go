@@ -1,12 +1,14 @@
 package backing
 
 import (
+	"encoding/json"
+
 	app "github.com/TruStory/truchain/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
 // NewHandler creates a new handler for all TruStory messages
-func NewHandler(k WriteKeeper) sdk.Handler {
+func NewHandler(k Keeper) sdk.Handler {
 	return func(ctx sdk.Context, msg sdk.Msg) sdk.Result {
 		switch msg := msg.(type) {
 		case BackStoryMsg:
@@ -19,7 +21,7 @@ func NewHandler(k WriteKeeper) sdk.Handler {
 	}
 }
 
-func handleBackStoryMsg(ctx sdk.Context, k WriteKeeper, msg BackStoryMsg) sdk.Result {
+func handleBackStoryMsg(ctx sdk.Context, k Keeper, msg BackStoryMsg) sdk.Result {
 	if err := msg.ValidateBasic(); err != nil {
 		return err.Result()
 	}
@@ -34,11 +36,10 @@ func handleBackStoryMsg(ctx sdk.Context, k WriteKeeper, msg BackStoryMsg) sdk.Re
 	if err != nil {
 		return err.Result()
 	}
-
-	return app.Result(id)
+	return result(ctx, k, msg.StoryID, id, msg.Creator)
 }
 
-func handleLikeArgumentMsg(ctx sdk.Context, k WriteKeeper, msg LikeBackingArgumentMsg) sdk.Result {
+func handleLikeArgumentMsg(ctx sdk.Context, k Keeper, msg LikeBackingArgumentMsg) sdk.Result {
 	if err := msg.ValidateBasic(); err != nil {
 		return err.Result()
 	}
@@ -48,5 +49,33 @@ func handleLikeArgumentMsg(ctx sdk.Context, k WriteKeeper, msg LikeBackingArgume
 		return err.Result()
 	}
 
-	return app.Result(backingID)
+	backing, err := k.Backing(ctx, backingID)
+	if err != nil {
+		err.Result()
+	}
+	return result(ctx, k, backing.StoryID(), backingID, msg.Creator)
+}
+
+func result(ctx sdk.Context, k Keeper, storyID, backingID int64, backer sdk.AccAddress) sdk.Result {
+	story, err := k.storyKeeper.Story(ctx, storyID)
+	if err != nil {
+		return err.Result()
+	}
+
+	resultData := app.StakeNotificationResult{
+		MsgResult: app.MsgResult{ID: backingID},
+		StoryID:   storyID,
+		From:      backer,
+		To:        story.Creator,
+	}
+
+	resultBytes, jsonErr := json.Marshal(resultData)
+	if jsonErr != nil {
+		panic(jsonErr)
+	}
+
+	return sdk.Result{
+		Data: resultBytes,
+		Tags: app.PushTag,
+	}
 }

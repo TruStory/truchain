@@ -136,3 +136,27 @@ func TestDuplicateBacking(t *testing.T) {
 	_, err := bk.Create(ctx, storyID, amount, 0, argument, creator)
 	assert.Equal(t, ErrDuplicate(storyID, creator).Code(), err.Code())
 }
+
+func Test_BackersByStoryID(t *testing.T) {
+	ctx, bk, sk, ck, bankKeeper, _ := mockDB()
+
+	storyID := createFakeStory(ctx, sk, ck)
+	amount := sdk.NewCoin(app.StakeDenom, sdk.NewInt(15000000000))
+	argument := "test argument is long enough"
+	creator := sdk.AccAddress([]byte{1, 2})
+	creator2 := sdk.AccAddress([]byte{1, 2, 3, 4})
+
+	// give user some funds
+	bankKeeper.AddCoins(ctx, creator, sdk.Coins{amount})
+	bankKeeper.AddCoins(ctx, creator2, sdk.Coins{amount})
+
+	_, err := bk.Create(ctx, storyID, amount, 0, argument, creator)
+	assert.Nil(t, err)
+
+	_, err = bk.Create(ctx, storyID, amount, 0, argument, creator2)
+	assert.Nil(t, err)
+
+	backers, err := bk.BackersByStoryID(ctx, storyID)
+	assert.Nil(t, err)
+	assert.Subset(t, []sdk.Address{creator, creator2}, backers)
+}

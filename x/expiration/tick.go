@@ -1,8 +1,10 @@
 package expiration
 
 import (
+	"encoding/json"
 	"fmt"
 
+	app "github.com/TruStory/truchain/types"
 	"github.com/TruStory/truchain/x/stake"
 	"github.com/TruStory/truchain/x/story"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -10,14 +12,24 @@ import (
 
 // EndBlock is called at the end of every block
 func (k Keeper) EndBlock(ctx sdk.Context) sdk.Tags {
-	err := k.processStoryQueue(ctx)
+	completed, err := k.processStoryQueue(ctx, make([]app.CompletedStory, 0))
 	if err != nil {
 		panic(err)
 	}
-	return sdk.EmptyTags()
+	result := &app.CompletedStoriesNotificationResult{
+		Stories: completed,
+	}
+	b, mErr := json.Marshal(result)
+	if mErr != nil {
+		panic(mErr)
+	}
+	if len(completed) == 0 {
+		return sdk.EmptyTags()
+	}
+	return append(app.PushTag, sdk.NewTags(app.KeyCompletedStoriesTag, b)...)
 }
 
-func (k Keeper) processStoryQueue(ctx sdk.Context) sdk.Error {
+func (k Keeper) processStoryQueue(ctx sdk.Context, completed []app.CompletedStory) ([]app.CompletedStory, sdk.Error) {
 	logger := ctx.Logger().With("module", StoreKey)
 
 	storyQueue := k.storyQueue(ctx)
@@ -25,7 +37,7 @@ func (k Keeper) processStoryQueue(ctx sdk.Context) sdk.Error {
 	if storyQueue.IsEmpty() {
 		// done processing all expired stories
 		// terminate
-		return nil
+		return completed, nil
 	}
 
 	var storyID int64
@@ -35,14 +47,14 @@ func (k Keeper) processStoryQueue(ctx sdk.Context) sdk.Error {
 
 	currentStory, err := k.storyKeeper.Story(ctx, storyID)
 	if err != nil {
-		return err
+		return completed, err
 	}
 
 	logger.Info(fmt.Sprintf("Checking %s", currentStory))
 
 	if ctx.BlockHeader().Time.Before(currentStory.ExpireTime) {
 		// return and wait until next block to check if story has expired
-		return nil
+		return completed, nil
 	}
 
 	logger.Info(fmt.Sprintf("Handling expired story id: %d", storyID))
@@ -53,7 +65,7 @@ func (k Keeper) processStoryQueue(ctx sdk.Context) sdk.Error {
 
 	backings, err := k.backingKeeper.BackingsByStoryID(ctx, storyID)
 	if err != nil {
-		return err
+		return completed, err
 	}
 	for _, backing := range backings {
 		votes = append(votes, backing)
@@ -61,7 +73,7 @@ func (k Keeper) processStoryQueue(ctx sdk.Context) sdk.Error {
 
 	challenges, err := k.challengeKeeper.ChallengesByStoryID(ctx, storyID)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	for _, challenge := range challenges {
 		votes = append(votes, challenge)
@@ -70,18 +82,35 @@ func (k Keeper) processStoryQueue(ctx sdk.Context) sdk.Error {
 	if len(votes) > 0 {
 		err = k.stakeKeeper.RedistributeStake(ctx, votes)
 		if err != nil {
-			return err
+			return completed, err
 		}
 
 		err = k.stakeKeeper.DistributeInterest(ctx, votes)
 		if err != nil {
-			return err
+			return completed, err
 		}
 	}
 
 	currentStory.Status = story.Expired
 	k.storyKeeper.UpdateStory(ctx, currentStory)
 
+	backers, err := k.backingKeeper.BackersByStoryID(ctx, currentStory.ID)
+	if err != nil {
+		return completed, err
+	}
+
+	challengers, err := k.challengeKeeper.ChallengersByStoryID(ctx, currentStory.ID)
+	if err != nil {
+		return completed, err
+	}
+	completed = append(completed,
+		app.CompletedStory{
+			ID:          currentStory.ID,
+			Creator:     currentStory.Creator,
+			Backers:     backers,
+			Challengers: challengers,
+		})
+
 	// handle next expired story
-	return k.processStoryQueue(ctx)
+	return k.processStoryQueue(ctx, completed)
 }

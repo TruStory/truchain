@@ -1,12 +1,14 @@
 package challenge
 
 import (
+	"encoding/json"
+
 	app "github.com/TruStory/truchain/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
 // NewHandler creates a new handler for all challenge messages
-func NewHandler(k WriteKeeper) sdk.Handler {
+func NewHandler(k Keeper) sdk.Handler {
 	return func(ctx sdk.Context, msg sdk.Msg) sdk.Result {
 		switch msg := msg.(type) {
 		case CreateChallengeMsg:
@@ -21,7 +23,7 @@ func NewHandler(k WriteKeeper) sdk.Handler {
 
 // handles a message to create a challenge
 func handleCreateChallengeMsg(
-	ctx sdk.Context, k WriteKeeper, msg CreateChallengeMsg) sdk.Result {
+	ctx sdk.Context, k Keeper, msg CreateChallengeMsg) sdk.Result {
 
 	if err := msg.ValidateBasic(); err != nil {
 		return err.Result()
@@ -33,10 +35,10 @@ func handleCreateChallengeMsg(
 		return err.Result()
 	}
 
-	return app.Result(id)
+	return result(ctx, k, msg.StoryID, id, msg.Creator)
 }
 
-func handleLikeArgumentMsg(ctx sdk.Context, k WriteKeeper, msg LikeChallengeArgumentMsg) sdk.Result {
+func handleLikeArgumentMsg(ctx sdk.Context, k Keeper, msg LikeChallengeArgumentMsg) sdk.Result {
 	if err := msg.ValidateBasic(); err != nil {
 		return err.Result()
 	}
@@ -46,5 +48,33 @@ func handleLikeArgumentMsg(ctx sdk.Context, k WriteKeeper, msg LikeChallengeArgu
 		return err.Result()
 	}
 
-	return app.Result(challengeID)
+	challenge, err := k.Challenge(ctx, challengeID)
+	if err != nil {
+		err.Result()
+	}
+	return result(ctx, k, challenge.StoryID(), challengeID, msg.Creator)
+}
+
+func result(ctx sdk.Context, k Keeper, storyID, challengeID int64, backer sdk.AccAddress) sdk.Result {
+	story, err := k.storyKeeper.Story(ctx, storyID)
+	if err != nil {
+		return err.Result()
+	}
+
+	resultData := app.StakeNotificationResult{
+		MsgResult: app.MsgResult{ID: challengeID},
+		StoryID:   storyID,
+		From:      backer,
+		To:        story.Creator,
+	}
+
+	resultBytes, jsonErr := json.Marshal(resultData)
+	if jsonErr != nil {
+		panic(jsonErr)
+	}
+
+	return sdk.Result{
+		Data: resultBytes,
+		Tags: app.PushTag,
+	}
 }
