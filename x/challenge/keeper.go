@@ -255,13 +255,16 @@ func (k Keeper) LikeArgument(ctx sdk.Context, argumentID int64, creator sdk.AccA
 		return 0, err
 	}
 
+	stakeToCredRatio := k.stakeKeeper.GetParams(ctx).StakeToCredRatio
+	likeCredAmount := amount.Amount.Div(stakeToCredRatio)
+
 	_, err = k.trubankKeeper.MintAndAddCoin(
 		ctx,
 		challenge.Creator(),
 		story.CategoryID,
 		story.ID,
 		trubank.Like,
-		app.LikeCredAmount)
+		likeCredAmount)
 	if err != nil {
 		return 0, err
 	}

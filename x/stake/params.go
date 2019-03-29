@@ -10,33 +10,36 @@ import (
 
 // store keys for voting params
 var (
-	KeyMaxAmount       = []byte("maxAmount")
-	KeyMinInterestRate = []byte("minInterestRate")
-	KeyMaxInterestRate = []byte("maxInterestRate")
-	KeyMajorityPercent = []byte("majorityPercent")
-	KeyAmountWeight    = []byte("amountWeight")
-	KeyPeriodWeight    = []byte("periodWeight")
+	KeyMaxAmount        = []byte("maxAmount")
+	KeyMinInterestRate  = []byte("minInterestRate")
+	KeyMaxInterestRate  = []byte("maxInterestRate")
+	KeyMajorityPercent  = []byte("majorityPercent")
+	KeyAmountWeight     = []byte("amountWeight")
+	KeyPeriodWeight     = []byte("periodWeight")
+	KeyStakeToCredRatio = []byte("stakeToCredRatio")
 )
 
 // Params holds parameters for voting
 type Params struct {
-	MaxAmount       sdk.Coin `json:"max_amount"`
-	MinInterestRate sdk.Dec  `json:"min_interest_rate"`
-	MaxInterestRate sdk.Dec  `json:"max_interest_rate"`
-	MajorityPercent sdk.Dec  `json:"majority_percent"`
-	AmountWeight    sdk.Dec  `json:"amount_weight"`
-	PeriodWeight    sdk.Dec  `json:"period_weight"`
+	MaxAmount        sdk.Coin `json:"max_amount"`
+	MinInterestRate  sdk.Dec  `json:"min_interest_rate"`
+	MaxInterestRate  sdk.Dec  `json:"max_interest_rate"`
+	MajorityPercent  sdk.Dec  `json:"majority_percent"`
+	AmountWeight     sdk.Dec  `json:"amount_weight"`
+	PeriodWeight     sdk.Dec  `json:"period_weight"`
+	StakeToCredRatio sdk.Int  `json:"stake_to_cred_ratio"`
 }
 
 // DefaultParams is the default parameters for voting
 func DefaultParams() Params {
 	return Params{
-		MaxAmount:       sdk.NewCoin(app.StakeDenom, sdk.NewInt(100*app.Shanev)),
-		AmountWeight:    sdk.NewDecWithPrec(333, 3), // 33.3%
-		PeriodWeight:    sdk.NewDecWithPrec(667, 3), // 66.7%
-		MinInterestRate: sdk.ZeroDec(),              // 0%
-		MaxInterestRate: sdk.NewDecWithPrec(10, 2),  // 10%
-		MajorityPercent: sdk.NewDecWithPrec(51, 2),  // 51%
+		MaxAmount:        sdk.NewCoin(app.StakeDenom, sdk.NewInt(100*app.Shanev)),
+		AmountWeight:     sdk.NewDecWithPrec(333, 3), // 33.3%
+		PeriodWeight:     sdk.NewDecWithPrec(667, 3), // 66.7%
+		MinInterestRate:  sdk.ZeroDec(),              // 0%
+		MaxInterestRate:  sdk.NewDecWithPrec(10, 2),  // 10%
+		MajorityPercent:  sdk.NewDecWithPrec(51, 2),  // 51%
+		StakeToCredRatio: sdk.NewInt(10),             // 10:1 ratio
 	}
 }
 
@@ -49,6 +52,7 @@ func (p *Params) KeyValuePairs() params.KeyValuePairs {
 		{Key: KeyAmountWeight, Value: &p.AmountWeight},
 		{Key: KeyPeriodWeight, Value: &p.PeriodWeight},
 		{Key: KeyMajorityPercent, Value: &p.MajorityPercent},
+		{Key: KeyStakeToCredRatio, Value: &p.StakeToCredRatio},
 	}
 }
 

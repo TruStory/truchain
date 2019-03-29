@@ -205,11 +205,12 @@ func (ta *TruAPI) RegisterResolvers() {
 
 	ta.GraphQLClient.RegisterQueryResolver("params", ta.paramsResolver)
 	ta.GraphQLClient.RegisterObjectResolver("Params", params.Params{}, map[string]interface{}{
-		"amountWeight":    func(_ context.Context, p params.Params) string { return p.StakeParams.AmountWeight.String() },
-		"periodWeight":    func(_ context.Context, p params.Params) string { return p.StakeParams.PeriodWeight.String() },
-		"minInterestRate": func(_ context.Context, p params.Params) string { return p.StakeParams.MinInterestRate.String() },
-		"maxInterestRate": func(_ context.Context, p params.Params) string { return p.StakeParams.MaxInterestRate.String() },
-		"maxStakeAmount":  func(_ context.Context, p params.Params) string { return p.StakeParams.MaxAmount.Amount.String() },
+		"amountWeight":     func(_ context.Context, p params.Params) string { return p.StakeParams.AmountWeight.String() },
+		"periodWeight":     func(_ context.Context, p params.Params) string { return p.StakeParams.PeriodWeight.String() },
+		"minInterestRate":  func(_ context.Context, p params.Params) string { return p.StakeParams.MinInterestRate.String() },
+		"maxInterestRate":  func(_ context.Context, p params.Params) string { return p.StakeParams.MaxInterestRate.String() },
+		"maxStakeAmount":   func(_ context.Context, p params.Params) string { return p.StakeParams.MaxAmount.Amount.String() },
+		"stakeToCredRatio": func(_ context.Context, p params.Params) string { return p.StakeParams.StakeToCredRatio.String() },
 
 		"minArgumentLength": func(_ context.Context, p params.Params) int { return p.ArgumentParams.MinArgumentLength },
 		"maxArgumentLength": func(_ context.Context, p params.Params) int { return p.ArgumentParams.MaxArgumentLength },
