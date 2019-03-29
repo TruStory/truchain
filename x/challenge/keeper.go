@@ -31,6 +31,9 @@ type ReadKeeper interface {
 		ctx sdk.Context, challengeID int64) (challenge Challenge, err sdk.Error)
 	ChallengesByStoryID(
 		ctx sdk.Context, storyID int64) (challenges []Challenge, err sdk.Error)
+	ChallengersByStoryID(
+		ctx sdk.Context, storyID int64) (challengers []sdk.AccAddress, err sdk.Error)
+
 	ChallengeByStoryIDAndCreator(
 		ctx sdk.Context,
 		storyID int64,
@@ -206,6 +209,21 @@ func (k Keeper) ChallengesByStoryID(
 		return nil
 	})
 
+	return
+}
+
+// ChallengersByStoryID returns a list of addresses that challenged a specific story.
+func (k Keeper) ChallengersByStoryID(ctx sdk.Context, storyID int64) (backers []sdk.AccAddress, err sdk.Error) {
+
+	// iterate over and return challenges for a game
+	err = k.challengeList.Map(ctx, k, storyID, func(challengeID int64) sdk.Error {
+		challenge, err := k.Challenge(ctx, challengeID)
+		if err != nil {
+			return err
+		}
+		backers = append(backers, challenge.Creator())
+		return nil
+	})
 	return
 }
 

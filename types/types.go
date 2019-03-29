@@ -38,6 +38,42 @@ var RegistrationFee = auth.StdFee{
 	Gas:    20000,
 }
 
+// Tags keys
+const (
+	KeyPushTag             = "tru.event"
+	KeyCompletedStoriesTag = "tru.event.completedStories"
+)
+
+// PushTag signifies a push notification event for Tendermint
+var PushTag = sdk.NewTags(KeyPushTag, []byte("Push"))
+
+// MsgResult is the default success response for a chain request
+type MsgResult struct {
+	ID int64 `json:"id"`
+}
+
+// StakeNotificationResult defines data for a stake push notification
+type StakeNotificationResult struct {
+	MsgResult
+
+	From sdk.AccAddress `json:"from,omitempty"`
+	To   sdk.AccAddress `json:"to,omitempty"`
+}
+
+// CompletedStory defines a story result.
+type CompletedStory struct {
+	ID          int64            `json:"id"`
+	Creator     sdk.AccAddress   `json:"creator"`
+	Backers     []sdk.AccAddress `json:"backers"`
+	Challengers []sdk.AccAddress `json:"challengers"`
+}
+
+// CompletedStoriesNotificationResult defines the notification result of
+// completed stories in a new Block.
+type CompletedStoriesNotificationResult struct {
+	Stories []CompletedStory `json:"stories"`
+}
+
 // Timestamp records the timestamp for a type
 type Timestamp struct {
 	CreatedBlock int64     `json:"created_block,omitempty"`

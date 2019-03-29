@@ -12,9 +12,9 @@ import (
 
 func Test_handleExpiredStoriesEmptyQueue(t *testing.T) {
 	ctx, k, _, _, _, _ := mockDB()
-
-	err := k.processStoryQueue(ctx)
+	completedStories, err := k.processStoryQueue(ctx, make([]app.CompletedStory, 0))
 	assert.Nil(t, err)
+	assert.Len(t, completedStories, 0)
 }
 
 func Test_handleExpiredStories(t *testing.T) {
@@ -35,15 +35,24 @@ func Test_handleExpiredStories(t *testing.T) {
 		ctx, storyID, amount, 0, argument, challenger)
 	assert.Nil(t, err)
 
-	// fake expired story queue
-	k.storyQueue(ctx).Push(storyID)
-
 	// fake future block time for expiration
 	expireTime := time.Now().Add(100 * time.Hour)
 	ctx = ctx.WithBlockHeader(abci.Header{Time: expireTime})
 
-	err = k.processStoryQueue(ctx)
+	completedStories, err := k.processStoryQueue(ctx, make([]app.CompletedStory, 0))
 	assert.Nil(t, err)
+	assert.Len(t, completedStories, 1)
+
+	assert.Equal(t,
+		[]app.CompletedStory{
+			app.CompletedStory{
+				ID:          storyID,
+				Creator:     sdk.AccAddress([]byte{1, 2}),
+				Challengers: []sdk.AccAddress{challenger},
+				Backers:     []sdk.AccAddress{backer},
+			},
+		},
+		completedStories)
 
 	// check expiration for backer
 	coins := bankKeeper.GetCoins(ctx, backer)

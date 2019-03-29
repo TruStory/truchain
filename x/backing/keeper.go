@@ -35,6 +35,9 @@ type ReadKeeper interface {
 	BackingsByStoryID(
 		ctx sdk.Context, storyID int64) (backings []Backing, err sdk.Error)
 
+	BackersByStoryID(
+		ctx sdk.Context, storyID int64) (backers []sdk.AccAddress, err sdk.Error)
+
 	TotalBackingAmount(
 		ctx sdk.Context, storyID int64) (totalAmount sdk.Coin, err sdk.Error)
 }
@@ -234,6 +237,20 @@ func (k Keeper) BackingsByStoryID(
 		return nil
 	})
 
+	return
+}
+
+// BackersByStoryID returns a list of addresses that backed a specific story.
+func (k Keeper) BackersByStoryID(ctx sdk.Context, storyID int64) (backers []sdk.AccAddress, err sdk.Error) {
+	// iterate over backing list and get backings
+	err = k.backingStoryList.Map(ctx, k, storyID, func(backingID int64) sdk.Error {
+		backing, err := k.Backing(ctx, backingID)
+		if err != nil {
+			return err
+		}
+		backers = append(backers, backing.Creator())
+		return nil
+	})
 	return
 }
 
