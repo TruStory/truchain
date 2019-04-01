@@ -131,11 +131,21 @@ func InitCmd(ctx *server.Context, cdc *codec.Codec) *cobra.Command {
 }
 
 func newApp(logger log.Logger, db dbm.DB, traceStore io.Writer) abci.Application {
-	return app.NewTruChain(logger, db)
+	return app.NewTruChain(logger, db, true)
 }
 
-func exportAppStateAndTMValidators(logger log.Logger, db dbm.DB, _ io.Writer, _ int64, _ bool) (
+func exportAppStateAndTMValidators(logger log.Logger, db dbm.DB, traceStore io.Writer, height int64, forZeroHeight bool) (
 	json.RawMessage, []tmtypes.GenesisValidator, error) {
-	bapp := app.NewTruChain(logger, db)
-	return bapp.ExportAppStateAndValidators()
+
+	if height != -1 {
+		tApp := app.NewTruChain(logger, db, true)
+		err := tApp.LoadHeight(height)
+		if err != nil {
+			return nil, nil, err
+		}
+		return tApp.ExportAppStateAndValidators()
+	}
+
+	tApp := app.NewTruChain(logger, db, true)
+	return tApp.ExportAppStateAndValidators()
 }

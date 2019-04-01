@@ -2,6 +2,7 @@ package app
 
 import (
 	"github.com/TruStory/truchain/x/argument"
+	"github.com/TruStory/truchain/x/backing"
 	"github.com/TruStory/truchain/x/category"
 	"github.com/TruStory/truchain/x/challenge"
 	"github.com/TruStory/truchain/x/expiration"
@@ -16,14 +17,18 @@ import (
 // GenesisState reflects the genesis state of the application.
 type GenesisState struct {
 	ArgumentData   argument.GenesisState   `json:"argument"`
+	Arguments      []argument.Argument     `json:"arguments"`
 	AuthData       auth.GenesisState       `json:"auth"`
 	BankData       bank.GenesisState       `json:"bank"`
 	Accounts       []*auth.BaseAccount     `json:"accounts"`
+	Backings       []backing.Backing       `json:"backings"`
 	Categories     []category.Category     `json:"categories"`
 	ChallengeData  challenge.GenesisState  `json:"challenge"`
+	Challenges     []challenge.Challenge   `json:"challenges"`
 	ExpirationData expiration.GenesisState `json:"expiration"`
 	StakeData      stake.GenesisState      `json:"stake"`
 	StoryData      story.GenesisState      `json:"story"`
+	Stories        []story.Story           `json:"stories"`
 }
 
 // initChainer implements the custom application logic that the BaseApp will

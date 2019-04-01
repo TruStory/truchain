@@ -27,6 +27,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/ibc"
 	"github.com/cosmos/cosmos-sdk/x/params"
 	"github.com/cosmos/cosmos-sdk/x/staking"
+	"github.com/davecgh/go-spew/spew"
 	"github.com/joho/godotenv"
 	"github.com/spf13/viper"
 	abci "github.com/tendermint/tendermint/abci/types"
@@ -100,7 +101,7 @@ type TruChain struct {
 // In addition, all necessary mappers and keepers are created, routes
 // registered, and finally the stores being mounted along with any necessary
 // chain initialization.
-func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *TruChain {
+func NewTruChain(logger log.Logger, db dbm.DB, loadLatest bool, options ...func(*bam.BaseApp)) *TruChain {
 	// create and register app-level codec for TXs and accounts
 	codec := MakeCodec()
 
@@ -280,10 +281,11 @@ func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *T
 
 	app.MountStoresTransient(app.tkeyParams)
 
-	err := app.LoadLatestVersion(app.keyMain)
-
-	if err != nil {
-		cmn.Exit(err.Error())
+	if loadLatest {
+		err := app.LoadLatestVersion(app.keyMain)
+		if err != nil {
+			cmn.Exit(err.Error())
+		}
 	}
 
 	// build HTTP api
@@ -360,10 +362,13 @@ func (app *TruChain) EndBlocker(ctx sdk.Context, _ abci.RequestEndBlock) abci.Re
 // ExportAppStateAndValidators implements custom application logic that exposes
 // various parts of the application's state and set of validators. An error is
 // returned if any step getting the state or set of validators fails.
-func (app *TruChain) ExportAppStateAndValidators() (appState json.RawMessage, validators []tmtypes.GenesisValidator, err error) {
-	ctx := app.NewContext(true, abci.Header{})
-	accounts := []*auth.BaseAccount{}
+func (app *TruChain) ExportAppStateAndValidators() (
+	appState json.RawMessage, validators []tmtypes.GenesisValidator, err error) {
 
+	spew.Dump(app.LastBlockHeight())
+	ctx := app.NewContext(true, abci.Header{Height: app.LastBlockHeight()})
+
+	accounts := []*auth.BaseAccount{}
 	appendAccountsFn := func(acc auth.Account) bool {
 		account := &auth.BaseAccount{
 			Address: acc.GetAddress(),
@@ -374,15 +379,29 @@ func (app *TruChain) ExportAppStateAndValidators() (appState json.RawMessage, va
 		return false
 	}
 
+	// arguments, err := app.argumentKeeper.A
+
 	app.accountKeeper.IterateAccounts(ctx, appendAccountsFn)
 
+	categories, err := app.categoryKeeper.GetAllCategories(ctx)
+
+	// backings, err := app.backingKeeper.Backings()
+
+	// challenges, err := app.challengeKeeper.Challenges()
+
+	stories := app.storyKeeper.Stories(ctx)
+
 	genState := GenesisState{
+		ArgumentData:   argument.DefaultGenesisState(),
 		Accounts:       accounts,
 		AuthData:       auth.DefaultGenesisState(),
 		BankData:       bank.DefaultGenesisState(),
-		Categories:     category.DefaultCategories(),
+		Categories:     categories,
+		ChallengeData:  challenge.DefaultGenesisState(),
 		ExpirationData: expiration.DefaultGenesisState(),
+		StakeData:      stake.DefaultGenesisState(),
 		StoryData:      story.DefaultGenesisState(),
+		Stories:        stories,
 	}
 
 	appState, err = codec.MarshalJSONIndent(app.codec, genState)
@@ -391,6 +410,11 @@ func (app *TruChain) ExportAppStateAndValidators() (appState json.RawMessage, va
 	}
 
 	return appState, validators, err
+}
+
+// LoadHeight loads the app at a particular height
+func (app *TruChain) LoadHeight(height int64) error {
+	return app.LoadVersion(height, app.keyMain)
 }
 
 func loadRegistrarKey() secp256k1.PrivKeySecp256k1 {
