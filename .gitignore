@@ -15,6 +15,7 @@ write-file-atomic-*
 .chain/config/priv_validator_key.json
 .chain/config/priv_validator.json.bak
 .chain/config/genesis.json
+.chain/twitter-whitelist.json
 dev/api_spec/.chain
 
 # Dependencies

@@ -4,10 +4,12 @@ import (
 	"context"
 	"encoding/hex"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"net/http"
 	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/TruStory/truchain/x/chttp"
@@ -16,6 +18,8 @@ import (
 	"github.com/btcsuite/btcd/btcec"
 	"github.com/dghubble/go-twitter/twitter"
 	"github.com/dghubble/oauth1"
+	"github.com/spf13/viper"
+	"github.com/tendermint/tmlibs/cli"
 )
 
 // RegistrationRequest is a JSON request body representing a twitter profile that a user wishes to register
@@ -68,6 +72,7 @@ func RegisterTwitterUser(ta *TruAPI, twitterUser *twitter.User) chttp.Response {
 		Address:   addr,
 		Username:  twitterUser.ScreenName,
 		FullName:  twitterUser.Name,
+		Email:     twitterUser.Email,
 		AvatarURI: strings.Replace(twitterUser.ProfileImageURL, "_normal", "_bigger", 1),
 	}
 
@@ -95,6 +100,15 @@ func RegisterTwitterUser(ta *TruAPI, twitterUser *twitter.User) chttp.Response {
 // CalibrateUser takes a twitter authenticated user and makes sure it has properly
 // been calibrated in the database with all proper keypairs
 func CalibrateUser(ta *TruAPI, twitterUser *twitter.User) (string, error) {
+	isWhitelisted, err := isWhitelistedUser(twitterUser)
+	if err != nil {
+		return "", err
+	}
+
+	if !isWhitelisted {
+		return "", errors.New("You are not allowed to register")
+	}
+
 	currentTwitterProfile, err := ta.DBClient.TwitterProfileByID(twitterUser.ID)
 	if err != nil {
 		return "", err
@@ -144,6 +158,44 @@ func CalibrateUser(ta *TruAPI, twitterUser *twitter.User) (string, error) {
 	}
 
 	return addr, nil
+}
+
+func isWhitelistedUser(twitterUser *twitter.User) (bool, error) {
+	rootdir := viper.GetString(cli.HomeFlag)
+	if rootdir == "" {
+		rootdir = os.ExpandEnv("$HOME/.truchaind")
+	}
+
+	path := filepath.Join(rootdir, "twitter-whitelist.json")
+	absPath, err := filepath.Abs(path)
+	if err != nil {
+		return false, err
+	}
+
+	fmt.Printf("PATH: %v\n", absPath)
+	whitelistedUserJSON, err := ioutil.ReadFile(absPath)
+	// if the .whitelisted file doesn't exist, we assume that
+	// anybody can register. Thus, to remove the whitelisting feature
+	// in future, we all need to do is delete the file.
+	if os.IsNotExist(err) {
+		return true, nil
+	}
+	if err != nil {
+		return false, err
+	}
+	var whitelistedUsers []string
+	err = json.Unmarshal(whitelistedUserJSON, &whitelistedUsers)
+	if err != nil {
+		return false, err
+	}
+
+	for _, whitelistedUser := range whitelistedUsers {
+		if whitelistedUser == twitterUser.ScreenName {
+			return true, nil
+		}
+	}
+
+	return false, nil
 }
 
 func getTwitterUser(authToken string, authTokenSecret string) (*twitter.User, error) {

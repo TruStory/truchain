@@ -12,6 +12,7 @@ type TwitterProfile struct {
 	Address   string `json:"address"`
 	Username  string `json:"username"`
 	FullName  string `json:"full_name"`
+	Email     string `json:"email"`
 	AvatarURI string `json:"avatar_uri"`
 }
 
@@ -48,22 +49,6 @@ func (c *Client) TwitterProfileByAddress(addr string) (TwitterProfile, error) {
 	}
 
 	return *twitterProfile, nil
-}
-
-// KeyPairByTwitterProfileID returns the key-pair for the account
-func (c *Client) KeyPairByTwitterProfileID(id int64) (KeyPair, error) {
-	keyPair := new(KeyPair)
-	err := c.Model(keyPair).Where("twitter_profile_id = ?", id).First()
-
-	if err == pg.ErrNoRows {
-		return *keyPair, nil
-	}
-
-	if err != nil {
-		return *keyPair, err
-	}
-
-	return *keyPair, nil
 }
 
 // UpsertTwitterProfile implements `Datastore`.
