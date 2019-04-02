@@ -60,6 +60,11 @@ func (ta *TruAPI) RegisterModels() {
 	if err != nil {
 		panic(err)
 	}
+
+	err = ta.DBClient.RegisterModel(&db.NotificationEvent{})
+	if err != nil {
+		panic(err)
+	}
 }
 
 // WrapHandler wraps a chttp.Handler and returns a standar http.Handler
