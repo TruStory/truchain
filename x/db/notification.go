@@ -23,7 +23,7 @@ type NotificationEvent struct {
 	Timestamp        time.Time        `json:"timestamp"`
 	SenderProfileID  int64            `json:"sender_profile_id" `
 	SenderProfile    *TwitterProfile  `json:"sender_profile"  pg:"fk:twitter_profile_id"`
-	Type             NotificationType `json:"type"`
+	Type             NotificationType `json:"type" sql:",notnull"`
 	Read             bool             `json:"read"`
 }
 
