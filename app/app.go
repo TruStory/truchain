@@ -379,8 +379,6 @@ func (app *TruChain) ExportAppStateAndValidators() (
 		return false
 	}
 
-	// arguments, err := app.argumentKeeper.A
-
 	app.accountKeeper.IterateAccounts(ctx, appendAccountsFn)
 
 	categories, err := app.categoryKeeper.GetAllCategories(ctx)
@@ -392,7 +390,7 @@ func (app *TruChain) ExportAppStateAndValidators() (
 	stories := app.storyKeeper.Stories(ctx)
 
 	genState := GenesisState{
-		ArgumentData:   argument.DefaultGenesisState(),
+		ArgumentData:   argument.ExportGenesis(ctx, app.argumentKeeper),
 		Accounts:       accounts,
 		AuthData:       auth.DefaultGenesisState(),
 		BankData:       bank.DefaultGenesisState(),

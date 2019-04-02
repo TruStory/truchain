@@ -17,7 +17,6 @@ import (
 // GenesisState reflects the genesis state of the application.
 type GenesisState struct {
 	ArgumentData   argument.GenesisState   `json:"argument"`
-	Arguments      []argument.Argument     `json:"arguments"`
 	AuthData       auth.GenesisState       `json:"auth"`
 	BankData       bank.GenesisState       `json:"bank"`
 	Accounts       []*auth.BaseAccount     `json:"accounts"`

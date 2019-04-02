@@ -20,7 +20,7 @@ type Argument struct {
 
 // Like for an argument
 type Like struct {
-	ArgumentID int64
-	Creator    sdk.AccAddress
-	Timestamp  app.Timestamp
+	ArgumentID int64          `json:"argument_id"`
+	Creator    sdk.AccAddress `json:"creator"`
+	Timestamp  app.Timestamp  `json:"timestamp"`
 }
