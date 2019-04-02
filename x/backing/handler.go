@@ -36,7 +36,7 @@ func handleBackStoryMsg(ctx sdk.Context, k Keeper, msg BackStoryMsg) sdk.Result 
 	if err != nil {
 		return err.Result()
 	}
-	return result(ctx, k, msg.StoryID, id, msg.Creator)
+	return result(ctx, k, msg.StoryID, id, msg.Creator, msg.Amount)
 }
 
 func handleLikeArgumentMsg(ctx sdk.Context, k Keeper, msg LikeBackingArgumentMsg) sdk.Result {
@@ -53,17 +53,17 @@ func handleLikeArgumentMsg(ctx sdk.Context, k Keeper, msg LikeBackingArgumentMsg
 	if err != nil {
 		err.Result()
 	}
-	return result(ctx, k, backing.StoryID(), backingID, msg.Creator)
+	return result(ctx, k, backing.StoryID(), backingID, msg.Creator, msg.Amount)
 }
 
-func result(ctx sdk.Context, k Keeper, storyID, backingID int64, backer sdk.AccAddress) sdk.Result {
+func result(ctx sdk.Context, k Keeper, storyID, backingID int64, backer sdk.AccAddress, amount sdk.Coin) sdk.Result {
 	story, err := k.storyKeeper.Story(ctx, storyID)
 	if err != nil {
 		return err.Result()
 	}
 
 	resultData := app.StakeNotificationResult{
-		MsgResult: app.MsgResult{ID: backingID},
+		MsgResult: app.MsgResult{ID: backingID, Amount: amount},
 		StoryID:   storyID,
 		From:      backer,
 		To:        story.Creator,

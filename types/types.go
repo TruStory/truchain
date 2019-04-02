@@ -49,7 +49,8 @@ var PushTag = sdk.NewTags(KeyPushTag, []byte("Push"))
 
 // MsgResult is the default success response for a chain request
 type MsgResult struct {
-	ID int64 `json:"id"`
+	ID     int64    `json:"id"`
+	Amount sdk.Coin `json:"amount"`
 }
 
 // StakeNotificationResult defines data for a stake push notification
