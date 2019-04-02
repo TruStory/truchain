@@ -32,7 +32,7 @@ func TestSubmitChallengeMsg(t *testing.T) {
 	_ = json.Unmarshal(res.Data, result)
 
 	expected := &app.StakeNotificationResult{
-		MsgResult: app.MsgResult{ID: int64(1)},
+		MsgResult: app.MsgResult{ID: int64(1), Amount: amount},
 		StoryID:   storyID,
 		From:      creator,
 		To:        sdk.AccAddress([]byte{1, 2}),
