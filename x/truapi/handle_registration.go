@@ -172,7 +172,6 @@ func isWhitelistedUser(twitterUser *twitter.User) (bool, error) {
 		return false, err
 	}
 
-	fmt.Printf("PATH: %v\n", absPath)
 	whitelistedUserJSON, err := ioutil.ReadFile(absPath)
 	// if the .whitelisted file doesn't exist, we assume that
 	// anybody can register. Thus, to remove the whitelisting feature
