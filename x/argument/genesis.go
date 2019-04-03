@@ -7,7 +7,7 @@ import (
 // GenesisState - all story state that must be provided at genesis
 type GenesisState struct {
 	Arguments []Argument `json:"arguments"`
-	Likes     []Like     `json:"likes,omitonempty"`
+	Likes     []Like     `json:"likes"`
 	Params    Params     `json:"params"`
 }
 
