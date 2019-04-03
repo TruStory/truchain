@@ -20,10 +20,9 @@ type GenesisState struct {
 	AuthData       auth.GenesisState       `json:"auth"`
 	BankData       bank.GenesisState       `json:"bank"`
 	Accounts       []*auth.BaseAccount     `json:"accounts"`
-	Backings       []backing.Backing       `json:"backings"`
+	BackingData    backing.GenesisState    `json:"backing"`
 	Categories     []category.Category     `json:"categories"`
 	ChallengeData  challenge.GenesisState  `json:"challenge"`
-	Challenges     []challenge.Challenge   `json:"challenges"`
 	ExpirationData expiration.GenesisState `json:"expiration"`
 	StakeData      stake.GenesisState      `json:"stake"`
 	StoryData      story.GenesisState      `json:"story"`
