@@ -63,7 +63,8 @@ func result(ctx sdk.Context, k Keeper, storyID, backingID int64, backer sdk.AccA
 	}
 
 	resultData := app.StakeNotificationResult{
-		MsgResult: app.MsgResult{ID: backingID, Amount: amount},
+		MsgResult: app.MsgResult{ID: backingID},
+		Amount:    amount,
 		StoryID:   storyID,
 		From:      backer,
 		To:        story.Creator,
