@@ -47,6 +47,7 @@ func TestBackStoryMsg(t *testing.T) {
 
 	expected := &app.StakeNotificationResult{
 		MsgResult: app.MsgResult{ID: int64(1)},
+		Amount:    amount,
 		StoryID:   storyID,
 		From:      creator,
 		To:        sdk.AccAddress([]byte{1, 2}),
