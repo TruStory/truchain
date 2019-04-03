@@ -28,7 +28,7 @@ type NotificationEvent struct {
 }
 
 // NotificationEventsByAddress retrieves all notifications sent to an user.
-// TODO: add pagination
+// TODO (issue #435): add pagination
 func (c *Client) NotificationEventsByAddress(addr string) ([]NotificationEvent, error) {
 	evts := make([]NotificationEvent, 0)
 
