@@ -10,7 +10,10 @@ import (
 
 // UserResponse is a JSON response body representing the result of User
 type UserResponse struct {
-	Address string `json:"address"`
+	UserID   int64  `json:"userId"`
+	Username string `json:"username"`
+	Fullname string `json:"fullname"`
+	Address  string `json:"address"`
 }
 
 // HandleUserDetails takes a `UserRequest` and returns a `UserResponse`
@@ -23,8 +26,16 @@ func (ta *TruAPI) HandleUserDetails(r *http.Request) chttp.Response {
 		return chttp.SimpleErrorResponse(401, err)
 	}
 
+	twitterProfile, err := ta.DBClient.TwitterProfileByID(user.TwitterProfileID)
+	if err != nil {
+		return chttp.SimpleErrorResponse(401, err)
+	}
+
 	responseBytes, _ := json.Marshal(UserResponse{
-		Address: user.Address,
+		UserID:   twitterProfile.ID,
+		Fullname: twitterProfile.FullName,
+		Username: twitterProfile.Username,
+		Address:  twitterProfile.Address,
 	})
 
 	return chttp.SimpleResponse(200, responseBytes)
