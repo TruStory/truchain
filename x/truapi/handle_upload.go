@@ -37,5 +37,8 @@ func (ta *TruAPI) HandleUpload(res http.ResponseWriter, req *http.Request) {
 	// if all went well, sending back the response
 	res.Header().Set("Content-Type", "application/json")
 	res.WriteHeader(http.StatusOK)
-	res.Write(responseBody)
+	_, err = res.Write(responseBody)
+	if err != nil {
+		render.Error(res, req, err.Error(), http.StatusBadRequest)
+	}
 }
