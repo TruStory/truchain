@@ -79,7 +79,7 @@ type TruChain struct {
 	// access truchain multistore
 	argumentKeeper     argument.Keeper
 	backingKeeper      backing.Keeper
-	categoryKeeper     category.WriteKeeper
+	categoryKeeper     category.Keeper
 	challengeKeeper    challenge.Keeper
 	clientParamsKeeper clientParams.Keeper
 	expirationKeeper   expiration.Keeper
@@ -379,18 +379,13 @@ func (app *TruChain) ExportAppStateAndValidators() (
 
 	app.accountKeeper.IterateAccounts(ctx, appendAccountsFn)
 
-	categories, err := app.categoryKeeper.GetAllCategories(ctx)
-	if err != nil {
-		panic(err)
-	}
-
 	genState := GenesisState{
 		ArgumentData:   argument.ExportGenesis(ctx, app.argumentKeeper),
 		Accounts:       accounts,
 		AuthData:       auth.DefaultGenesisState(),
 		BankData:       bank.DefaultGenesisState(),
 		BackingData:    backing.ExportGenesis(ctx, app.backingKeeper),
-		Categories:     categories,
+		CategoryData:   category.ExportGenesis(ctx, app.categoryKeeper),
 		ChallengeData:  challenge.ExportGenesis(ctx, app.challengeKeeper),
 		ExpirationData: expiration.ExportGenesis(ctx, app.expirationKeeper),
 		StakeData:      stake.DefaultGenesisState(),

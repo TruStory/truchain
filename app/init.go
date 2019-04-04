@@ -21,7 +21,7 @@ type GenesisState struct {
 	BankData       bank.GenesisState       `json:"bank"`
 	Accounts       []*auth.BaseAccount     `json:"accounts"`
 	BackingData    backing.GenesisState    `json:"backing"`
-	Categories     []category.Category     `json:"categories"`
+	CategoryData   category.GenesisState   `json:"category"`
 	ChallengeData  challenge.GenesisState  `json:"challenge"`
 	ExpirationData expiration.GenesisState `json:"expiration"`
 	StakeData      stake.GenesisState      `json:"stake"`
@@ -58,7 +58,7 @@ func (app *TruChain) initChainer(ctx sdk.Context, req abci.RequestInitChain) abc
 	argument.InitGenesis(ctx, app.argumentKeeper, genesisState.ArgumentData)
 	auth.InitGenesis(ctx, app.accountKeeper, app.feeCollectionKeeper, genesisState.AuthData)
 	bank.InitGenesis(ctx, app.bankKeeper, genesisState.BankData)
-	category.InitGenesis(ctx, app.categoryKeeper, genesisState.Categories)
+	category.InitGenesis(ctx, app.categoryKeeper, genesisState.CategoryData)
 	challenge.InitGenesis(ctx, app.challengeKeeper, genesisState.ChallengeData)
 	expiration.InitGenesis(ctx, app.expirationKeeper, genesisState.ExpirationData)
 	stake.InitGenesis(ctx, app.stakeKeeper, genesisState.StakeData)

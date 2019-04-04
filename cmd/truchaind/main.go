@@ -97,7 +97,7 @@ func InitCmd(ctx *server.Context, cdc *codec.Codec) *cobra.Command {
 				ArgumentData:   argument.DefaultGenesisState(),
 				AuthData:       auth.DefaultGenesisState(),
 				BankData:       bank.DefaultGenesisState(),
-				Categories:     category.DefaultCategories(),
+				CategoryData:   category.DefaultGenesisState(),
 				ChallengeData:  challenge.DefaultGenesisState(),
 				ExpirationData: expiration.DefaultGenesisState(),
 				StakeData:      stake.DefaultGenesisState(),

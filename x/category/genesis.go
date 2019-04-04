@@ -2,6 +2,18 @@ package category
 
 import sdk "github.com/cosmos/cosmos-sdk/types"
 
+// GenesisState for categories
+type GenesisState struct {
+	Categories []Category `json:"categories"`
+}
+
+// DefaultGenesisState for tests
+func DefaultGenesisState() GenesisState {
+	return GenesisState{
+		Categories: DefaultCategories(),
+	}
+}
+
 // DefaultCategories for tests and chain init
 func DefaultCategories() []Category {
 	return []Category{
@@ -11,8 +23,21 @@ func DefaultCategories() []Category {
 }
 
 // InitGenesis loads initial categories from the genesis file
-func InitGenesis(ctx sdk.Context, categoryKeeper WriteKeeper, categories []Category) {
-	for _, cat := range categories {
-		categoryKeeper.Create(ctx, cat.Title, cat.Slug, cat.Description)
+func InitGenesis(ctx sdk.Context, keeper Keeper, data GenesisState) {
+	for _, cat := range data.Categories {
+		keeper.setCategory(ctx, cat)
+	}
+}
+
+// ExportGenesis exports the genesis state
+func ExportGenesis(ctx sdk.Context, keeper Keeper) GenesisState {
+	categories, err := keeper.GetAllCategories(ctx)
+	if err != nil {
+		// it is okay to panic here because the chain is not running
+		panic(err)
+	}
+
+	return GenesisState{
+		Categories: categories,
 	}
 }

@@ -75,7 +75,7 @@ func mockDB() (sdk.Context, Keeper, story.Keeper, backing.Keeper, bank.Keeper) {
 	)
 
 	categoryKeeper := c.NewKeeper(catKey, codec)
-	c.InitGenesis(ctx, categoryKeeper, c.DefaultCategories())
+	c.InitGenesis(ctx, categoryKeeper, c.DefaultGenesisState())
 
 	sk := story.NewKeeper(
 		storyKey,
