@@ -931,6 +931,22 @@
             "deprecationReason": "",
             "description": "",
             "isDeprecated": false,
+            "name": "stakeToCredRatio",
+            "type": {
+              "kind": "NON_NULL",
+              "name": "",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "string",
+                "ofType": null
+              }
+            }
+          },
+          {
+            "args": [],
+            "deprecationReason": "",
+            "description": "",
+            "isDeprecated": false,
             "name": "storyExpireDuration",
             "type": {
               "kind": "NON_NULL",
@@ -1908,6 +1924,22 @@
             "description": "",
             "isDeprecated": false,
             "name": "avatarURI",
+            "type": {
+              "kind": "NON_NULL",
+              "name": "",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "string",
+                "ofType": null
+              }
+            }
+          },
+          {
+            "args": [],
+            "deprecationReason": "",
+            "description": "",
+            "isDeprecated": false,
+            "name": "email",
             "type": {
               "kind": "NON_NULL",
               "name": "",

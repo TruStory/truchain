@@ -32,6 +32,7 @@ func IssueSession(ta *TruAPI) http.Handler {
 			Address:   addr,
 			Username:  twitterUser.ScreenName,
 			FullName:  twitterUser.Name,
+			Email:     twitterUser.Email,
 			AvatarURI: strings.Replace(twitterUser.ProfileImageURL, "_normal", "_bigger", 1),
 		}
 		// upserting the twitter profile
