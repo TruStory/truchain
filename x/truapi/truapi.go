@@ -83,6 +83,7 @@ func (ta *TruAPI) RegisterRoutes() {
 	api.Handle("/register", WrapHandler(ta.HandleRegistration))
 	api.Handle("/user", WrapHandler(ta.HandleUserDetails))
 	api.HandleFunc("/deviceToken", ta.HandleDeviceTokenRegistration)
+	api.HandleFunc("/upload", ta.HandleUpload)
 
 	if os.Getenv("MOCK_REGISTRATION") == "true" {
 		api.Handle("/mock_register", WrapHandler(ta.HandleMockRegistration))
