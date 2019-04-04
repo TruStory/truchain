@@ -388,7 +388,7 @@ func (app *TruChain) ExportAppStateAndValidators() (
 		CategoryData:   category.ExportGenesis(ctx, app.categoryKeeper),
 		ChallengeData:  challenge.ExportGenesis(ctx, app.challengeKeeper),
 		ExpirationData: expiration.ExportGenesis(ctx, app.expirationKeeper),
-		StakeData:      stake.DefaultGenesisState(),
+		StakeData:      stake.ExportGenesis(ctx, app.stakeKeeper),
 		StoryData:      story.ExportGenesis(ctx, app.storyKeeper),
 	}
 
