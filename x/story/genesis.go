@@ -23,18 +23,25 @@ func InitGenesis(ctx sdk.Context, keeper Keeper, data GenesisState) {
 	for _, s := range data.Stories {
 		keeper.setStory(ctx, s)
 	}
-	// for _, storyID := range data.StoryQueue {
-	// keeper.pendingStoryList
-	// }
+	for _, storyID := range data.StoryQueue {
+		keeper.storyQueue(ctx).Push(storyID)
+	}
+
 	keeper.SetParams(ctx, data.Params)
 }
 
 // ExportGenesis exports the genesis state
 func ExportGenesis(ctx sdk.Context, keeper Keeper) GenesisState {
-	params := keeper.GetParams(ctx)
+	var storyIDs []int64
+	var storyID int64
+	keeper.storyQueue(ctx).List.Iterate(&storyID, func(uint64) bool {
+		storyIDs = append(storyIDs, storyID)
+		return false
+	})
 
 	return GenesisState{
-		Stories: keeper.Stories(ctx),
-		Params:  params,
+		Stories:    keeper.Stories(ctx),
+		StoryQueue: storyIDs,
+		Params:     keeper.GetParams(ctx),
 	}
 }
