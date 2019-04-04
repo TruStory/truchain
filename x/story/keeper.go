@@ -55,22 +55,22 @@ type WriteKeeper interface {
 type Keeper struct {
 	app.Keeper
 
-	pendingStoryListKey sdk.StoreKey
-	categoryKeeper      category.ReadKeeper
-	paramStore          params.Subspace
+	storyQueueKey  sdk.StoreKey
+	categoryKeeper category.ReadKeeper
+	paramStore     params.Subspace
 }
 
 // NewKeeper creates a new keeper with write and read access
 func NewKeeper(
 	storeKey sdk.StoreKey,
-	pendingStoryListKey sdk.StoreKey,
+	storyQueueKey sdk.StoreKey,
 	categoryKeeper category.ReadKeeper,
 	paramStore params.Subspace,
 	codec *amino.Codec) Keeper {
 
 	return Keeper{
 		app.NewKeeper(codec, storeKey),
-		pendingStoryListKey,
+		storyQueueKey,
 		categoryKeeper,
 		paramStore.WithTypeTable(ParamTypeTable()),
 	}
@@ -116,7 +116,7 @@ func (k Keeper) Create(
 	k.appendStoriesList(
 		ctx, storyIDsByCategoryKey(k, categoryID, story.Timestamp, false), story)
 
-	k.pendingStoryList(ctx).Push(story.ID)
+	k.storyQueue(ctx).Push(story.ID)
 
 	logger.Info("Created " + story.String())
 
@@ -321,9 +321,9 @@ func (k Keeper) storyIDsByCategoryID(
 	return storyIDs, nil
 }
 
-func (k Keeper) pendingStoryList(ctx sdk.Context) list.List {
-	store := ctx.KVStore(k.pendingStoryListKey)
-	return list.NewList(k.GetCodec(), store)
+func (k Keeper) storyQueue(ctx sdk.Context) list.Queue {
+	store := ctx.KVStore(k.storyQueueKey)
+	return list.NewQueue(k.GetCodec(), store)
 }
 
 func (k Keeper) validate(ctx sdk.Context, body string) sdk.Error {

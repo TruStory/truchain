@@ -6,8 +6,9 @@ import (
 
 // GenesisState - all story state that must be provided at genesis
 type GenesisState struct {
-	Stories []Story `json:"stories"`
-	Params  Params  `json:"params"`
+	Stories    []Story `json:"stories"`
+	StoryQueue []int64 `json:"story_queue"`
+	Params     Params  `json:"params"`
 }
 
 // DefaultGenesisState for tests
@@ -22,6 +23,9 @@ func InitGenesis(ctx sdk.Context, keeper Keeper, data GenesisState) {
 	for _, s := range data.Stories {
 		keeper.setStory(ctx, s)
 	}
+	// for _, storyID := range data.StoryQueue {
+	// keeper.pendingStoryList
+	// }
 	keeper.SetParams(ctx, data.Params)
 }
 
