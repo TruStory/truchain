@@ -26,7 +26,6 @@ type GenesisState struct {
 	ExpirationData expiration.GenesisState `json:"expiration"`
 	StakeData      stake.GenesisState      `json:"stake"`
 	StoryData      story.GenesisState      `json:"story"`
-	Stories        []story.Story           `json:"stories"`
 }
 
 // initChainer implements the custom application logic that the BaseApp will

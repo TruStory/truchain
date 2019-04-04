@@ -27,7 +27,6 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/ibc"
 	"github.com/cosmos/cosmos-sdk/x/params"
 	"github.com/cosmos/cosmos-sdk/x/staking"
-	"github.com/davecgh/go-spew/spew"
 	"github.com/joho/godotenv"
 	"github.com/spf13/viper"
 	abci "github.com/tendermint/tendermint/abci/types"
@@ -84,7 +83,7 @@ type TruChain struct {
 	challengeKeeper    challenge.Keeper
 	clientParamsKeeper clientParams.Keeper
 	expirationKeeper   expiration.Keeper
-	storyKeeper        story.WriteKeeper
+	storyKeeper        story.Keeper
 	stakeKeeper        stake.Keeper
 	truBankKeeper      trubank.Keeper
 
@@ -365,7 +364,6 @@ func (app *TruChain) EndBlocker(ctx sdk.Context, _ abci.RequestEndBlock) abci.Re
 func (app *TruChain) ExportAppStateAndValidators() (
 	appState json.RawMessage, validators []tmtypes.GenesisValidator, err error) {
 
-	spew.Dump(app.LastBlockHeight())
 	ctx := app.NewContext(true, abci.Header{Height: app.LastBlockHeight()})
 
 	accounts := []*auth.BaseAccount{}
@@ -382,12 +380,9 @@ func (app *TruChain) ExportAppStateAndValidators() (
 	app.accountKeeper.IterateAccounts(ctx, appendAccountsFn)
 
 	categories, err := app.categoryKeeper.GetAllCategories(ctx)
-
-	// backings, err := app.backingKeeper.Backings()
-
-	// challenges, err := app.challengeKeeper.Challenges()
-
-	stories := app.storyKeeper.Stories(ctx)
+	if err != nil {
+		panic(err)
+	}
 
 	genState := GenesisState{
 		ArgumentData:   argument.ExportGenesis(ctx, app.argumentKeeper),
@@ -399,8 +394,7 @@ func (app *TruChain) ExportAppStateAndValidators() (
 		ChallengeData:  challenge.ExportGenesis(ctx, app.challengeKeeper),
 		ExpirationData: expiration.DefaultGenesisState(),
 		StakeData:      stake.DefaultGenesisState(),
-		StoryData:      story.DefaultGenesisState(),
-		Stories:        stories,
+		StoryData:      story.ExportGenesis(ctx, app.storyKeeper),
 	}
 
 	appState, err = codec.MarshalJSONIndent(app.codec, genState)

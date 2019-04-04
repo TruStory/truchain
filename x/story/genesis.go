@@ -6,7 +6,8 @@ import (
 
 // GenesisState - all story state that must be provided at genesis
 type GenesisState struct {
-	Params Params `json:"params"`
+	Stories []Story `json:"stories"`
+	Params  Params  `json:"params"`
 }
 
 // DefaultGenesisState for tests
@@ -17,6 +18,19 @@ func DefaultGenesisState() GenesisState {
 }
 
 // InitGenesis initializes story state from genesis file
-func InitGenesis(ctx sdk.Context, storyKeeper WriteKeeper, data GenesisState) {
-	storyKeeper.SetParams(ctx, data.Params)
+func InitGenesis(ctx sdk.Context, keeper Keeper, data GenesisState) {
+	for _, s := range data.Stories {
+		keeper.setStory(ctx, s)
+	}
+	keeper.SetParams(ctx, data.Params)
+}
+
+// ExportGenesis exports the genesis state
+func ExportGenesis(ctx sdk.Context, keeper Keeper) GenesisState {
+	params := keeper.GetParams(ctx)
+
+	return GenesisState{
+		Stories: keeper.Stories(ctx),
+		Params:  params,
+	}
 }
