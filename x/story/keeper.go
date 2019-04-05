@@ -26,10 +26,6 @@ const (
 type ReadKeeper interface {
 	app.ReadKeeper
 
-	CategoryDenom(ctx sdk.Context, id int64) (name string, err sdk.Error)
-	FeedByCategoryID(
-		ctx sdk.Context,
-		catID int64) (stories []Story, err sdk.Error)
 	GetParams(ctx sdk.Context) Params
 	Stories(ctx sdk.Context) (stories []Story)
 	StoriesByCategoryID(ctx sdk.Context, catID int64) (stories []Story, err sdk.Error)
@@ -123,20 +119,6 @@ func (k Keeper) Create(
 	return story.ID, nil
 }
 
-// CategoryDenom returns the name of the category coin for the story
-func (k Keeper) CategoryDenom(ctx sdk.Context, id int64) (name string, err sdk.Error) {
-	story, err := k.Story(ctx, id)
-	if err != nil {
-		return
-	}
-	cat, err := k.categoryKeeper.GetCategory(ctx, story.CategoryID)
-	if err != nil {
-		return
-	}
-
-	return cat.Denom(), nil
-}
-
 // Story gets the story with the given id from the key-value store
 func (k Keeper) Story(
 	ctx sdk.Context, storyID int64) (story Story, err sdk.Error) {
@@ -157,46 +139,6 @@ func (k Keeper) StoriesByCategoryID(
 
 	return k.storiesByCategoryID(
 		ctx, storyIDsByCategorySubspaceKey(k, catID, false), catID)
-}
-
-// FeedByCategoryID gets stories ordered by challenged stories first
-func (k Keeper) FeedByCategoryID(
-	ctx sdk.Context,
-	catID int64) (stories []Story, err sdk.Error) {
-
-	// get all story ids by category
-	storyIDs, err := k.storyIDsByCategoryID(
-		ctx, storyIDsByCategorySubspaceKey(k, catID, false), catID)
-	if err != nil {
-		return
-	}
-
-	// get all challenged story ids by category
-	challengedStoryIDs, err := k.storyIDsByCategoryID(
-		ctx, storyIDsByCategorySubspaceKey(k, catID, true), catID)
-	if err != nil {
-		return
-	}
-
-	// make a list of all unchallenged story ids
-	var unchallengedStoryIDs []int64
-	for _, sid := range storyIDs {
-		isMatch := false
-		for _, cid := range challengedStoryIDs {
-			isMatch = sid == cid
-			if isMatch {
-				break
-			}
-		}
-		if !isMatch {
-			unchallengedStoryIDs = append(unchallengedStoryIDs, sid)
-		}
-	}
-
-	// concat challenged story ids with unchallenged story ids
-	feedIDs := append(challengedStoryIDs, unchallengedStoryIDs...)
-
-	return k.storiesByID(ctx, feedIDs)
 }
 
 // Stories returns all stories in reverse chronological order

@@ -9,16 +9,13 @@ type GenesisState struct {
 
 // DefaultGenesisState for tests
 func DefaultGenesisState() GenesisState {
-	return GenesisState{
-		Categories: DefaultCategories(),
+	categories := []Category{
+		{ID: 1, Title: "Cryptocurrency", Slug: "crypto"},
+		{ID: 2, Title: "Memes", Slug: "meme"},
 	}
-}
 
-// DefaultCategories for tests and chain init
-func DefaultCategories() []Category {
-	return []Category{
-		{Title: "Cryptocurrency", Slug: "crypto"},
-		{Title: "Memes", Slug: "meme"},
+	return GenesisState{
+		Categories: categories,
 	}
 }
 
