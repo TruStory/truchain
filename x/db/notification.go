@@ -16,13 +16,14 @@ const (
 // NotificationEvent represents a notification sent to an user.
 type NotificationEvent struct {
 	ID               int64            `json:"id"`
+	StoryID          int64            `json:"story_id"`
 	Address          string           `json:"address"`
 	TwitterProfileID int64            `json:"profile_id"`
 	TwitterProfile   *TwitterProfile  `json:"profile"`
 	Message          string           `json:"message"`
 	Timestamp        time.Time        `json:"timestamp"`
 	SenderProfileID  int64            `json:"sender_profile_id" `
-	SenderProfile    *TwitterProfile  `json:"sender_profile"  pg:"fk:twitter_profile_id"`
+	SenderProfile    *TwitterProfile  `json:"sender_profile"`
 	Type             NotificationType `json:"type" sql:",notnull"`
 	Read             bool             `json:"read"`
 }
@@ -34,7 +35,7 @@ func (c *Client) NotificationEventsByAddress(addr string) ([]NotificationEvent, 
 
 	err := c.Model(&evts).
 		Column("notification_event.*", "TwitterProfile", "SenderProfile").
-		Where("notification_event.address = ?", addr).Select()
+		Where("notification_event.address = ?", addr).Order("timestamp DESC").Select()
 	if err != nil {
 		return nil, err
 	}
