@@ -16,7 +16,16 @@ func DefaultGenesisState() GenesisState {
 	}
 }
 
-// InitGenesis initializes story state from genesis file
+// InitGenesis initializes state from genesis file
 func InitGenesis(ctx sdk.Context, stakingKeeper Keeper, data GenesisState) {
 	stakingKeeper.SetParams(ctx, data.Params)
+}
+
+// ExportGenesis exports the genesis state
+func ExportGenesis(ctx sdk.Context, keeper Keeper) GenesisState {
+	params := keeper.GetParams(ctx)
+
+	return GenesisState{
+		Params: params,
+	}
 }

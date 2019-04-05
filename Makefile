@@ -29,6 +29,9 @@ doc:
 	@echo "--> Wait a few seconds and visit http://localhost:6060/pkg/github.com/TruStory/truchain/"
 	godoc -http=:6060
 
+export:
+	bin/truchaind --home $(CHAIN_DIR) export
+
 init:
 	bin/truchaind --home $(CHAIN_DIR) init
 

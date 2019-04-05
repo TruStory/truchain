@@ -40,9 +40,6 @@ func TestAddGetStory(t *testing.T) {
 
 	storyID, _ = sk.Create(ctx, body, int64(1), creator, source, kind)
 	assert.Equal(t, int64(2), storyID, "Story ID did not increment properly")
-
-	coinName, _ := sk.CategoryDenom(ctx, storyID)
-	assert.Equal(t, "trudex", coinName)
 }
 
 func TestUpdateStory(t *testing.T) {
@@ -70,20 +67,6 @@ func TestGetStoriesWithCategory(t *testing.T) {
 
 	stories, _ := sk.StoriesByCategoryID(ctx, 1)
 	assert.Equal(t, numStories, len(stories))
-}
-
-func TestFeedWithCategory(t *testing.T) {
-	ctx, sk, ck := mockDB()
-
-	numStories := 5
-	for i := 0; i < numStories; i++ {
-		createFakeStory(ctx, sk, ck)
-	}
-
-	stories, _ := sk.FeedByCategoryID(ctx, 1)
-
-	assert.Equal(t, 5, len(stories))
-	assert.Equal(t, Pending, stories[2].Status)
 }
 
 func TestFeedTrending(t *testing.T) {

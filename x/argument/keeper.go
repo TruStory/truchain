@@ -95,11 +95,8 @@ func (k Keeper) RegisterLike(ctx sdk.Context, argumentID int64, creator sdk.AccA
 	}
 
 	// append argument <-> like association
-	// argument:id:[ID]:likes:creator:[0xdeadbeef] = Like{}
-	store := k.GetStore(ctx)
-	store.Set(
-		k.likesKey(argumentID, creator),
-		k.GetCodec().MustMarshalBinaryLengthPrefixed(like))
+	// likes:argument:id:[ID]:creator:[0xdeadbeef] = Like{}
+	k.setLike(ctx, like)
 
 	return nil
 }
@@ -108,7 +105,7 @@ func (k Keeper) RegisterLike(ctx sdk.Context, argumentID int64, creator sdk.AccA
 func (k Keeper) LikesByArgumentID(ctx sdk.Context, argumentID int64) (likes []Like, err sdk.Error) {
 	// iterate through prefix argument:id:[ID]:likes:creator:
 	searchPrefix := fmt.Sprintf(
-		"%s:id:%d:likes:creator:",
+		"likes:%s:id:%d:creator:",
 		k.GetStoreKey().Name(),
 		argumentID,
 	)
@@ -130,9 +127,16 @@ func (k Keeper) setArgument(ctx sdk.Context, argument Argument) {
 		k.GetCodec().MustMarshalBinaryLengthPrefixed(argument))
 }
 
+func (k Keeper) setLike(ctx sdk.Context, like Like) {
+	store := k.GetStore(ctx)
+	store.Set(
+		k.likesKey(like.ArgumentID, like.Creator),
+		k.GetCodec().MustMarshalBinaryLengthPrefixed(like))
+}
+
 func (k Keeper) likesKey(argumentID int64, creator sdk.AccAddress) []byte {
 	key := fmt.Sprintf(
-		"%s:id:%d:likes:creator:%s",
+		"likes:%s:id:%d:creator:%s",
 		k.GetStoreKey().Name(),
 		argumentID,
 		creator.String(),

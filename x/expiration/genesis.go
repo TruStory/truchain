@@ -20,3 +20,12 @@ func DefaultGenesisState() GenesisState {
 func InitGenesis(ctx sdk.Context, expirationKeeper Keeper, data GenesisState) {
 	expirationKeeper.SetParams(ctx, data.Params)
 }
+
+// ExportGenesis exports the genesis state
+func ExportGenesis(ctx sdk.Context, keeper Keeper) GenesisState {
+	params := keeper.GetParams(ctx)
+
+	return GenesisState{
+		Params: params,
+	}
+}

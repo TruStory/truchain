@@ -26,10 +26,6 @@ const (
 type ReadKeeper interface {
 	app.ReadKeeper
 
-	CategoryDenom(ctx sdk.Context, id int64) (name string, err sdk.Error)
-	FeedByCategoryID(
-		ctx sdk.Context,
-		catID int64) (stories []Story, err sdk.Error)
 	GetParams(ctx sdk.Context) Params
 	Stories(ctx sdk.Context) (stories []Story)
 	StoriesByCategoryID(ctx sdk.Context, catID int64) (stories []Story, err sdk.Error)
@@ -55,22 +51,22 @@ type WriteKeeper interface {
 type Keeper struct {
 	app.Keeper
 
-	pendingStoryListKey sdk.StoreKey
-	categoryKeeper      category.ReadKeeper
-	paramStore          params.Subspace
+	storyQueueKey  sdk.StoreKey
+	categoryKeeper category.ReadKeeper
+	paramStore     params.Subspace
 }
 
 // NewKeeper creates a new keeper with write and read access
 func NewKeeper(
 	storeKey sdk.StoreKey,
-	pendingStoryListKey sdk.StoreKey,
+	storyQueueKey sdk.StoreKey,
 	categoryKeeper category.ReadKeeper,
 	paramStore params.Subspace,
 	codec *amino.Codec) Keeper {
 
 	return Keeper{
 		app.NewKeeper(codec, storeKey),
-		pendingStoryListKey,
+		storyQueueKey,
 		categoryKeeper,
 		paramStore.WithTypeTable(ParamTypeTable()),
 	}
@@ -116,25 +112,11 @@ func (k Keeper) Create(
 	k.appendStoriesList(
 		ctx, storyIDsByCategoryKey(k, categoryID, story.Timestamp, false), story)
 
-	k.pendingStoryList(ctx).Push(story.ID)
+	k.storyQueue(ctx).Push(story.ID)
 
 	logger.Info("Created " + story.String())
 
 	return story.ID, nil
-}
-
-// CategoryDenom returns the name of the category coin for the story
-func (k Keeper) CategoryDenom(ctx sdk.Context, id int64) (name string, err sdk.Error) {
-	story, err := k.Story(ctx, id)
-	if err != nil {
-		return
-	}
-	cat, err := k.categoryKeeper.GetCategory(ctx, story.CategoryID)
-	if err != nil {
-		return
-	}
-
-	return cat.Denom(), nil
 }
 
 // Story gets the story with the given id from the key-value store
@@ -157,46 +139,6 @@ func (k Keeper) StoriesByCategoryID(
 
 	return k.storiesByCategoryID(
 		ctx, storyIDsByCategorySubspaceKey(k, catID, false), catID)
-}
-
-// FeedByCategoryID gets stories ordered by challenged stories first
-func (k Keeper) FeedByCategoryID(
-	ctx sdk.Context,
-	catID int64) (stories []Story, err sdk.Error) {
-
-	// get all story ids by category
-	storyIDs, err := k.storyIDsByCategoryID(
-		ctx, storyIDsByCategorySubspaceKey(k, catID, false), catID)
-	if err != nil {
-		return
-	}
-
-	// get all challenged story ids by category
-	challengedStoryIDs, err := k.storyIDsByCategoryID(
-		ctx, storyIDsByCategorySubspaceKey(k, catID, true), catID)
-	if err != nil {
-		return
-	}
-
-	// make a list of all unchallenged story ids
-	var unchallengedStoryIDs []int64
-	for _, sid := range storyIDs {
-		isMatch := false
-		for _, cid := range challengedStoryIDs {
-			isMatch = sid == cid
-			if isMatch {
-				break
-			}
-		}
-		if !isMatch {
-			unchallengedStoryIDs = append(unchallengedStoryIDs, sid)
-		}
-	}
-
-	// concat challenged story ids with unchallenged story ids
-	feedIDs := append(challengedStoryIDs, unchallengedStoryIDs...)
-
-	return k.storiesByID(ctx, feedIDs)
 }
 
 // Stories returns all stories in reverse chronological order
@@ -321,9 +263,9 @@ func (k Keeper) storyIDsByCategoryID(
 	return storyIDs, nil
 }
 
-func (k Keeper) pendingStoryList(ctx sdk.Context) list.List {
-	store := ctx.KVStore(k.pendingStoryListKey)
-	return list.NewList(k.GetCodec(), store)
+func (k Keeper) storyQueue(ctx sdk.Context) list.Queue {
+	store := ctx.KVStore(k.storyQueueKey)
+	return list.NewQueue(k.GetCodec(), store)
 }
 
 func (k Keeper) validate(ctx sdk.Context, body string) sdk.Error {

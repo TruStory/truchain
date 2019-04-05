@@ -2,6 +2,7 @@ package app
 
 import (
 	"github.com/TruStory/truchain/x/argument"
+	"github.com/TruStory/truchain/x/backing"
 	"github.com/TruStory/truchain/x/category"
 	"github.com/TruStory/truchain/x/challenge"
 	"github.com/TruStory/truchain/x/expiration"
@@ -19,7 +20,8 @@ type GenesisState struct {
 	AuthData       auth.GenesisState       `json:"auth"`
 	BankData       bank.GenesisState       `json:"bank"`
 	Accounts       []*auth.BaseAccount     `json:"accounts"`
-	Categories     []category.Category     `json:"categories"`
+	BackingData    backing.GenesisState    `json:"backing"`
+	CategoryData   category.GenesisState   `json:"category"`
 	ChallengeData  challenge.GenesisState  `json:"challenge"`
 	ExpirationData expiration.GenesisState `json:"expiration"`
 	StakeData      stake.GenesisState      `json:"stake"`
@@ -56,7 +58,7 @@ func (app *TruChain) initChainer(ctx sdk.Context, req abci.RequestInitChain) abc
 	argument.InitGenesis(ctx, app.argumentKeeper, genesisState.ArgumentData)
 	auth.InitGenesis(ctx, app.accountKeeper, app.feeCollectionKeeper, genesisState.AuthData)
 	bank.InitGenesis(ctx, app.bankKeeper, genesisState.BankData)
-	category.InitGenesis(ctx, app.categoryKeeper, genesisState.Categories)
+	category.InitGenesis(ctx, app.categoryKeeper, genesisState.CategoryData)
 	challenge.InitGenesis(ctx, app.challengeKeeper, genesisState.ChallengeData)
 	expiration.InitGenesis(ctx, app.expirationKeeper, genesisState.ExpirationData)
 	stake.InitGenesis(ctx, app.stakeKeeper, genesisState.StakeData)

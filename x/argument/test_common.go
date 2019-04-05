@@ -53,7 +53,7 @@ func mockDB() (
 	codec.RegisterConcrete(&auth.BaseAccount{}, "auth/Account", nil)
 
 	categoryKeeper := category.NewKeeper(catKey, codec)
-	category.InitGenesis(ctx, categoryKeeper, category.DefaultCategories())
+	category.InitGenesis(ctx, categoryKeeper, category.DefaultGenesisState())
 
 	pk := params.NewKeeper(codec, paramsKey, transientParamsKey)
 	am := auth.NewAccountKeeper(codec, accKey, pk.Subspace(auth.DefaultParamspace), auth.ProtoBaseAccount)

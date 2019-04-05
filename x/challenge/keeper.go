@@ -160,9 +160,7 @@ func (k Keeper) Create(
 	challenge := Challenge{&vote}
 
 	// persist challenge
-	k.GetStore(ctx).Set(
-		k.GetIDKey(challenge.ID()),
-		k.GetCodec().MustMarshalBinaryLengthPrefixed(challenge))
+	k.setChallenge(ctx, challenge)
 
 	// persist challenge <-> story mapping
 	k.challengeList.Append(ctx, k, storyID, creator, challenge.ID())

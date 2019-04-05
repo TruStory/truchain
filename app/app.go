@@ -79,11 +79,11 @@ type TruChain struct {
 	// access truchain multistore
 	argumentKeeper     argument.Keeper
 	backingKeeper      backing.Keeper
-	categoryKeeper     category.WriteKeeper
+	categoryKeeper     category.Keeper
 	challengeKeeper    challenge.Keeper
 	clientParamsKeeper clientParams.Keeper
 	expirationKeeper   expiration.Keeper
-	storyKeeper        story.WriteKeeper
+	storyKeeper        story.Keeper
 	stakeKeeper        stake.Keeper
 	truBankKeeper      trubank.Keeper
 
@@ -100,7 +100,7 @@ type TruChain struct {
 // In addition, all necessary mappers and keepers are created, routes
 // registered, and finally the stores being mounted along with any necessary
 // chain initialization.
-func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *TruChain {
+func NewTruChain(logger log.Logger, db dbm.DB, loadLatest bool, options ...func(*bam.BaseApp)) *TruChain {
 	// create and register app-level codec for TXs and accounts
 	codec := MakeCodec()
 
@@ -280,10 +280,11 @@ func NewTruChain(logger log.Logger, db dbm.DB, options ...func(*bam.BaseApp)) *T
 
 	app.MountStoresTransient(app.tkeyParams)
 
-	err := app.LoadLatestVersion(app.keyMain)
-
-	if err != nil {
-		cmn.Exit(err.Error())
+	if loadLatest {
+		err := app.LoadLatestVersion(app.keyMain)
+		if err != nil {
+			cmn.Exit(err.Error())
+		}
 	}
 
 	// build HTTP api
@@ -360,10 +361,12 @@ func (app *TruChain) EndBlocker(ctx sdk.Context, _ abci.RequestEndBlock) abci.Re
 // ExportAppStateAndValidators implements custom application logic that exposes
 // various parts of the application's state and set of validators. An error is
 // returned if any step getting the state or set of validators fails.
-func (app *TruChain) ExportAppStateAndValidators() (appState json.RawMessage, validators []tmtypes.GenesisValidator, err error) {
-	ctx := app.NewContext(true, abci.Header{})
-	accounts := []*auth.BaseAccount{}
+func (app *TruChain) ExportAppStateAndValidators() (
+	appState json.RawMessage, validators []tmtypes.GenesisValidator, err error) {
 
+	ctx := app.NewContext(true, abci.Header{Height: app.LastBlockHeight()})
+
+	accounts := []*auth.BaseAccount{}
 	appendAccountsFn := func(acc auth.Account) bool {
 		account := &auth.BaseAccount{
 			Address: acc.GetAddress(),
@@ -377,12 +380,16 @@ func (app *TruChain) ExportAppStateAndValidators() (appState json.RawMessage, va
 	app.accountKeeper.IterateAccounts(ctx, appendAccountsFn)
 
 	genState := GenesisState{
+		ArgumentData:   argument.ExportGenesis(ctx, app.argumentKeeper),
 		Accounts:       accounts,
-		AuthData:       auth.DefaultGenesisState(),
-		BankData:       bank.DefaultGenesisState(),
-		Categories:     category.DefaultCategories(),
-		ExpirationData: expiration.DefaultGenesisState(),
-		StoryData:      story.DefaultGenesisState(),
+		AuthData:       auth.ExportGenesis(ctx, app.accountKeeper, app.feeCollectionKeeper),
+		BankData:       bank.ExportGenesis(ctx, app.bankKeeper),
+		BackingData:    backing.ExportGenesis(ctx, app.backingKeeper),
+		CategoryData:   category.ExportGenesis(ctx, app.categoryKeeper),
+		ChallengeData:  challenge.ExportGenesis(ctx, app.challengeKeeper),
+		ExpirationData: expiration.ExportGenesis(ctx, app.expirationKeeper),
+		StakeData:      stake.ExportGenesis(ctx, app.stakeKeeper),
+		StoryData:      story.ExportGenesis(ctx, app.storyKeeper),
 	}
 
 	appState, err = codec.MarshalJSONIndent(app.codec, genState)
@@ -391,6 +398,11 @@ func (app *TruChain) ExportAppStateAndValidators() (appState json.RawMessage, va
 	}
 
 	return appState, validators, err
+}
+
+// LoadHeight loads the app at a particular height
+func (app *TruChain) LoadHeight(height int64) error {
+	return app.LoadVersion(height, app.keyMain)
 }
 
 func loadRegistrarKey() secp256k1.PrivKeySecp256k1 {
