@@ -938,7 +938,7 @@
         "inputFields": [],
         "interfaces": [],
         "kind": "OBJECT",
-        "name": "NotificaitonEvent",
+        "name": "NotificationEvent",
         "possibleTypes": []
       },
       {
@@ -1486,7 +1486,7 @@
                   "name": "",
                   "ofType": {
                     "kind": "OBJECT",
-                    "name": "NotificaitonEvent",
+                    "name": "NotificationEvent",
                     "ofType": null
                   }
                 }

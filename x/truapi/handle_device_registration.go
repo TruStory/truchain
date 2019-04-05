@@ -17,6 +17,12 @@ type DeviceTokenRegistrationRequest struct {
 	Token    string `json:"token"`
 }
 
+// DeviceTokenUnregistration represents the JSON request to remove a device token.
+type DeviceTokenUnregistration struct {
+	Platform string `json:"platform"`
+	Token    string `json:"token"`
+}
+
 // HandleDeviceTokenRegistration takes a `DeviceTokenRegistrationRequest` and returns a `DeviceToken`
 func (ta *TruAPI) HandleDeviceTokenRegistration(w http.ResponseWriter, r *http.Request) {
 	// check if request comes from an authenticated user.
@@ -52,4 +58,27 @@ func (ta *TruAPI) HandleDeviceTokenRegistration(w http.ResponseWriter, r *http.R
 		return
 	}
 	render.Response(w, r, deviceToken, http.StatusOK)
+}
+
+// HandleUnregisterDeviceToken takes a `UnregisterDeviceTokenRequest`
+func (ta *TruAPI) HandleUnregisterDeviceToken(w http.ResponseWriter, r *http.Request) {
+	// check if request comes from an authenticated user.
+	auth, err := cookies.GetAuthenticatedUser(r)
+	if err != nil {
+		render.Error(w, r, err.Error(), http.StatusBadRequest)
+		return
+	}
+	request := &DeviceTokenUnregistration{}
+	err = json.NewDecoder(r.Body).Decode(request)
+	if err != nil {
+		render.Error(w, r, "bad payload", http.StatusBadRequest)
+		return
+	}
+	err = ta.DBClient.RemoveDeviceToken(auth.Address, request.Token, request.Platform)
+
+	if err != nil {
+		render.Error(w, r, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	render.Response(w, r, request, http.StatusOK)
 }

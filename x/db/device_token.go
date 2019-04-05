@@ -33,6 +33,15 @@ func (c *Client) UpsertDeviceToken(token *DeviceToken) error {
 	return err
 }
 
+// RemoveDeviceToken performs a delete for a specific token.
+func (c *Client) RemoveDeviceToken(address, token, platform string) error {
+	t := &DeviceToken{}
+	_, err := c.Model(t).Where("address = ? ", address).
+		Where("token = ?", token).
+		Where("platform = ?", platform).Delete()
+	return err
+}
+
 // DeviceTokensByAddress implements `Datastore`
 // Finds a Device Tokens by the given address
 func (c *Client) DeviceTokensByAddress(addr string) ([]DeviceToken, error) {

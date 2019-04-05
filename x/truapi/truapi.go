@@ -104,6 +104,7 @@ func (ta *TruAPI) RegisterRoutes() {
 	api.Handle("/register", WrapHandler(ta.HandleRegistration))
 	api.Handle("/user", WrapHandler(ta.HandleUserDetails))
 	api.HandleFunc("/deviceToken", ta.HandleDeviceTokenRegistration)
+	api.HandleFunc("/deviceToken/unregister", ta.HandleUnregisterDeviceToken)
 	api.HandleFunc("/upload", ta.HandleUpload)
 
 	if os.Getenv("MOCK_REGISTRATION") == "true" {
@@ -311,7 +312,7 @@ func (ta *TruAPI) RegisterResolvers() {
 	})
 
 	ta.GraphQLClient.RegisterQueryResolver("notifications", ta.notificationsResolver)
-	ta.GraphQLClient.RegisterObjectResolver("NotificaitonEvent", db.NotificationEvent{}, map[string]interface{}{
+	ta.GraphQLClient.RegisterObjectResolver("NotificationEvent", db.NotificationEvent{}, map[string]interface{}{
 		"id": func(_ context.Context, q db.NotificationEvent) int64 { return q.StoryID },
 		"userId": func(_ context.Context, q db.NotificationEvent) int64 {
 			if q.SenderProfile != nil {
