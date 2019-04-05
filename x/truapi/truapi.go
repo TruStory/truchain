@@ -20,12 +20,20 @@ import (
 	"github.com/TruStory/truchain/x/graphql"
 	"github.com/TruStory/truchain/x/params"
 	"github.com/TruStory/truchain/x/story"
+	"github.com/TruStory/truchain/x/truapi/cookies"
 	trubank "github.com/TruStory/truchain/x/trubank"
 	"github.com/TruStory/truchain/x/users"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/dghubble/gologin/twitter"
 	"github.com/dghubble/oauth1"
 	twitterOAuth1 "github.com/dghubble/oauth1/twitter"
+)
+
+// ContextKey represents a string key for request context.
+type ContextKey string
+
+const (
+	userContextKey = ContextKey("user")
 )
 
 // TruAPI implements an HTTP server for TruStory functionality using `chttp.API`
@@ -72,12 +80,25 @@ func WrapHandler(h chttp.Handler) http.Handler {
 	return h.HandlerFunc()
 }
 
+// WithUser sets the user in the context that will be passed down to handlers.
+func WithUser(h http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		auth, err := cookies.GetAuthenticatedUser(r)
+		if err != nil {
+			h.ServeHTTP(w, r)
+			return
+		}
+		ctx := context.WithValue(r.Context(), userContextKey, auth)
+		h.ServeHTTP(w, r.WithContext(ctx))
+	})
+}
+
 // RegisterRoutes applies the TruStory API routes to the `chttp.API` router
 func (ta *TruAPI) RegisterRoutes() {
 	api := ta.Subrouter("/api/v1")
 	api.Use(chttp.JSONResponseMiddleware)
 	api.Handle("/ping", WrapHandler(ta.HandlePing))
-	api.Handle("/graphql", WrapHandler(ta.HandleGraphQL))
+	api.Handle("/graphql", WithUser(WrapHandler(ta.HandleGraphQL)))
 	api.Handle("/presigned", WrapHandler(ta.HandlePresigned))
 	api.Handle("/unsigned", WrapHandler(ta.HandleUnsigned))
 	api.Handle("/register", WrapHandler(ta.HandleRegistration))
@@ -287,6 +308,36 @@ func (ta *TruAPI) RegisterResolvers() {
 
 	ta.GraphQLClient.RegisterObjectResolver("URL", url.URL{}, map[string]interface{}{
 		"url": func(_ context.Context, q url.URL) string { return q.String() },
+	})
+
+	ta.GraphQLClient.RegisterQueryResolver("notifications", ta.notificationsResolver)
+	ta.GraphQLClient.RegisterObjectResolver("NotificaitonEvent", db.NotificationEvent{}, map[string]interface{}{
+		"id": func(_ context.Context, q db.NotificationEvent) int64 { return q.StoryID },
+		"userId": func(_ context.Context, q db.NotificationEvent) int64 {
+			if q.SenderProfile != nil {
+				return q.SenderProfileID
+			}
+			return q.TwitterProfileID
+		},
+		"title": func(_ context.Context, q db.NotificationEvent) string {
+			if q.SenderProfile != nil {
+				return q.SenderProfile.FullName
+			}
+			return "Story Update"
+		},
+		"createdTime": func(_ context.Context, q db.NotificationEvent) time.Time {
+			return q.Timestamp
+		},
+		"body": func(_ context.Context, q db.NotificationEvent) string {
+			return q.Message
+		},
+		"notificationId": func(_ context.Context, q db.NotificationEvent) int64 { return q.ID },
+		"image": func(_ context.Context, q db.NotificationEvent) string {
+			if q.SenderProfile != nil {
+				return q.SenderProfile.AvatarURI
+			}
+			return q.TwitterProfile.AvatarURI
+		},
 	})
 
 	ta.GraphQLClient.BuildSchema()

@@ -15,6 +15,7 @@ import (
 	"github.com/TruStory/truchain/x/db"
 	"github.com/TruStory/truchain/x/params"
 	"github.com/TruStory/truchain/x/story"
+	"github.com/TruStory/truchain/x/truapi/cookies"
 	trubank "github.com/TruStory/truchain/x/trubank"
 	"github.com/TruStory/truchain/x/users"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -335,4 +336,16 @@ func (ta *TruAPI) transactionsResolver(
 	}
 
 	return *transactions
+}
+
+func (ta *TruAPI) notificationsResolver(ctx context.Context, q struct{}) []db.NotificationEvent {
+	user, ok := ctx.Value(userContextKey).(*cookies.AuthenticatedUser)
+	if !ok {
+		return make([]db.NotificationEvent, 0)
+	}
+	evts, err := ta.DBClient.NotificationEventsByAddress(user.Address)
+	if err != nil {
+		panic(err)
+	}
+	return evts
 }
