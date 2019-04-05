@@ -31,6 +31,11 @@ func (ta *TruAPI) HandleUserDetails(r *http.Request) chttp.Response {
 		return chttp.SimpleErrorResponse(401, err)
 	}
 
+	// Chain was restarted and DB was wiped so Address and TwitterProfileID contained in cookie is stale.
+	if twitterProfile.ID == 0 {
+		return chttp.SimpleErrorResponse(401, err)
+	}
+
 	responseBytes, _ := json.Marshal(UserResponse{
 		UserID:   twitterProfile.ID,
 		Fullname: twitterProfile.FullName,
