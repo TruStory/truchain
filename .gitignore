@@ -27,6 +27,7 @@ node_modules/
 ./registrar.key
 .env
 web/
+.bak
 
 # These stay ignored until we switch to modules
 go.mod

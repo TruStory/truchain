@@ -22,6 +22,7 @@ func InitGenesis(ctx sdk.Context, keeper Keeper, data GenesisState) {
 	for _, challenge := range data.Challenges {
 		keeper.setChallenge(ctx, challenge)
 	}
+	keeper.SetLen(ctx, int64(len(data.Challenges)))
 	keeper.SetParams(ctx, data.Params)
 }
 

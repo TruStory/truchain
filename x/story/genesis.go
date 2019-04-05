@@ -27,7 +27,7 @@ func InitGenesis(ctx sdk.Context, keeper Keeper, data GenesisState) {
 	for _, storyID := range data.StoryQueue {
 		keeper.storyQueue(ctx).Push(storyID)
 	}
-
+	keeper.SetLen(ctx, int64(len(data.Stories)))
 	keeper.SetParams(ctx, data.Params)
 }
 

@@ -26,6 +26,7 @@ func InitGenesis(ctx sdk.Context, keeper Keeper, data GenesisState) {
 	for _, like := range data.Likes {
 		keeper.setLike(ctx, like)
 	}
+	keeper.SetLen(ctx, int64(len(data.Arguments)))
 	keeper.SetParams(ctx, data.Params)
 }
 

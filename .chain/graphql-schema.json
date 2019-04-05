@@ -1238,22 +1238,6 @@
             "deprecationReason": "",
             "description": "",
             "isDeprecated": false,
-            "name": "stakeToCredRatio",
-            "type": {
-              "kind": "NON_NULL",
-              "name": "",
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "string",
-                "ofType": null
-              }
-            }
-          },
-          {
-            "args": [],
-            "deprecationReason": "",
-            "description": "",
-            "isDeprecated": false,
             "name": "storyExpireDuration",
             "type": {
               "kind": "NON_NULL",

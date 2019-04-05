@@ -19,6 +19,7 @@ func InitGenesis(ctx sdk.Context, keeper Keeper, data GenesisState) {
 	for _, backing := range data.Backings {
 		keeper.setBacking(ctx, backing)
 	}
+	keeper.SetLen(ctx, int64(len(data.Backings)))
 }
 
 // ExportGenesis exports the genesis state

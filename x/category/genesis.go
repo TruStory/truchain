@@ -24,6 +24,7 @@ func InitGenesis(ctx sdk.Context, keeper Keeper, data GenesisState) {
 	for _, cat := range data.Categories {
 		keeper.setCategory(ctx, cat)
 	}
+	keeper.SetLen(ctx, int64(len(data.Categories)))
 }
 
 // ExportGenesis exports the genesis state

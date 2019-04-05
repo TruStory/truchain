@@ -22,6 +22,7 @@ type WriteKeeper interface {
 	ReadKeeper
 
 	GetStore(ctx sdk.Context) sdk.KVStore
+	SetLen(ctx sdk.Context, len int64)
 }
 
 // Keeper data type with a default codec
@@ -52,23 +53,29 @@ func (k Keeper) GetStore(ctx sdk.Context) sdk.KVStore {
 
 // GetNextID increments and returns the next available id by 1
 func (k Keeper) GetNextID(ctx sdk.Context) (id int64) {
-	store := k.GetStore(ctx)
-	lenKey := []byte(k.storeKey.Name() + ":len")
-
-	bz := store.Get(lenKey)
+	bz := k.GetStore(ctx).Get(k.lenKey())
 	if bz == nil {
-		one := k.GetCodec().MustMarshalBinaryBare(int64(1))
-		store.Set(lenKey, one)
+		initialIndex := int64(1)
+		k.SetLen(ctx, initialIndex)
 
-		return 1
+		return initialIndex
 	}
 
 	k.GetCodec().MustUnmarshalBinaryBare(bz, &id)
 	nextID := id + 1
-	bz = k.GetCodec().MustMarshalBinaryBare(nextID)
-	store.Set(lenKey, bz)
+	k.SetLen(ctx, nextID)
 
 	return nextID
+}
+
+// SetLen sets the len metadata in the store for incrementing ids
+func (k Keeper) SetLen(ctx sdk.Context, len int64) {
+	bz := k.GetCodec().MustMarshalBinaryBare(len)
+	k.GetStore(ctx).Set(k.lenKey(), bz)
+}
+
+func (k Keeper) lenKey() []byte {
+	return []byte(k.storeKey.Name() + ":len")
 }
 
 // EachPrefix calls `fn` for each record in a store with a given prefix. Iteration will stop if `fn` returns false
