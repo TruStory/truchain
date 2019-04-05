@@ -22,6 +22,7 @@ func DefaultGenesisState() GenesisState {
 func InitGenesis(ctx sdk.Context, keeper Keeper, data GenesisState) {
 	for _, s := range data.Stories {
 		keeper.setStory(ctx, s)
+		keeper.appendStoriesList(ctx, storyIDsByCategoryKey(keeper, s.CategoryID, s.Timestamp, false), s)
 	}
 	for _, storyID := range data.StoryQueue {
 		keeper.storyQueue(ctx).Push(storyID)
