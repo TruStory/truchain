@@ -189,7 +189,7 @@ func isWhitelistedUser(twitterUser *twitter.User) (bool, error) {
 	}
 
 	for _, whitelistedUser := range whitelistedUsers {
-		if whitelistedUser == twitterUser.ScreenName {
+		if strings.ToLower(whitelistedUser) == strings.ToLower(twitterUser.ScreenName) {
 			return true, nil
 		}
 	}
