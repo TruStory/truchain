@@ -24,7 +24,9 @@ func JSON(w http.ResponseWriter, r *http.Request, v interface{}, code int) {
 	}
 	w.WriteHeader(code)
 	_, err = io.Copy(w, buf)
-	fmt.Println("error sending response to underlying writer", err)
+	if err != nil {
+		fmt.Println("error sending response to underlying writer", err)
+	}
 }
 
 // Error renders a json error
