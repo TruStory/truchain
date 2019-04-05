@@ -382,8 +382,8 @@ func (app *TruChain) ExportAppStateAndValidators() (
 	genState := GenesisState{
 		ArgumentData:   argument.ExportGenesis(ctx, app.argumentKeeper),
 		Accounts:       accounts,
-		AuthData:       auth.DefaultGenesisState(),
-		BankData:       bank.DefaultGenesisState(),
+		AuthData:       auth.ExportGenesis(ctx, app.accountKeeper, app.feeCollectionKeeper),
+		BankData:       bank.ExportGenesis(ctx, app.bankKeeper),
 		BackingData:    backing.ExportGenesis(ctx, app.backingKeeper),
 		CategoryData:   category.ExportGenesis(ctx, app.categoryKeeper),
 		ChallengeData:  challenge.ExportGenesis(ctx, app.challengeKeeper),
