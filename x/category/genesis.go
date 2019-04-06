@@ -1,6 +1,8 @@
 package category
 
-import sdk "github.com/cosmos/cosmos-sdk/types"
+import (
+	sdk "github.com/cosmos/cosmos-sdk/types"
+)
 
 // GenesisState for categories
 type GenesisState struct {
@@ -10,8 +12,8 @@ type GenesisState struct {
 // DefaultGenesisState for tests
 func DefaultGenesisState() GenesisState {
 	categories := []Category{
-		{ID: 1, Title: "Cryptocurrency", Slug: "crypto"},
-		{ID: 2, Title: "Memes", Slug: "meme"},
+		{ID: 1, Title: "Cryptocurrency", Slug: "crypto", TotalCred: sdk.NewCoin("crypto", sdk.ZeroInt())},
+		{ID: 2, Title: "Memes", Slug: "meme", TotalCred: sdk.NewCoin("meme", sdk.ZeroInt())},
 	}
 
 	return GenesisState{
