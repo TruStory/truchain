@@ -369,8 +369,11 @@ func (app *TruChain) ExportAppStateAndValidators() (
 	accounts := []*auth.BaseAccount{}
 	appendAccountsFn := func(acc auth.Account) bool {
 		account := &auth.BaseAccount{
-			Address: acc.GetAddress(),
-			Coins:   acc.GetCoins(),
+			Address:       acc.GetAddress(),
+			Coins:         acc.GetCoins(),
+			PubKey:        acc.GetPubKey(),
+			AccountNumber: acc.GetAccountNumber(),
+			Sequence:      acc.GetSequence(),
 		}
 
 		accounts = append(accounts, account)
