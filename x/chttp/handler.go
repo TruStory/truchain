@@ -3,6 +3,8 @@ package chttp
 import (
 	"fmt"
 	"net/http"
+
+	"github.com/gorilla/csrf"
 )
 
 // Handler is an http.Handler that renders a chttp.Response
@@ -19,6 +21,8 @@ func (h Handler) HandlerFunc() http.HandlerFunc {
 			panic(err)
 		}
 
+		// adds the CSRF token to the requests here
+		w.Header().Set("X-CSRF-Token", csrf.Token(r))
 		w.WriteHeader(res.HTTPCode())
 		_, err = w.Write(bs)
 

@@ -10,6 +10,8 @@ import (
 	"path/filepath"
 	"time"
 
+	"github.com/gorilla/csrf"
+
 	app "github.com/TruStory/truchain/types"
 	"github.com/TruStory/truchain/x/argument"
 	"github.com/TruStory/truchain/x/backing"
@@ -77,7 +79,14 @@ func (ta *TruAPI) RegisterModels() {
 
 // WrapHandler wraps a chttp.Handler and returns a standar http.Handler
 func WrapHandler(h chttp.Handler) http.Handler {
-	return h.HandlerFunc()
+	CSRF := csrf.Protect([]byte(os.Getenv("CSRF_KEY")))
+
+	// override the handler to create a new handler that can run locally.
+	if os.Getenv("ENVIRONMENT") == "local" {
+		CSRF = csrf.Protect([]byte(os.Getenv("CSRF_KEY")), csrf.Secure(false))
+	}
+
+	return CSRF(h.HandlerFunc())
 }
 
 // WithUser sets the user in the context that will be passed down to handlers.
