@@ -10,8 +10,6 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/gorilla/csrf"
-
 	app "github.com/TruStory/truchain/types"
 	"github.com/TruStory/truchain/x/argument"
 	"github.com/TruStory/truchain/x/backing"
@@ -29,6 +27,7 @@ import (
 	"github.com/dghubble/gologin/twitter"
 	"github.com/dghubble/oauth1"
 	twitterOAuth1 "github.com/dghubble/oauth1/twitter"
+	"github.com/gorilla/csrf"
 )
 
 // ContextKey represents a string key for request context.
@@ -79,14 +78,7 @@ func (ta *TruAPI) RegisterModels() {
 
 // WrapHandler wraps a chttp.Handler and returns a standar http.Handler
 func WrapHandler(h chttp.Handler) http.Handler {
-	CSRF := csrf.Protect([]byte(os.Getenv("CSRF_KEY")))
-
-	// override the handler to create a new handler that can run locally.
-	if os.Getenv("ENVIRONMENT") == "local" {
-		CSRF = csrf.Protect([]byte(os.Getenv("CSRF_KEY")), csrf.Secure(false))
-	}
-
-	return CSRF(h.HandlerFunc())
+	return h.HandlerFunc()
 }
 
 // WithUser sets the user in the context that will be passed down to handlers.
@@ -102,16 +94,28 @@ func WithUser(h http.Handler) http.Handler {
 	})
 }
 
+// CSRFProtected protects an endpoint against the CSRF attacks
+func CSRFProtected(h http.Handler) http.Handler {
+	CSRF := csrf.Protect([]byte(os.Getenv("CSRF_KEY")))
+
+	// override the handler to create a new handler that can run locally.
+	if os.Getenv("ENVIRONMENT") == "local" {
+		CSRF = csrf.Protect([]byte(os.Getenv("CSRF_KEY")), csrf.Secure(false))
+	}
+
+	return CSRF(h)
+}
+
 // RegisterRoutes applies the TruStory API routes to the `chttp.API` router
 func (ta *TruAPI) RegisterRoutes() {
 	api := ta.Subrouter("/api/v1")
 	api.Use(chttp.JSONResponseMiddleware)
-	api.Handle("/ping", WrapHandler(ta.HandlePing))
+	api.Handle("/ping", CSRFProtected(WrapHandler(ta.HandlePing)))
 	api.Handle("/graphql", WithUser(WrapHandler(ta.HandleGraphQL)))
-	api.Handle("/presigned", WrapHandler(ta.HandlePresigned))
-	api.Handle("/unsigned", WrapHandler(ta.HandleUnsigned))
-	api.Handle("/register", WrapHandler(ta.HandleRegistration))
-	api.Handle("/user", WrapHandler(ta.HandleUserDetails))
+	api.Handle("/presigned", CSRFProtected(WrapHandler(ta.HandlePresigned)))
+	api.Handle("/unsigned", CSRFProtected(WrapHandler(ta.HandleUnsigned)))
+	api.Handle("/register", CSRFProtected(WrapHandler(ta.HandleRegistration)))
+	api.Handle("/user", CSRFProtected(WrapHandler(ta.HandleUserDetails)))
 	api.HandleFunc("/deviceToken", ta.HandleDeviceTokenRegistration)
 	api.HandleFunc("/deviceToken/unregister", ta.HandleUnregisterDeviceToken)
 	api.HandleFunc("/upload", ta.HandleUpload)
