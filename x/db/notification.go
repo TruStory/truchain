@@ -16,7 +16,7 @@ const (
 // NotificationEvent represents a notification sent to an user.
 type NotificationEvent struct {
 	ID               int64            `json:"id"`
-	StoryID          int64            `json:"story_id"`
+	TypeID           int64            `json:"type_id"`
 	Address          string           `json:"address"`
 	TwitterProfileID int64            `json:"profile_id"`
 	TwitterProfile   *TwitterProfile  `json:"profile"`
