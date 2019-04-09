@@ -13,6 +13,7 @@ type Mutations interface {
 	UpsertTwitterProfile(profile *TwitterProfile) error
 	UpsertDeviceToken(token *DeviceToken) error
 	RemoveDeviceToken(address, token, platform string) error
+	UpsertFlaggedStory(flaggedStory *FlaggedStory) error
 }
 
 // Queries read from the database
