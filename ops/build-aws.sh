@@ -1,35 +1,31 @@
 #!/usr/bin/env bash
-
 PATH=/home/ubuntu/go/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin
-
-# go (no not like the language) to repo
 GOPATH=/home/ubuntu/go
 cd "${GOPATH}/src/github.com/TruStory/truchain"
 
-COMMIT_BEFORE_PULL=$(git rev-parse HEAD)
-
 # get repo
-git pull > /dev/null
+git pull || echo "git pull truchain failed."
 
-COMMIT_AFTER_PULL=$(git rev-parse HEAD)
+# build node
+make update_deps
+make buidl
 
-# if new commits on branch, update and restart truchain service
-if [ "$COMMIT_BEFORE_PULL" != "$COMMIT_AFTER_PULL" ]
-then
+# stop truchaind daemon
+sudo systemctl stop truchaind.service
 
-  # build node
-  make update_deps
-  make buidl
+# copy binaries
+cp bin/truchaind $GOPATH/bin
+cp bin/trucli $GOPATH/bin
 
-  # stop truchaind daemon
-  sudo systemctl stop truchaind.service
+# allow truchain to run on priviledged ports :80/:443
+sudo setcap CAP_NET_BIND_SERVICE=+eip /home/ubuntu/go/bin/truchaind
 
-  # copy files
-  cp bin/truchaind $GOPATH/bin
-  cp bin/trucli $GOPATH/bin
-  cp .chain/bootstrap.csv ~/.truchaind/bootstrap.csv
+# upgrade octopus
+cd "/home/ubuntu/octopus"
+git pull || echo "git pull octopus failed."
+make db_init
+make db_migrate
 
-  # start truchain daemon
-  sudo systemctl start truchaind.service
+# start truchain daemon
+sudo systemctl start truchaind.service
 
-fi
