@@ -313,7 +313,7 @@ func (ta *TruAPI) RegisterResolvers() {
 
 	ta.GraphQLClient.RegisterQueryResolver("notifications", ta.notificationsResolver)
 	ta.GraphQLClient.RegisterObjectResolver("NotificationEvent", db.NotificationEvent{}, map[string]interface{}{
-		"id": func(_ context.Context, q db.NotificationEvent) int64 { return q.StoryID },
+		"id": func(_ context.Context, q db.NotificationEvent) int64 { return q.ID },
 		"userId": func(_ context.Context, q db.NotificationEvent) int64 {
 			if q.SenderProfile != nil {
 				return q.SenderProfileID
@@ -332,7 +332,7 @@ func (ta *TruAPI) RegisterResolvers() {
 		"body": func(_ context.Context, q db.NotificationEvent) string {
 			return q.Message
 		},
-		"notificationId": func(_ context.Context, q db.NotificationEvent) int64 { return q.ID },
+		"typeId": func(_ context.Context, q db.NotificationEvent) int64 { return q.TypeID },
 		"image": func(_ context.Context, q db.NotificationEvent) string {
 			if q.SenderProfile != nil {
 				return q.SenderProfile.AvatarURI
