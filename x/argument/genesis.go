@@ -35,7 +35,7 @@ func ExportGenesis(ctx sdk.Context, keeper Keeper) GenesisState {
 	var arguments []Argument
 	var likes []Like
 	prefix := "argument:id:"
-	keeper.EachPrefix(ctx, prefix, func(bz []byte) bool {
+	err := keeper.EachPrefix(ctx, prefix, func(bz []byte) bool {
 		var arg Argument
 		keeper.GetCodec().MustUnmarshalBinaryLengthPrefixed(bz, &arg)
 		arguments = append(arguments, arg)
@@ -48,6 +48,9 @@ func ExportGenesis(ctx sdk.Context, keeper Keeper) GenesisState {
 		}
 		return true
 	})
+	if err != nil {
+		panic(err)
+	}
 
 	params := keeper.GetParams(ctx)
 
