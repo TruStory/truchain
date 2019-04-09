@@ -136,9 +136,8 @@ func newApp(logger log.Logger, db dbm.DB, traceStore io.Writer) abci.Application
 
 func exportAppStateAndTMValidators(logger log.Logger, db dbm.DB, traceStore io.Writer, height int64, forZeroHeight bool) (
 	json.RawMessage, []tmtypes.GenesisValidator, error) {
-
 	if height != -1 {
-		tApp := app.NewTruChain(logger, db, true)
+		tApp := app.NewTruChain(logger, db, false)
 		err := tApp.LoadHeight(height)
 		if err != nil {
 			return nil, nil, err
