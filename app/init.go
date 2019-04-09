@@ -8,6 +8,7 @@ import (
 	"github.com/TruStory/truchain/x/expiration"
 	"github.com/TruStory/truchain/x/stake"
 	"github.com/TruStory/truchain/x/story"
+	trubank "github.com/TruStory/truchain/x/trubank"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth"
 	"github.com/cosmos/cosmos-sdk/x/bank"
@@ -26,6 +27,7 @@ type GenesisState struct {
 	ExpirationData expiration.GenesisState `json:"expiration"`
 	StakeData      stake.GenesisState      `json:"stake"`
 	StoryData      story.GenesisState      `json:"story"`
+	TrubankData    trubank.GenesisState    `json:"trubank"`
 }
 
 // initChainer implements the custom application logic that the BaseApp will
@@ -60,9 +62,11 @@ func (app *TruChain) initChainer(ctx sdk.Context, req abci.RequestInitChain) abc
 	bank.InitGenesis(ctx, app.bankKeeper, genesisState.BankData)
 	category.InitGenesis(ctx, app.categoryKeeper, genesisState.CategoryData)
 	challenge.InitGenesis(ctx, app.challengeKeeper, genesisState.ChallengeData)
+	backing.InitGenesis(ctx, app.backingKeeper, genesisState.BackingData)
 	expiration.InitGenesis(ctx, app.expirationKeeper, genesisState.ExpirationData)
 	stake.InitGenesis(ctx, app.stakeKeeper, genesisState.StakeData)
 	story.InitGenesis(ctx, app.storyKeeper, genesisState.StoryData)
+	trubank.InitGenesis(ctx, app.truBankKeeper, genesisState.TrubankData)
 
 	return abci.ResponseInitChain{}
 }

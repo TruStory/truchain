@@ -18,6 +18,7 @@ func DefaultGenesisState() GenesisState {
 func InitGenesis(ctx sdk.Context, keeper Keeper, data GenesisState) {
 	for _, backing := range data.Backings {
 		keeper.setBacking(ctx, backing)
+		keeper.backingStoryList.Append(ctx, keeper, backing.StoryID(), backing.Creator(), backing.ID())
 	}
 	keeper.SetLen(ctx, int64(len(data.Backings)))
 }
