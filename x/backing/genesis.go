@@ -25,12 +25,15 @@ func InitGenesis(ctx sdk.Context, keeper Keeper, data GenesisState) {
 // ExportGenesis exports the genesis state
 func ExportGenesis(ctx sdk.Context, keeper Keeper) GenesisState {
 	var backings []Backing
-	keeper.Each(ctx, func(bz []byte) bool {
+	err := keeper.Each(ctx, func(bz []byte) bool {
 		var b Backing
 		keeper.GetCodec().MustUnmarshalBinaryLengthPrefixed(bz, &b)
 		backings = append(backings, b)
 		return true
 	})
+	if err != nil {
+		panic(err)
+	}
 
 	return GenesisState{
 		Backings: backings,
