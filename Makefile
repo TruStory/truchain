@@ -55,6 +55,9 @@ db_version:
 db_migrate:
 	@go run ./x/db/migrations/*.go
 
+db_migrate_down:
+	@go run ./x/db/migrations/*.go down
+
 db_reset:
 	@go run ./x/db/migrations/*.go reset
 

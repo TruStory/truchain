@@ -8,6 +8,7 @@ import (
 
 // TwitterProfile is the Twitter profile associated with an account
 type TwitterProfile struct {
+	TimestampedModel
 	ID        int64  `json:"id"`
 	Address   string `json:"address"`
 	Username  string `json:"username"`
