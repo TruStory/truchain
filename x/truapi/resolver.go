@@ -366,7 +366,7 @@ func (ta *TruAPI) notificationsResolver(ctx context.Context, q struct{}) []db.No
 func (ta *TruAPI) filterFlaggedStories(stories *[]story.Story) ([]story.Story, error) {
 	val := os.Getenv("FLAGGED_STORY_LIMIT")
 	if val == "" {
-		return nil, ErrFlaggedStoryEnvVar
+		val = "2"
 	}
 	flagCountLimit, err := strconv.Atoi(val)
 	if err != nil {
