@@ -24,4 +24,5 @@ type Queries interface {
 	KeyPairByTwitterProfileID(id int64) (KeyPair, error)
 	DeviceTokensByAddress(addr string) ([]DeviceToken, error)
 	NotificationEventsByAddress(addr string) ([]NotificationEvent, error)
+	FlaggedStoriesByStoryID(storyID int64) ([]FlaggedStory, error)
 }
