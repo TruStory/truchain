@@ -26,7 +26,7 @@ func (ta *TruAPI) HandleFlagStory(r *http.Request) chttp.Response {
 
 	user := r.Context().Value(userContextKey)
 	if user == nil {
-		return chttp.SimpleErrorResponse(400, err)
+		return chttp.SimpleErrorResponse(401, err)
 	}
 
 	// add data to table
