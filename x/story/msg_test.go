@@ -1,7 +1,6 @@
 package story
 
 import (
-	"fmt"
 	"testing"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -60,21 +59,4 @@ func TestInValidCreatorSubmitStoryMsg(t *testing.T) {
 	err := msg.ValidateBasic()
 
 	assert.Equal(t, sdk.CodeType(7), err.Code(), err.Error())
-}
-
-func TestValidFlagStoryMsg(t *testing.T) {
-	validStoryID := int64(1)
-	validCreator := sdk.AccAddress([]byte{1, 2})
-	msg := NewFlagStoryMsg(validStoryID, validCreator)
-	err := msg.ValidateBasic()
-
-	assert.Nil(t, err)
-	assert.Equal(t, "story", msg.Route())
-	assert.Equal(t, "flag_story", msg.Type())
-	assert.Equal(
-		t,
-		`{"creator":"cosmos1qypq36vzru","story_id":1}`,
-		fmt.Sprintf("%s", msg.GetSignBytes()),
-	)
-	assert.Equal(t, []sdk.AccAddress{validCreator}, msg.GetSigners())
 }

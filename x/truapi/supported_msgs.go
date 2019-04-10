@@ -13,5 +13,4 @@ var supported = chttp.MsgTypes{
 	"LikeBackingArgumentMsg":   backing.LikeBackingArgumentMsg{},
 	"CreateChallengeMsg":       challenge.CreateChallengeMsg{},
 	"LikeChallengeArgumentMsg": challenge.LikeChallengeArgumentMsg{},
-	"FlagStoryMsg":             story.FlagStoryMsg{},
 }
