@@ -13,6 +13,7 @@ type Mutations interface {
 	UpsertTwitterProfile(profile *TwitterProfile) error
 	UpsertDeviceToken(token *DeviceToken) error
 	RemoveDeviceToken(address, token, platform string) error
+	UpsertFlaggedStory(flaggedStory *FlaggedStory) error
 }
 
 // Queries read from the database
@@ -23,4 +24,5 @@ type Queries interface {
 	KeyPairByTwitterProfileID(id int64) (KeyPair, error)
 	DeviceTokensByAddress(addr string) ([]DeviceToken, error)
 	NotificationEventsByAddress(addr string) ([]NotificationEvent, error)
+	FlaggedStoriesByStoryID(storyID int64) ([]FlaggedStory, error)
 }

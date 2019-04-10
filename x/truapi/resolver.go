@@ -4,8 +4,11 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"math"
+	"os"
 	"path"
 	"sort"
+	"strconv"
 
 	app "github.com/TruStory/truchain/types"
 	"github.com/TruStory/truchain/x/argument"
@@ -59,7 +62,13 @@ func (ta *TruAPI) allStoriesResolver(ctx context.Context, q struct{}) []story.St
 		panic(err)
 	}
 
-	return *stories
+	filteredStories, err := ta.filterFlaggedStories(stories)
+	if err != nil {
+		fmt.Println("Resolver err: ", err)
+		panic(err)
+	}
+
+	return filteredStories
 }
 
 func (ta *TruAPI) argumentResolver(_ context.Context, q app.QueryByIDParams) argument.Argument {
@@ -198,14 +207,19 @@ func (ta *TruAPI) categoryStoriesResolver(_ context.Context, q category.Category
 		return []story.Story{}
 	}
 
-	s := new([]story.Story)
-	err := json.Unmarshal(res.Value, s)
-
+	stories := new([]story.Story)
+	err := json.Unmarshal(res.Value, stories)
 	if err != nil {
 		panic(err)
 	}
 
-	return *s
+	filteredStories, err := ta.filterFlaggedStories(stories)
+	if err != nil {
+		fmt.Println("Resolver err: ", err)
+		panic(err)
+	}
+
+	return filteredStories
 }
 
 func (ta *TruAPI) challengeResolver(
@@ -348,4 +362,28 @@ func (ta *TruAPI) notificationsResolver(ctx context.Context, q struct{}) []db.No
 		panic(err)
 	}
 	return evts
+}
+
+func (ta *TruAPI) filterFlaggedStories(stories *[]story.Story) ([]story.Story, error) {
+	val := os.Getenv("FLAGGED_STORY_LIMIT")
+	if val == "" {
+		val = fmt.Sprintf("%d", math.MaxInt64)
+	}
+	flagCountLimit, err := strconv.Atoi(val)
+	if err != nil {
+		return nil, ErrFlaggedStoryEnvVarParsing
+	}
+
+	var filteredStories []story.Story
+	for _, story := range *stories {
+		flaggedStoryIDs, err := ta.DBClient.FlaggedStoriesByStoryID(story.ID)
+		if err != nil {
+			return nil, err
+		}
+		if len(flaggedStoryIDs) < flagCountLimit {
+			filteredStories = append(filteredStories, story)
+		}
+	}
+
+	return filteredStories, nil
 }

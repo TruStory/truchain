@@ -13,8 +13,6 @@ func NewHandler(k WriteKeeper) sdk.Handler {
 		switch msg := msg.(type) {
 		case SubmitStoryMsg:
 			return handleSubmitStoryMsg(ctx, k, msg)
-		case FlagStoryMsg:
-			return handleFlagStoryMsg(ctx, k, msg)
 		default:
 			return app.ErrMsgHandler(msg)
 		}
@@ -46,23 +44,4 @@ func handleSubmitStoryMsg(ctx sdk.Context, k WriteKeeper, msg SubmitStoryMsg) sd
 	}
 
 	return app.Result(id)
-}
-
-func handleFlagStoryMsg(ctx sdk.Context, k WriteKeeper, msg FlagStoryMsg) sdk.Result {
-	if err := msg.ValidateBasic(); err != nil {
-		return err.Result()
-	}
-
-	// get story
-	story, err := k.Story(ctx, msg.StoryID)
-	if err != nil {
-		err.Result()
-	}
-
-	if story.Flagged != true {
-		story.Flagged = true
-		k.UpdateStory(ctx, story)
-	}
-
-	return app.Result(story.ID)
 }
