@@ -32,7 +32,7 @@ func (ta *TruAPI) HandleFlagStory(r *http.Request) chttp.Response {
 	// add data to table
 	flaggedStory := &db.FlaggedStory{
 		StoryID:   request.StoryID,
-		Creator:   user.(cookies.AuthenticatedUser).Address,
+		Creator:   user.(*cookies.AuthenticatedUser).Address,
 		CreatedOn: time.Now(),
 	}
 	err = ta.DBClient.UpsertFlaggedStory(flaggedStory)
