@@ -46,6 +46,18 @@ start:
 check:
 	gometalinter ./...
 
+db_init:
+	@go run ./x/db/migrations/*.go init
+
+db_version:
+	@go run ./x/db/migrations/*.go version
+
+db_migrate:
+	@go run ./x/db/migrations/*.go
+
+db_reset:
+	@go run ./x/db/migrations/*.go reset
+
 dep_graph: ; $(foreach dir, $(MODULES), godepgraph -s -novendor github.com/TruStory/truchain/x/$(dir) | dot -Tpng -o x/$(dir)/dep.png${\n})
 
 install_tools_macos:
