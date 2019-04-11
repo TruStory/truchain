@@ -29,8 +29,8 @@ type QueryByCreatorParams struct {
 
 // QueryTrasanctionsByCreatorAndCategoryParams returns the query params for getting arguments by creator and category
 type QueryTrasanctionsByCreatorAndCategoryParams struct {
-	Creator    string
-	CategoryID *int64 `json:",omitempty"`
+	Creator string
+	Denom   *string `json:",omitempty"`
 }
 
 // UnmarshalQueryParams unmarshals the request query from a client

@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"path"
 
+	"github.com/TruStory/truchain/x/stake"
+
 	app "github.com/TruStory/truchain/types"
 	"github.com/TruStory/truchain/x/backing"
 	"github.com/TruStory/truchain/x/challenge"
@@ -13,36 +15,44 @@ import (
 	trubank "github.com/TruStory/truchain/x/trubank"
 )
 
-func (ta *TruAPI) likedArguments(
-	ctx context.Context, q app.QueryTrasanctionsByCreatorAndCategoryParams) []LikedArgument {
-	likedArguments := make([]LikedArgument, 0)
+func (ta *TruAPI) credArguments(
+	ctx context.Context, q app.QueryTrasanctionsByCreatorAndCategoryParams) []CredArgument {
+	credArguments := make([]CredArgument, 0)
 	transactions := make([]trubank.Transaction, 0)
 	res := ta.RunQuery(
 		path.Join(trubank.QueryPath, trubank.QueryLikeTransactionsByCreator), q)
 
 	if res.Code != 0 {
 		fmt.Println("Resolver err: ", res)
-		return likedArguments
+		return credArguments
 	}
 
 	err := json.Unmarshal(res.Value, &transactions)
 	if err != nil {
 		panic(err)
 	}
+
+	mappedCategories := make(map[string]int64)
+	for _, c := range ta.allCategoriesResolver(ctx, struct{}{}) {
+		mappedCategories[c.Slug] = c.ID
+	}
+
 	queryBacking := path.Join(backing.QueryPath, backing.QueryBackingByID)
 	queryChallenge := path.Join(challenge.QueryPath, challenge.QueryChallengeByID)
 
 	for _, tx := range transactions {
-		likedArgument := LikedArgument{
-			Transaction: tx,
-		}
-		// if category Id is sent filter by category
-		if q.CategoryID != nil {
+		// if category denom is sent filter by category
+		if q.Denom != nil {
+			filterCategoryID, ok := mappedCategories[*q.Denom]
+			if !ok {
+				continue
+			}
 			story := ta.storyResolver(ctx, story.QueryStoryByIDParams{ID: tx.GroupID})
-			if story.CategoryID != *q.CategoryID {
+			if story.CategoryID != filterCategoryID {
 				continue
 			}
 		}
+		var vote stake.Vote
 		switch tx.TransactionType {
 		case trubank.BackingLike:
 			var backing backing.Backing
@@ -55,7 +65,7 @@ func (ta *TruAPI) likedArguments(
 			if err != nil {
 				panic(err)
 			}
-			likedArgument.Stake = *backing.Vote
+			vote = *backing.Vote
 		case trubank.ChallengeLike:
 			var challenge challenge.Challenge
 			res := ta.RunQuery(queryChallenge, app.QueryByIDParams{ID: tx.ReferenceID})
@@ -67,11 +77,21 @@ func (ta *TruAPI) likedArguments(
 			if err != nil {
 				panic(err)
 			}
-			likedArgument.Stake = *challenge.Vote
+			vote = *challenge.Vote
 		}
-		argument := ta.argumentResolver(ctx, app.QueryByIDParams{ID: likedArgument.Stake.ArgumentID})
-		likedArgument.Argument = argument
-		likedArguments = append(likedArguments, likedArgument)
+		argument := ta.argumentResolver(ctx, app.QueryByIDParams{ID: vote.ArgumentID})
+		credArgument := CredArgument{
+			ID:             argument.ID,
+			StoryID:        argument.StoryID,
+			Body:           argument.Body,
+			CreatorAddress: argument.Creator,
+			Timestamp:      argument.Timestamp,
+			Vote:           vote.Vote,
+			Amount:         vote.Amount,
+			Argument:       argument,
+		}
+		credArgument.Argument = argument
+		credArguments = append(credArguments, credArgument)
 	}
-	return likedArguments
+	return credArguments
 }
