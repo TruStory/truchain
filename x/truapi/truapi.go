@@ -110,7 +110,6 @@ func (ta *TruAPI) RegisterRoutes() {
 
 	if os.Getenv("MOCK_REGISTRATION") == "true" {
 		api.Handle("/mock_register", WrapHandler(ta.HandleMockRegistration))
-		api.HandleFunc("/mock_login", ta.handleMockLogin)
 	}
 
 	ta.RegisterOAuthRoutes()
