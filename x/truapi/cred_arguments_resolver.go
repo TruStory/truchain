@@ -86,14 +86,14 @@ func (ta *TruAPI) credArguments(
 		}
 		argument := ta.argumentResolver(ctx, app.QueryByIDParams{ID: vote.ArgumentID})
 		credArgument := CredArgument{
-			ID:             argument.ID,
-			StoryID:        argument.StoryID,
-			Body:           argument.Body,
-			CreatorAddress: argument.Creator,
-			Timestamp:      argument.Timestamp,
-			Vote:           vote.Vote,
-			Amount:         vote.Amount,
-			Argument:       argument,
+			ID:        argument.ID,
+			StoryID:   argument.StoryID,
+			Body:      argument.Body,
+			Creator:   argument.Creator,
+			Timestamp: argument.Timestamp,
+			Vote:      vote.Vote,
+			Amount:    vote.Amount,
+			Argument:  argument,
 		}
 		credArgument.Argument = argument
 		credArguments = append(credArguments, credArgument)

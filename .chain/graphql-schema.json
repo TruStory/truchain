@@ -672,7 +672,7 @@
             "deprecationReason": "",
             "description": "",
             "isDeprecated": false,
-            "name": "storyID",
+            "name": "storyId",
             "type": {
               "kind": "NON_NULL",
               "name": "",

@@ -345,7 +345,7 @@ func (ta *TruAPI) RegisterResolvers() {
 	ta.GraphQLClient.RegisterQueryResolver("credArguments", ta.credArguments)
 	ta.GraphQLClient.RegisterObjectResolver("CredArgument", CredArgument{}, map[string]interface{}{
 		"creator": func(ctx context.Context, q CredArgument) users.User {
-			return getUser(ctx, q.CreatorAddress)
+			return getUser(ctx, q.Creator)
 		},
 		"likes": func(ctx context.Context, q CredArgument) []argument.Like {
 			return ta.likesObjectResolver(ctx, q.Argument)
