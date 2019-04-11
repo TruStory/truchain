@@ -3,6 +3,7 @@ package truapi
 import (
 	"context"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 	"net/url"
 	"os"
@@ -130,8 +131,19 @@ func (ta *TruAPI) RegisterRoutes() {
 	ta.PathPrefix("/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		// if it is not requesting a file with a valid extension serve the index
 		if filepath.Ext(path.Base(r.URL.Path)) == "" {
+			indexPath := filepath.Join(appDir, "index.html")
+			absIndexPath, err := filepath.Abs(indexPath)
+			if err != nil {
+				return
+			}
+			indexFile, err := ioutil.ReadFile(absIndexPath)
+			if err != nil {
+				return
+			}
+			compiledIndexFile := CompileIndexFile(indexFile, r.RequestURI)
+
 			w.Header().Add("Content-Type", "text/html")
-			http.ServeFile(w, r, filepath.Join(appDir, "index.html"))
+			fmt.Fprintf(w, compiledIndexFile)
 			return
 		}
 		fs.ServeHTTP(w, r)
