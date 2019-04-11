@@ -40,7 +40,12 @@ func (ta *TruAPI) credArguments(
 	queryBacking := path.Join(backing.QueryPath, backing.QueryBackingByID)
 	queryChallenge := path.Join(challenge.QueryPath, challenge.QueryChallengeByID)
 
+	filteredTransactions := make(map[string]trubank.Transaction)
 	for _, tx := range transactions {
+		key := mapArgumentTransaction(tx.TransactionType, tx.GroupID, tx.ReferenceID)
+		filteredTransactions[key] = tx
+	}
+	for _, tx := range filteredTransactions {
 		// if category denom is sent filter by category
 		if q.Denom != nil {
 			filterCategoryID, ok := mappedCategories[*q.Denom]
@@ -94,4 +99,8 @@ func (ta *TruAPI) credArguments(
 		credArguments = append(credArguments, credArgument)
 	}
 	return credArguments
+}
+
+func mapArgumentTransaction(tType trubank.TransactionType, storyID, stakeID int64) string {
+	return fmt.Sprintf("%d/%d/%d", storyID, tType, stakeID)
 }
