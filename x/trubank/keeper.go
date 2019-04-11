@@ -22,10 +22,9 @@ type ReadKeeper interface {
 	app.ReadKeeper
 
 	TransactionsByCreator(ctx sdk.Context, creator sdk.AccAddress) (transactions []Transaction, err sdk.Error)
-	TransactionsByCreatorAndCategory(ctx sdk.Context,
+	FilteredTransactionsByCreator(ctx sdk.Context,
 		creator sdk.AccAddress,
-		category string,
-		types ...TransactionType) (transactions []Transaction, err sdk.Error)
+		types []TransactionType) (transactions []Transaction, err sdk.Error)
 }
 
 // WriteKeeper defines a module interface that facilities write only access
@@ -213,12 +212,11 @@ func hasType(t TransactionType, types []TransactionType) bool {
 	return false
 }
 
-// TransactionsByCreatorAndCategory returns all the transactions for a user
-func (k Keeper) TransactionsByCreatorAndCategory(
+// FilteredTransactionsByCreator returns all the transactions for a user filtering by type.
+func (k Keeper) FilteredTransactionsByCreator(
 	ctx sdk.Context,
 	creator sdk.AccAddress,
-	category string,
-	types ...TransactionType) (transactions []Transaction, err sdk.Error) {
+	types []TransactionType) (transactions []Transaction, err sdk.Error) {
 	err = k.trubankList.MapByUser(ctx, k, creator, func(transactionID int64) sdk.Error {
 		transaction, err := k.Transaction(ctx, transactionID)
 		if err != nil {

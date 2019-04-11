@@ -1557,15 +1557,11 @@
               {
                 "defaultValue": null,
                 "description": "",
-                "name": "category",
+                "name": "categoryID",
                 "type": {
-                  "kind": "NON_NULL",
-                  "name": "",
-                  "ofType": {
-                    "kind": "SCALAR",
-                    "name": "string",
-                    "ofType": null
-                  }
+                  "kind": "SCALAR",
+                  "name": "int64",
+                  "ofType": null
                 }
               },
               {

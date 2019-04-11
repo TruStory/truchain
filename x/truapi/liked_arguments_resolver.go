@@ -9,6 +9,7 @@ import (
 	app "github.com/TruStory/truchain/types"
 	"github.com/TruStory/truchain/x/backing"
 	"github.com/TruStory/truchain/x/challenge"
+	"github.com/TruStory/truchain/x/story"
 	trubank "github.com/TruStory/truchain/x/trubank"
 )
 
@@ -17,7 +18,7 @@ func (ta *TruAPI) likedArguments(
 	likedArguments := make([]LikedArgument, 0)
 	transactions := make([]trubank.Transaction, 0)
 	res := ta.RunQuery(
-		path.Join(trubank.QueryPath, trubank.QueryLikeTransactionsByCreatorAndcategory), q)
+		path.Join(trubank.QueryPath, trubank.QueryLikeTransactionsByCreator), q)
 
 	if res.Code != 0 {
 		fmt.Println("Resolver err: ", res)
@@ -34,6 +35,13 @@ func (ta *TruAPI) likedArguments(
 	for _, tx := range transactions {
 		likedArgument := LikedArgument{
 			Transaction: tx,
+		}
+		// if category Id is sent filter by category
+		if q.CategoryID != nil {
+			story := ta.storyResolver(ctx, story.QueryStoryByIDParams{ID: tx.GroupID})
+			if story.CategoryID != *q.CategoryID {
+				continue
+			}
 		}
 		switch tx.TransactionType {
 		case trubank.BackingLike:
