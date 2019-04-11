@@ -203,15 +203,6 @@ func (k Keeper) Transaction(
 	return
 }
 
-func hasType(t TransactionType, types []TransactionType) bool {
-	for _, tType := range types {
-		if tType == t {
-			return true
-		}
-	}
-	return false
-}
-
 // FilteredTransactionsByCreator returns all the transactions for a user filtering by type.
 func (k Keeper) FilteredTransactionsByCreator(
 	ctx sdk.Context,
@@ -232,4 +223,13 @@ func (k Keeper) FilteredTransactionsByCreator(
 		return nil
 	})
 	return
+}
+
+func hasType(t TransactionType, types []TransactionType) bool {
+	for _, tType := range types {
+		if tType == t {
+			return true
+		}
+	}
+	return false
 }
