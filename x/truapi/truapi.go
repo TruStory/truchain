@@ -110,6 +110,7 @@ func (ta *TruAPI) RegisterRoutes() {
 
 	if os.Getenv("MOCK_REGISTRATION") == "true" {
 		api.Handle("/mock_register", WrapHandler(ta.HandleMockRegistration))
+		api.HandleFunc("/mock_login", ta.handleMockLogin)
 	}
 
 	ta.RegisterOAuthRoutes()
@@ -342,5 +343,11 @@ func (ta *TruAPI) RegisterResolvers() {
 		},
 	})
 
+	ta.GraphQLClient.RegisterQueryResolver("likedArguments", ta.likedArguments)
+	ta.GraphQLClient.RegisterObjectResolver("LikedArgument", LikedArgument{}, map[string]interface{}{
+		"likes": func(ctx context.Context, q LikedArgument) []argument.Like {
+			return ta.likesObjectResolver(ctx, q.Argument)
+		},
+	})
 	ta.GraphQLClient.BuildSchema()
 }

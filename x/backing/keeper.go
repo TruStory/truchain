@@ -200,7 +200,8 @@ func (k Keeper) LikeArgument(ctx sdk.Context, argumentID int64, creator sdk.AccA
 		backing.Creator(),
 		story.CategoryID,
 		story.ID,
-		trubank.Like,
+		trubank.BackingLike,
+		argument.StakeID,
 		likeCredAmount)
 	if err != nil {
 		return 0, err

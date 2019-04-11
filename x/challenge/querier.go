@@ -9,6 +9,7 @@ import (
 // query endpoints supported by the truchain Querier
 const (
 	QueryPath                     = "challenges"
+	QueryChallengeByID            = "id"
 	QueryByStoryID                = "storyID"
 	QueryByStoryIDAndCreator      = "storyIDAndCreator"
 	QueryChallengeAmountByStoryID = "totalAmountByStoryID"
@@ -18,6 +19,8 @@ const (
 func NewQuerier(k ReadKeeper) sdk.Querier {
 	return func(ctx sdk.Context, path []string, req abci.RequestQuery) (res []byte, err sdk.Error) {
 		switch path[0] {
+		case QueryChallengeByID:
+			return queryChallengeByID(ctx, req, k)
 		case QueryByStoryID:
 			return queryByStoryID(ctx, req, k)
 		case QueryByStoryIDAndCreator:
@@ -31,6 +34,20 @@ func NewQuerier(k ReadKeeper) sdk.Querier {
 }
 
 // ============================================================================
+func queryChallengeByID(ctx sdk.Context, req abci.RequestQuery, k ReadKeeper) (res []byte, err sdk.Error) {
+	params := app.QueryByIDParams{}
+
+	if err = app.UnmarshalQueryParams(req, &params); err != nil {
+		return
+	}
+
+	challenge, err := k.Challenge(ctx, params.ID)
+	if err != nil {
+		return
+	}
+
+	return app.MustMarshal(challenge), nil
+}
 
 func queryByStoryID(
 	ctx sdk.Context,

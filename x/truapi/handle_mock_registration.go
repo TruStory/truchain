@@ -7,6 +7,8 @@ import (
 	"time"
 
 	"github.com/TruStory/truchain/x/chttp"
+	"github.com/TruStory/truchain/x/truapi/cookies"
+	"github.com/TruStory/truchain/x/truapi/render"
 	"github.com/dghubble/go-twitter/twitter"
 )
 
@@ -16,6 +18,29 @@ func (ta *TruAPI) HandleMockRegistration(r *http.Request) chttp.Response {
 	twitterUser := getMockTwitterUser()
 
 	return RegisterTwitterUser(ta, twitterUser)
+}
+
+func (ta *TruAPI) handleMockLogin(w http.ResponseWriter, r *http.Request) {
+	values := r.URL.Query()
+	id, err := strconv.Atoi(values.Get("id"))
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+	}
+	profile, err := ta.DBClient.TwitterProfileByID(int64(id))
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+	}
+	cookieValue, err := cookies.MakeLoginCookieValue(&profile)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+	}
+	render.Response(w, r, &RegistrationResponse{
+		UserID:               string(profile.ID),
+		Username:             profile.Username,
+		Fullname:             profile.FullName,
+		Address:              profile.Address,
+		AuthenticationCookie: cookieValue,
+	}, http.StatusOK)
 }
 
 func getMockTwitterUser() *twitter.User {

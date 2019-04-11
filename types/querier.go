@@ -27,6 +27,12 @@ type QueryByCreatorParams struct {
 	Creator string
 }
 
+// QueryTrasanctionsByCreatorAndCategoryParams returns the query params for getting arguments by creator and category
+type QueryTrasanctionsByCreatorAndCategoryParams struct {
+	Creator  string
+	Category string
+}
+
 // UnmarshalQueryParams unmarshals the request query from a client
 func UnmarshalQueryParams(req abci.RequestQuery, params interface{}) (sdkErr sdk.Error) {
 	parseErr := json.Unmarshal(req.Data, params)

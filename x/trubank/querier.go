@@ -8,8 +8,9 @@ import (
 
 // query endpoints supported by the truchain Querier
 const (
-	QueryPath                  = "trubank"
-	QueryTransactionsByCreator = "transactionsByCreator"
+	QueryPath                                 = "trubank"
+	QueryTransactionsByCreator                = "transactionsByCreator"
+	QueryLikeTransactionsByCreatorAndcategory = "likeTransactionsByCreatorAndCategory"
 )
 
 // NewQuerier returns a function that handles queries on the KVStore
@@ -18,6 +19,8 @@ func NewQuerier(k ReadKeeper) sdk.Querier {
 		switch path[0] {
 		case QueryTransactionsByCreator:
 			return queryTransactionsByCreator(ctx, req, k)
+		case QueryLikeTransactionsByCreatorAndcategory:
+			return queryLikeTransactionsByCreator(ctx, req, k)
 		default:
 			return nil, sdk.ErrUnknownRequest("Unknown query endpoint")
 		}
@@ -45,6 +48,32 @@ func queryTransactionsByCreator(
 	}
 
 	transactions, sdkErr := k.TransactionsByCreator(ctx, addr)
+	if sdkErr != nil {
+		return
+	}
+
+	return app.MustMarshal(transactions), nil
+}
+
+func queryLikeTransactionsByCreator(
+	ctx sdk.Context,
+	req abci.RequestQuery,
+	k ReadKeeper) (res []byte, sdkErr sdk.Error) {
+
+	params := app.QueryTrasanctionsByCreatorAndCategoryParams{}
+
+	sdkErr = app.UnmarshalQueryParams(req, &params)
+	if sdkErr != nil {
+		return
+	}
+
+	// convert address bech32 string to bytes
+	addr, err := sdk.AccAddressFromBech32(params.Creator)
+	if err != nil {
+		return res, sdk.ErrInvalidAddress("Cannot decode address")
+	}
+
+	transactions, sdkErr := k.TransactionsByCreatorAndCategory(ctx, addr, params.Category, BackingLike, ChallengeLike)
 	if sdkErr != nil {
 		return
 	}

@@ -13,9 +13,9 @@ func TestAddCoins(t *testing.T) {
 	cat := createFakeCategory(ctx, ck)
 	creator := sdk.AccAddress([]byte{1, 2})
 
-	k.MintAndAddCoin(ctx, creator, cat.ID, 0, 5, sdk.NewInt(1000))
-	k.MintAndAddCoin(ctx, creator, cat.ID, 0, 5, sdk.NewInt(1000))
-	k.MintAndAddCoin(ctx, creator, cat.ID, 0, 5, sdk.NewInt(1000))
+	k.MintAndAddCoin(ctx, creator, cat.ID, 0, 5, 0, sdk.NewInt(1000))
+	k.MintAndAddCoin(ctx, creator, cat.ID, 0, 5, 0, sdk.NewInt(1000))
+	k.MintAndAddCoin(ctx, creator, cat.ID, 0, 5, 0, sdk.NewInt(1000))
 
 	cat2, _ := ck.GetCategory(ctx, cat.ID)
 
