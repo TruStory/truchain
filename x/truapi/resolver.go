@@ -364,6 +364,18 @@ func (ta *TruAPI) notificationsResolver(ctx context.Context, q struct{}) []db.No
 	return evts
 }
 
+func (ta *TruAPI) addressesWhoFlaggedResolver(ctx context.Context, q story.Story) []string {
+	flaggedStories, err := ta.DBClient.FlaggedStoriesByStoryID(q.ID)
+	if err != nil {
+		return []string{}
+	}
+	var addressesWhoFlagged []string
+	for _, story := range flaggedStories {
+		addressesWhoFlagged = append(addressesWhoFlagged, story.Creator)
+	}
+	return addressesWhoFlagged
+}
+
 func (ta *TruAPI) filterFlaggedStories(stories *[]story.Story) ([]story.Story, error) {
 	val := os.Getenv("FLAGGED_STORY_LIMIT")
 	if val == "" {
