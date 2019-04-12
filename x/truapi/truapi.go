@@ -27,6 +27,7 @@ import (
 	"github.com/dghubble/gologin/twitter"
 	"github.com/dghubble/oauth1"
 	twitterOAuth1 "github.com/dghubble/oauth1/twitter"
+	"github.com/gorilla/handlers"
 )
 
 // ContextKey represents a string key for request context.
@@ -95,6 +96,9 @@ func WithUser(h http.Handler) http.Handler {
 
 // RegisterRoutes applies the TruStory API routes to the `chttp.API` router
 func (ta *TruAPI) RegisterRoutes() {
+	// Enable gzip compression
+	ta.Use(handlers.CompressHandler)
+
 	api := ta.Subrouter("/api/v1")
 	api.Use(chttp.JSONResponseMiddleware)
 	api.Handle("/ping", WrapHandler(ta.HandlePing))

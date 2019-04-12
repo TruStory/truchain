@@ -297,6 +297,14 @@
   version = "v1.0.0"
 
 [[projects]]
+  digest = "1:664d37ea261f0fc73dd17f4a1f5f46d01fbb0b0d75f6375af064824424109b7d"
+  name = "github.com/gorilla/handlers"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "7e0847f9db758cdebd26c149d0ae9d5d0b9c98ce"
+  version = "v1.4.0"
+
+[[projects]]
   digest = "1:ca59b1175189b3f0e9f1793d2c350114be36eaabbe5b9f554b35edee1de50aea"
   name = "github.com/gorilla/mux"
   packages = ["."]
@@ -905,13 +913,15 @@
     "github.com/cosmos/cosmos-sdk/x/ibc",
     "github.com/cosmos/cosmos-sdk/x/params",
     "github.com/cosmos/cosmos-sdk/x/staking",
+    "github.com/davecgh/go-spew/spew",
     "github.com/dghubble/go-twitter/twitter",
+    "github.com/dghubble/gologin",
     "github.com/dghubble/gologin/twitter",
     "github.com/dghubble/oauth1",
     "github.com/dghubble/oauth1/twitter",
-    "github.com/ethereum/go-ethereum/crypto/secp256k1",
     "github.com/go-pg/pg",
     "github.com/go-pg/pg/orm",
+    "github.com/gorilla/handlers",
     "github.com/gorilla/mux",
     "github.com/gorilla/securecookie",
     "github.com/joho/godotenv",
