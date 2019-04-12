@@ -22,6 +22,23 @@ func TestAddCoins(t *testing.T) {
 	assert.Equal(t, "3000trudex", cat2.TotalCred.String())
 }
 
+func TestInvalidCreator(t *testing.T) {
+	ctx, k, ck := mockDB()
+	amount := sdk.NewCoin(app.StakeDenom, sdk.NewInt(5000000))
+	_, err := k.AddCoin(ctx, nil, amount, 0, Backing, 0)
+	assert.Error(t, err)
+	assert.Equal(t, err.Code(), sdk.CodeInvalidAddress)
+
+	_, err = k.SubtractCoin(ctx, nil, amount, 0, BackingReturned, 0)
+	assert.Error(t, err)
+	assert.Equal(t, err.Code(), sdk.CodeInvalidAddress)
+
+	cat := createFakeCategory(ctx, ck)
+	k.MintAndAddCoin(ctx, nil, cat.ID, 0, 5, 0, sdk.NewInt(1000))
+	assert.Error(t, err)
+	assert.Equal(t, err.Code(), sdk.CodeInvalidAddress)
+}
+
 func TestSubtractCoins(t *testing.T) {
 	ctx, k, _ := mockDB()
 	creator := sdk.AccAddress([]byte{1, 2})

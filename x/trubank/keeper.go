@@ -62,6 +62,9 @@ func NewKeeper(
 
 // AddCoin wraps around adding coins via the bank keeper and adds the transaction
 func (k Keeper) AddCoin(ctx sdk.Context, creator sdk.AccAddress, coin sdk.Coin, storyID int64, transactionType TransactionType, referenceID int64) (coins sdk.Coins, err sdk.Error) {
+	if len(creator) == 0 {
+		return nil, sdk.ErrInvalidAddress("Invalid creator address")
+	}
 	coins, _, err = k.bankKeeper.AddCoins(ctx, creator, sdk.Coins{coin})
 
 	if coin.IsZero() {
@@ -86,6 +89,9 @@ func (k Keeper) AddCoin(ctx sdk.Context, creator sdk.AccAddress, coin sdk.Coin, 
 
 // SubtractCoin wraps around subtracting coins via the bank keeper and adds the transaction
 func (k Keeper) SubtractCoin(ctx sdk.Context, creator sdk.AccAddress, coin sdk.Coin, storyID int64, transactionType TransactionType, referenceID int64) (coins sdk.Coins, err sdk.Error) {
+	if len(creator) == 0 {
+		return nil, sdk.ErrInvalidAddress("Invalid creator address")
+	}
 	coins, _, err = k.bankKeeper.SubtractCoins(ctx, creator, sdk.Coins{coin})
 
 	coin.Amount = coin.Amount.Mul(sdk.NewInt(-1))
@@ -118,7 +124,9 @@ func (k Keeper) MintAndAddCoin(
 	transactionType TransactionType,
 	referenceID int64,
 	amt sdk.Int) (sdk.Coins, sdk.Error) {
-
+	if len(creator) == 0 {
+		return nil, sdk.ErrInvalidAddress("Invalid creator address")
+	}
 	logger := ctx.Logger().With("module", StoreKey)
 
 	if amt.IsZero() {
