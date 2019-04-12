@@ -91,7 +91,7 @@ func (ta *TruAPI) argumentResolver(_ context.Context, q app.QueryByIDParams) arg
 	return *argument
 }
 
-func (ta *TruAPI) likesObjectResolver(_ context.Context, q argument.Argument) []argument.Like {
+func (ta *TruAPI) likesObjectResolver(_ context.Context, q app.QueryByIDParams) []argument.Like {
 	query := path.Join(argument.QueryPath, argument.QueryLikesByArgumentID)
 	res := ta.RunQuery(query, app.QueryByIDParams{ID: q.ID})
 

@@ -93,9 +93,7 @@ func (ta *TruAPI) credArguments(
 			Timestamp: argument.Timestamp,
 			Vote:      vote.Vote,
 			Amount:    vote.Amount,
-			Argument:  argument,
 		}
-		credArgument.Argument = argument
 		credArguments = append(credArguments, credArgument)
 	}
 	return credArguments

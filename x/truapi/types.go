@@ -2,7 +2,6 @@ package truapi
 
 import (
 	app "github.com/TruStory/truchain/types"
-	"github.com/TruStory/truchain/x/argument"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
@@ -15,6 +14,4 @@ type CredArgument struct {
 	Timestamp app.Timestamp  `json:"timestamp"`
 	Vote      bool           `json:"vote"`
 	Amount    sdk.Coin       `json:"coin"`
-
-	Argument argument.Argument `graphql:"-"`
 }
