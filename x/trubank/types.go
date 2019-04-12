@@ -2,6 +2,7 @@ package trubank
 
 import (
 	app "github.com/TruStory/truchain/types"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
@@ -27,5 +28,8 @@ const (
 	ChallengeReturned
 	RewardPool
 	Interest
+	// Deprecated
 	Like
+	BackingLike
+	ChallengeLike
 )

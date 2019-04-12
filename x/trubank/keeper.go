@@ -22,6 +22,9 @@ type ReadKeeper interface {
 	app.ReadKeeper
 
 	TransactionsByCreator(ctx sdk.Context, creator sdk.AccAddress) (transactions []Transaction, err sdk.Error)
+	FilteredTransactionsByCreator(ctx sdk.Context,
+		creator sdk.AccAddress,
+		types []TransactionType) (transactions []Transaction, err sdk.Error)
 }
 
 // WriteKeeper defines a module interface that facilities write only access
@@ -30,7 +33,7 @@ type WriteKeeper interface {
 
 	AddCoin(ctx sdk.Context, creator sdk.AccAddress, coin sdk.Coin, storyID int64, transactionType TransactionType, referenceID int64) (coins sdk.Coins, err sdk.Error)
 	SubtractCoin(ctx sdk.Context, creator sdk.AccAddress, coin sdk.Coin, storyID int64, transactionType TransactionType, referenceID int64) (coins sdk.Coins, err sdk.Error)
-	MintAndAddCoin(ctx sdk.Context, creator sdk.AccAddress, catID int64, storyID int64, transactionType TransactionType, amt sdk.Int) (sdk.Coins, sdk.Error)
+	MintAndAddCoin(ctx sdk.Context, creator sdk.AccAddress, catID int64, storyID int64, transactionType TransactionType, referenceID int64, amt sdk.Int) (sdk.Coins, sdk.Error)
 }
 
 // Keeper data type storing keys to the key-value store
@@ -59,6 +62,9 @@ func NewKeeper(
 
 // AddCoin wraps around adding coins via the bank keeper and adds the transaction
 func (k Keeper) AddCoin(ctx sdk.Context, creator sdk.AccAddress, coin sdk.Coin, storyID int64, transactionType TransactionType, referenceID int64) (coins sdk.Coins, err sdk.Error) {
+	if len(creator) == 0 {
+		return nil, sdk.ErrInvalidAddress("Invalid creator address")
+	}
 	coins, _, err = k.bankKeeper.AddCoins(ctx, creator, sdk.Coins{coin})
 
 	if coin.IsZero() {
@@ -83,6 +89,9 @@ func (k Keeper) AddCoin(ctx sdk.Context, creator sdk.AccAddress, coin sdk.Coin, 
 
 // SubtractCoin wraps around subtracting coins via the bank keeper and adds the transaction
 func (k Keeper) SubtractCoin(ctx sdk.Context, creator sdk.AccAddress, coin sdk.Coin, storyID int64, transactionType TransactionType, referenceID int64) (coins sdk.Coins, err sdk.Error) {
+	if len(creator) == 0 {
+		return nil, sdk.ErrInvalidAddress("Invalid creator address")
+	}
 	coins, _, err = k.bankKeeper.SubtractCoins(ctx, creator, sdk.Coins{coin})
 
 	coin.Amount = coin.Amount.Mul(sdk.NewInt(-1))
@@ -113,8 +122,11 @@ func (k Keeper) MintAndAddCoin(
 	catID int64,
 	storyID int64,
 	transactionType TransactionType,
+	referenceID int64,
 	amt sdk.Int) (sdk.Coins, sdk.Error) {
-
+	if len(creator) == 0 {
+		return nil, sdk.ErrInvalidAddress("Invalid creator address")
+	}
 	logger := ctx.Logger().With("module", StoreKey)
 
 	if amt.IsZero() {
@@ -128,7 +140,7 @@ func (k Keeper) MintAndAddCoin(
 
 	coin := sdk.NewCoin(cat.Slug, amt)
 
-	coins, err := k.AddCoin(ctx, creator, coin, storyID, transactionType, 0)
+	coins, err := k.AddCoin(ctx, creator, coin, storyID, transactionType, referenceID)
 	if err != nil {
 		return nil, ErrTransferringCoinsToUser(creator)
 	}
@@ -197,4 +209,35 @@ func (k Keeper) Transaction(
 	k.GetCodec().MustUnmarshalBinaryLengthPrefixed(val, &transaction)
 
 	return
+}
+
+// FilteredTransactionsByCreator returns all the transactions for a user filtering by type.
+func (k Keeper) FilteredTransactionsByCreator(
+	ctx sdk.Context,
+	creator sdk.AccAddress,
+	types []TransactionType) (transactions []Transaction, err sdk.Error) {
+	err = k.trubankList.MapByUser(ctx, k, creator, func(transactionID int64) sdk.Error {
+		transaction, err := k.Transaction(ctx, transactionID)
+		if err != nil {
+			return err
+		}
+		if len(types) == 0 {
+			transactions = append(transactions, transaction)
+			return nil
+		}
+		if hasType(transaction.TransactionType, types) {
+			transactions = append(transactions, transaction)
+		}
+		return nil
+	})
+	return
+}
+
+func hasType(t TransactionType, types []TransactionType) bool {
+	for _, tType := range types {
+		if tType == t {
+			return true
+		}
+	}
+	return false
 }
