@@ -206,7 +206,7 @@ func getTwitterUser(authToken string, authTokenSecret string) (*twitter.User, er
 	accountVerifyParams := &twitter.AccountVerifyParams{
 		IncludeEntities: twitter.Bool(false),
 		SkipStatus:      twitter.Bool(true),
-		IncludeEmail:    twitter.Bool(false),
+		IncludeEmail:    twitter.Bool(true),
 	}
 	user, _, err := twitterClient.Accounts.VerifyCredentials(accountVerifyParams)
 	if err != nil {
