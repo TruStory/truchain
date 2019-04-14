@@ -13,7 +13,6 @@ import (
 )
 
 const (
-	defaultTitle       = "TruStory"
 	defaultDescription = "Trustory is a social network for experts to identify what is true and what isn't."
 	defaultImage       = "pathtoimageurl"
 )
@@ -61,7 +60,7 @@ func compile(index []byte, tags Tags) string {
 // makes the default meta tags
 func makeDefaultMetaTags(ta *TruAPI, route string) Tags {
 	return Tags{
-		Title:       defaultTitle,
+		Title:       os.Getenv("APP_NAME"),
 		Description: defaultDescription,
 		Image:       defaultImage,
 		URL:         os.Getenv("APP_URL") + route,
