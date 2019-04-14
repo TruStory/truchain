@@ -143,7 +143,10 @@ func (ta *TruAPI) RegisterRoutes() {
 			compiledIndexFile := CompileIndexFile(ta, indexFile, r.RequestURI)
 
 			w.Header().Add("Content-Type", "text/html")
-			fmt.Fprintf(w, compiledIndexFile)
+			_, err = fmt.Fprintf(w, compiledIndexFile)
+			if err != nil {
+				panic(err)
+			}
 			return
 		}
 		fs.ServeHTTP(w, r)
