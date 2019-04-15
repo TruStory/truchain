@@ -52,6 +52,18 @@ func (c *Client) TwitterProfileByAddress(addr string) (TwitterProfile, error) {
 	return *twitterProfile, nil
 }
 
+// TwitterProfileByUsername implements `Datastore`
+// Finds a Twitter profile by the given username
+func (c *Client) TwitterProfileByUsername(username string) (TwitterProfile, error) {
+	twitterProfile := new(TwitterProfile)
+	err := c.Model(twitterProfile).Where("username = ?", username).Select()
+	if err != nil {
+		return *twitterProfile, err
+	}
+
+	return *twitterProfile, nil
+}
+
 // UpsertTwitterProfile implements `Datastore`.
 // Updates an existing Twitter profile or creates a new one.
 func (c *Client) UpsertTwitterProfile(profile *TwitterProfile) error {

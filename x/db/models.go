@@ -21,6 +21,7 @@ type Mutations interface {
 	UpsertDeviceToken(token *DeviceToken) error
 	RemoveDeviceToken(address, token, platform string) error
 	UpsertFlaggedStory(flaggedStory *FlaggedStory) error
+	AddComment(comment *Comment) error
 }
 
 // Queries read from the database
@@ -28,10 +29,12 @@ type Queries interface {
 	GenericQueries
 	TwitterProfileByID(id int64) (TwitterProfile, error)
 	TwitterProfileByAddress(addr string) (TwitterProfile, error)
+	TwitterProfileByUsername(username string) (TwitterProfile, error)
 	KeyPairByTwitterProfileID(id int64) (KeyPair, error)
 	DeviceTokensByAddress(addr string) ([]DeviceToken, error)
 	NotificationEventsByAddress(addr string) ([]NotificationEvent, error)
 	FlaggedStoriesByStoryID(storyID int64) ([]FlaggedStory, error)
+	CommentsByArgumentID(argumentID int64) ([]Comment, error)
 }
 
 // Timestamps carries the default timestamp fields for any derived model
