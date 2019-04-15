@@ -6,6 +6,7 @@ import (
 
 // FlaggedStory represents a flagged story in the DB
 type FlaggedStory struct {
+	Timestamps
 	ID        int64     `json:"id"`
 	StoryID   int64     `json:"story_id"`
 	Creator   string    `json:"creator"`
