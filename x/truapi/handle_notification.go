@@ -8,14 +8,15 @@ import (
 	"github.com/TruStory/truchain/x/db"
 )
 
-// MarkNotificationAsReadRequest represents the JSON request for.. come on
-type MarkNotificationAsReadRequest struct {
+// UpdateNotificationEventRequest represents the JSON request for.. come on
+type UpdateNotificationEventRequest struct {
 	NotificationID int64 `json:"notification_id"`
+	Read           bool  `json:"read"`
 }
 
-// HandleMarkNotificationAsRead takes a `MarkNotificationAsReadRequest` and returns a 200 response
-func (ta *TruAPI) HandleMarkNotificationAsRead(r *http.Request) chttp.Response {
-	request := &MarkNotificationAsReadRequest{}
+// HandleUpdateNotificationEvent takes a `MarkNotificationAsReadRequest` and returns a 200 response
+func (ta *TruAPI) HandleUpdateNotificationEvent(r *http.Request) chttp.Response {
+	request := &UpdateNotificationEventRequest{}
 	err := json.NewDecoder(r.Body).Decode(request)
 	if err != nil {
 		return chttp.SimpleErrorResponse(400, err)
@@ -27,7 +28,7 @@ func (ta *TruAPI) HandleMarkNotificationAsRead(r *http.Request) chttp.Response {
 		return chttp.SimpleErrorResponse(401, err)
 	}
 
-	notificationEvent.Read = true
+	notificationEvent.Read = request.Read
 	err = ta.DBClient.Update(notificationEvent)
 	if err != nil {
 		return chttp.SimpleErrorResponse(500, err)
