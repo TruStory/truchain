@@ -147,7 +147,7 @@ func (ta *TruAPI) RegisterOAuthRoutes() {
 	}
 
 	ta.Handle("/auth-twitter", twitter.LoginHandler(oauth1Config, nil))
-	ta.Handle("/auth-twitter-callback", twitter.CallbackHandler(oauth1Config, IssueSession(ta), HandleOAuthFailure(ta)))
+	ta.Handle("/auth-twitter-callback", HandleOAuthSuccess(oauth1Config, IssueSession(ta), HandleOAuthFailure(ta)))
 	ta.Handle("/auth-logout", Logout())
 }
 
