@@ -14,8 +14,23 @@ type UpdateNotificationEventRequest struct {
 	Read           bool  `json:"read"`
 }
 
-// HandleUpdateNotificationEvent takes a `MarkNotificationAsReadRequest` and returns a 200 response
-func (ta *TruAPI) HandleUpdateNotificationEvent(r *http.Request) chttp.Response {
+// HandleNotificationEvent takes a `UpdateNotificationEventRequest` and returns a 200 response
+func (ta *TruAPI) HandleNotificationEvent(r *http.Request) chttp.Response {
+	switch r.Method {
+	case http.MethodPut:
+		return ta.handleUpdateNotificationEvent(r)
+	default:
+		return chttp.SimpleErrorResponse(404, Err404)
+	}
+}
+
+func (ta *TruAPI) handleUpdateNotificationEvent(r *http.Request) chttp.Response {
+	// check if we have a user before doing anything
+	user := r.Context().Value(userContextKey)
+	if user == nil {
+		return chttp.SimpleErrorResponse(401, Err401NotAuthenticated)
+	}
+
 	request := &UpdateNotificationEventRequest{}
 	err := json.NewDecoder(r.Body).Decode(request)
 	if err != nil {
