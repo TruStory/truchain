@@ -32,8 +32,6 @@ func (c *Client) CommentsByArgumentID(argumentID int64) ([]Comment, error) {
 	if err != nil {
 		return nil, err
 	}
-
-	// replace @cosmosaddr with profile link [@username](https://app.trustory.io/profile/username)
 	transformedComments := make([]Comment, len(comments))
 	for _, comment := range comments {
 		transformedComment := comment
@@ -48,22 +46,7 @@ func (c *Client) CommentsByArgumentID(argumentID int64) ([]Comment, error) {
 	return transformedComments, nil
 }
 
-// AddComment adds a new comment to the comments table
-func (c *Client) AddComment(comment *Comment) error {
-	// TODO: replace @mentions with @cosmosaddr
-	err := c.Add(comment)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-// replace @mentions with @cosmosaddr
-func (c *Client) replaceUsernameWithAddress(body string) string {
-	return ""
-}
-
-// replace @cosmosaddr with profile link [@username](https://app.trustory.io/profile/username)
+// replace @cosmosaddr with profile link [@username](https://app.trustory.io/profile/cosmosaddr)
 func (c *Client) replaceAddressesWithProfileURLs(body string) (string, error) {
 	var chainConfig ChainConfig
 	err := envconfig.Process("chain", &chainConfig)
@@ -73,8 +56,7 @@ func (c *Client) replaceAddressesWithProfileURLs(body string) (string, error) {
 		return "", err
 	}
 	for address, profileURL := range profileURLsByAddress {
-		markdownLink := fmt.Sprintf("[%s](%s)")
-		body = strings.ReplaceAll(body, fmt.Sprintf("@%s", address), profileURL)
+		body = strings.ReplaceAll(body, address, profileURL)
 	}
 
 	return body, nil
@@ -82,18 +64,54 @@ func (c *Client) replaceAddressesWithProfileURLs(body string) (string, error) {
 
 func (c *Client) mapAddressesToProfileURLs(body string, profileURLPrefix string) (map[string]string, error) {
 	profileURLsByAddress := map[string]string{}
-	usernames := parseMentions(body)
-	for _, username := range usernames {
-		twitterProfile, err := c.TwitterProfileByUsername(username)
+	addresses := parseMentions(body)
+	for _, address := range addresses {
+		twitterProfile, err := c.TwitterProfileByAddress(address)
 		if err != nil {
 			return profileURLsByAddress, err
 		}
-		profileURLsByAddress[twitterProfile.Address] = path.Join(profileURLPrefix, twitterProfile.Address)
+		profileURL := path.Join(profileURLPrefix, twitterProfile.Address)
+		markdownProfileURL := fmt.Sprintf("[%s](%s)", twitterProfile.Username, profileURL)
+		profileURLsByAddress[address] = markdownProfileURL
 	}
 
 	return profileURLsByAddress, nil
 }
 
+// extract @mentions from text and return as slice
 func parseMentions(body string) []string {
 	return mention.GetTagsAsUniqueStrings('@', body)
+}
+
+// AddComment adds a new comment to the comments table
+func (c *Client) AddComment(comment *Comment) error {
+	transformedBody, err := c.replaceUsernamesWithAddress(comment.Body)
+	if err != nil {
+		return err
+	}
+	comment.Body = transformedBody
+	err = c.Add(comment)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// replace @usernames with @cosmosaddr
+func (c *Client) replaceUsernamesWithAddress(body string) (string, error) {
+	addressByUsername := map[string]string{}
+	usernames := parseMentions(body)
+	for _, username := range usernames {
+		twitterProfile, err := c.TwitterProfileByUsername(username)
+		if err != nil {
+			return body, err
+		}
+		addressByUsername[username] = twitterProfile.Address
+	}
+	for username, address := range addressByUsername {
+		body = strings.ReplaceAll(body, username, address)
+	}
+
+	return body, nil
 }
