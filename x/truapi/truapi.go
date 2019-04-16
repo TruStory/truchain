@@ -107,6 +107,7 @@ func (ta *TruAPI) RegisterRoutes() {
 	api.Handle("/unsigned", WrapHandler(ta.HandleUnsigned))
 	api.Handle("/register", WrapHandler(ta.HandleRegistration))
 	api.Handle("/user", WrapHandler(ta.HandleUserDetails))
+	api.Handle("/notifications/update?read=true", WrapHandler(ta.HandleMarkNotificationAsRead))
 	api.HandleFunc("/deviceToken", ta.HandleDeviceTokenRegistration)
 	api.HandleFunc("/deviceToken/unregister", ta.HandleUnregisterDeviceToken)
 	api.HandleFunc("/upload", ta.HandleUpload)
