@@ -4,14 +4,16 @@ import (
 	"encoding/json"
 	"net/http"
 
+	"github.com/go-pg/pg"
+
 	"github.com/TruStory/truchain/x/chttp"
 	"github.com/TruStory/truchain/x/db"
 )
 
-// UpdateNotificationEventRequest represents the JSON request for.. come on
+// UpdateNotificationEventRequest represents the JSON request
 type UpdateNotificationEventRequest struct {
 	NotificationID int64 `json:"notification_id"`
-	Read           bool  `json:"read"`
+	Read           *bool `json:"read,omitempty"`
 }
 
 // HandleNotificationEvent takes a `UpdateNotificationEventRequest` and returns a 200 response
@@ -20,7 +22,7 @@ func (ta *TruAPI) HandleNotificationEvent(r *http.Request) chttp.Response {
 	case http.MethodPut:
 		return ta.handleUpdateNotificationEvent(r)
 	default:
-		return chttp.SimpleErrorResponse(404, Err404)
+		return chttp.SimpleErrorResponse(404, Err404ResourceNotFound)
 	}
 }
 
@@ -36,15 +38,21 @@ func (ta *TruAPI) handleUpdateNotificationEvent(r *http.Request) chttp.Response 
 	if err != nil {
 		return chttp.SimpleErrorResponse(400, err)
 	}
+	if request.Read == nil {
+		return chttp.SimpleErrorResponse(400, Err400MissingParameter)
+	}
 
 	notificationEvent := &db.NotificationEvent{ID: request.NotificationID}
 	err = ta.DBClient.Find(notificationEvent)
+	if err == pg.ErrNoRows {
+		return chttp.SimpleErrorResponse(404, Err404ResourceNotFound)
+	}
 	if err != nil {
 		return chttp.SimpleErrorResponse(401, err)
 	}
 
-	notificationEvent.Read = request.Read
-	err = ta.DBClient.Update(notificationEvent)
+	notificationEvent.Read = *request.Read
+	err = ta.DBClient.UpdateModel(notificationEvent)
 	if err != nil {
 		return chttp.SimpleErrorResponse(500, err)
 	}

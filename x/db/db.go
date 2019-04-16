@@ -29,7 +29,7 @@ func NewDBClient() *Client {
 // GenericMutations write to the database
 type GenericMutations interface {
 	Add(model ...interface{}) error
-	Update(model interface{}) error
+	UpdateModel(model interface{}) error
 	RegisterModel(model interface{}) error
 	Remove(model interface{}) error
 }
@@ -49,8 +49,8 @@ func (c *Client) RegisterModel(model interface{}) error {
 	})
 }
 
-// Update updates a model
-func (c *Client) Update(model interface{}) error {
+// UpdateModel updates a model
+func (c *Client) UpdateModel(model interface{}) error {
 	return c.Update(model)
 }
 
