@@ -56,7 +56,7 @@ func (c *Client) TwitterProfileByAddress(addr string) (TwitterProfile, error) {
 func (c *Client) UpsertTwitterProfile(profile *TwitterProfile) error {
 	_, err := c.Model(profile).
 		OnConflict("(id) DO UPDATE").
-		Set("address = EXCLUDED.address, username = EXCLUDED.username, full_name = EXCLUDED.full_name, avatar_uri = EXCLUDED.avatar_uri").
+		Set("address = EXCLUDED.address, username = EXCLUDED.username, full_name = EXCLUDED.full_name, avatar_uri = EXCLUDED.avatar_uri, email = EXCLUDED.email").
 		Insert()
 
 	return err
