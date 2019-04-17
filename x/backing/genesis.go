@@ -26,7 +26,7 @@ func InitGenesis(ctx sdk.Context, keeper Keeper, data GenesisState) {
 // ExportGenesis exports the genesis state
 func ExportGenesis(ctx sdk.Context, keeper Keeper) GenesisState {
 	var backings []Backing
-	err := keeper.Each(ctx, func(bz []byte) bool {
+	err := keeper.EachPrefix(ctx, keeper.StorePrefix(), func(bz []byte) bool {
 		var b Backing
 		keeper.GetCodec().MustUnmarshalBinaryLengthPrefixed(bz, &b)
 		backings = append(backings, b)
