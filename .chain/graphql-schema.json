@@ -2,7 +2,7 @@
   "__schema": {
     "directives": [],
     "mutationType": {
-      "name": "mutation"
+      "name": "Mutation"
     },
     "queryType": {
       "name": "Query"
@@ -795,6 +795,62 @@
         "interfaces": [],
         "kind": "OBJECT",
         "name": "Like",
+        "possibleTypes": []
+      },
+      {
+        "description": "",
+        "enumValues": [],
+        "fields": [
+          {
+            "args": [
+              {
+                "defaultValue": null,
+                "description": "",
+                "name": "body",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": "",
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "string",
+                    "ofType": null
+                  }
+                }
+              },
+              {
+                "defaultValue": null,
+                "description": "",
+                "name": "parent",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": "",
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "int64",
+                    "ofType": null
+                  }
+                }
+              }
+            ],
+            "deprecationReason": "",
+            "description": "",
+            "isDeprecated": false,
+            "name": "addComment",
+            "type": {
+              "kind": "NON_NULL",
+              "name": "",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "bool",
+                "ofType": null
+              }
+            }
+          }
+        ],
+        "inputFields": [],
+        "interfaces": [],
+        "kind": "OBJECT",
+        "name": "Mutation",
         "possibleTypes": []
       },
       {
@@ -3086,16 +3142,6 @@
         "interfaces": [],
         "kind": "SCALAR",
         "name": "int8",
-        "possibleTypes": []
-      },
-      {
-        "description": "",
-        "enumValues": [],
-        "fields": [],
-        "inputFields": [],
-        "interfaces": [],
-        "kind": "OBJECT",
-        "name": "mutation",
         "possibleTypes": []
       },
       {

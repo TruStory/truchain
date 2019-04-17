@@ -48,6 +48,7 @@ func (app *TruChain) startAPI() {
 	})
 
 	app.api.RegisterResolvers()
+	app.api.RegisterMutations()
 	app.api.RegisterRoutes()
 	app.api.GraphQLClient.GenerateSchema()
 	log.Fatal(app.api.ListenAndServe(net.JoinHostPort(types.Hostname, types.Portname)))

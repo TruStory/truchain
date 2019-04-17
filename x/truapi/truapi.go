@@ -152,6 +152,17 @@ func (ta *TruAPI) RegisterOAuthRoutes() {
 	ta.Handle("/auth-logout", Logout())
 }
 
+// RegisterMutations registers mutations
+func (ta *TruAPI) RegisterMutations() {
+	ta.GraphQLClient.RegisterMutation("addComment", func(args struct {
+		Parent int64
+		Body   string
+	}) error {
+		err := ta.DBClient.AddComment(&db.Comment{ParentID: args.Parent, Body: args.Body})
+		return err
+	})
+}
+
 // RegisterResolvers builds the app's GraphQL schema from resolvers (declared in `resolver.go`)
 func (ta *TruAPI) RegisterResolvers() {
 	formatTime := func(t time.Time) string {
@@ -185,6 +196,11 @@ func (ta *TruAPI) RegisterResolvers() {
 	getArgument := func(ctx context.Context, argumentID int64) argument.Argument {
 		return ta.argumentResolver(ctx, app.QueryByIDParams{ID: argumentID})
 	}
+
+	ta.GraphQLClient.RegisterObjectResolver("Comment", db.Comment{}, map[string]interface{}{
+		"id":   func(_ context.Context, q db.Comment) int64 { return q.ID },
+		"body": func(_ context.Context, q db.Comment) string { return q.Body },
+	})
 
 	ta.GraphQLClient.RegisterObjectResolver("Argument", argument.Argument{}, map[string]interface{}{
 		"id":      func(_ context.Context, q argument.Argument) int64 { return q.ID },

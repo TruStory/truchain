@@ -29,6 +29,7 @@ type Request struct {
 type Client struct {
 	pendingSchema *builder.Schema
 	queries       *builder.Object
+	mutations     *builder.Object
 	Schema        *thunder.Schema
 	Built         bool
 }
@@ -36,7 +37,7 @@ type Client struct {
 // NewGraphQLClient returns a GraphQL client with an empty, unbuilt schema
 func NewGraphQLClient() *Client {
 	schema := builder.NewSchema()
-	client := Client{pendingSchema: schema, queries: schema.Query(), Schema: nil, Built: false}
+	client := Client{pendingSchema: schema, queries: schema.Query(), mutations: schema.Mutation(), Schema: nil, Built: false}
 	return &client
 }
 
@@ -45,9 +46,7 @@ func (c *Client) Query(withCtx context.Context, r Request) chttp.Response {
 	if !c.Built {
 		c.BuildSchema()
 	}
-
 	query, err := c.prepareQuery(r.Query, r.Variables)
-
 	if err != nil {
 		return chttp.SimpleErrorResponse(400, err)
 	}
@@ -65,10 +64,14 @@ func (c *Client) RegisterPaginatedQueryResolver(name string, fn interface{}) {
 	c.queries.FieldFunc(name, fn, builder.Paginated)
 }
 
+// RegisterMutation registers a mutation
+func (c *Client) RegisterMutation(name string, fn interface{}) {
+	c.mutations.FieldFunc(name, fn)
+}
+
 // RegisterObjectResolver adds a set of field resolvers for objects of the given type that are returned by top-level resolvers
 func (c *Client) RegisterObjectResolver(name string, objPrototype interface{}, fields map[string]interface{}) {
 	obj := c.pendingSchema.Object(name, objPrototype)
-
 	for fieldName, fn := range fields {
 		obj.FieldFunc(fieldName, fn)
 	}
@@ -121,21 +124,18 @@ func (c *Client) runQuery(withCtx context.Context, query *thunder.Query) chttp.J
 	runner := reactive.NewRerunner(withCtx, func(ctx context.Context) (interface{}, error) {
 		defer wg.Done()
 		data, err := e.Execute(batch.WithBatching(ctx), c.Schema.Query, nil, query)
-
 		if err != nil {
 			response = chttp.SimpleErrorResponse(400, err).(chttp.JSONResponse)
 			return nil, err
 		}
 
 		rawResBytes, err := json.Marshal(data)
-
 		if err != nil {
 			response = chttp.SimpleErrorResponse(500, err).(chttp.JSONResponse)
 			return nil, err
 		}
 
 		resBytes := []byte(strings.Replace(string(rawResBytes), "iD", "id", -1))
-
 		response = chttp.SimpleResponse(200, resBytes).(chttp.JSONResponse)
 
 		return data, nil
@@ -149,13 +149,11 @@ func (c *Client) runQuery(withCtx context.Context, query *thunder.Query) chttp.J
 
 func (c *Client) prepareQuery(qs string, params map[string]interface{}) (*thunder.Query, error) {
 	query, err := thunder.Parse(qs, params)
-
 	if err != nil {
 		return nil, err
 	}
 
 	err = thunder.PrepareQuery(c.Schema.Query, query.SelectionSet)
-
 	if err != nil {
 		return nil, err
 	}
