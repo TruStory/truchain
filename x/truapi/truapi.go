@@ -218,7 +218,8 @@ func (ta *TruAPI) RegisterResolvers() {
 	ta.GraphQLClient.RegisterQueryResolver("categories", ta.allCategoriesResolver)
 	ta.GraphQLClient.RegisterQueryResolver("category", ta.categoryResolver)
 	ta.GraphQLClient.RegisterObjectResolver("Category", category.Category{}, map[string]interface{}{
-		"id":      func(_ context.Context, q category.Category) int64 { return q.ID },
+		"id": func(_ context.Context, q category.Category) int64 { return q.ID },
+		// deprecated, paginated_stories takes a category id parameter
 		"stories": ta.categoryStoriesResolver,
 	})
 
@@ -268,9 +269,12 @@ func (ta *TruAPI) RegisterResolvers() {
 		"challengeThresholdPercent": func(_ context.Context, p params.Params) string { return "0" },
 	})
 
+	// deprecated in favor of paginated_stories
 	ta.GraphQLClient.RegisterQueryResolver("stories", ta.allStoriesResolver)
+
+	ta.GraphQLClient.RegisterPaginatedQueryResolver("paginated_stories", ta.storiesResolver)
 	ta.GraphQLClient.RegisterQueryResolver("story", ta.storyResolver)
-	ta.GraphQLClient.RegisterObjectResolver("Story", story.Story{}, map[string]interface{}{
+	ta.GraphQLClient.RegisterPaginatedObjectResolver("Story", "iD", story.Story{}, map[string]interface{}{
 		"id":                  func(_ context.Context, q story.Story) int64 { return q.ID },
 		"backings":            func(ctx context.Context, q story.Story) []backing.Backing { return getBackings(ctx, q.ID) },
 		"challenges":          func(ctx context.Context, q story.Story) []challenge.Challenge { return getChallenges(ctx, q.ID) },

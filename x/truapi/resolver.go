@@ -23,6 +23,7 @@ import (
 	"github.com/TruStory/truchain/x/users"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	amino "github.com/tendermint/go-amino"
+	abci "github.com/tendermint/tendermint/abci/types"
 )
 
 func (ta *TruAPI) allCategoriesResolver(ctx context.Context, q struct{}) []category.Category {
@@ -48,8 +49,37 @@ func (ta *TruAPI) allCategoriesResolver(ctx context.Context, q struct{}) []categ
 	return *cs
 }
 
+// Deprecated in favor of storiesResolver
 func (ta *TruAPI) allStoriesResolver(ctx context.Context, q struct{}) []story.Story {
 	res := ta.RunQuery("stories/all", struct{}{})
+
+	if res.Code != 0 {
+		fmt.Println("Resolver err: ", res)
+		return []story.Story{}
+	}
+
+	stories := new([]story.Story)
+	err := json.Unmarshal(res.Value, stories)
+	if err != nil {
+		panic(err)
+	}
+
+	filteredStories, err := ta.filterFlaggedStories(stories)
+	if err != nil {
+		fmt.Println("Resolver err: ", err)
+		panic(err)
+	}
+
+	return filteredStories
+}
+
+func (ta *TruAPI) storiesResolver(_ context.Context, q app.QueryByCategoryIDParams) []story.Story {
+	var res abci.ResponseQuery
+	if q.CategoryID == -1 {
+		res = ta.RunQuery("stories/all", struct{}{})
+	} else {
+		res = ta.RunQuery("stories/category", story.QueryCategoryStoriesParams{CategoryID: q.CategoryID})
+	}
 
 	if res.Code != 0 {
 		fmt.Println("Resolver err: ", res)
@@ -199,6 +229,7 @@ func (ta *TruAPI) categoryResolver(ctx context.Context, q category.QueryCategory
 	return *c
 }
 
+// Deprecated in favor of storiesResolver
 func (ta *TruAPI) categoryStoriesResolver(_ context.Context, q category.Category) []story.Story {
 	res := ta.RunQuery("stories/category", story.QueryCategoryStoriesParams{CategoryID: q.ID})
 
