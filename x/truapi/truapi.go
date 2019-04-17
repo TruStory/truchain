@@ -137,11 +137,13 @@ func (ta *TruAPI) RegisterRoutes() {
 			if err != nil {
 				log.Printf("ERROR index.html -- %s", err)
 				http.Error(w, "Error serving index.html", http.StatusNotFound)
+				return
 			}
 			indexFile, err := ioutil.ReadFile(absIndexPath)
 			if err != nil {
 				log.Printf("ERROR index.html -- %s", err)
 				http.Error(w, "Error serving index.html", http.StatusNotFound)
+				return
 			}
 			compiledIndexFile := CompileIndexFile(ta, indexFile, r.RequestURI)
 
@@ -150,6 +152,7 @@ func (ta *TruAPI) RegisterRoutes() {
 			if err != nil {
 				log.Printf("ERROR index.html -- %s", err)
 				http.Error(w, "Error serving index.html", http.StatusInternalServerError)
+				return
 			}
 		}
 		fs.ServeHTTP(w, r)
