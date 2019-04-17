@@ -1,8 +1,6 @@
 package trubank
 
 import (
-	"fmt"
-
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
@@ -23,7 +21,7 @@ func InitGenesis(ctx sdk.Context, keeper Keeper, data GenesisState) {
 // ExportGenesis exports the genesis state
 func ExportGenesis(ctx sdk.Context, keeper Keeper) GenesisState {
 	transactions := make([]Transaction, 0)
-	prefix := fmt.Sprintf("%s:id:", StoreKey)
+	prefix := keeper.StorePrefix(StoreKey)
 	err := keeper.EachPrefix(ctx, prefix, func(bz []byte) bool {
 		var tx Transaction
 		keeper.GetCodec().MustUnmarshalBinaryLengthPrefixed(bz, &tx)
