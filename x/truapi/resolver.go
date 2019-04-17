@@ -430,3 +430,11 @@ func (ta *TruAPI) filterFlaggedStories(stories *[]story.Story) ([]story.Story, e
 
 	return filteredStories, nil
 }
+
+func (ta *TruAPI) commentsResolver(ctx context.Context, q argument.Argument) []db.Comment {
+	comments, err := ta.DBClient.CommentsByArgumentID(q.ID)
+	if err != nil {
+		panic(err)
+	}
+	return comments
+}

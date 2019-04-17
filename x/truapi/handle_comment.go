@@ -17,8 +17,18 @@ type AddCommentRequest struct {
 	Creator    string `json:"creator"`
 }
 
-// HandleAddComment takes a `AddCommentRequest` and returns a 200 response
-func (ta *TruAPI) HandleAddComment(r *http.Request) chttp.Response {
+// HandleComment handles requests for comments
+func (ta *TruAPI) HandleComment(r *http.Request) chttp.Response {
+	switch r.Method {
+	case http.MethodPost:
+		return ta.handleCreateComment(r)
+	default:
+		return chttp.SimpleErrorResponse(401, Err404ResourceNotFound)
+	}
+	return chttp.SimpleResponse(200, nil)
+}
+
+func (ta *TruAPI) handleCreateComment(r *http.Request) chttp.Response {
 	request := &AddCommentRequest{}
 	err := json.NewDecoder(r.Body).Decode(request)
 	if err != nil {
@@ -27,7 +37,7 @@ func (ta *TruAPI) HandleAddComment(r *http.Request) chttp.Response {
 
 	user := r.Context().Value(userContextKey)
 	if user == nil {
-		return chttp.SimpleErrorResponse(401, err)
+		return chttp.SimpleErrorResponse(401, Err401NotAuthenticated)
 	}
 
 	comment := &db.Comment{
@@ -39,7 +49,7 @@ func (ta *TruAPI) HandleAddComment(r *http.Request) chttp.Response {
 	}
 	err = ta.DBClient.AddComment(comment)
 	if err != nil {
-		return chttp.SimpleErrorResponse(400, err)
+		return chttp.SimpleErrorResponse(500, err)
 	}
 
 	return chttp.SimpleResponse(200, nil)
