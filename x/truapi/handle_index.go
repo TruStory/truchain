@@ -17,6 +17,10 @@ const (
 	defaultImage       = "pathtoimageurl"
 )
 
+var (
+	storyRegex = regexp.MustCompile("/story/detail/([0-9]+)")
+)
+
 // Tags defines the struct containing all the request Meta Tags for a page
 type Tags struct {
 	Title       string
@@ -29,19 +33,20 @@ type Tags struct {
 func CompileIndexFile(ta *TruAPI, index []byte, route string) string {
 
 	// /story/detail/xxx
-	r, err := regexp.Compile("/story/detail/([0-9]+)")
-	if err != nil {
-		panic(err)
-	}
-	matches := r.FindStringSubmatch(route)
+	matches := storyRegex.FindStringSubmatch(route)
 	if len(matches) == 2 {
 		// replace placeholder with story details, where story id is in matches[1]
 		storyID, err := strconv.ParseInt(matches[1], 10, 64)
 		if err != nil {
-			panic(err)
+			// if error, return the default tags
+			return compile(index, makeDefaultMetaTags(ta, route))
 		}
 
-		return compile(index, makeStoryMetaTags(ta, route, storyID))
+		metaTags, err := makeStoryMetaTags(ta, route, storyID)
+		if err != nil {
+			return compile(index, makeDefaultMetaTags(ta, route))
+		}
+		return compile(index, *metaTags)
 	}
 
 	return compile(index, makeDefaultMetaTags(ta, route))
@@ -68,19 +73,20 @@ func makeDefaultMetaTags(ta *TruAPI, route string) Tags {
 }
 
 // meta tags for a story
-func makeStoryMetaTags(ta *TruAPI, route string, storyID int64) Tags {
+func makeStoryMetaTags(ta *TruAPI, route string, storyID int64) (*Tags, error) {
 	ctx := context.Background()
 
 	storyObj := ta.storyResolver(ctx, story.QueryStoryByIDParams{ID: storyID})
 	categoryObj := ta.categoryResolver(ctx, category.QueryCategoryByIDParams{ID: storyObj.CategoryID})
 	creatorObj, err := ta.DBClient.TwitterProfileByAddress(storyObj.Creator.String())
 	if err != nil {
-		panic(err)
+		// if error, return default
+		return nil, err
 	}
-	return Tags{
+	return &Tags{
 		Title:       fmt.Sprintf("%s made a claim in %s on TruStory", creatorObj.FullName, categoryObj.Title),
 		Description: storyObj.Body,
 		Image:       defaultImage,
 		URL:         os.Getenv("APP_URL") + route,
-	}
+	}, nil
 }

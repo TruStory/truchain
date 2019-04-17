@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"net/url"
 	"os"
@@ -134,20 +135,22 @@ func (ta *TruAPI) RegisterRoutes() {
 			indexPath := filepath.Join(appDir, "index.html")
 			absIndexPath, err := filepath.Abs(indexPath)
 			if err != nil {
-				return
+				log.Printf("ERROR index.html -- %s", err)
+				http.Error(w, "Error serving index.html", http.StatusNotFound)
 			}
 			indexFile, err := ioutil.ReadFile(absIndexPath)
 			if err != nil {
-				return
+				log.Printf("ERROR index.html -- %s", err)
+				http.Error(w, "Error serving index.html", http.StatusNotFound)
 			}
 			compiledIndexFile := CompileIndexFile(ta, indexFile, r.RequestURI)
 
 			w.Header().Add("Content-Type", "text/html")
 			_, err = fmt.Fprintf(w, compiledIndexFile)
 			if err != nil {
-				panic(err)
+				log.Printf("ERROR index.html -- %s", err)
+				http.Error(w, "Error serving index.html", http.StatusInternalServerError)
 			}
-			return
 		}
 		fs.ServeHTTP(w, r)
 	}))
