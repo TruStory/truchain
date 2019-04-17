@@ -14,7 +14,7 @@ import (
 
 const (
 	defaultDescription = "Trustory is a social network for experts to identify what is true and what isn't."
-	defaultImage       = "pathtoimageurl"
+	defaultImage       = "https://s3-us-west-1.amazonaws.com/trustory/assets/Image+from+iOS.jpg"
 )
 
 var (
