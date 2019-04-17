@@ -11,7 +11,7 @@ import (
 
 // AddCommentRequest represents the JSON request for adding a comment
 type AddCommentRequest struct {
-	ParentID   int64  `json:"parent_id.omitonempty"`
+	ParentID   int64  `json:"parent_id,omitonempty"`
 	ArgumentID int64  `json:"argument_id"`
 	Body       string `json:"body"`
 	Creator    string `json:"creator"`
@@ -25,7 +25,6 @@ func (ta *TruAPI) HandleComment(r *http.Request) chttp.Response {
 	default:
 		return chttp.SimpleErrorResponse(401, Err404ResourceNotFound)
 	}
-	return chttp.SimpleResponse(200, nil)
 }
 
 func (ta *TruAPI) handleCreateComment(r *http.Request) chttp.Response {
