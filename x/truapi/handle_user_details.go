@@ -3,6 +3,7 @@ package truapi
 import (
 	"encoding/json"
 	"net/http"
+	"strconv"
 
 	"github.com/TruStory/truchain/x/chttp"
 	"github.com/TruStory/truchain/x/truapi/cookies"
@@ -10,7 +11,7 @@ import (
 
 // UserResponse is a JSON response body representing the result of User
 type UserResponse struct {
-	UserID   int64  `json:"userId"`
+	UserID   string `json:"userId"`
 	Username string `json:"username"`
 	Fullname string `json:"fullname"`
 	Address  string `json:"address"`
@@ -37,7 +38,7 @@ func (ta *TruAPI) HandleUserDetails(r *http.Request) chttp.Response {
 	}
 
 	responseBytes, _ := json.Marshal(UserResponse{
-		UserID:   twitterProfile.ID,
+		UserID:   strconv.FormatInt(twitterProfile.ID, 10),
 		Fullname: twitterProfile.FullName,
 		Username: twitterProfile.Username,
 		Address:  twitterProfile.Address,
