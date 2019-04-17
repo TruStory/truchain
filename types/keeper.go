@@ -108,10 +108,10 @@ func (k Keeper) Each(ctx sdk.Context, fn func([]byte) bool) (err sdk.Error) {
 
 // GetIDKey returns the key for a given index
 func (k Keeper) GetIDKey(id int64) []byte {
-	return []byte(fmt.Sprintf("%s:id:%d", k.GetStoreKey().Name(), id))
+	return []byte(fmt.Sprintf("%s%d", k.StorePrefix(), id))
 }
 
 // StorePrefix returns the root prefix of the key-value store
-func (k Keeper) StorePrefix(storeKey string) string {
-	return fmt.Sprintf("%s:id:", storeKey)
+func (k Keeper) StorePrefix() string {
+	return fmt.Sprintf("%s:id:", k.GetStoreKey().Name())
 }
