@@ -4,6 +4,7 @@ import "github.com/go-pg/pg"
 
 // KeyPair is the private key associated with an account
 type KeyPair struct {
+	Timestamps
 	ID               int64  `json:"id"`
 	TwitterProfileID int64  `json:"twitter_profile_id"`
 	PrivateKey       string `json:"private_key"`

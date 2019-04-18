@@ -15,6 +15,7 @@ const (
 
 // NotificationEvent represents a notification sent to an user.
 type NotificationEvent struct {
+	Timestamps
 	ID               int64            `json:"id"`
 	TypeID           int64            `json:"type_id"`
 	Address          string           `json:"address"`
