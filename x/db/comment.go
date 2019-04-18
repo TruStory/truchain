@@ -32,7 +32,7 @@ func (c *Client) CommentsByArgumentID(argumentID int64) ([]Comment, error) {
 	if err != nil {
 		return nil, err
 	}
-	transformedComments := make([]Comment, len(comments))
+	transformedComments := make([]Comment, 0)
 	for _, comment := range comments {
 		transformedComment := comment
 		transformedBody, err := c.replaceAddressesWithProfileURLs(comment.Body)
