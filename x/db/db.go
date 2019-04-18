@@ -1,11 +1,9 @@
 package db
 
 import (
-	"fmt"
 	"os"
 
 	"github.com/go-pg/pg"
-	"github.com/go-pg/pg/orm"
 )
 
 // Client is a Postgres client.
@@ -30,23 +28,12 @@ func NewDBClient() *Client {
 type GenericMutations interface {
 	Add(model ...interface{}) error
 	UpdateModel(model interface{}) error
-	RegisterModel(model interface{}) error
 	Remove(model interface{}) error
 }
 
 // Add adds any number of models as a database rows
 func (c *Client) Add(model ...interface{}) error {
 	return c.Insert(model...)
-}
-
-// RegisterModel creates a table for a type.
-// A table is automatically created based on the passed in struct fields.
-func (c *Client) RegisterModel(model interface{}) error {
-	fmt.Printf("Registered model %v\n", model)
-	return c.CreateTable(model, &orm.CreateTableOptions{
-		Temp:        false,
-		IfNotExists: true,
-	})
 }
 
 // UpdateModel updates a model

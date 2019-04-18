@@ -57,27 +57,6 @@ func NewTruAPI(aa *chttp.App) *TruAPI {
 	return &ta
 }
 
-// RegisterModels registers types for off-chain DB models
-func (ta *TruAPI) RegisterModels() {
-	err := ta.DBClient.RegisterModel(&db.TwitterProfile{})
-	if err != nil {
-		panic(err)
-	}
-	err = ta.DBClient.RegisterModel(&db.KeyPair{})
-	if err != nil {
-		panic(err)
-	}
-	err = ta.DBClient.RegisterModel(&db.DeviceToken{})
-	if err != nil {
-		panic(err)
-	}
-
-	err = ta.DBClient.RegisterModel(&db.NotificationEvent{})
-	if err != nil {
-		panic(err)
-	}
-}
-
 // WrapHandler wraps a chttp.Handler and returns a standar http.Handler
 func WrapHandler(h chttp.Handler) http.Handler {
 	return h.HandlerFunc()
