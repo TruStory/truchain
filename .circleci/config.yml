@@ -2,7 +2,7 @@ version: 2
 
 defaults: &defaults
   docker:
-    - image: circleci/golang:1.11.1
+    - image: circleci/golang:1.12
   working_directory: /go/src/github.com/TruStory/truchain
   environment:
     GOBIN: /tmp/workspace/bin
