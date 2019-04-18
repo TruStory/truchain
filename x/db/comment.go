@@ -19,10 +19,10 @@ type ChainConfig struct {
 type Comment struct {
 	ID         int64     `json:"id"`
 	ParentID   int64     `json:"parent_id"`
-	ArgumentID int64     `json:"argument_id" sql:"notnull"`
-	Body       string    `json:"body" sql:"notnull"`
-	Creator    string    `json:"creator" sql:"notnull"`
-	CreatedAt  time.Time `json:"created_at" sql:"notnull"`
+	ArgumentID int64     `json:"argument_id"`
+	Body       string    `json:"body"`
+	Creator    string    `json:"creator"`
+	CreatedAt  time.Time `json:"created_at"`
 }
 
 // CommentsByArgumentID finds comments by argument id
