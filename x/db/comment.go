@@ -2,6 +2,7 @@ package db
 
 import (
 	"fmt"
+	"net/url"
 	"path"
 	"strings"
 	"time"
@@ -70,7 +71,11 @@ func (c *Client) mapAddressesToProfileURLs(body string, profileURLPrefix string)
 		if err != nil {
 			return profileURLsByAddress, err
 		}
-		profileURL := path.Join(profileURLPrefix, twitterProfile.Address)
+		profileURLString := path.Join(profileURLPrefix, twitterProfile.Address)
+		profileURL, err := url.Parse(profileURLString)
+		if err != nil {
+			return profileURLsByAddress, err
+		}
 		markdownProfileURL := fmt.Sprintf("[@%s](%s)", twitterProfile.Username, profileURL)
 		profileURLsByAddress[address] = markdownProfileURL
 	}
