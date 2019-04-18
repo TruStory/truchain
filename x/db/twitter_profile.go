@@ -56,7 +56,7 @@ func (c *Client) TwitterProfileByAddress(addr string) (TwitterProfile, error) {
 // Finds a Twitter profile by the given username
 func (c *Client) TwitterProfileByUsername(username string) (TwitterProfile, error) {
 	twitterProfile := new(TwitterProfile)
-	err := c.Model(twitterProfile).Where("username = ?", username).Select()
+	err := c.Model(twitterProfile).Where("username = ?", username).First()
 	if err != nil {
 		return *twitterProfile, err
 	}
