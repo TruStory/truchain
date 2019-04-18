@@ -1,6 +1,7 @@
 package db
 
 import (
+	"context"
 	"time"
 
 	"github.com/go-pg/pg/orm"
@@ -41,7 +42,7 @@ type Timestamps struct {
 }
 
 // BeforeInsert is the hook that fills in the created_at and updated_at fields
-func (m *Timestamps) BeforeInsert(db orm.DB) error {
+func (m *Timestamps) BeforeInsert(ctx context.Context, db orm.DB) error {
 	now := time.Now()
 	if m.CreatedAt.IsZero() {
 		m.CreatedAt = now
@@ -53,7 +54,7 @@ func (m *Timestamps) BeforeInsert(db orm.DB) error {
 }
 
 // BeforeUpdate is the hook that updates the updated_at field
-func (m *Timestamps) BeforeUpdate(db orm.DB) error {
+func (m *Timestamps) BeforeUpdate(ctx context.Context, db orm.DB) error {
 	m.UpdatedAt = time.Now()
 	return nil
 }
