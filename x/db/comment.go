@@ -56,7 +56,7 @@ func (c *Client) replaceAddressesWithProfileURLs(body string) (string, error) {
 		return "", err
 	}
 	for address, profileURL := range profileURLsByAddress {
-		body = strings.ReplaceAll(body, address, profileURL)
+		body = strings.ReplaceAll(body, fmt.Sprintf("@%s", address), profileURL)
 	}
 
 	return body, nil
@@ -71,7 +71,7 @@ func (c *Client) mapAddressesToProfileURLs(body string, profileURLPrefix string)
 			return profileURLsByAddress, err
 		}
 		profileURL := path.Join(profileURLPrefix, twitterProfile.Address)
-		markdownProfileURL := fmt.Sprintf("[%s](%s)", twitterProfile.Username, profileURL)
+		markdownProfileURL := fmt.Sprintf("[@%s](%s)", twitterProfile.Username, profileURL)
 		profileURLsByAddress[address] = markdownProfileURL
 	}
 
