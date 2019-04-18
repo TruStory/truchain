@@ -207,7 +207,7 @@ func (ta *TruAPI) RegisterResolvers() {
 		"creator": func(ctx context.Context, q db.Comment) users.User {
 			creator, err := sdk.AccAddressFromBech32(q.Creator)
 			if err != nil {
-				// TODO: handle error better
+				// [shanev] TODO: handle error better, see https://github.com/TruStory/truchain/issues/199
 				panic(err)
 			}
 			return getUser(ctx, creator)
