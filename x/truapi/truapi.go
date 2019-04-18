@@ -215,6 +215,7 @@ func (ta *TruAPI) RegisterResolvers() {
 		"createdAt": func(_ context.Context, q db.Comment) time.Time { return q.CreatedAt },
 	})
 
+	ta.GraphQLClient.RegisterQueryResolver("argument", ta.argumentResolver)
 	ta.GraphQLClient.RegisterObjectResolver("Argument", argument.Argument{}, map[string]interface{}{
 		"id":      func(_ context.Context, q argument.Argument) int64 { return q.ID },
 		"creator": func(ctx context.Context, q argument.Argument) users.User { return getUser(ctx, q.Creator) },
