@@ -536,7 +536,15 @@
   version = "v1.6.0"
 
 [[projects]]
-  digest = "1:c7fd35ab0fb23ad0fb999ae43ace47b1b76518513a7b6ae87a6b26547913bf5e"
+  branch = "master"
+  digest = "1:0734027cf0eb9c4c15942a473cc10db0a2bbb99e6533a3bdc71a1b16642f3e2f"
+  name = "github.com/samsarahq/go"
+  packages = ["oops"]
+  pruneopts = "UT"
+  revision = "720caea591c9ff985b9c9f697578e2f603c046de"
+
+[[projects]]
+  digest = "1:0fbd6c83ce474b15807389c16f26eb044a987945faf54689784f924b008ed483"
   name = "github.com/samsarahq/thunder"
   packages = [
     "batch",
@@ -546,11 +554,13 @@
     "graphql/introspection",
     "graphql/schemabuilder",
     "internal",
+    "internal/filter",
     "reactive",
+    "thunderpb",
   ]
   pruneopts = "UT"
-  revision = "7b4f7dd9431130c9bc775a48f3cb6760fe35d307"
-  version = "v0.4.0"
+  revision = "87f8c4e4307286693c2151f81a9c2e7025bfb2cc"
+  version = "v0.5.0"
 
 [[projects]]
   digest = "1:3e39bafd6c2f4bf3c76c3bfd16a2e09e016510ad5db90dc02b88e2f565d6d595"
