@@ -3,7 +3,6 @@ package truapi
 import (
 	"encoding/json"
 	"net/http"
-	"time"
 
 	"github.com/TruStory/truchain/x/chttp"
 	"github.com/TruStory/truchain/x/db"
@@ -44,7 +43,6 @@ func (ta *TruAPI) handleCreateComment(r *http.Request) chttp.Response {
 		ArgumentID: request.ArgumentID,
 		Body:       request.Body,
 		Creator:    request.Creator,
-		CreatedAt:  time.Now(),
 	}
 	err = ta.DBClient.AddComment(comment)
 	if err != nil {

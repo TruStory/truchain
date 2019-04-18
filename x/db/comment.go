@@ -5,7 +5,6 @@ import (
 	"net/url"
 	"path"
 	"strings"
-	"time"
 
 	"github.com/gernest/mention"
 	"github.com/kelseyhightower/envconfig"
@@ -18,12 +17,12 @@ type ChainConfig struct {
 
 // Comment represents a comment in the DB
 type Comment struct {
-	ID         int64     `json:"id"`
-	ParentID   int64     `json:"parent_id"`
-	ArgumentID int64     `json:"argument_id"`
-	Body       string    `json:"body"`
-	Creator    string    `json:"creator"`
-	CreatedAt  time.Time `json:"created_at"`
+	Timestamps
+	ID         int64  `json:"id"`
+	ParentID   int64  `json:"parent_id"`
+	ArgumentID int64  `json:"argument_id"`
+	Body       string `json:"body"`
+	Creator    string `json:"creator"`
 }
 
 // CommentsByArgumentID finds comments by argument id
