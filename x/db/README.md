@@ -13,7 +13,7 @@ type Datastore interface {
 
 ## Installation and Setup
 
-On macOS: 
+On macOS:
 
 ```sh
 # install postgres
@@ -39,7 +39,6 @@ docker run --name trudb \
 -d postgres:11.1
 ```
 
-
 Create a `.env` with the following variables for local setup:
 
 ```
@@ -58,15 +57,8 @@ Writes conform to the interface:
 ```go
 type Mutations interface {
 	Add(model interface{}) error
-	RegisterModel(model interface{}) error
 }
 ```
-
-### Create a new table
-
-Call `RegisterModel(model interface{})` in `TruAPI.RegisterModels()`. `model` is a struct with all the fields for the table. A table will automatically
-be created based on the struct fields. Go fields will be automatically translated to
-Postgres data types.
 
 ### Add a row
 
@@ -86,9 +78,9 @@ This interface can be mocked out for testing.
 
 ### GraphQL
 
-The Postgres client has been added to `TruAPI`, which means it can be accessed in GraphQL resolvers. 
+The Postgres client has been added to `TruAPI`, which means it can be accessed in GraphQL resolvers.
 
-For example, the `TwitterProfile` type is resolved with: 
+For example, the `TwitterProfile` type is resolved with:
 
 ```go
 	ta.GraphQLClient.RegisterObjectResolver("TwitterProfile", db.TwitterProfile{}, map[string]interface{}{
