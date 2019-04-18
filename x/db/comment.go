@@ -51,6 +51,9 @@ func (c *Client) CommentsByArgumentID(argumentID int64) ([]Comment, error) {
 func (c *Client) replaceAddressesWithProfileURLs(body string) (string, error) {
 	var chainConfig ChainConfig
 	err := envconfig.Process("chain", &chainConfig)
+	if err != nil {
+		return "", err
+	}
 	profileURLPrefix := path.Join(chainConfig.Host, "profile")
 	profileURLsByAddress, err := c.mapAddressesToProfileURLs(body, profileURLPrefix)
 	if err != nil {
