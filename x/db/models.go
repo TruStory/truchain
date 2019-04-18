@@ -1,5 +1,11 @@
 package db
 
+import (
+	"time"
+
+	"github.com/go-pg/pg/orm"
+)
+
 // Datastore defines all operations on the DB
 // This interface can be mocked out for tests, etc.
 type Datastore interface {
@@ -25,4 +31,29 @@ type Queries interface {
 	DeviceTokensByAddress(addr string) ([]DeviceToken, error)
 	NotificationEventsByAddress(addr string) ([]NotificationEvent, error)
 	FlaggedStoriesByStoryID(storyID int64) ([]FlaggedStory, error)
+}
+
+// Timestamps carries the default timestamp fields for any derived model
+type Timestamps struct {
+	CreatedAt time.Time
+	UpdatedAt time.Time
+	DeletedAt *time.Time
+}
+
+// BeforeInsert is the hook that fills in the created_at and updated_at fields
+func (m *Timestamps) BeforeInsert(db orm.DB) error {
+	now := time.Now()
+	if m.CreatedAt.IsZero() {
+		m.CreatedAt = now
+	}
+	if m.UpdatedAt.IsZero() {
+		m.UpdatedAt = now
+	}
+	return nil
+}
+
+// BeforeUpdate is the hook that updates the updated_at field
+func (m *Timestamps) BeforeUpdate(db orm.DB) error {
+	m.UpdatedAt = time.Now()
+	return nil
 }

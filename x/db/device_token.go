@@ -5,7 +5,9 @@ import "github.com/go-pg/pg"
 // DeviceToken is the association between a cosmos address and a device token used for
 // push notifications.
 type DeviceToken struct {
+	Timestamps
 	ID int64 `json:"id"`
+
 	// Address is the cosmos address
 	Address string `json:"address"  sql:"unique:device_address_token,notnull"`
 	// Token represents the DeviceToken (iOS), RegistrationId (android)
