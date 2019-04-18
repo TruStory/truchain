@@ -12,7 +12,7 @@ import (
 
 // QueryByIDParams is query params for any ID
 type QueryByIDParams struct {
-	ID int64
+	ID int64 `json:"id" graphql:"id"`
 }
 
 // QueryByCategoryIDParams is query params for a CategoryID
@@ -23,18 +23,18 @@ type QueryByCategoryIDParams struct {
 // QueryByStoryIDAndCreatorParams is query params for backing,
 // challenge, and token votes by story id and creator
 type QueryByStoryIDAndCreatorParams struct {
-	StoryID int64
-	Creator string
+	StoryID int64  `json:"story_id"`
+	Creator string `json:"creator"`
 }
 
 // QueryByCreatorParams returns the query params for getting any query by the creator
 type QueryByCreatorParams struct {
-	Creator string
+	Creator string `json:"creator"`
 }
 
 // QueryTrasanctionsByCreatorAndCategoryParams returns the query params for getting arguments by creator and category
 type QueryTrasanctionsByCreatorAndCategoryParams struct {
-	Creator string
+	Creator string  `json:"creator"`
 	Denom   *string `json:",omitempty"`
 }
 
