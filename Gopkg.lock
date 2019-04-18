@@ -202,6 +202,14 @@
   version = "v1.4.7"
 
 [[projects]]
+  digest = "1:ac37ac4ac7c309e30acdf39726662aac0167b37d3912e0baded1dc12569b08c9"
+  name = "github.com/gernest/mention"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "73020b3ba30e14340bfc86de1db3278749cd86c6"
+  version = "v2.0.0"
+
+[[projects]]
   digest = "1:fdf5169073fb0ad6dc12a70c249145e30f4058647bea25f0abd48b6d9f228a11"
   name = "github.com/go-kit/kit"
   packages = [
@@ -393,6 +401,14 @@
   packages = ["."]
   pruneopts = "UT"
   revision = "23d116af351c84513e1946b527c88823e476be13"
+  version = "v1.3.0"
+
+[[projects]]
+  digest = "1:edbef42561faa44c19129b68d1e109fbc1647f63239250391eadc8d0e7c9f669"
+  name = "github.com/kelseyhightower/envconfig"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "f611eb38b3875cc3bd991ca91c51d06446afa14c"
   version = "v1.3.0"
 
 [[projects]]
@@ -930,12 +946,14 @@
     "github.com/dghubble/gologin/twitter",
     "github.com/dghubble/oauth1",
     "github.com/dghubble/oauth1/twitter",
+    "github.com/gernest/mention",
     "github.com/go-pg/pg",
     "github.com/go-pg/pg/orm",
     "github.com/gorilla/handlers",
     "github.com/gorilla/mux",
     "github.com/gorilla/securecookie",
     "github.com/joho/godotenv",
+    "github.com/kelseyhightower/envconfig",
     "github.com/oklog/ulid",
     "github.com/samsarahq/thunder/batch",
     "github.com/samsarahq/thunder/graphql",

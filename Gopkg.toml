@@ -59,6 +59,14 @@
   name = "github.com/dghubble/gologin"
   version = "=v2.1.0"
 
+[[constraint]]
+  name = "github.com/gernest/mention"
+  version = "=v2.0.0"
+
+[[constraint]]
+  name = "github.com/kelseyhightower/envconfig"
+  version = "=v1.3.0"
+
 ## deps without releases:
 
 [[override]]

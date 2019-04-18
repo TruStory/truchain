@@ -93,6 +93,7 @@ func (ta *TruAPI) RegisterRoutes() {
 	api.HandleFunc("/deviceToken/unregister", ta.HandleUnregisterDeviceToken)
 	api.HandleFunc("/upload", ta.HandleUpload)
 	api.Handle("/flagStory", WithUser(WrapHandler(ta.HandleFlagStory)))
+	api.Handle("/comments", WithUser(WrapHandler(ta.HandleComment)))
 
 	if os.Getenv("MOCK_REGISTRATION") == "true" {
 		api.Handle("/mock_register", WrapHandler(ta.HandleMockRegistration))
@@ -152,6 +153,17 @@ func (ta *TruAPI) RegisterOAuthRoutes() {
 	ta.Handle("/auth-logout", Logout())
 }
 
+// RegisterMutations registers mutations
+func (ta *TruAPI) RegisterMutations() {
+	ta.GraphQLClient.RegisterMutation("addComment", func(args struct {
+		Parent int64
+		Body   string
+	}) error {
+		err := ta.DBClient.AddComment(&db.Comment{ParentID: args.Parent, Body: args.Body})
+		return err
+	})
+}
+
 // RegisterResolvers builds the app's GraphQL schema from resolvers (declared in `resolver.go`)
 func (ta *TruAPI) RegisterResolvers() {
 	formatTime := func(t time.Time) string {
@@ -186,6 +198,24 @@ func (ta *TruAPI) RegisterResolvers() {
 		return ta.argumentResolver(ctx, app.QueryByIDParams{ID: argumentID})
 	}
 
+	ta.GraphQLClient.RegisterQueryResolver("comments", ta.commentsResolver)
+	ta.GraphQLClient.RegisterObjectResolver("Comment", db.Comment{}, map[string]interface{}{
+		"id":         func(_ context.Context, q db.Comment) int64 { return q.ID },
+		"parentId":   func(_ context.Context, q db.Comment) int64 { return q.ParentID },
+		"argumentId": func(_ context.Context, q db.Comment) int64 { return q.ArgumentID },
+		"body":       func(_ context.Context, q db.Comment) string { return q.Body },
+		"creator": func(ctx context.Context, q db.Comment) users.User {
+			creator, err := sdk.AccAddressFromBech32(q.Creator)
+			if err != nil {
+				// [shanev] TODO: handle error better, see https://github.com/TruStory/truchain/issues/199
+				panic(err)
+			}
+			return getUser(ctx, creator)
+		},
+		"createdAt": func(_ context.Context, q db.Comment) time.Time { return q.CreatedAt },
+	})
+
+	ta.GraphQLClient.RegisterQueryResolver("argument", ta.argumentResolver)
 	ta.GraphQLClient.RegisterObjectResolver("Argument", argument.Argument{}, map[string]interface{}{
 		"id":      func(_ context.Context, q argument.Argument) int64 { return q.ID },
 		"creator": func(ctx context.Context, q argument.Argument) users.User { return getUser(ctx, q.Creator) },
@@ -195,6 +225,7 @@ func (ta *TruAPI) RegisterResolvers() {
 			return ta.likesObjectResolver(ctx, app.QueryByIDParams{ID: q.ID})
 		},
 		"timestamp": func(_ context.Context, q argument.Argument) app.Timestamp { return q.Timestamp },
+		"comments":  ta.commentsResolver,
 	})
 
 	ta.GraphQLClient.RegisterObjectResolver("Like", argument.Like{}, map[string]interface{}{
