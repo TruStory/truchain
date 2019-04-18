@@ -60,9 +60,24 @@ func (c *Client) RegisterQueryResolver(name string, fn interface{}) {
 	c.queries.FieldFunc(name, fn)
 }
 
+// RegisterPaginatedQueryResolver adds a top-level resolver to find the first paginated batch of entities in a GraphQL query
+func (c *Client) RegisterPaginatedQueryResolver(name string, fn interface{}) {
+	c.queries.FieldFunc(name, fn, builder.Paginated)
+}
+
 // RegisterObjectResolver adds a set of field resolvers for objects of the given type that are returned by top-level resolvers
 func (c *Client) RegisterObjectResolver(name string, objPrototype interface{}, fields map[string]interface{}) {
 	obj := c.pendingSchema.Object(name, objPrototype)
+
+	for fieldName, fn := range fields {
+		obj.FieldFunc(fieldName, fn)
+	}
+}
+
+// RegisterPaginatedObjectResolver adds a set of paginated field resolvers for objects of the given type that are returned by top-level resolvers
+func (c *Client) RegisterPaginatedObjectResolver(name, key string, objPrototype interface{}, fields map[string]interface{}) {
+	obj := c.pendingSchema.Object(name, objPrototype)
+	obj.Key(key)
 
 	for fieldName, fn := range fields {
 		obj.FieldFunc(fieldName, fn)

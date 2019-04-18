@@ -15,6 +15,11 @@ type QueryByIDParams struct {
 	ID int64
 }
 
+// QueryByCategoryIDParams is query params for a CategoryID
+type QueryByCategoryIDParams struct {
+	CategoryID int64
+}
+
 // QueryByStoryIDAndCreatorParams is query params for backing,
 // challenge, and token votes by story id and creator
 type QueryByStoryIDAndCreatorParams struct {
