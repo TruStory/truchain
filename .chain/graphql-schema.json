@@ -806,6 +806,120 @@
             "deprecationReason": "",
             "description": "",
             "isDeprecated": false,
+            "name": "edges",
+            "type": {
+              "kind": "NON_NULL",
+              "name": "",
+              "ofType": {
+                "kind": "LIST",
+                "name": "",
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "name": "",
+                  "ofType": {
+                    "kind": "OBJECT",
+                    "name": "NonNullStoryEdge",
+                    "ofType": null
+                  }
+                }
+              }
+            }
+          },
+          {
+            "args": [],
+            "deprecationReason": "",
+            "description": "",
+            "isDeprecated": false,
+            "name": "pageInfo",
+            "type": {
+              "kind": "NON_NULL",
+              "name": "",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "PageInfo",
+                "ofType": null
+              }
+            }
+          },
+          {
+            "args": [],
+            "deprecationReason": "",
+            "description": "",
+            "isDeprecated": false,
+            "name": "totalCount",
+            "type": {
+              "kind": "NON_NULL",
+              "name": "",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "int64",
+                "ofType": null
+              }
+            }
+          }
+        ],
+        "inputFields": [],
+        "interfaces": [],
+        "kind": "OBJECT",
+        "name": "NonNullStoryConnection",
+        "possibleTypes": []
+      },
+      {
+        "description": "",
+        "enumValues": [],
+        "fields": [
+          {
+            "args": [],
+            "deprecationReason": "",
+            "description": "",
+            "isDeprecated": false,
+            "name": "cursor",
+            "type": {
+              "kind": "NON_NULL",
+              "name": "",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "string",
+                "ofType": null
+              }
+            }
+          },
+          {
+            "args": [],
+            "deprecationReason": "",
+            "description": "",
+            "isDeprecated": false,
+            "name": "node",
+            "type": {
+              "kind": "NON_NULL",
+              "name": "",
+              "ofType": {
+                "kind": "NON_NULL",
+                "name": "",
+                "ofType": {
+                  "kind": "OBJECT",
+                  "name": "Story",
+                  "ofType": null
+                }
+              }
+            }
+          }
+        ],
+        "inputFields": [],
+        "interfaces": [],
+        "kind": "OBJECT",
+        "name": "NonNullStoryEdge",
+        "possibleTypes": []
+      },
+      {
+        "description": "",
+        "enumValues": [],
+        "fields": [
+          {
+            "args": [],
+            "deprecationReason": "",
+            "description": "",
+            "isDeprecated": false,
             "name": "address",
             "type": {
               "kind": "NON_NULL",
@@ -1086,6 +1200,105 @@
         "interfaces": [],
         "kind": "OBJECT",
         "name": "NotificationEvent",
+        "possibleTypes": []
+      },
+      {
+        "description": "",
+        "enumValues": [],
+        "fields": [
+          {
+            "args": [],
+            "deprecationReason": "",
+            "description": "",
+            "isDeprecated": false,
+            "name": "endCursor",
+            "type": {
+              "kind": "NON_NULL",
+              "name": "",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "string",
+                "ofType": null
+              }
+            }
+          },
+          {
+            "args": [],
+            "deprecationReason": "",
+            "description": "",
+            "isDeprecated": false,
+            "name": "hasNextPage",
+            "type": {
+              "kind": "NON_NULL",
+              "name": "",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "bool",
+                "ofType": null
+              }
+            }
+          },
+          {
+            "args": [],
+            "deprecationReason": "",
+            "description": "",
+            "isDeprecated": false,
+            "name": "hasPrevPage",
+            "type": {
+              "kind": "NON_NULL",
+              "name": "",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "bool",
+                "ofType": null
+              }
+            }
+          },
+          {
+            "args": [],
+            "deprecationReason": "",
+            "description": "",
+            "isDeprecated": false,
+            "name": "pages",
+            "type": {
+              "kind": "NON_NULL",
+              "name": "",
+              "ofType": {
+                "kind": "LIST",
+                "name": "",
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "name": "",
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "string",
+                    "ofType": null
+                  }
+                }
+              }
+            }
+          },
+          {
+            "args": [],
+            "deprecationReason": "",
+            "description": "",
+            "isDeprecated": false,
+            "name": "startCursor",
+            "type": {
+              "kind": "NON_NULL",
+              "name": "",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "string",
+                "ofType": null
+              }
+            }
+          }
+        ],
+        "inputFields": [],
+        "interfaces": [],
+        "kind": "OBJECT",
+        "name": "PageInfo",
         "possibleTypes": []
       },
       {
@@ -1690,6 +1903,107 @@
             }
           },
           {
+            "args": [
+              {
+                "defaultValue": null,
+                "description": "",
+                "name": "after",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "string",
+                  "ofType": null
+                }
+              },
+              {
+                "defaultValue": null,
+                "description": "",
+                "name": "before",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "string",
+                  "ofType": null
+                }
+              },
+              {
+                "defaultValue": null,
+                "description": "",
+                "name": "categoryID",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": "",
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "int64",
+                    "ofType": null
+                  }
+                }
+              },
+              {
+                "defaultValue": null,
+                "description": "",
+                "name": "filterText",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "string",
+                  "ofType": null
+                }
+              },
+              {
+                "defaultValue": null,
+                "description": "",
+                "name": "first",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "int64",
+                  "ofType": null
+                }
+              },
+              {
+                "defaultValue": null,
+                "description": "",
+                "name": "last",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "int64",
+                  "ofType": null
+                }
+              },
+              {
+                "defaultValue": null,
+                "description": "",
+                "name": "sortBy",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "string",
+                  "ofType": null
+                }
+              },
+              {
+                "defaultValue": null,
+                "description": "",
+                "name": "sortOrder",
+                "type": {
+                  "kind": "ENUM",
+                  "name": "SortOrder",
+                  "ofType": null
+                }
+              }
+            ],
+            "deprecationReason": "",
+            "description": "",
+            "isDeprecated": false,
+            "name": "paginated_stories",
+            "type": {
+              "kind": "NON_NULL",
+              "name": "",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "NonNullStoryConnection",
+                "ofType": null
+              }
+            }
+          },
+          {
             "args": [],
             "deprecationReason": "",
             "description": "",
@@ -1812,6 +2126,29 @@
         "interfaces": [],
         "kind": "OBJECT",
         "name": "Query",
+        "possibleTypes": []
+      },
+      {
+        "description": "",
+        "enumValues": [
+          {
+            "deprecationReason": "",
+            "description": "0",
+            "isDeprecated": false,
+            "name": "asc"
+          },
+          {
+            "deprecationReason": "",
+            "description": "1",
+            "isDeprecated": false,
+            "name": "desc"
+          }
+        ],
+        "fields": [],
+        "inputFields": [],
+        "interfaces": [],
+        "kind": "ENUM",
+        "name": "SortOrder",
         "possibleTypes": []
       },
       {
