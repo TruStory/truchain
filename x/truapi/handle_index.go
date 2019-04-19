@@ -58,6 +58,10 @@ func CompileIndexFile(ta *TruAPI, index []byte, route string) string {
 	if len(matches) == 3 {
 		// replace placeholder with story details, where story id is in matches[1]
 		storyID, err := strconv.ParseInt(matches[1], 10, 64)
+		if err != nil {
+			// if error, return the default tags
+			return compile(index, makeDefaultMetaTags(ta, route))
+		}
 		argumentID, err := strconv.ParseInt(matches[2], 10, 64)
 		if err != nil {
 			// if error, return the default tags
