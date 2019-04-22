@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"html"
 	"os"
 	"regexp"
 	"strconv"
@@ -111,7 +112,7 @@ func makeStoryMetaTags(ta *TruAPI, route string, storyID int64) (*Tags, error) {
 	}
 	return &Tags{
 		Title:       fmt.Sprintf("%s made a claim in %s on TruStory", creatorObj.FullName, categoryObj.Title),
-		Description: storyObj.Body,
+		Description: html.EscapeString(storyObj.Body),
 		Image:       defaultImage,
 		URL:         os.Getenv("APP_URL") + route,
 	}, nil
@@ -129,7 +130,7 @@ func makeArgumentMetaTags(ta *TruAPI, route string, storyID int64, argumentID in
 	}
 	return &Tags{
 		Title:       fmt.Sprintf("%s made an argument in %s on TruStory", creatorObj.FullName, categoryObj.Title),
-		Description: argumentObj.Body,
+		Description: html.EscapeString(argumentObj.Body),
 		Image:       defaultImage,
 		URL:         os.Getenv("APP_URL") + route,
 	}, nil
