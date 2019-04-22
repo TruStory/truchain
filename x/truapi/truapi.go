@@ -134,6 +134,7 @@ func (ta *TruAPI) RegisterRoutes() {
 				http.Error(w, "Error serving index.html", http.StatusInternalServerError)
 				return
 			}
+			return
 		}
 		fs.ServeHTTP(w, r)
 	}))
