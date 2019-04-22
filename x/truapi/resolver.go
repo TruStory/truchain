@@ -4,11 +4,8 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"math"
-	"os"
 	"path"
 	"sort"
-	"strconv"
 
 	app "github.com/TruStory/truchain/types"
 	"github.com/TruStory/truchain/x/argument"
@@ -22,6 +19,7 @@ import (
 	trubank "github.com/TruStory/truchain/x/trubank"
 	"github.com/TruStory/truchain/x/users"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/kelseyhightower/envconfig"
 	amino "github.com/tendermint/go-amino"
 	abci "github.com/tendermint/tendermint/abci/types"
 )
@@ -408,22 +406,29 @@ func (ta *TruAPI) addressesWhoFlaggedResolver(ctx context.Context, q story.Story
 }
 
 func (ta *TruAPI) filterFlaggedStories(stories *[]story.Story) ([]story.Story, error) {
-	val := os.Getenv("FLAGGED_STORY_LIMIT")
-	if val == "" {
-		val = fmt.Sprintf("%d", math.MaxInt64)
-	}
-	flagCountLimit, err := strconv.Atoi(val)
-	if err != nil {
-		return nil, ErrFlaggedStoryEnvVarParsing
+	type FlagConfig struct {
+		Limit int    `default:"4294967295"`
+		Admin string `default:"cosmos1xqc5gwzpg3fyv5en2fzyx36z2se5ks33tt57e7"`
 	}
 
-	var filteredStories []story.Story
+	var flagConfig FlagConfig
+	err := envconfig.Process("api_story_flag", &flagConfig)
+	if err != nil {
+		return nil, err
+	}
+
+	filteredStories := make([]story.Story, 0)
 	for _, story := range *stories {
-		flaggedStoryIDs, err := ta.DBClient.FlaggedStoriesByStoryID(story.ID)
+		flaggedStories, err := ta.DBClient.FlaggedStoriesByStoryID(story.ID)
 		if err != nil {
 			return nil, err
 		}
-		if len(flaggedStoryIDs) < flagCountLimit {
+		if len(flaggedStories) > 0 {
+			if flaggedStories[0].Creator == flagConfig.Admin {
+				continue
+			}
+		}
+		if len(flaggedStories) < flagConfig.Limit {
 			filteredStories = append(filteredStories, story)
 		}
 	}
