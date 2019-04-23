@@ -419,16 +419,16 @@ func (ta *TruAPI) filterFlaggedStories(stories *[]story.Story) ([]story.Story, e
 
 	filteredStories := make([]story.Story, 0)
 	for _, story := range *stories {
-		flaggedStories, err := ta.DBClient.FlaggedStoriesByStoryID(story.ID)
+		storyFlags, err := ta.DBClient.FlaggedStoriesByStoryID(story.ID)
 		if err != nil {
 			return nil, err
 		}
-		if len(flaggedStories) > 0 {
-			if flaggedStories[0].Creator == flagConfig.Admin {
+		if len(storyFlags) > 0 {
+			if storyFlags[0].Creator == flagConfig.Admin {
 				continue
 			}
 		}
-		if len(flaggedStories) < flagConfig.Limit {
+		if len(storyFlags) < flagConfig.Limit {
 			filteredStories = append(filteredStories, story)
 		}
 	}
