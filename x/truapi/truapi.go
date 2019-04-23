@@ -77,10 +77,10 @@ func WithUser(h http.Handler) http.Handler {
 
 // RegisterRoutes applies the TruStory API routes to the `chttp.API` router
 func (ta *TruAPI) RegisterRoutes() {
-	// Enable gzip compression
-	ta.Use(handlers.CompressHandler)
-
 	api := ta.Subrouter("/api/v1")
+
+	// Enable gzip compression
+	api.Use(handlers.CompressHandler)
 	api.Use(chttp.JSONResponseMiddleware)
 	api.Handle("/ping", WrapHandler(ta.HandlePing))
 	api.Handle("/graphql", WithUser(WrapHandler(ta.HandleGraphQL)))
