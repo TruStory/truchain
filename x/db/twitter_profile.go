@@ -23,6 +23,24 @@ func (t TwitterProfile) String() string {
 		t.ID, t.Address, t.Username, t.FullName, t.AvatarURI)
 }
 
+// UsernamesByPrefix returns the first five usernames for the provided prefix string
+func (c *Client) UsernamesByPrefix(prefix string) (usernames []string, err error) {
+	var twitterProfiles []TwitterProfile
+	sqlFragment := fmt.Sprintf("username LIKE '%s", prefix)
+	err = c.Model(&twitterProfiles).Where(sqlFragment + "%'").Limit(5).Select()
+	if err == pg.ErrNoRows {
+		return usernames, nil
+	}
+	if err != nil {
+		return usernames, err
+	}
+	for _, twitterProfile := range twitterProfiles {
+		usernames = append(usernames, twitterProfile.Username)
+	}
+
+	return usernames, nil
+}
+
 // TwitterProfileByID implements `Datastore`
 // Finds a Twitter profile by the given twitter profile id
 func (c *Client) TwitterProfileByID(id int64) (TwitterProfile, error) {
