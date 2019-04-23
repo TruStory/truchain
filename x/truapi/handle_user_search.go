@@ -27,14 +27,11 @@ func (ta *TruAPI) handleUsernameSearch(r *http.Request) chttp.Response {
 	if err != nil {
 		return chttp.SimpleErrorResponse(500, Err400MissingParameter)
 	}
-	prefix := r.Form["username_prefix"][0]
 
+	prefix := r.Form["username_prefix"][0]
 	usernames, err := ta.DBClient.UsernamesByPrefix(prefix)
 	if err != nil {
 		return chttp.SimpleErrorResponse(500, err)
-	}
-	if len(usernames) == 0 {
-		return chttp.SimpleErrorResponse(404, Err404ResourceNotFound)
 	}
 
 	responseBytes, _ := json.Marshal(UsernameSearchResponse{
