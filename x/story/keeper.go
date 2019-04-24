@@ -158,8 +158,12 @@ func (k Keeper) Stories(ctx sdk.Context) (stories []Story) {
 	// iterates through keyspace to find all stories
 	for ; iter.Valid(); iter.Next() {
 		var story Story
-		k.GetCodec().MustUnmarshalBinaryLengthPrefixed(
-			iter.Value(), &story)
+		k.GetCodec().MustUnmarshalBinaryLengthPrefixed(iter.Value(), &story)
+
+		// TODO [shanev]: revert this after importing story time change (https://github.com/TruStory/truchain/issues/538)
+		// subtract 4 days from expire time
+		story.ExpireTime = story.ExpireTime.AddDate(0, 0, -4)
+
 		stories = append(stories, story)
 	}
 
