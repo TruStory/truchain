@@ -7,6 +7,7 @@
 
 1. Install `go` by following the [official docs](https://golang.org/doc/install). Remember to set your `$GOPATH`, `$GOBIN`, and `$PATH` environment variables.
 
+**Go version must be 1.12+**.
 
 2. Now let's install truchain.
 
