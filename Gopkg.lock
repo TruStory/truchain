@@ -756,6 +756,14 @@
   version = "v0.9.0"
 
 [[projects]]
+  digest = "1:3956765c0ca8e687414b4dffaa35362a47a971a33a5af30a36a85a9ebd7dc599"
+  name = "github.com/writeas/go-strip-markdown"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "5f8ba69e46917bcbf78b212886edbd4825d2bddd"
+  version = "v2.0.1"
+
+[[projects]]
   digest = "1:29b886f00694ae7c18c4559a2901f2a057d5a62308ed5eb6cd52b9a31016fb14"
   name = "github.com/zondax/ledger-cosmos-go"
   packages = ["."]
@@ -978,6 +986,7 @@
     "github.com/tendermint/tendermint/rpc/core/types",
     "github.com/tendermint/tendermint/types",
     "github.com/tendermint/tmlibs/cli",
+    "github.com/writeas/go-strip-markdown",
     "golang.org/x/crypto/acme/autocert",
     "golang.org/x/sync/errgroup",
   ]
