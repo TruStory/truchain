@@ -12,6 +12,8 @@ import (
 	app "github.com/TruStory/truchain/types"
 	"github.com/TruStory/truchain/x/category"
 	"github.com/TruStory/truchain/x/story"
+	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/writeas/go-strip-markdown"
 )
 
 const (
@@ -104,15 +106,25 @@ func makeStoryMetaTags(ta *TruAPI, route string, storyID int64) (*Tags, error) {
 	ctx := context.Background()
 
 	storyObj := ta.storyResolver(ctx, story.QueryStoryByIDParams{ID: storyID})
-	categoryObj := ta.categoryResolver(ctx, category.QueryCategoryByIDParams{ID: storyObj.CategoryID})
-	creatorObj, err := ta.DBClient.TwitterProfileByAddress(storyObj.Creator.String())
-	if err != nil {
-		// if error, return default
-		return nil, err
+	backings := ta.backingsResolver(ctx, app.QueryByIDParams{ID: storyObj.ID})
+	challenges := ta.challengesResolver(ctx, app.QueryByIDParams{ID: storyObj.ID})
+	backingTotalAmount := ta.backingPoolResolver(ctx, storyObj)
+	challengeTotalAmount := ta.challengePoolResolver(ctx, storyObj)
+
+	storyState := "Active"
+	if storyObj.Status == story.Expired {
+		storyState = "Completed"
 	}
+	totalParticipants := len(backings) + len(challenges)
+	totalParticipantsPlural := "s"
+	if totalParticipants == 1 {
+		totalParticipantsPlural = ""
+	}
+	totalStake := backingTotalAmount.Plus(challengeTotalAmount).Amount.Div(sdk.NewInt(app.Shanev))
+
 	return &Tags{
-		Title:       fmt.Sprintf("%s made a claim in %s on TruStory", creatorObj.FullName, categoryObj.Title),
-		Description: html.EscapeString(storyObj.Body),
+		Title:       html.EscapeString(storyObj.Body),
+		Description: fmt.Sprintf("%s: %d participant%s and %s TruStake", storyState, totalParticipants, totalParticipantsPlural, totalStake),
 		Image:       defaultImage,
 		URL:         os.Getenv("APP_URL") + route,
 	}, nil
@@ -129,8 +141,8 @@ func makeArgumentMetaTags(ta *TruAPI, route string, storyID int64, argumentID in
 		return nil, err
 	}
 	return &Tags{
-		Title:       fmt.Sprintf("%s made an argument in %s on TruStory", creatorObj.FullName, categoryObj.Title),
-		Description: html.EscapeString(argumentObj.Body),
+		Title:       fmt.Sprintf("%s made an argument in %s", creatorObj.FullName, categoryObj.Title),
+		Description: html.EscapeString(stripmd.Strip(argumentObj.Body)),
 		Image:       defaultImage,
 		URL:         os.Getenv("APP_URL") + route,
 	}, nil
