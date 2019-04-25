@@ -395,6 +395,10 @@ func (ta *TruAPI) RegisterResolvers() {
 		"likes": func(ctx context.Context, q CredArgument) []argument.Like {
 			return ta.likesObjectResolver(ctx, app.QueryByIDParams{ID: q.ID})
 		},
+		// required to retrieve story state, because we only show endorse count once the story is expired
+		"story": func(ctx context.Context, q CredArgument) story.Story {
+			return ta.storyResolver(ctx, story.QueryStoryByIDParams{ID: q.StoryID})
+		},
 	})
 	ta.GraphQLClient.BuildSchema()
 }
