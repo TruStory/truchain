@@ -94,6 +94,8 @@ func TestLikeBackingMsg(t *testing.T) {
 
 	likeResult := &app.StakeNotificationResult{}
 	_ = json.Unmarshal(res.Data, likeResult)
+	stakeToCredRatio := bk.stakeKeeper.GetParams(ctx).StakeToCredRatio
+	expectedCred := sdk.NewCoin(amount.Denom, amount.Amount.Div(stakeToCredRatio))
 
 	expectedLikeResult := &app.StakeNotificationResult{
 		MsgResult: app.MsgResult{ID: int64(2)},
@@ -101,6 +103,7 @@ func TestLikeBackingMsg(t *testing.T) {
 		StoryID:   storyID,
 		From:      likeCreator,
 		To:        backingCreator,
+		Cred:      &expectedCred,
 	}
 
 	assert.Equal(t, expectedLikeResult, likeResult)

@@ -53,7 +53,7 @@ type WriteKeeper interface {
 		argumentID int64,
 		argument string,
 		creator sdk.AccAddress) (int64, sdk.Error)
-	LikeArgument(ctx sdk.Context, argumentID int64, creator sdk.AccAddress, amount sdk.Coin) (int64, sdk.Error)
+	LikeArgument(ctx sdk.Context, argumentID int64, creator sdk.AccAddress, amount sdk.Coin) (*stake.LikeResult, sdk.Error)
 }
 
 // Keeper data type storing keys to the key-value store
@@ -166,30 +166,32 @@ func (k Keeper) Create(
 }
 
 // LikeArgument likes and argument
-func (k Keeper) LikeArgument(ctx sdk.Context, argumentID int64, creator sdk.AccAddress, amount sdk.Coin) (int64, sdk.Error) {
-	err := k.argumentKeeper.RegisterLike(ctx, argumentID, creator)
+func (k Keeper) LikeArgument(ctx sdk.Context, argumentID int64, creator sdk.AccAddress, amount sdk.Coin) (*stake.LikeResult, sdk.Error) {
+	arg, err := k.argumentKeeper.Argument(ctx, argumentID)
+
 	if err != nil {
-		return 0, err
+		return nil, err
 	}
 
-	argument, err := k.argumentKeeper.Argument(ctx, argumentID)
+	err = k.argumentKeeper.RegisterLike(ctx, argumentID, creator)
 	if err != nil {
-		return 0, err
+		return nil, err
 	}
 
-	backing, err := k.Backing(ctx, argument.StakeID)
+	backing, err := k.Backing(ctx, arg.StakeID)
 	if err != nil {
-		return 0, err
+		return nil, err
 	}
 
 	story, err := k.storyKeeper.Story(ctx, backing.StoryID())
 	if err != nil {
-		return 0, err
+		return nil, err
 	}
 
+	// new backing based on the liked argument that doesn't create a new argument
 	backingID, err := k.Create(ctx, story.ID, amount, argumentID, "", creator)
 	if err != nil {
-		return 0, err
+		return nil, err
 	}
 
 	stakeToCredRatio := k.stakeKeeper.GetParams(ctx).StakeToCredRatio
@@ -201,13 +203,19 @@ func (k Keeper) LikeArgument(ctx sdk.Context, argumentID int64, creator sdk.AccA
 		story.CategoryID,
 		story.ID,
 		trubank.BackingLike,
-		argument.StakeID,
+		arg.StakeID,
 		likeCredAmount)
 	if err != nil {
-		return 0, err
+		return nil, err
 	}
 
-	return backingID, nil
+	return &stake.LikeResult{
+		StakeID:         backingID,
+		ArgumentID:      argumentID,
+		ArgumentCreator: backing.Creator(),
+		CredEarned:      sdk.NewCoin(amount.Denom, likeCredAmount),
+		StoryID:         story.ID,
+	}, nil
 }
 
 // Backing gets the backing at the current index from the KVStore

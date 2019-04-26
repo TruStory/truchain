@@ -39,7 +39,7 @@ func handleCreateChallengeMsg(
 		return err.Result()
 	}
 
-	return result(ctx, k, msg.StoryID, id, msg.Creator, story.Creator, msg.Amount)
+	return result(ctx, k, msg.StoryID, id, msg.Creator, story.Creator, msg.Amount, nil)
 }
 
 func handleLikeArgumentMsg(ctx sdk.Context, k Keeper, msg LikeChallengeArgumentMsg) sdk.Result {
@@ -47,27 +47,24 @@ func handleLikeArgumentMsg(ctx sdk.Context, k Keeper, msg LikeChallengeArgumentM
 		return err.Result()
 	}
 
-	challengeID, err := k.LikeArgument(ctx, msg.ArgumentID, msg.Creator, msg.Amount)
+	r, err := k.LikeArgument(ctx, msg.ArgumentID, msg.Creator, msg.Amount)
 	if err != nil {
 		return err.Result()
 	}
-
-	challenge, err := k.Challenge(ctx, challengeID)
-	if err != nil {
-		err.Result()
-	}
-	argument, err := k.argumentKeeper.Argument(ctx, msg.ArgumentID)
-	if err != nil {
-		return err.Result()
-	}
-	return result(ctx, k, challenge.StoryID(), challengeID, msg.Creator, argument.Creator, msg.Amount)
+	return result(ctx, k, r.StoryID, r.StakeID, msg.Creator, r.ArgumentCreator, msg.Amount, &r.CredEarned)
 }
 
-func result(ctx sdk.Context, k Keeper, storyID, challengeID int64, from, to sdk.AccAddress, amount sdk.Coin) sdk.Result {
+func result(ctx sdk.Context,
+	k Keeper,
+	storyID, challengeID int64,
+	from, to sdk.AccAddress,
+	amount sdk.Coin,
+	cred *sdk.Coin) sdk.Result {
 
 	resultData := app.StakeNotificationResult{
 		MsgResult: app.MsgResult{ID: challengeID},
 		Amount:    amount,
+		Cred:      cred,
 		StoryID:   storyID,
 		From:      from,
 		To:        to,

@@ -59,6 +59,7 @@ type StakeNotificationResult struct {
 	From    sdk.AccAddress `json:"from,omitempty"`
 	To      sdk.AccAddress `json:"to,omitempty"`
 	Amount  sdk.Coin       `json:"amount"`
+	Cred    *sdk.Coin      `json:"cred,omitempty"`
 }
 
 // CompletedStory defines a story result.

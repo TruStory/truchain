@@ -42,7 +42,7 @@ func handleBackStoryMsg(ctx sdk.Context, k Keeper, msg BackStoryMsg) sdk.Result 
 		return err.Result()
 	}
 
-	return result(ctx, k, msg.StoryID, id, msg.Creator, story.Creator, msg.Amount)
+	return result(ctx, k, msg.StoryID, id, msg.Creator, story.Creator, msg.Amount, nil)
 }
 
 func handleLikeArgumentMsg(ctx sdk.Context, k Keeper, msg LikeBackingArgumentMsg) sdk.Result {
@@ -50,26 +50,22 @@ func handleLikeArgumentMsg(ctx sdk.Context, k Keeper, msg LikeBackingArgumentMsg
 		return err.Result()
 	}
 
-	backingID, err := k.LikeArgument(ctx, msg.ArgumentID, msg.Creator, msg.Amount)
+	r, err := k.LikeArgument(ctx, msg.ArgumentID, msg.Creator, msg.Amount)
 	if err != nil {
 		return err.Result()
 	}
-
-	backing, err := k.Backing(ctx, backingID)
-	if err != nil {
-		err.Result()
-	}
-	argument, err := k.argumentKeeper.Argument(ctx, msg.ArgumentID)
-	if err != nil {
-		return err.Result()
-	}
-	return result(ctx, k, backing.StoryID(), backingID, msg.Creator, argument.Creator, msg.Amount)
+	return result(ctx, k, r.StoryID, r.StakeID, msg.Creator, r.ArgumentCreator, msg.Amount, &r.CredEarned)
 }
 
-func result(ctx sdk.Context, k Keeper, storyID, backingID int64, from, to sdk.AccAddress, amount sdk.Coin) sdk.Result {
+func result(ctx sdk.Context,
+	k Keeper, storyID, backingID int64,
+	from, to sdk.AccAddress,
+	amount sdk.Coin,
+	cred *sdk.Coin) sdk.Result {
 	resultData := app.StakeNotificationResult{
 		MsgResult: app.MsgResult{ID: backingID},
 		Amount:    amount,
+		Cred:      cred,
 		StoryID:   storyID,
 		From:      from,
 		To:        to,

@@ -55,7 +55,7 @@ type WriteKeeper interface {
 		argument string,
 		creator sdk.AccAddress) (int64, sdk.Error)
 	SetParams(ctx sdk.Context, params Params)
-	LikeArgument(ctx sdk.Context, argumentID int64, creator sdk.AccAddress, amount sdk.Coin) (int64, sdk.Error)
+	LikeArgument(ctx sdk.Context, argumentID int64, creator sdk.AccAddress, amount sdk.Coin) (*stake.LikeResult, sdk.Error)
 }
 
 // Keeper data type storing keys to the key-value store
@@ -245,30 +245,30 @@ func (k Keeper) ChallengeByStoryIDAndCreator(
 }
 
 // LikeArgument likes and argument
-func (k Keeper) LikeArgument(ctx sdk.Context, argumentID int64, creator sdk.AccAddress, amount sdk.Coin) (int64, sdk.Error) {
+func (k Keeper) LikeArgument(ctx sdk.Context, argumentID int64, creator sdk.AccAddress, amount sdk.Coin) (*stake.LikeResult, sdk.Error) {
 	err := k.argumentKeeper.RegisterLike(ctx, argumentID, creator)
 	if err != nil {
-		return 0, err
+		return nil, err
 	}
 
 	argument, err := k.argumentKeeper.Argument(ctx, argumentID)
 	if err != nil {
-		return 0, err
+		return nil, err
 	}
 
 	challenge, err := k.Challenge(ctx, argument.StakeID)
 	if err != nil {
-		return 0, err
+		return nil, err
 	}
 
 	story, err := k.storyKeeper.Story(ctx, challenge.StoryID())
 	if err != nil {
-		return 0, err
+		return nil, err
 	}
 
 	challengeID, err := k.Create(ctx, story.ID, amount, argumentID, "", creator)
 	if err != nil {
-		return 0, err
+		return nil, err
 	}
 
 	stakeToCredRatio := k.stakeKeeper.GetParams(ctx).StakeToCredRatio
@@ -283,10 +283,16 @@ func (k Keeper) LikeArgument(ctx sdk.Context, argumentID int64, creator sdk.AccA
 		argument.StakeID,
 		likeCredAmount)
 	if err != nil {
-		return 0, err
+		return nil, err
 	}
 
-	return challengeID, nil
+	return &stake.LikeResult{
+		StakeID:         challengeID,
+		ArgumentID:      argumentID,
+		ArgumentCreator: challenge.Creator(),
+		CredEarned:      sdk.NewCoin(amount.Denom, likeCredAmount),
+		StoryID:         story.ID,
+	}, nil
 }
 
 // TotalChallengeAmount returns the total of all backings
