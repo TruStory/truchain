@@ -208,12 +208,15 @@ func (k Keeper) LikeArgument(ctx sdk.Context, argumentID int64, creator sdk.AccA
 	if err != nil {
 		return nil, err
 	}
-
+	cat, err := k.categoryKeeper.GetCategory(ctx, story.CategoryID)
+	if err != nil {
+		return nil, err
+	}
 	return &stake.LikeResult{
 		StakeID:         backingID,
 		ArgumentID:      argumentID,
 		ArgumentCreator: backing.Creator(),
-		CredEarned:      sdk.NewCoin(amount.Denom, likeCredAmount),
+		CredEarned:      sdk.NewCoin(cat.Denom(), likeCredAmount),
 		StoryID:         story.ID,
 	}, nil
 }

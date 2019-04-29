@@ -127,6 +127,7 @@ func mockDB() (
 		truBankKeeper,
 		bankKeeper,
 		storyKeeper,
+		categoryKeeper,
 		pk.Subspace(challenge.StoreKey),
 		codec,
 	)

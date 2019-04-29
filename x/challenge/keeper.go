@@ -7,6 +7,7 @@ import (
 	"github.com/TruStory/truchain/x/stake"
 
 	"github.com/TruStory/truchain/x/backing"
+	cat "github.com/TruStory/truchain/x/category"
 
 	trubank "github.com/TruStory/truchain/x/trubank"
 	"github.com/cosmos/cosmos-sdk/x/bank"
@@ -68,6 +69,7 @@ type Keeper struct {
 	bankKeeper     bank.Keeper
 	trubankKeeper  trubank.Keeper
 	storyKeeper    story.WriteKeeper
+	categoryKeeper cat.ReadKeeper
 	paramStore     params.Subspace
 
 	challengeList app.UserList // challenge <-> story mappings
@@ -82,6 +84,7 @@ func NewKeeper(
 	trubankKeeper trubank.Keeper,
 	bankKeeper bank.Keeper,
 	storyKeeper story.WriteKeeper,
+	categoryKeeper cat.ReadKeeper,
 	paramStore params.Subspace,
 	codec *amino.Codec) Keeper {
 
@@ -93,6 +96,7 @@ func NewKeeper(
 		bankKeeper,
 		trubankKeeper,
 		storyKeeper,
+		categoryKeeper,
 		paramStore.WithTypeTable(ParamTypeTable()),
 		app.NewUserList(storyKeeper.GetStoreKey()),
 	}
@@ -286,11 +290,15 @@ func (k Keeper) LikeArgument(ctx sdk.Context, argumentID int64, creator sdk.AccA
 		return nil, err
 	}
 
+	cat, err := k.categoryKeeper.GetCategory(ctx, story.CategoryID)
+	if err != nil {
+		return nil, err
+	}
 	return &stake.LikeResult{
 		StakeID:         challengeID,
 		ArgumentID:      argumentID,
 		ArgumentCreator: challenge.Creator(),
-		CredEarned:      sdk.NewCoin(amount.Denom, likeCredAmount),
+		CredEarned:      sdk.NewCoin(cat.Denom(), likeCredAmount),
 		StoryID:         story.ID,
 	}, nil
 }
