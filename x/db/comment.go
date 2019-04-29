@@ -137,7 +137,7 @@ func (c *Client) CommentsParticipantsByArgumentID(argumentID int64) ([]string, e
 	return addresses, nil
 }
 
-//CommentByID returns the comment for specific pk.
+// CommentByID returns the comment for specific pk.
 func (c *Client) CommentByID(id int64) (*Comment, error) {
 	comment := new(Comment)
 	err := c.Model(comment).Where("id = ?", id).Select()
