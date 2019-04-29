@@ -23,6 +23,7 @@ type CommentNotificationRequest struct {
 	// ID is the comment id.
 	ID         int64     `json:"id"`
 	ArgumentID int64     `json:"argumentId"`
+	StoryID    int64     `json:"storyId"`
 	Creator    string    `json:"creator"`
 	Timestamp  time.Time `json:"timestamp"`
 }
