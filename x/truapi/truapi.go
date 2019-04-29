@@ -65,8 +65,8 @@ func NewTruAPI(aa *chttp.App) *TruAPI {
 	return &ta
 }
 
-// RunNotificaitonSender runs notification sender.
-func (ta *TruAPI) RunNotificaitonSender() error {
+// RunNotificationSender runs notification sender.
+func (ta *TruAPI) RunNotificationSender() error {
 	endpoint := os.Getenv("PUSHD_ENDPOINT_URL")
 	if endpoint == "" {
 		return fmt.Errorf("PUSHD_ENDPOINT_URL must be set")

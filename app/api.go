@@ -47,7 +47,7 @@ func (app *TruChain) startAPI() {
 		})
 	})
 
-	err := app.api.RunNotificaitonSender()
+	err := app.api.RunNotificationSender()
 	if err != nil {
 		fmt.Println("Notification sender could not be started: ", err)
 	}
