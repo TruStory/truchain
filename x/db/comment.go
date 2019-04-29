@@ -122,3 +122,27 @@ func (c *Client) replaceUsernamesWithAddress(body string) (string, error) {
 
 	return body, nil
 }
+
+// CommentsParticipantsByArgumentID gets the list of users participating on a argument thread.
+func (c *Client) CommentsParticipantsByArgumentID(argumentID int64) ([]string, error) {
+	comments := make([]Comment, 0)
+	addresses := make([]string, 0)
+	err := c.Model(&comments).ColumnExpr("DISTINCT creator").Where("argument_id = ?", argumentID).Select()
+	if err != nil {
+		return nil, err
+	}
+	for _, c := range comments {
+		addresses = append(addresses, c.Creator)
+	}
+	return addresses, nil
+}
+
+//CommentByID returns the comment for specific pk.
+func (c *Client) CommentByID(id int64) (*Comment, error) {
+	comment := new(Comment)
+	err := c.Model(comment).Where("id = ?", id).Select()
+	if err != nil {
+		return comment, err
+	}
+	return comment, nil
+}

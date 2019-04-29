@@ -44,17 +44,35 @@ type TruAPI struct {
 	*chttp.API
 	GraphQLClient *graphql.Client
 	DBClient      db.Datastore
+
+	// notifications
+	commentsNotificationsCh chan CommentNotificationRequest
+	httpClient              *http.Client
 }
 
 // NewTruAPI returns a `TruAPI` instance populated with the existing app and a new GraphQL client
 func NewTruAPI(aa *chttp.App) *TruAPI {
 	ta := TruAPI{
-		API:           chttp.NewAPI(aa, supported),
-		GraphQLClient: graphql.NewGraphQLClient(),
-		DBClient:      db.NewDBClient(),
+		API:                     chttp.NewAPI(aa, supported),
+		GraphQLClient:           graphql.NewGraphQLClient(),
+		DBClient:                db.NewDBClient(),
+		commentsNotificationsCh: make(chan CommentNotificationRequest),
+		httpClient: &http.Client{
+			Timeout: time.Second * 5,
+		},
 	}
 
 	return &ta
+}
+
+// RunNotificaitonSender runs notification sender.
+func (ta *TruAPI) RunNotificaitonSender() error {
+	endpoint := os.Getenv("PUSHD_ENDPOINT_URL")
+	if endpoint == "" {
+		return fmt.Errorf("PUSHD_ENDPOINT_URL must be set")
+	}
+	go ta.runCommentNotificationSender(ta.commentsNotificationsCh, endpoint)
+	return nil
 }
 
 // WrapHandler wraps a chttp.Handler and returns a standar http.Handler
@@ -368,7 +386,7 @@ func (ta *TruAPI) RegisterResolvers() {
 		},
 		"title": func(_ context.Context, q db.NotificationEvent) string {
 			if q.SenderProfile != nil {
-				return q.SenderProfile.FullName
+				return q.SenderProfile.Username
 			}
 			return "Story Update"
 		},

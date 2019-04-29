@@ -10,7 +10,7 @@ type NotificationType int
 // Types of notifications.
 const (
 	NotificationStoryAction NotificationType = iota
-	NotificationStoryUpdate
+	NotificationCommentAction
 )
 
 // NotificationEvent represents a notification sent to an user.

@@ -3,6 +3,7 @@ package truapi
 import (
 	"encoding/json"
 	"net/http"
+	"time"
 
 	"github.com/TruStory/truchain/x/chttp"
 	"github.com/TruStory/truchain/x/db"
@@ -48,6 +49,15 @@ func (ta *TruAPI) handleCreateComment(r *http.Request) chttp.Response {
 	if err != nil {
 		return chttp.SimpleErrorResponse(500, err)
 	}
-
-	return chttp.SimpleResponse(200, nil)
+	respBytes, err := json.Marshal(comment)
+	if err != nil {
+		return chttp.SimpleErrorResponse(500, err)
+	}
+	ta.commentsNotificationsCh <- CommentNotificationRequest{
+		ID:         comment.ID,
+		ArgumentID: comment.ArgumentID,
+		Creator:    comment.Creator,
+		Timestamp:  time.Now(),
+	}
+	return chttp.SimpleResponse(200, respBytes)
 }

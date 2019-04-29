@@ -78,17 +78,22 @@ func (k Keeper) processStoryQueue(ctx sdk.Context, completed []app.CompletedStor
 	for _, challenge := range challenges {
 		votes = append(votes, challenge)
 	}
-
+	storyToComplete := app.CompletedStory{
+		ID:      currentStory.ID,
+		Creator: currentStory.Creator,
+	}
 	if len(votes) > 0 {
-		err = k.stakeKeeper.RedistributeStake(ctx, votes)
+		stakeResults, err := k.stakeKeeper.RedistributeStake(ctx, votes)
 		if err != nil {
 			return completed, err
 		}
 
-		err = k.stakeKeeper.DistributeInterest(ctx, votes)
+		interestResults, err := k.stakeKeeper.DistributeInterest(ctx, votes)
 		if err != nil {
 			return completed, err
 		}
+		storyToComplete.StakeDistributionResults = stakeResults
+		storyToComplete.InterestDistributionResults = interestResults
 	}
 
 	currentStory.Status = story.Expired
@@ -103,13 +108,9 @@ func (k Keeper) processStoryQueue(ctx sdk.Context, completed []app.CompletedStor
 	if err != nil {
 		return completed, err
 	}
-	completed = append(completed,
-		app.CompletedStory{
-			ID:          currentStory.ID,
-			Creator:     currentStory.Creator,
-			Backers:     backers,
-			Challengers: challengers,
-		})
+	storyToComplete.Backers = backers
+	storyToComplete.Challengers = challengers
+	completed = append(completed, storyToComplete)
 
 	// handle next expired story
 	return k.processStoryQueue(ctx, completed)

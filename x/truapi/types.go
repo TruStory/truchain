@@ -1,6 +1,8 @@
 package truapi
 
 import (
+	"time"
+
 	app "github.com/TruStory/truchain/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
@@ -14,4 +16,13 @@ type CredArgument struct {
 	Timestamp app.Timestamp  `json:"timestamp"`
 	Vote      bool           `json:"vote"`
 	Amount    sdk.Coin       `json:"coin"`
+}
+
+// CommentNotificationRequest is the payload sent to pushd for sending notifications.
+type CommentNotificationRequest struct {
+	// ID is the comment id.
+	ID         int64     `json:"id"`
+	ArgumentID int64     `json:"argumentId"`
+	Creator    string    `json:"creator"`
+	Timestamp  time.Time `json:"timestamp"`
 }

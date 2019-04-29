@@ -43,16 +43,12 @@ func Test_handleExpiredStories(t *testing.T) {
 	assert.Nil(t, err)
 	assert.Len(t, completedStories, 1)
 
-	assert.Equal(t,
-		[]app.CompletedStory{
-			app.CompletedStory{
-				ID:          storyID,
-				Creator:     sdk.AccAddress([]byte{1, 2}),
-				Challengers: []sdk.AccAddress{challenger},
-				Backers:     []sdk.AccAddress{backer},
-			},
-		},
-		completedStories)
+	assert.Equal(t, completedStories[0].ID, storyID)
+	assert.Equal(t, completedStories[0].Creator, sdk.AccAddress([]byte{1, 2}))
+	assert.Equal(t, completedStories[0].Challengers, []sdk.AccAddress{challenger})
+	assert.Equal(t, completedStories[0].Backers, []sdk.AccAddress{backer})
+	assert.Equal(t, completedStories[0].StakeDistributionResults.TotalAmount, amount.Plus(amount))
+	assert.Equal(t, completedStories[0].StakeDistributionResults.Type, app.DistributionMajorityNotReached)
 
 	// check expiration for backer
 	coins := bankKeeper.GetCoins(ctx, backer)
