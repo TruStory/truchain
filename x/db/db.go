@@ -1,7 +1,9 @@
 package db
 
 import (
+	"fmt"
 	"os"
+	"strconv"
 
 	"github.com/go-pg/pg"
 )
@@ -19,6 +21,7 @@ func NewDBClient() *Client {
 		User:     os.Getenv("PG_USER"),
 		Password: os.Getenv("PG_USER_PW"),
 		Database: os.Getenv("PG_DB_NAME"),
+		PoolSize: getPoolSize(),
 	})
 
 	return &Client{db}
@@ -68,4 +71,23 @@ func (c *Client) Find(model interface{}) error {
 // FindAll selects all models
 func (c *Client) FindAll(models interface{}) error {
 	return c.Model(models).Select()
+}
+
+func getPoolSize() int {
+	size := os.Getenv("PG_POOL_SIZE")
+	defaultPoolSize := 25
+	if size != "" {
+		return defaultPoolSize
+	}
+	poolSize, err := strconv.Atoi(size)
+
+	if err != nil {
+		fmt.Printf("WARNING: invalid pool size [%s] \n", size)
+		return defaultPoolSize
+	}
+
+	if poolSize <= 0 {
+		return defaultPoolSize
+	}
+	return poolSize
 }
