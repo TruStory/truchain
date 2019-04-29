@@ -76,7 +76,7 @@ func (c *Client) FindAll(models interface{}) error {
 func getPoolSize() int {
 	size := os.Getenv("PG_POOL_SIZE")
 	defaultPoolSize := 25
-	if size != "" {
+	if size == "" {
 		return defaultPoolSize
 	}
 	poolSize, err := strconv.Atoi(size)
