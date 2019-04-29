@@ -45,8 +45,8 @@ func Test_handleExpiredStories(t *testing.T) {
 
 	assert.Equal(t, completedStories[0].ID, storyID)
 	assert.Equal(t, completedStories[0].Creator, sdk.AccAddress([]byte{1, 2}))
-	assert.Equal(t, completedStories[0].Challengers, []sdk.AccAddress{challenger})
-	assert.Equal(t, completedStories[0].Backers, []sdk.AccAddress{backer})
+	assert.Equal(t, completedStories[0].Challengers, []app.Staker{app.Staker{Address: challenger, Amount: amount}})
+	assert.Equal(t, completedStories[0].Backers, []app.Staker{app.Staker{Address: backer, Amount: amount}})
 	assert.Equal(t, completedStories[0].StakeDistributionResults.TotalAmount, amount.Plus(amount))
 	assert.Equal(t, completedStories[0].StakeDistributionResults.Type, app.DistributionMajorityNotReached)
 
