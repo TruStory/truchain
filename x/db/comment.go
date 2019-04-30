@@ -78,7 +78,7 @@ func (c *Client) mapAddressesToProfileURLs(body string, profileURLPrefix string)
 		if err != nil {
 			return profileURLsByAddress, err
 		}
-		markdownProfileURL := fmt.Sprintf("[@%s](%s)", twitterProfile.Username, profileURL)
+		markdownProfileURL := fmt.Sprintf("[@%s](http://%s)", twitterProfile.Username, profileURL)
 		profileURLsByAddress[address] = markdownProfileURL
 	}
 
