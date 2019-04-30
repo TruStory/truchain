@@ -121,7 +121,11 @@ func (c *Client) replaceUsernamesWithAddress(body string) (string, error) {
 		if err != nil {
 			return body, err
 		}
-		addressByUsername[username] = twitterProfile.Address
+		if twitterProfile == nil {
+			addressByUsername[username] = username
+		} else {
+			addressByUsername[username] = twitterProfile.Address
+		}
 	}
 	for username, address := range addressByUsername {
 		body = strings.ReplaceAll(body, username, address)

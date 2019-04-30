@@ -72,14 +72,17 @@ func (c *Client) TwitterProfileByAddress(addr string) (TwitterProfile, error) {
 
 // TwitterProfileByUsername implements `Datastore`
 // Finds a Twitter profile by the given username
-func (c *Client) TwitterProfileByUsername(username string) (TwitterProfile, error) {
+func (c *Client) TwitterProfileByUsername(username string) (*TwitterProfile, error) {
 	twitterProfile := new(TwitterProfile)
 	err := c.Model(twitterProfile).Where("username = ?", username).First()
+	if err == pg.ErrNoRows {
+		return nil, nil
+	}
 	if err != nil {
-		return *twitterProfile, err
+		return twitterProfile, err
 	}
 
-	return *twitterProfile, nil
+	return twitterProfile, nil
 }
 
 // UpsertTwitterProfile implements `Datastore`.
