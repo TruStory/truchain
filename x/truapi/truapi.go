@@ -46,8 +46,9 @@ type TruAPI struct {
 	DBClient      db.Datastore
 
 	// notifications
-	commentsNotificationsCh chan CommentNotificationRequest
-	httpClient              *http.Client
+	notificationsInitialized bool
+	commentsNotificationsCh  chan CommentNotificationRequest
+	httpClient               *http.Client
 }
 
 // NewTruAPI returns a `TruAPI` instance populated with the existing app and a new GraphQL client
@@ -71,6 +72,7 @@ func (ta *TruAPI) RunNotificationSender() error {
 	if endpoint == "" {
 		return fmt.Errorf("PUSHD_ENDPOINT_URL must be set")
 	}
+	ta.notificationsInitialized = true
 	go ta.runCommentNotificationSender(ta.commentsNotificationsCh, endpoint)
 	return nil
 }

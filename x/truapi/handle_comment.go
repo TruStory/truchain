@@ -53,11 +53,11 @@ func (ta *TruAPI) handleCreateComment(r *http.Request) chttp.Response {
 	if err != nil {
 		return chttp.SimpleErrorResponse(500, err)
 	}
-	ta.commentsNotificationsCh <- CommentNotificationRequest{
+	ta.sendCommentNotification(CommentNotificationRequest{
 		ID:         comment.ID,
 		ArgumentID: comment.ArgumentID,
 		Creator:    comment.Creator,
 		Timestamp:  time.Now(),
-	}
+	})
 	return chttp.SimpleResponse(200, respBytes)
 }
