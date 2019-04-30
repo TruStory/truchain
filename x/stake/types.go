@@ -42,3 +42,12 @@ type Vote struct {
 func (v Vote) String() string {
 	return fmt.Sprintf("Vote<%v %t>", v.Amount, v.Vote)
 }
+
+// LikeResult returned from the keeper.
+type LikeResult struct {
+	StakeID         int64          `json:"stake_id"`
+	ArgumentID      int64          `json:"argument_id"`
+	ArgumentCreator sdk.AccAddress `json:"argument_creator"`
+	CredEarned      sdk.Coin       `json:"cred_earned"`
+	StoryID         int64          `json:"story_id"`
+}

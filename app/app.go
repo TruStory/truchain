@@ -203,6 +203,7 @@ func NewTruChain(logger log.Logger, db dbm.DB, loadLatest bool, options ...func(
 		app.truBankKeeper,
 		app.bankKeeper,
 		app.storyKeeper,
+		app.categoryKeeper,
 		app.paramsKeeper.Subspace(challenge.StoreKey),
 		codec,
 	)

@@ -59,14 +59,23 @@ type StakeNotificationResult struct {
 	From    sdk.AccAddress `json:"from,omitempty"`
 	To      sdk.AccAddress `json:"to,omitempty"`
 	Amount  sdk.Coin       `json:"amount"`
+	Cred    *sdk.Coin      `json:"cred,omitempty"`
+}
+
+// Staker represents a backer or challenger with the amount staked.
+type Staker struct {
+	Address sdk.AccAddress
+	Amount  sdk.Coin
 }
 
 // CompletedStory defines a story result.
 type CompletedStory struct {
-	ID          int64            `json:"id"`
-	Creator     sdk.AccAddress   `json:"creator"`
-	Backers     []sdk.AccAddress `json:"backers"`
-	Challengers []sdk.AccAddress `json:"challengers"`
+	ID                          int64                       `json:"id"`
+	Creator                     sdk.AccAddress              `json:"creator"`
+	Backers                     []Staker                    `json:"backers"`
+	Challengers                 []Staker                    `json:"challengers"`
+	StakeDistributionResults    StakeDistributionResults    `json:"stake_destribution_results"`
+	InterestDistributionResults InterestDistributionResults `json:"interest_destribution_results"`
 }
 
 // CompletedStoriesNotificationResult defines the notification result of
@@ -99,4 +108,40 @@ func (t Timestamp) Update(blockHeader abci.Header) Timestamp {
 	t.UpdatedTime = blockHeader.Time
 
 	return t
+}
+
+// StakeReward represents the amount of stake earned by an user.
+type StakeReward struct {
+	Account sdk.AccAddress `json:"account"`
+	Amount  sdk.Coin       `json:"amount"`
+}
+
+// StakeDistributionResultsType indicates who wins the pool.
+type StakeDistributionResultsType int64
+
+// Distribution result constants
+const (
+	DistributionMajorityNotReached StakeDistributionResultsType = iota
+	DistributionBackersWin
+	DistributionChallengersWin
+)
+
+// StakeDistributionResults contains how the stake was distributed after a story completes.
+type StakeDistributionResults struct {
+	Type        StakeDistributionResultsType `json:"type"`
+	TotalAmount sdk.Coin                     `json:"total_amount"`
+	Rewards     []StakeReward                `json:"rewards"`
+}
+
+// Interest represents the amount of interest earned by an user in trustake
+type Interest struct {
+	Account sdk.AccAddress `json:"account"`
+	Amount  sdk.Coin       `json:"amount"`
+	Rate    sdk.Int        `json:"rate"`
+}
+
+// InterestDistributionResults contains how the interest was applied after a story completes.
+type InterestDistributionResults struct {
+	TotalAmount sdk.Coin   `json:"total_amount"`
+	Interests   []Interest `json:"interests"`
 }

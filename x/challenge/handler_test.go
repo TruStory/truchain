@@ -88,12 +88,16 @@ func TestLikeChallengeMsg(t *testing.T) {
 	likeResult := &app.StakeNotificationResult{}
 	_ = json.Unmarshal(res.Data, likeResult)
 
+	stakeToCredRatio := k.stakeKeeper.GetParams(ctx).StakeToCredRatio
+	expectedCred := sdk.NewCoin("crypto", amount.Amount.Div(stakeToCredRatio))
+
 	expectedLikeResult := &app.StakeNotificationResult{
 		MsgResult: app.MsgResult{ID: int64(2)},
 		Amount:    amount,
 		StoryID:   storyID,
 		From:      likeCreator,
 		To:        challengeCreator,
+		Cred:      &expectedCred,
 	}
 
 	assert.Equal(t, expectedLikeResult, likeResult)

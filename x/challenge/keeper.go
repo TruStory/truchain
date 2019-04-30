@@ -7,6 +7,7 @@ import (
 	"github.com/TruStory/truchain/x/stake"
 
 	"github.com/TruStory/truchain/x/backing"
+	cat "github.com/TruStory/truchain/x/category"
 
 	trubank "github.com/TruStory/truchain/x/trubank"
 	"github.com/cosmos/cosmos-sdk/x/bank"
@@ -55,7 +56,7 @@ type WriteKeeper interface {
 		argument string,
 		creator sdk.AccAddress) (int64, sdk.Error)
 	SetParams(ctx sdk.Context, params Params)
-	LikeArgument(ctx sdk.Context, argumentID int64, creator sdk.AccAddress, amount sdk.Coin) (int64, sdk.Error)
+	LikeArgument(ctx sdk.Context, argumentID int64, creator sdk.AccAddress, amount sdk.Coin) (*stake.LikeResult, sdk.Error)
 }
 
 // Keeper data type storing keys to the key-value store
@@ -68,6 +69,7 @@ type Keeper struct {
 	bankKeeper     bank.Keeper
 	trubankKeeper  trubank.Keeper
 	storyKeeper    story.WriteKeeper
+	categoryKeeper cat.ReadKeeper
 	paramStore     params.Subspace
 
 	challengeList app.UserList // challenge <-> story mappings
@@ -82,6 +84,7 @@ func NewKeeper(
 	trubankKeeper trubank.Keeper,
 	bankKeeper bank.Keeper,
 	storyKeeper story.WriteKeeper,
+	categoryKeeper cat.ReadKeeper,
 	paramStore params.Subspace,
 	codec *amino.Codec) Keeper {
 
@@ -93,6 +96,7 @@ func NewKeeper(
 		bankKeeper,
 		trubankKeeper,
 		storyKeeper,
+		categoryKeeper,
 		paramStore.WithTypeTable(ParamTypeTable()),
 		app.NewUserList(storyKeeper.GetStoreKey()),
 	}
@@ -245,30 +249,30 @@ func (k Keeper) ChallengeByStoryIDAndCreator(
 }
 
 // LikeArgument likes and argument
-func (k Keeper) LikeArgument(ctx sdk.Context, argumentID int64, creator sdk.AccAddress, amount sdk.Coin) (int64, sdk.Error) {
+func (k Keeper) LikeArgument(ctx sdk.Context, argumentID int64, creator sdk.AccAddress, amount sdk.Coin) (*stake.LikeResult, sdk.Error) {
 	err := k.argumentKeeper.RegisterLike(ctx, argumentID, creator)
 	if err != nil {
-		return 0, err
+		return nil, err
 	}
 
 	argument, err := k.argumentKeeper.Argument(ctx, argumentID)
 	if err != nil {
-		return 0, err
+		return nil, err
 	}
 
 	challenge, err := k.Challenge(ctx, argument.StakeID)
 	if err != nil {
-		return 0, err
+		return nil, err
 	}
 
 	story, err := k.storyKeeper.Story(ctx, challenge.StoryID())
 	if err != nil {
-		return 0, err
+		return nil, err
 	}
 
 	challengeID, err := k.Create(ctx, story.ID, amount, argumentID, "", creator)
 	if err != nil {
-		return 0, err
+		return nil, err
 	}
 
 	stakeToCredRatio := k.stakeKeeper.GetParams(ctx).StakeToCredRatio
@@ -283,10 +287,20 @@ func (k Keeper) LikeArgument(ctx sdk.Context, argumentID int64, creator sdk.AccA
 		argument.StakeID,
 		likeCredAmount)
 	if err != nil {
-		return 0, err
+		return nil, err
 	}
 
-	return challengeID, nil
+	cat, err := k.categoryKeeper.GetCategory(ctx, story.CategoryID)
+	if err != nil {
+		return nil, err
+	}
+	return &stake.LikeResult{
+		StakeID:         challengeID,
+		ArgumentID:      argumentID,
+		ArgumentCreator: challenge.Creator(),
+		CredEarned:      sdk.NewCoin(cat.Denom(), likeCredAmount),
+		StoryID:         story.ID,
+	}, nil
 }
 
 // TotalChallengeAmount returns the total of all backings

@@ -76,7 +76,7 @@ func TestRedistributeStakeTrueWins(t *testing.T) {
 
 	votes := []Voter{backingVote, backingVote, backingVote, challengeVote}
 
-	err := k.RedistributeStake(ctx, votes)
+	_, err := k.RedistributeStake(ctx, votes)
 	assert.NoError(t, err)
 
 	// check stake amounts
@@ -127,7 +127,7 @@ func TestRedistributeStakeFalseWins(t *testing.T) {
 
 	votes := []Voter{backingVote, challengeVote, challengeVote, challengeVote}
 
-	err := k.RedistributeStake(ctx, votes)
+	_, err := k.RedistributeStake(ctx, votes)
 	assert.NoError(t, err)
 
 	transactions, err := k.truBankKeeper.TransactionsByCreator(ctx, creator1)
@@ -176,7 +176,7 @@ func TestRedistributeStakeNoMajority(t *testing.T) {
 
 	votes := []Voter{backingVote, challengeVote}
 
-	err := k.RedistributeStake(ctx, votes)
+	_, err := k.RedistributeStake(ctx, votes)
 	assert.NoError(t, err)
 
 	transactions, err := k.truBankKeeper.TransactionsByCreator(ctx, creator1)
@@ -222,7 +222,7 @@ func TestDistributeInterest(t *testing.T) {
 
 	votes := []Voter{backingVote, backingVote, backingVote, challengeVote}
 
-	err := k.DistributeInterest(ctx, votes)
+	_, err := k.DistributeInterest(ctx, votes)
 	assert.NoError(t, err)
 
 	transactions, err := k.truBankKeeper.TransactionsByCreator(ctx, creator1)

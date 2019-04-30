@@ -62,12 +62,18 @@ func (k Keeper) processStoryQueue(ctx sdk.Context, completed []app.CompletedStor
 	storyQueue.Pop()
 
 	var votes []stake.Voter
+	backers := make([]app.Staker, 0)
+	challengers := make([]app.Staker, 0)
 
 	backings, err := k.backingKeeper.BackingsByStoryID(ctx, storyID)
 	if err != nil {
 		return completed, err
 	}
 	for _, backing := range backings {
+		backers = append(backers, app.Staker{
+			Address: backing.Creator(),
+			Amount:  backing.Amount(),
+		})
 		votes = append(votes, backing)
 	}
 
@@ -76,40 +82,36 @@ func (k Keeper) processStoryQueue(ctx sdk.Context, completed []app.CompletedStor
 		return nil, err
 	}
 	for _, challenge := range challenges {
+		challengers = append(challengers, app.Staker{
+			Address: challenge.Creator(),
+			Amount:  challenge.Amount(),
+		})
 		votes = append(votes, challenge)
 	}
-
+	storyToComplete := app.CompletedStory{
+		ID:      currentStory.ID,
+		Creator: currentStory.Creator,
+	}
 	if len(votes) > 0 {
-		err = k.stakeKeeper.RedistributeStake(ctx, votes)
+		stakeResults, err := k.stakeKeeper.RedistributeStake(ctx, votes)
 		if err != nil {
 			return completed, err
 		}
 
-		err = k.stakeKeeper.DistributeInterest(ctx, votes)
+		interestResults, err := k.stakeKeeper.DistributeInterest(ctx, votes)
 		if err != nil {
 			return completed, err
 		}
+		storyToComplete.StakeDistributionResults = stakeResults
+		storyToComplete.InterestDistributionResults = interestResults
 	}
 
 	currentStory.Status = story.Expired
 	k.storyKeeper.UpdateStory(ctx, currentStory)
 
-	backers, err := k.backingKeeper.BackersByStoryID(ctx, currentStory.ID)
-	if err != nil {
-		return completed, err
-	}
-
-	challengers, err := k.challengeKeeper.ChallengersByStoryID(ctx, currentStory.ID)
-	if err != nil {
-		return completed, err
-	}
-	completed = append(completed,
-		app.CompletedStory{
-			ID:          currentStory.ID,
-			Creator:     currentStory.Creator,
-			Backers:     backers,
-			Challengers: challengers,
-		})
+	storyToComplete.Backers = backers
+	storyToComplete.Challengers = challengers
+	completed = append(completed, storyToComplete)
 
 	// handle next expired story
 	return k.processStoryQueue(ctx, completed)
