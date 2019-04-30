@@ -12,7 +12,8 @@ import (
 
 // ChainConfig represents chain env vars
 type ChainConfig struct {
-	Host string
+	Host               string `required:"true"`
+	LetsEncryptEnabled bool   `split_words:"true"`
 }
 
 // Comment represents a comment in the DB
@@ -27,15 +28,21 @@ type Comment struct {
 
 // CommentsByArgumentID finds comments by argument id
 func (c *Client) CommentsByArgumentID(argumentID int64) ([]Comment, error) {
+	var chainConfig ChainConfig
+	err := envconfig.Process("chain", &chainConfig)
+	if err != nil {
+		return nil, err
+	}
+
 	comments := make([]Comment, 0)
-	err := c.Model(&comments).Where("argument_id = ?", argumentID).Select()
+	err = c.Model(&comments).Where("argument_id = ?", argumentID).Select()
 	if err != nil {
 		return nil, err
 	}
 	transformedComments := make([]Comment, 0)
 	for _, comment := range comments {
 		transformedComment := comment
-		transformedBody, err := c.replaceAddressesWithProfileURLs(comment.Body)
+		transformedBody, err := c.replaceAddressesWithProfileURLs(chainConfig, comment.Body)
 		if err != nil {
 			return transformedComments, err
 		}
@@ -47,14 +54,9 @@ func (c *Client) CommentsByArgumentID(argumentID int64) ([]Comment, error) {
 }
 
 // replace @cosmosaddr with profile link [@username](https://app.trustory.io/profile/cosmosaddr)
-func (c *Client) replaceAddressesWithProfileURLs(body string) (string, error) {
-	var chainConfig ChainConfig
-	err := envconfig.Process("chain", &chainConfig)
-	if err != nil {
-		return "", err
-	}
-	profileURLPrefix := path.Join(chainConfig.Host, "profile")
-	profileURLsByAddress, err := c.mapAddressesToProfileURLs(body, profileURLPrefix)
+func (c *Client) replaceAddressesWithProfileURLs(config ChainConfig, body string) (string, error) {
+	profileURLPrefix := path.Join(config.Host, "profile")
+	profileURLsByAddress, err := c.mapAddressesToProfileURLs(config, body, profileURLPrefix)
 	if err != nil {
 		return "", err
 	}
@@ -65,7 +67,7 @@ func (c *Client) replaceAddressesWithProfileURLs(body string) (string, error) {
 	return body, nil
 }
 
-func (c *Client) mapAddressesToProfileURLs(body string, profileURLPrefix string) (map[string]string, error) {
+func (c *Client) mapAddressesToProfileURLs(config ChainConfig, body string, profileURLPrefix string) (map[string]string, error) {
 	profileURLsByAddress := map[string]string{}
 	addresses := parseMentions(body)
 	for _, address := range addresses {
@@ -78,7 +80,12 @@ func (c *Client) mapAddressesToProfileURLs(body string, profileURLPrefix string)
 		if err != nil {
 			return profileURLsByAddress, err
 		}
-		markdownProfileURL := fmt.Sprintf("[@%s](http://%s)", twitterProfile.Username, profileURL)
+
+		httpPrefix := "http://"
+		if config.LetsEncryptEnabled == true {
+			httpPrefix = "https://"
+		}
+		markdownProfileURL := fmt.Sprintf("[@%s](%s%s)", twitterProfile.Username, httpPrefix, profileURL)
 		profileURLsByAddress[address] = markdownProfileURL
 	}
 
