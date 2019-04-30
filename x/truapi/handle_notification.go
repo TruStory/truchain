@@ -72,7 +72,10 @@ func markAllAsRead(ta *TruAPI, r *http.Request) chttp.Response {
 		return chttp.SimpleErrorResponse(401, Err401NotAuthenticated)
 	}
 
-	ta.DBClient.MarkAllNotificationEventsAsReadByAddress(user.Address)
+	err = ta.DBClient.MarkAllNotificationEventsAsReadByAddress(user.Address)
+	if err != nil {
+		return chttp.SimpleErrorResponse(500, Err500InternalServerError)
+	}
 
 	return chttp.SimpleResponse(200, nil)
 }
