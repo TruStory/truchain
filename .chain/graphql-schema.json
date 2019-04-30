@@ -1512,13 +1512,9 @@
             "isDeprecated": false,
             "name": "commentId",
             "type": {
-              "kind": "NON_NULL",
-              "name": "",
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "int64",
-                "ofType": null
-              }
+              "kind": "SCALAR",
+              "name": "int64",
+              "ofType": null
             }
           },
           {
@@ -1528,13 +1524,9 @@
             "isDeprecated": false,
             "name": "storyId",
             "type": {
-              "kind": "NON_NULL",
-              "name": "",
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "int64",
-                "ofType": null
-              }
+              "kind": "SCALAR",
+              "name": "int64",
+              "ofType": null
             }
           }
         ],

@@ -378,10 +378,7 @@ func (ta *TruAPI) RegisterResolvers() {
 	})
 
 	ta.GraphQLClient.RegisterQueryResolver("notifications", ta.notificationsResolver)
-	ta.GraphQLClient.RegisterObjectResolver("NotificationMeta", db.NotificationMeta{}, map[string]interface{}{
-		"storyId":   func(_ context.Context, q db.NotificationMeta) int64 { return q.StoryID },
-		"commentId": func(_ context.Context, q db.NotificationMeta) int64 { return q.CommentID },
-	})
+	ta.GraphQLClient.RegisterObjectResolver("NotificationMeta", db.NotificationMeta{}, map[string]interface{}{})
 	ta.GraphQLClient.RegisterObjectResolver("NotificationEvent", db.NotificationEvent{}, map[string]interface{}{
 		"id": func(_ context.Context, q db.NotificationEvent) int64 { return q.ID },
 		"userId": func(_ context.Context, q db.NotificationEvent) int64 {
