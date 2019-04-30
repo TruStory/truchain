@@ -2538,6 +2538,18 @@
             }
           },
           {
+            "args": [],
+            "deprecationReason": "",
+            "description": "",
+            "isDeprecated": false,
+            "name": "unreadNotificationsCount",
+            "type": {
+              "kind": "OBJECT",
+              "name": "UnreadNotificationEventsCount",
+              "ofType": null
+            }
+          },
+          {
             "args": [
               {
                 "defaultValue": null,
@@ -3523,6 +3535,33 @@
         "interfaces": [],
         "kind": "OBJECT",
         "name": "TwitterProfile",
+        "possibleTypes": []
+      },
+      {
+        "description": "",
+        "enumValues": [],
+        "fields": [
+          {
+            "args": [],
+            "deprecationReason": "",
+            "description": "",
+            "isDeprecated": false,
+            "name": "count",
+            "type": {
+              "kind": "NON_NULL",
+              "name": "",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "int64",
+                "ofType": null
+              }
+            }
+          }
+        ],
+        "inputFields": [],
+        "interfaces": [],
+        "kind": "OBJECT",
+        "name": "UnreadNotificationEventsCount",
         "possibleTypes": []
       },
       {

@@ -7,6 +7,11 @@ import (
 // NotificationType represents a type of notification defiend by the system.
 type NotificationType int
 
+// NotificationsCountResponse is the interface to respond graphQL query
+type NotificationsCountResponse struct {
+	Count int64 `json:"count"`
+}
+
 // Types of notifications.
 const (
 	NotificationStoryAction NotificationType = iota
@@ -49,4 +54,38 @@ func (c *Client) NotificationEventsByAddress(addr string) ([]NotificationEvent, 
 		return nil, err
 	}
 	return evts, nil
+}
+
+// UnreadNotificationEventsCountByAddress retrieves the number of unread notifications sent to an user.
+func (c *Client) UnreadNotificationEventsCountByAddress(addr string) (*NotificationsCountResponse, error) {
+	notificationEvent := new(NotificationEvent)
+
+	count, err := c.Model(notificationEvent).
+		Where("notification_event.address = ?", addr).
+		Where("read = ?", false).Count()
+	if err != nil {
+		return &NotificationsCountResponse{
+			Count: 0,
+		}, err
+	}
+
+	return &NotificationsCountResponse{
+		Count: int64(count),
+	}, nil
+}
+
+// MarkAllNotificationEventsAsReadByAddress retrieves the number of unread notifications sent to an user.
+func (c *Client) MarkAllNotificationEventsAsReadByAddress(addr string) error {
+	notificationEvent := new(NotificationEvent)
+
+	_, err := c.Model(notificationEvent).
+		Where("notification_event.address = ?", addr).
+		Where("read = ?", false).
+		Set("read = ?", true).
+		Update()
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

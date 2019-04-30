@@ -21,6 +21,7 @@ type Mutations interface {
 	UpsertDeviceToken(token *DeviceToken) error
 	RemoveDeviceToken(address, token, platform string) error
 	UpsertFlaggedStory(flaggedStory *FlaggedStory) error
+	MarkAllNotificationEventsAsReadByAddress(addr string) error
 	AddComment(comment *Comment) error
 }
 
@@ -34,6 +35,7 @@ type Queries interface {
 	KeyPairByTwitterProfileID(id int64) (KeyPair, error)
 	DeviceTokensByAddress(addr string) ([]DeviceToken, error)
 	NotificationEventsByAddress(addr string) ([]NotificationEvent, error)
+	UnreadNotificationEventsCountByAddress(addr string) (*NotificationsCountResponse, error)
 	FlaggedStoriesByStoryID(storyID int64) ([]FlaggedStory, error)
 	CommentsByArgumentID(argumentID int64) ([]Comment, error)
 }

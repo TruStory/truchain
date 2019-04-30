@@ -8,6 +8,7 @@ import (
 
 	"github.com/TruStory/truchain/x/chttp"
 	"github.com/TruStory/truchain/x/db"
+	"github.com/TruStory/truchain/x/truapi/cookies"
 )
 
 // UpdateNotificationEventRequest represents the JSON request
@@ -42,6 +43,11 @@ func (ta *TruAPI) handleUpdateNotificationEvent(r *http.Request) chttp.Response 
 		return chttp.SimpleErrorResponse(400, Err400MissingParameter)
 	}
 
+	// if request was made to mark all notification as read
+	if request.NotificationID == -1 && *request.Read == true {
+		return markAllAsRead(ta, r)
+	}
+
 	notificationEvent := &db.NotificationEvent{ID: request.NotificationID}
 	err = ta.DBClient.Find(notificationEvent)
 	if err == pg.ErrNoRows {
@@ -56,6 +62,17 @@ func (ta *TruAPI) handleUpdateNotificationEvent(r *http.Request) chttp.Response 
 	if err != nil {
 		return chttp.SimpleErrorResponse(500, err)
 	}
+
+	return chttp.SimpleResponse(200, nil)
+}
+
+func markAllAsRead(ta *TruAPI, r *http.Request) chttp.Response {
+	user, err := cookies.GetAuthenticatedUser(r)
+	if err != nil {
+		return chttp.SimpleErrorResponse(401, Err401NotAuthenticated)
+	}
+
+	ta.DBClient.MarkAllNotificationEventsAsReadByAddress(user.Address)
 
 	return chttp.SimpleResponse(200, nil)
 }
