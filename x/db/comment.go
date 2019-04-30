@@ -75,6 +75,10 @@ func (c *Client) mapAddressesToProfileURLs(config ChainConfig, body string, prof
 		if err != nil {
 			return profileURLsByAddress, err
 		}
+		if twitterProfile == nil {
+			profileURLsByAddress[address] = address
+			continue
+		}
 		profileURLString := path.Join(profileURLPrefix, twitterProfile.Address)
 		profileURL, err := url.Parse(profileURLString)
 		if err != nil {

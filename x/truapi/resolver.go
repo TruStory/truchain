@@ -333,13 +333,16 @@ func (ta *TruAPI) twitterProfileResolver(
 
 	addr := q.Address
 	twitterProfile, err := ta.DBClient.TwitterProfileByAddress(addr)
+	if twitterProfile == nil {
+		return db.TwitterProfile{}
+	}
 	if err != nil {
 		// TODO [shanev]: Add back after adding error handling to resolvers
 		// fmt.Println("Resolver err: ", err)
 		return db.TwitterProfile{}
 	}
 
-	return twitterProfile
+	return *twitterProfile
 }
 
 func (ta *TruAPI) usersResolver(ctx context.Context, q users.QueryUsersByAddressesParams) []users.User {
