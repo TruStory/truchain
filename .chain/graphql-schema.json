@@ -1301,9 +1301,13 @@
             "isDeprecated": false,
             "name": "meta",
             "type": {
-              "kind": "OBJECT",
-              "name": "NotificationMeta",
-              "ofType": null
+              "kind": "NON_NULL",
+              "name": "",
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "NotificationMeta",
+                "ofType": null
+              }
             }
           },
           {
@@ -1506,11 +1510,15 @@
             "deprecationReason": "",
             "description": "",
             "isDeprecated": false,
-            "name": "commentID",
+            "name": "commentId",
             "type": {
-              "kind": "SCALAR",
-              "name": "int64",
-              "ofType": null
+              "kind": "NON_NULL",
+              "name": "",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "int64",
+                "ofType": null
+              }
             }
           },
           {
@@ -1518,11 +1526,15 @@
             "deprecationReason": "",
             "description": "",
             "isDeprecated": false,
-            "name": "storyID",
+            "name": "storyId",
             "type": {
-              "kind": "SCALAR",
-              "name": "int64",
-              "ofType": null
+              "kind": "NON_NULL",
+              "name": "",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "int64",
+                "ofType": null
+              }
             }
           }
         ],
