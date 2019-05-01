@@ -62,7 +62,7 @@ func (c *Client) UnreadNotificationEventsCountByAddress(addr string) (*Notificat
 
 	count, err := c.Model(notificationEvent).
 		Where("notification_event.address = ?", addr).
-		Where("read = ?", false).Count()
+		Where("read is NULL or read is FALSE").Count()
 	if err != nil {
 		return &NotificationsCountResponse{
 			Count: 0,
@@ -80,7 +80,7 @@ func (c *Client) MarkAllNotificationEventsAsReadByAddress(addr string) error {
 
 	_, err := c.Model(notificationEvent).
 		Where("notification_event.address = ?", addr).
-		Where("read = ?", false).
+		Where("read is NULL or read is FALSE").
 		Set("read = ?", true).
 		Update()
 	if err != nil {
