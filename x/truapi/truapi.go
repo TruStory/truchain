@@ -411,6 +411,11 @@ func (ta *TruAPI) RegisterResolvers() {
 		},
 	})
 
+	ta.GraphQLClient.RegisterQueryResolver("unreadNotificationsCount", ta.unreadNotificationsCountResolver)
+	ta.GraphQLClient.RegisterObjectResolver("UnreadNotificationEventsCount", db.NotificationsCountResponse{}, map[string]interface{}{
+		"count": func(_ context.Context, q db.NotificationsCountResponse) int64 { return q.Count },
+	})
+
 	ta.GraphQLClient.RegisterQueryResolver("credArguments", ta.credArguments)
 	ta.GraphQLClient.RegisterObjectResolver("CredArgument", CredArgument{}, map[string]interface{}{
 		"creator": func(ctx context.Context, q CredArgument) users.User {
