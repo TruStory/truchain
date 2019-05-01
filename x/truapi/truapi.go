@@ -378,6 +378,7 @@ func (ta *TruAPI) RegisterResolvers() {
 	})
 
 	ta.GraphQLClient.RegisterQueryResolver("notifications", ta.notificationsResolver)
+	ta.GraphQLClient.RegisterObjectResolver("NotificationMeta", db.NotificationMeta{}, map[string]interface{}{})
 	ta.GraphQLClient.RegisterObjectResolver("NotificationEvent", db.NotificationEvent{}, map[string]interface{}{
 		"id": func(_ context.Context, q db.NotificationEvent) int64 { return q.ID },
 		"userId": func(_ context.Context, q db.NotificationEvent) int64 {
@@ -404,6 +405,9 @@ func (ta *TruAPI) RegisterResolvers() {
 				return q.SenderProfile.AvatarURI
 			}
 			return q.TwitterProfile.AvatarURI
+		},
+		"meta": func(_ context.Context, q db.NotificationEvent) db.NotificationMeta {
+			return q.Meta
 		},
 	})
 

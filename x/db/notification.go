@@ -13,6 +13,13 @@ const (
 	NotificationCommentAction
 )
 
+// NotificationMeta  contains extra payload information.
+type NotificationMeta struct {
+	ArgumentID *int64 `json:"argumentId,omitempty" graphql:"argumentId"`
+	StoryID    *int64 `json:"storyId,omitempty" graphql:"storyId"`
+	CommentID  *int64 `json:"commentId,omitempty" graphql:"commentId"`
+}
+
 // NotificationEvent represents a notification sent to an user.
 type NotificationEvent struct {
 	Timestamps
@@ -26,6 +33,7 @@ type NotificationEvent struct {
 	SenderProfileID  int64            `json:"sender_profile_id" `
 	SenderProfile    *TwitterProfile  `json:"sender_profile"`
 	Type             NotificationType `json:"type" sql:",notnull"`
+	Meta             NotificationMeta `json:"meta"`
 	Read             bool             `json:"read"`
 }
 
