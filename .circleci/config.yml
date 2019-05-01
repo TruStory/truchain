@@ -8,7 +8,6 @@ defaults: &defaults
     GOBIN: /tmp/workspace/bin
 
 jobs:
-
   setup_dependencies:
     <<: *defaults
     steps:
@@ -28,7 +27,6 @@ jobs:
           paths:
             - bin
             - profiles
-
   check:
     <<: *defaults
     parallelism: 1
@@ -52,7 +50,6 @@ jobs:
           command: |
             export PATH="$GOBIN:$PATH"
             make check
-
   test_unit:
     <<: *defaults
     parallelism: 2
@@ -75,6 +72,48 @@ jobs:
           command: |
             export PATH="$GOBIN:$PATH"
             bash <(curl -s https://codecov.io/bash)
+  data_dump:
+    <<: *defaults
+    working_directory: /tmp/truchaind
+    steps:
+      - add_ssh_keys:
+          fingerprints:
+            - "7a:fe:42:64:1d:e4:c0:1a:cc:aa:8c:5e:5e:e8:f8:03"
+      - attach_workspace:
+          at: /tmp/truchaind/backups
+      - run:
+          name: Dump chain data
+          command: |
+            mkdir -p ~/.ssh
+            ssh-keyscan $VENICE4_HOST >> ~/.ssh/known_hosts
+            ssh $VENICE4_USER@$VENICE4_HOST "sudo systemctl stop truchaind.service"
+            ssh $VENICE4_USER@$VENICE4_HOST "tar -zcvf .truchaind.tar.gz .truchaind"
+            ssh $VENICE4_USER@$VENICE4_HOST "sudo systemctl start truchaind.service"
+            mkdir -p backups
+            scp "$VENICE4_USER@$VENICE4_HOST:/home/ubuntu/.truchaind.tar.gz" "/tmp/truchaind/backups/.truchaind.tar.gz"
+            echo "Backed up chain data"
+      - persist_to_workspace:
+          root: backups
+          paths:
+          - .truchaind.tar.gz
+  s3_upload:
+    docker:
+      - image: circleci/python:2.7-jessie    
+    working_directory: /tmp/truchaind
+    steps:
+      - attach_workspace:
+          at: /tmp/truchaind/backups
+      - run:
+          name: List backups
+          command: |
+            pwd
+            ls -l ./backups/
+      - run:
+          name: Install awscli
+          command: sudo pip install awscli
+      - run:
+          name: Upload to S3
+          command: aws s3 cp ./backups/.truchaind.tar.gz s3://io-trustory-backups/chain/$(date +%y%m%d%H).truchaind.tar.gz
 
 workflows:
   version: 2
@@ -88,3 +127,30 @@ workflows:
           context: truchain-context
           requires:
             - setup_dependencies
+  deploy-flow:
+    jobs:
+      - data_dump:
+          filters:
+            branches:
+              only:
+                - master
+      - s3_upload:
+          requires:
+            - data_dump
+          filters:
+            branches:
+              only:
+                - master
+  nightly-backup:
+    triggers:
+      - schedule:
+          cron: "0 0 * * *"
+          filters:
+            branches:
+              only:
+                - master
+    jobs:
+      - data_dump
+      - s3_upload:
+          requires:
+            - data_dump
