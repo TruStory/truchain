@@ -113,7 +113,7 @@ jobs:
           command: sudo pip install awscli
       - run:
           name: Upload to S3
-          command: aws s3 cp ./backups/.truchaind.tar.gz s3://io-trustory-backups/chain/$(date +%y%m%d).truchaind.tar.gz
+          command: aws s3 cp ./backups/.truchaind.tar.gz s3://io-trustory-backups/chain/$(date +%y%m%d%H).truchaind.tar.gz
 
 workflows:
   version: 2
