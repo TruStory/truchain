@@ -28,8 +28,8 @@ type Mutations interface {
 type Queries interface {
 	GenericQueries
 	TwitterProfileByID(id int64) (TwitterProfile, error)
-	TwitterProfileByAddress(addr string) (TwitterProfile, error)
-	TwitterProfileByUsername(username string) (TwitterProfile, error)
+	TwitterProfileByAddress(addr string) (*TwitterProfile, error)
+	TwitterProfileByUsername(username string) (*TwitterProfile, error)
 	UsernamesByPrefix(prefix string) ([]string, error)
 	KeyPairByTwitterProfileID(id int64) (KeyPair, error)
 	DeviceTokensByAddress(addr string) ([]DeviceToken, error)
