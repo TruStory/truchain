@@ -2538,18 +2538,6 @@
             }
           },
           {
-            "args": [],
-            "deprecationReason": "",
-            "description": "",
-            "isDeprecated": false,
-            "name": "unreadNotificationsCount",
-            "type": {
-              "kind": "OBJECT",
-              "name": "UnreadNotificationEventsCount",
-              "ofType": null
-            }
-          },
-          {
             "args": [
               {
                 "defaultValue": null,
@@ -2578,6 +2566,18 @@
                 "name": "Story",
                 "ofType": null
               }
+            }
+          },
+          {
+            "args": [],
+            "deprecationReason": "",
+            "description": "",
+            "isDeprecated": false,
+            "name": "unreadNotificationsCount",
+            "type": {
+              "kind": "OBJECT",
+              "name": "UnreadNotificationEventsCount",
+              "ofType": null
             }
           },
           {

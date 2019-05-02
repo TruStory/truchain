@@ -115,6 +115,7 @@ func (ta *TruAPI) RegisterRoutes() {
 	api.HandleFunc("/upload", ta.HandleUpload)
 	api.Handle("/flagStory", WithUser(WrapHandler(ta.HandleFlagStory)))
 	api.Handle("/comments", WithUser(WrapHandler(ta.HandleComment)))
+	api.Handle("/reactions", WithUser(WrapHandler(ta.HandleReaction)))
 
 	if os.Getenv("MOCK_REGISTRATION") == "true" {
 		api.Handle("/mock_register", WrapHandler(ta.HandleMockRegistration))
