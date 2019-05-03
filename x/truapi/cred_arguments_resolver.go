@@ -84,7 +84,7 @@ func (ta *TruAPI) credArguments(
 			}
 			vote = *challenge.Vote
 		}
-		argument := ta.argumentResolver(ctx, app.QueryByIDParams{ID: vote.ArgumentID})
+		argument := ta.argumentResolver(ctx, app.QueryArgumentByID{ID: vote.ArgumentID})
 		credArgument := CredArgument{
 			ID:        argument.ID,
 			StoryID:   argument.StoryID,

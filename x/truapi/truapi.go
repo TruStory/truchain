@@ -115,6 +115,7 @@ func (ta *TruAPI) RegisterRoutes() {
 	api.HandleFunc("/upload", ta.HandleUpload)
 	api.Handle("/flagStory", WithUser(WrapHandler(ta.HandleFlagStory)))
 	api.Handle("/comments", WithUser(WrapHandler(ta.HandleComment)))
+	api.HandleFunc("/mentions/translateToCosmos", ta.HandleTranslateCosmosMentions)
 
 	if os.Getenv("MOCK_REGISTRATION") == "true" {
 		api.Handle("/mock_register", WrapHandler(ta.HandleMockRegistration))
@@ -217,7 +218,7 @@ func (ta *TruAPI) RegisterResolvers() {
 	}
 
 	getArgument := func(ctx context.Context, argumentID int64) argument.Argument {
-		return ta.argumentResolver(ctx, app.QueryByIDParams{ID: argumentID})
+		return ta.argumentResolver(ctx, app.QueryArgumentByID{ID: argumentID})
 	}
 
 	ta.GraphQLClient.RegisterQueryResolver("comments", ta.commentsResolver)
