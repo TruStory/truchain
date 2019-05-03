@@ -38,6 +38,8 @@ type Queries interface {
 	UnreadNotificationEventsCountByAddress(addr string) (*NotificationsCountResponse, error)
 	FlaggedStoriesByStoryID(storyID int64) ([]FlaggedStory, error)
 	CommentsByArgumentID(argumentID int64) ([]Comment, error)
+	TranslateToCosmosMentions(body string) (string, error)
+	TranslateToUsersMentions(body string) (string, error)
 }
 
 // Timestamps carries the default timestamp fields for any derived model
