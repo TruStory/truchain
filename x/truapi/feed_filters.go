@@ -10,8 +10,8 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
-// TrendingMetrics holds metrics used to sort the trending feed
-type TrendingMetrics struct {
+// trendingMetricsData holds metrics used to sort the trending feed
+type trendingMetricsData struct {
 	Story        story.Story
 	Participants int
 	TotalStake   int64
@@ -56,7 +56,7 @@ func (ta *TruAPI) filterByCompleted(ctx context.Context, feedStories []story.Sto
 
 // filterByTrending orders the stories according to story state, stake, participants and expire time
 func (ta *TruAPI) filterByTrending(ctx context.Context, feedStories []story.Story) ([]story.Story, error) {
-	trendingMetrics := make([]TrendingMetrics, 0)
+	trendingMetrics := make([]trendingMetricsData, 0)
 
 	// for better performance, we first fetch metrics for all stories from the KV store
 	// then we execute a sort using those metrics
@@ -74,7 +74,7 @@ func (ta *TruAPI) filterByTrending(ctx context.Context, feedStories []story.Stor
 		}
 		totalStake := totalBacking.Plus(totalChallenge).Amount.Int64()
 
-		metrics := TrendingMetrics{
+		metrics := trendingMetricsData{
 			Story:        feedStory,
 			Participants: participants,
 			TotalStake:   totalStake,
@@ -86,24 +86,28 @@ func (ta *TruAPI) filterByTrending(ctx context.Context, feedStories []story.Stor
 
 	// Now we sort all the stories by story state, stake, participants and expire time
 	sort.Slice(trendingMetrics, func(i, j int) bool {
+		// sorty by story state
 		if trendingMetrics[i].Status == story.Pending && trendingMetrics[j].Status == story.Expired {
 			return true
 		}
 		if trendingMetrics[i].Status == story.Expired && trendingMetrics[j].Status == story.Pending {
 			return false
 		}
+		// sort by stake
 		if trendingMetrics[i].TotalStake > trendingMetrics[j].TotalStake {
 			return true
 		}
 		if trendingMetrics[i].TotalStake < trendingMetrics[j].TotalStake {
 			return false
 		}
+		// sort by participants
 		if trendingMetrics[i].Participants > trendingMetrics[j].Participants {
 			return true
 		}
 		if trendingMetrics[i].Participants < trendingMetrics[j].Participants {
 			return false
 		}
+		// sort by expire time
 		return trendingMetrics[j].ExpireTime.Before(trendingMetrics[i].ExpireTime)
 	})
 

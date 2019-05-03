@@ -10,17 +10,6 @@ import (
 
 // These are helpers used by Queriers
 
-// FeedFilter is parameter for filtering the story feed
-type FeedFilter int64
-
-// List of filter types
-const (
-	None FeedFilter = iota
-	Trending
-	Latest
-	Completed
-)
-
 // QueryByIDParams is query params for any ID
 type QueryByIDParams struct {
 	ID int64
@@ -29,12 +18,6 @@ type QueryByIDParams struct {
 // QueryByCategoryIDParams is query params for a CategoryID
 type QueryByCategoryIDParams struct {
 	CategoryID int64
-}
-
-// QueryByCategoryIDAndFeedFilter is query params for filtering a story feed by category and FeedFilter
-type QueryByCategoryIDAndFeedFilter struct {
-	CategoryID int64
-	FeedFilter FeedFilter `graphql:",optional"`
 }
 
 // QueryByStoryIDAndCreatorParams is query params for backing,

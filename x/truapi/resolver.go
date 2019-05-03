@@ -24,6 +24,23 @@ import (
 	abci "github.com/tendermint/tendermint/abci/types"
 )
 
+// FeedFilter is parameter for filtering the story feed
+type FeedFilter int64
+
+// List of filter types
+const (
+	None FeedFilter = iota
+	Trending
+	Latest
+	Completed
+)
+
+// QueryByCategoryIDAndFeedFilter is query params for filtering a story feed by category and FeedFilter
+type QueryByCategoryIDAndFeedFilter struct {
+	CategoryID int64
+	FeedFilter FeedFilter `graphql:",optional"`
+}
+
 func (ta *TruAPI) allCategoriesResolver(ctx context.Context, q struct{}) []category.Category {
 	res := ta.RunQuery("categories/all", struct{}{})
 
@@ -47,7 +64,7 @@ func (ta *TruAPI) allCategoriesResolver(ctx context.Context, q struct{}) []categ
 	return *cs
 }
 
-func (ta *TruAPI) storiesResolver(ctx context.Context, q app.QueryByCategoryIDAndFeedFilter) []story.Story {
+func (ta *TruAPI) storiesResolver(ctx context.Context, q QueryByCategoryIDAndFeedFilter) []story.Story {
 	var res abci.ResponseQuery
 	if q.CategoryID == -1 {
 		res = ta.RunQuery("stories/all", struct{}{})
@@ -380,13 +397,13 @@ func (ta *TruAPI) addressesWhoFlaggedResolver(ctx context.Context, q story.Story
 	return addressesWhoFlagged
 }
 
-func (ta *TruAPI) filterFeedStories(ctx context.Context, feedStories []story.Story, filter app.FeedFilter) ([]story.Story, error) {
+func (ta *TruAPI) filterFeedStories(ctx context.Context, feedStories []story.Story, filter FeedFilter) ([]story.Story, error) {
 	switch filter {
-	case app.Latest:
+	case Latest:
 		return ta.filterByLatest(ctx, feedStories)
-	case app.Trending:
+	case Trending:
 		return ta.filterByTrending(ctx, feedStories)
-	case app.Completed:
+	case Completed:
 		return ta.filterByCompleted(ctx, feedStories)
 	}
 	return feedStories, nil
