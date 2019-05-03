@@ -2021,6 +2021,20 @@
                     "ofType": null
                   }
                 }
+              },
+              {
+                "defaultValue": null,
+                "description": "",
+                "name": "raw",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": "",
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "bool",
+                    "ofType": null
+                  }
+                }
               }
             ],
             "deprecationReason": "",

@@ -98,7 +98,7 @@ func (ta *TruAPI) storiesResolver(ctx context.Context, q QueryByCategoryIDAndFee
 	return filteredStories
 }
 
-func (ta *TruAPI) argumentResolver(_ context.Context, q app.QueryByIDParams) argument.Argument {
+func (ta *TruAPI) argumentResolver(_ context.Context, q app.QueryArgumentByID) argument.Argument {
 	res := ta.RunQuery(
 		path.Join(argument.QueryPath, argument.QueryArgumentByID),
 		app.QueryByIDParams{ID: q.ID},
@@ -114,6 +114,16 @@ func (ta *TruAPI) argumentResolver(_ context.Context, q app.QueryByIDParams) arg
 	if err != nil {
 		panic(err)
 	}
+	// check if raw argument was passed
+	if q.Raw {
+		return *argument
+	}
+
+	body, err := ta.DBClient.TranslateToUsersMentions(argument.Body)
+	if err != nil {
+		panic(err)
+	}
+	argument.Body = body
 
 	return *argument
 }

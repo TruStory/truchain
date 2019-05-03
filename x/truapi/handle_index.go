@@ -13,7 +13,7 @@ import (
 	"github.com/TruStory/truchain/x/category"
 	"github.com/TruStory/truchain/x/story"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/writeas/go-strip-markdown"
+	stripmd "github.com/writeas/go-strip-markdown"
 )
 
 const (
@@ -134,7 +134,7 @@ func makeArgumentMetaTags(ta *TruAPI, route string, storyID int64, argumentID in
 	ctx := context.Background()
 	storyObj := ta.storyResolver(ctx, story.QueryStoryByIDParams{ID: storyID})
 	categoryObj := ta.categoryResolver(ctx, category.QueryCategoryByIDParams{ID: storyObj.CategoryID})
-	argumentObj := ta.argumentResolver(ctx, app.QueryByIDParams{ID: argumentID})
+	argumentObj := ta.argumentResolver(ctx, app.QueryArgumentByID{ID: argumentID})
 	creatorObj, err := ta.DBClient.TwitterProfileByAddress(argumentObj.Creator.String())
 	if err != nil {
 		// if error, return default

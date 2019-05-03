@@ -15,6 +15,12 @@ type QueryByIDParams struct {
 	ID int64
 }
 
+// QueryArgumentByID is query params for an argument ID.
+type QueryArgumentByID struct {
+	ID  int64
+	Raw bool `graphql:",optional"`
+}
+
 // QueryByCategoryIDParams is query params for a CategoryID
 type QueryByCategoryIDParams struct {
 	CategoryID int64
