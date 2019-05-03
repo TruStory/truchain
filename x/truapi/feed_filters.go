@@ -24,19 +24,25 @@ func (ta *TruAPI) filterByLatest(ctx context.Context, feedStories []story.Story)
 	filteredStories := make([]story.Story, 0)
 
 	for _, feedStory := range feedStories {
-		// only include pending stories
-		if feedStory.Status == story.Pending {
-			// which have no backers
-			backingPool := ta.backingPoolResolver(ctx, feedStory)
-			if backingPool.Amount.IsZero() {
-				// and no challengers
-				challengePool := ta.challengePoolResolver(ctx, feedStory)
-				if challengePool.Amount.IsZero() {
-					// passed all criteria to appear in latest list
-					filteredStories = append(filteredStories, feedStory)
-				}
-			}
+		// exclude completed stories
+		if feedStory.Status == story.Expired {
+			continue
 		}
+
+		// exclude stories with backers
+		backingPool := ta.backingPoolResolver(ctx, feedStory)
+		if !backingPool.Amount.IsZero() {
+			continue
+		}
+
+		// exclude stories with challengers
+		challengePool := ta.challengePoolResolver(ctx, feedStory)
+		if !challengePool.Amount.IsZero() {
+			continue
+		}
+
+		// active stories with no backers and no challengers
+		filteredStories = append(filteredStories, feedStory)
 	}
 	return filteredStories, nil
 }
