@@ -375,30 +375,6 @@
             "deprecationReason": "",
             "description": "",
             "isDeprecated": false,
-            "name": "stories",
-            "type": {
-              "kind": "NON_NULL",
-              "name": "",
-              "ofType": {
-                "kind": "LIST",
-                "name": "",
-                "ofType": {
-                  "kind": "NON_NULL",
-                  "name": "",
-                  "ofType": {
-                    "kind": "OBJECT",
-                    "name": "Story",
-                    "ofType": null
-                  }
-                }
-              }
-            }
-          },
-          {
-            "args": [],
-            "deprecationReason": "",
-            "description": "",
-            "isDeprecated": false,
             "name": "timestamp",
             "type": {
               "kind": "NON_NULL",
@@ -2449,6 +2425,20 @@
               {
                 "defaultValue": null,
                 "description": "",
+                "name": "feedFilter",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": "",
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "int64",
+                    "ofType": null
+                  }
+                }
+              },
+              {
+                "defaultValue": null,
+                "description": "",
                 "name": "filterText",
                 "type": {
                   "kind": "SCALAR",
@@ -2524,30 +2514,6 @@
                 "kind": "OBJECT",
                 "name": "Params",
                 "ofType": null
-              }
-            }
-          },
-          {
-            "args": [],
-            "deprecationReason": "",
-            "description": "",
-            "isDeprecated": false,
-            "name": "stories",
-            "type": {
-              "kind": "NON_NULL",
-              "name": "",
-              "ofType": {
-                "kind": "LIST",
-                "name": "",
-                "ofType": {
-                  "kind": "NON_NULL",
-                  "name": "",
-                  "ofType": {
-                    "kind": "OBJECT",
-                    "name": "Story",
-                    "ofType": null
-                  }
-                }
               }
             }
           },
