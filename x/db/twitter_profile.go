@@ -26,7 +26,7 @@ func (t TwitterProfile) String() string {
 // UsernamesByPrefix returns the first five usernames for the provided prefix string
 func (c *Client) UsernamesByPrefix(prefix string) (usernames []string, err error) {
 	var twitterProfiles []TwitterProfile
-	sqlFragment := fmt.Sprintf("username LIKE '%s", prefix)
+	sqlFragment := fmt.Sprintf("username ILIKE '%s", prefix)
 	err = c.Model(&twitterProfiles).Where(sqlFragment + "%'").Limit(5).Select()
 	if err == pg.ErrNoRows {
 		return usernames, nil
