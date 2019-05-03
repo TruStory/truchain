@@ -82,18 +82,56 @@ func TestRedistributeStakeTrueWins(t *testing.T) {
 	// check stake amounts
 	transactions, err := k.truBankKeeper.TransactionsByCreator(ctx, creator1)
 	assert.NoError(t, err)
-	assert.Len(t, transactions, 3)
-	assert.Equal(t, trubank.RewardPool, transactions[0].TransactionType)
+	// 3 backers should receive stake * 2 transaction each (refund + reward)
+	assert.Len(t, transactions, 6)
+	assert.Equal(t, trubank.BackingReturned, transactions[0].TransactionType)
 	assert.Equal(t, trubank.RewardPool, transactions[1].TransactionType)
-	assert.Equal(t, trubank.RewardPool, transactions[2].TransactionType)
-	assert.Equal(t, "13333333333trusteak", transactions[0].Amount.String())
-	assert.Equal(t, "13333333333trusteak", transactions[1].Amount.String())
-	assert.Equal(t, "13333333333trusteak", transactions[2].Amount.String())
+	assert.Equal(t, trubank.BackingReturned, transactions[2].TransactionType)
+	assert.Equal(t, trubank.RewardPool, transactions[3].TransactionType)
+	assert.Equal(t, trubank.BackingReturned, transactions[4].TransactionType)
+	assert.Equal(t, trubank.RewardPool, transactions[5].TransactionType)
+	assert.Equal(t, "10000000000trusteak", transactions[0].Amount.String())
+	assert.Equal(t, "3333333333trusteak", transactions[1].Amount.String())
+	assert.Equal(t, "10000000000trusteak", transactions[2].Amount.String())
+	assert.Equal(t, "3333333333trusteak", transactions[3].Amount.String())
+	assert.Equal(t, "10000000000trusteak", transactions[4].Amount.String())
+	assert.Equal(t, "3333333333trusteak", transactions[5].Amount.String())
 
 	// false voters get nothing back
 	transactions, err = k.truBankKeeper.TransactionsByCreator(ctx, creator2)
 	assert.NoError(t, err)
 	assert.Len(t, transactions, 0)
+
+}
+
+func TestRedistributeStakeOneStaker(t *testing.T) {
+	ctx, k := mockDB()
+
+	amount := sdk.NewCoin("trusteak", sdk.NewInt(10*app.Shanev))
+	creator1 := sdk.AccAddress([]byte{1, 2})
+	trueVote := Vote{
+		ID:         1,
+		StoryID:    1,
+		Amount:     amount,
+		ArgumentID: 0,
+		Creator:    creator1,
+		Vote:       true,
+		Timestamp:  app.NewTimestamp(ctx.BlockHeader()),
+	}
+	backingVote := FakeStaker{&trueVote}
+
+	votes := []Voter{backingVote}
+
+	_, err := k.RedistributeStake(ctx, votes)
+	assert.NoError(t, err)
+
+	// check stake amounts
+	transactions, err := k.truBankKeeper.TransactionsByCreator(ctx, creator1)
+	assert.NoError(t, err)
+	// Stake should be returned
+	assert.Len(t, transactions, 1)
+	assert.Equal(t, trubank.BackingReturned, transactions[0].TransactionType)
+	assert.Equal(t, "10000000000trusteak", transactions[0].Amount.String())
 
 }
 
@@ -137,13 +175,20 @@ func TestRedistributeStakeFalseWins(t *testing.T) {
 
 	transactions, err = k.truBankKeeper.TransactionsByCreator(ctx, creator2)
 	assert.NoError(t, err)
-	assert.Len(t, transactions, 3)
-	assert.Equal(t, trubank.RewardPool, transactions[0].TransactionType)
+	// 3 challengers should receive stake * 2 transaction each (refund + reward)
+	assert.Len(t, transactions, 6)
+	assert.Equal(t, trubank.ChallengeReturned, transactions[0].TransactionType)
 	assert.Equal(t, trubank.RewardPool, transactions[1].TransactionType)
-	assert.Equal(t, trubank.RewardPool, transactions[2].TransactionType)
-	assert.Equal(t, "13333333333trusteak", transactions[0].Amount.String())
-	assert.Equal(t, "13333333333trusteak", transactions[1].Amount.String())
-	assert.Equal(t, "13333333333trusteak", transactions[2].Amount.String())
+	assert.Equal(t, trubank.ChallengeReturned, transactions[2].TransactionType)
+	assert.Equal(t, trubank.RewardPool, transactions[3].TransactionType)
+	assert.Equal(t, trubank.ChallengeReturned, transactions[4].TransactionType)
+	assert.Equal(t, trubank.RewardPool, transactions[5].TransactionType)
+	assert.Equal(t, "10000000000trusteak", transactions[0].Amount.String())
+	assert.Equal(t, "3333333333trusteak", transactions[1].Amount.String())
+	assert.Equal(t, "10000000000trusteak", transactions[2].Amount.String())
+	assert.Equal(t, "3333333333trusteak", transactions[3].Amount.String())
+	assert.Equal(t, "10000000000trusteak", transactions[4].Amount.String())
+	assert.Equal(t, "3333333333trusteak", transactions[5].Amount.String())
 }
 
 func TestRedistributeStakeNoMajority(t *testing.T) {
