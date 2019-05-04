@@ -33,3 +33,4 @@ web/
 go.mod
 go.sum
 .vscode
+build/

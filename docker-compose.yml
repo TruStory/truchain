@@ -1,0 +1,68 @@
+version: '3'
+
+services:
+  truchaindnode0:
+    container_name: truchaindnode0
+    image: "trustory/truchaindnode"
+    ports:
+      - "26656-26657:26656-26657"
+    environment:
+      - ID=0
+      - LOG=${LOG:-truchaind.log}
+    volumes:
+      - ./build:/truchaind:Z
+    networks:
+      localnet:
+        ipv4_address: 192.168.10.2
+
+  truchaindnode1:
+    container_name: truchaindnode1
+    image: "trustory/truchaindnode"
+    ports:
+      - "26659-26660:26656-26657"
+    environment:
+      - ID=1
+      - LOG=${LOG:-truchaind.log}
+    volumes:
+      - ./build:/truchaind:Z
+    networks:
+      localnet:
+        ipv4_address: 192.168.10.3
+
+  truchaindnode2:
+    container_name: truchaindnode2
+    image: "trustory/truchaindnode"
+    environment:
+      - ID=2
+      - LOG=${LOG:-truchaind.log}
+    ports:
+      - "26661-26662:26656-26657"
+    volumes:
+      - ./build:/truchaind:Z
+    networks:
+      localnet:
+        ipv4_address: 192.168.10.4
+
+  truchaindnode3:
+    container_name: truchaindnode3
+    image: "trustory/truchaindnode"
+    environment:
+      - ID=3
+      - LOG=${LOG:-truchaind.log}
+    ports:
+      - "26663-26664:26656-26657"
+    volumes:
+      - ./build:/truchaind:Z
+    networks:
+      localnet:
+        ipv4_address: 192.168.10.5
+
+networks:
+  localnet:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+      -
+        subnet: 192.168.10.0/16
+

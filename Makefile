@@ -23,7 +23,7 @@ build_daemon:
 	go build -o bin/truchaind cmd/truchaind/main.go
 
 build_linux:
-	GOOS=linux GOARCH=amd64 go build -o bin/truchaind cmd/truchaind/main.go
+	GOOS=linux GOARCH=amd64 go build -o build/truchaind cmd/truchaind/main.go
 
 doc:
 	@echo "--> Wait a few seconds and visit http://localhost:6060/pkg/github.com/TruStory/truchain/"
@@ -75,5 +75,22 @@ update_deps:
 	@rm -rf .vendor-new
 	@dep ensure -v -vendor-only
 
-.PHONY: benchmark buidl build check dep_graph test test_cover update_deps
+########################################
+### Local validator nodes using docker and docker-compose
 
+build-docker-truchaindnode:
+	$(MAKE) -C networks/local
+
+# Run a 4-node testnet locally
+localnet-start: localnet-stop
+	@if ! [ -f build/node0/truchaind/config/genesis.json ]; then docker run --rm -v $(CURDIR)/build:/truchaind:Z trustory/truchaindnode testnet --v 4 -o . --starting-ip-address 192.168.10.2 ; fi
+	docker-compose up -d
+
+# Stop testnet
+localnet-stop:
+	docker-compose down
+
+########################################
+
+.PHONY: benchmark buidl build check dep_graph test test_cover update_deps \
+build-docker-truchaindnode localnet-start localnet-stop
