@@ -26,7 +26,6 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/ibc"
 	"github.com/cosmos/cosmos-sdk/x/params"
 	"github.com/cosmos/cosmos-sdk/x/staking"
-	"github.com/joho/godotenv"
 	"github.com/spf13/viper"
 	abci "github.com/tendermint/tendermint/abci/types"
 	"github.com/tendermint/tendermint/crypto/secp256k1"
@@ -101,8 +100,6 @@ type TruChain struct {
 func NewTruChain(logger log.Logger, db dbm.DB, loadLatest bool, options ...func(*bam.BaseApp)) *TruChain {
 	// create and register app-level codec for TXs and accounts
 	codec := MakeCodec()
-
-	loadEnvVars()
 
 	// create your application type
 	var app = &TruChain{
@@ -290,19 +287,6 @@ func NewTruChain(logger log.Logger, db dbm.DB, loadLatest bool, options ...func(
 	app.api = app.makeAPI()
 
 	return app
-}
-
-func loadEnvVars() {
-	rootdir := viper.GetString(cli.HomeFlag)
-	if rootdir == "" {
-		rootdir = DefaultNodeHome
-	}
-
-	envPath := filepath.Join(rootdir, ".env")
-	err := godotenv.Load(envPath)
-	if err != nil {
-		panic("Error loading .env file")
-	}
 }
 
 // MakeCodec creates a new codec codec and registers all the necessary types

@@ -22,7 +22,7 @@ build_cli:
 build_daemon:
 	go build -o bin/truchaind cmd/truchaind/main.go
 
-build_linux:
+build-linux:
 	GOOS=linux GOARCH=amd64 go build -o build/truchaind cmd/truchaind/main.go
 
 doc:
