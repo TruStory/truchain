@@ -2,9 +2,11 @@ package app
 
 import (
 	"encoding/hex"
+	"fmt"
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"sort"
 
 	"github.com/TruStory/truchain/types"
 	"github.com/TruStory/truchain/x/argument"
@@ -23,6 +25,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth"
 	"github.com/cosmos/cosmos-sdk/x/bank"
+	distr "github.com/cosmos/cosmos-sdk/x/distribution"
 	"github.com/cosmos/cosmos-sdk/x/ibc"
 	"github.com/cosmos/cosmos-sdk/x/params"
 	"github.com/cosmos/cosmos-sdk/x/staking"
@@ -50,27 +53,35 @@ type TruChain struct {
 	codec *codec.Codec
 
 	// keys to access the multistore
-	keyAccount    *sdk.KVStoreKey
+	keyAccount  *sdk.KVStoreKey
+	keyDistr    *sdk.KVStoreKey
+	tkeyDistr   *sdk.TransientStoreKey
+	keyStaking  *sdk.KVStoreKey
+	tkeyStaking *sdk.TransientStoreKey
+	keyFee      *sdk.KVStoreKey
+	keyIBC      *sdk.KVStoreKey
+	keyMain     *sdk.KVStoreKey
+	keyParams   *sdk.KVStoreKey
+	tkeyParams  *sdk.TransientStoreKey
+
+	// keys to access trustory state
 	keyArgument   *sdk.KVStoreKey
 	keyBacking    *sdk.KVStoreKey
 	keyCategory   *sdk.KVStoreKey
 	keyChallenge  *sdk.KVStoreKey
 	keyExpiration *sdk.KVStoreKey
-	keyFee        *sdk.KVStoreKey
-	keyIBC        *sdk.KVStoreKey
-	keyMain       *sdk.KVStoreKey
 	keyStake      *sdk.KVStoreKey
 	keyStory      *sdk.KVStoreKey
 	keyStoryQueue *sdk.KVStoreKey
 	keyTruBank    *sdk.KVStoreKey
-	keyParams     *sdk.KVStoreKey
-	tkeyParams    *sdk.TransientStoreKey
 
 	// manage getting and setting accounts
 	accountKeeper       auth.AccountKeeper
 	feeCollectionKeeper auth.FeeCollectionKeeper
 	bankKeeper          bank.Keeper
+	stakingKeeper       staking.Keeper
 	ibcMapper           ibc.Mapper
+	distrKeeper         distr.Keeper
 	paramsKeeper        params.Keeper
 
 	// access truchain multistore
@@ -112,6 +123,10 @@ func NewTruChain(logger log.Logger, db dbm.DB, loadLatest bool, options ...func(
 		keyMain:       sdk.NewKVStoreKey("main"),
 		keyAccount:    sdk.NewKVStoreKey("acc"),
 		keyIBC:        sdk.NewKVStoreKey("ibc"),
+		keyStaking:    sdk.NewKVStoreKey(staking.StoreKey),
+		tkeyStaking:   sdk.NewTransientStoreKey(staking.TStoreKey),
+		keyDistr:      sdk.NewKVStoreKey(distr.StoreKey),
+		tkeyDistr:     sdk.NewTransientStoreKey(distr.TStoreKey),
 		keyArgument:   sdk.NewKVStoreKey(argument.StoreKey),
 		keyStory:      sdk.NewKVStoreKey(story.StoreKey),
 		keyStoryQueue: sdk.NewKVStoreKey(story.QueueStoreKey),
@@ -148,6 +163,23 @@ func NewTruChain(logger log.Logger, db dbm.DB, loadLatest bool, options ...func(
 
 	app.ibcMapper = ibc.NewMapper(app.codec, app.keyIBC, ibc.DefaultCodespace)
 	app.feeCollectionKeeper = auth.NewFeeCollectionKeeper(app.codec, app.keyFee)
+
+	stakingKeeper := staking.NewKeeper(
+		app.codec,
+		app.keyStaking, app.tkeyStaking,
+		app.bankKeeper, app.paramsKeeper.Subspace(staking.DefaultParamspace),
+		staking.DefaultCodespace,
+	)
+
+	app.distrKeeper = distr.NewKeeper(
+		app.codec,
+		app.keyDistr,
+		app.paramsKeeper.Subspace(distr.DefaultParamspace),
+		app.bankKeeper, &stakingKeeper, app.feeCollectionKeeper,
+		distr.DefaultCodespace,
+	)
+
+	app.stakingKeeper = stakingKeeper
 
 	// wire up keepers
 	app.categoryKeeper = category.NewKeeper(
@@ -233,6 +265,7 @@ func NewTruChain(logger log.Logger, db dbm.DB, loadLatest bool, options ...func(
 	// The app.Router is the main transaction router where each module registers its routes
 	app.Router().
 		AddRoute("bank", bank.NewHandler(app.bankKeeper)).
+		AddRoute(staking.RouterKey, staking.NewHandler(app.stakingKeeper)).
 		AddRoute("ibc", ibc.NewHandler(app.ibcMapper, app.bankKeeper)).
 		AddRoute("story", story.NewHandler(app.storyKeeper)).
 		AddRoute("category", category.NewHandler(app.categoryKeeper)).
@@ -261,6 +294,8 @@ func NewTruChain(logger log.Logger, db dbm.DB, loadLatest bool, options ...func(
 	app.MountStores(
 		app.keyAccount,
 		app.keyParams,
+		app.keyStaking,
+		app.keyDistr,
 		app.keyBacking,
 		app.keyCategory,
 		app.keyChallenge,
@@ -297,6 +332,7 @@ func MakeCodec() *codec.Codec {
 	auth.RegisterCodec(cdc)
 	bank.RegisterCodec(cdc)
 	staking.RegisterCodec(cdc)
+	distr.RegisterCodec(cdc)
 	sdk.RegisterCodec(cdc)
 	ibc.RegisterCodec(cdc)
 
@@ -339,6 +375,118 @@ func (app *TruChain) EndBlocker(ctx sdk.Context, _ abci.RequestEndBlock) abci.Re
 	tags := app.expirationKeeper.EndBlock(ctx)
 
 	return abci.ResponseEndBlock{Tags: tags}
+}
+
+// initialize store from a genesis state
+func (app *TruChain) initFromGenesisState(ctx sdk.Context, genesisState GenesisState) []abci.ValidatorUpdate {
+	genesisState.Sanitize()
+
+	// load the accounts
+	for _, gacc := range genesisState.Accounts {
+		acc := gacc.ToAccount()
+		acc = app.accountKeeper.NewAccount(ctx, acc) // set account number
+		app.accountKeeper.SetAccount(ctx, acc)
+	}
+
+	// initialize distribution (must happen before staking)
+	distr.InitGenesis(ctx, app.distrKeeper, genesisState.DistrData)
+
+	// load the initial staking information
+	validators, err := staking.InitGenesis(ctx, app.stakingKeeper, genesisState.StakingData)
+	if err != nil {
+		panic(err) // TODO find a way to do this w/o panics
+	}
+
+	// initialize module-specific stores
+	auth.InitGenesis(ctx, app.accountKeeper, app.feeCollectionKeeper, genesisState.AuthData)
+	bank.InitGenesis(ctx, app.bankKeeper, genesisState.BankData)
+
+	// trustory-specific modules
+	argument.InitGenesis(ctx, app.argumentKeeper, genesisState.ArgumentData)
+	category.InitGenesis(ctx, app.categoryKeeper, genesisState.CategoryData)
+	challenge.InitGenesis(ctx, app.challengeKeeper, genesisState.ChallengeData)
+	backing.InitGenesis(ctx, app.backingKeeper, genesisState.BackingData)
+	expiration.InitGenesis(ctx, app.expirationKeeper, genesisState.ExpirationData)
+	stake.InitGenesis(ctx, app.stakeKeeper, genesisState.StakeData)
+	story.InitGenesis(ctx, app.storyKeeper, genesisState.StoryData)
+	trubank.InitGenesis(ctx, app.truBankKeeper, genesisState.TrubankData)
+
+	// validate genesis state
+	// if err := GaiaValidateGenesisState(genesisState); err != nil {
+	// 	panic(err) // TODO find a way to do this w/o panics
+	// }
+
+	if len(genesisState.GenTxs) > 0 {
+		for _, genTx := range genesisState.GenTxs {
+			var tx auth.StdTx
+			err = app.codec.UnmarshalJSON(genTx, &tx)
+			if err != nil {
+				panic(err)
+			}
+			bz := app.codec.MustMarshalBinaryLengthPrefixed(tx)
+			// res := app.DeliverTx(bz)
+			res := app.BaseApp.DeliverTx(bz)
+			if !res.IsOK() {
+				panic(res.Log)
+			}
+		}
+
+		validators = app.stakingKeeper.ApplyAndReturnValidatorSetUpdates(ctx)
+	}
+	return validators
+}
+
+// initChainer implements the custom application logic that the BaseApp will
+// invoke upon initialization. In this case, it will take the application's
+// state provided by 'req' and attempt to deserialize said state. The state
+// should contain all the genesis accounts. These accounts will be added to the
+// application's account mapper.
+func (app *TruChain) initChainer(ctx sdk.Context, req abci.RequestInitChain) abci.ResponseInitChain {
+	stateJSON := req.AppStateBytes
+
+	var genesisState GenesisState
+	err := app.codec.UnmarshalJSON(stateJSON, &genesisState)
+	if err != nil {
+		panic(err)
+	}
+
+	for i, acc := range genesisState.Accounts {
+		acc.AccountNumber = app.accountKeeper.GetNextAccountNumber(ctx)
+		if i == 1 { // TODO: more robust way of identifying registrar account [notduncansmith]
+			// err := acc.SetPubKey(app.registrarKey.PubKey())
+			err := acc.ToAccount().SetPubKey(app.registrarKey.PubKey())
+			if err != nil {
+				panic(err)
+			}
+		}
+		app.accountKeeper.SetAccount(ctx, acc.ToAccount())
+	}
+
+	validators := app.initFromGenesisState(ctx, genesisState)
+
+	// sanity check
+	if len(req.Validators) > 0 {
+		fmt.Println(fmt.Sprintf("req.Validators len %d", len(req.Validators)))
+		fmt.Println(fmt.Sprintf("validators len %d", len(validators)))
+		if len(req.Validators) != len(validators) {
+			panic(fmt.Errorf("len(RequestInitChain.Validators) != len(validators) (%d != %d)",
+				len(req.Validators), len(validators)))
+		}
+		sort.Sort(abci.ValidatorUpdates(req.Validators))
+		sort.Sort(abci.ValidatorUpdates(validators))
+		for i, val := range validators {
+			if !val.Equal(req.Validators[i]) {
+				panic(fmt.Errorf("validators[%d] != req.Validators[%d] ", i, i))
+			}
+		}
+	}
+
+	// assert runtime invariants
+	// app.assertRuntimeInvariants()
+
+	return abci.ResponseInitChain{
+		Validators: validators,
+	}
 }
 
 // LoadHeight loads the app at a particular height
