@@ -7,6 +7,7 @@ import (
 	"os"
 
 	"github.com/TruStory/truchain/app"
+	truchainInit "github.com/TruStory/truchain/cmd/truchaind/init"
 	"github.com/TruStory/truchain/x/argument"
 	"github.com/TruStory/truchain/x/category"
 	"github.com/TruStory/truchain/x/challenge"
@@ -47,6 +48,7 @@ func main() {
 	}
 
 	rootCmd.AddCommand(InitCmd(ctx, cdc))
+	rootCmd.AddCommand(truchainInit.TestnetFilesCmd(ctx, cdc))
 
 	server.AddCommands(
 		ctx,

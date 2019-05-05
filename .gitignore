@@ -34,3 +34,4 @@ go.mod
 go.sum
 .vscode
 build/
+.testnet/

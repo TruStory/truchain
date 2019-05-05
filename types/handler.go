@@ -18,7 +18,7 @@ type IDResult struct {
 // ErrMsgHandler returns an unknown Msg request error result
 func ErrMsgHandler(msg sdk.Msg) sdk.Result {
 	if mType := reflect.TypeOf(msg); mType != nil {
-		errMsg := "Unrecognized Msg type: " + mType.Name()
+		errMsg := "Truchain: Unrecognized Msg type: " + mType.Name()
 		return sdk.ErrUnknownRequest(errMsg).Result()
 	}
 
