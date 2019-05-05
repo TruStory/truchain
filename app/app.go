@@ -126,7 +126,7 @@ func NewTruChain(logger log.Logger, db dbm.DB, loadLatest bool, options ...func(
 		apiStarted:    false,
 		blockCtx:      nil,
 		blockHeader:   abci.Header{},
-		registrarKey:  loadRegistrarKey(),
+		registrarKey:  secp256k1.GenPrivKey(),
 	}
 
 	// The ParamsKeeper handles parameter storage for the application
