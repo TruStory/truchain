@@ -1,7 +1,6 @@
 package db
 
 import (
-	"fmt"
 	"time"
 
 	"github.com/go-pg/pg"
@@ -43,15 +42,20 @@ type Reaction struct {
 	Creator          string           `json:"creator"`
 }
 
+// ReactionsCount represents the structure to contain the count of each reaction left on a reactionable
+type ReactionsCount struct {
+	Type  ReactionType `json:"type"`
+	Count int64        `json:"count"`
+}
+
 // ReactionsByReactionable returns all the reactions left by all the users on a particular reactionable
 func (c *Client) ReactionsByReactionable(reactionable Reactionable) ([]Reaction, error) {
 	reactions := make([]Reaction, 0)
 
 	err := c.Model(&reactions).
-		Column("reactions.*").
-		Where("reactions.reactionable_type = ?", reactionable.Type).
-		Where("reactions.reactionable_id = ?", reactionable.ID).
-		Where("reactions.deleted_at IS NOT NULL").
+		Where("reactionable_type = ?", reactionable.Type).
+		Where("reactionable_id = ?", reactionable.ID).
+		Where("deleted_at IS NOT NULL").
 		Order("timestamp DESC").
 		Select()
 
@@ -61,14 +65,31 @@ func (c *Client) ReactionsByReactionable(reactionable Reactionable) ([]Reaction,
 	return reactions, nil
 }
 
+// ReactionsCountByReactionable returns the cound of each reaction type for a particular reactionable
+func (c *Client) ReactionsCountByReactionable(reactionable Reactionable) ([]ReactionsCount, error) {
+
+	var result []ReactionsCount
+
+	err := c.Model((*Reaction)(nil)).
+		ColumnExpr("reaction_type as type").
+		ColumnExpr("count(*) AS count").
+		Group("reaction_type").
+		Order("reaction_type").
+		Select(&result)
+
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
+}
+
 // ReactionsByAddress returns all the reactions left by a user on any reactionable
 func (c *Client) ReactionsByAddress(addr string) ([]Reaction, error) {
 	reactions := make([]Reaction, 0)
 
 	err := c.Model(&reactions).
-		Column("reactions.*").
-		Where("reactions.creator = ?", addr).
-		Where("reactions.deleted_at IS NOT NULL").
+		Where("creator = ?", addr).
+		Where("deleted_at IS NOT NULL").
 		Order("timestamp DESC").
 		Select()
 
@@ -104,7 +125,6 @@ func (c *Client) ReactionByAddressAndReactionable(addr string, reactionable Reac
 func (c *Client) ReactOnReactionable(addr string, reaction ReactionType, reactionable Reactionable) error {
 	// checking if already exists
 	rxn, err := c.ReactionByAddressAndReactionable(addr, reactionable)
-	fmt.Printf("\n\nRXN -- %v\n\n", rxn)
 	if err != nil {
 		return err
 	}

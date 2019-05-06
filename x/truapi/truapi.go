@@ -247,6 +247,13 @@ func (ta *TruAPI) RegisterResolvers() {
 		"likes": func(ctx context.Context, q argument.Argument) []argument.Like {
 			return ta.likesObjectResolver(ctx, app.QueryByIDParams{ID: q.ID})
 		},
+		"reactionsCount": func(ctx context.Context, q argument.Argument) []db.ReactionsCount {
+			rxnable := db.Reactionable{
+				Type: "arguments",
+				ID:   q.ID,
+			}
+			return ta.reactionsCountResolver(ctx, rxnable)
+		},
 		"timestamp": func(_ context.Context, q argument.Argument) app.Timestamp { return q.Timestamp },
 		"comments":  ta.commentsResolver,
 	})

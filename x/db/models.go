@@ -42,6 +42,7 @@ type Queries interface {
 	CommentsByArgumentID(argumentID int64) ([]Comment, error)
 	ReactionsByReactionable(reactionable Reactionable) ([]Reaction, error)
 	ReactionsByAddress(addr string) ([]Reaction, error)
+	ReactionsCountByReactionable(reactionable Reactionable) ([]ReactionsCount, error)
 }
 
 // Timestamps carries the default timestamp fields for any derived model
