@@ -115,6 +115,7 @@ func (ta *TruAPI) RegisterRoutes() {
 	api.HandleFunc("/upload", ta.HandleUpload)
 	api.Handle("/flagStory", WithUser(WrapHandler(ta.HandleFlagStory)))
 	api.Handle("/comments", WithUser(WrapHandler(ta.HandleComment)))
+	api.Handle("/reactions", WithUser(WrapHandler(ta.HandleReaction)))
 	api.HandleFunc("/mentions/translateToCosmos", ta.HandleTranslateCosmosMentions)
 
 	if os.Getenv("MOCK_REGISTRATION") == "true" {
@@ -246,6 +247,13 @@ func (ta *TruAPI) RegisterResolvers() {
 		"storyId": func(_ context.Context, q argument.Argument) int64 { return q.StoryID },
 		"likes": func(ctx context.Context, q argument.Argument) []argument.Like {
 			return ta.likesObjectResolver(ctx, app.QueryByIDParams{ID: q.ID})
+		},
+		"reactionsCount": func(ctx context.Context, q argument.Argument) []db.ReactionsCount {
+			rxnable := db.Reactionable{
+				Type: "arguments",
+				ID:   q.ID,
+			}
+			return ta.reactionsCountResolver(ctx, rxnable)
 		},
 		"timestamp": func(_ context.Context, q argument.Argument) app.Timestamp { return q.Timestamp },
 		"comments":  ta.commentsResolver,
