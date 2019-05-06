@@ -210,23 +210,31 @@ func (k Keeper) interest(
 
 // distribute stake proportionally to winner
 func (k Keeper) rewardStaker(ctx sdk.Context, staker Voter, winPool sdk.Int, rewardPool sdk.Int) (*sdk.Coin, sdk.Error) {
+	logger := ctx.Logger().With("module", StoreKey)
 	rewardAmount := rewardAmount(staker.Amount().Amount, winPool, rewardPool)
 	rewardCoin := sdk.NewCoin(app.StakeDenom, rewardAmount)
-	_, err := k.truBankKeeper.AddCoin(ctx, staker.Creator(), rewardCoin, staker.StoryID(), trubank.RewardPool, 0)
+	transactionType := trubank.BackingReturned
+	if staker.VoteChoice() == false {
+		transactionType = trubank.ChallengeReturned
+	}
+	_, err := k.truBankKeeper.AddCoin(ctx, staker.Creator(), staker.Amount(), staker.StoryID(), transactionType, 0)
+	if err != nil {
+		return nil, err
+	}
+	_, err = k.truBankKeeper.AddCoin(ctx, staker.Creator(), rewardCoin, staker.StoryID(), trubank.RewardPool, 0)
 	if err != nil {
 		return nil, err
 	}
 
-	logger := ctx.Logger().With("module", StoreKey)
 	logger.Info(fmt.Sprintf("Distributed stake reward %s to %s", rewardCoin, staker.Creator()))
-
 	return &rewardCoin, nil
 }
 
 // reward stake = reward pool * (stake amount / winner pool)
 func rewardAmount(stakeAmount sdk.Int, winPool sdk.Int, rewardPool sdk.Int) sdk.Int {
-	return sdk.NewDecFromInt(rewardPool).
+	totalAmount := sdk.NewDecFromInt(rewardPool).
 		MulInt(stakeAmount).
 		QuoInt(winPool).
 		TruncateInt()
+	return totalAmount.Sub(stakeAmount)
 }

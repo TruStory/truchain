@@ -22,7 +22,7 @@ func (ta *TruAPI) runCommentNotificationSender(notifications <-chan CommentNotif
 	url := fmt.Sprintf("%s/%s", strings.TrimRight(strings.TrimSpace(endpoint), "/"), "sendCommentNotification")
 
 	for n := range notifications {
-		argument := ta.argumentResolver(context.Background(), app.QueryByIDParams{ID: n.ArgumentID})
+		argument := ta.argumentResolver(context.Background(), app.QueryArgumentByID{ID: n.ArgumentID, Raw: true})
 		n.StoryID = argument.StoryID
 		n.ArgumentCreator = argument.Creator.String()
 		b, err := json.Marshal(&n)

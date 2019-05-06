@@ -24,6 +24,23 @@ import (
 	abci "github.com/tendermint/tendermint/abci/types"
 )
 
+// FeedFilter is parameter for filtering the story feed
+type FeedFilter int64
+
+// List of filter types
+const (
+	None FeedFilter = iota
+	Trending
+	Latest
+	Completed
+)
+
+// QueryByCategoryIDAndFeedFilter is query params for filtering a story feed by category and FeedFilter
+type QueryByCategoryIDAndFeedFilter struct {
+	CategoryID int64
+	FeedFilter FeedFilter `graphql:",optional"`
+}
+
 func (ta *TruAPI) allCategoriesResolver(ctx context.Context, q struct{}) []category.Category {
 	res := ta.RunQuery("categories/all", struct{}{})
 
@@ -47,31 +64,7 @@ func (ta *TruAPI) allCategoriesResolver(ctx context.Context, q struct{}) []categ
 	return *cs
 }
 
-// Deprecated in favor of storiesResolver
-func (ta *TruAPI) allStoriesResolver(ctx context.Context, q struct{}) []story.Story {
-	res := ta.RunQuery("stories/all", struct{}{})
-
-	if res.Code != 0 {
-		fmt.Println("Resolver err: ", res)
-		return []story.Story{}
-	}
-
-	stories := new([]story.Story)
-	err := json.Unmarshal(res.Value, stories)
-	if err != nil {
-		panic(err)
-	}
-
-	filteredStories, err := ta.filterFlaggedStories(stories)
-	if err != nil {
-		fmt.Println("Resolver err: ", err)
-		panic(err)
-	}
-
-	return filteredStories
-}
-
-func (ta *TruAPI) storiesResolver(_ context.Context, q app.QueryByCategoryIDParams) []story.Story {
+func (ta *TruAPI) storiesResolver(ctx context.Context, q QueryByCategoryIDAndFeedFilter) []story.Story {
 	var res abci.ResponseQuery
 	if q.CategoryID == -1 {
 		res = ta.RunQuery("stories/all", struct{}{})
@@ -90,7 +83,13 @@ func (ta *TruAPI) storiesResolver(_ context.Context, q app.QueryByCategoryIDPara
 		panic(err)
 	}
 
-	filteredStories, err := ta.filterFlaggedStories(stories)
+	unflaggedStories, err := ta.filterFlaggedStories(stories)
+	if err != nil {
+		fmt.Println("Resolver err: ", err)
+		panic(err)
+	}
+
+	filteredStories, err := ta.filterFeedStories(ctx, unflaggedStories, q.FeedFilter)
 	if err != nil {
 		fmt.Println("Resolver err: ", err)
 		panic(err)
@@ -99,7 +98,7 @@ func (ta *TruAPI) storiesResolver(_ context.Context, q app.QueryByCategoryIDPara
 	return filteredStories
 }
 
-func (ta *TruAPI) argumentResolver(_ context.Context, q app.QueryByIDParams) argument.Argument {
+func (ta *TruAPI) argumentResolver(_ context.Context, q app.QueryArgumentByID) argument.Argument {
 	res := ta.RunQuery(
 		path.Join(argument.QueryPath, argument.QueryArgumentByID),
 		app.QueryByIDParams{ID: q.ID},
@@ -115,6 +114,16 @@ func (ta *TruAPI) argumentResolver(_ context.Context, q app.QueryByIDParams) arg
 	if err != nil {
 		panic(err)
 	}
+	// check if raw argument was passed
+	if q.Raw {
+		return *argument
+	}
+
+	body, err := ta.DBClient.TranslateToUsersMentions(argument.Body)
+	if err != nil {
+		panic(err)
+	}
+	argument.Body = body
 
 	return *argument
 }
@@ -225,30 +234,6 @@ func (ta *TruAPI) categoryResolver(ctx context.Context, q category.QueryCategory
 	}
 
 	return *c
-}
-
-// Deprecated in favor of storiesResolver
-func (ta *TruAPI) categoryStoriesResolver(_ context.Context, q category.Category) []story.Story {
-	res := ta.RunQuery("stories/category", story.QueryCategoryStoriesParams{CategoryID: q.ID})
-
-	if res.Code != 0 {
-		fmt.Println("Resolver err: ", res)
-		return []story.Story{}
-	}
-
-	stories := new([]story.Story)
-	err := json.Unmarshal(res.Value, stories)
-	if err != nil {
-		panic(err)
-	}
-
-	filteredStories, err := ta.filterFlaggedStories(stories)
-	if err != nil {
-		fmt.Println("Resolver err: ", err)
-		panic(err)
-	}
-
-	return filteredStories
 }
 
 func (ta *TruAPI) challengeResolver(
@@ -422,6 +407,18 @@ func (ta *TruAPI) addressesWhoFlaggedResolver(ctx context.Context, q story.Story
 	return addressesWhoFlagged
 }
 
+func (ta *TruAPI) filterFeedStories(ctx context.Context, feedStories []story.Story, filter FeedFilter) ([]story.Story, error) {
+	switch filter {
+	case Latest:
+		return ta.filterByLatest(ctx, feedStories)
+	case Trending:
+		return ta.filterByTrending(ctx, feedStories)
+	case Completed:
+		return ta.filterByCompleted(ctx, feedStories)
+	}
+	return feedStories, nil
+}
+
 func (ta *TruAPI) filterFlaggedStories(stories *[]story.Story) ([]story.Story, error) {
 	type FlagConfig struct {
 		Limit int    `default:"4294967295"`
@@ -434,7 +431,7 @@ func (ta *TruAPI) filterFlaggedStories(stories *[]story.Story) ([]story.Story, e
 		return nil, err
 	}
 
-	filteredStories := make([]story.Story, 0)
+	unflaggedStories := make([]story.Story, 0)
 	for _, story := range *stories {
 		storyFlags, err := ta.DBClient.FlaggedStoriesByStoryID(story.ID)
 		if err != nil {
@@ -446,11 +443,11 @@ func (ta *TruAPI) filterFlaggedStories(stories *[]story.Story) ([]story.Story, e
 			}
 		}
 		if len(storyFlags) < flagConfig.Limit {
-			filteredStories = append(filteredStories, story)
+			unflaggedStories = append(unflaggedStories, story)
 		}
 	}
 
-	return filteredStories, nil
+	return unflaggedStories, nil
 }
 
 func (ta *TruAPI) commentsResolver(ctx context.Context, q argument.Argument) []db.Comment {

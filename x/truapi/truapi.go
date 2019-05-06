@@ -116,6 +116,7 @@ func (ta *TruAPI) RegisterRoutes() {
 	api.Handle("/flagStory", WithUser(WrapHandler(ta.HandleFlagStory)))
 	api.Handle("/comments", WithUser(WrapHandler(ta.HandleComment)))
 	api.Handle("/reactions", WithUser(WrapHandler(ta.HandleReaction)))
+	api.HandleFunc("/mentions/translateToCosmos", ta.HandleTranslateCosmosMentions)
 
 	if os.Getenv("MOCK_REGISTRATION") == "true" {
 		api.Handle("/mock_register", WrapHandler(ta.HandleMockRegistration))
@@ -218,7 +219,7 @@ func (ta *TruAPI) RegisterResolvers() {
 	}
 
 	getArgument := func(ctx context.Context, argumentID int64) argument.Argument {
-		return ta.argumentResolver(ctx, app.QueryByIDParams{ID: argumentID})
+		return ta.argumentResolver(ctx, app.QueryArgumentByID{ID: argumentID})
 	}
 
 	ta.GraphQLClient.RegisterQueryResolver("comments", ta.commentsResolver)
@@ -280,8 +281,6 @@ func (ta *TruAPI) RegisterResolvers() {
 	ta.GraphQLClient.RegisterQueryResolver("category", ta.categoryResolver)
 	ta.GraphQLClient.RegisterObjectResolver("Category", category.Category{}, map[string]interface{}{
 		"id": func(_ context.Context, q category.Category) int64 { return q.ID },
-		// deprecated, paginated_stories takes a category id parameter
-		"stories": ta.categoryStoriesResolver,
 	})
 
 	ta.GraphQLClient.RegisterQueryResolver("challenge", ta.challengeResolver)
@@ -329,9 +328,6 @@ func (ta *TruAPI) RegisterResolvers() {
 		"challengeMinThreshold":     func(_ context.Context, p params.Params) string { return "0" },
 		"challengeThresholdPercent": func(_ context.Context, p params.Params) string { return "0" },
 	})
-
-	// deprecated in favor of paginated_stories
-	ta.GraphQLClient.RegisterQueryResolver("stories", ta.allStoriesResolver)
 
 	ta.GraphQLClient.RegisterPaginatedQueryResolver("paginated_stories", ta.storiesResolver)
 	ta.GraphQLClient.RegisterQueryResolver("story", ta.storyResolver)
