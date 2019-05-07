@@ -64,6 +64,11 @@ func (c *Client) RegisterPaginatedQueryResolver(name string, fn interface{}) {
 	c.queries.FieldFunc(name, fn, builder.Paginated)
 }
 
+// RegisterPaginatedQueryResolverWithFilter adds a top-level resolver to find the first paginated batch of entities in a GraphQL query filtered by content
+func (c *Client) RegisterPaginatedQueryResolverWithFilter(name string, fn interface{}, filter map[string]interface{}) {
+	c.queries.FieldFunc(name, fn, builder.Paginated, builder.TextFilterFields(filter))
+}
+
 // RegisterMutation registers a mutation
 func (c *Client) RegisterMutation(name string, fn interface{}) {
 	c.mutations.FieldFunc(name, fn)
