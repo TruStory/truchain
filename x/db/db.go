@@ -24,6 +24,15 @@ func NewDBClient() *Client {
 		PoolSize: getPoolSize(),
 	})
 
+	fmt.Println(db.String())
+
+	// runtime assert if DB is up
+	// cuz its nice to fail fast than not know
+	_, err := db.ExecOne("SELECT 1")
+	if err != nil {
+		panic(err)
+	}
+
 	return &Client{db}
 }
 
