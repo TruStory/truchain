@@ -7,15 +7,16 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/TruStory/truchain/app"
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/codec"
+	"github.com/cosmos/cosmos-sdk/server"
 	srvconfig "github.com/cosmos/cosmos-sdk/server/config"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth"
 	authtx "github.com/cosmos/cosmos-sdk/x/auth/client/txbuilder"
 	"github.com/cosmos/cosmos-sdk/x/staking"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
-
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	tmconfig "github.com/tendermint/tendermint/config"
@@ -23,9 +24,6 @@ import (
 	cmn "github.com/tendermint/tendermint/libs/common"
 	"github.com/tendermint/tendermint/types"
 	tmtime "github.com/tendermint/tendermint/types/time"
-
-	gaiaApp "github.com/cosmos/cosmos-sdk/cmd/gaia/app"
-	"github.com/cosmos/cosmos-sdk/server"
 )
 
 var (
@@ -107,7 +105,7 @@ func initTestnet(config *tmconfig.Config, cdc *codec.Codec) error {
 	gaiaConfig.MinGasPrices = viper.GetString(server.FlagMinGasPrices)
 
 	var (
-		accs     []gaiaApp.GenesisAccount
+		accs     []app.GenesisAccount
 		genFiles []string
 	)
 
@@ -154,7 +152,7 @@ func initTestnet(config *tmconfig.Config, cdc *codec.Codec) error {
 
 		buf := client.BufferStdin()
 		prompt := fmt.Sprintf(
-			"Password for account '%s' (default %s):", nodeDirName, gaiaApp.DefaultKeyPass,
+			"Password for account '%s' (default %s):", nodeDirName, app.DefaultKeyPass,
 		)
 
 		keyPass, err := client.GetPassword(prompt, buf)
@@ -166,7 +164,7 @@ func initTestnet(config *tmconfig.Config, cdc *codec.Codec) error {
 		}
 
 		if keyPass == "" {
-			keyPass = gaiaApp.DefaultKeyPass
+			keyPass = app.DefaultKeyPass
 		}
 
 		addr, secret, err := server.GenerateSaveCoinKey(clientDir, nodeDirName, keyPass, true)
@@ -188,7 +186,7 @@ func initTestnet(config *tmconfig.Config, cdc *codec.Codec) error {
 			return err
 		}
 
-		accs = append(accs, gaiaApp.GenesisAccount{
+		accs = append(accs, app.GenesisAccount{
 			Address: addr,
 			Coins: sdk.Coins{
 				sdk.NewInt64Coin(fmt.Sprintf("%stoken", nodeDirName), 1000),
@@ -206,7 +204,7 @@ func initTestnet(config *tmconfig.Config, cdc *codec.Codec) error {
 		tx := auth.NewStdTx([]sdk.Msg{msg}, auth.StdFee{}, []auth.StdSignature{}, memo)
 		txBldr := authtx.NewTxBuilderFromCLI().WithChainID(chainID).WithMemo(memo)
 
-		signedTx, err := txBldr.SignStdTx(nodeDirName, gaiaApp.DefaultKeyPass, tx, false)
+		signedTx, err := txBldr.SignStdTx(nodeDirName, app.DefaultKeyPass, tx, false)
 		if err != nil {
 			_ = os.RemoveAll(outDir)
 			return err
@@ -246,11 +244,11 @@ func initTestnet(config *tmconfig.Config, cdc *codec.Codec) error {
 }
 
 func initGenFiles(
-	cdc *codec.Codec, chainID string, accs []gaiaApp.GenesisAccount,
+	cdc *codec.Codec, chainID string, accs []app.GenesisAccount,
 	genFiles []string, numValidators int,
 ) error {
 
-	appGenState := gaiaApp.NewDefaultGenesisState()
+	appGenState := app.NewDefaultGenesisState()
 	appGenState.Accounts = accs
 
 	appGenStateJSON, err := codec.MarshalJSONIndent(cdc, appGenState)

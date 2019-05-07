@@ -38,6 +38,12 @@ import (
 	"github.com/tendermint/tmlibs/cli"
 )
 
+const (
+	appName = "TruchainApp"
+	// DefaultKeyPass contains the default key password for genesis transactions
+	DefaultKeyPass = "12345678"
+)
+
 // default home directories for expected binaries
 var (
 	DefaultCLIHome  = os.ExpandEnv("$HOME/.trucli")
