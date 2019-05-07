@@ -329,7 +329,10 @@ func (ta *TruAPI) RegisterResolvers() {
 		"challengeThresholdPercent": func(_ context.Context, p params.Params) string { return "0" },
 	})
 
-	ta.GraphQLClient.RegisterPaginatedQueryResolver("paginated_stories", ta.storiesResolver)
+	ta.GraphQLClient.RegisterPaginatedQueryResolverWithFilter("paginated_stories", ta.storiesResolver, map[string]interface{}{
+		"body": func(_ context.Context, q story.Story) string { return q.Body },
+	})
+
 	ta.GraphQLClient.RegisterQueryResolver("story", ta.storyResolver)
 	ta.GraphQLClient.RegisterPaginatedObjectResolver("Story", "iD", story.Story{}, map[string]interface{}{
 		"id":                  func(_ context.Context, q story.Story) int64 { return q.ID },
