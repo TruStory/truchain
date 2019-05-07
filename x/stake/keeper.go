@@ -166,44 +166,14 @@ func (k Keeper) ValidateStoryState(ctx sdk.Context, storyID int64) sdk.Error {
 }
 
 // Interest calculates interest for staked amount
-func (k Keeper) interest(
-	ctx sdk.Context,
-	amount sdk.Coin,
-	period time.Duration) sdk.Int {
+func (k Keeper) interest(ctx sdk.Context, amount sdk.Coin, period time.Duration) sdk.Int {
+	interestRate := k.GetParams(ctx).InterestRate
 
-	// TODO: keep track of total supply
-	// https://github.com/TruStory/truchain/issues/22
-
-	totalSupply := sdk.NewDec(1000000000000000)
-
-	// inputs
-	maxAmount := totalSupply
-	amountWeight := k.GetParams(ctx).AmountWeight
-	periodWeight := k.GetParams(ctx).PeriodWeight
-	maxInterestRate := k.GetParams(ctx).MaxInterestRate
-	maxPeriod := k.storyKeeper.GetParams(ctx).ExpireDuration
-
-	// type cast values to unitless decimals for math operations
 	periodDec := sdk.NewDec(int64(period))
-	maxPeriodDec := sdk.NewDec(int64(maxPeriod))
 	amountDec := sdk.NewDecFromInt(amount.Amount)
 
-	// normalize amount and period to 0 - 1
-	normalizedAmount := amountDec.Quo(maxAmount)
-	normalizedPeriod := periodDec.Quo(maxPeriodDec)
-
-	// apply weights to normalized amount and period
-	weightedAmount := normalizedAmount.Mul(amountWeight)
-	weightedPeriod := normalizedPeriod.Mul(periodWeight)
-
-	// calculate interest
-	interestRate := maxInterestRate.Mul(weightedAmount.Add(weightedPeriod))
-	// convert rate to a value
-	minInterestRate := k.GetParams(ctx).MinInterestRate
-	if interestRate.LT(minInterestRate) {
-		interestRate = minInterestRate
-	}
-	interest := amountDec.Mul(interestRate)
+	oneYearDec := sdk.NewDec(int64(time.Hour * 24 * 365))
+	interest := interestRate.Mul(periodDec.Quo(oneYearDec)).Mul(amountDec)
 
 	return interest.RoundInt()
 }

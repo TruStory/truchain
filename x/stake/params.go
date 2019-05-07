@@ -11,35 +11,26 @@ import (
 // store keys for voting params
 var (
 	KeyMaxAmount        = []byte("maxAmount")
-	KeyMinInterestRate  = []byte("minInterestRate")
-	KeyMaxInterestRate  = []byte("maxInterestRate")
 	KeyMajorityPercent  = []byte("majorityPercent")
-	KeyAmountWeight     = []byte("amountWeight")
-	KeyPeriodWeight     = []byte("periodWeight")
 	KeyStakeToCredRatio = []byte("stakeToCredRatio")
+	KeyInterestRate     = []byte("interestRate")
 )
 
 // Params holds parameters for voting
 type Params struct {
 	MaxAmount        sdk.Coin `json:"max_amount"`
-	MinInterestRate  sdk.Dec  `json:"min_interest_rate"`
-	MaxInterestRate  sdk.Dec  `json:"max_interest_rate"`
 	MajorityPercent  sdk.Dec  `json:"majority_percent"`
-	AmountWeight     sdk.Dec  `json:"amount_weight"`
-	PeriodWeight     sdk.Dec  `json:"period_weight"`
 	StakeToCredRatio sdk.Int  `json:"stake_to_cred_ratio"`
+	InterestRate     sdk.Dec  `json:"interest_rate"`
 }
 
 // DefaultParams is the default parameters for voting
 func DefaultParams() Params {
 	return Params{
 		MaxAmount:        sdk.NewCoin(app.StakeDenom, sdk.NewInt(100*app.Shanev)),
-		AmountWeight:     sdk.NewDecWithPrec(333, 3), // 33.3%
-		PeriodWeight:     sdk.NewDecWithPrec(667, 3), // 66.7%
-		MinInterestRate:  sdk.ZeroDec(),              // 0%
-		MaxInterestRate:  sdk.NewDecWithPrec(10, 2),  // 10%
-		MajorityPercent:  sdk.NewDecWithPrec(51, 2),  // 51%
-		StakeToCredRatio: sdk.NewInt(10),             // 10:1 ratio
+		MajorityPercent:  sdk.NewDecWithPrec(51, 2), // 51%
+		StakeToCredRatio: sdk.NewInt(10),            // 10:1 ratio
+		InterestRate:     sdk.NewDecWithPrec(25, 2), // 25% for Year 1
 	}
 }
 
@@ -47,10 +38,7 @@ func DefaultParams() Params {
 func (p *Params) KeyValuePairs() params.KeyValuePairs {
 	return params.KeyValuePairs{
 		{Key: KeyMaxAmount, Value: &p.MaxAmount},
-		{Key: KeyMinInterestRate, Value: &p.MinInterestRate},
-		{Key: KeyMaxInterestRate, Value: &p.MaxInterestRate},
-		{Key: KeyAmountWeight, Value: &p.AmountWeight},
-		{Key: KeyPeriodWeight, Value: &p.PeriodWeight},
+		{Key: KeyInterestRate, Value: &p.InterestRate},
 		{Key: KeyMajorityPercent, Value: &p.MajorityPercent},
 		{Key: KeyStakeToCredRatio, Value: &p.StakeToCredRatio},
 	}
