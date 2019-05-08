@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/TruStory/truchain/x/trubank"
+	abci "github.com/tendermint/tendermint/abci/types"
 
 	app "github.com/TruStory/truchain/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -239,9 +240,16 @@ func TestRedistributeStakeNoMajority(t *testing.T) {
 func TestDistributeInterest(t *testing.T) {
 	ctx, k := mockDB()
 
+	blockTime := time.Now()
+	ctx = ctx.WithBlockHeader(abci.Header{Time: blockTime})
+
+	// 10,000,000,000 amount
+	//     20,547,945 interest ✅
 	amount := sdk.NewCoin("trusteak", sdk.NewInt(10*app.Shanev))
 	creator1 := sdk.AccAddress([]byte{1, 2})
 	creator2 := sdk.AccAddress([]byte{2, 4})
+	voteEndTime := blockTime.Add(-time.Hour * 24 * 3)
+
 	trueVote := Vote{
 		ID:         1,
 		StoryID:    1,
@@ -249,7 +257,7 @@ func TestDistributeInterest(t *testing.T) {
 		ArgumentID: 0,
 		Creator:    creator1,
 		Vote:       true,
-		Timestamp:  app.NewTimestamp(ctx.BlockHeader()),
+		Timestamp:  app.NewTimestamp(abci.Header{Time: voteEndTime}),
 	}
 	backingVote := FakeStaker{&trueVote}
 
@@ -260,7 +268,7 @@ func TestDistributeInterest(t *testing.T) {
 		ArgumentID: 0,
 		Creator:    creator2,
 		Vote:       false,
-		Timestamp:  app.NewTimestamp(ctx.BlockHeader()),
+		Timestamp:  app.NewTimestamp(abci.Header{Time: voteEndTime}),
 	}
 	challengeVote := FakeStaker{&falseVote}
 
@@ -275,15 +283,15 @@ func TestDistributeInterest(t *testing.T) {
 	assert.Equal(t, trubank.Interest, transactions[0].TransactionType)
 	assert.Equal(t, trubank.Interest, transactions[1].TransactionType)
 	assert.Equal(t, trubank.Interest, transactions[2].TransactionType)
-	assert.Equal(t, "3330trusteak", transactions[0].Amount.String())
-	assert.Equal(t, "3330trusteak", transactions[1].Amount.String())
-	assert.Equal(t, "3330trusteak", transactions[2].Amount.String())
+	assert.Equal(t, "20547945trusteak", transactions[0].Amount.String())
+	assert.Equal(t, "20547945trusteak", transactions[1].Amount.String())
+	assert.Equal(t, "20547945trusteak", transactions[2].Amount.String())
 
 	transactions, err = k.truBankKeeper.TransactionsByCreator(ctx, creator2)
 	assert.NoError(t, err)
 	assert.Len(t, transactions, 1)
 	assert.Equal(t, trubank.Interest, transactions[0].TransactionType)
-	assert.Equal(t, "3330trusteak", transactions[0].Amount.String())
+	assert.Equal(t, "20547945trusteak", transactions[0].Amount.String())
 }
 
 func Test_interest_3days(t *testing.T) {
