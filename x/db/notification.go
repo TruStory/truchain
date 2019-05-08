@@ -16,13 +16,24 @@ type NotificationsCountResponse struct {
 const (
 	NotificationStoryAction NotificationType = iota
 	NotificationCommentAction
+	NotificationMentionAction
+)
+
+// MentionType represents  the types on how an user can be mentioned.
+type MentionType int
+
+// Types of mentions.
+const (
+	MentionArgument MentionType = iota
+	MentionComment
 )
 
 // NotificationMeta  contains extra payload information.
 type NotificationMeta struct {
-	ArgumentID *int64 `json:"argumentId,omitempty" graphql:"argumentId"`
-	StoryID    *int64 `json:"storyId,omitempty" graphql:"storyId"`
-	CommentID  *int64 `json:"commentId,omitempty" graphql:"commentId"`
+	ArgumentID  *int64 `json:"argumentId,omitempty" graphql:"argumentId"`
+	StoryID     *int64 `json:"storyId,omitempty" graphql:"storyId"`
+	CommentID   *int64 `json:"commentId,omitempty" graphql:"commentId"`
+	MentionType *int64 `json:"mentionType,omitempty" graphql:"mentionType"`
 }
 
 // NotificationEvent represents a notification sent to an user.

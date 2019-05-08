@@ -44,6 +44,12 @@ type QueryTrasanctionsByCreatorAndCategoryParams struct {
 	Denom   *string `json:",omitempty"`
 }
 
+// QueryStakeArgumentByIDAndType is  query params for getting an argument by its stake.
+type QueryStakeArgumentByIDAndType struct {
+	StakeID int64 `graphql:"stakeId"`
+	Backing bool  `graphql:"backing"`
+}
+
 // UnmarshalQueryParams unmarshals the request query from a client
 func UnmarshalQueryParams(req abci.RequestQuery, params interface{}) (sdkErr sdk.Error) {
 	parseErr := json.Unmarshal(req.Data, params)

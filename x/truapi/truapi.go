@@ -433,5 +433,8 @@ func (ta *TruAPI) RegisterResolvers() {
 			return ta.storyResolver(ctx, story.QueryStoryByIDParams{ID: q.StoryID})
 		},
 	})
+
+	ta.GraphQLClient.RegisterQueryResolver("stakeArgument", ta.stakeArgumentResolver)
+	ta.GraphQLClient.RegisterObjectResolver("StakeArgument", StakeArgument{}, map[string]interface{}{})
 	ta.GraphQLClient.BuildSchema()
 }
