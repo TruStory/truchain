@@ -20,7 +20,7 @@ const (
 )
 
 // MentionType represents  the types on how an user can be mentioned.
-type MentionType int
+type MentionType int64
 
 // Types of mentions.
 const (
