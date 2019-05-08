@@ -30,10 +30,10 @@ const (
 
 // NotificationMeta  contains extra payload information.
 type NotificationMeta struct {
-	ArgumentID  *int64 `json:"argumentId,omitempty" graphql:"argumentId"`
-	StoryID     *int64 `json:"storyId,omitempty" graphql:"storyId"`
-	CommentID   *int64 `json:"commentId,omitempty" graphql:"commentId"`
-	MentionType *int64 `json:"mentionType,omitempty" graphql:"mentionType"`
+	ArgumentID  *int64       `json:"argumentId,omitempty" graphql:"argumentId"`
+	StoryID     *int64       `json:"storyId,omitempty" graphql:"storyId"`
+	CommentID   *int64       `json:"commentId,omitempty" graphql:"commentId"`
+	MentionType *MentionType `json:"mentionType,omitempty" graphql:"mentionType"`
 }
 
 // NotificationEvent represents a notification sent to an user.
