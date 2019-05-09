@@ -147,22 +147,18 @@ func (ta *TruAPI) likesObjectResolver(_ context.Context, q app.QueryByIDParams) 
 }
 
 func (ta *TruAPI) backingResolver(
-	_ context.Context, q app.QueryByStoryIDAndCreatorParams) backing.Backing {
-
-	res := ta.RunQuery("backings/storyIDAndCreator", q)
-
+	_ context.Context, q app.QueryByIDParams) backing.Backing {
+	res := ta.RunQuery("backings/id", app.QueryByIDParams{ID: q.ID})
 	if res.Code != 0 {
-		fmt.Println("Resolver err: ", res)
+		fmt.Println("error getting backing", res)
 		return backing.Backing{}
 	}
-
-	backing := new(backing.Backing)
-	err := json.Unmarshal(res.Value, backing)
+	backing := backing.Backing{}
+	err := json.Unmarshal(res.Value, &backing)
 	if err != nil {
 		panic(err)
 	}
-
-	return *backing
+	return backing
 }
 
 func (ta *TruAPI) backingsResolver(
@@ -237,21 +233,19 @@ func (ta *TruAPI) categoryResolver(ctx context.Context, q category.QueryCategory
 }
 
 func (ta *TruAPI) challengeResolver(
-	_ context.Context, q app.QueryByStoryIDAndCreatorParams) challenge.Challenge {
-	res := ta.RunQuery("challenges/storyIDAndCreator", q)
+	_ context.Context, q app.QueryByIDParams) challenge.Challenge {
+	res := ta.RunQuery("challenges/id", q)
 
 	if res.Code != 0 {
-		fmt.Println("Resolver err: ", res)
+		fmt.Println("error getting challenge", res)
 		return challenge.Challenge{}
 	}
-
-	challenge := new(challenge.Challenge)
-	err := json.Unmarshal(res.Value, challenge)
+	challenge := challenge.Challenge{}
+	err := json.Unmarshal(res.Value, &challenge)
 	if err != nil {
 		panic(err)
 	}
-
-	return *challenge
+	return challenge
 }
 
 func (ta *TruAPI) challengesResolver(
