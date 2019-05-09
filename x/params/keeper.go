@@ -56,11 +56,8 @@ func (k Keeper) Params(ctx sdk.Context) Params {
 		},
 		StakeParams: stake.Params{
 			MaxAmount:        k.stakeKeeper.GetParams(ctx).MaxAmount,
-			MinInterestRate:  k.stakeKeeper.GetParams(ctx).MinInterestRate,
-			MaxInterestRate:  k.stakeKeeper.GetParams(ctx).MaxInterestRate,
+			InterestRate:     k.stakeKeeper.GetParams(ctx).InterestRate,
 			MajorityPercent:  k.stakeKeeper.GetParams(ctx).MajorityPercent,
-			AmountWeight:     k.stakeKeeper.GetParams(ctx).AmountWeight,
-			PeriodWeight:     k.stakeKeeper.GetParams(ctx).PeriodWeight,
 			StakeToCredRatio: k.stakeKeeper.GetParams(ctx).StakeToCredRatio,
 		},
 		StoryParams: story.Params{
