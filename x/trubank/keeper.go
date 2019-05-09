@@ -233,6 +233,21 @@ func (k Keeper) FilteredTransactionsByCreator(
 	return
 }
 
+// FilteredTransactions returns all the transactions  filtered by type.
+func (k Keeper) FilteredTransactions(
+	ctx sdk.Context,
+	types []TransactionType) (transactions []Transaction, err sdk.Error) {
+
+	iter := sdk.KVStoreReversePrefixIterator(k.GetStore(ctx), []byte(k.StorePrefix()))
+	var val []byte
+	for iter.Valid() {
+		val = iter.Value()
+		fmt.Println(val)
+	}
+	iter.Close()
+	return
+}
+
 func hasType(t TransactionType, types []TransactionType) bool {
 	for _, tType := range types {
 		if tType == t {

@@ -4,7 +4,6 @@ import (
 	"time"
 
 	app "github.com/TruStory/truchain/types"
-	"github.com/TruStory/truchain/x/argument"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
@@ -28,9 +27,4 @@ type CommentNotificationRequest struct {
 	StoryID         int64     `json:"storyId"`
 	Creator         string    `json:"creator"`
 	Timestamp       time.Time `json:"timestamp"`
-}
-
-// StakeArgument is the argument that a stake references to.
-type StakeArgument struct {
-	argument.Argument
 }

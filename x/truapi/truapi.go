@@ -218,8 +218,8 @@ func (ta *TruAPI) RegisterResolvers() {
 		return ta.storyResolver(ctx, story.QueryStoryByIDParams{ID: storyID})
 	}
 
-	getArgument := func(ctx context.Context, argumentID int64) argument.Argument {
-		return ta.argumentResolver(ctx, app.QueryArgumentByID{ID: argumentID})
+	getArgument := func(ctx context.Context, argumentID int64, raw bool) argument.Argument {
+		return ta.argumentResolver(ctx, app.QueryArgumentByID{ID: argumentID, Raw: raw})
 	}
 
 	ta.GraphQLClient.RegisterQueryResolver("comments", ta.commentsResolver)
@@ -267,8 +267,12 @@ func (ta *TruAPI) RegisterResolvers() {
 
 	ta.GraphQLClient.RegisterQueryResolver("backing", ta.backingResolver)
 	ta.GraphQLClient.RegisterObjectResolver("Backing", backing.Backing{}, map[string]interface{}{
-		"amount":    func(ctx context.Context, q backing.Backing) sdk.Coin { return q.Amount() },
-		"argument":  func(ctx context.Context, q backing.Backing) argument.Argument { return getArgument(ctx, q.ArgumentID) },
+		"amount": func(ctx context.Context, q backing.Backing) sdk.Coin { return q.Amount() },
+		"argument": func(ctx context.Context, q backing.Backing, args struct {
+			Raw bool `graphql:",optional"`
+		}) argument.Argument {
+			return getArgument(ctx, q.ArgumentID, args.Raw)
+		},
 		"vote":      func(ctx context.Context, q backing.Backing) bool { return q.VoteChoice() },
 		"creator":   func(ctx context.Context, q backing.Backing) users.User { return getUser(ctx, q.Creator()) },
 		"timestamp": func(ctx context.Context, q backing.Backing) app.Timestamp { return q.Timestamp() },
@@ -286,8 +290,10 @@ func (ta *TruAPI) RegisterResolvers() {
 	ta.GraphQLClient.RegisterQueryResolver("challenge", ta.challengeResolver)
 	ta.GraphQLClient.RegisterObjectResolver("Challenge", challenge.Challenge{}, map[string]interface{}{
 		"amount": func(ctx context.Context, q challenge.Challenge) sdk.Coin { return q.Amount() },
-		"argument": func(ctx context.Context, q challenge.Challenge) argument.Argument {
-			return getArgument(ctx, q.ArgumentID)
+		"argument": func(ctx context.Context, q challenge.Challenge, args struct {
+			Raw bool `graphql:",optional"`
+		}) argument.Argument {
+			return getArgument(ctx, q.ArgumentID, args.Raw)
 		},
 		"vote":      func(ctx context.Context, q challenge.Challenge) bool { return q.VoteChoice() },
 		"creator":   func(ctx context.Context, q challenge.Challenge) users.User { return getUser(ctx, q.Creator()) },
@@ -437,7 +443,5 @@ func (ta *TruAPI) RegisterResolvers() {
 		},
 	})
 
-	ta.GraphQLClient.RegisterQueryResolver("stakeArgument", ta.stakeArgumentResolver)
-	ta.GraphQLClient.RegisterObjectResolver("StakeArgument", StakeArgument{}, map[string]interface{}{})
 	ta.GraphQLClient.BuildSchema()
 }
