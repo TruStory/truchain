@@ -34,4 +34,7 @@ func TestHumanReadable(t *testing.T) {
 	for _, testCase := range testCases {
 		assert.Equal(t, testCase.output, HumanReadable(sdk.NewCoin("steak", testCase.amount)))
 	}
+
+	// return "0" for empty struct
+	assert.Equal(t, "0", HumanReadable(sdk.Coin{}))
 }
