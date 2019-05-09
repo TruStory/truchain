@@ -169,10 +169,11 @@ func (k Keeper) ValidateStoryState(ctx sdk.Context, storyID int64) sdk.Error {
 func (k Keeper) interest(ctx sdk.Context, amount sdk.Coin, period time.Duration) sdk.Int {
 	interestRate := k.GetParams(ctx).InterestRate
 
-	periodDec := sdk.NewDec(int64(period))
+	periodDec := sdk.NewDec(period.Nanoseconds())
 	amountDec := sdk.NewDecFromInt(amount.Amount)
 
-	oneYearDec := sdk.NewDec(int64(time.Hour * 24 * 365))
+	oneYear := time.Hour * 24 * 365
+	oneYearDec := sdk.NewDec(oneYear.Nanoseconds())
 	interest := interestRate.Mul(periodDec.Quo(oneYearDec)).Mul(amountDec)
 
 	return interest.RoundInt()
