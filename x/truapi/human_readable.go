@@ -8,6 +8,8 @@ import (
 )
 
 // HumanReadable formats a coin amount to be human readable
+// Duplicated inside of Octopus until truapi package is moved there
+// If modifying, modify Octopus as well
 func HumanReadable(coin sdk.Coin) string {
 	shanevs := sdk.NewDecFromIntWithPrec(coin.Amount, 9).String()
 	parts := strings.Split(shanevs, ".")
