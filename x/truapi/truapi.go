@@ -255,8 +255,28 @@ func (ta *TruAPI) RegisterResolvers() {
 			}
 			return ta.reactionsCountResolver(ctx, rxnable)
 		},
+		"reactions": func(ctx context.Context, q argument.Argument) []db.Reaction {
+			rxnable := db.Reactionable{
+				Type: "arguments",
+				ID:   q.ID,
+			}
+			return ta.reactionsResolver(ctx, rxnable)
+		},
 		"timestamp": func(_ context.Context, q argument.Argument) app.Timestamp { return q.Timestamp },
 		"comments":  ta.commentsResolver,
+	})
+
+	ta.GraphQLClient.RegisterObjectResolver("Reaction", db.Reaction{}, map[string]interface{}{
+		"id":   func(_ context.Context, q db.Reaction) int64 { return q.ID },
+		"type": func(_ context.Context, q db.Reaction) db.ReactionType { return q.ReactionType },
+		"creator": func(ctx context.Context, q db.Reaction) users.User {
+			creator, err := sdk.AccAddressFromBech32(q.Creator)
+			if err != nil {
+				// [shanev] TODO: handle error better, see https://github.com/TruStory/truchain/issues/199
+				panic(err)
+			}
+			return getUser(ctx, creator)
+		},
 	})
 
 	ta.GraphQLClient.RegisterObjectResolver("Like", argument.Like{}, map[string]interface{}{

@@ -461,3 +461,13 @@ func (ta *TruAPI) reactionsCountResolver(ctx context.Context, rxnable db.Reactio
 	}
 	return reactionsCount
 }
+
+func (ta *TruAPI) reactionsResolver(ctx context.Context, rxnable db.Reactionable) []db.Reaction {
+	reactions, err := ta.DBClient.ReactionsByReactionable(rxnable)
+	fmt.Printf("\n\nReactions -- %v - %v\n\n", rxnable, reactions)
+	if err != nil {
+		fmt.Printf("\n\n ERROR -- %v\n\n", err)
+		panic(err)
+	}
+	return reactions
+}

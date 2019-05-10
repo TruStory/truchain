@@ -55,8 +55,8 @@ func (c *Client) ReactionsByReactionable(reactionable Reactionable) ([]Reaction,
 	err := c.Model(&reactions).
 		Where("reactionable_type = ?", reactionable.Type).
 		Where("reactionable_id = ?", reactionable.ID).
-		Where("deleted_at IS NOT NULL").
-		Order("timestamp DESC").
+		Where("deleted_at IS NULL").
+		Order("created_at DESC").
 		Select()
 
 	if err != nil {
@@ -90,7 +90,7 @@ func (c *Client) ReactionsByAddress(addr string) ([]Reaction, error) {
 	err := c.Model(&reactions).
 		Where("creator = ?", addr).
 		Where("deleted_at IS NOT NULL").
-		Order("timestamp DESC").
+		Order("created_at DESC").
 		Select()
 
 	if err != nil {
@@ -100,13 +100,14 @@ func (c *Client) ReactionsByAddress(addr string) ([]Reaction, error) {
 }
 
 // ReactionByAddressAndReactionable returns the reaction left by a particular user on a particular reactionable
-func (c *Client) ReactionByAddressAndReactionable(addr string, reactionable Reactionable) (*Reaction, error) {
+func (c *Client) ReactionByAddressAndReactionable(addr string, reaction ReactionType, reactionable Reactionable) (*Reaction, error) {
 	rxn := new(Reaction)
 
 	err := c.Model(rxn).
 		Where("creator = ?", addr).
 		Where("reactionable_type = ?", reactionable.Type).
 		Where("reactionable_id = ?", reactionable.ID).
+		Where("reaction_type = ?", reaction).
 		Where("deleted_at IS NULL").
 		First()
 
@@ -124,10 +125,11 @@ func (c *Client) ReactionByAddressAndReactionable(addr string, reactionable Reac
 // ReactOnReactionable leaves a reaction by a user on a reactionable
 func (c *Client) ReactOnReactionable(addr string, reaction ReactionType, reactionable Reactionable) error {
 	// checking if already exists
-	rxn, err := c.ReactionByAddressAndReactionable(addr, reactionable)
+	rxn, err := c.ReactionByAddressAndReactionable(addr, reaction, reactionable)
 	if err != nil {
 		return err
 	}
+
 	// if found, then, do nothing
 	if rxn != nil {
 		return nil
