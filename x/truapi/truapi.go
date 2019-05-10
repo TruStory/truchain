@@ -321,17 +321,14 @@ func (ta *TruAPI) RegisterResolvers() {
 	})
 
 	ta.GraphQLClient.RegisterObjectResolver("Coin", sdk.Coin{}, map[string]interface{}{
-		"amount": func(_ context.Context, q sdk.Coin) string { return q.Amount.String() },
-		"denom":  func(_ context.Context, q sdk.Coin) string { return q.Denom },
-		"unit":   func(_ context.Context, q sdk.Coin) string { return "preethi" },
+		"amount":        func(_ context.Context, q sdk.Coin) string { return q.Amount.String() },
+		"denom":         func(_ context.Context, q sdk.Coin) string { return q.Denom },
+		"humanReadable": func(_ context.Context, q sdk.Coin) string { return HumanReadable(q) },
 	})
 
 	ta.GraphQLClient.RegisterQueryResolver("params", ta.paramsResolver)
 	ta.GraphQLClient.RegisterObjectResolver("Params", params.Params{}, map[string]interface{}{
-		"amountWeight":     func(_ context.Context, p params.Params) string { return p.StakeParams.AmountWeight.String() },
-		"periodWeight":     func(_ context.Context, p params.Params) string { return p.StakeParams.PeriodWeight.String() },
-		"minInterestRate":  func(_ context.Context, p params.Params) string { return p.StakeParams.MinInterestRate.String() },
-		"maxInterestRate":  func(_ context.Context, p params.Params) string { return p.StakeParams.MaxInterestRate.String() },
+		"interestRate":     func(_ context.Context, p params.Params) string { return p.StakeParams.InterestRate.String() },
 		"maxStakeAmount":   func(_ context.Context, p params.Params) string { return p.StakeParams.MaxAmount.Amount.String() },
 		"stakeToCredRatio": func(_ context.Context, p params.Params) string { return p.StakeParams.StakeToCredRatio.String() },
 
@@ -348,11 +345,10 @@ func (ta *TruAPI) RegisterResolvers() {
 		"stakeDenom":        func(_ context.Context, _ params.Params) string { return app.StakeDenom },
 
 		// Deprecated
-		"storyMinLength":            func(_ context.Context, p params.Params) int { return p.StoryParams.MinStoryLength },
-		"storyMaxLength":            func(_ context.Context, p params.Params) int { return p.StoryParams.MaxStoryLength },
-		"storyVotingDuration":       func(_ context.Context, p params.Params) string { return "0" },
-		"challengeMinThreshold":     func(_ context.Context, p params.Params) string { return "0" },
-		"challengeThresholdPercent": func(_ context.Context, p params.Params) string { return "0" },
+		"amountWeight":    func(_ context.Context, p params.Params) string { return "0" },
+		"periodWeight":    func(_ context.Context, p params.Params) string { return "0" },
+		"minInterestRate": func(_ context.Context, p params.Params) string { return "0" },
+		"maxInterestRate": func(_ context.Context, p params.Params) string { return "0" },
 	})
 
 	ta.GraphQLClient.RegisterPaginatedQueryResolverWithFilter("paginated_stories", ta.storiesResolver, map[string]interface{}{

@@ -635,7 +635,7 @@
             "deprecationReason": "",
             "description": "",
             "isDeprecated": false,
-            "name": "unit",
+            "name": "humanReadable",
             "type": {
               "kind": "NON_NULL",
               "name": "",
