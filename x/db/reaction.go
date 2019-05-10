@@ -90,7 +90,7 @@ func (c *Client) ReactionsByAddress(addr string) ([]Reaction, error) {
 
 	err := c.Model(&reactions).
 		Where("creator = ?", addr).
-		Where("deleted_at IS NULL").
+		Where("deleted_at IS NOT NULL").
 		Order("created_at DESC").
 		Select()
 

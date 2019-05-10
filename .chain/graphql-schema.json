@@ -1770,22 +1770,6 @@
             "deprecationReason": "",
             "description": "",
             "isDeprecated": false,
-            "name": "challengeMinThreshold",
-            "type": {
-              "kind": "NON_NULL",
-              "name": "",
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "string",
-                "ofType": null
-              }
-            }
-          },
-          {
-            "args": [],
-            "deprecationReason": "",
-            "description": "",
-            "isDeprecated": false,
             "name": "challengeParams",
             "type": {
               "kind": "NON_NULL",
@@ -1793,22 +1777,6 @@
               "ofType": {
                 "kind": "OBJECT",
                 "name": "Params",
-                "ofType": null
-              }
-            }
-          },
-          {
-            "args": [],
-            "deprecationReason": "",
-            "description": "",
-            "isDeprecated": false,
-            "name": "challengeThresholdPercent",
-            "type": {
-              "kind": "NON_NULL",
-              "name": "",
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "string",
                 "ofType": null
               }
             }
@@ -1857,6 +1825,22 @@
               "ofType": {
                 "kind": "OBJECT",
                 "name": "Params",
+                "ofType": null
+              }
+            }
+          },
+          {
+            "args": [],
+            "deprecationReason": "",
+            "description": "",
+            "isDeprecated": false,
+            "name": "interestRate",
+            "type": {
+              "kind": "NON_NULL",
+              "name": "",
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "string",
                 "ofType": null
               }
             }
@@ -2026,38 +2010,6 @@
             "deprecationReason": "",
             "description": "",
             "isDeprecated": false,
-            "name": "storyMaxLength",
-            "type": {
-              "kind": "NON_NULL",
-              "name": "",
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "int",
-                "ofType": null
-              }
-            }
-          },
-          {
-            "args": [],
-            "deprecationReason": "",
-            "description": "",
-            "isDeprecated": false,
-            "name": "storyMinLength",
-            "type": {
-              "kind": "NON_NULL",
-              "name": "",
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "int",
-                "ofType": null
-              }
-            }
-          },
-          {
-            "args": [],
-            "deprecationReason": "",
-            "description": "",
-            "isDeprecated": false,
             "name": "storyParams",
             "type": {
               "kind": "NON_NULL",
@@ -2065,22 +2017,6 @@
               "ofType": {
                 "kind": "OBJECT",
                 "name": "Params",
-                "ofType": null
-              }
-            }
-          },
-          {
-            "args": [],
-            "deprecationReason": "",
-            "description": "",
-            "isDeprecated": false,
-            "name": "storyVotingDuration",
-            "type": {
-              "kind": "NON_NULL",
-              "name": "",
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "string",
                 "ofType": null
               }
             }
