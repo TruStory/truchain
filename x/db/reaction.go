@@ -71,6 +71,7 @@ func (c *Client) ReactionsCountByReactionable(reactionable Reactionable) ([]Reac
 	var result []ReactionsCount
 
 	err := c.Model((*Reaction)(nil)).
+		Where("deleted_at IS NULL").
 		ColumnExpr("reaction_type as type").
 		ColumnExpr("count(*) AS count").
 		Group("reaction_type").
@@ -89,7 +90,7 @@ func (c *Client) ReactionsByAddress(addr string) ([]Reaction, error) {
 
 	err := c.Model(&reactions).
 		Where("creator = ?", addr).
-		Where("deleted_at IS NOT NULL").
+		Where("deleted_at IS NULL").
 		Order("created_at DESC").
 		Select()
 
