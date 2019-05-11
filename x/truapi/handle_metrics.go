@@ -132,9 +132,6 @@ func (ta *TruAPI) HandleMetrics(w http.ResponseWriter, r *http.Request) {
 			backingAmount = backingAmount.Plus(b.Amount())
 			creator := b.Creator().String()
 			mapUserStakeByStoryID[mapUserStakeByStoryIDKey(creator, b.StoryID())] = b.Amount()
-			if b.StoryID() == 235 {
-				fmt.Println("backed", mapUserStakeByStoryIDKey(creator, b.StoryID()), b.Amount())
-			}
 			backerMetrics := m.GetUserMetrics(creator)
 			backerMetrics.addStakedAmount(b.Amount())
 			if s.Status == story.Pending {
@@ -160,9 +157,6 @@ func (ta *TruAPI) HandleMetrics(w http.ResponseWriter, r *http.Request) {
 		for _, c := range challenges {
 			challengeAmount = challengeAmount.Plus(c.Amount())
 			creator := c.Creator().String()
-			if c.StoryID() == 235 {
-				fmt.Println("challenge", mapUserStakeByStoryIDKey(creator, c.StoryID()), c.Amount())
-			}
 			mapUserStakeByStoryID[mapUserStakeByStoryIDKey(creator, c.StoryID())] = c.Amount()
 			challengerMetrics := m.GetUserMetrics(creator)
 			challengerMetrics.addStakedAmount(c.Amount())
@@ -271,7 +265,7 @@ func (ta *TruAPI) HandleMetrics(w http.ResponseWriter, r *http.Request) {
 				continue
 			}
 
-			// this should not happend for any reason but just adding a safe check point.
+			// this should not happen for any reason but just adding a safe check point.
 			if reward.IsNegative() {
 				continue
 			}
