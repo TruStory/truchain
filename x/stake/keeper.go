@@ -144,6 +144,9 @@ func (k Keeper) DistributeInterest(ctx sdk.Context, votes []Voter) (app.Interest
 // ValidateAmount validates the stake amount
 func (k Keeper) ValidateAmount(ctx sdk.Context, amount sdk.Coin) sdk.Error {
 	maxAmount := k.GetParams(ctx).MaxAmount
+	if maxAmount.Denom != amount.Denom {
+		return sdk.ErrInvalidCoins("Coin denom mismatch")
+	}
 	if maxAmount.IsLT(amount) {
 		return ErrOverMaxAmount()
 	}

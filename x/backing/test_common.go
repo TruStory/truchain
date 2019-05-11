@@ -4,12 +4,10 @@ import (
 	"net/url"
 
 	"github.com/TruStory/truchain/x/argument"
-	"github.com/TruStory/truchain/x/trubank"
-
-	"github.com/TruStory/truchain/x/stake"
-
 	"github.com/TruStory/truchain/x/category"
+	"github.com/TruStory/truchain/x/stake"
 	"github.com/TruStory/truchain/x/story"
+	"github.com/TruStory/truchain/x/trubank"
 	"github.com/cosmos/cosmos-sdk/store"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth"
@@ -123,7 +121,7 @@ func mockDB() (
 func createFakeStory(ctx sdk.Context, sk story.Keeper, ck category.WriteKeeper) int64 {
 	body := "TruStory has it's own programmable native currency."
 	cat := createFakeCategory(ctx, ck)
-	creator := sdk.AccAddress([]byte{1, 2})
+	creator := sdk.AccAddress(ed25519.GenPrivKey().PubKey().Address())
 	storyType := story.Default
 	source := url.URL{}
 
