@@ -101,7 +101,7 @@ func TestNewChallenge_Duplicate(t *testing.T) {
 	creator := sdk.AccAddress([]byte{1, 2})
 
 	// give user some funds
-	bankKeeper.AddCoins(ctx, creator, sdk.Coins{amount.Plus(amount)})
+	bankKeeper.AddCoins(ctx, creator, sdk.Coins{amount.Add(amount)})
 
 	_, err := k.Create(ctx, storyID, amount, 0, argument, creator)
 	assert.Nil(t, err)

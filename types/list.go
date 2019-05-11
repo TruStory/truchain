@@ -2,164 +2,110 @@ package types
 
 import (
 	"fmt"
+	"strconv"
 
-	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/cosmos/cosmos-sdk/codec"
+	"github.com/cosmos/cosmos-sdk/store/types"
 )
 
-// UserList defines a list of users associated with a type.
-// Users could be backers, challengers, or voters.
-// Store layout:
-// [foreignStoreKey]:id:[keyID]:[storeKey]:users:[user] -> [valueID]
-type UserList struct {
-	foreignStoreKey sdk.StoreKey
+// Key for the length of the list
+func LengthKey() []byte {
+	return []byte{0x00}
 }
 
-// NewUserList creates a new `UserList`
-func NewUserList(foreignStoreKey sdk.StoreKey) UserList {
-	return UserList{foreignStoreKey}
+// Key for the elements of the list
+func ElemKey(index uint64) []byte {
+	return append([]byte{0x01}, []byte(fmt.Sprintf("%020d", index))...)
 }
 
-// Append adds a new key <-> value association
-func (l UserList) Append(
-	ctx sdk.Context, k WriteKeeper, keyID int64, user sdk.AccAddress, valueID int64) {
-	k.GetStore(ctx).Set(
-		l.typeByUserKey(ctx, k, keyID, user),
-		k.GetCodec().MustMarshalBinaryBare(valueID))
+// List defines an integer indexable mapper
+// It panics when the element type cannot be (un/)marshalled by the codec
+type List struct {
+	cdc   *codec.Codec
+	store types.KVStore
 }
 
-// Delete deletes a  key <-> value association from the underlying store.
-func (l UserList) Delete(
-	ctx sdk.Context, k WriteKeeper, keyID int64, user sdk.AccAddress) {
-	k.GetStore(ctx).Delete(l.typeByUserKey(ctx, k, keyID, user))
+// NewList constructs new List
+func NewList(cdc *codec.Codec, store types.KVStore) List {
+	return List{
+		cdc:   cdc,
+		store: store,
+	}
 }
 
-// Get gets a saved value id for the given key
-func (l UserList) Get(
-	ctx sdk.Context, k WriteKeeper, keyID int64, user sdk.AccAddress) (valueID int64) {
-
-	bz := k.GetStore(ctx).Get(l.typeByUserKey(ctx, k, keyID, user))
+// Len() returns the length of the list
+// The length is only increased by Push() and not decreased
+// List dosen't check if an index is in bounds
+// The user should check Len() before doing any actions
+func (m List) Len() (res uint64) {
+	bz := m.store.Get(LengthKey())
 	if bz == nil {
 		return 0
 	}
-	k.GetCodec().MustUnmarshalBinaryBare(bz, &valueID)
 
-	return valueID
+	m.cdc.MustUnmarshalBinaryLengthPrefixed(bz, &res)
+	return
 }
 
-// Includes returns true if the given key is found
-func (l UserList) Includes(
-	ctx sdk.Context, k WriteKeeper, keyID int64, user sdk.AccAddress) bool {
-
-	return l.Get(ctx, k, keyID, user) > 0
+// Get() returns the element by its index
+func (m List) Get(index uint64, ptr interface{}) error {
+	bz := m.store.Get(ElemKey(index))
+	return m.cdc.UnmarshalBinaryLengthPrefixed(bz, ptr)
 }
 
-// Map applies a function across the subspace of users on a key
-func (l UserList) Map(
-	ctx sdk.Context, k WriteKeeper, keyID int64, fn func(int64) sdk.Error) sdk.Error {
+// Set() stores the element to the given position
+// Setting element out of range will break length counting
+// Use Push() instead of Set() to append a new element
+func (m List) Set(index uint64, value interface{}) {
+	bz := m.cdc.MustMarshalBinaryLengthPrefixed(value)
+	m.store.Set(ElemKey(index), bz)
+}
 
-	// get store
-	store := k.GetStore(ctx)
+// Delete() deletes the element in the given position
+// Other elements' indices are preserved after deletion
+// Panics when the index is out of range
+func (m List) Delete(index uint64) {
+	m.store.Delete(ElemKey(index))
+}
 
-	// builds prefix
-	prefix := l.typeByUserSubspaceKey(ctx, k, keyID)
+// Push() inserts the element to the end of the list
+// It will increase the length when it is called
+func (m List) Push(value interface{}) {
+	length := m.Len()
+	m.Set(length, value)
+	m.store.Set(LengthKey(), m.cdc.MustMarshalBinaryLengthPrefixed(length+1))
+}
 
-	// iterates through keyspace to find all value ids
-	iter := sdk.KVStorePrefixIterator(store, prefix)
+// Iterate() is used to iterate over all existing elements in the list
+// Return true in the continuation to break
+// The second element of the continuation will indicate the position of the element
+// Using it with Get() will return the same one with the provided element
+
+// CONTRACT: No writes may happen within a domain while iterating over it.
+func (m List) Iterate(ptr interface{}, fn func(uint64) bool) {
+	iter := types.KVStorePrefixIterator(m.store, []byte{0x01})
 	defer iter.Close()
 	for ; iter.Valid(); iter.Next() {
-		var id int64
-		k.GetCodec().MustUnmarshalBinaryBare(iter.Value(), &id)
-		if err := fn(id); err != nil {
-			return err
+		v := iter.Value()
+		m.cdc.MustUnmarshalBinaryLengthPrefixed(v, ptr)
+
+		k := iter.Key()
+		s := string(k[len(k)-20:])
+
+		index, err := strconv.ParseUint(s, 10, 64)
+		if err != nil {
+			panic(err)
+		}
+
+		if fn(index) {
+			break
 		}
 	}
-
-	return nil
 }
 
-// ============================================================================
-
-// generates key "[foreignStoreKey]:id:[keyID]:[storeKey]:users:[user]"
-func (l UserList) typeByUserKey(
-	ctx sdk.Context, k WriteKeeper, keyID int64, user sdk.AccAddress) []byte {
-
-	key := fmt.Sprintf(
-		"%s:id:%d:%s:user:%s",
-		l.foreignStoreKey.Name(),
-		keyID,
-		k.GetStoreKey().Name(),
-		user.String())
-
-	return []byte(key)
-}
-
-// generates key "[foreignStoreKey]:id:[keyID]:[storeKey]:users:"
-func (l UserList) typeByUserSubspaceKey(
-	ctx sdk.Context, k WriteKeeper, keyID int64) []byte {
-
-	key := fmt.Sprintf(
-		"%s:id:%d:%s:user:",
-		l.foreignStoreKey.Name(),
-		keyID,
-		k.GetStoreKey().Name())
-
-	return []byte(key)
-}
-
-// USER QUERY FUNCTIONS
-
-// AppendToUser adds a new user+value <-> value association
-func (l UserList) AppendToUser(
-	ctx sdk.Context, k WriteKeeper, user sdk.AccAddress, valueID int64) {
-	k.GetStore(ctx).Set(
-		l.userAndValueKey(ctx, k, user, valueID),
-		k.GetCodec().MustMarshalBinaryBare(valueID))
-}
-
-// userAndValueKey generates a key with "[foreignStoreKey]:user:[user]:value[valueID]" to create quickly queriable user:value -> value associations
-func (l UserList) userAndValueKey(
-	ctx sdk.Context, k WriteKeeper, user sdk.AccAddress, valueID int64) []byte {
-
-	key := fmt.Sprintf(
-		"%s:user:%s:value:%d",
-		l.foreignStoreKey.Name(),
-		user.String(),
-		valueID)
-
-	return []byte(key)
-}
-
-func (l UserList) userAndValuePrefix(
-	ctx sdk.Context, k WriteKeeper, user sdk.AccAddress) []byte {
-
-	key := fmt.Sprintf(
-		"%s:user:%s",
-		l.foreignStoreKey.Name(),
-		user.String())
-
-	return []byte(key)
-}
-
-// MapByUser applies a function
-func (l UserList) MapByUser(
-	ctx sdk.Context, k WriteKeeper, user sdk.AccAddress, fn func(int64) sdk.Error) sdk.Error {
-
-	// get store
-	store := k.GetStore(ctx)
-
-	// builds prefix
-	prefix := l.userAndValuePrefix(ctx, k, user)
-
-	// iterates through keyspace to find all value ids
-	iter := sdk.KVStorePrefixIterator(store, prefix)
-	defer iter.Close()
-	for ; iter.Valid(); iter.Next() {
-		var id int64
-		k.GetCodec().MustUnmarshalBinaryBare(iter.Value(), &id)
-		if err := fn(id); err != nil {
-			return err
-		}
-	}
-
-	return nil
+func subspace(prefix []byte) (start, end []byte) {
+	end = make([]byte, len(prefix))
+	copy(end, prefix)
+	end[len(end)-1]++
+	return prefix, end
 }
