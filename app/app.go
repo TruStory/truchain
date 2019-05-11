@@ -17,7 +17,6 @@ import (
 	clientParams "github.com/TruStory/truchain/x/params"
 	"github.com/TruStory/truchain/x/stake"
 	"github.com/TruStory/truchain/x/story"
-	"github.com/TruStory/truchain/x/truapi"
 	trubank "github.com/TruStory/truchain/x/trubank"
 	"github.com/TruStory/truchain/x/users"
 	bam "github.com/cosmos/cosmos-sdk/baseapp"
@@ -104,7 +103,6 @@ type TruChain struct {
 	// state to run api
 	blockCtx     *sdk.Context
 	blockHeader  abci.Header
-	api          *truapi.TruAPI
 	apiStarted   bool
 	registrarKey secp256k1.PrivKeySecp256k1
 }
@@ -143,8 +141,6 @@ func NewTruChain(logger log.Logger, db dbm.DB, loadLatest bool, options ...func(
 		keyFee:        sdk.NewKVStoreKey("fee_collection"),
 		keyStake:      sdk.NewKVStoreKey(stake.StoreKey),
 		keyTruBank:    sdk.NewKVStoreKey(trubank.StoreKey),
-		api:           nil,
-		apiStarted:    false,
 		blockCtx:      nil,
 		blockHeader:   abci.Header{},
 		registrarKey:  secp256k1.GenPrivKey(),
@@ -315,7 +311,7 @@ func NewTruChain(logger log.Logger, db dbm.DB, loadLatest bool, options ...func(
 		app.keyArgument,
 	)
 
-	app.MountStoresTransient(app.tkeyParams)
+	// app.MountStoresTransient(app.tkeyParams)
 
 	if loadLatest {
 		err := app.LoadLatestVersion(app.keyMain)
@@ -323,9 +319,6 @@ func NewTruChain(logger log.Logger, db dbm.DB, loadLatest bool, options ...func(
 			cmn.Exit(err.Error())
 		}
 	}
-
-	// build HTTP api
-	app.api = app.makeAPI()
 
 	return app
 }
@@ -362,15 +355,6 @@ func MakeCodec() *codec.Codec {
 func (app *TruChain) BeginBlocker(ctx sdk.Context, req abci.RequestBeginBlock) abci.ResponseBeginBlock {
 	app.blockCtx = &ctx
 	app.blockHeader = req.Header
-
-	if !(app.apiStarted) {
-		go app.startAPI()
-		app.apiStarted = true
-	}
-
-	if app.apiStarted == false && ctx.BlockHeight() > int64(1) {
-		panic("API server not started.")
-	}
 
 	return abci.ResponseBeginBlock{}
 }

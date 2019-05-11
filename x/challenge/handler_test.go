@@ -8,6 +8,7 @@ import (
 	app "github.com/TruStory/truchain/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/stretchr/testify/assert"
+	"github.com/tendermint/tendermint/crypto/ed25519"
 )
 
 func TestSubmitChallengeMsg(t *testing.T) {
@@ -19,7 +20,7 @@ func TestSubmitChallengeMsg(t *testing.T) {
 	storyID := createFakeStory(ctx, sk)
 	amount := sdk.NewCoin(app.StakeDenom, sdk.NewInt(15000000000))
 	argument := "test argument"
-	creator := sdk.AccAddress([]byte{1, 2})
+	creator := sdk.AccAddress(ed25519.GenPrivKey().PubKey().Address())
 
 	// give user some funds
 	bankKeeper.AddCoins(ctx, creator, sdk.Coins{amount})
@@ -29,14 +30,18 @@ func TestSubmitChallengeMsg(t *testing.T) {
 
 	res := h(ctx, msg)
 	result := &app.StakeNotificationResult{}
-	_ = json.Unmarshal(res.Data, result)
+	err := json.Unmarshal(res.Data, result)
+	assert.NotNil(t, msg)
+
+	story, err := sk.Story(ctx, storyID)
+	assert.NoError(t, err)
 
 	expected := &app.StakeNotificationResult{
 		MsgResult: app.MsgResult{ID: int64(1)},
 		Amount:    amount,
 		StoryID:   storyID,
 		From:      creator,
-		To:        sdk.AccAddress([]byte{1, 2}),
+		To:        story.Creator,
 	}
 
 	assert.Equal(t, expected, result)
@@ -51,7 +56,7 @@ func TestLikeChallengeMsg(t *testing.T) {
 	storyID := createFakeStory(ctx, sk)
 	amount := sdk.NewCoin(app.StakeDenom, sdk.NewInt(15000000000))
 	argument := "test argument"
-	challengeCreator := sdk.AccAddress([]byte{1, 2})
+	challengeCreator := sdk.AccAddress(ed25519.GenPrivKey().PubKey().Address())
 
 	// give user some funds
 	bankKeeper.AddCoins(ctx, challengeCreator, sdk.Coins{amount})
@@ -63,19 +68,22 @@ func TestLikeChallengeMsg(t *testing.T) {
 	result := &app.StakeNotificationResult{}
 	_ = json.Unmarshal(res.Data, result)
 
+	story, err := sk.Story(ctx, storyID)
+	assert.NoError(t, err)
+
 	expected := &app.StakeNotificationResult{
 		MsgResult: app.MsgResult{ID: int64(1)},
 		Amount:    amount,
 		StoryID:   storyID,
 		From:      challengeCreator,
-		To:        sdk.AccAddress([]byte{1, 2}),
+		To:        story.Creator,
 	}
 
 	assert.Equal(t, expected, result)
 
 	challenge, err := k.Challenge(ctx, result.ID)
 	assert.NoError(t, err)
-	likeCreator := sdk.AccAddress([]byte{1, 2, 3, 4})
+	likeCreator := sdk.AccAddress(ed25519.GenPrivKey().PubKey().Address())
 
 	// give user some funds
 	bankKeeper.AddCoins(ctx, likeCreator, sdk.Coins{amount})

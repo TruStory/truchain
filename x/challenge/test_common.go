@@ -21,6 +21,7 @@ import (
 	sdkparams "github.com/cosmos/cosmos-sdk/x/params"
 	amino "github.com/tendermint/go-amino"
 	abci "github.com/tendermint/tendermint/abci/types"
+	"github.com/tendermint/tendermint/crypto/ed25519"
 	cryptoAmino "github.com/tendermint/tendermint/crypto/encoding/amino"
 	dbm "github.com/tendermint/tendermint/libs/db"
 	"github.com/tendermint/tendermint/libs/log"
@@ -135,7 +136,7 @@ func mockDB() (sdk.Context, Keeper, story.Keeper, backing.Keeper, bank.Keeper) {
 
 func createFakeStory(ctx sdk.Context, sk story.WriteKeeper) int64 {
 	body := "TruStory can be goverened by it's stakeholders."
-	creator := sdk.AccAddress([]byte{1, 2})
+	creator := sdk.AccAddress(ed25519.GenPrivKey().PubKey().Address())
 	storyType := story.Default
 	source := url.URL{}
 

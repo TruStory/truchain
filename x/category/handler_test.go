@@ -14,20 +14,23 @@ func TestHandleCreateCategoryMsg(t *testing.T) {
 	h := NewHandler(ck)
 	assert.NotNil(t, h)
 
-	title := "Flying cars"
+	title := "Fungi"
 	creator := sdk.AccAddress([]byte{1, 2})
-	slug := "flying-cars"
+	slug := "fungi"
 	desc := ""
 
 	msg := NewCreateCategoryMsg(title, creator, slug, desc)
 	assert.NotNil(t, msg)
 
 	res := h(ctx, msg)
-	res1 := h(ctx, msg)
 	idres := new(types.IDResult)
+	err := json.Unmarshal(res.Data, &idres)
+	assert.NoError(t, err)
+
+	res1 := h(ctx, msg)
 	idres1 := new(types.IDResult)
-	_ = json.Unmarshal(res.Data, &idres)
-	_ = json.Unmarshal(res1.Data, &idres1)
+	err = json.Unmarshal(res1.Data, &idres1)
+	assert.NoError(t, err)
 
 	assert.Equal(t, int64(1), idres.ID, "incorrect result data")
 	assert.Equal(t, int64(2), idres1.ID, "incorrect result data")
