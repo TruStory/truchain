@@ -33,9 +33,9 @@ func DefaultParams() Params {
 	}
 }
 
-// KeyValuePairs implements params.ParamSet
-func (p *Params) KeyValuePairs() params.KeyValuePairs {
-	return params.KeyValuePairs{
+// ParamSetPairs implements params.ParamSet
+func (p *Params) ParamSetPairs() params.ParamSetPairs {
+	return params.ParamSetPairs{
 		{Key: KeyAmountWeight, Value: &p.AmountWeight},
 		{Key: KeyPeriodWeight, Value: &p.PeriodWeight},
 		{Key: KeyMinInterestRate, Value: &p.MinInterestRate},
@@ -43,9 +43,9 @@ func (p *Params) KeyValuePairs() params.KeyValuePairs {
 	}
 }
 
-// ParamTypeTable for story module
-func ParamTypeTable() params.TypeTable {
-	return params.NewTypeTable().RegisterParamSet(&Params{})
+// ParamKeyTable for story module
+func ParamKeyTable() params.KeyTable {
+	return params.NewKeyTable().RegisterParamSet(&Params{})
 }
 
 // GetParams gets the genesis params for the type

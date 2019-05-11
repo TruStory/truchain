@@ -33,7 +33,7 @@ func NewKeeper(
 	return Keeper{
 		app.NewKeeper(codec, storeKey),
 		storyKeeper,
-		paramStore.WithTypeTable(ParamTypeTable()),
+		paramStore.WithKeyTable(ParamKeyTable()),
 	}
 }
 

@@ -95,7 +95,7 @@ func TestLikeBackingMsg(t *testing.T) {
 	likeResult := &app.StakeNotificationResult{}
 	_ = json.Unmarshal(res.Data, likeResult)
 	stakeToCredRatio := bk.stakeKeeper.GetParams(ctx).StakeToCredRatio
-	expectedCred := sdk.NewCoin("trudex", amount.Amount.Div(stakeToCredRatio))
+	expectedCred := sdk.NewCoin("trudex", amount.Amount.Quo(stakeToCredRatio))
 
 	expectedLikeResult := &app.StakeNotificationResult{
 		MsgResult: app.MsgResult{ID: int64(2)},

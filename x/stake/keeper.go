@@ -33,7 +33,7 @@ func NewKeeper(
 	return Keeper{
 		storyKeeper,
 		truBankKeeper,
-		paramStore.WithTypeTable(ParamTypeTable()),
+		paramStore.WithKeyTable(ParamKeyTable()),
 	}
 }
 
@@ -128,7 +128,7 @@ func (k Keeper) DistributeInterest(ctx sdk.Context, votes []Voter) (app.Interest
 		period := ctx.BlockHeader().Time.Sub(v.Timestamp().CreatedTime)
 		interest := k.interest(ctx, v.Amount(), period)
 		interestCoin := sdk.NewCoin(app.StakeDenom, interest)
-		total.Plus(interestCoin)
+		total.Add(interestCoin)
 		_, err := k.truBankKeeper.AddCoin(ctx, v.Creator(), interestCoin, v.StoryID(), trubank.Interest, 0)
 		if err != nil {
 			return result, err

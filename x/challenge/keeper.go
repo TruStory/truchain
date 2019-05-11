@@ -97,7 +97,7 @@ func NewKeeper(
 		trubankKeeper,
 		storyKeeper,
 		categoryKeeper,
-		paramStore.WithTypeTable(ParamTypeTable()),
+		paramStore.WithKeyTable(ParamKeyTable()),
 		app.NewUserList(storyKeeper.GetStoreKey()),
 	}
 }
@@ -276,7 +276,7 @@ func (k Keeper) LikeArgument(ctx sdk.Context, argumentID int64, creator sdk.AccA
 	}
 
 	stakeToCredRatio := k.stakeKeeper.GetParams(ctx).StakeToCredRatio
-	likeCredAmount := amount.Amount.Div(stakeToCredRatio)
+	likeCredAmount := amount.Amount.Quo(stakeToCredRatio)
 
 	_, err = k.trubankKeeper.MintAndAddCoin(
 		ctx,
@@ -315,7 +315,7 @@ func (k Keeper) TotalChallengeAmount(ctx sdk.Context, storyID int64) (
 		if err != nil {
 			return err
 		}
-		totalAmount = totalAmount.Plus(challenge.Amount())
+		totalAmount = totalAmount.Add(challenge.Amount())
 
 		return nil
 	})
