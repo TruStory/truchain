@@ -55,18 +55,14 @@ install_tools_macos:
 go_test:
 	@go test $(PACKAGES)
 
-set_registrar:
-	mkdir -p $(HOME)/.truchaind
-	cp $(CHAIN_DIR)/registrar.key $(HOME)/.truchaind/registrar.key
-
 set_env_vars:
 	mkdir -p $(HOME)/.truchaind
 	cp .env.example $(CHAIN_DIR)/.env
 	cp .env.example $(HOME)/.truchaind/.env
 
-test: set_registrar go_test
+test: go_test
 
-test_cover: set_registrar set_env_vars
+test_cover: set_env_vars
 	@go test $(PACKAGES) -v -timeout 30m -race -coverprofile=coverage.txt -covermode=atomic
 	@go tool cover -html=coverage.txt
 
