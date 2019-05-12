@@ -30,7 +30,6 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/staking"
 	"github.com/spf13/viper"
 	abci "github.com/tendermint/tendermint/abci/types"
-	"github.com/tendermint/tendermint/crypto/secp256k1"
 	cmn "github.com/tendermint/tendermint/libs/common"
 	dbm "github.com/tendermint/tendermint/libs/db"
 	"github.com/tendermint/tendermint/libs/log"
@@ -99,12 +98,6 @@ type TruChain struct {
 	storyKeeper        story.Keeper
 	stakeKeeper        stake.Keeper
 	truBankKeeper      trubank.Keeper
-
-	// state to run api
-	blockCtx     *sdk.Context
-	blockHeader  abci.Header
-	apiStarted   bool
-	registrarKey secp256k1.PrivKeySecp256k1
 }
 
 // NewTruChain returns a reference to a new TruChain. Internally,
@@ -141,9 +134,6 @@ func NewTruChain(logger log.Logger, db dbm.DB, loadLatest bool, options ...func(
 		keyFee:        sdk.NewKVStoreKey("fee_collection"),
 		keyStake:      sdk.NewKVStoreKey(stake.StoreKey),
 		keyTruBank:    sdk.NewKVStoreKey(trubank.StoreKey),
-		blockCtx:      nil,
-		blockHeader:   abci.Header{},
-		registrarKey:  secp256k1.GenPrivKey(),
 	}
 
 	// The ParamsKeeper handles parameter storage for the application
@@ -353,9 +343,6 @@ func MakeCodec() *codec.Codec {
 // BeginBlocker reflects logic to run before any TXs application are processed
 // by the application.
 func (app *TruChain) BeginBlocker(ctx sdk.Context, req abci.RequestBeginBlock) abci.ResponseBeginBlock {
-	app.blockCtx = &ctx
-	app.blockHeader = req.Header
-
 	return abci.ResponseBeginBlock{}
 }
 
@@ -482,34 +469,4 @@ func (app *TruChain) initChainer(ctx sdk.Context, req abci.RequestInitChain) abc
 // LoadHeight loads the app at a particular height
 func (app *TruChain) LoadHeight(height int64) error {
 	return app.LoadVersion(height, app.keyMain)
-}
-
-func loadRegistrarKey() secp256k1.PrivKeySecp256k1 {
-	rootdir := viper.GetString(cli.HomeFlag)
-	if rootdir == "" {
-		rootdir = DefaultNodeHome
-	}
-
-	keypath := filepath.Join(rootdir, "registrar.key")
-	fileBytes, err := ioutil.ReadFile(keypath)
-
-	if err != nil {
-		panic(err)
-	}
-
-	keyBytes, err := hex.DecodeString(string(fileBytes))
-
-	if err != nil {
-		panic(err)
-	}
-
-	if len(keyBytes) != 32 {
-		panic("Invalid registrar key: " + string(fileBytes))
-	}
-
-	key := secp256k1.PrivKeySecp256k1{}
-
-	copy(key[:], keyBytes)
-
-	return key
 }
