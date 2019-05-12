@@ -23,6 +23,7 @@ type Mutations interface {
 	UpsertFlaggedStory(flaggedStory *FlaggedStory) error
 	MarkAllNotificationEventsAsReadByAddress(addr string) error
 	AddComment(comment *Comment) error
+	AddInvite(invite *Invite) error
 	ReactOnReactionable(addr string, reaction ReactionType, reactionable Reactionable) error
 	UnreactByAddressAndID(addr string, id int64) error
 }
@@ -40,6 +41,7 @@ type Queries interface {
 	UnreadNotificationEventsCountByAddress(addr string) (*NotificationsCountResponse, error)
 	FlaggedStoriesByStoryID(storyID int64) ([]FlaggedStory, error)
 	CommentsByArgumentID(argumentID int64) ([]Comment, error)
+	Invites() ([]Invite, error)
 	ReactionsByReactionable(reactionable Reactionable) ([]Reaction, error)
 	ReactionsByAddress(addr string) ([]Reaction, error)
 	ReactionsCountByReactionable(reactionable Reactionable) ([]ReactionsCount, error)

@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"path"
 	"sort"
+	"strings"
 
 	app "github.com/TruStory/truchain/types"
 	"github.com/TruStory/truchain/x/argument"
@@ -450,6 +451,28 @@ func (ta *TruAPI) commentsResolver(ctx context.Context, q argument.Argument) []d
 		panic(err)
 	}
 	return comments
+}
+
+func (ta *TruAPI) invitesResolver(ctx context.Context) []db.Invite {
+	user, ok := ctx.Value(userContextKey).(*cookies.AuthenticatedUser)
+	if !ok {
+		return make([]db.Invite, 0)
+	}
+	// TODO: replace admin address
+	twitterProfile, err := ta.DBClient.TwitterProfileByID(user.TwitterProfileID)
+	if err != nil {
+		panic(err)
+	}
+
+	if strings.EqualFold(twitterProfile.Username, "lilrushshah") ||
+		strings.EqualFold(twitterProfile.Username, "truted2") {
+		invites, err := ta.DBClient.Invites()
+		if err != nil {
+			panic(err)
+		}
+		return invites
+	}
+	return make([]db.Invite, 0)
 }
 
 func (ta *TruAPI) reactionsCountResolver(ctx context.Context, rxnable db.Reactionable) []db.ReactionsCount {

@@ -8,5 +8,6 @@ var (
 	Err400MissingParameter       = errors.New("Missing parameter")
 	Err401NotAuthenticated       = errors.New("User not authenticated")
 	Err404ResourceNotFound       = errors.New("Resource not found")
+	Err422UnprocessableEntity    = errors.New("Unprocessable entity")
 	Err500InternalServerError    = errors.New("Something went wrong")
 )
