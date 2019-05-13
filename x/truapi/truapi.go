@@ -219,8 +219,8 @@ func (ta *TruAPI) RegisterResolvers() {
 		return ta.storyResolver(ctx, story.QueryStoryByIDParams{ID: storyID})
 	}
 
-	getArgument := func(ctx context.Context, argumentID int64) argument.Argument {
-		return ta.argumentResolver(ctx, app.QueryArgumentByID{ID: argumentID})
+	getArgument := func(ctx context.Context, argumentID int64, raw bool) argument.Argument {
+		return ta.argumentResolver(ctx, app.QueryArgumentByID{ID: argumentID, Raw: raw})
 	}
 
 	ta.GraphQLClient.RegisterQueryResolver("comments", ta.commentsResolver)
@@ -256,8 +256,28 @@ func (ta *TruAPI) RegisterResolvers() {
 			}
 			return ta.reactionsCountResolver(ctx, rxnable)
 		},
+		"reactions": func(ctx context.Context, q argument.Argument) []db.Reaction {
+			rxnable := db.Reactionable{
+				Type: "arguments",
+				ID:   q.ID,
+			}
+			return ta.reactionsResolver(ctx, rxnable)
+		},
 		"timestamp": func(_ context.Context, q argument.Argument) app.Timestamp { return q.Timestamp },
 		"comments":  ta.commentsResolver,
+	})
+
+	ta.GraphQLClient.RegisterObjectResolver("Reaction", db.Reaction{}, map[string]interface{}{
+		"id":   func(_ context.Context, q db.Reaction) int64 { return q.ID },
+		"type": func(_ context.Context, q db.Reaction) db.ReactionType { return q.ReactionType },
+		"creator": func(ctx context.Context, q db.Reaction) users.User {
+			creator, err := sdk.AccAddressFromBech32(q.Creator)
+			if err != nil {
+				// [shanev] TODO: handle error better, see https://github.com/TruStory/truchain/issues/199
+				panic(err)
+			}
+			return getUser(ctx, creator)
+		},
 	})
 
 	ta.GraphQLClient.RegisterObjectResolver("Like", argument.Like{}, map[string]interface{}{
@@ -268,8 +288,12 @@ func (ta *TruAPI) RegisterResolvers() {
 
 	ta.GraphQLClient.RegisterQueryResolver("backing", ta.backingResolver)
 	ta.GraphQLClient.RegisterObjectResolver("Backing", backing.Backing{}, map[string]interface{}{
-		"amount":    func(ctx context.Context, q backing.Backing) sdk.Coin { return q.Amount() },
-		"argument":  func(ctx context.Context, q backing.Backing) argument.Argument { return getArgument(ctx, q.ArgumentID) },
+		"amount": func(ctx context.Context, q backing.Backing) sdk.Coin { return q.Amount() },
+		"argument": func(ctx context.Context, q backing.Backing, args struct {
+			Raw bool `graphql:",optional"`
+		}) argument.Argument {
+			return getArgument(ctx, q.ArgumentID, args.Raw)
+		},
 		"vote":      func(ctx context.Context, q backing.Backing) bool { return q.VoteChoice() },
 		"creator":   func(ctx context.Context, q backing.Backing) users.User { return getUser(ctx, q.Creator()) },
 		"timestamp": func(ctx context.Context, q backing.Backing) app.Timestamp { return q.Timestamp() },
@@ -287,8 +311,10 @@ func (ta *TruAPI) RegisterResolvers() {
 	ta.GraphQLClient.RegisterQueryResolver("challenge", ta.challengeResolver)
 	ta.GraphQLClient.RegisterObjectResolver("Challenge", challenge.Challenge{}, map[string]interface{}{
 		"amount": func(ctx context.Context, q challenge.Challenge) sdk.Coin { return q.Amount() },
-		"argument": func(ctx context.Context, q challenge.Challenge) argument.Argument {
-			return getArgument(ctx, q.ArgumentID)
+		"argument": func(ctx context.Context, q challenge.Challenge, args struct {
+			Raw bool `graphql:",optional"`
+		}) argument.Argument {
+			return getArgument(ctx, q.ArgumentID, args.Raw)
 		},
 		"vote":      func(ctx context.Context, q challenge.Challenge) bool { return q.VoteChoice() },
 		"creator":   func(ctx context.Context, q challenge.Challenge) users.User { return getUser(ctx, q.Creator()) },
@@ -296,17 +322,14 @@ func (ta *TruAPI) RegisterResolvers() {
 	})
 
 	ta.GraphQLClient.RegisterObjectResolver("Coin", sdk.Coin{}, map[string]interface{}{
-		"amount": func(_ context.Context, q sdk.Coin) string { return q.Amount.String() },
-		"denom":  func(_ context.Context, q sdk.Coin) string { return q.Denom },
-		"unit":   func(_ context.Context, q sdk.Coin) string { return "preethi" },
+		"amount":        func(_ context.Context, q sdk.Coin) string { return q.Amount.String() },
+		"denom":         func(_ context.Context, q sdk.Coin) string { return q.Denom },
+		"humanReadable": func(_ context.Context, q sdk.Coin) string { return HumanReadable(q) },
 	})
 
 	ta.GraphQLClient.RegisterQueryResolver("params", ta.paramsResolver)
 	ta.GraphQLClient.RegisterObjectResolver("Params", params.Params{}, map[string]interface{}{
-		"amountWeight":     func(_ context.Context, p params.Params) string { return p.StakeParams.AmountWeight.String() },
-		"periodWeight":     func(_ context.Context, p params.Params) string { return p.StakeParams.PeriodWeight.String() },
-		"minInterestRate":  func(_ context.Context, p params.Params) string { return p.StakeParams.MinInterestRate.String() },
-		"maxInterestRate":  func(_ context.Context, p params.Params) string { return p.StakeParams.MaxInterestRate.String() },
+		"interestRate":     func(_ context.Context, p params.Params) string { return p.StakeParams.InterestRate.String() },
 		"maxStakeAmount":   func(_ context.Context, p params.Params) string { return p.StakeParams.MaxAmount.Amount.String() },
 		"stakeToCredRatio": func(_ context.Context, p params.Params) string { return p.StakeParams.StakeToCredRatio.String() },
 
@@ -323,11 +346,10 @@ func (ta *TruAPI) RegisterResolvers() {
 		"stakeDenom":        func(_ context.Context, _ params.Params) string { return app.StakeDenom },
 
 		// Deprecated
-		"storyMinLength":            func(_ context.Context, p params.Params) int { return p.StoryParams.MinStoryLength },
-		"storyMaxLength":            func(_ context.Context, p params.Params) int { return p.StoryParams.MaxStoryLength },
-		"storyVotingDuration":       func(_ context.Context, p params.Params) string { return "0" },
-		"challengeMinThreshold":     func(_ context.Context, p params.Params) string { return "0" },
-		"challengeThresholdPercent": func(_ context.Context, p params.Params) string { return "0" },
+		"amountWeight":    func(_ context.Context, p params.Params) string { return "0" },
+		"periodWeight":    func(_ context.Context, p params.Params) string { return "0" },
+		"minInterestRate": func(_ context.Context, p params.Params) string { return "0" },
+		"maxInterestRate": func(_ context.Context, p params.Params) string { return "0" },
 	})
 
 	ta.GraphQLClient.RegisterPaginatedQueryResolverWithFilter("paginated_stories", ta.storiesResolver, map[string]interface{}{
@@ -437,5 +459,6 @@ func (ta *TruAPI) RegisterResolvers() {
 			return ta.storyResolver(ctx, story.QueryStoryByIDParams{ID: q.StoryID})
 		},
 	})
+
 	ta.GraphQLClient.BuildSchema()
 }

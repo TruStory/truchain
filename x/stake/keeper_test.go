@@ -4,8 +4,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/TruStory/truchain/x/story"
 	"github.com/TruStory/truchain/x/trubank"
+	abci "github.com/tendermint/tendermint/abci/types"
 
 	app "github.com/TruStory/truchain/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -240,9 +240,16 @@ func TestRedistributeStakeNoMajority(t *testing.T) {
 func TestDistributeInterest(t *testing.T) {
 	ctx, k := mockDB()
 
+	blockTime := time.Now()
+	ctx = ctx.WithBlockHeader(abci.Header{Time: blockTime})
+
+	// 10,000,000,000 amount
+	//     20,547,945 interest ✅
 	amount := sdk.NewCoin("trusteak", sdk.NewInt(10*app.Shanev))
 	creator1 := sdk.AccAddress([]byte{1, 2})
 	creator2 := sdk.AccAddress([]byte{2, 4})
+	voteEndTime := blockTime.Add(-time.Hour * 24 * 3)
+
 	trueVote := Vote{
 		ID:         1,
 		StoryID:    1,
@@ -250,7 +257,7 @@ func TestDistributeInterest(t *testing.T) {
 		ArgumentID: 0,
 		Creator:    creator1,
 		Vote:       true,
-		Timestamp:  app.NewTimestamp(ctx.BlockHeader()),
+		Timestamp:  app.NewTimestamp(abci.Header{Time: voteEndTime}),
 	}
 	backingVote := FakeStaker{&trueVote}
 
@@ -261,7 +268,7 @@ func TestDistributeInterest(t *testing.T) {
 		ArgumentID: 0,
 		Creator:    creator2,
 		Vote:       false,
-		Timestamp:  app.NewTimestamp(ctx.BlockHeader()),
+		Timestamp:  app.NewTimestamp(abci.Header{Time: voteEndTime}),
 	}
 	challengeVote := FakeStaker{&falseVote}
 
@@ -276,101 +283,39 @@ func TestDistributeInterest(t *testing.T) {
 	assert.Equal(t, trubank.Interest, transactions[0].TransactionType)
 	assert.Equal(t, trubank.Interest, transactions[1].TransactionType)
 	assert.Equal(t, trubank.Interest, transactions[2].TransactionType)
-	assert.Equal(t, "3330trusteak", transactions[0].Amount.String())
-	assert.Equal(t, "3330trusteak", transactions[1].Amount.String())
-	assert.Equal(t, "3330trusteak", transactions[2].Amount.String())
+	assert.Equal(t, "20547945trusteak", transactions[0].Amount.String())
+	assert.Equal(t, "20547945trusteak", transactions[1].Amount.String())
+	assert.Equal(t, "20547945trusteak", transactions[2].Amount.String())
 
 	transactions, err = k.truBankKeeper.TransactionsByCreator(ctx, creator2)
 	assert.NoError(t, err)
 	assert.Len(t, transactions, 1)
 	assert.Equal(t, trubank.Interest, transactions[0].TransactionType)
-	assert.Equal(t, "3330trusteak", transactions[0].Amount.String())
+	assert.Equal(t, "20547945trusteak", transactions[0].Amount.String())
 }
 
-func Test_interest_MidAmountMidPeriod(t *testing.T) {
+func Test_interest_3days(t *testing.T) {
 	ctx, k := mockDB()
 
 	amount := sdk.NewCoin("crypto", sdk.NewInt(500000000000000))
-	period := 12 * time.Hour
+	period := time.Hour * 24 * 3
 
 	interest := k.interest(ctx, amount, period)
-	assert.Equal(t, sdk.NewInt(25000000000000).String(), interest.String())
+
+	// 500,000,000,000,000 amount
+	//   1,027,397,260,274 interest
+	assert.Equal(t, sdk.NewInt(1027397260274).String(), interest.String())
 }
 
-func Test_interest_MaxAmountMinPeriod(t *testing.T) {
+func Test_interest_0days(t *testing.T) {
 	ctx, k := mockDB()
-	amount := sdk.NewCoin("crypto", sdk.NewInt(1000000000000000))
-	period := 0 * time.Hour
+
+	amount := sdk.NewCoin("crypto", sdk.NewInt(500000000000000))
+	period := time.Hour * 24 * 0
 
 	interest := k.interest(ctx, amount, period)
-	assert.Equal(t, sdk.NewInt(33300000000000).String(), interest.String())
-}
 
-func Test_interest_MinAmountMaxPeriod(t *testing.T) {
-	ctx, k := mockDB()
-	amount := sdk.NewCoin("crypto", sdk.NewInt(0))
-	period := 24 * time.Hour
-
-	interest := k.interest(ctx, amount, period)
-	assert.Equal(t, interest.String(), sdk.NewInt(0).String())
-}
-
-func Test_interest_MaxAmountMaxPeriod(t *testing.T) {
-	ctx, k := mockDB()
-	amount := sdk.NewCoin("crypto", sdk.NewInt(1000000000000000))
-	period := 24 * time.Hour
-	maxInterestRate := k.GetParams(ctx).MaxInterestRate
-	expected := sdk.NewDecFromInt(amount.Amount).Mul(maxInterestRate)
-
-	interest := k.interest(ctx, amount, period)
-	assert.Equal(t, expected.RoundInt().String(), interest.String())
-}
-
-func Test_interest_ZeroAmountWeight(t *testing.T) {
-	ctx, k := mockDB()
-	params := Params{
-		MaxAmount:       k.GetParams(ctx).MaxAmount,
-		MinInterestRate: k.GetParams(ctx).MinInterestRate,
-		MaxInterestRate: k.GetParams(ctx).MaxInterestRate,
-		MajorityPercent: k.GetParams(ctx).MajorityPercent,
-		AmountWeight:    sdk.ZeroDec(),
-		PeriodWeight:    sdk.NewDec(1),
-	}
-	k.SetParams(ctx, params)
-
-	storyParams := story.Params{
-		ExpireDuration: 72 * time.Hour,
-		MinStoryLength: 25,
-		MaxStoryLength: 350,
-	}
-	storyWriteKeeper := k.storyKeeper.(story.WriteKeeper)
-	storyWriteKeeper.SetParams(ctx, storyParams)
-
-	// 10000000000 amount
-	//           0 interest
-	amount := sdk.NewCoin("crypto", sdk.NewInt(10*app.Shanev))
-	period := 0 * time.Hour
-	interest := k.interest(ctx, amount, period)
+	// 500,000,000,000,000 amount
+	//                   0 interest
 	assert.Equal(t, sdk.NewInt(0).String(), interest.String())
-
-	// 10000000000 amount
-	//   333333333 interest
-	amount = sdk.NewCoin("crypto", sdk.NewInt(10*app.Shanev))
-	period = 24 * time.Hour
-	interest = k.interest(ctx, amount, period)
-	assert.Equal(t, sdk.NewInt(333333333).String(), interest.String())
-
-	// 10000000000 amount
-	//   666666667 interest
-	amount = sdk.NewCoin("crypto", sdk.NewInt(10*app.Shanev))
-	period = 48 * time.Hour
-	interest = k.interest(ctx, amount, period)
-	assert.Equal(t, sdk.NewInt(666666667).String(), interest.String())
-
-	// 10000000000 amount
-	//  1000000000 interest
-	amount = sdk.NewCoin("crypto", sdk.NewInt(10*app.Shanev))
-	period = 72 * time.Hour
-	interest = k.interest(ctx, amount, period)
-	assert.Equal(t, sdk.NewInt(1000000000).String(), interest.String())
 }
