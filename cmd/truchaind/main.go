@@ -12,6 +12,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/cosmos/cosmos-sdk/server"
+	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	abci "github.com/tendermint/tendermint/abci/types"
@@ -88,7 +89,7 @@ func InitCmd(ctx *server.Context, cdc *codec.Codec) *cobra.Command { // nolint: 
 				chainID = fmt.Sprintf("test-chain-%v", common.RandStr(6))
 			}
 
-			nodeID, _, err := InitializeNodeValidatorFiles(config)
+			nodeID, pk, err := InitializeNodeValidatorFiles(config)
 			if err != nil {
 				return err
 			}
@@ -115,8 +116,15 @@ func InitCmd(ctx *server.Context, cdc *codec.Codec) *cobra.Command { // nolint: 
 				}
 			}
 
+			_, _, validator, err := SimpleAppGenTx(cdc, pk)
+			if err != nil {
+				return err
+			}
+
+			// spew.Dump(validator)
+
 			genDoc.ChainID = chainID
-			genDoc.Validators = nil
+			genDoc.Validators = []tmtypes.GenesisValidator{validator}
 			genDoc.AppState = appState
 			if err = truchainInit.ExportGenesisFile(genDoc, genFile); err != nil {
 				return err
@@ -193,4 +201,37 @@ func initializeEmptyGenesis(
 	}
 
 	return codec.MarshalJSONIndent(cdc, app.NewDefaultGenesisState())
+}
+
+// SimpleAppGenTx returns a simple GenTx command that makes the node a valdiator from the start
+func SimpleAppGenTx(cdc *codec.Codec, pk crypto.PubKey) (
+	appGenTx, cliPrint json.RawMessage, validator tmtypes.GenesisValidator, err error) {
+
+	addr, secret, err := server.GenerateCoinKey()
+	if err != nil {
+		return
+	}
+
+	bz, err := cdc.MarshalJSON(struct {
+		Addr sdk.AccAddress `json:"addr"`
+	}{addr})
+	if err != nil {
+		return
+	}
+
+	appGenTx = json.RawMessage(bz)
+
+	bz, err = cdc.MarshalJSON(map[string]string{"secret": secret})
+	if err != nil {
+		return
+	}
+
+	cliPrint = json.RawMessage(bz)
+
+	validator = tmtypes.GenesisValidator{
+		PubKey: pk,
+		Power:  10,
+	}
+
+	return
 }
