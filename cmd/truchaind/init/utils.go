@@ -7,6 +7,9 @@ import (
 	"path/filepath"
 	"time"
 
+	"github.com/TruStory/truchain/app"
+	"github.com/cosmos/cosmos-sdk/codec"
+	"github.com/cosmos/cosmos-sdk/server"
 	amino "github.com/tendermint/go-amino"
 	cfg "github.com/tendermint/tendermint/config"
 	"github.com/tendermint/tendermint/crypto"
@@ -14,10 +17,6 @@ import (
 	"github.com/tendermint/tendermint/p2p"
 	"github.com/tendermint/tendermint/privval"
 	"github.com/tendermint/tendermint/types"
-
-	"github.com/TruStory/truchain/app"
-	"github.com/cosmos/cosmos-sdk/codec"
-	"github.com/cosmos/cosmos-sdk/server"
 )
 
 // ExportGenesisFile creates and writes the genesis configuration to disk. An
@@ -26,6 +25,8 @@ func ExportGenesisFile(genDoc *types.GenesisDoc, genFile string) error {
 	if err := genDoc.ValidateAndComplete(); err != nil {
 		return err
 	}
+
+	// spew.Dump(genDoc)
 
 	return genDoc.SaveAs(genFile)
 }
