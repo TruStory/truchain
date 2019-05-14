@@ -294,9 +294,10 @@ func NewTruChain(logger log.Logger, db dbm.DB, loadLatest bool, options ...func(
 		app.keyStoryQueue,
 		app.keyTruBank,
 		app.keyArgument,
+		app.tkeyParams,
+		app.tkeyStaking,
+		app.tkeyDistr,
 	)
-
-	// app.MountStoresTransient(app.tkeyParams)
 
 	if loadLatest {
 		err := app.LoadLatestVersion(app.keyMain)
