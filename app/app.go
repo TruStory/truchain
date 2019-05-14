@@ -1,11 +1,8 @@
 package app
 
 import (
-	"encoding/hex"
 	"fmt"
-	"io/ioutil"
 	"os"
-	"path/filepath"
 	"sort"
 
 	"github.com/TruStory/truchain/types"
@@ -28,7 +25,6 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/ibc"
 	"github.com/cosmos/cosmos-sdk/x/params"
 	"github.com/cosmos/cosmos-sdk/x/staking"
-	"github.com/spf13/viper"
 	abci "github.com/tendermint/tendermint/abci/types"
 	cmn "github.com/tendermint/tendermint/libs/common"
 	dbm "github.com/tendermint/tendermint/libs/db"
@@ -426,15 +422,15 @@ func (app *TruChain) initChainer(ctx sdk.Context, req abci.RequestInitChain) abc
 		panic(err)
 	}
 
-	for i, acc := range genesisState.Accounts {
+	for _, acc := range genesisState.Accounts {
 		acc.AccountNumber = app.accountKeeper.GetNextAccountNumber(ctx)
-		if i == 1 { // TODO: more robust way of identifying registrar account [notduncansmith]
-			// err := acc.SetPubKey(app.registrarKey.PubKey())
-			err := acc.ToAccount().SetPubKey(app.registrarKey.PubKey())
-			if err != nil {
-				panic(err)
-			}
-		}
+		// if i == 1 { // TODO: more robust way of identifying registrar account [notduncansmith]
+		// 	// err := acc.SetPubKey(app.registrarKey.PubKey())
+		// 	err := acc.ToAccount().SetPubKey(app.registrarKey.PubKey())
+		// 	if err != nil {
+		// 		panic(err)
+		// 	}
+		// }
 		app.accountKeeper.SetAccount(ctx, acc.ToAccount())
 	}
 
