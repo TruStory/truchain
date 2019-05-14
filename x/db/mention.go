@@ -55,7 +55,8 @@ func (c *Client) mapAddressesToProfileURLs(config ChainConfig, body string, prof
 
 // extract @mentions from text and return as slice
 func parseMentions(body string) []string {
-	return mention.GetTagsAsUniqueStrings('@', body, ' ', '\n', '\r')
+	terminators := []rune(" \n\r.,():!?")
+	return mention.GetTagsAsUniqueStrings('@', body, terminators...)
 }
 
 // replace @usernames with @cosmosaddr
