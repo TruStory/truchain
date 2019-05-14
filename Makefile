@@ -33,7 +33,7 @@ export:
 	bin/truchaind --home $(CHAIN_DIR) export
 
 init:
-	bin/truchaind --home $(CHAIN_DIR) init
+	bin/truchaind --home $(CHAIN_DIR) init trunode
 
 reset:
 	bin/truchaind --home $(CHAIN_DIR) unsafe-reset-all
