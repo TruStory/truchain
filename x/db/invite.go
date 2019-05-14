@@ -21,6 +21,17 @@ func (c *Client) Invites() ([]Invite, error) {
 	return invites, nil
 }
 
+// InvitesByAddress returns all invites for a specific address
+func (c *Client) InvitesByAddress(addr string) ([]Invite, error) {
+	invites := make([]Invite, 0)
+	err := c.Model(&invites).Where("creator = ?", addr).Select()
+	if err != nil {
+		return nil, err
+	}
+
+	return invites, nil
+}
+
 // AddInvite inserts an invitation
 func (c *Client) AddInvite(invite *Invite) error {
 	_, err := c.Model(invite).

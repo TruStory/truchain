@@ -13,7 +13,7 @@ import (
 
 // AddInviteRequest represents the JSON request for adding an invite
 type AddInviteRequest struct {
-	TwitterUsername string `json:"twitter_username"`
+	TwitterUsername string `json:"twitter_username,omitempty"`
 	Email           string `json:"email"`
 }
 
@@ -32,10 +32,6 @@ func (ta *TruAPI) handleCreateInvite(r *http.Request) chttp.Response {
 	err := json.NewDecoder(r.Body).Decode(request)
 	if err != nil {
 		return chttp.SimpleErrorResponse(400, err)
-	}
-	// check for empty inputs
-	if request.TwitterUsername == "" {
-		return chttp.SimpleErrorResponse(422, errors.New("Invalid username"))
 	}
 	// check if valid email address
 	re := regexp.MustCompile("^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$")

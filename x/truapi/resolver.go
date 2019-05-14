@@ -458,12 +458,13 @@ func (ta *TruAPI) invitesResolver(ctx context.Context) []db.Invite {
 	if !ok {
 		return make([]db.Invite, 0)
 	}
-	// TODO: replace admin address
+
 	twitterProfile, err := ta.DBClient.TwitterProfileByID(user.TwitterProfileID)
 	if err != nil {
 		panic(err)
 	}
 
+	// TODO: pull this in from an ENV
 	if strings.EqualFold(twitterProfile.Username, "lilrushshah") ||
 		strings.EqualFold(twitterProfile.Username, "truted2") {
 		invites, err := ta.DBClient.Invites()
@@ -472,7 +473,11 @@ func (ta *TruAPI) invitesResolver(ctx context.Context) []db.Invite {
 		}
 		return invites
 	}
-	return make([]db.Invite, 0)
+	invites, err := ta.DBClient.InvitesByAddress(user.Address)
+	if err != nil {
+		panic(err)
+	}
+	return invites
 }
 
 func (ta *TruAPI) reactionsCountResolver(ctx context.Context, rxnable db.Reactionable) []db.ReactionsCount {
