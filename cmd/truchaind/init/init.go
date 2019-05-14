@@ -11,6 +11,7 @@ import (
 	cfg "github.com/tendermint/tendermint/config"
 	"github.com/tendermint/tendermint/libs/cli"
 	"github.com/tendermint/tendermint/libs/common"
+	"github.com/tendermint/tendermint/types"
 
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/cmd/gaia/app"
@@ -33,7 +34,7 @@ type printInfo struct {
 }
 
 // nolint: errcheck
-func displayInfo(cdc *codec.Codec, info printInfo) error {
+func DisplayInfo(cdc *codec.Codec, info printInfo) error {
 	out, err := codec.MarshalJSONIndent(cdc, info)
 	if err != nil {
 		return err
@@ -73,15 +74,30 @@ func InitCmd(ctx *server.Context, cdc *codec.Codec) *cobra.Command {
 				return err
 			}
 
-			if err = ExportGenesisFile(genFile, chainID, nil, appState); err != nil {
+			genDoc := &types.GenesisDoc{}
+			if _, err := os.Stat(genFile); err != nil {
+				if !os.IsNotExist(err) {
+					return err
+				}
+			} else {
+				genDoc, err = types.GenesisDocFromFile(genFile)
+				if err != nil {
+					return err
+				}
+			}
+
+			genDoc.ChainID = chainID
+			genDoc.Validators = nil
+			genDoc.AppState = appState
+			if err = ExportGenesisFile(genDoc, genFile); err != nil {
 				return err
 			}
 
-			toPrint := newPrintInfo(config.Moniker, chainID, nodeID, "", appState)
+			toPrint := NewPrintInfo(config.Moniker, chainID, nodeID, "", appState)
 
 			cfg.WriteConfigFile(filepath.Join(config.RootDir, "config", "config.toml"), config)
 
-			return displayInfo(cdc, toPrint)
+			return DisplayInfo(cdc, toPrint)
 		},
 	}
 

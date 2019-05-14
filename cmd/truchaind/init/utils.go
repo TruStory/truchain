@@ -22,16 +22,7 @@ import (
 
 // ExportGenesisFile creates and writes the genesis configuration to disk. An
 // error is returned if building or writing the configuration to file fails.
-func ExportGenesisFile(
-	genFile, chainID string, validators []types.GenesisValidator, appState json.RawMessage,
-) error {
-
-	genDoc := types.GenesisDoc{
-		ChainID:    chainID,
-		Validators: validators,
-		AppState:   appState,
-	}
-
+func ExportGenesisFile(genDoc *types.GenesisDoc, genFile string) error {
 	if err := genDoc.ValidateAndComplete(); err != nil {
 		return err
 	}

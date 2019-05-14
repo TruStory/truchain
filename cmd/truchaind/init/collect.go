@@ -54,7 +54,7 @@ func CollectGenTxsCmd(ctx *server.Context, cdc *codec.Codec) *cobra.Command {
 				genTxsDir = filepath.Join(config.RootDir, "config", "gentx")
 			}
 
-			toPrint := newPrintInfo(config.Moniker, genDoc.ChainID, nodeID, genTxsDir, json.RawMessage(""))
+			toPrint := NewPrintInfo(config.Moniker, genDoc.ChainID, nodeID, genTxsDir, json.RawMessage(""))
 			initCfg := newInitConfig(genDoc.ChainID, genTxsDir, name, nodeID, valPubKey)
 
 			appMessage, err := genAppStateFromConfig(cdc, config, initCfg, genDoc)
@@ -65,7 +65,7 @@ func CollectGenTxsCmd(ctx *server.Context, cdc *codec.Codec) *cobra.Command {
 			toPrint.AppMessage = appMessage
 
 			// print out some key information
-			return displayInfo(cdc, toPrint)
+			return DisplayInfo(cdc, toPrint)
 		},
 	}
 
@@ -80,7 +80,6 @@ func genAppStateFromConfig(
 	cdc *codec.Codec, config *cfg.Config, initCfg initConfig, genDoc types.GenesisDoc,
 ) (appState json.RawMessage, err error) {
 
-	genFile := config.GenesisFile()
 	var (
 		appGenTxs       []auth.StdTx
 		persistentPeers string
@@ -114,7 +113,8 @@ func genAppStateFromConfig(
 		return
 	}
 
-	err = ExportGenesisFile(genFile, initCfg.ChainID, nil, appState)
+	genDoc.AppState = appState
+	err = ExportGenesisFile(&genDoc, config.GenesisFile())
 	return
 }
 
@@ -130,7 +130,7 @@ func newInitConfig(chainID, genTxsDir, name, nodeID string,
 	}
 }
 
-func newPrintInfo(moniker, chainID, nodeID, genTxsDir string,
+func NewPrintInfo(moniker, chainID, nodeID, genTxsDir string,
 	appMessage json.RawMessage) printInfo {
 
 	return printInfo{
