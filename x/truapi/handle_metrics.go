@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"time"
 
 	app "github.com/TruStory/truchain/types"
 	"github.com/TruStory/truchain/x/category"
@@ -159,10 +160,26 @@ func (um *UserMetrics) trackCreadEarned(tx trubank.Transaction) {
 
 // HandleMetrics dumps metrics per user basis.
 func (ta *TruAPI) HandleMetrics(w http.ResponseWriter, r *http.Request) {
+	err := r.ParseForm()
+	if err != nil {
+		render.Error(w, r, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	date := r.FormValue("date")
+	if date == "" {
+		render.Error(w, r, "provide a valid date", http.StatusBadRequest)
+		return
+	}
+
+	beforeDate, err := time.Parse("2006-01-02", date)
+	if err != nil {
+		render.Error(w, r, err.Error(), http.StatusInternalServerError)
+		return
+	}
 	stories := make([]story.Story, 0)
 
 	res := ta.RunQuery("stories/all", struct{}{})
-	err := json.Unmarshal(res.Value, &stories)
+	err = json.Unmarshal(res.Value, &stories)
 	if err != nil {
 		render.Error(w, r, err.Error(), http.StatusInternalServerError)
 		return
@@ -187,6 +204,10 @@ func (ta *TruAPI) HandleMetrics(w http.ResponseWriter, r *http.Request) {
 	}
 	mapUserStakeByStoryID := make(map[string]sdk.Coin)
 	for idx, s := range stories {
+		if !s.Timestamp.CreatedTime.Before(beforeDate) {
+			continue
+		}
+
 		mappedStories[s.ID] = idx
 		backingAmount := sdk.NewCoin(app.StakeDenom, sdk.NewInt(0))
 		challengeAmount := sdk.NewCoin(app.StakeDenom, sdk.NewInt(0))
@@ -195,6 +216,9 @@ func (ta *TruAPI) HandleMetrics(w http.ResponseWriter, r *http.Request) {
 		// get backings and challenges
 		backings := ta.backingsResolver(r.Context(), app.QueryByIDParams{ID: s.ID})
 		for _, b := range backings {
+			if !b.Timestamp().CreatedTime.Before(beforeDate) {
+				continue
+			}
 			backingAmount = backingAmount.Plus(b.Amount())
 			creator := b.Creator().String()
 			mapUserStakeByStoryID[mapUserStakeByStoryIDKey(creator, b.StoryID())] = b.Amount()
@@ -221,6 +245,9 @@ func (ta *TruAPI) HandleMetrics(w http.ResponseWriter, r *http.Request) {
 
 		challenges := ta.challengesResolver(r.Context(), app.QueryByIDParams{ID: s.ID})
 		for _, c := range challenges {
+			if !c.Timestamp().CreatedTime.Before(beforeDate) {
+				continue
+			}
 			challengeAmount = challengeAmount.Plus(c.Amount())
 			creator := c.Creator().String()
 			mapUserStakeByStoryID[mapUserStakeByStoryIDKey(creator, c.StoryID())] = c.Amount()
@@ -314,6 +341,9 @@ func (ta *TruAPI) HandleMetrics(w http.ResponseWriter, r *http.Request) {
 		txs := ta.transactionsResolver(r.Context(), app.QueryByCreatorParams{Creator: userAddress})
 		userStoryResults := make(map[int64]*storyRewardResult)
 		for _, tx := range txs {
+			if !tx.Timestamp.CreatedTime.Before(beforeDate) {
+				continue
+			}
 			switch tx.TransactionType {
 			case trubank.Interest:
 				i, ok := mappedStories[tx.GroupID]
