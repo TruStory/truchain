@@ -11,6 +11,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/TruStory/truchain/types"
 	"github.com/TruStory/truchain/x/argument"
 	"github.com/TruStory/truchain/x/backing"
 	"github.com/TruStory/truchain/x/category"
@@ -396,7 +397,7 @@ func CollectStdTxs(cdc *codec.Codec, moniker string, genTxsDir string, genDoc tm
 func NewDefaultGenesisAccount(addr sdk.AccAddress) GenesisAccount {
 	accAuth := auth.NewBaseAccountWithAddress(addr)
 	coins := sdk.Coins{
-		sdk.NewCoin("footoken", sdk.NewInt(1000)),
+		sdk.NewCoin(types.StakeDenom, sdk.NewInt(1000)),
 		sdk.NewCoin(bondDenom, freeFermionsAcc),
 	}
 

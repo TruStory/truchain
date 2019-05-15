@@ -4,8 +4,10 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/TruStory/truchain/app"
 	truchainInit "github.com/TruStory/truchain/cmd/truchaind/init"
@@ -46,6 +48,7 @@ func main() {
 	}
 
 	rootCmd.AddCommand(InitCmd(ctx, cdc))
+	rootCmd.AddCommand(AddGenesisAccountCmd(ctx, cdc))
 	rootCmd.AddCommand(truchainInit.TestnetFilesCmd(ctx, cdc))
 
 	server.AddCommands(ctx, cdc, rootCmd, newApp, exportAppStateAndTMValidators)
@@ -120,8 +123,6 @@ func InitCmd(ctx *server.Context, cdc *codec.Codec) *cobra.Command { // nolint: 
 			if err != nil {
 				return err
 			}
-
-			// spew.Dump(validator)
 
 			genDoc.ChainID = chainID
 			genDoc.Validators = []tmtypes.GenesisValidator{validator}
@@ -234,4 +235,98 @@ func SimpleAppGenTx(cdc *codec.Codec, pk crypto.PubKey) (
 	}
 
 	return
+}
+
+// AddGenesisAccountCmd allows users to add accounts to the genesis file
+func AddGenesisAccountCmd(ctx *server.Context, cdc *codec.Codec) *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "add-genesis-account [address] [coins[,coins]]",
+		Short: "Adds an account to the genesis file",
+		Args:  cobra.ExactArgs(2),
+		Long: strings.TrimSpace(`
+Adds accounts to the genesis file so that you can start a chain with coins in the CLI:
+$ nsd add-genesis-account cosmos1tse7r2fadvlrrgau3pa0ss7cqh55wrv6y9alwh 1000STAKE,1000nametoken
+`),
+		RunE: func(_ *cobra.Command, args []string) error {
+			addr, err := sdk.AccAddressFromBech32(args[0])
+			if err != nil {
+				return err
+			}
+			coins, err := sdk.ParseCoins(args[1])
+			if err != nil {
+				return err
+			}
+			coins.Sort()
+
+			var genDoc tmtypes.GenesisDoc
+			config := ctx.Config
+			genFile := config.GenesisFile()
+			if !common.FileExists(genFile) {
+				return fmt.Errorf("%s does not exist, run `gaiad init` first", genFile)
+			}
+			genContents, err := ioutil.ReadFile(genFile)
+			if err != nil {
+			}
+
+			if err = cdc.UnmarshalJSON(genContents, &genDoc); err != nil {
+				return err
+			}
+
+			var appState app.GenesisState
+			if err = cdc.UnmarshalJSON(genDoc.AppState, &appState); err != nil {
+				return err
+			}
+
+			for _, stateAcc := range appState.Accounts {
+				if stateAcc.Address.Equals(addr) {
+					return fmt.Errorf("the application state already contains account %v", addr)
+				}
+			}
+
+			// genDoc := &types.GenesisDoc{}
+			// if _, err := os.Stat(genFile); err != nil {
+			// 	if !os.IsNotExist(err) {
+			// 		return err
+			// 	}
+			// } else {
+			// 	genDoc, err = types.GenesisDocFromFile(genFile)
+			// 	if err != nil {
+			// 		return err
+			// 	}
+			// }
+
+			// _, _, validator, err := SimpleAppGenTx(cdc, pk)
+			// if err != nil {
+			// 	return err
+			// }
+
+			// genDoc.ChainID = chainID
+			// genDoc.Validators = []tmtypes.GenesisValidator{validator}
+			// genDoc.AppState = appState
+			// if err = truchainInit.ExportGenesisFile(genDoc, genFile); err != nil {
+			// 	return err
+			// }
+
+			// acc := auth.NewBaseAccountWithAddress(addr)
+			acc := app.NewDefaultGenesisAccount(addr)
+			acc.Coins = coins
+			appState.Accounts = append(appState.Accounts, acc)
+			appStateJSON, err := cdc.MarshalJSON(appState)
+			if err != nil {
+				return err
+			}
+
+			// genDoc.ChainID = chainID
+			// genDoc.Validators = []tmtypes.GenesisValidator{validator}
+			genDoc.AppState = appStateJSON
+			if err = truchainInit.ExportGenesisFile(&genDoc, genFile); err != nil {
+				return err
+			}
+
+			return nil
+
+			// return truchainInit.ExportGenesisFile(genFile, genDoc.ChainID, genDoc.Validators, appStateJSON)
+		},
+	}
+	return cmd
 }

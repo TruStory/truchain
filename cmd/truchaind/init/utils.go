@@ -26,8 +26,6 @@ func ExportGenesisFile(genDoc *types.GenesisDoc, genFile string) error {
 		return err
 	}
 
-	// spew.Dump(genDoc)
-
 	return genDoc.SaveAs(genFile)
 }
 
