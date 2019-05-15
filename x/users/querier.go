@@ -23,12 +23,14 @@ type QueryUsersByAddressesParams struct {
 // NewQuerier returns a function that handles queries on the KVStore
 func NewQuerier(cdc *amino.Codec, k auth.AccountKeeper) sdk.Querier {
 	return func(ctx sdk.Context, path []string, req abci.RequestQuery) (res []byte, err sdk.Error) {
-		switch path[0] {
-		case QueryUsersByAddresses:
-			return queryUsersByAddresses(ctx, req, cdc, k)
-		default:
-			return nil, sdk.ErrUnknownRequest("Unknown truchain query endpoint")
-		}
+		fmt.Println("IN USERS QUERIER 1")
+		fmt.Printf("PATH: %v\n", path)
+		// switch path[0] {
+		// case QueryUsersByAddresses:
+		return queryUsersByAddresses(ctx, req, cdc, k)
+		// default:
+		// 	return nil, sdk.ErrUnknownRequest("Unknown truchain query endpoint")
+		// }
 	}
 }
 
@@ -40,8 +42,11 @@ func queryUsersByAddresses(
 	cdc *amino.Codec,
 	k auth.AccountKeeper) (res []byte, err sdk.Error) {
 
+	fmt.Println("IN USERS QUERIER 2")
+
 	// get query params
 	params, err := unmarshalQueryParams(cdc, req)
+	fmt.Printf("user params: %+v\n", params)
 
 	if err != nil {
 		return
@@ -61,6 +66,8 @@ func queryUsersByAddresses(
 			users[i] = User{}
 		}
 	}
+
+	fmt.Printf("users: %+v\n", users)
 
 	// return users JSON bytes
 	return marshalUsers(cdc, users)

@@ -260,6 +260,7 @@ func NewTruChain(logger log.Logger, db dbm.DB, loadLatest bool, options ...func(
 
 	// The app.QueryRouter is the main query router where each module registers its routes
 	app.QueryRouter().
+		AddRoute("acc", auth.NewQuerier(app.accountKeeper)).
 		AddRoute(argument.QueryPath, argument.NewQuerier(app.argumentKeeper)).
 		AddRoute(story.QueryPath, story.NewQuerier(app.storyKeeper)).
 		AddRoute(category.QueryPath, category.NewQuerier(app.categoryKeeper)).
