@@ -11,21 +11,21 @@ import (
 
 	app "github.com/TruStory/truchain/types"
 	"github.com/TruStory/truchain/x/category"
+	"github.com/TruStory/truchain/x/db"
 	"github.com/TruStory/truchain/x/story"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	stripmd "github.com/writeas/go-strip-markdown"
 )
 
 const (
-	defaultDescription = "Trustory is a social network for experts to identify what is true and what isn't."
+	defaultDescription = "TruStory is a social network to debate claims with skin in the game"
 	defaultImage       = "https://s3-us-west-1.amazonaws.com/trustory/assets/Image+from+iOS.jpg"
 )
 
-// matches /story/detail/xxx OR /story/xxx. story/detail/xxx is legacy url format and can be
-// removed once the client no longer supports these routes.
 var (
-	storyRegex    = regexp.MustCompile("/story/(detail/)?([0-9]+)$")
+	storyRegex    = regexp.MustCompile("/story/([0-9]+)$")
 	argumentRegex = regexp.MustCompile("/story/([0-9]+)/argument/([0-9]+)$")
+	commentRegex  = regexp.MustCompile("/story/([0-9]+)/argument/([0-9]+)/comment/([0-9]+)$")
 )
 
 // Tags defines the struct containing all the request Meta Tags for a page
@@ -39,11 +39,11 @@ type Tags struct {
 // CompileIndexFile replaces the placeholders for the social sharing
 func CompileIndexFile(ta *TruAPI, index []byte, route string) string {
 
-	// /story/detail/xxx OR /story/xxx
+	// /story/xxx
 	matches := storyRegex.FindStringSubmatch(route)
-	if len(matches) == 3 {
+	if len(matches) == 2 {
 		// replace placeholder with story details, where story id is in matches[1]
-		storyID, err := strconv.ParseInt(matches[2], 10, 64)
+		storyID, err := strconv.ParseInt(matches[1], 10, 64)
 		if err != nil {
 			// if error, return the default tags
 			return compile(index, makeDefaultMetaTags(ta, route))
@@ -72,6 +72,33 @@ func CompileIndexFile(ta *TruAPI, index []byte, route string) string {
 		}
 
 		metaTags, err := makeArgumentMetaTags(ta, route, storyID, argumentID)
+		if err != nil {
+			return compile(index, makeDefaultMetaTags(ta, route))
+		}
+		return compile(index, *metaTags)
+	}
+
+	// /story/xxx/argument/xxx/comment/xxx
+	matches = commentRegex.FindStringSubmatch(route)
+	if len(matches) == 4 {
+		// replace placeholder with story details, where story id is in matches[1]
+		storyID, err := strconv.ParseInt(matches[1], 10, 64)
+		if err != nil {
+			// if error, return the default tags
+			return compile(index, makeDefaultMetaTags(ta, route))
+		}
+		argumentID, err := strconv.ParseInt(matches[2], 10, 64)
+		if err != nil {
+			// if error, return the default tags
+			return compile(index, makeDefaultMetaTags(ta, route))
+		}
+		commentID, err := strconv.ParseInt(matches[3], 10, 64)
+		if err != nil {
+			// if error, return the default tags
+			return compile(index, makeDefaultMetaTags(ta, route))
+		}
+
+		metaTags, err := makeCommentMetaTags(ta, route, storyID, argumentID, commentID)
 		if err != nil {
 			return compile(index, makeDefaultMetaTags(ta, route))
 		}
@@ -143,6 +170,31 @@ func makeArgumentMetaTags(ta *TruAPI, route string, storyID int64, argumentID in
 	return &Tags{
 		Title:       fmt.Sprintf("%s made an argument in %s", creatorObj.FullName, categoryObj.Title),
 		Description: html.EscapeString(stripmd.Strip(argumentObj.Body)),
+		Image:       defaultImage,
+		URL:         os.Getenv("APP_URL") + route,
+	}, nil
+}
+
+func makeCommentMetaTags(ta *TruAPI, route string, storyID int64, argumentID int64, commentID int64) (*Tags, error) {
+	ctx := context.Background()
+	storyObj := ta.storyResolver(ctx, story.QueryStoryByIDParams{ID: storyID})
+	categoryObj := ta.categoryResolver(ctx, category.QueryCategoryByIDParams{ID: storyObj.CategoryID})
+	argumentObj := ta.argumentResolver(ctx, app.QueryArgumentByID{ID: argumentID})
+	comments := ta.commentsResolver(ctx, argumentObj)
+	commentObj := db.Comment{}
+	for _, comment := range comments {
+		if comment.ID == commentID {
+			commentObj = comment
+		}
+	}
+	creatorObj, err := ta.DBClient.TwitterProfileByAddress(argumentObj.Creator.String())
+	if err != nil {
+		// if error, return default
+		return nil, err
+	}
+	return &Tags{
+		Title:       fmt.Sprintf("%s posted a comment in %s", creatorObj.FullName, categoryObj.Title),
+		Description: html.EscapeString(stripmd.Strip(commentObj.Body)),
 		Image:       defaultImage,
 		URL:         os.Getenv("APP_URL") + route,
 	}, nil
