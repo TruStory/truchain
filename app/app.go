@@ -256,7 +256,7 @@ func NewTruChain(logger log.Logger, db dbm.DB, loadLatest bool, options ...func(
 		AddRoute("category", category.NewHandler(app.categoryKeeper)).
 		AddRoute("backing", backing.NewHandler(app.backingKeeper)).
 		AddRoute("challenge", challenge.NewHandler(app.challengeKeeper)).
-		AddRoute("users", users.NewHandler(app.accountKeeper))
+		AddRoute("users", users.NewHandler(app.accountKeeper, app.categoryKeeper))
 
 	// The app.QueryRouter is the main query router where each module registers its routes
 	app.QueryRouter().
@@ -366,7 +366,7 @@ func (app *TruChain) initFromGenesisState(ctx sdk.Context, genesisState GenesisS
 	// load the initial staking information
 	validators, err := staking.InitGenesis(ctx, app.stakingKeeper, genesisState.StakingData)
 	if err != nil {
-		panic(err) // TODO find a way to do this w/o panics
+		panic(err)
 	}
 
 	// initialize module-specific stores
@@ -383,11 +383,6 @@ func (app *TruChain) initFromGenesisState(ctx sdk.Context, genesisState GenesisS
 	story.InitGenesis(ctx, app.storyKeeper, genesisState.StoryData)
 	trubank.InitGenesis(ctx, app.truBankKeeper, genesisState.TrubankData)
 
-	// validate genesis state
-	// if err := GaiaValidateGenesisState(genesisState); err != nil {
-	// 	panic(err) // TODO find a way to do this w/o panics
-	// }
-
 	if len(genesisState.GenTxs) > 0 {
 		for _, genTx := range genesisState.GenTxs {
 			var tx auth.StdTx
@@ -396,7 +391,6 @@ func (app *TruChain) initFromGenesisState(ctx sdk.Context, genesisState GenesisS
 				panic(err)
 			}
 			bz := app.codec.MustMarshalBinaryLengthPrefixed(tx)
-			// res := app.DeliverTx(bz)
 			res := app.BaseApp.DeliverTx(bz)
 			if !res.IsOK() {
 				panic(res.Log)
@@ -424,13 +418,6 @@ func (app *TruChain) initChainer(ctx sdk.Context, req abci.RequestInitChain) abc
 
 	for _, acc := range genesisState.Accounts {
 		acc.AccountNumber = app.accountKeeper.GetNextAccountNumber(ctx)
-		// if i == 1 { // TODO: more robust way of identifying registrar account [notduncansmith]
-		// 	// err := acc.SetPubKey(app.registrarKey.PubKey())
-		// 	err := acc.ToAccount().SetPubKey(app.registrarKey.PubKey())
-		// 	if err != nil {
-		// 		panic(err)
-		// 	}
-		// }
 		app.accountKeeper.SetAccount(ctx, acc.ToAccount())
 	}
 
