@@ -22,9 +22,6 @@ type MetricsSummary struct {
 	Categories map[int64]category.Category `json:"-"`
 }
 
-// AccumulatedUserCred tracks accumulated cred by day.
-type AccumulatedUserCred map[string]sdk.Coin
-
 func (um *UserMetrics) getMetricsByCategory(categoryID int64) *CategoryMetrics {
 	cm, ok := um.CategoryMetrics[categoryID]
 	if !ok {
@@ -50,7 +47,6 @@ func (m *MetricsSummary) GetUserMetrics(address string) *UserMetrics {
 	if !ok {
 		userMetrics = &UserMetrics{
 			CategoryMetrics: make(map[int64]*CategoryMetrics),
-			CredEarned:      make(map[string]AccumulatedUserCred),
 		}
 	}
 	m.setUserMetrics(address, userMetrics)
@@ -66,8 +62,8 @@ type Metrics struct {
 	// Interactions
 	TotalClaims               int64 `json:"total_claims"`
 	TotalArguments            int64 `json:"total_arguments"`
-	TotalReceivedEndorsements int64 `json:"total_received_endorsements"`
-	TotalGivenEndorsements    int64 `json:"total_given_endorsments"`
+	TotalEndorsementsReceived int64 `json:"total_endorsements_received"`
+	TotalEndorsementsGiven    int64 `json:"total_endorsements_given"`
 
 	// StakeBased Metrics
 	TotalAmountStaked  sdk.Coin `json:"total_amount_staked"`
@@ -92,9 +88,6 @@ type UserMetrics struct {
 
 	// ByCategoryID
 	CategoryMetrics map[int64]*CategoryMetrics `json:"category_metrics"`
-
-	// Tracked by day
-	CredEarned map[string]AccumulatedUserCred
 }
 
 func (um *UserMetrics) increaseArgumentsCount(categoryID int64) {
@@ -107,14 +100,14 @@ func (um *UserMetrics) increaseClaimsCount(categoryID int64) {
 	m.TotalClaims = m.TotalClaims + 1
 }
 
-func (um *UserMetrics) increaseGivenEndorsmentsCount(categoryID int64) {
+func (um *UserMetrics) increaseEndorsementsGivenCount(categoryID int64) {
 	m := um.getMetricsByCategory(categoryID).Metrics
-	m.TotalGivenEndorsements = m.TotalGivenEndorsements + 1
+	m.TotalEndorsementsGiven = m.TotalEndorsementsGiven + 1
 }
 
-func (um *UserMetrics) increaseReceivedEndorsmentsCount(categoryID int64) {
+func (um *UserMetrics) increaseEndorsementsReceivedCount(categoryID int64) {
 	m := um.getMetricsByCategory(categoryID).Metrics
-	m.TotalReceivedEndorsements = m.TotalReceivedEndorsements + 1
+	m.TotalEndorsementsReceived = m.TotalEndorsementsReceived + 1
 }
 
 func (um *UserMetrics) addAmoutAtStake(categoryID int64, amount sdk.Coin) {
@@ -140,22 +133,6 @@ func (um *UserMetrics) addInterestEarned(categoryID int64, amount sdk.Coin) {
 func (um *UserMetrics) addStakeEarned(categoryID int64, amount sdk.Coin) {
 	m := um.getMetricsByCategory(categoryID).Metrics
 	m.StakeEarned = m.StakeEarned.Plus(amount)
-}
-
-func (um *UserMetrics) trackCreadEarned(tx trubank.Transaction) {
-	date := tx.Timestamp.CreatedTime.Format("2006-01-02")
-	userCred, ok := um.CredEarned[date]
-	if !ok {
-		userCred = AccumulatedUserCred(make(map[string]sdk.Coin))
-	}
-	um.CredEarned[date] = userCred
-	categoryTotal, ok := userCred[tx.Amount.Denom]
-
-	if !ok {
-		categoryTotal = sdk.NewCoin(tx.Amount.Denom, sdk.NewInt(0))
-	}
-
-	userCred[tx.Amount.Denom] = categoryTotal.Plus(tx.Amount)
 }
 
 // HandleMetrics dumps metrics per user basis.
@@ -194,7 +171,7 @@ func (ta *TruAPI) HandleMetrics(w http.ResponseWriter, r *http.Request) {
 	for _, cat := range categories {
 		mappedCategories[cat.ID] = cat
 	}
-	m := &MetricsSummary{
+	metricsSummary := &MetricsSummary{
 		Users:      make(map[string]*UserMetrics),
 		Categories: mappedCategories,
 	}
@@ -211,7 +188,7 @@ func (ta *TruAPI) HandleMetrics(w http.ResponseWriter, r *http.Request) {
 		mappedStories[s.ID] = idx
 		backingAmount := sdk.NewCoin(app.StakeDenom, sdk.NewInt(0))
 		challengeAmount := sdk.NewCoin(app.StakeDenom, sdk.NewInt(0))
-		m.GetUserMetrics(s.Creator.String()).increaseClaimsCount(s.CategoryID)
+		metricsSummary.GetUserMetrics(s.Creator.String()).increaseClaimsCount(s.CategoryID)
 
 		// get backings and challenges
 		backings := ta.backingsResolver(r.Context(), app.QueryByIDParams{ID: s.ID})
@@ -222,7 +199,7 @@ func (ta *TruAPI) HandleMetrics(w http.ResponseWriter, r *http.Request) {
 			backingAmount = backingAmount.Plus(b.Amount())
 			creator := b.Creator().String()
 			mapUserStakeByStoryID[mapUserStakeByStoryIDKey(creator, b.StoryID())] = b.Amount()
-			backerMetrics := m.GetUserMetrics(creator)
+			backerMetrics := metricsSummary.GetUserMetrics(creator)
 			backerMetrics.addStakedAmount(s.CategoryID, b.Amount())
 			if s.Status == story.Pending {
 				backerMetrics.addAmoutAtStake(s.CategoryID, b.Amount())
@@ -238,7 +215,7 @@ func (ta *TruAPI) HandleMetrics(w http.ResponseWriter, r *http.Request) {
 			}
 
 			if argument.Creator.String() != creator {
-				backerMetrics.increaseGivenEndorsmentsCount(s.CategoryID)
+				backerMetrics.increaseEndorsementsGivenCount(s.CategoryID)
 			}
 
 		}
@@ -251,7 +228,7 @@ func (ta *TruAPI) HandleMetrics(w http.ResponseWriter, r *http.Request) {
 			challengeAmount = challengeAmount.Plus(c.Amount())
 			creator := c.Creator().String()
 			mapUserStakeByStoryID[mapUserStakeByStoryIDKey(creator, c.StoryID())] = c.Amount()
-			challengerMetrics := m.GetUserMetrics(creator)
+			challengerMetrics := metricsSummary.GetUserMetrics(creator)
 			challengerMetrics.addStakedAmount(s.CategoryID, c.Amount())
 			if s.Status == story.Pending {
 				challengerMetrics.addAmoutAtStake(s.CategoryID, c.Amount())
@@ -268,7 +245,7 @@ func (ta *TruAPI) HandleMetrics(w http.ResponseWriter, r *http.Request) {
 			}
 
 			if argument.Creator.String() != creator {
-				challengerMetrics.increaseGivenEndorsmentsCount(s.CategoryID)
+				challengerMetrics.increaseEndorsementsGivenCount(s.CategoryID)
 			}
 		}
 		// only check expired
@@ -278,14 +255,14 @@ func (ta *TruAPI) HandleMetrics(w http.ResponseWriter, r *http.Request) {
 		// Check if backings lost
 		if backingAmount.IsLT(challengeAmount) {
 			for _, b := range backings {
-				m.GetUserMetrics(b.Creator().String()).addStakeLost(s.CategoryID, b.Amount())
+				metricsSummary.GetUserMetrics(b.Creator().String()).addStakeLost(s.CategoryID, b.Amount())
 			}
 		}
 
 		// Check if challenges lost
 		if challengeAmount.IsLT(backingAmount) {
 			for _, c := range challenges {
-				m.GetUserMetrics(c.Creator().String()).addStakeLost(s.CategoryID, c.Amount())
+				metricsSummary.GetUserMetrics(c.Creator().String()).addStakeLost(s.CategoryID, c.Amount())
 			}
 		}
 	}
@@ -304,15 +281,6 @@ func (ta *TruAPI) HandleMetrics(w http.ResponseWriter, r *http.Request) {
 		return users.User{}
 	}
 
-	findBalanceByDenom := func(coins sdk.Coins, denom string) sdk.Coin {
-		for _, c := range coins {
-			if c.Denom == denom {
-				return c
-			}
-		}
-		return sdk.NewCoin(denom, sdk.NewInt(0))
-	}
-
 	findCategoryByID := func(categories []category.Category, categoryID int64) *category.Category {
 		for _, c := range categories {
 			if c.ID == categoryID {
@@ -321,16 +289,16 @@ func (ta *TruAPI) HandleMetrics(w http.ResponseWriter, r *http.Request) {
 		}
 		return nil
 	}
-	for userAddress, userMetrics := range m.Users {
+	for userAddress, userMetrics := range metricsSummary.Users {
 		user := getUser(r.Context(), userAddress)
-		userMetrics.Balance = findBalanceByDenom(user.Coins, app.StakeDenom)
+		userMetrics.Balance = sdk.NewCoin(app.StakeDenom, user.Coins.AmountOf(app.StakeDenom))
 
 		for cID, cm := range userMetrics.CategoryMetrics {
 			c := findCategoryByID(categories, cID)
 			if c == nil {
 				continue
 			}
-			cm.CredBalance = findBalanceByDenom(user.Coins, c.Denom())
+			cm.CredBalance = sdk.NewCoin(c.Denom(), user.Coins.AmountOf(c.Denom()))
 			cm.CategoryName = c.Title
 		}
 		profile, err := ta.DBClient.TwitterProfileByAddress(userAddress)
@@ -360,8 +328,7 @@ func (ta *TruAPI) HandleMetrics(w http.ResponseWriter, r *http.Request) {
 					continue
 				}
 				s := stories[i]
-				userMetrics.increaseReceivedEndorsmentsCount(s.CategoryID)
-				userMetrics.trackCreadEarned(tx)
+				userMetrics.increaseEndorsementsReceivedCount(s.CategoryID)
 			// this three transactions are related to finished expired stories.
 			case trubank.RewardPool:
 				fallthrough
@@ -424,6 +391,6 @@ func (ta *TruAPI) HandleMetrics(w http.ResponseWriter, r *http.Request) {
 
 		}
 	}
-	render.JSON(w, r, m, http.StatusOK)
+	render.JSON(w, r, metricsSummary, http.StatusOK)
 
 }
