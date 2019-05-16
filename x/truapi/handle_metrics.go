@@ -77,7 +77,7 @@ type Metrics struct {
 type CategoryMetrics struct {
 	CategoryID   int64    `json:"category_id"`
 	CategoryName string   `json:"category_name"`
-	CredBalance  sdk.Coin `json:"cred_balance"`
+	CredEarned   sdk.Coin `json:"cred_earned"`
 	Metrics      *Metrics `json:"metrics"`
 }
 
@@ -133,6 +133,11 @@ func (um *UserMetrics) addInterestEarned(categoryID int64, amount sdk.Coin) {
 func (um *UserMetrics) addStakeEarned(categoryID int64, amount sdk.Coin) {
 	m := um.getMetricsByCategory(categoryID).Metrics
 	m.StakeEarned = m.StakeEarned.Plus(amount)
+}
+
+func (um *UserMetrics) addCredEarned(categoryID int64, amount sdk.Coin) {
+	m := um.getMetricsByCategory(categoryID)
+	m.CredEarned = m.CredEarned.Plus(amount)
 }
 
 // HandleMetrics dumps metrics per user basis.
@@ -298,7 +303,7 @@ func (ta *TruAPI) HandleMetrics(w http.ResponseWriter, r *http.Request) {
 			if c == nil {
 				continue
 			}
-			cm.CredBalance = sdk.NewCoin(c.Denom(), user.Coins.AmountOf(c.Denom()))
+			cm.CredEarned = sdk.NewCoin(c.Denom(), sdk.NewInt(0))
 			cm.CategoryName = c.Title
 		}
 		profile, err := ta.DBClient.TwitterProfileByAddress(userAddress)
@@ -328,6 +333,7 @@ func (ta *TruAPI) HandleMetrics(w http.ResponseWriter, r *http.Request) {
 					continue
 				}
 				s := stories[i]
+				userMetrics.addCredEarned(s.CategoryID, tx.Amount)
 				userMetrics.increaseEndorsementsReceivedCount(s.CategoryID)
 			// this three transactions are related to finished expired stories.
 			case trubank.RewardPool:
