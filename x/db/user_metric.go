@@ -35,8 +35,10 @@ func (c *Client) AggregateStatisticsByAddressBetweenDates(address string, from s
 		ColumnExpr(`
 			sum(total_claims) as total_claims,
 			sum(total_arguments) as total_arguments,
-			sum(total_backed) as total_backed,
-			sum(total_challenged) as total_challenged,
+			sum(total_claims_backed) as total_claims_backed,
+			sum(total_claims_challenged) as total_claims_challenged,
+			sum(total_amount_backed) as total_amount_backed,
+			sum(total_amount_challenged) as total_amount_challenged,
 			sum(total_endorsements_given) as total_endorsements_given,
 			sum(total_endorsements_received) as total_endorsements_received,
 			sum(stake_earned) as stake_earned,

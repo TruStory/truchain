@@ -4,7 +4,6 @@ import (
 	"context"
 	"time"
 
-	"github.com/go-pg/pg"
 	"github.com/go-pg/pg/orm"
 )
 
@@ -27,8 +26,6 @@ type Mutations interface {
 	AddInvite(invite *Invite) error
 	ReactOnReactionable(addr string, reaction ReactionType, reactionable Reactionable) error
 	UnreactByAddressAndID(addr string, id int64) error
-	UpsertDailyUserMetric(metric UserMetric) error
-	UpsertDailyUserMetricInTx(tx *pg.Tx, metric UserMetric) error
 }
 
 // Queries read from the database
