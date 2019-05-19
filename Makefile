@@ -43,6 +43,9 @@ restart: build_daemon reset start
 start:
 	bin/truchaind --home $(CHAIN_DIR) --log_level "main:info,state:info,*:error,app:info,argument:info,backing:info,category:info,challenge:info,expiration:info,stake:info,stories:info" start
 
+start-backup:
+	bin/truchaind --home /Users/mohit/Code/TruStory/.truchaind --log_level "main:info,state:info,*:error,app:info,argument:info,backing:info,category:info,challenge:info,expiration:info,stake:info,stories:info" start
+
 check:
 	gometalinter ./...
 

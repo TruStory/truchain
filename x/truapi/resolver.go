@@ -42,6 +42,12 @@ type QueryByCategoryIDAndFeedFilter struct {
 	FeedFilter FeedFilter `graphql:",optional"`
 }
 
+// StatisticsFilter is query params for filtering the statistics
+type StatisticsFilter struct {
+	From string
+	To   string
+}
+
 func (ta *TruAPI) allCategoriesResolver(ctx context.Context, q struct{}) []category.Category {
 	res := ta.RunQuery("categories/all", struct{}{})
 
@@ -498,4 +504,17 @@ func (ta *TruAPI) reactionsResolver(ctx context.Context, rxnable db.Reactionable
 		panic(err)
 	}
 	return reactions
+}
+
+func (ta *TruAPI) userStatisticsResolver(ctx context.Context, q StatisticsFilter) []db.UserMetric {
+	_, ok := ctx.Value(userContextKey).(*cookies.AuthenticatedUser)
+	if !ok {
+		return make([]db.UserMetric, 0)
+	}
+	// response, err := ta.DBClient.AggregateStatisticsByAddressBetweenDates(user.Address, q.from, q.to)
+	response, err := ta.DBClient.AggregateStatisticsByAddressBetweenDates("cosmos1xqc5gwzpg3fyv5en2fzyx36z2se5ks33tt57e7", q.From, q.To)
+	if err != nil {
+		panic(err)
+	}
+	return response
 }
