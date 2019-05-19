@@ -44,7 +44,8 @@ start:
 	bin/truchaind --home $(CHAIN_DIR) --log_level "main:info,state:info,*:error,app:info,argument:info,backing:info,category:info,challenge:info,expiration:info,stake:info,stories:info" start
 
 check:
-	gometalinter ./...
+	@echo "--> Running golangci"
+	@golangci-lint run --tests=false --skip-files=\\btest_common.go
 
 dep_graph: ; $(foreach dir, $(MODULES), godepgraph -s -novendor github.com/TruStory/truchain/x/$(dir) | dot -Tpng -o x/$(dir)/dep.png${\n})
 
