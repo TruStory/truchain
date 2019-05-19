@@ -26,10 +26,10 @@ buidl: build
 build: build_daemon
 
 build_cli:
-	go build -o bin/trucli cmd/trucli/main.go
+	@go build -o bin/trucli cmd/trucli/main.go
 
 build_daemon:
-	go build $(BUILD_FLAGS) -o bin/truchaind cmd/truchaind/main.go
+	@go build $(BUILD_FLAGS) -o bin/truchaind cmd/truchaind/main.go
 
 build-linux:
 	GOOS=linux GOARCH=amd64 go build $(BUILD_FLAGS) -o build/truchaind cmd/truchaind/main.go
@@ -60,7 +60,8 @@ dep_graph: ; $(foreach dir, $(MODULES), godepgraph -s -novendor github.com/TruSt
 
 install_tools_macos:
 	brew install dep && brew upgrade dep
-	brew tap alecthomas/homebrew-tap && brew install gometalinter
+	brew install golangci/tap/golangci-lint
+	brew upgrade golangci/tap/golangci-lint
 
 go_test:
 	@go test $(PACKAGES)
