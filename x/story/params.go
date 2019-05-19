@@ -59,11 +59,6 @@ func (k Keeper) SetParams(ctx sdk.Context, params Params) {
 	logger.Info(fmt.Sprintf("Loaded story params: %+v", params))
 }
 
-func (k Keeper) minStoryLength(ctx sdk.Context) (res int) {
-	k.paramStore.Get(ctx, KeyMinStoryLength, &res)
-	return
-}
-
 func (k Keeper) expireDuration(ctx sdk.Context) (res time.Duration) {
 	k.paramStore.Get(ctx, KeyExpireDuration, &res)
 	return

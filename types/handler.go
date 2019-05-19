@@ -1,7 +1,6 @@
 package types
 
 import (
-	"encoding/binary"
 	"encoding/json"
 	"reflect"
 
@@ -35,10 +34,4 @@ func Result(id int64) sdk.Result {
 	}
 
 	return sdk.Result{Data: bz}
-}
-
-// i2b converts an int64 into a byte array
-func i2b(x int64) []byte {
-	var b [binary.MaxVarintLen64]byte
-	return b[:binary.PutVarint(b[:], x)]
 }

@@ -17,7 +17,7 @@ const (
 
 // ErrTransferringCoinsToUser throws an error when the category is invalid
 func ErrTransferringCoinsToUser(creator sdk.AccAddress) sdk.Error {
-	return sdk.NewError(DefaultCodespace, CodeErrorAddingCoinsToUser, "Coins could not be added to the user "+fmt.Sprintf("%s", creator))
+	return sdk.NewError(DefaultCodespace, CodeErrorAddingCoinsToUser, "Coins could not be added to the user "+creator.String())
 }
 
 // ErrTransferringCoinsToCategory throws an error when a category msg is invalid

@@ -25,14 +25,6 @@ const (
 	storeAcc = "acc"
 )
 
-// rootCmd is the entry point for this binary
-var (
-	rootCmd = &cobra.Command{
-		Use:   "trucli",
-		Short: "TruChain light-client",
-	}
-)
-
 func main() {
 	// disable sorting
 	cobra.EnableCommandSorting = false
