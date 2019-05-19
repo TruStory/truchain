@@ -105,7 +105,10 @@ func InitCmd(ctx *server.Context, cdc *codec.Codec) *cobra.Command {
 	cmd.Flags().BoolP(flagOverwrite, "o", false, "overwrite the genesis.json file")
 	cmd.Flags().String(client.FlagChainID, "", "genesis file chain-id, if left blank will be randomly created")
 	cmd.Flags().String(flagMoniker, "", "set the validator's moniker")
-	cmd.MarkFlagRequired(flagMoniker)
+	err := cmd.MarkFlagRequired(flagMoniker)
+	if err != nil {
+		panic(err)
+	}
 
 	return cmd
 }
