@@ -64,17 +64,6 @@ func main() {
 	}
 }
 
-// genesis := app.GenesisState{
-// 	ArgumentData:   argument.DefaultGenesisState(),
-// 	AuthData:       auth.DefaultGenesisState(),
-// 	BankData:       bank.DefaultGenesisState(),
-// 	CategoryData:   category.DefaultGenesisState(),
-// 	ChallengeData:  challenge.DefaultGenesisState(),
-// 	ExpirationData: expiration.DefaultGenesisState(),
-// 	StakeData:      stake.DefaultGenesisState(),
-// 	StoryData:      story.DefaultGenesisState(),
-// }
-
 // InitCmd returns a command that initializes all files needed for Tendermint
 // and the respective application.
 func InitCmd(ctx *server.Context, cdc *codec.Codec) *cobra.Command { // nolint: golint
@@ -283,31 +272,6 @@ $ nsd add-genesis-account cosmos1tse7r2fadvlrrgau3pa0ss7cqh55wrv6y9alwh 1000STAK
 				}
 			}
 
-			// genDoc := &types.GenesisDoc{}
-			// if _, err := os.Stat(genFile); err != nil {
-			// 	if !os.IsNotExist(err) {
-			// 		return err
-			// 	}
-			// } else {
-			// 	genDoc, err = types.GenesisDocFromFile(genFile)
-			// 	if err != nil {
-			// 		return err
-			// 	}
-			// }
-
-			// _, _, validator, err := SimpleAppGenTx(cdc, pk)
-			// if err != nil {
-			// 	return err
-			// }
-
-			// genDoc.ChainID = chainID
-			// genDoc.Validators = []tmtypes.GenesisValidator{validator}
-			// genDoc.AppState = appState
-			// if err = truchainInit.ExportGenesisFile(genDoc, genFile); err != nil {
-			// 	return err
-			// }
-
-			// acc := auth.NewBaseAccountWithAddress(addr)
 			acc := app.NewDefaultGenesisAccount(addr)
 			acc.Coins = coins
 			appState.Accounts = append(appState.Accounts, acc)
@@ -316,16 +280,12 @@ $ nsd add-genesis-account cosmos1tse7r2fadvlrrgau3pa0ss7cqh55wrv6y9alwh 1000STAK
 				return err
 			}
 
-			// genDoc.ChainID = chainID
-			// genDoc.Validators = []tmtypes.GenesisValidator{validator}
 			genDoc.AppState = appStateJSON
 			if err = truchainInit.ExportGenesisFile(&genDoc, genFile); err != nil {
 				return err
 			}
 
 			return nil
-
-			// return truchainInit.ExportGenesisFile(genFile, genDoc.ChainID, genDoc.Validators, appStateJSON)
 		},
 	}
 	return cmd
