@@ -233,18 +233,7 @@ func GaiaValidateGenesisState(genesisState GenesisState) error {
 	if err := staking.ValidateGenesis(genesisState.StakingData); err != nil {
 		return err
 	}
-	// if err := mint.ValidateGenesis(genesisState.MintData); err != nil {
-	// 	return err
-	// }
-	// if err := distr.ValidateGenesis(genesisState.DistrData); err != nil {
-	// 	return err
-	// }
 	return distr.ValidateGenesis(genesisState.DistrData)
-	// if err := gov.ValidateGenesis(genesisState.GovData); err != nil {
-	// 	return err
-	// }
-
-	// return slashing.ValidateGenesis(genesisState.SlashingData)
 }
 
 // validateGenesisStateAccounts performs validation of genesis accounts. It

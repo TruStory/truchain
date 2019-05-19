@@ -3,6 +3,9 @@
 [![CircleCI](https://circleci.com/gh/TruStory/truchain.svg?style=svg&circle-token=0cea219dcac9bd6962a057d85c4a319613c6680e)](https://circleci.com/gh/TruStory/truchain)
 [![codecov](https://codecov.io/gh/TruStory/truchain/branch/master/graph/badge.svg?token=jh3muAAEBs)](https://codecov.io/gh/TruStory/truchain)
 
+TruChain is an application-specific blockchain built with [Cosmos SDK](https://cosmos.network/sdk).
+
+
 ## Installation
 
 1. Install Go by following the [official docs](https://golang.org/doc/install). Remember to set your `$GOPATH`, `$GOBIN`, and `$PATH` environment variables.
@@ -18,7 +21,7 @@ git clone https://github.com/TruStory/truchain.git
 cd truchain && git checkout master
 ```
 
-## Running
+## Getting Started
 
 ### Install dependencies
 
@@ -38,32 +41,34 @@ This creates:
 
 `./bin/truchaincli`: TruStory blockchain client. Used for creating keys and lightweight interaction with the chain and underlying Tendermint node.
 
+### Setup genesis accounts
 
-### Create genesis file and setup private validator
-
-```
-make init
-```
-
-This creates `genesis.json` in the chain config folder that contains all the initial parameters for bootstrapping a node. It resets the chain so it starts with a clean slate with block 0.
-
-### Start chain
+TruChain currently needs a _registrar_ account to sign new user registration messages. _This is temporary and will go away once client-side signing is implemented_.
 
 ```
-make start
+# Initialize configuration files and genesis file
+./bin/truchaind init --chain-id truchain
+
+# Configure the CLI to eliminate need for chain-id flag
+./bin/truchaincli config chain-id truchain
+
+# Add a new key named registrar
+./bin/truchaincli keys add registrar --home ~/.octopus
+
+# Add the genesis account on the chain, giving it some trusteak
+./bin/truchaind add-genesis-account $(./bin/truchaincli keys show registrar -a --home ~/.octopus) 1000000000trusteak
+
+# Start the chain
+./bin/truchaind start
 ```
 
 ## Architecture
-
-TruChain is an application-specific blockchain built with [Cosmos SDK](https://cosmos.network/sdk).
 
 Each main feature of TruChain is implemented as a separate module that lives under `x/`. Each module has it's own types for data storage, _keepers_ for reading and writing this data, `Msg` types that communicate with the blockchain, and _handlers_ that route messages.
 
 Each module has it's own [README](x/README.md).
 
 ### Key-Value Storage
-
-Because the current Cosmos SDK data store is built on key-value storage, database operations are more explicit than a relational or even NoSQL database. Lists and queues must be made for data that needs to be retrieved.
 
 Keepers handle all reads and writes from key-value storage. There's a separate keeper for each module.
 
@@ -77,14 +82,46 @@ Most chain operations are executed based on changes to data at certain block tim
 
 A queue of all new stories that haven't expired. These are stories in the pending state. When they expire they are handled in [`x/expiration`](x/expiration/README.md), where rewards and interested are distributed.
 
+## Local single-node development
+
+TruChain can be setup for local development.
+
+```
+# Create a genesis file in .chain
+make init
+
+# Start the chain with logging for all modules turned on
+make start
+```
+
+## Local 4-node testnet
+
+A 4-node local testnet can be created with Docker Compose.
+
+```
+# Build daemon for linux so it can run inside a Docker container
+make build-linux
+
+# Create 4-nodes with their own genesis files and configuration
+make localnet-start
+
+# Tail chain logs within Docker Compose
+docker-compose logs --tail=0 --follow
+```
+
 ## Testing
 
 ```
+# Run linter
+make check
+
+# Run tests
 make test
 ```
 
-## Generate Documentation
+## API Documentation
 
 ```
+# Generate a website with documentation
 make doc
 ```
