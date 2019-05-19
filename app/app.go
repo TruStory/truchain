@@ -1,7 +1,9 @@
 package app
 
 import (
+	"fmt"
 	"os"
+	"sort"
 
 	"github.com/TruStory/truchain/types"
 	"github.com/TruStory/truchain/x/argument"
@@ -435,33 +437,22 @@ func (app *TruChain) initChainer(ctx sdk.Context, req abci.RequestInitChain) abc
 	story.InitGenesis(ctx, app.storyKeeper, genesisState.StoryData)
 	trubank.InitGenesis(ctx, app.truBankKeeper, genesisState.TrubankData)
 
-	// validators := app.initFromGenesisState(ctx, genesisState)
+	validators := app.initFromGenesisState(ctx, genesisState)
 
 	// sanity check
-	// if len(req.Validators) > 0 {
-	// 	fmt.Println(fmt.Sprintf("req.Validators len %d", len(req.Validators)))
-	// 	fmt.Println(fmt.Sprintf("validators len %d", len(validators)))
-	// 	if len(req.Validators) != len(validators) {
-	// 		panic(fmt.Errorf("len(RequestInitChain.Validators) != len(validators) (%d != %d)",
-	// 			len(req.Validators), len(validators)))
-	// 	}
-	// 	sort.Sort(abci.ValidatorUpdates(req.Validators))
-	// 	sort.Sort(abci.ValidatorUpdates(validators))
-	// 	for i, val := range validators {
-	// 		if !val.Equal(req.Validators[i]) {
-	// 			panic(fmt.Errorf("validators[%d] != req.Validators[%d] ", i, i))
-	// 		}
-	// 	}
-	// }
+	if len(req.Validators) > 0 {
+		sort.Sort(abci.ValidatorUpdates(req.Validators))
+		sort.Sort(abci.ValidatorUpdates(validators))
+		for i, val := range validators {
+			if !val.Equal(req.Validators[i]) {
+				panic(fmt.Errorf("validators[%d] != req.Validators[%d] ", i, i))
+			}
+		}
+	}
 
-	// assert runtime invariants
-	// app.assertRuntimeInvariants()
-
-	// return abci.ResponseInitChain{
-	// 	Validators: validators,
-	// }
-
-	return abci.ResponseInitChain{}
+	return abci.ResponseInitChain{
+		Validators: validators,
+	}
 }
 
 // LoadHeight loads the app at a particular height
