@@ -1,4 +1,10 @@
-version: 2
+version: 2.1
+
+executors:
+  go:
+    docker:
+      - image: circleci/golang:1.12
+    working_directory: /tmp/octopus
 
 defaults: &defaults
   docker:
