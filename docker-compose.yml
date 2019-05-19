@@ -6,10 +6,6 @@ services:
     image: "trustory/truchaindnode"
     ports:
       - "26656-26657:26656-26657"
-      - "1337:1337"
-      - "3000:3000"
-      - "5432:5432"
-    env_file: .env
     environment:
       - ID=0
       - LOG=${LOG:-truchaind.log}
