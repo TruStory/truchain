@@ -50,6 +50,31 @@ jobs:
           command: |
             export PATH="$GOBIN:$PATH"
             make check
+  deploy:
+    executor: go
+    steps:
+      - add_ssh_keys:
+          fingerprints:
+            - "7a:fe:42:64:1d:e4:c0:1a:cc:aa:8c:5e:5e:e8:f8:03"
+      - run:
+          name: Deploy
+          command: |
+            if [ "${CIRCLE_BRANCH}" == "master" ]; then
+                mkdir ~/.ssh
+                ssh-keyscan $VENICE4_HOST >> ~/.ssh/known_hosts
+                ssh $VENICE4_USER@$VENICE4_HOST "sudo systemctl stop truchaind.service"
+                ssh $VENICE4_USER@$VENICE4_HOST "c && git pull && make update_deps && make build-linux && cp bin/truchaind /home/ubuntu/go/bin/"
+                ssh $VENICE4_USER@$VENICE4_HOST "sudo systemctl start truchaind.service"
+                echo "deploying to venice4"
+            elif [ "${CIRCLE_BRANCH}" == "develop" ]
+            then
+                mkdir ~/.ssh
+                ssh-keyscan $DEVNET_HOST >> ~/.ssh/known_hosts
+                ssh $DEVNET_USER@$DEVNET_HOST "sudo systemctl stop truchaind.service"
+                ssh $DEVNET_USER@$DEVNET_HOST "c && git pull && make update_deps && make build-linux && cp bin/truchaind /home/ubuntu/go/bin/"
+                ssh $DEVNET_USER@$DEVNET_HOST "sudo systemctl start truchaind.service"
+                echo "deployed to devnet"
+            fi
   test_unit:
     <<: *defaults
     parallelism: 2
@@ -141,6 +166,12 @@ workflows:
             branches:
               only:
                 - master
+      - deploy:
+          filters:
+            branches:
+              only:
+                - master
+                - develop
   nightly-backup:
     triggers:
       - schedule:
