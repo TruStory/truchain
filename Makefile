@@ -4,6 +4,15 @@ MODULES = argument backing category challenge expiration stake story
 
 CHAIN_DIR = ./.chain
 
+VERSION := $(shell echo $(shell git describe --tags) | sed 's/^v//')
+COMMIT := $(shell git log -1 --format='%H')
+
+ldflags = -X github.com/TruStory/truchain/vendor/github.com/cosmos/cosmos-sdk/version.Name=truchaind \
+	-X github.com/TruStory/truchain/vendor/github.com/cosmos/cosmos-sdk/version.Version=$(VERSION) \
+	-X github.com/TruStory/truchain/vendor/github.com/cosmos/cosmos-sdk/version.Commit=$(COMMIT)
+
+BUILD_FLAGS := -ldflags '$(ldflags)'
+
 define \n
 
 
@@ -20,10 +29,10 @@ build_cli:
 	go build -o bin/trucli cmd/trucli/main.go
 
 build_daemon:
-	go build -o bin/truchaind cmd/truchaind/main.go
+	go build $(BUILD_FLAGS) -o bin/truchaind cmd/truchaind/main.go
 
 build-linux:
-	GOOS=linux GOARCH=amd64 go build -o build/truchaind cmd/truchaind/main.go
+	GOOS=linux GOARCH=amd64 go build $(BUILD_FLAGS) -o build/truchaind cmd/truchaind/main.go
 
 doc:
 	@echo "--> Wait a few seconds and visit http://localhost:6060/pkg/github.com/TruStory/truchain/"
