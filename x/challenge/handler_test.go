@@ -31,6 +31,7 @@ func TestSubmitChallengeMsg(t *testing.T) {
 	res := h(ctx, msg)
 	result := &app.StakeNotificationResult{}
 	err := json.Unmarshal(res.Data, result)
+	assert.NoError(t, err)
 	assert.NotNil(t, msg)
 
 	story, err := sk.Story(ctx, storyID)
