@@ -15,6 +15,6 @@ comment:
   behavior: default  # update if exists else create new
 
 ignore:
-  - "docs"
+  - "cmd"
   - "*.md"
-  - "*.rst"
+
