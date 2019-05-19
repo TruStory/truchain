@@ -74,7 +74,7 @@ Example:
 	cmd.Flags().String(flagNodeDaemonHome, "truchaind",
 		"Home directory of the node's daemon configuration",
 	)
-	cmd.Flags().String(flagNodeCliHome, "trucli",
+	cmd.Flags().String(flagNodeCliHome, "truchaincli",
 		"Home directory of the node's cli configuration",
 	)
 	cmd.Flags().String(flagStartingIPAddress, "192.168.0.1",

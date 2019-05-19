@@ -42,7 +42,7 @@ func main() {
 	mc := []sdk.ModuleClients{}
 
 	rootCmd := &cobra.Command{
-		Use:   "trucli",
+		Use:   "truchaincli",
 		Short: "TruChain Client",
 	}
 

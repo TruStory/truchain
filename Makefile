@@ -26,7 +26,7 @@ buidl: build
 build: build_daemon
 
 build_cli:
-	@go build -o bin/trucli cmd/trucli/main.go
+	@go build -o bin/truchaincli cmd/truchaincli/main.go
 
 build_daemon:
 	@go build $(BUILD_FLAGS) -o bin/truchaind cmd/truchaind/main.go
