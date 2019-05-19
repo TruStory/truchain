@@ -65,14 +65,9 @@ install_tools_macos:
 go_test:
 	@go test $(PACKAGES)
 
-set_env_vars:
-	mkdir -p $(HOME)/.truchaind
-	cp .env.example $(CHAIN_DIR)/.env
-	cp .env.example $(HOME)/.truchaind/.env
-
 test: go_test
 
-test_cover: set_env_vars
+test_cover:
 	@go test $(PACKAGES) -v -timeout 30m -race -coverprofile=coverage.txt -covermode=atomic
 	@go tool cover -html=coverage.txt
 
