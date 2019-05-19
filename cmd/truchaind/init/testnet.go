@@ -27,8 +27,6 @@ import (
 )
 
 const (
-	flagGet = "get"
-
 	// DefaultKeyPass contains the default key password for genesis transactions
 	DefaultKeyPass = "12345678"
 )

@@ -55,7 +55,7 @@ func (msg SubmitStoryMsg) ValidateBasic() sdk.Error {
 	if len(msg.Creator) == 0 {
 		return sdk.ErrInvalidAddress("Invalid address: " + msg.Creator.String())
 	}
-	if msg.StoryType.IsValid() == false {
+	if !msg.StoryType.IsValid() {
 		return ErrInvalidStoryType(msg.StoryType.String())
 	}
 

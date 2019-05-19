@@ -31,8 +31,7 @@ import (
 )
 
 const (
-	flagClientHome = "home-client"
-	flagOverwrite  = "overwrite"
+	flagOverwrite = "overwrite"
 )
 
 func main() {
@@ -255,6 +254,7 @@ $ nsd add-genesis-account cosmos1tse7r2fadvlrrgau3pa0ss7cqh55wrv6y9alwh 1000STAK
 			}
 			genContents, err := ioutil.ReadFile(genFile)
 			if err != nil {
+				return err
 			}
 
 			if err = cdc.UnmarshalJSON(genContents, &genDoc); err != nil {

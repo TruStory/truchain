@@ -20,9 +20,8 @@ import (
 )
 
 const (
-	flagOverwrite  = "overwrite"
-	flagClientHome = "home-client"
-	flagMoniker    = "moniker"
+	flagOverwrite = "overwrite"
+	flagMoniker   = "moniker"
 )
 
 type printInfo struct {

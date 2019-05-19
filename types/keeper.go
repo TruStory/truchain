@@ -90,7 +90,7 @@ func (k Keeper) EachPrefix(ctx sdk.Context, prefix string, fn func([]byte) bool)
 	for iter.Valid() {
 		val = iter.Value()
 		if len(val) > 1 {
-			if fn(val) == false {
+			if !fn(val) {
 				break
 			}
 		}
