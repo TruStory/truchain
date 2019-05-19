@@ -46,11 +46,9 @@ jobs:
             export PATH="$GOBIN:$PATH"
             make update_deps
       - run:
-          name: Get metalinter
+          name: Get golangci
           command: |
-            export PATH="$GOBIN:$PATH"
-            go get github.com/alecthomas/gometalinter
-            gometalinter --install --update
+            curl -sfL https://install.goreleaser.com/github.com/golangci/golangci-lint.sh | sh -s -- -b $(go env GOPATH)/bin v1.16.0
       - run:
           name: Lint source
           command: |
