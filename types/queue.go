@@ -5,6 +5,8 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
+// NOTE: This is copied directly from an older version of Cosmos SDK.
+
 // TopKey is the key for the top element position in the queue
 func TopKey() []byte {
 	return []byte{0x02}

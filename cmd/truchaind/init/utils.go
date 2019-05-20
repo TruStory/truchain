@@ -19,6 +19,9 @@ import (
 	"github.com/tendermint/tendermint/types"
 )
 
+// NOTE: Much of this file is copied from it's gaia equivalent. It's some helper for genesis files.
+// This should go away after it becomes part of a module in the Cosmos SDK (in the works).
+
 // ExportGenesisFile creates and writes the genesis configuration to disk. An
 // error is returned if building or writing the configuration to file fails.
 func ExportGenesisFile(genDoc *types.GenesisDoc, genFile string) error {

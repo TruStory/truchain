@@ -18,6 +18,9 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/auth"
 )
 
+// NOTE: Much of this file is copied from it's gaia equivalent. It collects the genesis transactions and writes them to the
+// genesis file. This should go away after it becomes part of a module in the Cosmos SDK (in the works).
+
 const (
 	flagGenTxDir = "gentx-dir"
 )

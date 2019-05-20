@@ -29,6 +29,10 @@ import (
 	tmtypes "github.com/tendermint/tendermint/types"
 )
 
+// NOTE: Much of this file is copied from it's gaia equivalent. The only difference is the data in the `GenesisState` struct.
+// Much of this will go away after gaia is separated out of the SDK, and this becomes a generic module on the SDK.
+// The main purpose of this is to setup the genesis files for the testnet.
+
 var (
 	// bonded tokens given to genesis validators/accounts
 	freeFermionsAcc = sdk.NewInt(150)

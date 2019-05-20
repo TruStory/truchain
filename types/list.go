@@ -8,6 +8,8 @@ import (
 	"github.com/cosmos/cosmos-sdk/store/types"
 )
 
+// NOTE: This is copied directly from an older version of Cosmos SDK.
+
 // Key for the length of the list
 func LengthKey() []byte {
 	return []byte{0x00}

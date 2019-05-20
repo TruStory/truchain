@@ -26,6 +26,9 @@ import (
 	tmtime "github.com/tendermint/tendermint/types/time"
 )
 
+// NOTE: Much of this file is copied from it's gaia equivalent. It initializes a 4-node testnet.
+// This should go away after it becomes part of a module in the Cosmos SDK (in the works).
+
 const (
 	// DefaultKeyPass contains the default key password for genesis transactions
 	DefaultKeyPass = "12345678"

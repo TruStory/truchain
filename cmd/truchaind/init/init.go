@@ -19,6 +19,9 @@ import (
 	"github.com/cosmos/cosmos-sdk/server"
 )
 
+// NOTE: Much of this file is copied from it's gaia equivalent. It initializes a genesis file with defaults.
+// This should go away after it becomes part of a module in the Cosmos SDK (in the works).
+
 const (
 	flagOverwrite = "overwrite"
 	flagMoniker   = "moniker"
