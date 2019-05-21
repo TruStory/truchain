@@ -29,7 +29,7 @@ func (ta *TruAPI) HandleStatistics(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	userMetrics, err := ta.DBClient.AggregateStatisticsByAddressBetweenDates(address, from, to)
+	userMetrics, err := ta.DBClient.AggregateUserMetricsByAddressBetweenDates(address, from, to)
 	if err != nil {
 		panic(err)
 	}

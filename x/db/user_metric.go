@@ -27,8 +27,8 @@ type UserMetric struct {
 	CredEarned                uint64    `json:"cred_earned"  sql:"type:,notnull"`
 }
 
-// AggregateStatisticsByAddressBetweenDates gets and aggregates the user metrics for a given address on a given date
-func (c *Client) AggregateStatisticsByAddressBetweenDates(address string, from string, to string) ([]UserMetric, error) {
+// AggregateUserMetricsByAddressBetweenDates gets and aggregates the user metrics for a given address on a given date
+func (c *Client) AggregateUserMetricsByAddressBetweenDates(address string, from string, to string) ([]UserMetric, error) {
 	userMetrics := make([]UserMetric, 0)
 	err := c.Model(&userMetrics).
 		Column("as_on_date", "category_id").

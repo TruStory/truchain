@@ -507,12 +507,11 @@ func (ta *TruAPI) reactionsResolver(ctx context.Context, rxnable db.Reactionable
 }
 
 func (ta *TruAPI) userStatisticsResolver(ctx context.Context, q StatisticsFilter) []db.UserMetric {
-	_, ok := ctx.Value(userContextKey).(*cookies.AuthenticatedUser)
+	user, ok := ctx.Value(userContextKey).(*cookies.AuthenticatedUser)
 	if !ok {
 		return make([]db.UserMetric, 0)
 	}
-	// response, err := ta.DBClient.AggregateStatisticsByAddressBetweenDates(user.Address, q.from, q.to)
-	response, err := ta.DBClient.AggregateStatisticsByAddressBetweenDates("cosmos1xqc5gwzpg3fyv5en2fzyx36z2se5ks33tt57e7", q.From, q.To)
+	response, err := ta.DBClient.AggregateUserMetricsByAddressBetweenDates(user.Address, q.From, q.To)
 	if err != nil {
 		panic(err)
 	}
