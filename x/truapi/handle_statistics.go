@@ -6,7 +6,7 @@ import (
 	"github.com/TruStory/truchain/x/truapi/render"
 )
 
-// HandleStatistics dumps metrics per user basis.
+// HandleStatistics dumps metrics per user per day basis (NOT 'accumulated till date' basis as in HandleMetrics).
 func (ta *TruAPI) HandleStatistics(w http.ResponseWriter, r *http.Request) {
 	err := r.ParseForm()
 	if err != nil {

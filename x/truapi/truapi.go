@@ -488,26 +488,10 @@ func (ta *TruAPI) RegisterResolvers() {
 
 	ta.GraphQLClient.RegisterQueryResolver("userStatistics", ta.userStatisticsResolver)
 	ta.GraphQLClient.RegisterObjectResolver("UserStatistics", db.UserMetric{}, map[string]interface{}{
-		"address":    func(_ context.Context, q db.UserMetric) string { return q.Address },
-		"as_on_date": func(_ context.Context, q db.UserMetric) string { return q.AsOnDate.Format("2006-01-02") },
+		"asOnDate": func(_ context.Context, q db.UserMetric) string { return q.AsOnDate.Format("2006-01-02") },
 		"category": func(ctx context.Context, q db.UserMetric) category.Category {
 			return ta.categoryResolver(ctx, category.QueryCategoryByIDParams{ID: q.CategoryID})
 		},
-		"total_claims":                func(ctx context.Context, q db.UserMetric) uint64 { return q.TotalClaims },
-		"total_arguments":             func(ctx context.Context, q db.UserMetric) uint64 { return q.TotalArguments },
-		"total_claims_backed":         func(ctx context.Context, q db.UserMetric) uint64 { return q.TotalClaimsBacked },
-		"total_claims_challenged":     func(ctx context.Context, q db.UserMetric) uint64 { return q.TotalClaimsChallenged },
-		"total_amount_backed":         func(ctx context.Context, q db.UserMetric) uint64 { return q.TotalAmountBacked },
-		"total_amount_challenged":     func(ctx context.Context, q db.UserMetric) uint64 { return q.TotalAmountChallenged },
-		"total_endorsements_given":    func(ctx context.Context, q db.UserMetric) uint64 { return q.TotalEndorsementsGiven },
-		"total_endorsements_received": func(ctx context.Context, q db.UserMetric) uint64 { return q.TotalEndorsementsReceived },
-		"stake_earned":                func(ctx context.Context, q db.UserMetric) uint64 { return q.StakeEarned },
-		"stake_lost":                  func(ctx context.Context, q db.UserMetric) uint64 { return q.StakeLost },
-		"stake_balance":               func(ctx context.Context, q db.UserMetric) uint64 { return q.StakeBalance },
-		"interest_earned":             func(ctx context.Context, q db.UserMetric) uint64 { return q.InterestEarned },
-		"total_amount_at_stake":       func(ctx context.Context, q db.UserMetric) uint64 { return q.TotalAmountAtStake },
-		"total_amount_staked":         func(ctx context.Context, q db.UserMetric) uint64 { return q.TotalAmountStaked },
-		"cred_earned":                 func(ctx context.Context, q db.UserMetric) uint64 { return q.CredEarned },
 	})
 
 	ta.GraphQLClient.BuildSchema()
