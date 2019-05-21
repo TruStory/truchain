@@ -118,6 +118,7 @@ func (ta *TruAPI) RegisterRoutes() {
 	api.Handle("/invite", WithUser(WrapHandler(ta.HandleInvite)))
 	api.Handle("/reactions", WithUser(WrapHandler(ta.HandleReaction)))
 	api.HandleFunc("/mentions/translateToCosmos", ta.HandleTranslateCosmosMentions)
+	api.HandleFunc("/metrics", ta.HandleMetrics)
 
 	if os.Getenv("MOCK_REGISTRATION") == "true" {
 		api.Handle("/mock_register", WrapHandler(ta.HandleMockRegistration))
