@@ -66,6 +66,8 @@ type Metrics struct {
 	TotalArguments            int64 `json:"total_arguments"`
 	TotalEndorsementsReceived int64 `json:"total_endorsements_received"`
 	TotalEndorsementsGiven    int64 `json:"total_endorsements_given"`
+	TotalBackings             int64 `json:"total_backings"`
+	TotalChallenges           int64 `json:"total_challenges"`
 
 	// StakeBased Metrics
 	TotalAmountStaked     sdk.Coin `json:"total_amount_staked"`
@@ -112,6 +114,16 @@ func (um *UserMetrics) increaseEndorsementsGivenCount(categoryID int64) {
 func (um *UserMetrics) increaseEndorsementsReceivedCount(categoryID int64) {
 	m := um.getMetricsByCategory(categoryID).Metrics
 	m.TotalEndorsementsReceived = m.TotalEndorsementsReceived + 1
+}
+
+func (um *UserMetrics) increaseTotalBackings(categoryID int64) {
+	m := um.getMetricsByCategory(categoryID).Metrics
+	m.TotalBackings = m.TotalBackings + 1
+}
+
+func (um *UserMetrics) increaseTotalChallenges(categoryID int64) {
+	m := um.getMetricsByCategory(categoryID).Metrics
+	m.TotalChallenges = m.TotalChallenges + 1
 }
 
 func (um *UserMetrics) addAmoutAtStake(categoryID int64, amount sdk.Coin) {
@@ -221,6 +233,7 @@ func (ta *TruAPI) HandleMetrics(w http.ResponseWriter, r *http.Request) {
 			backerMetrics := metricsSummary.GetUserMetrics(creator)
 			backerMetrics.addStakedAmount(s.CategoryID, b.Amount())
 			backerMetrics.addBackedAmount(s.CategoryID, b.Amount())
+			backerMetrics.increaseTotalBackings(s.CategoryID)
 			if s.Status == story.Pending {
 				backerMetrics.addAmoutAtStake(s.CategoryID, b.Amount())
 			}
@@ -251,6 +264,7 @@ func (ta *TruAPI) HandleMetrics(w http.ResponseWriter, r *http.Request) {
 			challengerMetrics := metricsSummary.GetUserMetrics(creator)
 			challengerMetrics.addStakedAmount(s.CategoryID, c.Amount())
 			challengerMetrics.addChallengedAmount(s.CategoryID, c.Amount())
+			challengerMetrics.increaseTotalChallenges(s.CategoryID)
 			if s.Status == story.Pending {
 				challengerMetrics.addAmoutAtStake(s.CategoryID, c.Amount())
 			}
