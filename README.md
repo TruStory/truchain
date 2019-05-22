@@ -47,7 +47,7 @@ TruChain currently needs a _registrar_ account to sign new user registration mes
 
 ```
 # Initialize configuration files and genesis file
-./bin/truchaind init --chain-id truchain
+./bin/truchaind init localnet --chain-id truchain
 
 # Configure the CLI to eliminate need for chain-id flag
 ./bin/truchaincli config chain-id truchain
