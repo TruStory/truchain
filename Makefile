@@ -23,16 +23,17 @@ benchmark:
 
 buidl: build
 
-build: build_daemon
+build: build_cli build_daemon
 
 build_cli:
-	@go build -o bin/truchaincli cmd/truchaincli/main.go
+	@go build $(BUILD_FLAGS) -o bin/truchaincli cmd/truchaincli/main.go
 
 build_daemon:
 	@go build $(BUILD_FLAGS) -o bin/truchaind cmd/truchaind/main.go
 
 build-linux:
 	GOOS=linux GOARCH=amd64 go build $(BUILD_FLAGS) -o build/truchaind cmd/truchaind/main.go
+	GOOS=linux GOARCH=amd64 go build $(BUILD_FLAGS) -o build/truchaincli cmd/truchaincli/main.go
 
 doc:
 	@echo "--> Wait a few seconds and visit http://localhost:6060/pkg/github.com/TruStory/truchain/"
@@ -94,5 +95,5 @@ localnet-stop:
 
 ########################################
 
-.PHONY: benchmark buidl build check dep_graph test test_cover update_deps \
+.PHONY: benchmark buidl build build_cli build_daemon check dep_graph test test_cover update_deps \
 build-docker-truchaindnode localnet-start localnet-stop

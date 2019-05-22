@@ -67,7 +67,7 @@ jobs:
                 mkdir -p ~/.ssh
                 ssh-keyscan $VENICE4_HOST >> ~/.ssh/known_hosts
                 ssh $VENICE4_USER@$VENICE4_HOST "sudo systemctl stop truchaind.service"
-                ssh $VENICE4_USER@$VENICE4_HOST "cd /home/ubuntu/go/src/github.com/TruStory/truchain && git pull && PATH=/home/ubuntu/go/bin:$PATH && make update_deps && PATH=/usr/local/go/bin:$PATH make build-linux && cp build/truchaind /home/ubuntu/go/bin/"
+                ssh $VENICE4_USER@$VENICE4_HOST "cd /home/ubuntu/go/src/github.com/TruStory/truchain && git pull && PATH=/home/ubuntu/go/bin:$PATH && make update_deps && PATH=/usr/local/go/bin:$PATH make build-linux && cp build/truchaind /home/ubuntu/go/bin/ && cp build/truchaincli /home/ubuntu/go/bin/"
                 ssh $VENICE4_USER@$VENICE4_HOST "sudo systemctl start truchaind.service"
                 echo "deploying to venice4"
             elif [ "${CIRCLE_BRANCH}" == "develop" ]
@@ -75,7 +75,7 @@ jobs:
                 mkdir -p ~/.ssh
                 ssh-keyscan $DEVNET_HOST >> ~/.ssh/known_hosts
                 ssh $DEVNET_USER@$DEVNET_HOST "sudo systemctl stop truchaind.service"
-                ssh $DEVNET_USER@$DEVNET_HOST "cd /home/ubuntu/go/src/github.com/TruStory/truchain && git pull && PATH=/home/ubuntu/go/bin:$PATH && make update_deps && PATH=/usr/local/go/bin:$PATH make build-linux && cp build/truchaind /home/ubuntu/go/bin/"
+                ssh $DEVNET_USER@$DEVNET_HOST "cd /home/ubuntu/go/src/github.com/TruStory/truchain && git pull && PATH=/home/ubuntu/go/bin:$PATH && make update_deps && PATH=/usr/local/go/bin:$PATH make build-linux && cp build/truchaind /home/ubuntu/go/bin/ && cp build/truchaincli /home/ubuntu/go/bin/"
                 ssh $DEVNET_USER@$DEVNET_HOST "sudo systemctl start truchaind.service"
                 echo "deployed to devnet"
             fi
