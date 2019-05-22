@@ -43,7 +43,7 @@ This creates:
 
 ### Setup genesis accounts
 
-TruChain currently needs a _registrar_ account to sign new user registration messages. _This is temporary and will go away once client-side signing is implemented_.
+TruChain currently needs a _registrar_ account to sign new user registration messages.
 
 ```
 # Initialize configuration files and genesis file
