@@ -75,7 +75,7 @@ test_cover:
 update_deps:
 	@echo "--> Running dep ensure"
 	@rm -rf .vendor-new
-	@$(GOPATH)/bin/dep ensure -v -vendor-only
+	@$(GOBIN)/dep ensure -v -vendor-only
 
 ########################################
 ### Local validator nodes using docker and docker-compose
