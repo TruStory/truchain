@@ -50,7 +50,7 @@ TruChain currently needs a _registrar_ account to sign new user registration mes
 ./bin/truchaind init localnet --chain-id truchain
 
 # Configure the CLI to eliminate need for chain-id flag
-./bin/truchaincli config chain-id truchain
+./bin/truchaincli config chain-id truchain --home ~/.octopus
 
 # Add a new key named registrar
 ./bin/truchaincli keys add registrar --home ~/.octopus
