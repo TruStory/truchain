@@ -3,7 +3,7 @@
 [![CircleCI](https://circleci.com/gh/TruStory/truchain.svg?style=svg&circle-token=0cea219dcac9bd6962a057d85c4a319613c6680e)](https://circleci.com/gh/TruStory/truchain)
 [![codecov](https://codecov.io/gh/TruStory/truchain/branch/master/graph/badge.svg?token=jh3muAAEBs)](https://codecov.io/gh/TruStory/truchain)
 
-TruChain is an application-specific blockchain built with [Cosmos SDK](https://cosmos.network/sdk).
+TruChain is an application-specific blockchain built with [Cosmos SDK](https://cosmos.network/sdk). It powers [trustory.io](https://www.trustory.io/).
 
 
 ## Installation
