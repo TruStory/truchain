@@ -146,7 +146,7 @@ jobs:
 
 workflows:
   version: 2
-  test-suite:
+  deploy-flow:
     jobs:
       - setup_dependencies
       - check:
@@ -156,8 +156,6 @@ workflows:
           context: truchain-context
           requires:
             - setup_dependencies
-  deploy-flow:
-    jobs:
       - data_dump:
           filters:
             branches:
