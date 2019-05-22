@@ -195,7 +195,7 @@ func (k Keeper) LikeArgument(ctx sdk.Context, argumentID int64, creator sdk.AccA
 	}
 
 	stakeToCredRatio := k.stakeKeeper.GetParams(ctx).StakeToCredRatio
-	likeCredAmount := amount.Amount.Div(stakeToCredRatio)
+	likeCredAmount := amount.Amount.Quo(stakeToCredRatio)
 
 	_, err = k.trubankKeeper.MintAndAddCoin(
 		ctx,
@@ -289,7 +289,7 @@ func (k Keeper) TotalBackingAmount(ctx sdk.Context, storyID int64) (
 		if err != nil {
 			return err
 		}
-		totalAmount = totalAmount.Plus(backing.Amount())
+		totalAmount = totalAmount.Add(backing.Amount())
 
 		return nil
 	})

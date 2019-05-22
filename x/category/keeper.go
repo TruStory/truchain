@@ -96,7 +96,7 @@ func (k Keeper) AddToTotalCred(ctx sdk.Context, id int64, amt sdk.Coin) (err sdk
 		return ErrCodeDenomMismatch(id)
 	}
 
-	cat.TotalCred = cat.TotalCred.Plus(amt)
+	cat.TotalCred = cat.TotalCred.Add(amt)
 	k.setCategory(ctx, cat)
 
 	return

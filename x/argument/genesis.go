@@ -43,9 +43,7 @@ func ExportGenesis(ctx sdk.Context, keeper Keeper) GenesisState {
 		if err != nil {
 			panic(err)
 		}
-		for _, like := range likesForArgument {
-			likes = append(likes, like)
-		}
+		likes = append(likes, likesForArgument...)
 		return true
 	})
 	if err != nil {

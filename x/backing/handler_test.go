@@ -43,14 +43,17 @@ func TestBackStoryMsg(t *testing.T) {
 
 	res := h(ctx, msg)
 	result := &app.StakeNotificationResult{}
-	_ = json.Unmarshal(res.Data, result)
+	assert.NoError(t, json.Unmarshal(res.Data, result))
+
+	story, _ := sk.Story(ctx, storyID)
+	assert.NotNil(t, story)
 
 	expected := &app.StakeNotificationResult{
 		MsgResult: app.MsgResult{ID: int64(1)},
 		Amount:    amount,
 		StoryID:   storyID,
 		From:      creator,
-		To:        sdk.AccAddress([]byte{1, 2}),
+		To:        story.Creator,
 	}
 
 	assert.Equal(t, expected, result)
@@ -74,12 +77,15 @@ func TestLikeBackingMsg(t *testing.T) {
 	result := &app.StakeNotificationResult{}
 	_ = json.Unmarshal(res.Data, result)
 
+	story, _ := sk.Story(ctx, storyID)
+	assert.NotNil(t, story)
+
 	expected := &app.StakeNotificationResult{
 		MsgResult: app.MsgResult{ID: int64(1)},
 		Amount:    amount,
 		StoryID:   storyID,
 		From:      backingCreator,
-		To:        sdk.AccAddress([]byte{1, 2}),
+		To:        story.Creator,
 	}
 	backing, err := bk.Backing(ctx, result.ID)
 	assert.NoError(t, err)
@@ -95,7 +101,7 @@ func TestLikeBackingMsg(t *testing.T) {
 	likeResult := &app.StakeNotificationResult{}
 	_ = json.Unmarshal(res.Data, likeResult)
 	stakeToCredRatio := bk.stakeKeeper.GetParams(ctx).StakeToCredRatio
-	expectedCred := sdk.NewCoin("trudex", amount.Amount.Div(stakeToCredRatio))
+	expectedCred := sdk.NewCoin("trudex", amount.Amount.Quo(stakeToCredRatio))
 
 	expectedLikeResult := &app.StakeNotificationResult{
 		MsgResult: app.MsgResult{ID: int64(2)},
@@ -107,7 +113,6 @@ func TestLikeBackingMsg(t *testing.T) {
 	}
 
 	assert.Equal(t, expectedLikeResult, likeResult)
-
 }
 
 func TestByzantineMsg(t *testing.T) {

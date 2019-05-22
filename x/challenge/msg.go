@@ -48,7 +48,7 @@ func (msg CreateChallengeMsg) ValidateBasic() sdk.Error {
 	if msg.StoryID == 0 {
 		return story.ErrInvalidStoryID(msg.StoryID)
 	}
-	if msg.Amount.IsZero() == true {
+	if msg.Amount.IsZero() {
 		return sdk.ErrInsufficientFunds("Invalid challenge amount: " + msg.Amount.String())
 	}
 	if len(msg.Creator) == 0 {

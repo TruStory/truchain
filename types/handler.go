@@ -1,7 +1,6 @@
 package types
 
 import (
-	"encoding/binary"
 	"encoding/json"
 	"reflect"
 
@@ -18,7 +17,7 @@ type IDResult struct {
 // ErrMsgHandler returns an unknown Msg request error result
 func ErrMsgHandler(msg sdk.Msg) sdk.Result {
 	if mType := reflect.TypeOf(msg); mType != nil {
-		errMsg := "Unrecognized Msg type: " + mType.Name()
+		errMsg := "Truchain: Unrecognized Msg type: " + mType.Name()
 		return sdk.ErrUnknownRequest(errMsg).Result()
 	}
 
@@ -35,10 +34,4 @@ func Result(id int64) sdk.Result {
 	}
 
 	return sdk.Result{Data: bz}
-}
-
-// i2b converts an int64 into a byte array
-func i2b(x int64) []byte {
-	var b [binary.MaxVarintLen64]byte
-	return b[:binary.PutVarint(b[:], x)]
 }

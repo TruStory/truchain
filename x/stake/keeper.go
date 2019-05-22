@@ -33,7 +33,7 @@ func NewKeeper(
 	return Keeper{
 		storyKeeper,
 		truBankKeeper,
-		paramStore.WithTypeTable(ParamTypeTable()),
+		paramStore.WithKeyTable(ParamKeyTable()),
 	}
 }
 
@@ -55,7 +55,7 @@ func (k Keeper) RedistributeStake(ctx sdk.Context, votes []Voter) (app.StakeDist
 	for _, v := range votes {
 		voteStake := v.Amount().Amount
 		rewardPool = rewardPool.Add(voteStake)
-		if v.VoteChoice() == true {
+		if v.VoteChoice() {
 			truePool = truePool.Add(voteStake)
 		} else {
 			falsePool = falsePool.Add(voteStake)
@@ -80,7 +80,7 @@ func (k Keeper) RedistributeStake(ctx sdk.Context, votes []Voter) (app.StakeDist
 		// true pool >= 51% total pool
 		winPool = truePool
 		for _, v := range votes {
-			if v.VoteChoice() == true {
+			if v.VoteChoice() {
 				r, err := k.rewardStaker(ctx, v, winPool, rewardPool)
 				if err != nil {
 					return result, err
@@ -92,7 +92,7 @@ func (k Keeper) RedistributeStake(ctx sdk.Context, votes []Voter) (app.StakeDist
 		result.Type = app.DistributionChallengersWin
 		// false pool >= 51% total pool
 		for _, v := range votes {
-			if v.VoteChoice() == false {
+			if !v.VoteChoice() {
 				r, err := k.rewardStaker(ctx, v, winPool, rewardPool)
 				if err != nil {
 					return result, err
@@ -104,7 +104,7 @@ func (k Keeper) RedistributeStake(ctx sdk.Context, votes []Voter) (app.StakeDist
 		// 51% majority not met, return stake
 		for _, v := range votes {
 			transactionType := trubank.BackingReturned
-			if v.VoteChoice() == false {
+			if !v.VoteChoice() {
 				transactionType = trubank.ChallengeReturned
 			}
 			_, err := k.truBankKeeper.AddCoin(ctx, v.Creator(), v.Amount(), v.StoryID(), transactionType, 0)
@@ -128,7 +128,7 @@ func (k Keeper) DistributeInterest(ctx sdk.Context, votes []Voter) (app.Interest
 		period := ctx.BlockHeader().Time.Sub(v.Timestamp().CreatedTime)
 		interest := k.interest(ctx, v.Amount(), period)
 		interestCoin := sdk.NewCoin(app.StakeDenom, interest)
-		total.Plus(interestCoin)
+		total.Add(interestCoin)
 		_, err := k.truBankKeeper.AddCoin(ctx, v.Creator(), interestCoin, v.StoryID(), trubank.Interest, 0)
 		if err != nil {
 			return result, err
@@ -144,6 +144,9 @@ func (k Keeper) DistributeInterest(ctx sdk.Context, votes []Voter) (app.Interest
 // ValidateAmount validates the stake amount
 func (k Keeper) ValidateAmount(ctx sdk.Context, amount sdk.Coin) sdk.Error {
 	maxAmount := k.GetParams(ctx).MaxAmount
+	if maxAmount.Denom != amount.Denom {
+		return sdk.ErrInvalidCoins("Coin denom mismatch")
+	}
 	if maxAmount.IsLT(amount) {
 		return ErrOverMaxAmount()
 	}
@@ -185,7 +188,7 @@ func (k Keeper) rewardStaker(ctx sdk.Context, staker Voter, winPool sdk.Int, rew
 	rewardAmount := rewardAmount(staker.Amount().Amount, winPool, rewardPool)
 	rewardCoin := sdk.NewCoin(app.StakeDenom, rewardAmount)
 	transactionType := trubank.BackingReturned
-	if staker.VoteChoice() == false {
+	if !staker.VoteChoice() {
 		transactionType = trubank.ChallengeReturned
 	}
 	_, err := k.truBankKeeper.AddCoin(ctx, staker.Creator(), staker.Amount(), staker.StoryID(), transactionType, 0)

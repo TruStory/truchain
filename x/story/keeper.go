@@ -8,7 +8,6 @@ import (
 
 	app "github.com/TruStory/truchain/types"
 	"github.com/TruStory/truchain/x/category"
-	list "github.com/cosmos/cosmos-sdk/store"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/params"
 	amino "github.com/tendermint/go-amino"
@@ -68,7 +67,7 @@ func NewKeeper(
 		app.NewKeeper(codec, storeKey),
 		storyQueueKey,
 		categoryKeeper,
-		paramStore.WithTypeTable(ParamTypeTable()),
+		paramStore.WithKeyTable(ParamKeyTable()),
 	}
 }
 
@@ -263,9 +262,9 @@ func (k Keeper) storyIDsByCategoryID(
 	return storyIDs, nil
 }
 
-func (k Keeper) storyQueue(ctx sdk.Context) list.Queue {
+func (k Keeper) storyQueue(ctx sdk.Context) app.Queue {
 	store := ctx.KVStore(k.storyQueueKey)
-	return list.NewQueue(k.GetCodec(), store)
+	return app.NewQueue(k.GetCodec(), store)
 }
 
 func (k Keeper) validate(ctx sdk.Context, body string) sdk.Error {

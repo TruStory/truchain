@@ -24,7 +24,6 @@ node_modules/
 
 # Misc.
 .DS_Store
-./registrar.key
 .env
 web/
 *.bak
@@ -33,3 +32,5 @@ web/
 go.mod
 go.sum
 .vscode
+build/
+.testnet/

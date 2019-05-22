@@ -27,21 +27,14 @@ func (app *TruChain) ExportAppStateAndValidators() (
 
 	ctx := app.NewContext(true, abci.Header{Height: app.LastBlockHeight()})
 
-	accounts := []*auth.BaseAccount{}
-	appendAccountsFn := func(acc auth.Account) bool {
-		account := &auth.BaseAccount{
-			Address:       acc.GetAddress(),
-			Coins:         acc.GetCoins(),
-			PubKey:        acc.GetPubKey(),
-			AccountNumber: acc.GetAccountNumber(),
-			Sequence:      acc.GetSequence(),
-		}
-
+	// iterate to get the accounts
+	accounts := []GenesisAccount{}
+	appendAccount := func(acc auth.Account) (stop bool) {
+		account := NewGenesisAccountI(acc)
 		accounts = append(accounts, account)
 		return false
 	}
-
-	app.accountKeeper.IterateAccounts(ctx, appendAccountsFn)
+	app.accountKeeper.IterateAccounts(ctx, appendAccount)
 
 	genState := GenesisState{
 		ArgumentData:   argument.ExportGenesis(ctx, app.argumentKeeper),
