@@ -26,7 +26,6 @@ jobs:
       - run:
           name: dependencies
           command: |
-            export PATH="$GOBIN:$PATH"
             make update_deps
       - persist_to_workspace:
           root: /tmp/workspace
@@ -43,7 +42,6 @@ jobs:
       - run:
           name: dependencies
           command: |
-            export PATH="$GOBIN:$PATH"
             make update_deps
       - run:
           name: Get golangci
