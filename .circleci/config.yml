@@ -64,7 +64,7 @@ jobs:
           name: Deploy
           command: |
             if [ "${CIRCLE_BRANCH}" == "master" ]; then
-                mkdir ~/.ssh
+                mkdir -p ~/.ssh
                 ssh-keyscan $VENICE4_HOST >> ~/.ssh/known_hosts
                 ssh $VENICE4_USER@$VENICE4_HOST "sudo systemctl stop truchaind.service"
                 ssh $VENICE4_USER@$VENICE4_HOST "c && git pull && make update_deps && make build-linux && cp bin/truchaind /home/ubuntu/go/bin/"
@@ -72,7 +72,7 @@ jobs:
                 echo "deploying to venice4"
             elif [ "${CIRCLE_BRANCH}" == "develop" ]
             then
-                mkdir ~/.ssh
+                mkdir -p ~/.ssh
                 ssh-keyscan $DEVNET_HOST >> ~/.ssh/known_hosts
                 ssh $DEVNET_USER@$DEVNET_HOST "sudo systemctl stop truchaind.service"
                 ssh $DEVNET_USER@$DEVNET_HOST "c && git pull && make update_deps && make build-linux && cp bin/truchaind /home/ubuntu/go/bin/"
