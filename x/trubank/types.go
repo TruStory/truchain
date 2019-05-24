@@ -32,4 +32,5 @@ const (
 	Like
 	BackingLike
 	ChallengeLike
+	InviteAFriend
 )
