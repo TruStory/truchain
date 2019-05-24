@@ -12,9 +12,13 @@ type GenesisState struct {
 
 // DefaultGenesisState for tests
 func DefaultGenesisState() GenesisState {
+	rewardBrokerAddress, err := sdk.AccAddressFromBech32("cosmos1xqc5gwzpgdr4wjz8xscnys2jx3f9x4zy223g9w")
+	if err != nil {
+		panic(err)
+	}
 	return GenesisState{
 		Transactions:        make([]Transaction, 0),
-		RewardBrokerAddress: sdk.AccAddress([]byte("cosmos1xqc5gs2xfdryws6dtfvng3z32ftr2de56tksud")),
+		RewardBrokerAddress: rewardBrokerAddress,
 	}
 }
 
@@ -42,7 +46,7 @@ func ExportGenesis(ctx sdk.Context, keeper Keeper) GenesisState {
 	}
 	rewardBrokerAddress, err2 := keeper.GetRewardBrokerAddress(ctx)
 	if err2 != nil {
-		panic(err)
+		rewardBrokerAddress = DefaultGenesisState().RewardBrokerAddress
 	}
 	return GenesisState{
 		Transactions:        transactions,

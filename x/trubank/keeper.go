@@ -188,7 +188,9 @@ func (k Keeper) setTransaction(ctx sdk.Context, transaction Transaction) {
 
 func (k Keeper) setRewardBrokerAddress(ctx sdk.Context, address sdk.AccAddress) {
 	store := k.GetStore(ctx)
-	store.Set(k.rewardBrokerAddressKey(), address)
+	store.Set(
+		k.rewardBrokerAddressKey(),
+		k.GetCodec().MustMarshalBinaryLengthPrefixed(address))
 }
 
 // GetRewardBrokerAddress returns account addressed that is permitted to pay out rewards
@@ -196,7 +198,7 @@ func (k Keeper) GetRewardBrokerAddress(ctx sdk.Context) (address sdk.AccAddress,
 	store := k.GetStore(ctx)
 	bz := store.Get(k.rewardBrokerAddressKey())
 	if bz == nil {
-		return address, ErrNotFound()
+		return address, ErrRewardBrokerAddressNotFound()
 	}
 	k.GetCodec().MustUnmarshalBinaryLengthPrefixed(bz, &address)
 

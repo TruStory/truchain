@@ -31,7 +31,7 @@ func ErrTransactionNotFound(id int64) sdk.Error {
 	return sdk.NewError(DefaultCodespace, CodeErrorTransactionNotFound, "There was no transaction found with an id of "+fmt.Sprintf("%d", id))
 }
 
-// ErrNotFound throws an error when the searched backing is not found
-func ErrNotFound() sdk.Error {
+// ErrRewardBrokerAddressNotFound throws an error when the reward broker address is not found
+func ErrRewardBrokerAddressNotFound() sdk.Error {
 	return sdk.NewError(DefaultCodespace, CodeErrorRewardBrokerAddressNotFound, "Reward broker address not found")
 }
