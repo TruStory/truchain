@@ -25,7 +25,7 @@ func handlePayRewardMsg(ctx sdk.Context, k WriteKeeper, msg PayRewardMsg) sdk.Re
 	}
 
 	// TODO: move this into genesis.json and import via parameters
-	adminAccount, addrErr := sdk.AccAddressFromBech32("cosmos1xqc5gs2xfdryws6dtfvng3z32ftr2de56tksud")
+	adminAccount, addrErr := k.GetRewardBrokerAddress(ctx)
 	if addrErr != nil {
 		return sdk.ErrInvalidAddress("Could not access admin account").Result()
 	}
