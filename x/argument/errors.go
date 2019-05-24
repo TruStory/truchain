@@ -38,13 +38,17 @@ func ErrArgumentTooShortMsg(len int) sdk.Error {
 }
 
 // ErrArgumentTooLongMsg throws for an invalid argument
-func ErrArgumentTooLongMsg(len int) sdk.Error {
-	msg := "Argument body too long. Must be less than %d characters."
+func ErrArgumentTooLongMsg(len int, maxLength int) sdk.Error {
+	msg := "Argument is %d character%s too long. Must be less than %d characters."
+	plural := "s"
+	if (len - maxLength) == 1 {
+		plural = ""
+	}
 
 	return sdk.NewError(
 		DefaultCodespace,
 		CodeBodyTooLong,
-		fmt.Sprintf(msg, len))
+		fmt.Sprintf(msg, len-maxLength, plural, maxLength))
 }
 
 // ErrInvalidArgument throws when are argument is invalid
