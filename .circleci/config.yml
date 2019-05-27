@@ -12,6 +12,7 @@ defaults: &defaults
   working_directory: /go/src/github.com/TruStory/truchain
   environment:
     GOBIN: /tmp/workspace/bin
+    GO111MODULE: 'on'
 
 jobs:
   setup_dependencies:
@@ -22,12 +23,15 @@ jobs:
       - checkout
       - restore_cache:
           keys:
-            - v1-pkg-cache
+            - go-mod-v1-{{ checksum "go.sum" }}
       - run:
           name: dependencies
           command: |
-            export PATH="$GOBIN:$PATH"
-            make update_deps
+            make download
+      - save_cache:
+          key: go-mod-v1-{{ checksum "go.sum" }}
+          paths:
+            - '/go/pkg/mod'
       - persist_to_workspace:
           root: /tmp/workspace
           paths:
@@ -40,11 +44,9 @@ jobs:
       - attach_workspace:
           at: /tmp/workspace
       - checkout
-      - run:
-          name: dependencies
-          command: |
-            export PATH="$GOBIN:$PATH"
-            make update_deps
+      - restore_cache:
+          keys:
+            - go-mod-v1-{{ checksum "go.sum" }}
       - run:
           name: Get golangci
           command: |
@@ -52,14 +54,13 @@ jobs:
       - run:
           name: Lint source
           command: |
-            export PATH="$GOBIN:$PATH"
             make check
   deploy:
     executor: go
     steps:
       - add_ssh_keys:
           fingerprints:
-            - "7a:fe:42:64:1d:e4:c0:1a:cc:aa:8c:5e:5e:e8:f8:03"
+            - '7a:fe:42:64:1d:e4:c0:1a:cc:aa:8c:5e:5e:e8:f8:03'
       - run:
           name: Deploy
           command: |
@@ -86,20 +87,16 @@ jobs:
       - attach_workspace:
           at: /tmp/workspace
       - checkout
-      - run:
-          name: dependencies
-          command: |
-            export PATH="$GOBIN:$PATH"
-            make update_deps
+      - restore_cache:
+          keys:
+            - go-mod-v1-{{ checksum "go.sum" }}
       - run:
           name: Run unit tests
           command: |
-            export PATH="$GOBIN:$PATH"
             make test_cover
       - run:
           name: Upload coverage report
           command: |
-            export PATH="$GOBIN:$PATH"
             bash <(curl -s https://codecov.io/bash)
   data_dump:
     <<: *defaults
@@ -107,7 +104,7 @@ jobs:
     steps:
       - add_ssh_keys:
           fingerprints:
-            - "7a:fe:42:64:1d:e4:c0:1a:cc:aa:8c:5e:5e:e8:f8:03"
+            - '7a:fe:42:64:1d:e4:c0:1a:cc:aa:8c:5e:5e:e8:f8:03'
       - attach_workspace:
           at: /tmp/truchaind/backups
       - run:
@@ -124,10 +121,10 @@ jobs:
       - persist_to_workspace:
           root: backups
           paths:
-          - .truchaind.tar.gz
+            - .truchaind.tar.gz
   s3_upload:
     docker:
-      - image: circleci/python:2.7-jessie    
+      - image: circleci/python:2.7-jessie
     working_directory: /tmp/truchaind
     steps:
       - attach_workspace:
@@ -180,7 +177,7 @@ workflows:
   nightly-backup:
     triggers:
       - schedule:
-          cron: "0 0 * * *"
+          cron: '0 0 * * *'
           filters:
             branches:
               only:

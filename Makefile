@@ -1,4 +1,4 @@
-PACKAGES=$(shell go list ./...)
+PACKAGES=$(shell GO111MODULE=on go list -mod=readonly ./...)
 
 MODULES = argument backing category challenge expiration stake story
 
@@ -19,21 +19,24 @@ define \n
 endef
 
 benchmark:
-	@go test -bench=. $(PACKAGES)
+	@go test -mod=readonly -bench=. $(PACKAGES)
 
 buidl: build
 
 build: build_cli build_daemon
 
+download:
+	go mod download
+
 build_cli:
-	@go build $(BUILD_FLAGS) -o bin/truchaincli cmd/truchaincli/main.go
+	@go build -mod=readonly $(BUILD_FLAGS) -o bin/truchaincli cmd/truchaincli/main.go
 
 build_daemon:
-	@go build $(BUILD_FLAGS) -o bin/truchaind cmd/truchaind/main.go
+	@go build -mod=readonly $(BUILD_FLAGS) -o bin/truchaind cmd/truchaind/main.go
 
 build-linux:
-	GOOS=linux GOARCH=amd64 go build $(BUILD_FLAGS) -o build/truchaind cmd/truchaind/main.go
-	GOOS=linux GOARCH=amd64 go build $(BUILD_FLAGS) -o build/truchaincli cmd/truchaincli/main.go
+	GOOS=linux GOARCH=amd64 go build -mod=readonly $(BUILD_FLAGS) -o build/truchaind cmd/truchaind/main.go
+	GOOS=linux GOARCH=amd64 go build -mod=readonly $(BUILD_FLAGS) -o build/truchaincli cmd/truchaincli/main.go
 
 doc:
 	@echo "--> Wait a few seconds and visit http://localhost:6060/pkg/github.com/TruStory/truchain/"
@@ -72,11 +75,6 @@ test: go_test
 test_cover:
 	@go test $(PACKAGES) -v -timeout 30m -race -coverprofile=coverage.txt -covermode=atomic
 	@go tool cover -html=coverage.txt
-
-update_deps:
-	@echo "--> Running dep ensure"
-	@rm -rf .vendor-new
-	@dep ensure -v -vendor-only
 
 ########################################
 ### Local validator nodes using docker and docker-compose

@@ -28,9 +28,7 @@ node_modules/
 web/
 *.bak
 
-# These stay ignored until we switch to modules
-go.mod
-go.sum
+
 .vscode
 build/
 .testnet/
