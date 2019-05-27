@@ -146,16 +146,16 @@ func (k Keeper) likesKey(argumentID int64, creator sdk.AccAddress) []byte {
 }
 
 func (k Keeper) validateArgumentBody(ctx sdk.Context, argument string) sdk.Error {
-	len := len([]rune(argument))
+	length := len([]rune(argument))
 	minArgumentLength := k.GetParams(ctx).MinArgumentLength
 	maxArgumentLength := k.GetParams(ctx).MaxArgumentLength
 
-	if len > 0 && (len < minArgumentLength) {
+	if length > 0 && (length < minArgumentLength) {
 		return ErrArgumentTooShortMsg(minArgumentLength)
 	}
 
-	if len > 0 && (len > maxArgumentLength) {
-		return ErrArgumentTooLongMsg(len, maxArgumentLength)
+	if length > 0 && (length > maxArgumentLength) {
+		return ErrArgumentTooLongMsg(length, maxArgumentLength)
 	}
 
 	return nil

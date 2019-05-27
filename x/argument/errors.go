@@ -28,27 +28,27 @@ func ErrNotFound(id int64) sdk.Error {
 }
 
 // ErrArgumentTooShortMsg throws for an invalid argument
-func ErrArgumentTooShortMsg(len int) sdk.Error {
+func ErrArgumentTooShortMsg(length int) sdk.Error {
 	msg := "Argument body too short. Must be greater than %d characters."
 
 	return sdk.NewError(
 		DefaultCodespace,
 		CodeBodyTooShort,
-		fmt.Sprintf(msg, len))
+		fmt.Sprintf(msg, length))
 }
 
 // ErrArgumentTooLongMsg throws for an invalid argument
-func ErrArgumentTooLongMsg(len int, maxLength int) sdk.Error {
+func ErrArgumentTooLongMsg(length int, maxLength int) sdk.Error {
 	msg := "Argument is %d character%s too long. Must be less than %d characters."
 	plural := "s"
-	if (len - maxLength) == 1 {
+	if (length - maxLength) == 1 {
 		plural = ""
 	}
 
 	return sdk.NewError(
 		DefaultCodespace,
 		CodeBodyTooLong,
-		fmt.Sprintf(msg, len-maxLength, plural, maxLength))
+		fmt.Sprintf(msg, length-maxLength, plural, maxLength))
 }
 
 // ErrInvalidArgument throws when are argument is invalid
