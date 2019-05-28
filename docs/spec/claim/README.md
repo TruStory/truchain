@@ -8,7 +8,7 @@ The claim module's responsibility is to create and store claims. Claims are the 
 
 ### Main Types
 
-`Claim` objects are used to track the lifecycle of a claim. They contain the content of a claim, and other fields which track the mutable state of debating a claim.
+`Claim` objects are used to track the life-cycle of a claim. They contain the content of a claim, and other fields which track the mutable state of debating a claim.
 
 `TotalBacked` and `TotalChallenged` are modified by the staking and slashing modules when an argument is created or curated.
 

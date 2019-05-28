@@ -99,7 +99,7 @@ type AgreeArgumentMsg struct {
 }
 ```
 
-Staking via `CreateArgumentMsg` and `AgreeAgrumentMsg` should fail validation if the creator has already staked over 66% of their total trustake within a 7-day rolling period. 
+Staking via `CreateArgumentMsg` and `AgreeArgumentMsg` should fail validation if the creator has already staked over 66% of their total trustake within a 7-day rolling period. 
 
 ## Block Triggers
 
