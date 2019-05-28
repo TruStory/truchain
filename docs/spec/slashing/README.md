@@ -18,7 +18,7 @@ type Slash struct {
 
 // Params can be changed by governance vote
 type Param struct {
-    MaxSlashCount   int
+    MaxStakeSlashCount   int
 }
 ```
 
@@ -34,7 +34,7 @@ type SlashedStakes app.UserList
 
 ### Messages
 
-`SlashUserMsg` increments the `SlashCount` of an `Argument`. If `SlashCount` exceeds the `MaxSlashCount` param, implement punishments. Only a user with an earned trustake of greater than 100 can slash. In the future, this value will be based on the total earned trustake in the community and user reputation.
+`SlashUserMsg` increments the `SlashCount` of an `Argument`. If `SlashCount` exceeds the `MaxStakeSlashCount` param, implement punishments. Only a user with an earned trustake of greater than 100 can slash. In the future, this value will be based on the total earned trustake in the community and user reputation.
 
 Punishment
 * Slash total interest of each staker
@@ -43,7 +43,7 @@ Punishment
 Curator reward
 * Each user who marked "Unhelpful" will get a reward of 25% of the staking pool, distributed evenly
 
-When a user is punished, their stake should be removed from the `ActiveStakes` queue since it should no longer expire.
+When a user is punished, their stake should be removed from the `ActiveStakes` queue since it should no longer expire. Also, their `SlashCount` should be incremented. If it exceeds the value defined in the `AppAccount` params, mark the user as "jailed". The user has to create a claim to "unjail" themselves.
 
 ```go
 type SlashUserMsg struct {

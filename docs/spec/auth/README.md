@@ -26,6 +26,11 @@ type AppAccount struct {
     SlashCount      int
     IsJailed        bool
 }
+
+// Params can be changed by governance vote
+type Param struct {
+    MaxSlashCount   int
+}
 ```
 
 For reference, `auth.BaseAccount` is:
