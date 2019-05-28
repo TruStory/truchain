@@ -32,7 +32,7 @@ const (
 
 // Params can be voted on by governance
 type Params struct {
-    Period                  time.Time   // default = 3 days
+    Period                  time.Time   // default = 7 days
     ArgumentCreationStake   sdk.Coin    // default = 50 trustake
     UpvoteStake             sdk.Coin    // default = 10 trustake
 }
@@ -74,7 +74,7 @@ type ActiveStakes Queue
 
 `CreateArgumentMsg` creates an `Argument` in the module's key-value store. The only allowed values for `StakeType` are 0 (back), and 1 (challenge). 
 
-`EndTime` is currently fixed at 3 days. 
+`EndTime` is currently fixed at 7 days. 
 
 The stake `Amount` is currently fixed at 50 trustake. In the future, this will be a value algorithmically determined based on various factors such as the current amount staked on the claim, total supply of trustake, and the health of the community associated with the claim.
 
