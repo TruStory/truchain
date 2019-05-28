@@ -7,7 +7,7 @@ The community module specifies data for a TruStory community.
 ```go
 type Community struct {
     ID                  int64         
-    Title               string        
+    Name                string        
     Slug                string        
     Description         string        
     TotalEarnedStake    sdk.Coin      
