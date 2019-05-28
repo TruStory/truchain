@@ -35,6 +35,8 @@ type Params struct {
     Period                  time.Time   // default = 7 days
     ArgumentCreationStake   sdk.Coin    // default = 50 trustake
     UpvoteStake             sdk.Coin    // default = 10 trustake
+    CreatorShare            sdk.Dec     // default = 50%
+    InterestRate            sdk.Dec     // default = 25%
 }
 ```
 
@@ -108,7 +110,9 @@ Staking via `CreateArgumentMsg` and `UpvoteArgumentMsg` should fail validation i
 After each block is processed, check the `ActiveStakes` queue for expiring stakes. After a stake has ended, distribute rewards.
 
 Rewards:
-* argument creators get 70% interest reward from each staker
-* stakers keep 30% interest
+* argument creators get `CreatorShare` interest reward from each staker
+* stakers keep (1 - `CreatorShare`) interest
 
-This incentive structure heavily rewards argument creation. Upvoting is a lightweight way to earn 30% interest. But to earn full interest and rewards, content creators are encouraged to write arguments.
+This incentive structure heavily rewards argument creation as creators get 50% of the interest from multiple upvoters. Upvoting is a lightweight way to earn 50% interest. But to earn full interest and rewards, content creators are encouraged to write arguments.
+
+Interest is calculated based on the time the stake was placed, using the annual `InterestRate` param.
