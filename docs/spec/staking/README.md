@@ -15,7 +15,7 @@ The `Stake` type stores all data necessarily for a staking action. It is designe
 ```go
 type Stake struct {
     ID           int64
-    Type         int
+    Type         StakeType
     Amount       sdk.Coin
     Creator      sdk.AccAddress
     CreatedTime  time.Time
@@ -25,9 +25,9 @@ type Stake struct {
 // stake type enum
 type StakeType int
 const (
-    Back StakeType = iota  // 0
-    Challenge              // 1
-    Upvote                 // 2
+    Backing StakeType = iota    // 0
+    Challenge                   // 1
+    Upvote                      // 2
 )
 
 // Params can be voted on by governance
@@ -93,6 +93,8 @@ type CreateArgumentMsg struct {
 An argument currently cannot be edited or deleted.
 
 An argument's standing can be enhanced with an `UpvoteArgumentMsg` with some stake. The stake `Amount` is currently fixed at 10 trustake.
+
+An argument creator cannot upvote their own argument.
 
 ```go
 type UpvoteArgumentMsg struct {
