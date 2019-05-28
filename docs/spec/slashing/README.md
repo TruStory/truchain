@@ -37,6 +37,10 @@ type SlashedStakes app.UserList
 
 `SlashUserMsg` increments the `SlashCount` of an `Argument`. If `SlashCount` exceeds the `MaxStakeSlashCount` param, implement punishments. Only a user with an earned trustake of greater than 100 can slash. In the future, this value will be based on the total earned trustake in the community and user reputation.
 
+Fail validation if the `SlashCount` already exceeds `MaxStakeSlashCount`, preventing further slashing on the argument.
+
+If `SlashCount` is equal to `MaxStakeSlashCount`, then remove the amount of this stake from the total backing or challenge stake count on the claim.
+
 Punishment
 * Slash total interest of each staker
 * Slash 3x the total stake amount of each staker
@@ -49,7 +53,7 @@ When a user is punished, their stake should be removed from the `ActiveStakes` q
 ```go
 type SlashUserMsg struct {
     StakeID     int64
-    Type        int
+    Type        SlashType
     Creator     sdk.AccAddress
 }
 ```

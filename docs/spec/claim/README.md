@@ -44,7 +44,7 @@ type ClaimArguments types.UserList
 
 `CreateClaimMsg` creates a claim in the module's key-value store. 
 
-When creating a claim, check if the `Creator` has been jailed. If they are, unjail them.
+When creating a claim, check if the `Creator` has been jailed. If they are, unjail them. Un-jailing should reset the creator's `SlashCount` and `IsJailed` status.
 
 ```go
 type CreateClaimMsg struct {
