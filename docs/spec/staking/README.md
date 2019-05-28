@@ -4,7 +4,7 @@
 
 The staking module contains all data types and state transitions needed to stake on Arguments. Arguments are how claims are supported or refuted. Arguments contain a text body that serves to *Back* or *Challenge* a specific claim with a specific amount of trustake.
 
-Furthermore, Arguments can be staked with an *Agree* designation. It serves as kind of an upvote, to further enhance the standing of a claim, making the case for it stronger.
+Furthermore, Arguments can be staked with an *Upvote* designation. It further enhances the standing of a claim, making the case for it stronger.
 
 ## State
 
@@ -27,14 +27,14 @@ type StakeType int
 const (
     Back StakeType = iota  // 0
     Challenge              // 1
-    Agree                  // 2
+    Upvote                 // 2
 )
 
 // Params can be voted on by governance
 type Params struct {
     Period                  time.Time   // default = 3 days
     ArgumentCreationStake   sdk.Coin    // default = 50 trustake
-    AgreeStake              sdk.Coin    // default = 10 trustake
+    UpvoteStake             sdk.Coin    // default = 10 trustake
 }
 ```
 
@@ -47,7 +47,7 @@ type Argument struct {
     ClaimID              int64
     TLDR                 string
     Body                 string
-    TotalAgreed          sdk.Coin
+    TotalUpvoted         sdk.Coin
     SlashCount           int
 }
 ```
@@ -90,16 +90,16 @@ type CreateArgumentMsg struct {
 
 An argument currently cannot be edited or deleted.
 
-An argument's standing can be enhanced with an `AgreeArgumentMsg` with some stake. The stake `Amount` is currently fixed at 10 trustake.
+An argument's standing can be enhanced with an `UpvoteArgumentMsg` with some stake. The stake `Amount` is currently fixed at 10 trustake.
 
 ```go
-type AgreeArgumentMsg struct {
+type UpvoteArgumentMsg struct {
     ArgumentID    int64
     Creator       sdk.AccAddress
 }
 ```
 
-Staking via `CreateArgumentMsg` and `AgreeArgumentMsg` should fail validation if the creator has already staked over 66% of their total trustake within a 7-day rolling period. 
+Staking via `CreateArgumentMsg` and `UpvoteArgumentMsg` should fail validation if the creator has already staked over 66% of their total trustake within a 7-day rolling period. 
 
 ## Block Triggers
 
@@ -111,4 +111,4 @@ Rewards:
 * argument creators get 70% interest reward from each staker
 * stakers keep 30% interest
 
-This incentive structure heavily rewards argument creation. Agreeing is a lightweight way to earn 30% interest. But to earn full interest and rewards, content creators are encouraged to write arguments.
+This incentive structure heavily rewards argument creation. Upvoting is a lightweight way to earn 30% interest. But to earn full interest and rewards, content creators are encouraged to write arguments.

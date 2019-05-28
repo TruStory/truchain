@@ -22,10 +22,10 @@ type TransactionType int8
 const (
     Backing TransactionType = iota
     Challenge
-    Agree
+    Upvote
     BackingReturned
     ChallengeReturned
-    AgreeReturned
+    UpvoteReturned
     RewardPool
     Interest
 )
