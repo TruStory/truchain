@@ -21,25 +21,28 @@ type TransactionType int8
 
 const (
     Backing TransactionType = iota
-    Challenge
-    Upvote
     BackingReturned
+    Challenge
     ChallengeReturned
+    Upvote
     UpvoteReturned
-    RewardPool
     Interest
+    InviteAFriend
+    RewardPayout
 )
 ```
 
 ## State Transitions
 ### Messages
 
-None.
+`PayRewardMsg` is used as a reward for inviting friends to TruStory.
 
-Currently the bank module is only used internally and doesn't allow transfer in or out of TruStory.
-
-### Functions
-* AddCoin
-* SubtractCoin
-* MintAndAddCoin
-
+```go
+type PayRewardMsg struct {
+    Creator   sdk.AccAddress
+    Recipient sdk.AccAddress
+    Reward    sdk.Coin
+    InviteID  int64
+}
+```
+Currently the bank module doesn't allow transfer out of TruStory.
