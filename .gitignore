@@ -25,12 +25,11 @@ node_modules/
 # Misc.
 .DS_Store
 .env
+.envrc
 web/
 *.bak
 
-# These stay ignored until we switch to modules
-go.mod
-go.sum
+
 .vscode
 build/
 .testnet/

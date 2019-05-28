@@ -5,7 +5,6 @@
 
 TruChain is an application-specific blockchain built with [Cosmos SDK](https://cosmos.network/sdk). It powers [trustory.io](https://www.trustory.io/).
 
-
 ## Installation
 
 1. Install Go by following the [official docs](https://golang.org/doc/install). Remember to set your `$GOPATH`, `$GOBIN`, and `$PATH` environment variables.
@@ -14,7 +13,7 @@ TruChain is an application-specific blockchain built with [Cosmos SDK](https://c
 
 2. Now let's install truchain.
 
-``` bash
+```bash
 mkdir -p $GOPATH/src/github.com/TruStory
 cd $GOPATH/src/github.com/TruStory
 git clone https://github.com/TruStory/truchain.git
@@ -23,10 +22,10 @@ cd truchain && git checkout master
 
 ## Getting Started
 
-### Install dependencies
+### Download dependencies
 
 ```
-make update_deps
+make download
 ```
 
 ### Build binaries
