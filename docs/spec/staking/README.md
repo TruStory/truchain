@@ -45,7 +45,7 @@ type Argument struct {
     *Stake
 
     ClaimID              int64
-    TLDR                 string
+    Summary              string
     Body                 string
     TotalUpvoted         sdk.Coin
     SlashCount           int
@@ -81,7 +81,7 @@ The stake `Amount` is currently fixed at 50 trustake. In the future, this will b
 ```go
 type CreateArgumentMsg struct {
     ClaimID       int64
-    TLDR          string
+    Summary       string
     Body          string
     StakeType     int             // back  or challenge
     Creator       sdk.AccAddress
