@@ -10,7 +10,7 @@ Furthermore, Arguments can be staked with an *Upvote* designation. It further en
 
 ### Main Types
 
-The `Stake` type stores all data necessarily for a staking action. It is designed to be embedded by every type that requires staking functionality. For example, it is embedded in the `Argument` type.
+The `Stake` type stores all data necessarily for a staking action. It is designed to be embedded by every type that requires staking functionality. For example, it is embedded in `Argument` and `Upvote` types.
 
 ```go
 type Stake struct {
@@ -51,6 +51,15 @@ type Argument struct {
     Body                 string
     TotalUpvoted         sdk.Coin
     SlashCount           int
+    UpdatedTime          time.Time
+}
+```
+
+An `Upvote` wraps a `Stake` and represents an upvote.
+
+```go
+type Upvote struct {
+    *Stake
 }
 ```
 

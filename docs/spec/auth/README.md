@@ -25,6 +25,7 @@ type AppAccount struct {
     EarnedStake     type.EarnedCoins
     SlashCount      int
     IsJailed        bool
+    CreatedTime     time.Time
 }
 
 // Params can be changed by governance vote
