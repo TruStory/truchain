@@ -34,6 +34,7 @@ type WriteKeeper interface {
 	AddCoin(ctx sdk.Context, creator sdk.AccAddress, coin sdk.Coin, storyID int64, transactionType TransactionType, referenceID int64) (coins sdk.Coins, err sdk.Error)
 	SubtractCoin(ctx sdk.Context, creator sdk.AccAddress, coin sdk.Coin, storyID int64, transactionType TransactionType, referenceID int64) (coins sdk.Coins, err sdk.Error)
 	MintAndAddCoin(ctx sdk.Context, creator sdk.AccAddress, catID int64, storyID int64, transactionType TransactionType, referenceID int64, amt sdk.Int) (sdk.Coins, sdk.Error)
+	GetRewardBrokerAddress(ctx sdk.Context) (address sdk.AccAddress, error sdk.Error)
 }
 
 // Keeper data type storing keys to the key-value store
@@ -174,11 +175,34 @@ func exchangeCoinsBetweenDenoms(from sdk.Coin, toDenom string) sdk.Dec {
 	return sdk.NewDec(1)
 }
 
+func (k Keeper) rewardBrokerAddressKey() []byte {
+	return []byte("rewardBrokerAddress")
+}
+
 func (k Keeper) setTransaction(ctx sdk.Context, transaction Transaction) {
 	store := k.GetStore(ctx)
 	store.Set(
 		k.GetIDKey(transaction.ID),
 		k.GetCodec().MustMarshalBinaryLengthPrefixed(transaction))
+}
+
+func (k Keeper) setRewardBrokerAddress(ctx sdk.Context, address sdk.AccAddress) {
+	store := k.GetStore(ctx)
+	store.Set(
+		k.rewardBrokerAddressKey(),
+		k.GetCodec().MustMarshalBinaryLengthPrefixed(address))
+}
+
+// GetRewardBrokerAddress returns account addressed that is permitted to pay out rewards
+func (k Keeper) GetRewardBrokerAddress(ctx sdk.Context) (address sdk.AccAddress, error sdk.Error) {
+	store := k.GetStore(ctx)
+	bz := store.Get(k.rewardBrokerAddressKey())
+	if bz == nil {
+		return address, ErrRewardBrokerAddressNotFound()
+	}
+	k.GetCodec().MustUnmarshalBinaryLengthPrefixed(bz, &address)
+
+	return
 }
 
 // TransactionsByCreator returns all the transactions for a user

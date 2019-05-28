@@ -257,7 +257,8 @@ func NewTruChain(logger log.Logger, db dbm.DB, loadLatest bool, options ...func(
 		AddRoute("category", category.NewHandler(app.categoryKeeper)).
 		AddRoute("backing", backing.NewHandler(app.backingKeeper)).
 		AddRoute("challenge", challenge.NewHandler(app.challengeKeeper)).
-		AddRoute("users", users.NewHandler(app.accountKeeper, app.categoryKeeper))
+		AddRoute("users", users.NewHandler(app.accountKeeper, app.categoryKeeper)).
+		AddRoute("trubank", trubank.NewHandler(app.truBankKeeper))
 
 	// The app.QueryRouter is the main query router where each module registers its routes
 	app.QueryRouter().
@@ -327,6 +328,7 @@ func MakeCodec() *codec.Codec {
 	category.RegisterAmino(cdc)
 	challenge.RegisterAmino(cdc)
 	users.RegisterAmino(cdc)
+	trubank.RegisterAmino(cdc)
 
 	// register other types
 	cdc.RegisterConcrete(&types.AppAccount{}, "types/AppAccount", nil)
