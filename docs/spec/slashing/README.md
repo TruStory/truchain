@@ -19,6 +19,7 @@ type Slash struct {
 // Params can be changed by governance vote
 type Param struct {
     MaxStakeSlashCount   int
+    SlashMagnitude       sdk.Dec // 3x
 }
 ```
 
@@ -38,7 +39,7 @@ type SlashedStakes app.UserList
 
 Punishment
 * Slash total interest of each staker
-* Slash 2x the total stake amount of each staker
+* Slash 3x the total stake amount of each staker
 
 Curator reward
 * Each user who marked "Unhelpful" will get a reward of 25% of the staking pool, distributed evenly
