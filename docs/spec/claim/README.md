@@ -54,7 +54,7 @@ type CreateClaimMsg struct {
 }
 ```
 
-A claim can be deleted with `DeleteClaimMsg` as long as `TotalBacked` and `TotalChallenged` are zero.
+A claim can be deleted with `DeleteClaimMsg` as long as `TotalBacked` and `TotalChallenged` are zero. The `Creator` of this message must be the same creator of the claim to delete.
 
 ```go
 type DeleteClaimMsg struct {

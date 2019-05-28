@@ -51,6 +51,7 @@ type Argument struct {
     Body                 string
     TotalUpvoted         sdk.Coin
     SlashCount           int
+    IsUnhelpful          bool
     UpdatedTime          time.Time
 }
 ```
@@ -108,6 +109,15 @@ An argument creator cannot upvote their own argument.
 ```go
 type UpvoteArgumentMsg struct {
     ArgumentID    int64
+    Creator       sdk.AccAddress
+}
+```
+
+If no actions has been taken on an `Argument`, allow the original creator of an argument to delete it.
+
+```go
+type DeleteArgumentMsg struct {
+    ID            int64
     Creator       sdk.AccAddress
 }
 ```
