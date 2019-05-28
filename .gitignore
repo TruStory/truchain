@@ -25,6 +25,7 @@ node_modules/
 # Misc.
 .DS_Store
 .env
+.envrc
 web/
 *.bak
 

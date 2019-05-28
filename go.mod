@@ -1,7 +1,7 @@
 module github.com/TruStory/truchain
 
 require (
-	github.com/cosmos/cosmos-sdk v0.34.4
+	github.com/cosmos/cosmos-sdk v0.34.5
 	github.com/gogo/protobuf v1.1.1
 	github.com/spf13/cobra v0.0.3
 	github.com/spf13/viper v1.0.3
