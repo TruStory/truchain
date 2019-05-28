@@ -1,6 +1,7 @@
 package argument
 
 import (
+	"strings"
 	"testing"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -56,6 +57,9 @@ func TestArgumentValidation(t *testing.T) {
 	creator := sdk.AccAddress([]byte{1, 2})
 
 	_, err := k.Create(ctx, stakeID, storyID, int64(0), "", creator)
+	assert.Error(t, err)
+
+	_, err = k.Create(ctx, stakeID, storyID, int64(0), strings.Repeat("A", 1001), creator)
 	assert.Error(t, err)
 
 	_, err = k.Create(ctx, stakeID, storyID, int64(5), "argument body", creator)

@@ -10,9 +10,10 @@ import (
 const (
 	DefaultCodespace sdk.CodespaceType = "tbank"
 
-	CodeErrorAddingCoinsToUser     sdk.CodeType = 1401
-	CodeErrorAddingCoinsToCategory sdk.CodeType = 1402
-	CodeErrorTransactionNotFound   sdk.CodeType = 1403
+	CodeErrorAddingCoinsToUser           sdk.CodeType = 1401
+	CodeErrorAddingCoinsToCategory       sdk.CodeType = 1402
+	CodeErrorTransactionNotFound         sdk.CodeType = 1403
+	CodeErrorRewardBrokerAddressNotFound sdk.CodeType = 1404
 )
 
 // ErrTransferringCoinsToUser throws an error when the category is invalid
@@ -28,4 +29,9 @@ func ErrTransferringCoinsToCategory(id int64) sdk.Error {
 // ErrTransactionNotFound throws an error when a transaction was not found
 func ErrTransactionNotFound(id int64) sdk.Error {
 	return sdk.NewError(DefaultCodespace, CodeErrorTransactionNotFound, "There was no transaction found with an id of "+fmt.Sprintf("%d", id))
+}
+
+// ErrRewardBrokerAddressNotFound throws an error when the reward broker address is not found
+func ErrRewardBrokerAddressNotFound() sdk.Error {
+	return sdk.NewError(DefaultCodespace, CodeErrorRewardBrokerAddressNotFound, "Reward broker address not found")
 }

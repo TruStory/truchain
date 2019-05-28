@@ -6,7 +6,20 @@ import (
 
 // GenesisState contains all history of transactions
 type GenesisState struct {
-	Transactions []Transaction `json:"transactions"`
+	Transactions        []Transaction  `json:"transactions"`
+	RewardBrokerAddress sdk.AccAddress `json:"reward_broker_address"`
+}
+
+// DefaultGenesisState for tests
+func DefaultGenesisState() GenesisState {
+	rewardBrokerAddress, err := sdk.AccAddressFromBech32("cosmos1xqc5gwzpgdr4wjz8xscnys2jx3f9x4zy223g9w")
+	if err != nil {
+		panic(err)
+	}
+	return GenesisState{
+		Transactions:        make([]Transaction, 0),
+		RewardBrokerAddress: rewardBrokerAddress,
+	}
 }
 
 // InitGenesis initializes state from genesis file
@@ -16,6 +29,7 @@ func InitGenesis(ctx sdk.Context, keeper Keeper, data GenesisState) {
 		keeper.trubankList.AppendToUser(ctx, keeper, t.Creator, t.ID)
 	}
 	keeper.SetLen(ctx, int64(len(data.Transactions)))
+	keeper.setRewardBrokerAddress(ctx, data.RewardBrokerAddress)
 }
 
 // ExportGenesis exports the genesis state
@@ -30,7 +44,12 @@ func ExportGenesis(ctx sdk.Context, keeper Keeper) GenesisState {
 	if err != nil {
 		panic(err)
 	}
+	rewardBrokerAddress, err2 := keeper.GetRewardBrokerAddress(ctx)
+	if err2 != nil {
+		rewardBrokerAddress = DefaultGenesisState().RewardBrokerAddress
+	}
 	return GenesisState{
-		Transactions: transactions,
+		Transactions:        transactions,
+		RewardBrokerAddress: rewardBrokerAddress,
 	}
 }
