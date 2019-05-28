@@ -25,7 +25,7 @@ type Claim struct {
 
 // Params can be voted on by governance
 type Params struct {
-	MinBodyLength int    
+    MinBodyLength int
     MaxBodyLength int
 }
 ```

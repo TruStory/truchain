@@ -90,11 +90,7 @@ type CreateArgumentMsg struct {
 
 An argument currently cannot be edited or deleted.
 
-An argument's standing can be enhanced with an `AgreeArgumentMsg` with some stake. 
-
-`EndTime` is currently fixed at 3 days. 
-
-The stake `Amount` is currently fixed at 10 trustake.
+An argument's standing can be enhanced with an `AgreeArgumentMsg` with some stake. The stake `Amount` is currently fixed at 10 trustake.
 
 ```go
 type AgreeArgumentMsg struct {
