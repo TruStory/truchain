@@ -32,11 +32,13 @@ const (
 
 // Params can be voted on by governance
 type Params struct {
-    Period                  time.Time   // default = 7 days
-    ArgumentCreationStake   sdk.Coin    // default = 50 trustake
-    UpvoteStake             sdk.Coin    // default = 10 trustake
-    CreatorShare            sdk.Dec     // default = 50%
-    InterestRate            sdk.Dec     // default = 25%
+    Period                  time.Time       // default = 7 days
+    ArgumentCreationStake   sdk.Coin        // default = 50 trustake
+    UpvoteStake             sdk.Coin        // default = 10 trustake
+    CreatorShare            sdk.Dec         // default = 50%
+    InterestRate            sdk.Dec         // default = 25%
+    StakeLimitPercent       sdk.Dec         // default = 66.7%
+    StakeLimitDays          time.Duration   // default = 7 days
 }
 ```
 

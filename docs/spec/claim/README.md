@@ -18,6 +18,7 @@ type Claim struct {
     CommunityID     int64
     Body            string
     Creator         sdk.AccAddress
+    Source          url.URL
     TotalBacked     sdk.Coin
     TotalChallenged sdk.Coin
     CreatedTime     time.Time
