@@ -45,7 +45,7 @@ func mockDB() (sdk.Context, Keeper, c.Keeper) {
 	RegisterAmino(codec)
 
 	ck := c.NewKeeper(catKey, codec)
-	pk := params.NewKeeper(codec, paramsKey, transientParamsKey)
+	pk := params.NewKeeper(codec, paramsKey, transientParamsKey, params.DefaultCodespace)
 	sk := NewKeeper(
 		storyKey,
 		storyListKey,
