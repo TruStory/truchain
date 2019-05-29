@@ -94,7 +94,7 @@ type ActiveStakes Queue
 
 The stake `Amount` is currently fixed at 50 trustake. In the future, this will be a value algorithmically determined based on various factors such as the current amount staked on the claim, total supply of trustake, and the health of the community associated with the claim.
 
-Only users who have surpassed their jail time are allowed to create arguments.
+Only users who have surpassed their jail time are allowed to create arguments. Each user may create one backing argument, and one challenge argument per claim.
 
 ```go
 type CreateArgumentMsg struct {
