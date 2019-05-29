@@ -25,6 +25,7 @@ type AppAccount struct {
     EarnedStake     type.EarnedCoins
     SlashCount      int
     IsJailed        bool
+    JailEndTime     time.Time
     CreatedTime     time.Time
 }
 

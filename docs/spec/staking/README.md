@@ -39,6 +39,7 @@ type Params struct {
     InterestRate            sdk.Dec         // default = 25%
     StakeLimitPercent       sdk.Dec         // default = 66.7%
     StakeLimitDays          time.Duration   // default = 7 days
+    UnjailUpvotes           int             // default = 1
 }
 ```
 
@@ -92,6 +93,8 @@ type ActiveStakes Queue
 
 The stake `Amount` is currently fixed at 50 trustake. In the future, this will be a value algorithmically determined based on various factors such as the current amount staked on the claim, total supply of trustake, and the health of the community associated with the claim.
 
+Only users who have surpassed their jail time are allowed to create arguments.
+
 ```go
 type CreateArgumentMsg struct {
     ClaimID       int64
@@ -107,6 +110,8 @@ An argument currently cannot be edited or deleted.
 An argument's standing can be enhanced with an `UpvoteArgumentMsg` with some stake. The stake `Amount` is currently fixed at 10 trustake.
 
 An argument creator cannot upvote their own argument.
+
+Check if the upvote is on an argument by a user who is jailed. Check their jail status and unjail them. Un-jailing should reset the creator's `SlashCount` and `IsJailed` status.
 
 ```go
 type UpvoteArgumentMsg struct {

@@ -20,7 +20,8 @@ type Slash struct {
 // Params can be changed by governance vote
 type Param struct {
     MaxStakeSlashCount   int
-    SlashMagnitude       sdk.Dec // 3x
+    SlashMagnitude       sdk.Dec        // 3x
+    JailTime             time.Duration  // 7 days
 }
 ```
 
@@ -51,7 +52,7 @@ Punishment
 Curator reward
 * Each user who marked "Unhelpful" will get a reward of 25% of the staking pool, distributed evenly
 
-When a user is punished, their stake should be removed from the `ActiveStakes` queue since it should no longer expire. Also, their `SlashCount` should be incremented. If it exceeds the value defined in the `AppAccount` params, mark the user as "jailed". The user has to create a claim to "unjail" themselves.
+When a user is punished, their stake should be removed from the `ActiveStakes` queue since it should no longer expire. Also, their `SlashCount` should be incremented. If it exceeds the value defined in the `AppAccount` params, mark the user as "jailed" and add set the `JailEndTime` on the user. The user has to create an argument with at least X upvotes to unjail themselves. The parameter for X is defined in the staking module param store.
 
 ```go
 type SlashArgumentMsg struct {
