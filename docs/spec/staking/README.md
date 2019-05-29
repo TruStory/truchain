@@ -15,6 +15,7 @@ The `Stake` type stores all data necessarily for a staking action. It is designe
 ```go
 type Stake struct {
     ID           int64
+    ArgumentID   int64
     Type         StakeType
     Amount       sdk.Coin
     Creator      sdk.AccAddress
