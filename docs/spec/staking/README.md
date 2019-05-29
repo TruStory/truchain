@@ -106,7 +106,7 @@ type CreateArgumentMsg struct {
 }
 ```
 
-An argument currently cannot be edited or deleted.
+An argument currently cannot be edited.
 
 An argument's standing can be enhanced with an `UpvoteArgumentMsg` with some stake. The stake `Amount` is currently fixed at 10 trustake.
 
