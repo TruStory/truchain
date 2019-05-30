@@ -53,7 +53,8 @@ type Argument struct {
     ClaimID              int64
     Summary              string
     Body                 string
-    TotalUpvoted         sdk.Coin
+    UpvotedCount         int64
+    UpvotedStake         sdk.Coin
     SlashCount           int
     IsUnhelpful          bool
     UpdatedTime          time.Time
