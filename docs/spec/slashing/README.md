@@ -20,8 +20,10 @@ type Slash struct {
 // Params can be changed by governance vote
 type Param struct {
     MaxStakeSlashCount   int
-    SlashMagnitude       sdk.Dec        // 3x
-    JailTime             time.Duration  // 7 days
+    SlashMagnitude       sdk.Dec            // 3x
+    SlashMinStake        types.EarnedCoin   // 50 earned trustake
+    SlashAdmins          []sdk.AccAddress   // list of admin addresses who can slash
+    JailTime             time.Duration      // 7 days
 }
 ```
 
@@ -37,7 +39,7 @@ type SlashedStakes app.UserList
 
 ### Messages
 
-`SlashArgumentMsg` increments the `SlashCount` of an `Argument`. If `SlashCount` exceeds the `MaxStakeSlashCount` param, implement punishments. Only a user with an earned trustake of greater than 100 can slash. In the future, this value will be based on the total earned trustake in the community and user reputation.
+`SlashArgumentMsg` increments the `SlashCount` of an `Argument`. If `SlashCount` exceeds the `MaxStakeSlashCount` param, implement punishments. Only a user with an earned trustake of greater than `SlashMinStake` can slash *or* `SlashAdmins`. In the future, this value will be based on the total earned trustake in the community and user reputation.
 
 Fail validation if the `SlashCount` already exceeds `MaxStakeSlashCount`, preventing further slashing on the argument.
 
