@@ -2,8 +2,6 @@ PACKAGES=$(shell GO111MODULE=on go list -mod=readonly ./...)
 
 MODULES = argument backing category challenge expiration stake story
 
-CHAIN_DIR = ./.chain
-
 VERSION := $(shell echo $(shell git describe --tags) | sed 's/^v//')
 COMMIT := $(shell git log -1 --format='%H')
 
@@ -43,18 +41,18 @@ doc:
 	godoc -http=:6060
 
 export:
-	bin/truchaind --home $(CHAIN_DIR) export
+	bin/truchaind export
 
 init:
-	bin/truchaind --home $(CHAIN_DIR) init trunode
+	bin/truchaind init trunode
 
 reset:
-	bin/truchaind --home $(CHAIN_DIR) unsafe-reset-all
+	bin/truchaind unsafe-reset-all
 
 restart: build_daemon reset start
 
 start:
-	bin/truchaind --home $(CHAIN_DIR) --log_level "main:info,state:info,*:error,app:info,argument:info,backing:info,category:info,challenge:info,expiration:info,stake:info,stories:info" start
+	bin/truchaind --log_level "main:info,state:info,*:error,app:info,argument:info,backing:info,category:info,challenge:info,expiration:info,stake:info,stories:info" start
 
 check:
 	@echo "--> Running golangci"

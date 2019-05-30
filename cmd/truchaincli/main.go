@@ -39,7 +39,7 @@ func main() {
 	config.SetBech32PrefixForConsensusNode(sdk.Bech32PrefixConsAddr, sdk.Bech32PrefixConsPub)
 	config.Seal()
 
-	mc := []sdk.ModuleClients{}
+	mc := []sdk.ModuleClient{}
 
 	rootCmd := &cobra.Command{
 		Use:   "truchaincli",
@@ -60,7 +60,7 @@ func main() {
 		client.LineBreak,
 		keys.Commands(),
 		client.LineBreak,
-		version.VersionCmd,
+		version.Cmd,
 	)
 
 	// prepare and add flags
@@ -71,7 +71,7 @@ func main() {
 	}
 }
 
-func queryCmd(cdc *codec.Codec, mc []sdk.ModuleClients) *cobra.Command {
+func queryCmd(cdc *codec.Codec, mc []sdk.ModuleClient) *cobra.Command {
 	queryCmd := &cobra.Command{
 		Use:     "query",
 		Aliases: []string{"q"},
@@ -94,7 +94,7 @@ func queryCmd(cdc *codec.Codec, mc []sdk.ModuleClients) *cobra.Command {
 	return queryCmd
 }
 
-func txCmd(cdc *codec.Codec, mc []sdk.ModuleClients) *cobra.Command {
+func txCmd(cdc *codec.Codec, mc []sdk.ModuleClient) *cobra.Command {
 	txCmd := &cobra.Command{
 		Use:   "tx",
 		Short: "Transactions subcommands",
@@ -116,9 +116,8 @@ func txCmd(cdc *codec.Codec, mc []sdk.ModuleClients) *cobra.Command {
 
 func registerRoutes(rs *lcd.RestServer) {
 	rs.CliCtx = rs.CliCtx.WithAccountDecoder(rs.Cdc)
-	tx.RegisterRoutes(rs.CliCtx, rs.Mux, rs.Cdc)
-	rpc.RegisterRoutes(rs.CliCtx, rs.Mux)
-	tx.RegisterRoutes(rs.CliCtx, rs.Mux, rs.Cdc)
+	tx.RegisterTxRoutes(rs.CliCtx, rs.Mux, rs.Cdc)
+	rpc.RegisterRPCRoutes(rs.CliCtx, rs.Mux)
 	auth.RegisterRoutes(rs.CliCtx, rs.Mux, rs.Cdc, storeAcc)
 	bank.RegisterRoutes(rs.CliCtx, rs.Mux, rs.Cdc, rs.KeyBase)
 }

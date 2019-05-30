@@ -132,7 +132,6 @@ func TestRedistributeStakeOneStaker(t *testing.T) {
 	assert.Len(t, transactions, 1)
 	assert.Equal(t, trubank.BackingReturned, transactions[0].TransactionType)
 	assert.Equal(t, "10000000000trusteak", transactions[0].Amount.String())
-
 }
 
 func TestRedistributeStakeFalseWins(t *testing.T) {

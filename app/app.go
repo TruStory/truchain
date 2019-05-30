@@ -131,7 +131,7 @@ func NewTruChain(logger log.Logger, db dbm.DB, loadLatest bool, options ...func(
 	}
 
 	// The ParamsKeeper handles parameter storage for the application
-	app.paramsKeeper = params.NewKeeper(app.codec, app.keyParams, app.tkeyParams)
+	app.paramsKeeper = params.NewKeeper(app.codec, app.keyParams, app.tkeyParams, params.DefaultCodespace)
 
 	// The AccountKeeper handles address -> account lookups
 	app.accountKeeper = auth.NewAccountKeeper(
@@ -367,10 +367,7 @@ func (app *TruChain) initFromGenesisState(ctx sdk.Context, genesisState GenesisS
 	distr.InitGenesis(ctx, app.distrKeeper, genesisState.DistrData)
 
 	// load the initial staking information
-	validators, err := staking.InitGenesis(ctx, app.stakingKeeper, genesisState.StakingData)
-	if err != nil {
-		panic(err)
-	}
+	validators := staking.InitGenesis(ctx, app.stakingKeeper, app.accountKeeper, genesisState.StakingData)
 
 	// initialize module-specific stores
 	auth.InitGenesis(ctx, app.accountKeeper, app.feeCollectionKeeper, genesisState.AuthData)
@@ -389,7 +386,7 @@ func (app *TruChain) initFromGenesisState(ctx sdk.Context, genesisState GenesisS
 	if len(genesisState.GenTxs) > 0 {
 		for _, genTx := range genesisState.GenTxs {
 			var tx auth.StdTx
-			err = app.codec.UnmarshalJSON(genTx, &tx)
+			err := app.codec.UnmarshalJSON(genTx, &tx)
 			if err != nil {
 				panic(err)
 			}

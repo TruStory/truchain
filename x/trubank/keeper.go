@@ -66,10 +66,14 @@ func (k Keeper) AddCoin(ctx sdk.Context, creator sdk.AccAddress, coin sdk.Coin, 
 	if len(creator) == 0 {
 		return nil, sdk.ErrInvalidAddress("Invalid creator address")
 	}
-	coins, _, err = k.bankKeeper.AddCoins(ctx, creator, sdk.Coins{coin})
 
 	if coin.IsZero() {
 		return sdk.Coins{}, nil
+	}
+
+	coins, err = k.bankKeeper.AddCoins(ctx, creator, sdk.Coins{coin})
+	if err != nil {
+		return
 	}
 
 	transaction := Transaction{
@@ -93,7 +97,15 @@ func (k Keeper) SubtractCoin(ctx sdk.Context, creator sdk.AccAddress, coin sdk.C
 	if len(creator) == 0 {
 		return nil, sdk.ErrInvalidAddress("Invalid creator address")
 	}
-	coins, _, err = k.bankKeeper.SubtractCoins(ctx, creator, sdk.Coins{coin})
+
+	if coin.IsZero() {
+		return sdk.Coins{}, nil
+	}
+
+	coins, err = k.bankKeeper.SubtractCoins(ctx, creator, sdk.Coins{coin})
+	if err != nil {
+		return
+	}
 
 	coin.Amount = coin.Amount.Mul(sdk.NewInt(-1))
 	if coin.IsZero() {

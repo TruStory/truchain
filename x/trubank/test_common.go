@@ -8,6 +8,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth"
 	"github.com/cosmos/cosmos-sdk/x/bank"
+	"github.com/cosmos/cosmos-sdk/x/params"
 	sdkparams "github.com/cosmos/cosmos-sdk/x/params"
 	amino "github.com/tendermint/go-amino"
 	abci "github.com/tendermint/tendermint/abci/types"
@@ -40,7 +41,7 @@ func mockDB() (sdk.Context, Keeper, c.WriteKeeper) {
 	codec.RegisterInterface((*auth.Account)(nil), nil)
 	codec.RegisterConcrete(&auth.BaseAccount{}, "auth/Account", nil)
 
-	pk := sdkparams.NewKeeper(codec, paramsKey, transientParamsKey)
+	pk := sdkparams.NewKeeper(codec, paramsKey, transientParamsKey, params.DefaultCodespace)
 	am := auth.NewAccountKeeper(codec, accKey, pk.Subspace(auth.DefaultParamspace), auth.ProtoBaseAccount)
 	bankKeeper := bank.NewBaseKeeper(am,
 		pk.Subspace(bank.DefaultParamspace),

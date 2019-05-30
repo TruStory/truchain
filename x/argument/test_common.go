@@ -55,7 +55,7 @@ func mockDB() (
 	categoryKeeper := category.NewKeeper(catKey, codec)
 	category.InitGenesis(ctx, categoryKeeper, category.DefaultGenesisState())
 
-	pk := params.NewKeeper(codec, paramsKey, transientParamsKey)
+	pk := params.NewKeeper(codec, paramsKey, transientParamsKey, params.DefaultCodespace)
 	am := auth.NewAccountKeeper(codec, accKey, pk.Subspace(auth.DefaultParamspace), auth.ProtoBaseAccount)
 	bankKeeper := bank.NewBaseKeeper(am,
 		pk.Subspace(bank.DefaultParamspace),
