@@ -14,14 +14,15 @@ The claim module's responsibility is to create and store claims. Claims are the 
 
 ```go
 type Claim struct {
-    ID              int64
-    CommunityID     int64
-    Body            string
-    Creator         sdk.AccAddress
-    Source          url.URL
-    TotalBacked     sdk.Coin
-    TotalChallenged sdk.Coin
-    CreatedTime     time.Time
+    ID                  int64
+    CommunityID         int64
+    Body                string
+    Creator             sdk.AccAddress
+    Source              url.URL
+    TotalParticipants   int64
+    TotalBackingStake   sdk.Coin
+    TotalChallengeStake sdk.Coin
+    CreatedTime         time.Time
 }
 
 // Params can be voted on by governance
