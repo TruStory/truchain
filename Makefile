@@ -74,6 +74,9 @@ test_cover:
 	@go test $(PACKAGES) -v -timeout 30m -race -coverprofile=coverage.txt -covermode=atomic
 	@go tool cover -html=coverage.txt
 
+version:
+	@bin/truchaind version --long
+
 ########################################
 ### Local validator nodes using docker and docker-compose
 
