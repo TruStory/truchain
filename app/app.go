@@ -437,17 +437,6 @@ func (app *TruChain) initChainer(ctx sdk.Context, req abci.RequestInitChain) abc
 
 	validators := app.initFromGenesisState(ctx, genesisState)
 
-	// sanity check
-	if len(req.Validators) > 0 {
-		sort.Sort(abci.ValidatorUpdates(req.Validators))
-		sort.Sort(abci.ValidatorUpdates(validators))
-		for i, val := range validators {
-			if !val.Equal(req.Validators[i]) {
-				panic(fmt.Errorf("validators[%d] != req.Validators[%d] ", i, i))
-			}
-		}
-	}
-
 	return abci.ResponseInitChain{
 		Validators: validators,
 	}
