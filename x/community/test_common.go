@@ -35,3 +35,9 @@ func getFakeCommunityParams() (name string, slug string, description string) {
 
 	return
 }
+
+func getAnotherFakeCommunityParams() (name string, slug string, description string) {
+	name, slug, description = "Space", "space", "Come here for anything you want to learn about the space."
+
+	return
+}

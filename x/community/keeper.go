@@ -22,8 +22,8 @@ func NewKeeper(storeKey sdk.StoreKey, codec *amino.Codec) Keeper {
 	return Keeper{app.NewKeeper(codec, storeKey)}
 }
 
-// Create creates a new community
-func (k Keeper) Create(ctx sdk.Context, name string, slug string, description string) Community {
+// NewCommunity creates a new community
+func (k Keeper) NewCommunity(ctx sdk.Context, name string, slug string, description string) Community {
 	logger := getLogger(ctx)
 
 	community := Community{
@@ -42,8 +42,8 @@ func (k Keeper) Create(ctx sdk.Context, name string, slug string, description st
 	return community
 }
 
-// Get returns a community by its ID
-func (k Keeper) Get(ctx sdk.Context, id int64) (community Community, err sdk.Error) {
+// Community returns a community by its ID
+func (k Keeper) Community(ctx sdk.Context, id int64) (community Community, err sdk.Error) {
 	store := k.GetStore(ctx)
 	bz := store.Get(k.GetIDKey(id))
 	if bz == nil {
@@ -52,6 +52,17 @@ func (k Keeper) Get(ctx sdk.Context, id int64) (community Community, err sdk.Err
 	k.GetCodec().MustUnmarshalBinaryLengthPrefixed(bz, &community)
 
 	return community, nil
+}
+
+// Communities gets all communities from the KVStore
+func (k Keeper) Communities(ctx sdk.Context) (communities []Community, err sdk.Error) {
+	community := Community{}
+	err = k.Each(ctx, func(val []byte) bool {
+		k.GetCodec().MustUnmarshalBinaryLengthPrefixed(val, &community)
+		communities = append(communities, community)
+		return true
+	})
+	return
 }
 
 func getLogger(ctx sdk.Context) log.Logger {
