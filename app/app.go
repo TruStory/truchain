@@ -1,9 +1,7 @@
 package app
 
 import (
-	"fmt"
 	"os"
-	"sort"
 
 	"github.com/TruStory/truchain/types"
 	"github.com/TruStory/truchain/x/argument"
