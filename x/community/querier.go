@@ -28,7 +28,7 @@ func NewQuerier(k Keeper) sdk.Querier {
 		case QueryCommunities:
 			return queryCommunities(ctx, k)
 		default:
-			return nil, sdk.ErrUnknownRequest("Unknown truchain query endpoint: communities/" + path[0])
+			return nil, sdk.ErrUnknownRequest("Unknown truchain query endpoint: commmunity/" + path[0])
 		}
 	}
 }
