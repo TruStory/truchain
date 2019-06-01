@@ -22,7 +22,7 @@ func GetRoute(msg sdk.Msg) string {
 func GetType(msg sdk.Msg) string {
 	name := reflect.TypeOf(msg).Name()
 	prefix := strings.Split(toSnakeCase(name), "_")
-	return strings.Join(prefix[1:len(prefix)], "_")
+	return strings.Join(prefix[1:], "_")
 }
 
 // MustGetSignBytes serializes a `Msg` type into json bytes.
