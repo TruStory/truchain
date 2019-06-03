@@ -6,6 +6,12 @@ import (
 	app "github.com/TruStory/truchain/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
+// Defines module constants
+const (
+	RouterKey    = ModuleName
+	QuerierRoute = ModuleName
+)
+
 
 // Category is a type that defines the category for a story
 type Category struct {

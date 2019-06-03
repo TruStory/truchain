@@ -30,7 +30,7 @@ build_cli:
 	@go build -mod=readonly $(BUILD_FLAGS) -o bin/truchaincli cmd/truchaincli/main.go
 
 build_daemon:
-	@go build -mod=readonly $(BUILD_FLAGS) -o bin/truchaind cmd/truchaind/main.go
+	@go build -mod=readonly $(BUILD_FLAGS) -o bin/truchaind cmd/truchaind/*.go
 
 build-linux:
 	GOOS=linux GOARCH=amd64 go build -mod=readonly $(BUILD_FLAGS) -o build/truchaind cmd/truchaind/main.go

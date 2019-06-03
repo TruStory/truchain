@@ -46,3 +46,8 @@ func ExportGenesis(ctx sdk.Context, keeper Keeper) GenesisState {
 		Params:     keeper.GetParams(ctx),
 	}
 }
+
+
+func ValidateGenesis(data GenesisState) error {
+	return nil
+}

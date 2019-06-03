@@ -40,3 +40,7 @@ func ExportGenesis(ctx sdk.Context, keeper Keeper) GenesisState {
 		Backings: backings,
 	}
 }
+
+func ValidateGenesis(data GenesisState) error {
+	return nil
+}

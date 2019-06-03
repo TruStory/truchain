@@ -8,6 +8,12 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
+// Defines module constants
+const (
+	RouterKey    = ModuleName
+	QuerierRoute = ModuleName
+)
+
 // Challenge defines a user's challenge on a story
 type Challenge struct {
 	*stake.Vote `json:"vote"`

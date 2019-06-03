@@ -7,7 +7,6 @@ import (
 	"os"
 
 	"github.com/TruStory/truchain/app"
-	truchainInit "github.com/TruStory/truchain/cmd/truchaind/init"
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/server"
 	"github.com/cosmos/cosmos-sdk/x/auth/genaccounts"
@@ -41,7 +40,7 @@ func main() {
 	rootCmd.AddCommand(genutilcli.ValidateGenesisCmd(ctx, cdc, app.ModuleBasics))
 	rootCmd.AddCommand(genaccscli.AddGenesisAccountCmd(ctx, cdc, app.DefaultNodeHome, app.DefaultCLIHome))
 	rootCmd.AddCommand(client.NewCompletionCmd(rootCmd, true))
-	rootCmd.AddCommand(truchainInit.TestnetFilesCmd(ctx, cdc))
+	rootCmd.AddCommand(testnetCmd(ctx, cdc, app.ModuleBasics, genaccounts.AppModuleBasic{}))
 
 	server.AddCommands(ctx, cdc, rootCmd, newApp, exportAppStateAndTMValidators)
 
@@ -69,9 +68,8 @@ func exportAppStateAndTMValidators(
 		if err != nil {
 			return nil, nil, err
 		}
-		return tApp.ExportAppStateAndValidators()
+		return tApp.ExportAppStateAndValidators(forZeroHeight, jailWhiteList)
 	}
-
-	tApp := app.NewTruChain(logger, db, true)
-	return tApp.ExportAppStateAndValidators()
+	tApp := app.NewTruChain(logger, db, false)
+	return tApp.ExportAppStateAndValidators(forZeroHeight, jailWhiteList)
 }

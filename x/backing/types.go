@@ -8,6 +8,12 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
+// Defines module constants
+const (
+	RouterKey    = ModuleName
+	QuerierRoute = ModuleName
+)
+
 // Backing type
 type Backing struct {
 	*stake.Vote `json:"vote"`

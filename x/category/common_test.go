@@ -17,13 +17,13 @@ func mockDB() (sdk.Context, Keeper) {
 
 	ms := store.NewCommitMultiStore(db)
 	ms.MountStoreWithDB(catKey, sdk.StoreTypeIAVL, db)
-	ms.LoadLatestVersion()
+	_ = ms.LoadLatestVersion()
 
 	ctx := sdk.NewContext(ms, abci.Header{}, false, log.NewNopLogger())
 
 	cdc := amino.NewCodec()
 	cryptoAmino.RegisterAmino(cdc)
-	RegisterAmino(cdc)
+	RegisterCodec(cdc)
 
 	ck := NewKeeper(catKey, cdc)
 

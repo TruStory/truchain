@@ -1,11 +1,13 @@
 package backing
 
 import (
-	amino "github.com/tendermint/go-amino"
+	"github.com/cosmos/cosmos-sdk/codec"
 )
 
-// RegisterAmino registers messages into the codec
-func RegisterAmino(c *amino.Codec) {
-	c.RegisterConcrete(BackStoryMsg{}, "backing/BackStoryMsg", nil)
-	c.RegisterConcrete(LikeBackingArgumentMsg{}, "backing/LikeBackingArgumentMsg", nil)
+var moduleCodec = codec.New()
+
+// RegisterCodec registers messages into the codec
+func RegisterCodec(cdc *codec.Codec) {
+	cdc.RegisterConcrete(BackStoryMsg{}, "backing/BackStoryMsg", nil)
+	cdc.RegisterConcrete(LikeBackingArgumentMsg{}, "backing/LikeBackingArgumentMsg", nil)
 }

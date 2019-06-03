@@ -2,58 +2,149 @@ package app
 
 import (
 	"encoding/json"
+	"log"
 
-	"github.com/TruStory/truchain/x/trubank"
-
-	"github.com/TruStory/truchain/x/argument"
-	"github.com/TruStory/truchain/x/backing"
-	"github.com/TruStory/truchain/x/category"
-	"github.com/TruStory/truchain/x/challenge"
-	"github.com/TruStory/truchain/x/expiration"
-	"github.com/TruStory/truchain/x/stake"
-	"github.com/TruStory/truchain/x/story"
-	"github.com/cosmos/cosmos-sdk/codec"
-	"github.com/cosmos/cosmos-sdk/x/auth"
-	"github.com/cosmos/cosmos-sdk/x/bank"
 	abci "github.com/tendermint/tendermint/abci/types"
 	tmtypes "github.com/tendermint/tendermint/types"
+
+	"github.com/cosmos/cosmos-sdk/codec"
+	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/cosmos/cosmos-sdk/x/staking"
 )
 
-// ExportAppStateAndValidators implements custom application logic that exposes
-// various parts of the application's state and set of validators. An error is
-// returned if any step getting the state or set of validators fails.
-func (app *TruChain) ExportAppStateAndValidators() (
-	appState json.RawMessage, validators []tmtypes.GenesisValidator, err error) {
+// export the state of gaia for a genesis file
+func (app *TruChain) ExportAppStateAndValidators(forZeroHeight bool, jailWhiteList []string,
+) (appState json.RawMessage, validators []tmtypes.GenesisValidator, err error) {
 
+	// as if they could withdraw from the start of the next block
 	ctx := app.NewContext(true, abci.Header{Height: app.LastBlockHeight()})
 
-	// iterate to get the accounts
-	accounts := []GenesisAccount{}
-	appendAccount := func(acc auth.Account) (stop bool) {
-		account := NewGenesisAccountI(acc)
-		accounts = append(accounts, account)
-		return false
-	}
-	app.accountKeeper.IterateAccounts(ctx, appendAccount)
-
-	genState := GenesisState{
-		ArgumentData:   argument.ExportGenesis(ctx, app.argumentKeeper),
-		Accounts:       accounts,
-		AuthData:       auth.ExportGenesis(ctx, app.accountKeeper, app.feeCollectionKeeper),
-		BankData:       bank.ExportGenesis(ctx, app.bankKeeper),
-		BackingData:    backing.ExportGenesis(ctx, app.backingKeeper),
-		CategoryData:   category.ExportGenesis(ctx, app.categoryKeeper),
-		ChallengeData:  challenge.ExportGenesis(ctx, app.challengeKeeper),
-		ExpirationData: expiration.ExportGenesis(ctx, app.expirationKeeper),
-		StakeData:      stake.ExportGenesis(ctx, app.stakeKeeper),
-		StoryData:      story.ExportGenesis(ctx, app.storyKeeper),
-		TrubankData:    trubank.ExportGenesis(ctx, app.truBankKeeper),
+	if forZeroHeight {
+		app.prepForZeroHeightGenesis(ctx, jailWhiteList)
 	}
 
+	genState := app.mm.ExportGenesis(ctx)
 	appState, err = codec.MarshalJSONIndent(app.codec, genState)
 	if err != nil {
 		return nil, nil, err
 	}
+	validators = staking.WriteValidators(ctx, app.stakingKeeper)
+	return appState, validators, nil
+}
 
-	return appState, validators, err
+// prepare for fresh start at zero height
+// NOTE zero height genesis is a temporary feature which will be deprecated
+//      in favour of export at a block height
+func (app *TruChain) prepForZeroHeightGenesis(ctx sdk.Context, jailWhiteList []string) {
+	applyWhiteList := false
+
+	//Check if there is a whitelist
+	if len(jailWhiteList) > 0 {
+		applyWhiteList = true
+	}
+
+	whiteListMap := make(map[string]bool)
+
+	for _, addr := range jailWhiteList {
+		_, err := sdk.ValAddressFromBech32(addr)
+		if err != nil {
+			log.Fatal(err)
+		}
+		whiteListMap[addr] = true
+	}
+
+	/* Handle fee distribution state. */
+
+	// withdraw all validator commission
+	app.stakingKeeper.IterateValidators(ctx, func(_ int64, val sdk.Validator) (stop bool) {
+		_, _ = app.distrKeeper.WithdrawValidatorCommission(ctx, val.GetOperator())
+		return false
+	})
+
+	// withdraw all delegator rewards
+	dels := app.stakingKeeper.GetAllDelegations(ctx)
+	for _, delegation := range dels {
+		_, _ = app.distrKeeper.WithdrawDelegationRewards(ctx, delegation.DelegatorAddress, delegation.ValidatorAddress)
+	}
+
+	// clear validator slash events
+	app.distrKeeper.DeleteAllValidatorSlashEvents(ctx)
+
+	// clear validator historical rewards
+	app.distrKeeper.DeleteAllValidatorHistoricalRewards(ctx)
+
+	// set context height to zero
+	height := ctx.BlockHeight()
+	ctx = ctx.WithBlockHeight(0)
+
+	// reinitialize all validators
+	app.stakingKeeper.IterateValidators(ctx, func(_ int64, val sdk.Validator) (stop bool) {
+
+		// donate any unwithdrawn outstanding reward fraction tokens to the community pool
+		scraps := app.distrKeeper.GetValidatorOutstandingRewards(ctx, val.GetOperator())
+		feePool := app.distrKeeper.GetFeePool(ctx)
+		feePool.CommunityPool = feePool.CommunityPool.Add(scraps)
+		app.distrKeeper.SetFeePool(ctx, feePool)
+
+		app.distrKeeper.Hooks().AfterValidatorCreated(ctx, val.GetOperator())
+		return false
+	})
+
+	// reinitialize all delegations
+	for _, del := range dels {
+		app.distrKeeper.Hooks().BeforeDelegationCreated(ctx, del.DelegatorAddress, del.ValidatorAddress)
+		app.distrKeeper.Hooks().AfterDelegationModified(ctx, del.DelegatorAddress, del.ValidatorAddress)
+	}
+
+	// reset context height
+	ctx = ctx.WithBlockHeight(height)
+
+	/* Handle staking state. */
+
+	// iterate through redelegations, reset creation height
+	app.stakingKeeper.IterateRedelegations(ctx, func(_ int64, red staking.Redelegation) (stop bool) {
+		for i := range red.Entries {
+			red.Entries[i].CreationHeight = 0
+		}
+		app.stakingKeeper.SetRedelegation(ctx, red)
+		return false
+	})
+
+	// iterate through unbonding delegations, reset creation height
+	app.stakingKeeper.IterateUnbondingDelegations(ctx, func(_ int64, ubd staking.UnbondingDelegation) (stop bool) {
+		for i := range ubd.Entries {
+			ubd.Entries[i].CreationHeight = 0
+		}
+		app.stakingKeeper.SetUnbondingDelegation(ctx, ubd)
+		return false
+	})
+
+	// Iterate through validators by power descending, reset bond heights, and
+	// update bond intra-tx counters.
+	store := ctx.KVStore(app.keyStaking)
+	iter := sdk.KVStoreReversePrefixIterator(store, staking.ValidatorsKey)
+	counter := int16(0)
+
+	var valConsAddrs []sdk.ConsAddress
+	for ; iter.Valid(); iter.Next() {
+		addr := sdk.ValAddress(iter.Key()[1:])
+		validator, found := app.stakingKeeper.GetValidator(ctx, addr)
+		if !found {
+			panic("expected validator, not found")
+		}
+
+		validator.UnbondingHeight = 0
+		valConsAddrs = append(valConsAddrs, validator.ConsAddress())
+		if applyWhiteList && !whiteListMap[addr.String()] {
+			validator.Jailed = true
+		}
+
+		app.stakingKeeper.SetValidator(ctx, validator)
+		counter++
+	}
+
+	iter.Close()
+
+	_ = app.stakingKeeper.ApplyAndReturnValidatorSetUpdates(ctx)
+
 }

@@ -53,3 +53,7 @@ func ExportGenesis(ctx sdk.Context, keeper Keeper) GenesisState {
 		RewardBrokerAddress: rewardBrokerAddress,
 	}
 }
+
+func ValidateGenesis(data GenesisState) error {
+	return nil
+}
