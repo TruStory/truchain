@@ -41,6 +41,13 @@ type Params struct {
 type ClaimArguments types.UserList
 ```
 
+`ClaimParticipants` maintains a list of all participants on a claim.
+
+```go
+// "claim:id:XX:participant:id:XX:creator:XX"
+type ClaimParticipants types.UserList
+```
+
 ## State Transitions
 ### Messages
 
