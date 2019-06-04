@@ -297,7 +297,7 @@ func NewTruChain(logger log.Logger, db dbm.DB, loadLatest bool, options ...func(
 	app.mm.SetOrderInitGenesis(genaccounts.ModuleName, distr.ModuleName,
 		staking.ModuleName, auth.ModuleName, bank.ModuleName,
 		genutil.ModuleName, category.ModuleName, story.ModuleName,
-		stake.ModuleName, backing.ModuleName, challenge.ModuleName,
+		argument.ModuleName, stake.ModuleName, backing.ModuleName, challenge.ModuleName,
 		expiration.ModuleName, trubank.ModuleName)
 
 	app.SetInitChainer(app.InitChainer)
