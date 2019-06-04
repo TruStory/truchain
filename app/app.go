@@ -357,14 +357,7 @@ func MakeCodec() *codec.Codec {
 	ModuleBasics.RegisterCodec(cdc)
 	sdk.RegisterCodec(cdc)
 
-	// register msg types
-	story.RegisterCodec(cdc)
-	category.RegisterCodec(cdc)
-	backing.RegisterCodec(cdc)
-	challenge.RegisterCodec(cdc)
 	users.RegisterCodec(cdc)
-	trubank.RegisterCodec(cdc)
-
 	// register other types
 	cdc.RegisterConcrete(&types.AppAccount{}, "types/AppAccount", nil)
 
