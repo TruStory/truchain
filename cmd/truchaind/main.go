@@ -70,6 +70,6 @@ func exportAppStateAndTMValidators(
 		}
 		return tApp.ExportAppStateAndValidators(forZeroHeight, jailWhiteList)
 	}
-	tApp := app.NewTruChain(logger, db, false)
+	tApp := app.NewTruChain(logger, db, true)
 	return tApp.ExportAppStateAndValidators(forZeroHeight, jailWhiteList)
 }
