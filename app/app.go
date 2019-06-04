@@ -56,6 +56,14 @@ func init() {
 		staking.AppModuleBasic{},
 		distr.AppModuleBasic{},
 		params.AppModuleBasic{},
+		argument.AppModuleBasic{},
+		category.AppModuleBasic{},
+		backing.AppModuleBasic{},
+		challenge.AppModuleBasic{},
+		expiration.AppModuleBasic{},
+		stake.AppModuleBasic{},
+		story.AppModuleBasic{},
+		trubank.AppModuleBasic{},
 	)
 }
 
