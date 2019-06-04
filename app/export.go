@@ -12,7 +12,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/staking"
 )
 
-// export the state of gaia for a genesis file
+// ExportAppStateAndValidators export the state of gaia for a genesis file
 func (app *TruChain) ExportAppStateAndValidators(forZeroHeight bool, jailWhiteList []string,
 ) (appState json.RawMessage, validators []tmtypes.GenesisValidator, err error) {
 
@@ -125,7 +125,6 @@ func (app *TruChain) prepForZeroHeightGenesis(ctx sdk.Context, jailWhiteList []s
 	iter := sdk.KVStoreReversePrefixIterator(store, staking.ValidatorsKey)
 	counter := int16(0)
 
-	var valConsAddrs []sdk.ConsAddress
 	for ; iter.Valid(); iter.Next() {
 		addr := sdk.ValAddress(iter.Key()[1:])
 		validator, found := app.stakingKeeper.GetValidator(ctx, addr)
@@ -134,7 +133,6 @@ func (app *TruChain) prepForZeroHeightGenesis(ctx sdk.Context, jailWhiteList []s
 		}
 
 		validator.UnbondingHeight = 0
-		valConsAddrs = append(valConsAddrs, validator.ConsAddress())
 		if applyWhiteList && !whiteListMap[addr.String()] {
 			validator.Jailed = true
 		}
