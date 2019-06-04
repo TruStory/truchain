@@ -18,8 +18,10 @@ import (
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth"
+	"github.com/cosmos/cosmos-sdk/x/auth/genaccounts"
 	"github.com/cosmos/cosmos-sdk/x/bank"
 	distr "github.com/cosmos/cosmos-sdk/x/distribution"
+	"github.com/cosmos/cosmos-sdk/x/genutil"
 	"github.com/cosmos/cosmos-sdk/x/ibc"
 	"github.com/cosmos/cosmos-sdk/x/params"
 	"github.com/cosmos/cosmos-sdk/x/staking"
@@ -38,7 +40,23 @@ const (
 var (
 	DefaultCLIHome  = os.ExpandEnv("$HOME/.trucli")
 	DefaultNodeHome = os.ExpandEnv("$HOME/.truchaind")
+	// The ModuleBasicManager is in charge of setting up basic,
+	// non-dependant module elements, such as codec registration
+	// and genesis verification.
+	ModuleBasics sdk.ModuleBasicManager
 )
+
+func init() {
+	ModuleBasics = sdk.NewModuleBasicManager(
+		genaccounts.AppModuleBasic{},
+		genutil.AppModuleBasic{},
+		auth.AppModuleBasic{},
+		bank.AppModuleBasic{},
+		staking.AppModuleBasic{},
+		distr.AppModuleBasic{},
+		params.AppModuleBasic{},
+	)
+}
 
 // TruChain implements an extended ABCI application. It contains a BaseApp,
 // a codec for serialization, KVStore keys for multistore state management, and
@@ -49,16 +67,16 @@ type TruChain struct {
 	codec *codec.Codec
 
 	// keys to access the multistore
-	keyAccount  *sdk.KVStoreKey
-	keyDistr    *sdk.KVStoreKey
-	tkeyDistr   *sdk.TransientStoreKey
-	keyStaking  *sdk.KVStoreKey
-	tkeyStaking *sdk.TransientStoreKey
-	keyFee      *sdk.KVStoreKey
-	keyIBC      *sdk.KVStoreKey
-	keyMain     *sdk.KVStoreKey
-	keyParams   *sdk.KVStoreKey
-	tkeyParams  *sdk.TransientStoreKey
+	keyMain          *sdk.KVStoreKey
+	keyAccount       *sdk.KVStoreKey
+	keyStaking       *sdk.KVStoreKey
+	tkeyStaking      *sdk.TransientStoreKey
+	keyDistr         *sdk.KVStoreKey
+	tkeyDistr        *sdk.TransientStoreKey
+	keyFeeCollection *sdk.KVStoreKey
+	keyIBC           *sdk.KVStoreKey
+	keyParams        *sdk.KVStoreKey
+	tkeyParams       *sdk.TransientStoreKey
 
 	// keys to access trustory state
 	keyArgument   *sdk.KVStoreKey
@@ -90,6 +108,9 @@ type TruChain struct {
 	storyKeeper        story.Keeper
 	stakeKeeper        stake.Keeper
 	truBankKeeper      trubank.Keeper
+
+	// the module manager
+	mm *sdk.ModuleManager
 }
 
 // NewTruChain returns a reference to a new TruChain. Internally,
@@ -106,59 +127,50 @@ func NewTruChain(logger log.Logger, db dbm.DB, loadLatest bool, options ...func(
 		BaseApp: bam.NewBaseApp(types.AppName, logger, db, auth.DefaultTxDecoder(codec), options...),
 		codec:   codec,
 
-		keyParams:  sdk.NewKVStoreKey("params"),
-		tkeyParams: sdk.NewTransientStoreKey("transient_params"),
+		keyParams:  sdk.NewKVStoreKey(params.StoreKey),
+		tkeyParams: sdk.NewTransientStoreKey(params.TStoreKey),
 
-		keyMain:       sdk.NewKVStoreKey("main"),
-		keyAccount:    sdk.NewKVStoreKey("acc"),
-		keyIBC:        sdk.NewKVStoreKey("ibc"),
-		keyStaking:    sdk.NewKVStoreKey(staking.StoreKey),
-		tkeyStaking:   sdk.NewTransientStoreKey(staking.TStoreKey),
-		keyDistr:      sdk.NewKVStoreKey(distr.StoreKey),
-		tkeyDistr:     sdk.NewTransientStoreKey(distr.TStoreKey),
-		keyArgument:   sdk.NewKVStoreKey(argument.StoreKey),
-		keyStory:      sdk.NewKVStoreKey(story.StoreKey),
-		keyStoryQueue: sdk.NewKVStoreKey(story.QueueStoreKey),
-		keyCategory:   sdk.NewKVStoreKey(category.StoreKey),
-		keyBacking:    sdk.NewKVStoreKey(backing.StoreKey),
-		keyChallenge:  sdk.NewKVStoreKey(challenge.StoreKey),
-		keyExpiration: sdk.NewKVStoreKey(expiration.StoreKey),
-		keyFee:        sdk.NewKVStoreKey("fee_collection"),
-		keyStake:      sdk.NewKVStoreKey(stake.StoreKey),
-		keyTruBank:    sdk.NewKVStoreKey(trubank.StoreKey),
+		keyMain:          sdk.NewKVStoreKey(bam.MainStoreKey),
+		keyAccount:       sdk.NewKVStoreKey(auth.StoreKey),
+		keyIBC:           sdk.NewKVStoreKey("ibc"),
+		keyStaking:       sdk.NewKVStoreKey(staking.StoreKey),
+		tkeyStaking:      sdk.NewTransientStoreKey(staking.TStoreKey),
+		keyDistr:         sdk.NewKVStoreKey(distr.StoreKey),
+		tkeyDistr:        sdk.NewTransientStoreKey(distr.TStoreKey),
+		keyArgument:      sdk.NewKVStoreKey(argument.StoreKey),
+		keyStory:         sdk.NewKVStoreKey(story.StoreKey),
+		keyStoryQueue:    sdk.NewKVStoreKey(story.QueueStoreKey),
+		keyCategory:      sdk.NewKVStoreKey(category.StoreKey),
+		keyBacking:       sdk.NewKVStoreKey(backing.StoreKey),
+		keyChallenge:     sdk.NewKVStoreKey(challenge.StoreKey),
+		keyExpiration:    sdk.NewKVStoreKey(expiration.StoreKey),
+		keyFeeCollection: sdk.NewKVStoreKey(auth.FeeStoreKey),
+		keyStake:         sdk.NewKVStoreKey(stake.StoreKey),
+		keyTruBank:       sdk.NewKVStoreKey(trubank.StoreKey),
 	}
 
-	// The ParamsKeeper handles parameter storage for the application
+	// init params keeper and subspaces
 	app.paramsKeeper = params.NewKeeper(app.codec, app.keyParams, app.tkeyParams, params.DefaultCodespace)
+	authSubspace := app.paramsKeeper.Subspace(auth.DefaultParamspace)
+	bankSubspace := app.paramsKeeper.Subspace(bank.DefaultParamspace)
+	stakingSubspace := app.paramsKeeper.Subspace(staking.DefaultParamspace)
+	distrSubspace := app.paramsKeeper.Subspace(distr.DefaultParamspace)
+	storySubspace := app.paramsKeeper.Subspace(story.StoreKey)
+	argumentSubspace := app.paramsKeeper.Subspace(argument.StoreKey)
 
-	// The AccountKeeper handles address -> account lookups
-	app.accountKeeper = auth.NewAccountKeeper(
-		app.codec,
-		app.keyAccount,
-		app.paramsKeeper.Subspace(auth.DefaultParamspace),
-		auth.ProtoBaseAccount,
-	)
-
-	app.bankKeeper = bank.NewBaseKeeper(
-		app.accountKeeper,
-		app.paramsKeeper.Subspace(bank.DefaultParamspace),
-		bank.DefaultCodespace,
-	)
-
+	// add keepers
+	app.accountKeeper = auth.NewAccountKeeper(app.codec, app.keyAccount, authSubspace, auth.ProtoBaseAccount)
+	app.bankKeeper = bank.NewBaseKeeper(app.accountKeeper, bankSubspace, bank.DefaultCodespace)
 	app.ibcMapper = ibc.NewMapper(app.codec, app.keyIBC, ibc.DefaultCodespace)
-	app.feeCollectionKeeper = auth.NewFeeCollectionKeeper(app.codec, app.keyFee)
+	app.feeCollectionKeeper = auth.NewFeeCollectionKeeper(app.codec, app.keyFeeCollection)
 
-	stakingKeeper := staking.NewKeeper(
-		app.codec,
-		app.keyStaking, app.tkeyStaking,
-		app.bankKeeper, app.paramsKeeper.Subspace(staking.DefaultParamspace),
-		staking.DefaultCodespace,
-	)
+	stakingKeeper := staking.NewKeeper(app.codec, app.keyStaking, app.tkeyStaking, app.bankKeeper,
+		stakingSubspace, staking.DefaultCodespace)
 
 	app.distrKeeper = distr.NewKeeper(
 		app.codec,
 		app.keyDistr,
-		app.paramsKeeper.Subspace(distr.DefaultParamspace),
+		distrSubspace,
 		app.bankKeeper, &stakingKeeper, app.feeCollectionKeeper,
 		distr.DefaultCodespace,
 	)
@@ -166,24 +178,11 @@ func NewTruChain(logger log.Logger, db dbm.DB, loadLatest bool, options ...func(
 	app.stakingKeeper = stakingKeeper
 
 	// wire up keepers
-	app.categoryKeeper = category.NewKeeper(
-		app.keyCategory,
-		codec,
-	)
-
-	app.storyKeeper = story.NewKeeper(
-		app.keyStory,
-		app.keyStoryQueue,
-		app.categoryKeeper,
-		app.paramsKeeper.Subspace(story.StoreKey),
-		app.codec,
-	)
-
-	app.argumentKeeper = argument.NewKeeper(
-		app.keyArgument,
-		app.storyKeeper,
-		app.paramsKeeper.Subspace(argument.StoreKey),
-		app.codec)
+	app.categoryKeeper = category.NewKeeper(app.keyCategory, codec)
+	app.storyKeeper = story.NewKeeper(app.keyStory, app.keyStoryQueue,
+		app.categoryKeeper, storySubspace, app.codec)
+	app.argumentKeeper = argument.NewKeeper(app.keyArgument, app.storyKeeper,
+		argumentSubspace, app.codec)
 
 	app.truBankKeeper = trubank.NewKeeper(
 		app.keyTruBank,
@@ -260,7 +259,7 @@ func NewTruChain(logger log.Logger, db dbm.DB, loadLatest bool, options ...func(
 
 	// The app.QueryRouter is the main query router where each module registers its routes
 	app.QueryRouter().
-		AddRoute("acc", auth.NewQuerier(app.accountKeeper)).
+		AddRoute(auth.QuerierRoute, auth.NewQuerier(app.accountKeeper)).
 		AddRoute(argument.QueryPath, argument.NewQuerier(app.argumentKeeper)).
 		AddRoute(story.QueryPath, story.NewQuerier(app.storyKeeper)).
 		AddRoute(category.QueryPath, category.NewQuerier(app.categoryKeeper)).
@@ -270,8 +269,38 @@ func NewTruChain(logger log.Logger, db dbm.DB, loadLatest bool, options ...func(
 		AddRoute(clientParams.QueryPath, clientParams.NewQuerier(app.clientParamsKeeper)).
 		AddRoute(trubank.QueryPath, trubank.NewQuerier(app.truBankKeeper))
 
-	// The initChainer handles translating the genesis.json file into initial state for the network
-	app.SetInitChainer(app.initChainer)
+	app.mm = sdk.NewModuleManager(
+		genaccounts.NewAppModule(app.accountKeeper),
+		genutil.NewAppModule(app.accountKeeper, app.stakingKeeper, app.BaseApp.DeliverTx),
+		auth.NewAppModule(app.accountKeeper, app.feeCollectionKeeper),
+		bank.NewAppModule(app.bankKeeper, app.accountKeeper),
+		distr.NewAppModule(app.distrKeeper),
+		staking.NewAppModule(app.stakingKeeper, app.feeCollectionKeeper, app.distrKeeper, app.accountKeeper),
+		story.NewAppModule(app.storyKeeper),
+		category.NewAppModule(app.categoryKeeper),
+		argument.NewAppModule(app.argumentKeeper),
+		stake.NewAppModule(app.stakeKeeper),
+		backing.NewAppModule(app.backingKeeper),
+		challenge.NewAppModule(app.challengeKeeper),
+		expiration.NewAppModule(app.expirationKeeper),
+		trubank.NewAppModule(app.truBankKeeper),
+	)
+
+	// During begin block slashing happens after distr.BeginBlocker so that
+	// there is nothing left over in the validator fee pool, so as to keep the
+	// CanWithdrawInvariant invariant.
+	app.mm.SetOrderBeginBlockers(distr.ModuleName)
+	app.mm.SetOrderEndBlockers(staking.ModuleName, expiration.ModuleName)
+
+	// genutils must occur after staking so that pools are properly
+	// initialized with tokens from genesis accounts.
+	app.mm.SetOrderInitGenesis(genaccounts.ModuleName, distr.ModuleName,
+		staking.ModuleName, auth.ModuleName, bank.ModuleName,
+		genutil.ModuleName, category.ModuleName, story.ModuleName,
+		argument.ModuleName, stake.ModuleName, backing.ModuleName, challenge.ModuleName,
+		expiration.ModuleName, trubank.ModuleName)
+
+	app.SetInitChainer(app.InitChainer)
 
 	app.SetBeginBlocker(app.BeginBlocker)
 	app.SetEndBlocker(app.EndBlocker)
@@ -286,7 +315,7 @@ func NewTruChain(logger log.Logger, db dbm.DB, loadLatest bool, options ...func(
 		app.keyCategory,
 		app.keyChallenge,
 		app.keyExpiration,
-		app.keyFee,
+		app.keyFeeCollection,
 		app.keyIBC,
 		app.keyMain,
 		app.keyStory,
@@ -313,20 +342,16 @@ func NewTruChain(logger log.Logger, db dbm.DB, loadLatest bool, options ...func(
 func MakeCodec() *codec.Codec {
 	cdc := codec.New()
 
-	auth.RegisterCodec(cdc)
-	bank.RegisterCodec(cdc)
-	staking.RegisterCodec(cdc)
-	distr.RegisterCodec(cdc)
+	ModuleBasics.RegisterCodec(cdc)
 	sdk.RegisterCodec(cdc)
-	ibc.RegisterCodec(cdc)
 
 	// register msg types
-	story.RegisterAmino(cdc)
-	backing.RegisterAmino(cdc)
-	category.RegisterAmino(cdc)
-	challenge.RegisterAmino(cdc)
-	users.RegisterAmino(cdc)
-	trubank.RegisterAmino(cdc)
+	story.RegisterCodec(cdc)
+	category.RegisterCodec(cdc)
+	backing.RegisterCodec(cdc)
+	challenge.RegisterCodec(cdc)
+	users.RegisterCodec(cdc)
+	trubank.RegisterCodec(cdc)
 
 	// register other types
 	cdc.RegisterConcrete(&types.AppAccount{}, "types/AppAccount", nil)
@@ -350,94 +375,11 @@ func (app *TruChain) EndBlocker(ctx sdk.Context, _ abci.RequestEndBlock) abci.Re
 	return abci.ResponseEndBlock{Tags: tags}
 }
 
-// initialize store from a genesis state
-func (app *TruChain) initFromGenesisState(ctx sdk.Context, genesisState GenesisState) []abci.ValidatorUpdate {
-	genesisState.Sanitize()
-
-	// load the accounts
-	for _, gacc := range genesisState.Accounts {
-		acc := gacc.ToAccount()
-		acc = app.accountKeeper.NewAccount(ctx, acc) // set account number
-		app.accountKeeper.SetAccount(ctx, acc)
-	}
-
-	// initialize distribution (must happen before staking)
-	distr.InitGenesis(ctx, app.distrKeeper, genesisState.DistrData)
-
-	// load the initial staking information
-	validators := staking.InitGenesis(ctx, app.stakingKeeper, app.accountKeeper, genesisState.StakingData)
-
-	// initialize module-specific stores
-	auth.InitGenesis(ctx, app.accountKeeper, app.feeCollectionKeeper, genesisState.AuthData)
-	bank.InitGenesis(ctx, app.bankKeeper, genesisState.BankData)
-
-	// trustory-specific modules
-	argument.InitGenesis(ctx, app.argumentKeeper, genesisState.ArgumentData)
-	category.InitGenesis(ctx, app.categoryKeeper, genesisState.CategoryData)
-	challenge.InitGenesis(ctx, app.challengeKeeper, genesisState.ChallengeData)
-	backing.InitGenesis(ctx, app.backingKeeper, genesisState.BackingData)
-	expiration.InitGenesis(ctx, app.expirationKeeper, genesisState.ExpirationData)
-	stake.InitGenesis(ctx, app.stakeKeeper, genesisState.StakeData)
-	story.InitGenesis(ctx, app.storyKeeper, genesisState.StoryData)
-	trubank.InitGenesis(ctx, app.truBankKeeper, genesisState.TrubankData)
-
-	if len(genesisState.GenTxs) > 0 {
-		for _, genTx := range genesisState.GenTxs {
-			var tx auth.StdTx
-			err := app.codec.UnmarshalJSON(genTx, &tx)
-			if err != nil {
-				panic(err)
-			}
-			bz := app.codec.MustMarshalBinaryLengthPrefixed(tx)
-			res := app.BaseApp.DeliverTx(bz)
-			if !res.IsOK() {
-				panic(res.Log)
-			}
-		}
-
-		validators = app.stakingKeeper.ApplyAndReturnValidatorSetUpdates(ctx)
-	}
-	return validators
-}
-
-// initChainer implements the custom application logic that the BaseApp will
-// invoke upon initialization. In this case, it will take the application's
-// state provided by 'req' and attempt to deserialize said state. The state
-// should contain all the genesis accounts. These accounts will be added to the
-// application's account mapper.
-func (app *TruChain) initChainer(ctx sdk.Context, req abci.RequestInitChain) abci.ResponseInitChain {
-	stateJSON := req.AppStateBytes
-
+// InitChainer application update at chain initialization
+func (app *TruChain) InitChainer(ctx sdk.Context, req abci.RequestInitChain) abci.ResponseInitChain {
 	var genesisState GenesisState
-	err := app.codec.UnmarshalJSON(stateJSON, &genesisState)
-	if err != nil {
-		panic(err)
-	}
-
-	for _, acc := range genesisState.Accounts {
-		acc.AccountNumber = app.accountKeeper.GetNextAccountNumber(ctx)
-		app.accountKeeper.SetAccount(ctx, acc.ToAccount())
-	}
-
-	// initialize module-specific stores
-	auth.InitGenesis(ctx, app.accountKeeper, app.feeCollectionKeeper, genesisState.AuthData)
-	bank.InitGenesis(ctx, app.bankKeeper, genesisState.BankData)
-
-	// trustory-specific modules
-	argument.InitGenesis(ctx, app.argumentKeeper, genesisState.ArgumentData)
-	category.InitGenesis(ctx, app.categoryKeeper, genesisState.CategoryData)
-	challenge.InitGenesis(ctx, app.challengeKeeper, genesisState.ChallengeData)
-	backing.InitGenesis(ctx, app.backingKeeper, genesisState.BackingData)
-	expiration.InitGenesis(ctx, app.expirationKeeper, genesisState.ExpirationData)
-	stake.InitGenesis(ctx, app.stakeKeeper, genesisState.StakeData)
-	story.InitGenesis(ctx, app.storyKeeper, genesisState.StoryData)
-	trubank.InitGenesis(ctx, app.truBankKeeper, genesisState.TrubankData)
-
-	validators := app.initFromGenesisState(ctx, genesisState)
-
-	return abci.ResponseInitChain{
-		Validators: validators,
-	}
+	app.codec.MustUnmarshalJSON(req.AppStateBytes, &genesisState)
+	return app.mm.InitGenesis(ctx, genesisState)
 }
 
 // LoadHeight loads the app at a particular height

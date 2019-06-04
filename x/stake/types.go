@@ -7,6 +7,8 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
+
+
 // Msg defines data common to backing, challenge, and
 // token vote messages.
 type Msg struct {

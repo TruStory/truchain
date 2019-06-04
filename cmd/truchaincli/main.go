@@ -17,6 +17,8 @@ import (
 	"github.com/cosmos/cosmos-sdk/version"
 	authcmd "github.com/cosmos/cosmos-sdk/x/auth/client/cli"
 	bankcmd "github.com/cosmos/cosmos-sdk/x/bank/client/cli"
+	st "github.com/cosmos/cosmos-sdk/x/staking"
+	stakingclient "github.com/cosmos/cosmos-sdk/x/staking/client"
 	"github.com/spf13/cobra"
 	"github.com/tendermint/tmlibs/cli"
 )
@@ -39,7 +41,9 @@ func main() {
 	config.SetBech32PrefixForConsensusNode(sdk.Bech32PrefixConsAddr, sdk.Bech32PrefixConsPub)
 	config.Seal()
 
-	mc := []sdk.ModuleClient{}
+	mc := []sdk.ModuleClient{
+		stakingclient.NewModuleClient(st.StoreKey, cdc),
+	}
 
 	rootCmd := &cobra.Command{
 		Use:   "truchaincli",

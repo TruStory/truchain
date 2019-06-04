@@ -29,3 +29,7 @@ func ExportGenesis(ctx sdk.Context, keeper Keeper) GenesisState {
 		Params: params,
 	}
 }
+
+func ValidateGenesis(data GenesisState) error {
+	return nil
+}

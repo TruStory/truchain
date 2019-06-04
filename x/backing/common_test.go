@@ -62,7 +62,7 @@ func mockDB() (
 
 	codec := amino.NewCodec()
 	cryptoAmino.RegisterAmino(codec)
-	RegisterAmino(codec)
+	RegisterCodec(codec)
 	codec.RegisterInterface((*auth.Account)(nil), nil)
 	codec.RegisterConcrete(&auth.BaseAccount{}, "auth/Account", nil)
 

@@ -5,6 +5,12 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
+// Defines module constants
+const (
+	RouterKey    = ModuleName
+	QuerierRoute = ModuleName
+)
+
 // Argument for a story
 type Argument struct {
 	ID      int64 `json:"id"`
