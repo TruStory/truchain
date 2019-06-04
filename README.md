@@ -45,6 +45,11 @@ This creates:
 TruChain currently needs a _registrar_ account to sign new user registration messages.
 
 ```
+truchaind init trustory --chain-id devnet-1 --overwrite
+truchaind add-genesis-account $(truchaincli keys show registrar -a --home ~/.octopus) 1000000000trusteak
+truchaind gentx --name=registrar --amount 100000000trusteak --home-client ~/.octopus
+truchaind collect-gentxs
+
 # Initialize configuration files and genesis file
 ./bin/truchaind init localnet --chain-id truchain
 

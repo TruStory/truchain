@@ -46,6 +46,12 @@ export:
 init:
 	bin/truchaind init trunode
 
+install:
+	@go install $(BUILD_FLAGS) ./cmd/truchaind
+	@go install $(BUILD_FLAGS) ./cmd/truchaincli
+	@echo "Installed truchaind and truchaincli ..."
+	@truchaind version --long
+
 reset:
 	bin/truchaind unsafe-reset-all
 
