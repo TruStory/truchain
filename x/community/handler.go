@@ -20,10 +20,6 @@ func NewHandler(k Keeper) sdk.Handler {
 	}
 }
 
-// ============================================================================ //
-// HANDLERS BELOW
-// ============================================================================ //
-
 func handleMsgNewCommunity(ctx sdk.Context, k Keeper, msg MsgNewCommunity) sdk.Result {
 	if err := msg.ValidateBasic(); err != nil {
 		return err.Result()

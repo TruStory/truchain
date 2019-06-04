@@ -16,10 +16,10 @@ const (
 
 // ErrCommunityNotFound throws an error when the searched category is not found
 func ErrCommunityNotFound(id uint64) sdk.Error {
-	return sdk.NewError(DefaultCodespace, ErrorCodeCommunityNotFound, "Community not found with ID: "+fmt.Sprintf("%d", id))
+	return sdk.NewError(DefaultCodespace, ErrorCodeCommunityNotFound, fmt.Sprintf("Community not found with ID: %d", id))
 }
 
 // ErrInvalidCommunityMsg throws an error when the searched category is not found
 func ErrInvalidCommunityMsg(message string) sdk.Error {
-	return sdk.NewError(DefaultCodespace, ErrorCodeInvalidCommunityMsg, "Invalid community msg. Reason: "+message)
+	return sdk.NewError(DefaultCodespace, ErrorCodeInvalidCommunityMsg, fmt.Sprintf("Invalid community msg. Reason: %s", message))
 }

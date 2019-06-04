@@ -33,10 +33,6 @@ func NewQuerier(k Keeper) sdk.Querier {
 	}
 }
 
-// ============================================================================ //
-// QUERIERS BELOW
-// ============================================================================ //
-
 func queryCommunity(ctx sdk.Context, request abci.RequestQuery, k Keeper) (result []byte, err sdk.Error) {
 	params := QueryCommunityParams{}
 
