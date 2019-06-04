@@ -28,42 +28,41 @@ cd truchain && git checkout master
 make download
 ```
 
-### Build binaries
+### Install
 
 ```
-make buidl
+make install
 ```
 
 This creates:
 
-`./bin/truchaind`: TruStory blockchain daemon
+`truchaind`: TruStory blockchain daemon
 
-`./bin/truchaincli`: TruStory blockchain client. Used for creating keys and lightweight interaction with the chain and underlying Tendermint node.
+`truchaincli`: TruStory blockchain client. Used for creating keys and lightweight interaction with the chain and underlying Tendermint node.
 
-### Setup genesis accounts
+### Setup genesis file
 
 TruChain currently needs a _registrar_ account to sign new user registration messages.
 
 ```
-truchaind init trustory --chain-id devnet-1 --overwrite
+# Initialize configuration files and genesis file
+truchaind init trustory --chain-id localnet-1
+
+# Configure the CLI to eliminate need for chain-id flag
+truchaincli config chain-id truchain --home ~/.octopus
+
+# Add a new key named registrar
+truchaincli keys add registrar --home ~/.octopus
+
+# Add the genesis account on the chain, giving it some trusteak
 truchaind add-genesis-account $(truchaincli keys show registrar -a --home ~/.octopus) 1000000000trusteak
+
+# Add genesis transactions that creates a test validator when the chain starts
 truchaind gentx --name=registrar --amount 100000000trusteak --home-client ~/.octopus
 truchaind collect-gentxs
 
-# Initialize configuration files and genesis file
-./bin/truchaind init localnet --chain-id truchain
-
-# Configure the CLI to eliminate need for chain-id flag
-./bin/truchaincli config chain-id truchain --home ~/.octopus
-
-# Add a new key named registrar
-./bin/truchaincli keys add registrar --home ~/.octopus
-
-# Add the genesis account on the chain, giving it some trusteak
-./bin/truchaind add-genesis-account $(./bin/truchaincli keys show registrar -a --home ~/.octopus) 1000000000trusteak
-
 # Start the chain
-./bin/truchaind start
+truchaind start
 ```
 
 ## Architecture
