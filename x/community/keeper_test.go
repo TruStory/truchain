@@ -27,7 +27,6 @@ func TestCommunity_Success(t *testing.T) {
 	createdCommunity := keeper.NewCommunity(ctx, name, slug, description)
 
 	returnedCommunity, err := keeper.Community(ctx, createdCommunity.ID)
-
 	assert.Nil(t, err)
 	assert.Equal(t, createdCommunity.ID, returnedCommunity.ID)
 	assert.Equal(t, createdCommunity.Name, returnedCommunity.Name)
@@ -37,7 +36,7 @@ func TestCommunity_Success(t *testing.T) {
 
 func TestCommunity_ErrCommunityNotFound(t *testing.T) {
 	ctx, keeper := mockDB()
-	id := int64(314) // any random number, what better than a pie 🥧
+	id := uint64(314) // any random number, what better than a pie 🥧
 
 	_, err := keeper.Community(ctx, id)
 	assert.NotNil(t, err)

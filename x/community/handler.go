@@ -1,6 +1,9 @@
 package community
 
 import (
+	"encoding/json"
+	"fmt"
+
 	app "github.com/TruStory/truchain/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
@@ -28,5 +31,12 @@ func handleMsgNewCommunity(ctx sdk.Context, k Keeper, msg MsgNewCommunity) sdk.R
 
 	community := k.NewCommunity(ctx, msg.Name, msg.Slug, msg.Description)
 
-	return app.Result(community.ID)
+	res, jsonErr := json.Marshal(community)
+	if jsonErr != nil {
+		return sdk.ErrInternal(fmt.Sprintf("Marshal result error: %s", jsonErr)).Result()
+	}
+
+	return sdk.Result{
+		Data: res,
+	}
 }

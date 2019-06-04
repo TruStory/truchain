@@ -9,7 +9,7 @@ import (
 
 // Community represents the state of a community on TruStory
 type Community struct {
-	ID               int64
+	ID               uint64
 	Name             string
 	Slug             string
 	Description      string
