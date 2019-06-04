@@ -17,6 +17,7 @@ import (
 	bam "github.com/cosmos/cosmos-sdk/baseapp"
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/cosmos/cosmos-sdk/version"
 	"github.com/cosmos/cosmos-sdk/x/auth"
 	"github.com/cosmos/cosmos-sdk/x/auth/genaccounts"
 	"github.com/cosmos/cosmos-sdk/x/bank"
@@ -122,9 +123,12 @@ func NewTruChain(logger log.Logger, db dbm.DB, loadLatest bool, options ...func(
 	// create and register app-level codec for TXs and accounts
 	codec := MakeCodec()
 
+	bApp := bam.NewBaseApp(types.AppName, logger, db, auth.DefaultTxDecoder(codec), options...)
+	bApp.SetAppVersion(version.Version)
+
 	// create your application type
 	var app = &TruChain{
-		BaseApp: bam.NewBaseApp(types.AppName, logger, db, auth.DefaultTxDecoder(codec), options...),
+		BaseApp: bApp,
 		codec:   codec,
 
 		keyParams:  sdk.NewKVStoreKey(params.StoreKey),
