@@ -1,10 +1,10 @@
 package community
 
-import (
-	amino "github.com/tendermint/go-amino"
-)
+import "github.com/cosmos/cosmos-sdk/codec"
 
-// RegisterAmino registers messages into the codec
-func RegisterAmino(c *amino.Codec) {
-	c.RegisterConcrete(MsgNewCommunity{}, "community/NewCommunity", nil)
+var moduleCodec = codec.New()
+
+// RegisterCodec registers messages into the codec
+func RegisterCodec(c *codec.Codec) {
+	c.RegisterConcrete(MsgNewCommunity{}, "community/MsgNewCommunity", nil)
 }

@@ -7,6 +7,12 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
+// Defines module constants
+const (
+	RouterKey    = ModuleName
+	QuerierRoute = ModuleName
+)
+
 // Community represents the state of a community on TruStory
 type Community struct {
 	ID               uint64

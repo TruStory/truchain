@@ -52,9 +52,8 @@ func TestCommunities_Success(t *testing.T) {
 	name2, slug2, description2 := getAnotherFakeCommunityParams()
 	another := keeper.NewCommunity(ctx, name2, slug2, description2)
 
-	all, err := keeper.Communities(ctx)
+	all := keeper.Communities(ctx)
 
-	assert.Nil(t, err)
 	assert.Len(t, all, 2)
 	assert.Equal(t, all[0].ID, first.ID)
 	assert.Equal(t, all[1].ID, another.ID)

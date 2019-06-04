@@ -52,13 +52,18 @@ func (k Keeper) Community(ctx sdk.Context, id uint64) (community Community, err 
 }
 
 // Communities gets all communities from the KVStore
-func (k Keeper) Communities(ctx sdk.Context) (communities []Community, err sdk.Error) {
-	err = k.Each(ctx, func(bytes []byte) bool {
+func (k Keeper) Communities(ctx sdk.Context) (communities []Community) {
+	err := k.Each(ctx, func(bytes []byte) bool {
 		var community Community
 		k.Codec.MustUnmarshalBinaryLengthPrefixed(bytes, &community)
 		communities = append(communities, community)
 		return true
 	})
+
+	if err != nil {
+		return 
+	}
+
 	return
 }
 

@@ -1,9 +1,9 @@
 package community
 
 import (
+	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/cosmos/cosmos-sdk/store"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	amino "github.com/tendermint/go-amino"
 	abci "github.com/tendermint/tendermint/abci/types"
 	cryptoAmino "github.com/tendermint/tendermint/crypto/encoding/amino"
 	dbm "github.com/tendermint/tendermint/libs/db"
@@ -21,11 +21,11 @@ func mockDB() (sdk.Context, Keeper) {
 
 	ctx := sdk.NewContext(ms, abci.Header{}, false, log.NewNopLogger())
 
-	cdc := amino.NewCodec()
-	cryptoAmino.RegisterAmino(cdc)
-	RegisterAmino(cdc)
+	codec := codec.New()
+	cryptoAmino.RegisterAmino(codec)
+	RegisterCodec(codec)
 
-	ck := NewKeeper(communityKey, cdc)
+	ck := NewKeeper(communityKey, codec)
 
 	return ctx, ck
 }

@@ -54,11 +54,7 @@ func queryCommunity(ctx sdk.Context, request abci.RequestQuery, k Keeper) (resul
 }
 
 func queryCommunities(ctx sdk.Context, k Keeper) (result []byte, err sdk.Error) {
-	communities, err := k.Communities(ctx)
-
-	if err != nil {
-		return
-	}
+	communities := k.Communities(ctx)
 
 	return mustMarshal(communities), nil
 }
