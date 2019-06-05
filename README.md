@@ -62,7 +62,7 @@ truchaind gentx --name=registrar --amount 100000000trusteak --home-client ~/.oct
 truchaind collect-gentxs
 
 # Start the chain
-truchaind start
+make start
 ```
 
 ## Architecture
