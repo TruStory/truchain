@@ -28,24 +28,9 @@ func NewMsgNewCommunity(name, slug, description string, creator sdk.AccAddress) 
 // ValidateBasic implements Msg
 func (msg MsgNewCommunity) ValidateBasic() sdk.Error {
 	if len(msg.Creator) == 0 {
-		return sdk.ErrInvalidAddress("Invalid address: " + msg.Creator.String())
+		return sdk.ErrInvalidAddress(fmt.Sprintf("Invalid address: %s", msg.Creator.String()))
 	}
-	params := DefaultMsgParams()
-	if len(msg.Name) < params.MinNameLen || len(msg.Name) > params.MaxNameLen {
-		return ErrInvalidCommunityMsg(
-			fmt.Sprintf("Name must be between %d-%d chars in length", params.MinNameLen, params.MaxNameLen),
-		)
-	}
-	if len(msg.Slug) < params.MinSlugLen || len(msg.Slug) > params.MaxSlugLen {
-		return ErrInvalidCommunityMsg(
-			fmt.Sprintf("Slug must be between %d-%d chars in length", params.MinSlugLen, params.MaxSlugLen),
-		)
-	}
-	if len(msg.Description) > params.MaxDescriptionLen {
-		return ErrInvalidCommunityMsg(
-			fmt.Sprintf("Description must be less than %d chars in length", params.MaxDescriptionLen),
-		)
-	}
+
 	return nil
 }
 

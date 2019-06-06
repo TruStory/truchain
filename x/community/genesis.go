@@ -9,55 +9,56 @@ import (
 // GenesisState defines genesis data for the module
 type GenesisState struct {
 	Communities []Community `json:"communities"`
-	Params      MsgParams   `json:"msg_params"`
+	Params      Params      `json:"params"`
 }
 
 // NewGenesisState creates a new genesis state.
-func NewGenesisState(communities []Community, msgParams MsgParams) GenesisState {
+func NewGenesisState(communities []Community, params Params) GenesisState {
 	return GenesisState{
 		Communities: communities,
-		Params:      msgParams,
+		Params:      params,
 	}
 }
 
 // DefaultGenesisState returns a default genesis state
-func DefaultGenesisState() GenesisState { return NewGenesisState([]Community{}, DefaultMsgParams()) }
+func DefaultGenesisState() GenesisState { return NewGenesisState([]Community{}, DefaultParams()) }
 
 // InitGenesis initializes community state from genesis file
 func InitGenesis(ctx sdk.Context, keeper Keeper, data GenesisState) {
 	for _, community := range data.Communities {
 		keeper.Set(ctx, community.ID, community)
 	}
+	keeper.SetParams(ctx, data.Params)
 }
 
 // ExportGenesis exports the genesis state
 func ExportGenesis(ctx sdk.Context, keeper Keeper) GenesisState {
 	return GenesisState{
 		Communities: keeper.Communities(ctx),
-		Params:      DefaultMsgParams(),
+		Params:      keeper.GetParams(ctx),
 	}
 }
 
 // ValidateGenesis validates the genesis state data
 func ValidateGenesis(data GenesisState) error {
-	if data.Params.MinNameLen < 1 {
-		return fmt.Errorf("Param: MinNameLen, must have a positive value")
+	if data.Params.MinNameLength < 1 {
+		return fmt.Errorf("Param: MinNameLength, must have a positive value")
 	}
 
-	if data.Params.MaxNameLen < 1 || data.Params.MaxNameLen < data.Params.MinNameLen {
-		return fmt.Errorf("Param: MaxNameLen, must have a positive value and be larger than MinNameLen")
+	if data.Params.MaxNameLength < 1 || data.Params.MaxNameLength < data.Params.MinNameLength {
+		return fmt.Errorf("Param: MaxNameLength, must have a positive value and be larger than MinNameLength")
 	}
 
-	if data.Params.MinSlugLen < 1 {
-		return fmt.Errorf("Param: MinSlugLen, must have a positive value")
+	if data.Params.MinSlugLength < 1 {
+		return fmt.Errorf("Param: MinSlugLength, must have a positive value")
 	}
 
-	if data.Params.MaxSlugLen < 1 || data.Params.MaxSlugLen < data.Params.MinSlugLen {
-		return fmt.Errorf("Param: MaxSlugLen, must have a positive value and be larger than MinSlugLen")
+	if data.Params.MaxSlugLength < 1 || data.Params.MaxSlugLength < data.Params.MinSlugLength {
+		return fmt.Errorf("Param: MaxSlugLength, must have a positive value and be larger than MinSlugLength")
 	}
 
-	if data.Params.MaxDescriptionLen < 1 {
-		return fmt.Errorf("Param: MaxDescriptionLen, must have a positive value")
+	if data.Params.MaxDescriptionLength < 1 {
+		return fmt.Errorf("Param: MaxDescriptionLength, must have a positive value")
 	}
 
 	return nil

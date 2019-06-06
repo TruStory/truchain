@@ -14,7 +14,7 @@ func TestMsgNewCommunity_Success(t *testing.T) {
 	msg := NewMsgNewCommunity(name, slug, description, creator)
 	err := msg.ValidateBasic()
 	assert.Nil(t, err)
-	assert.Equal(t, StoreKey, msg.Route())
+	assert.Equal(t, ModuleName, msg.Route())
 	assert.Equal(t, "new_community", msg.Type())
 }
 

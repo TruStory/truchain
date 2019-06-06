@@ -25,7 +25,10 @@ func handleMsgNewCommunity(ctx sdk.Context, k Keeper, msg MsgNewCommunity) sdk.R
 		return err.Result()
 	}
 
-	community := k.NewCommunity(ctx, msg.Name, msg.Slug, msg.Description)
+	community, err := k.NewCommunity(ctx, msg.Name, msg.Slug, msg.Description)
+	if err != nil {
+		return err.Result()
+	}
 
 	res, jsonErr := json.Marshal(community)
 	if jsonErr != nil {

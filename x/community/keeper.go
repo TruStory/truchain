@@ -6,30 +6,35 @@ import (
 	app "github.com/TruStory/truchain/types"
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/cosmos/cosmos-sdk/x/params"
 	recordkeeper "github.com/shanev/cosmos-record-keeper/recordkeeper"
 	log "github.com/tendermint/tendermint/libs/log"
-)
-
-const (
-	// StoreKey represents the KVStore for the communities
-	StoreKey = ModuleName
 )
 
 // Keeper data type storing keys to the KVStore
 type Keeper struct {
 	recordkeeper.RecordKeeper
+	paramStore params.Subspace
 }
 
 // NewKeeper creates a new keeper of the community Keeper
-func NewKeeper(storeKey sdk.StoreKey, codec *codec.Codec) Keeper {
-	return Keeper{recordkeeper.NewRecordKeeper(storeKey, codec)}
+func NewKeeper(storeKey sdk.StoreKey, paramStore params.Subspace, codec *codec.Codec) Keeper {
+	return Keeper{
+		recordkeeper.NewRecordKeeper(storeKey, codec),
+		paramStore.WithKeyTable(ParamKeyTable()),
+	}
 }
 
 // NewCommunity creates a new community
-func (k Keeper) NewCommunity(ctx sdk.Context, name string, slug string, description string) Community {
+func (k Keeper) NewCommunity(ctx sdk.Context, name string, slug string, description string) (community Community, err sdk.Error) {
 	logger := getLogger(ctx)
 
-	community := Community{
+	err = k.validateParams(ctx, name, slug, description)
+	if err != nil {
+		return
+	}
+
+	community = Community{
 		ID:          k.IncrementID(ctx),
 		Name:        name,
 		Slug:        slug,
@@ -40,7 +45,7 @@ func (k Keeper) NewCommunity(ctx sdk.Context, name string, slug string, descript
 	k.Set(ctx, community.ID, community)
 	logger.Info(fmt.Sprintf("Created new community: %s", community.String()))
 
-	return community
+	return
 }
 
 // Community returns a community by its ID
@@ -69,6 +74,27 @@ func (k Keeper) Communities(ctx sdk.Context) (communities []Community) {
 	return
 }
 
+func (k Keeper) validateParams(ctx sdk.Context, name, slug, description string) (err sdk.Error) {
+	params := k.GetParams(ctx)
+	if len(name) < params.MinNameLength || len(name) > params.MaxNameLength {
+		err = ErrInvalidCommunityMsg(
+			fmt.Sprintf("Name must be between %d-%d chars in length", params.MinNameLength, params.MaxNameLength),
+		)
+	}
+	if len(slug) < params.MinSlugLength || len(slug) > params.MaxSlugLength {
+		err = ErrInvalidCommunityMsg(
+			fmt.Sprintf("Slug must be between %d-%d chars in length", params.MinSlugLength, params.MaxSlugLength),
+		)
+	}
+	if len(description) > params.MaxDescriptionLength {
+		err = ErrInvalidCommunityMsg(
+			fmt.Sprintf("Description must be less than %d chars in length", params.MaxDescriptionLength),
+		)
+	}
+
+	return
+}
+
 func getLogger(ctx sdk.Context) log.Logger {
-	return ctx.Logger().With("module", StoreKey)
+	return ctx.Logger().With("module", ModuleName)
 }

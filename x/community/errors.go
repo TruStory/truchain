@@ -8,7 +8,7 @@ import (
 
 // Community errors reserve 800 ~ 899.
 const (
-	DefaultCodespace sdk.CodespaceType = StoreKey
+	DefaultCodespace sdk.CodespaceType = ModuleName
 
 	ErrorCodeCommunityNotFound   sdk.CodeType = 801
 	ErrorCodeInvalidCommunityMsg sdk.CodeType = 802
