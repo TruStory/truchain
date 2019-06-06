@@ -52,7 +52,6 @@ func (AppModuleBasic) ValidateGenesis(bz json.RawMessage) error {
 type AppModule struct {
 	AppModuleBasic
 	keeper Keeper
-	// accountKeeper auth.AccountKeeper
 }
 
 // RegisterInvariants enforces registering of invariants

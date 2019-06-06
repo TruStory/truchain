@@ -1,16 +1,18 @@
 package community
 
 import (
+	"fmt"
+
 	app "github.com/TruStory/truchain/types"
+	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	recordkeeper "github.com/shanev/cosmos-record-keeper/recordkeeper"
-	amino "github.com/tendermint/go-amino"
 	log "github.com/tendermint/tendermint/libs/log"
 )
 
 const (
 	// StoreKey represents the KVStore for the communities
-	StoreKey = "community"
+	StoreKey = ModuleName
 )
 
 // Keeper data type storing keys to the KVStore
@@ -19,7 +21,7 @@ type Keeper struct {
 }
 
 // NewKeeper creates a new keeper of the community Keeper
-func NewKeeper(storeKey sdk.StoreKey, codec *amino.Codec) Keeper {
+func NewKeeper(storeKey sdk.StoreKey, codec *codec.Codec) Keeper {
 	return Keeper{recordkeeper.NewRecordKeeper(storeKey, codec)}
 }
 
@@ -36,7 +38,7 @@ func (k Keeper) NewCommunity(ctx sdk.Context, name string, slug string, descript
 	}
 
 	k.Set(ctx, community.ID, community)
-	logger.Info("Created new community: " + community.String())
+	logger.Info(fmt.Sprintf("Created new community: %s", community.String()))
 
 	return community
 }
@@ -61,7 +63,7 @@ func (k Keeper) Communities(ctx sdk.Context) (communities []Community) {
 	})
 
 	if err != nil {
-		return 
+		return
 	}
 
 	return

@@ -32,12 +32,10 @@ func mockDB() (sdk.Context, Keeper) {
 
 func getFakeCommunityParams() (name string, slug string, description string) {
 	name, slug, description = "Randomness", "randomness", "All the random quantum things happen in this community."
-
 	return
 }
 
 func getAnotherFakeCommunityParams() (name string, slug string, description string) {
 	name, slug, description = "Space", "space", "Come here for anything you want to learn about the space."
-
 	return
 }

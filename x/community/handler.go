@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 
-	app "github.com/TruStory/truchain/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
@@ -15,7 +14,8 @@ func NewHandler(k Keeper) sdk.Handler {
 		case MsgNewCommunity:
 			return handleMsgNewCommunity(ctx, k, msg)
 		default:
-			return app.ErrMsgHandler(msg)
+			errMsg := fmt.Sprintf("Unrecognized community message type: %T", msg)
+			return sdk.ErrUnknownRequest(errMsg).Result()
 		}
 	}
 }

@@ -28,20 +28,18 @@ func NewQuerier(k Keeper) sdk.Querier {
 		case QueryCommunities:
 			return queryCommunities(ctx, k)
 		default:
-			return nil, sdk.ErrUnknownRequest("Unknown truchain query endpoint: commmunity/" + path[0])
+			return nil, sdk.ErrUnknownRequest(fmt.Sprintf("Unknown truchain query endpoint: commmunity/%s", path[0]))
 		}
 	}
 }
 
 func queryCommunity(ctx sdk.Context, request abci.RequestQuery, k Keeper) (result []byte, err sdk.Error) {
 	params := QueryCommunityParams{}
-
 	if err = unmarshalQueryParams(request, &params); err != nil {
 		return
 	}
 
 	community, err := k.Community(ctx, params.ID)
-
 	if err != nil {
 		return
 	}
@@ -51,7 +49,6 @@ func queryCommunity(ctx sdk.Context, request abci.RequestQuery, k Keeper) (resul
 
 func queryCommunities(ctx sdk.Context, k Keeper) (result []byte, err sdk.Error) {
 	communities := k.Communities(ctx)
-
 	return mustMarshal(communities), nil
 }
 
