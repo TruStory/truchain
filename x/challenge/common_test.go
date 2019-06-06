@@ -57,7 +57,7 @@ func mockDB() (sdk.Context, Keeper, story.Keeper, backing.Keeper, bank.Keeper) {
 	ms.MountStoreWithDB(backingKey, sdk.StoreTypeIAVL, db)
 	ms.MountStoreWithDB(paramsKey, sdk.StoreTypeIAVL, db)
 	ms.MountStoreWithDB(transientParamsKey, sdk.StoreTypeTransient, db)
-	ms.LoadLatestVersion()
+	_ = ms.LoadLatestVersion()
 
 	// fake block time in the future
 	header := abci.Header{Time: time.Now().Add(50 * 24 * time.Hour)}
@@ -65,7 +65,7 @@ func mockDB() (sdk.Context, Keeper, story.Keeper, backing.Keeper, bank.Keeper) {
 
 	codec := amino.NewCodec()
 	cryptoAmino.RegisterAmino(codec)
-	RegisterAmino(codec)
+	RegisterCodec(codec)
 	codec.RegisterInterface((*auth.Account)(nil), nil)
 	codec.RegisterConcrete(&auth.BaseAccount{}, "auth/Account", nil)
 

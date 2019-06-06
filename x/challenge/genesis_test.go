@@ -18,8 +18,9 @@ func TestExportGenesis(t *testing.T) {
 	amount := sdk.NewCoin(app.StakeDenom, sdk.NewInt(15000000000))
 	argument := "test argument is long enough"
 	creator := sdk.AccAddress([]byte{1, 2})
-	bankKeeper.AddCoins(ctx, creator, sdk.Coins{amount})
-	_, err := keeper.Create(ctx, storyID, amount, 0, argument, creator)
+	_, err  := bankKeeper.AddCoins(ctx, creator, sdk.Coins{amount})
+	assert.NoError(t, err)
+	_, err = keeper.Create(ctx, storyID, amount, 0, argument, creator)
 	assert.NoError(t, err)
 
 	genesisState := ExportGenesis(ctx, keeper)

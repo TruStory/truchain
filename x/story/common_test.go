@@ -36,13 +36,13 @@ func mockDB() (sdk.Context, Keeper, c.Keeper) {
 	ms.MountStoreWithDB(challengeKey, sdk.StoreTypeIAVL, db)
 	ms.MountStoreWithDB(paramsKey, sdk.StoreTypeIAVL, db)
 	ms.MountStoreWithDB(transientParamsKey, sdk.StoreTypeTransient, db)
-	ms.LoadLatestVersion()
+	_ = ms.LoadLatestVersion()
 
 	ctx := sdk.NewContext(ms, abci.Header{}, false, log.NewNopLogger())
 
 	codec := amino.NewCodec()
 	cryptoAmino.RegisterAmino(codec)
-	RegisterAmino(codec)
+	RegisterCodec(codec)
 
 	ck := c.NewKeeper(catKey, codec)
 	pk := params.NewKeeper(codec, paramsKey, transientParamsKey, params.DefaultCodespace)

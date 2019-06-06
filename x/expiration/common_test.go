@@ -59,7 +59,7 @@ func mockDB() (
 	ms.MountStoreWithDB(paramsKey, sdk.StoreTypeIAVL, db)
 	ms.MountStoreWithDB(transientParamsKey, sdk.StoreTypeTransient, db)
 	ms.MountStoreWithDB(truBankKey, sdk.StoreTypeIAVL, db)
-	ms.LoadLatestVersion()
+	_ = ms.LoadLatestVersion()
 
 	ctx := sdk.NewContext(ms, abci.Header{}, false, log.NewNopLogger())
 
@@ -164,10 +164,9 @@ func createFakeStory(ctx sdk.Context, sk story.WriteKeeper) int64 {
 
 func fakeFundedCreator(ctx sdk.Context, k bank.Keeper) sdk.AccAddress {
 	bz := make([]byte, 4)
-	rand.Read(bz)
+	_, _ = rand.Read(bz)
 	creator := sdk.AccAddress(bz)
 	amount := sdk.NewCoin("trusteak", sdk.NewInt(2000000000000))
-	k.AddCoins(ctx, creator, sdk.Coins{amount})
-
+	_, _ = k.AddCoins(ctx, creator, sdk.Coins{amount})
 	return creator
 }

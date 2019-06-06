@@ -6,6 +6,12 @@ import (
 	abci "github.com/tendermint/tendermint/abci/types"
 )
 
+// Defines module constants
+const (
+	RouterKey    = ModuleName
+	QuerierRoute = ModuleName
+)
+
 // query endpoints supported by the truchain Querier
 const (
 	QueryPath                = "stories"

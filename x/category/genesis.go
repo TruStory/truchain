@@ -41,3 +41,8 @@ func ExportGenesis(ctx sdk.Context, keeper Keeper) GenesisState {
 		Categories: categories,
 	}
 }
+
+
+func ValidateGenesis(data GenesisState) error {
+	return nil
+}

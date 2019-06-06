@@ -33,3 +33,4 @@ web/
 .vscode
 build/
 .testnet/
+*.pyc

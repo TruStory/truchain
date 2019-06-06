@@ -5,9 +5,9 @@ MODULES = argument backing category challenge expiration stake story
 VERSION := $(shell echo $(shell git describe --tags) | sed 's/^v//')
 COMMIT := $(shell git log -1 --format='%H')
 
-ldflags = -X github.com/TruStory/truchain/vendor/github.com/cosmos/cosmos-sdk/version.Name=truchaind \
-	-X github.com/TruStory/truchain/vendor/github.com/cosmos/cosmos-sdk/version.Version=$(VERSION) \
-	-X github.com/TruStory/truchain/vendor/github.com/cosmos/cosmos-sdk/version.Commit=$(COMMIT)
+ldflags = -X github.com/cosmos/cosmos-sdk/version.Name=truchaind \
+	-X github.com/cosmos/cosmos-sdk/version.Version=$(VERSION) \
+	-X github.com/cosmos/cosmos-sdk/version.Commit=$(COMMIT)
 
 BUILD_FLAGS := -ldflags '$(ldflags)'
 
@@ -30,10 +30,10 @@ build_cli:
 	@go build -mod=readonly $(BUILD_FLAGS) -o bin/truchaincli cmd/truchaincli/main.go
 
 build_daemon:
-	@go build -mod=readonly $(BUILD_FLAGS) -o bin/truchaind cmd/truchaind/main.go
+	@go build -mod=readonly $(BUILD_FLAGS) -o bin/truchaind cmd/truchaind/*.go
 
 build-linux:
-	GOOS=linux GOARCH=amd64 go build -mod=readonly $(BUILD_FLAGS) -o build/truchaind cmd/truchaind/main.go
+	GOOS=linux GOARCH=amd64 go build -mod=readonly $(BUILD_FLAGS) -o build/truchaind cmd/truchaind/*.go
 	GOOS=linux GOARCH=amd64 go build -mod=readonly $(BUILD_FLAGS) -o build/truchaincli cmd/truchaincli/main.go
 
 doc:
@@ -45,6 +45,12 @@ export:
 
 init:
 	bin/truchaind init trunode
+
+install:
+	@go install $(BUILD_FLAGS) ./cmd/truchaind
+	@go install $(BUILD_FLAGS) ./cmd/truchaincli
+	@echo "Installed truchaind and truchaincli ..."
+	@truchaind version --long
 
 reset:
 	bin/truchaind unsafe-reset-all
