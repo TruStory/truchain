@@ -15,7 +15,7 @@ func TestMsgNewCommunity_Success(t *testing.T) {
 	err := msg.ValidateBasic()
 	assert.Nil(t, err)
 	assert.Equal(t, ModuleName, msg.Route())
-	assert.Equal(t, "new_community", msg.Type())
+	assert.Equal(t, TypeMsgNewCommunity, msg.Type())
 }
 
 func TestMsgNewCommunity_InvalidCreator(t *testing.T) {

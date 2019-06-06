@@ -7,6 +7,10 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
+const (
+	TypeMsgNewCommunity = "new_community"
+)
+
 // MsgNewCommunity defines the message to create new community
 type MsgNewCommunity struct {
 	Name        string         `json:"name"`
@@ -38,7 +42,7 @@ func (msg MsgNewCommunity) ValidateBasic() sdk.Error {
 func (msg MsgNewCommunity) Route() string { return RouterKey }
 
 // Type implements Msg
-func (msg MsgNewCommunity) Type() string { return "new_community" }
+func (msg MsgNewCommunity) Type() string { return TypeMsgNewCommunity }
 
 // GetSignBytes implements Msg
 func (msg MsgNewCommunity) GetSignBytes() []byte {
