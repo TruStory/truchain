@@ -26,6 +26,8 @@ github.com/btcsuite/winsvc v1.0.0/go.mod h1:jsenWakMcC0zFBFurPLEAyrnc/teJEM1O46f
 github.com/client9/misspell v0.3.4/go.mod h1:qj6jICC3Q7zFZvVWo7KLAzC3yx5G7kyvSDkc90ppPyw=
 github.com/cosmos/cosmos-sdk v0.28.2-0.20190529145828-5cae008fbe8b h1:zZfmnNxNCWxV3OkqAxJA3nbrR7KX2a/DTY66jd9tcxE=
 github.com/cosmos/cosmos-sdk v0.28.2-0.20190529145828-5cae008fbe8b/go.mod h1:No7UW0JgQnogs4W0jPetEH8s0gZHvqAr3sRmzyuf0i0=
+github.com/cosmos/cosmos-sdk v0.28.2-0.20190601143109-dcdabc7e6e20 h1:N8vZFZp9TXj9w8rXs11lOk9EU/Nmud4h1X+xbCyaF1s=
+github.com/cosmos/cosmos-sdk v0.28.2-0.20190601143109-dcdabc7e6e20/go.mod h1:BvyNPEYewihHQa092/+OEX5dgLZsV7H2boKkkj1H2wI=
 github.com/cosmos/cosmos-sdk v0.34.4 h1:UlYAt0AA0ePAuGvEYe1poW07rdVvxV0/HFY6vUKgkHM=
 github.com/cosmos/cosmos-sdk v0.34.4/go.mod h1:a0NaOtHsrPNIS+uIbIeCuPINqUjgE4AVLfxFCMpBN6A=
 github.com/cosmos/cosmos-sdk v0.34.5 h1:xAqgHUZxd1pikqUHHxVbrn0tyvUcxRig+PU7W4k2fy4=
@@ -141,6 +143,8 @@ github.com/rcrowley/go-metrics v0.0.0-20180503174638-e2704e165165 h1:nkcn14uNmFE
 github.com/rcrowley/go-metrics v0.0.0-20180503174638-e2704e165165/go.mod h1:bCqnVzQkZxMG4s8nGwiZ5l3QUCyqpo9Y+/ZMZ9VjZe4=
 github.com/rs/cors v1.6.0 h1:G9tHG9lebljV9mfp9SNPDL36nCDxmo3zTlAf1YgvzmI=
 github.com/rs/cors v1.6.0/go.mod h1:gFx+x8UowdsKA9AchylcLynDq+nNFfI8FkUZdN/jGCU=
+github.com/shanev/cosmos-record-keeper v0.0.0-20190603233255-3ef9f5358485 h1:iiMb4KfCsbO7hrYcfq8DvLzY56omejcyEx4TlziQMkE=
+github.com/shanev/cosmos-record-keeper v0.0.0-20190603233255-3ef9f5358485/go.mod h1:a1tNXWZPDzSPY1iTEbjIWSsyoKC4kCjtlAQxra44cbc=
 github.com/sirupsen/logrus v1.2.0/go.mod h1:LxeOpSwHxABJmUn/MG1IvRgCAasNZTLOkJPxbbu5VWo=
 github.com/spf13/afero v1.2.1 h1:qgMbHoJbPbw579P+1zVY+6n4nIFuIchaIjzZ/I/Yq8M=
 github.com/spf13/afero v1.2.1/go.mod h1:9ZxEEn6pIJ8Rxe320qSDBk6AsU0r9pR7Q4OcevTdifk=
