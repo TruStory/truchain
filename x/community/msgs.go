@@ -35,10 +35,10 @@ func (msg MsgNewCommunity) ValidateBasic() sdk.Error {
 }
 
 // Route implements Msg
-func (msg MsgNewCommunity) Route() string { return app.GetRoute(msg) }
+func (msg MsgNewCommunity) Route() string { return RouterKey }
 
 // Type implements Msg
-func (msg MsgNewCommunity) Type() string { return app.GetType(msg) }
+func (msg MsgNewCommunity) Type() string { return "new_community" }
 
 // GetSignBytes implements Msg
 func (msg MsgNewCommunity) GetSignBytes() []byte {
