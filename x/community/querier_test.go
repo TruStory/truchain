@@ -13,12 +13,13 @@ func TestQueryCommunity_Success(t *testing.T) {
 	ctx, keeper := mockDB()
 
 	name, slug, description := getFakeCommunityParams()
-	createdCommunity := keeper.NewCommunity(ctx, name, slug, description)
+	createdCommunity, err := keeper.NewCommunity(ctx, name, slug, description)
+	assert.Nil(t, err)
 
-	params, err := json.Marshal(QueryCommunityParams{
+	params, jsonErr := json.Marshal(QueryCommunityParams{
 		ID: 1,
 	})
-	assert.Nil(t, err)
+	assert.Nil(t, jsonErr)
 
 	query := abci.RequestQuery{
 		Path: "/custom/community/id",
@@ -29,8 +30,8 @@ func TestQueryCommunity_Success(t *testing.T) {
 	assert.Nil(t, sdkErr)
 
 	var returnedCommunity Community
-	err = json.Unmarshal(result, &returnedCommunity)
-	assert.Nil(t, err)
+	jsonErr = json.Unmarshal(result, &returnedCommunity)
+	assert.Nil(t, jsonErr)
 	assert.Equal(t, returnedCommunity.ID, createdCommunity.ID)
 	assert.Equal(t, returnedCommunity.Name, createdCommunity.Name)
 	assert.Equal(t, returnedCommunity.Slug, createdCommunity.Slug)
@@ -59,17 +60,19 @@ func TestQueryCommunities_Success(t *testing.T) {
 	ctx, keeper := mockDB()
 
 	name, slug, description := getFakeCommunityParams()
-	first := keeper.NewCommunity(ctx, name, slug, description)
+	first, err := keeper.NewCommunity(ctx, name, slug, description)
+	assert.Nil(t, err)
 
 	name2, slug2, description2 := getAnotherFakeCommunityParams()
-	another := keeper.NewCommunity(ctx, name2, slug2, description2)
+	another, err := keeper.NewCommunity(ctx, name2, slug2, description2)
+	assert.Nil(t, err)
 
 	result, sdkErr := queryCommunities(ctx, keeper)
 	assert.Nil(t, sdkErr)
 
 	var communities []Community
-	err := json.Unmarshal(result, &communities)
-	assert.Nil(t, err)
+	jsonErr := json.Unmarshal(result, &communities)
+	assert.Nil(t, jsonErr)
 	assert.Equal(t, communities[0].ID, first.ID)
 	assert.Equal(t, communities[1].ID, another.ID)
 }
