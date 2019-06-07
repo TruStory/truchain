@@ -34,7 +34,7 @@ BlocksPerYear = 60 min / 6 sec block time = 10 blocks per min * 60 min = 600 per
 
 ### Begin-Block
 
-At the beginning of each block, inflation is re-calcuated, and distributed.
+At the beginning of each block, inflation is re-calcuated.
 
 #### Inflation Rate
 
