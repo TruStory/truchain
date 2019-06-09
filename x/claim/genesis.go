@@ -24,19 +24,20 @@ func NewGenesisState() GenesisState {
 func DefaultGenesisState() GenesisState { return NewGenesisState() }
 
 // InitGenesis initializes story state from genesis file
-func InitGenesis(ctx sdk.Context, keeper Keeper, data GenesisState) {
-	for _, claim := range data.Claims {
-		keeper.Set(ctx, claim.ID, claim)
+func InitGenesis(ctx sdk.Context, k Keeper, data GenesisState) {
+	for _, c := range data.Claims {
+		k.Set(ctx, c.ID, c)
+		k.Push(ctx, k.StoreKey, k.communityKeeper.StoreKey, c.ID, c.CommunityID)
 	}
-	keeper.SetLen(ctx, uint64(len(data.Claims)))
-	keeper.SetParams(ctx, data.Params)
+	k.SetLen(ctx, uint64(len(data.Claims)))
+	k.SetParams(ctx, data.Params)
 }
 
 // ExportGenesis exports the genesis state
-func ExportGenesis(ctx sdk.Context, keeper Keeper) GenesisState {
+func ExportGenesis(ctx sdk.Context, k Keeper) GenesisState {
 	return GenesisState{
-		Claims: keeper.Claims(ctx),
-		Params: keeper.GetParams(ctx),
+		Claims: k.Claims(ctx),
+		Params: k.GetParams(ctx),
 	}
 }
 
