@@ -40,7 +40,7 @@ def migrate_story_data(story_data):
 
 if __name__ == '__main__':
     parser = lib.init_default_argument_parser(
-        prog_desc='Migrate genesis.json',
+        prog_desc='Migrate genesis.json from stories to claims',
         default_chain_id='devnet-n',
         default_start_time='2019-02-11T12:00:00Z',
     )
