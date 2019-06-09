@@ -31,6 +31,5 @@ if __name__ == '__main__':
         prog_desc='Convert genesis.json ',
         default_chain_id='truchain',
         default_start_time='2019-06-05T12:00:00Z',
-        bond_denom='trusteak',
     )
     lib.main(parser, process_genesis)
