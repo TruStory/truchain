@@ -3,11 +3,11 @@ package community
 import (
 	"fmt"
 
-	app "github.com/TruStory/truchain/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
 const (
+	// TypeMsgNewCommunity represents the type of the message for creating new community
 	TypeMsgNewCommunity = "new_community"
 )
 
@@ -46,10 +46,11 @@ func (msg MsgNewCommunity) Type() string { return TypeMsgNewCommunity }
 
 // GetSignBytes implements Msg
 func (msg MsgNewCommunity) GetSignBytes() []byte {
-	return app.MustGetSignBytes(msg)
+	msgBytes := ModuleCodec.MustMarshalJSON(msg)
+	return sdk.MustSortJSON(msgBytes)
 }
 
 // GetSigners implements Msg. Returns the creator as the signer.
 func (msg MsgNewCommunity) GetSigners() []sdk.AccAddress {
-	return app.GetSigners(msg.Creator)
+	return []sdk.AccAddress{sdk.AccAddress(msg.Creator)}
 }
