@@ -51,22 +51,22 @@ type ClaimParticipants types.UserList
 ## State Transitions
 ### Messages
 
-`CreateClaimMsg` creates a claim in the module's key-value store. 
+`MsgCreateClaim` creates a claim in the module's key-value store. 
 
 When creating a claim, check if the `Creator` has been jailed. Jailed users cannot create claims.
 
 ```go
-type CreateClaimMsg struct {
+type MsgCreateClaim struct {
     CommunityID     int64
     Body            string
     Creator         sdk.AccAddress
 }
 ```
 
-A claim can be deleted with `DeleteClaimMsg` as long as `TotalBacked` and `TotalChallenged` are zero. The `Creator` of this message must be the same creator of the claim to delete.
+A claim can be deleted with `MsgDeleteClaim` as long as `TotalBacked` and `TotalChallenged` are zero. The `Creator` of this message must be the same creator of the claim to delete.
 
 ```go
-type DeleteClaimMsg struct {
+type MsgDeleteClaim struct {
     ClaimID     int64
     Creator     sdk.AccAddress
 }
