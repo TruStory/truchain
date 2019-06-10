@@ -10,7 +10,7 @@ import (
 func TestMsgRegisterKey_Success(t *testing.T) {
 	_, publicKey, address, coins, _ := getFakeAppAccountParams()
 
-	msg := NewMsgRegisterKey(address, publicKey, "scep", coins)
+	msg := NewMsgRegisterKey(address, publicKey, "scep256k1", coins)
 	err := msg.ValidateBasic()
 	assert.Nil(t, err)
 	assert.Equal(t, ModuleName, msg.Route())
@@ -21,7 +21,7 @@ func TestMsgNewCommunity_InvalidAddress(t *testing.T) {
 	_, publicKey, _, coins, _ := getFakeAppAccountParams()
 	invalidAddress := sdk.AccAddress(nil)
 
-	msg := NewMsgRegisterKey(invalidAddress, publicKey, "scep", coins)
+	msg := NewMsgRegisterKey(invalidAddress, publicKey, "scep256k1", coins)
 	err := msg.ValidateBasic()
 	assert.NotNil(t, err)
 	assert.Equal(t, sdk.ErrInvalidAddress("").Code(), err.Code())
