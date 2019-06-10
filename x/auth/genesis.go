@@ -8,18 +8,25 @@ import (
 
 // GenesisState defines genesis data for the module
 type GenesisState struct {
-	Params Params `json:"params"`
+	Registrar sdk.AccAddress `json:"registrar"`
+	Params    Params         `json:"params"`
 }
 
 // NewGenesisState creates a new genesis state.
-func NewGenesisState(params Params) GenesisState {
+func NewGenesisState() GenesisState {
+	// TODO: figure out where to get this address from
+	registrar, err := sdk.AccAddressFromBech32("cosmos1xqc5gwzpgdr4wjz8xscnys2jx3f9x4zy223g9w")
+	if err != nil {
+		panic(err)
+	}
 	return GenesisState{
-		Params: params,
+		Registrar: registrar,
+		Params:    DefaultParams(),
 	}
 }
 
 // DefaultGenesisState returns a default genesis state
-func DefaultGenesisState() GenesisState { return NewGenesisState(DefaultParams()) }
+func DefaultGenesisState() GenesisState { return NewGenesisState() }
 
 // InitGenesis initializes story state from genesis file
 func InitGenesis(ctx sdk.Context, keeper Keeper, data GenesisState) {
