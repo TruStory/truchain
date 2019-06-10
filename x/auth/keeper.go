@@ -30,7 +30,7 @@ func NewKeeper(storeKey sdk.StoreKey, paramStore params.Subspace, codec *codec.C
 // NewAppAccount creates a new account for a user
 func (k Keeper) NewAppAccount(
 	ctx sdk.Context,
-	address sdk.AccAddress, coins sdk.Coins, pubKey crypto.PubKey, accountNumber uint64, sequence uint64, earnedStake EarnedCoins,
+	address sdk.AccAddress, coins sdk.Coins, pubKey crypto.PubKey, accountNumber uint64, sequence uint64,
 ) AppAccount {
 
 	logger := getLogger(ctx)
@@ -45,7 +45,7 @@ func (k Keeper) NewAppAccount(
 		},
 
 		ID:          k.IncrementID(ctx),
-		EarnedStake: earnedStake,
+		EarnedStake: EarnedCoins{},
 		SlashCount:  0,
 		IsJailed:    false,
 		JailEndTime: time.Time{}, // zero value of time.Time; to check, use JailEndTime.IsZero()

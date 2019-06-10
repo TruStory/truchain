@@ -9,23 +9,22 @@ import (
 func TestNewAppAccount_Success(t *testing.T) {
 	ctx, keeper := mockDB()
 
-	_, publicKey, address, coins, earnedCoins := getFakeAppAccountParams()
+	_, publicKey, address, coins, _ := getFakeAppAccountParams()
 	
-	appAccount := keeper.NewAppAccount(ctx, address, coins, publicKey, 0, 0, earnedCoins)
+	appAccount := keeper.NewAppAccount(ctx, address, coins, publicKey, 0, 0)
 
 	assert.NotZero(t, appAccount.ID)
 	assert.Equal(t, appAccount.BaseAccount.Address, address)
 	assert.Equal(t, appAccount.BaseAccount.Coins, coins)
 	assert.Equal(t, appAccount.BaseAccount.PubKey, publicKey)
-	assert.Equal(t, appAccount.EarnedStake, earnedCoins)
 }
 
 func TestAppAccount_Success(t *testing.T) {
 	ctx, keeper := mockDB()
 
-	_, publicKey, address, coins, earnedCoins := getFakeAppAccountParams()
+	_, publicKey, address, coins, _ := getFakeAppAccountParams()
 	
-	createdAppAccount := keeper.NewAppAccount(ctx, address, coins, publicKey, 0, 0, earnedCoins)
+	createdAppAccount := keeper.NewAppAccount(ctx, address, coins, publicKey, 0, 0)
 
 	returnedAppAccount, err := keeper.AppAccount(ctx, createdAppAccount.ID)
 	assert.Nil(t, err)
@@ -35,11 +34,11 @@ func TestAppAccount_Success(t *testing.T) {
 func TestAppAccounts_Success(t *testing.T) {
 	ctx, keeper := mockDB()
 
-	_, publicKey, address, coins, earnedCoins := getFakeAppAccountParams()
-	appAccount := keeper.NewAppAccount(ctx, address, coins, publicKey, 0, 0, earnedCoins)
+	_, publicKey, address, coins, _ := getFakeAppAccountParams()
+	appAccount := keeper.NewAppAccount(ctx, address, coins, publicKey, 0, 0)
 
-	_, publicKey2, address2, coins2, earnedCoins2 := getFakeAppAccountParams()
-	appAccount2 := keeper.NewAppAccount(ctx, address2, coins2, publicKey2, 0, 0, earnedCoins2)
+	_, publicKey2, address2, coins2, _ := getFakeAppAccountParams()
+	appAccount2 := keeper.NewAppAccount(ctx, address2, coins2, publicKey2, 0, 0)
 
 	all := keeper.AppAccounts(ctx)
 	assert.Len(t, all, 2)
