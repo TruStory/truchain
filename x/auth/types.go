@@ -1,6 +1,7 @@
 package auth
 
 import (
+	"fmt"
 	"time"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -17,7 +18,7 @@ const (
 type EarnedCoin struct {
 	sdk.Coin
 
-	CommunityID int64
+	CommunityID uint64
 }
 
 // EarnedCoins is a collection of EarnedCoins
@@ -27,9 +28,14 @@ type EarnedCoins []EarnedCoin
 type AppAccount struct {
 	sdkAuth.BaseAccount
 
+	ID          uint64
 	EarnedStake EarnedCoins
 	SlashCount  int
 	IsJailed    bool
 	JailEndTime time.Time
 	CreatedTime time.Time
+}
+
+func (appAccount AppAccount) String() string {
+	return fmt.Sprintf("AppAccount <%d %s %s>", appAccount.ID, appAccount.BaseAccount.Address, appAccount.BaseAccount.PubKey)
 }
