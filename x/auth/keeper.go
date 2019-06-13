@@ -71,6 +71,30 @@ func (k Keeper) AppAccount(ctx sdk.Context, address sdk.AccAddress) (appAccount 
 	return appAccount, nil
 }
 
+// JailUntil puts an AppAccount in jail until a time
+func (k Keeper) JailUntil(ctx sdk.Context, address sdk.AccAddress, until time.Time) (sdk.Error) {
+	appAccount, err := k.AppAccount(ctx, address)
+	if err != nil {
+		return err
+	}
+	
+	appAccount.IsJailed = true
+	appAccount.JailEndTime = until
+	k.StringSet(ctx, address.String(), appAccount)
+
+	return nil
+}
+
+// IsJailed tells whether an AppAccount is jailed by its address
+func (k Keeper) IsJailed(ctx sdk.Context, address sdk.AccAddress) (bool, sdk.Error) {
+	appAccount, err := k.AppAccount(ctx, address)
+	if err != nil {
+		return false, err
+	}
+
+	return appAccount.IsJailed, nil
+}
+
 // AppAccounts gets all AppAccounts from the KVStore
 func (k Keeper) AppAccounts(ctx sdk.Context) (appAccounts []AppAccount) {
 	err := k.Each(ctx, func(bytes []byte) bool {
