@@ -44,12 +44,21 @@ func queryAppAccount(ctx sdk.Context, request abci.RequestQuery, k Keeper) (resu
 		return
 	}
 
-	return mustMarshal(appAccount), nil
+	result, jsonErr := k.codec.MarshalJSON(appAccount)
+	if jsonErr != nil {
+		panic(jsonErr)
+	}
+	return result, nil
 }
 
 func queryAppAccounts(ctx sdk.Context, k Keeper) (result []byte, err sdk.Error) {
 	appAccounts := k.AppAccounts(ctx)
-	return mustMarshal(appAccounts), nil
+	
+	result, jsonErr := k.codec.MarshalJSON(appAccounts)
+	if jsonErr != nil {
+		panic(jsonErr)
+	}
+	return result, nil
 }
 
 func unmarshalQueryParams(request abci.RequestQuery, params interface{}) (sdkErr sdk.Error) {
@@ -57,14 +66,6 @@ func unmarshalQueryParams(request abci.RequestQuery, params interface{}) (sdkErr
 	if err != nil {
 		sdkErr = sdk.ErrUnknownRequest(fmt.Sprintf("Incorrectly formatted request data - %s", err.Error()))
 		return
-	}
-	return
-}
-
-func mustMarshal(v interface{}) (result []byte) {
-	result, err := json.MarshalIndent(v, "", "  ")
-	if err != nil {
-		panic("Could not marshal result to JSON")
 	}
 	return
 }

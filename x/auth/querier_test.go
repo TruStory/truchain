@@ -8,7 +8,7 @@ import (
 	abci "github.com/tendermint/tendermint/abci/types"
 )
 
-func TestQueryCommunity_Success(t *testing.T) {
+func TestQueryAppAccount_Success(t *testing.T) {
 	ctx, keeper := mockDB()
 
 	_, publicKey, address, coins, _ := getFakeAppAccountParams()
@@ -28,12 +28,12 @@ func TestQueryCommunity_Success(t *testing.T) {
 	assert.Nil(t, sdkErr)
 
 	var returnedAppAccount AppAccount
-	jsonErr = json.Unmarshal(result, &returnedAppAccount)
+	jsonErr = keeper.codec.UnmarshalJSON(result, &returnedAppAccount)
 	assert.Nil(t, jsonErr)
 	assert.Equal(t, returnedAppAccount.BaseAccount, createdAppAccount.BaseAccount)
 }
 
-func TestQueryCommunity_ErrNotFound(t *testing.T) {
+func TestQueryAppAccount_ErrNotFound(t *testing.T) {
 	ctx, keeper := mockDB()
 
 	_, _, address, _, _ := getFakeAppAccountParams()
@@ -58,18 +58,16 @@ func TestQueryAppAccounts_Success(t *testing.T) {
 	ctx, keeper := mockDB()
 
 	_, publicKey, address, coins, _ := getFakeAppAccountParams()
-	first := keeper.NewAppAccount(ctx, address, coins, publicKey, 0, 0)
+	_ = keeper.NewAppAccount(ctx, address, coins, publicKey, 0, 0)
 
 	_, publicKey2, address2, coins2, _ := getFakeAppAccountParams()
-	another := keeper.NewAppAccount(ctx, address2, coins2, publicKey2, 0, 0)
+	_ = keeper.NewAppAccount(ctx, address2, coins2, publicKey2, 0, 0)
 
 	result, sdkErr := queryAppAccounts(ctx, keeper)
 	assert.Nil(t, sdkErr)
 
 	var appAccounts []AppAccount
-	jsonErr := json.Unmarshal(result, &appAccounts)
-	t.Log(appAccounts)
+	jsonErr := keeper.codec.UnmarshalJSON(result, &appAccounts)
 	assert.Nil(t, jsonErr)
-	assert.Equal(t, appAccounts[0].BaseAccount.Address, first.BaseAccount.Address)
-	assert.Equal(t, appAccounts[1].BaseAccount.Address, another.BaseAccount.Address)
+	assert.Len(t, appAccounts, 2)
 }
