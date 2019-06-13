@@ -10,10 +10,9 @@ func TestNewAppAccount_Success(t *testing.T) {
 	ctx, keeper := mockDB()
 
 	_, publicKey, address, coins, _ := getFakeAppAccountParams()
-	
+
 	appAccount := keeper.NewAppAccount(ctx, address, coins, publicKey, 0, 0)
 
-	assert.NotZero(t, appAccount.ID)
 	assert.Equal(t, appAccount.BaseAccount.Address, address)
 	assert.Equal(t, appAccount.BaseAccount.Coins, coins)
 	assert.Equal(t, appAccount.BaseAccount.PubKey, publicKey)
@@ -23,12 +22,12 @@ func TestAppAccount_Success(t *testing.T) {
 	ctx, keeper := mockDB()
 
 	_, publicKey, address, coins, _ := getFakeAppAccountParams()
-	
+
 	createdAppAccount := keeper.NewAppAccount(ctx, address, coins, publicKey, 0, 0)
 
-	returnedAppAccount, err := keeper.AppAccount(ctx, createdAppAccount.ID)
+	returnedAppAccount, err := keeper.AppAccount(ctx, createdAppAccount.BaseAccount.Address)
 	assert.Nil(t, err)
-	assert.Equal(t, returnedAppAccount, createdAppAccount)
+	assert.Equal(t, returnedAppAccount.BaseAccount, createdAppAccount.BaseAccount)
 }
 
 func TestAppAccounts_Success(t *testing.T) {
@@ -42,6 +41,6 @@ func TestAppAccounts_Success(t *testing.T) {
 
 	all := keeper.AppAccounts(ctx)
 	assert.Len(t, all, 2)
-	assert.Equal(t, all[0], appAccount)
-	assert.Equal(t, all[1], appAccount2)
+	assert.Equal(t, all[0].BaseAccount, appAccount.BaseAccount)
+	assert.Equal(t, all[1].BaseAccount, appAccount2.BaseAccount)
 }

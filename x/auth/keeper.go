@@ -8,7 +8,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkAuth "github.com/cosmos/cosmos-sdk/x/auth"
 	"github.com/cosmos/cosmos-sdk/x/params"
-	recordkeeper "github.com/shanev/cosmos-record-keeper/recordkeeper"
+	"github.com/shanev/cosmos-record-keeper/recordkeeper"
 	"github.com/tendermint/tendermint/crypto"
 	log "github.com/tendermint/tendermint/libs/log"
 )
@@ -17,6 +17,7 @@ import (
 type Keeper struct {
 	recordkeeper.RecordKeeper
 	paramStore params.Subspace
+	codec      *codec.Codec
 }
 
 // NewKeeper creates a new keeper of the auth Keeper
@@ -24,6 +25,7 @@ func NewKeeper(storeKey sdk.StoreKey, paramStore params.Subspace, codec *codec.C
 	return Keeper{
 		recordkeeper.NewRecordKeeper(storeKey, codec),
 		paramStore.WithKeyTable(ParamKeyTable()),
+		codec,
 	}
 }
 
@@ -44,14 +46,13 @@ func (k Keeper) NewAppAccount(
 			Sequence:      sequence,
 		},
 
-		ID:          k.IncrementID(ctx),
-		EarnedStake: EarnedCoins{},
+		EarnedStake: nil,
 		SlashCount:  0,
 		IsJailed:    false,
 		JailEndTime: time.Time{}, // zero value of time.Time; to check, use JailEndTime.IsZero()
 	}
 
-	k.Set(ctx, appAccount.ID, appAccount)
+	k.StringSet(ctx, address.String(), appAccount)
 	logger.Info(fmt.Sprintf("Created new appAccount: %s", appAccount.String()))
 
 	// TODO: Add a bank transaction with the the initial creation of an AppAccount
@@ -60,11 +61,11 @@ func (k Keeper) NewAppAccount(
 	return appAccount
 }
 
-// AppAccount returns a AppAccount by its ID
-func (k Keeper) AppAccount(ctx sdk.Context, id uint64) (appAccount AppAccount, err sdk.Error) {
-	err = k.Get(ctx, id, &appAccount)
-	if err != nil {
-		return appAccount, ErrAppAccountNotFound(id)
+// AppAccount returns a AppAccount by its address
+func (k Keeper) AppAccount(ctx sdk.Context, address sdk.AccAddress) (appAccount AppAccount, err sdk.Error) {
+	k.StringGet(ctx, address.String(), &appAccount)
+	if appAccount.BaseAccount.Address.Empty() {
+		return appAccount, ErrAppAccountNotFound(address)
 	}
 
 	return appAccount, nil
@@ -74,7 +75,7 @@ func (k Keeper) AppAccount(ctx sdk.Context, id uint64) (appAccount AppAccount, e
 func (k Keeper) AppAccounts(ctx sdk.Context) (appAccounts []AppAccount) {
 	err := k.Each(ctx, func(bytes []byte) bool {
 		var appAccount AppAccount
-		k.Codec.MustUnmarshalBinaryLengthPrefixed(bytes, &appAccount)
+		k.codec.MustUnmarshalBinaryLengthPrefixed(bytes, &appAccount)
 		appAccounts = append(appAccounts, appAccount)
 		return true
 	})

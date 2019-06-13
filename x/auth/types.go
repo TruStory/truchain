@@ -28,7 +28,6 @@ type EarnedCoins []EarnedCoin
 type AppAccount struct {
 	sdkAuth.BaseAccount
 
-	ID          uint64
 	EarnedStake EarnedCoins
 	SlashCount  int
 	IsJailed    bool
@@ -37,5 +36,5 @@ type AppAccount struct {
 }
 
 func (appAccount AppAccount) String() string {
-	return fmt.Sprintf("AppAccount <%d %s %s>", appAccount.ID, appAccount.BaseAccount.Address, appAccount.BaseAccount.PubKey)
+	return fmt.Sprintf("AppAccount <%s %s>", appAccount.BaseAccount.Address, appAccount.BaseAccount.PubKey)
 }

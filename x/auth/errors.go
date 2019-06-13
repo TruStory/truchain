@@ -14,6 +14,6 @@ const (
 )
 
 // ErrAppAccountNotFound throws an error when the searched AppAccount is not found
-func ErrAppAccountNotFound(id uint64) sdk.Error {
-	return sdk.NewError(DefaultCodespace, ErrorCodeAppAccountNotFound, fmt.Sprintf("AppAccount not found with ID: %d", id))
+func ErrAppAccountNotFound(address sdk.AccAddress) sdk.Error {
+	return sdk.NewError(DefaultCodespace, ErrorCodeAppAccountNotFound, fmt.Sprintf("AppAccount not found with Address: %s", address))
 }
