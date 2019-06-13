@@ -1,7 +1,6 @@
 package auth
 
 import (
-	"encoding/json"
 	"fmt"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -27,7 +26,7 @@ func handleMsgRegisterKey(ctx sdk.Context, k Keeper, msg MsgRegisterKey) sdk.Res
 
 	appAccount := k.NewAppAccount(ctx, msg.Address, msg.Coins, msg.PubKey, 0, 0)
 
-	res, jsonErr := json.Marshal(appAccount)
+	res, jsonErr := k.codec.MarshalJSON(appAccount)
 	if jsonErr != nil {
 		return sdk.ErrInternal(fmt.Sprintf("Marshal result error: %s", jsonErr)).Result()
 	}
