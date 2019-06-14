@@ -13,6 +13,24 @@ import (
 	"github.com/tendermint/tendermint/crypto/secp256k1"
 )
 
+// interface conformance check
+var _ BankKeeper = bankKeeper{}
+
+type transaction struct {
+	Address sdk.Address
+	Coins sdk.Coins
+}
+type bankKeeper struct {
+	Transactions []transaction
+}
+
+// NewTransaction ...
+func (bk bankKeeper) NewTransaction(ctx sdk.Context, to sdk.AccAddress, coins sdk.Coins) bool {
+	txn := transaction{to, coins}
+	bk.Transactions = append(bk.Transactions, txn)
+	return true
+}
+
 func mockDB() (sdk.Context, Keeper) {
 	db := dbm.NewMemDB()
 
@@ -33,7 +51,10 @@ func mockDB() (sdk.Context, Keeper) {
 	RegisterCodec(codec)
 
 	paramsKeeper := params.NewKeeper(codec, paramsKey, transientParamsKey, params.DefaultCodespace)
-	authKeeper := NewKeeper(authKey, paramsKeeper.Subspace(ModuleName), codec)
+	bankKeeper := bankKeeper{
+		Transactions: []transaction{},
+	}
+	authKeeper := NewKeeper(authKey, paramsKeeper.Subspace(ModuleName), codec, bankKeeper)
 
 	InitGenesis(ctx, authKeeper, DefaultGenesisState())
 

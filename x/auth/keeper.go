@@ -16,16 +16,20 @@ import (
 // Keeper data type storing keys to the KVStore
 type Keeper struct {
 	recordkeeper.RecordKeeper
-	paramStore params.Subspace
+	
 	codec      *codec.Codec
+	paramStore params.Subspace
+
+	bankKeeper BankKeeper
 }
 
 // NewKeeper creates a new keeper of the auth Keeper
-func NewKeeper(storeKey sdk.StoreKey, paramStore params.Subspace, codec *codec.Codec) Keeper {
+func NewKeeper(storeKey sdk.StoreKey, paramStore params.Subspace, codec *codec.Codec, bankKeeper BankKeeper) Keeper {
 	return Keeper{
 		recordkeeper.NewRecordKeeper(storeKey, codec),
-		paramStore.WithKeyTable(ParamKeyTable()),
 		codec,
+		paramStore.WithKeyTable(ParamKeyTable()),
+		bankKeeper,
 	}
 }
 
@@ -55,8 +59,7 @@ func (k Keeper) NewAppAccount(
 	k.StringSet(ctx, address.String(), appAccount)
 	logger.Info(fmt.Sprintf("Created new appAccount: %s", appAccount.String()))
 
-	// TODO: Add a bank transaction with the the initial creation of an AppAccount
-	// ...
+	k.bankKeeper.NewTransaction(ctx, address, coins)
 
 	return appAccount
 }
