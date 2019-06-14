@@ -18,16 +18,21 @@ type Keeper struct {
 	codec      *codec.Codec
 	paramStore params.Subspace
 
-	stakeKeeper StakeKeeper
+	stakeKeeper      StakeKeeper
+	appAccountKeeper AppAccountKeeper
 }
 
 // NewKeeper creates a new keeper of the slashing Keeper
-func NewKeeper(storeKey sdk.StoreKey, paramStore params.Subspace, codec *codec.Codec, stakeKeeper StakeKeeper) Keeper {
+func NewKeeper(
+	storeKey sdk.StoreKey, paramStore params.Subspace, codec *codec.Codec,
+	stakeKeeper StakeKeeper, appAccountKeeper AppAccountKeeper,
+) Keeper {
 	return Keeper{
 		recordkeeper.NewRecordKeeper(storeKey, codec),
 		codec,
 		paramStore.WithKeyTable(ParamKeyTable()),
 		stakeKeeper,
+		appAccountKeeper,
 	}
 }
 
@@ -82,16 +87,43 @@ func (k Keeper) Slashes(ctx sdk.Context) (slashes []Slash) {
 func (k Keeper) validateParams(ctx sdk.Context, stakeID uint64, creator sdk.AccAddress) (err sdk.Error) {
 	params := k.GetParams(ctx)
 
-	_, stakeErr := k.stakeKeeper.Stake(ctx, stakeID)
+	// validating stake
+	stake, stakeErr := k.stakeKeeper.Stake(ctx, stakeID)
 	if stakeErr != nil {
 		return ErrInvalidStake(stakeID)
+	}
+	if stake.SlashCount > params.MaxStakeSlashCount {
+		return ErrMaxSlashCountReached(stakeID)
+	}
+
+	// validating creator
+	appAccount, authErr := k.appAccountKeeper.AppAccount(ctx, creator)
+	if authErr != nil {
+		return ErrInvalidCreator(creator)
+	}
+	if !hasEnoughEarnedStake(appAccount) {
+		return ErrNotEnoughEarnedStake(creator)
 	}
 
 	if !isAdmin(creator, params.SlashAdmins) {
 		return ErrInvalidCreator(creator)
 	}
 
+	if hasPreviouslySlashed(creator) {
+		return ErrAlreadySlashed()
+	}
+
 	return nil
+}
+
+func hasEnoughEarnedStake(appAccount AppAccount) bool {
+	// TODO: write the real logic
+	return true
+}
+
+func hasPreviouslySlashed(creator sdk.AccAddress) bool {
+	// TODO: write the real logic
+	return false
 }
 
 func isAdmin(address sdk.AccAddress, admins []sdk.AccAddress) bool {

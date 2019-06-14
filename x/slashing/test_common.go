@@ -2,6 +2,7 @@ package slashing
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/cosmos/cosmos-sdk/store"
@@ -15,6 +16,7 @@ import (
 
 // interface conformance check
 var _ StakeKeeper = stakeKeeper{}
+var _ AppAccountKeeper = appAccountKeeper{}
 
 type stakeKeeper struct {
 	Stakes []Stake
@@ -28,6 +30,53 @@ func (sk stakeKeeper) Stake(ctx sdk.Context, id uint64) (stake Stake, err sdk.Er
 		}
 	}
 	return stake, sdk.NewError(DefaultCodespace, 404, fmt.Sprintf("Stake not found with ID: %d", id))
+}
+
+func (sk stakeKeeper) SlashCountByID(ctx sdk.Context, id uint64) (count int, err sdk.Error) {
+	stake, err := sk.Stake(ctx, id)
+	if err != nil {
+		return
+	}
+
+	return stake.SlashCount, nil
+}
+
+func (sk stakeKeeper) IncrementSlashCount(ctx sdk.Context, id uint64) (err sdk.Error) {
+	for i, stake := range sk.Stakes {
+		if stake.ID == id {
+			sk.Stakes[i].SlashCount++
+			return nil
+		}
+	}
+
+	return sdk.NewError(DefaultCodespace, 404, fmt.Sprintf("Stake not found with ID: %d", id))
+}
+
+type appAccountKeeper struct {
+	AppAccounts []AppAccount
+}
+
+func (aak appAccountKeeper) AppAccount(ctx sdk.Context, address sdk.AccAddress) (appAccount AppAccount, err sdk.Error) {
+	for _, appAccount := range aak.AppAccounts {
+		if appAccount.Address.Equals(address) {
+			return appAccount, nil
+		}
+	}
+	return appAccount, sdk.NewError(DefaultCodespace, 404, fmt.Sprintf("AppAccount not found with address: %d", address))
+}
+
+func (aak appAccountKeeper) IsJailed(ctx sdk.Context, address sdk.AccAddress) (isJailed bool, err sdk.Error) {
+	appAccount, err := aak.AppAccount(ctx, address)
+	if err != nil {
+		return
+	}
+
+	return appAccount.IsJailed, nil
+}
+
+func (aak appAccountKeeper) JailUntil(ctx sdk.Context, address sdk.AccAddress, until time.Time) sdk.Error {
+	// nothing here..
+	return nil
 }
 
 func mockDB() (sdk.Context, Keeper) {
@@ -57,7 +106,19 @@ func mockDB() (sdk.Context, Keeper) {
 			Stake{ID: 3},
 		},
 	}
-	slashKeeper := NewKeeper(slashKey, paramsKeeper.Subspace(ModuleName), codec, stakeKeeper)
+	appAccountKeeper := appAccountKeeper{
+		AppAccounts: []AppAccount{
+			AppAccount{
+				Address: DefaultParams().SlashAdmins[0],
+				IsJailed: false,
+			},
+			AppAccount{
+				Address: sdk.AccAddress([]byte{3, 4}),
+				IsJailed: true,
+			},
+		},
+	}
+	slashKeeper := NewKeeper(slashKey, paramsKeeper.Subspace(ModuleName), codec, stakeKeeper, appAccountKeeper)
 
 	InitGenesis(ctx, slashKeeper, DefaultGenesisState())
 
