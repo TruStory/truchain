@@ -41,3 +41,49 @@ func TestNewSlash_InvalidCreator(t *testing.T) {
 	assert.NotNil(t, err)
 	assert.Equal(t, ErrInvalidCreator(invalidCreator).Code(), err.Code())
 }
+
+func TestSlash_Success(t *testing.T) {
+	ctx, keeper := mockDB()
+
+	stakeID := uint64(1)
+	creator := DefaultParams().SlashAdmins[0]
+	createdSlash, err := keeper.NewSlash(ctx, stakeID, creator)
+	assert.Nil(t, err)
+
+	returnedSlash, err := keeper.Slash(ctx, createdSlash.ID)
+
+	assert.Nil(t, err)
+	assert.Equal(t, createdSlash, returnedSlash)
+}
+
+func TestSlash_ErrNotFound(t *testing.T) {
+	ctx, keeper := mockDB()
+
+	stakeID := uint64(1)
+	creator := DefaultParams().SlashAdmins[0]
+	_, err := keeper.NewSlash(ctx, stakeID, creator)
+	assert.Nil(t, err)
+
+	_, err = keeper.Slash(ctx, uint64(404))
+
+	assert.NotNil(t, err)
+	assert.Equal(t, ErrSlashNotFound(uint64(404)).Code(), err.Code())
+}
+
+func TestSlashes_Success(t *testing.T) {
+	ctx, keeper := mockDB()
+
+	stakeID := uint64(1)
+	creator := DefaultParams().SlashAdmins[0]
+	first, err := keeper.NewSlash(ctx, stakeID, creator)
+	assert.Nil(t, err)
+
+	stakeID2 := uint64(2)
+	another, err := keeper.NewSlash(ctx, stakeID2, creator)
+	assert.Nil(t, err)
+
+	all := keeper.Slashes(ctx)
+	assert.Len(t, all, 2)
+	assert.Equal(t, all[0], first)
+	assert.Equal(t, all[1], another)
+}

@@ -53,6 +53,32 @@ func (k Keeper) NewSlash(ctx sdk.Context, stakeID uint64, creator sdk.AccAddress
 	return
 }
 
+// Slash returns a slash by its ID
+func (k Keeper) Slash(ctx sdk.Context, id uint64) (slash Slash, err sdk.Error) {
+	err = k.Get(ctx, id, &slash)
+	if err != nil {
+		return slash, ErrSlashNotFound(id)
+	}
+
+	return slash, nil
+}
+
+// Slashes gets all slashes from the KVStore
+func (k Keeper) Slashes(ctx sdk.Context) (slashes []Slash) {
+	err := k.Each(ctx, func(bytes []byte) bool {
+		var slash Slash
+		k.codec.MustUnmarshalBinaryLengthPrefixed(bytes, &slash)
+		slashes = append(slashes, slash)
+		return true
+	})
+
+	if err != nil {
+		return
+	}
+
+	return
+}
+
 func (k Keeper) validateParams(ctx sdk.Context, stakeID uint64, creator sdk.AccAddress) (err sdk.Error) {
 	params := k.GetParams(ctx)
 
