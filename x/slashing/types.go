@@ -24,3 +24,11 @@ type Slash struct {
 func (s Slash) String() string {
 	return fmt.Sprintf("Slash <%d %d %s>", s.ID, s.StakeID, s.Creator)
 }
+
+// SlashType enum
+type SlashType int
+
+const (
+	// SlashTypeUnhelpful represents the unhelpful slashing type
+	SlashTypeUnhelpful SlashType = iota // 0
+)
