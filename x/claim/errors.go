@@ -6,7 +6,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
-// CodeType ...
+// CodeType is the error code type for the module
 type CodeType = sdk.CodeType
 
 // Claim error types

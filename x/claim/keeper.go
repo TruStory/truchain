@@ -123,7 +123,7 @@ func (k Keeper) AddBackingStake(ctx sdk.Context, id uint64, stake sdk.Coin) sdk.
 	return nil
 }
 
-// AddChallengeStake adds a stake amount to the total backing amount
+// AddChallengeStake adds a stake amount to the total challenge amount
 func (k Keeper) AddChallengeStake(ctx sdk.Context, id uint64, stake sdk.Coin) sdk.Error {
 	claim, err := k.Claim(ctx, id)
 	if err != nil {
