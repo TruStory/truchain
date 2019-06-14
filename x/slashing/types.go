@@ -1,8 +1,9 @@
 package slashing
 
 import (
-	"time"
+	"fmt"
 
+	app "github.com/TruStory/truchain/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
@@ -12,9 +13,14 @@ const (
 	QuerierRoute = ModuleName
 )
 
-// Slashing stores data about a slashing
-type Slashing struct {
-	ID              int64
-	Creator         sdk.AccAddress
-	CreatedTime     time.Time
+// Slash stores data about a slashing
+type Slash struct {
+	ID        uint64
+	StakeID   uint64
+	Creator   sdk.AccAddress
+	Timestamp app.Timestamp
+}
+
+func (s Slash) String() string {
+	return fmt.Sprintf("Slash <%d %d %s>", s.ID, s.StakeID, s.Creator)
 }

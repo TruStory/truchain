@@ -28,12 +28,16 @@ type Params struct {
 
 // DefaultParams is the Slashing params for testing
 func DefaultParams() Params {
+	admin, err := sdk.AccAddressFromBech32("cosmos1xqc5gwzpgdr4wjz8xscnys2jx3f9x4zy223g9w")
+	if err != nil {
+		panic(err)
+	}
 	return Params{
 		MaxStakeSlashCount: 50,
 		SlashMagnitude:     sdk.NewDec(3),
 		SlashMinStake:      sdk.NewCoin("trustake", sdk.NewInt(50)),
-		SlashAdmins:        []sdk.AccAddress{},
 		JailTime:           time.Duration((7 * 24) * time.Hour),
+		SlashAdmins:        []sdk.AccAddress{admin},
 	}
 }
 

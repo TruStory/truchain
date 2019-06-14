@@ -8,15 +8,15 @@ import (
 
 // GenesisState defines genesis data for the module
 type GenesisState struct {
-	Slashings []Slashing `json:"slashings"`
-	Params    Params     `json:"params"`
+	Slashes []Slash `json:"slashes"`
+	Params  Params  `json:"params"`
 }
 
 // NewGenesisState creates a new genesis state.
 func NewGenesisState() GenesisState {
 	return GenesisState{
-		Slashings: nil,
-		Params:    DefaultParams(),
+		Slashes: nil,
+		Params:  DefaultParams(),
 	}
 }
 
