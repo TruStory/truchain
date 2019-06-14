@@ -15,7 +15,7 @@ type GenesisState struct {
 // NewGenesisState creates a new genesis state.
 func NewGenesisState() GenesisState {
 	return GenesisState{
-		Slashes: nil,
+		Slashes: []Slash{},
 		Params:  DefaultParams(),
 	}
 }
@@ -25,13 +25,16 @@ func DefaultGenesisState() GenesisState { return NewGenesisState() }
 
 // InitGenesis initializes story state from genesis file
 func InitGenesis(ctx sdk.Context, keeper Keeper, data GenesisState) {
+	for _, slash := range data.Slashes {
+		keeper.Set(ctx, slash.ID, slash)
+	}
 	keeper.SetParams(ctx, data.Params)
 }
 
 // ExportGenesis exports the genesis state
 func ExportGenesis(ctx sdk.Context, keeper Keeper) GenesisState {
 	return GenesisState{
-		//		Slashings: keeper.Slashings(ctx),
+		Slashes: keeper.Slashes(ctx),
 		Params: keeper.GetParams(ctx),
 	}
 }
