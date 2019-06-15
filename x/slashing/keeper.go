@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	app "github.com/TruStory/truchain/types"
+	"github.com/TruStory/truchain/x/auth"
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/params"
@@ -18,19 +19,21 @@ type Keeper struct {
 	codec      *codec.Codec
 	paramStore params.Subspace
 
+	claimKeeper      ClaimKeeper
 	stakeKeeper      StakeKeeper
-	appAccountKeeper AppAccountKeeper
+	appAccountKeeper auth.Keeper
 }
 
 // NewKeeper creates a new keeper of the slashing Keeper
 func NewKeeper(
 	storeKey sdk.StoreKey, paramStore params.Subspace, codec *codec.Codec,
-	stakeKeeper StakeKeeper, appAccountKeeper AppAccountKeeper,
+	claimKeeper ClaimKeeper, stakeKeeper StakeKeeper, appAccountKeeper auth.Keeper,
 ) Keeper {
 	return Keeper{
 		recordkeeper.NewRecordKeeper(storeKey, codec),
 		codec,
 		paramStore.WithKeyTable(ParamKeyTable()),
+		claimKeeper,
 		stakeKeeper,
 		appAccountKeeper,
 	}
@@ -96,12 +99,18 @@ func (k Keeper) validateParams(ctx sdk.Context, stakeID uint64, creator sdk.AccA
 		return ErrMaxSlashCountReached(stakeID)
 	}
 
+	// validating claim
+	claim, claimErr := k.claimKeeper.Claim(ctx, stake.ClaimID)
+	if claimErr != nil {
+		return ErrInvalidClaim(stake.ClaimID)
+	}
+
 	// validating creator
 	appAccount, authErr := k.appAccountKeeper.AppAccount(ctx, creator)
 	if authErr != nil {
 		return ErrInvalidCreator(creator)
 	}
-	if !hasEnoughEarnedStake(appAccount) {
+	if !hasEnoughEarnedStake(appAccount, claim.CommunityID, params.SlashMinStake) {
 		return ErrNotEnoughEarnedStake(creator)
 	}
 
@@ -116,8 +125,29 @@ func (k Keeper) validateParams(ctx sdk.Context, stakeID uint64, creator sdk.AccA
 	return nil
 }
 
-func hasEnoughEarnedStake(appAccount AppAccount) bool {
-	// TODO: write the real logic
+func hasEnoughEarnedStake(appAccount auth.AppAccount, communityID uint64, minimumEarnedCoins auth.EarnedCoins) bool {
+	// first, loop through all the earned coins of the user
+	for _, earnedCoin := range appAccount.EarnedStake {
+
+		// for the coin earned for the given community,
+		if earnedCoin.CommunityID == communityID {
+
+			// find the minimum required earned coin by looping over the requirements
+			for _, minimumEarnedCoin := range minimumEarnedCoins {
+
+				// when found,
+				if minimumEarnedCoin.CommunityID == communityID {
+
+					// make sure the user's earned coin is greater than or equal to the requirment
+					if earnedCoin.IsGTE(minimumEarnedCoin.Coin) {
+						return true
+					}
+				}
+			}
+		}
+	}
+
+	// in all other cases, return false
 	return true
 }
 

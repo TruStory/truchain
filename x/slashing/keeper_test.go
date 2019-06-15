@@ -11,7 +11,7 @@ func TestNewSlash_Success(t *testing.T) {
 	ctx, keeper := mockDB()
 
 	stakeID := uint64(1)
-	creator := DefaultParams().SlashAdmins[0]
+	creator := keeper.GetParams(ctx).SlashAdmins[0]
 	slash, err := keeper.NewSlash(ctx, stakeID, creator)
 	assert.Nil(t, err)
 
@@ -24,7 +24,7 @@ func TestNewSlash_InvalidStake(t *testing.T) {
 	ctx, keeper := mockDB()
 
 	invalidStakeID := uint64(404)
-	creator := DefaultParams().SlashAdmins[0]
+	creator := keeper.GetParams(ctx).SlashAdmins[0]
 	_, err := keeper.NewSlash(ctx, invalidStakeID, creator)
 
 	assert.NotNil(t, err)
@@ -46,7 +46,7 @@ func TestSlash_Success(t *testing.T) {
 	ctx, keeper := mockDB()
 
 	stakeID := uint64(1)
-	creator := DefaultParams().SlashAdmins[0]
+	creator := keeper.GetParams(ctx).SlashAdmins[0]
 	createdSlash, err := keeper.NewSlash(ctx, stakeID, creator)
 	assert.Nil(t, err)
 
@@ -60,7 +60,7 @@ func TestSlash_ErrNotFound(t *testing.T) {
 	ctx, keeper := mockDB()
 
 	stakeID := uint64(1)
-	creator := DefaultParams().SlashAdmins[0]
+	creator := keeper.GetParams(ctx).SlashAdmins[0]
 	_, err := keeper.NewSlash(ctx, stakeID, creator)
 	assert.Nil(t, err)
 
@@ -74,7 +74,7 @@ func TestSlashes_Success(t *testing.T) {
 	ctx, keeper := mockDB()
 
 	stakeID := uint64(1)
-	creator := DefaultParams().SlashAdmins[0]
+	creator := keeper.GetParams(ctx).SlashAdmins[0]
 	first, err := keeper.NewSlash(ctx, stakeID, creator)
 	assert.Nil(t, err)
 

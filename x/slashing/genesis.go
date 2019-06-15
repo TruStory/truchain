@@ -4,19 +4,26 @@ import (
 	"fmt"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/tendermint/tendermint/crypto"
+	"github.com/tendermint/tendermint/crypto/secp256k1"
 )
 
 // GenesisState defines genesis data for the module
 type GenesisState struct {
-	Slashes []Slash `json:"slashes"`
-	Params  Params  `json:"params"`
+	Slashes      []Slash         `json:"slashes"`
+	Params       Params          `json:"params"`
+	AdminPubKeys []crypto.PubKey `json:"admin_public_keys"`
 }
 
 // NewGenesisState creates a new genesis state.
 func NewGenesisState() GenesisState {
+	// make a new random account for admin
+	admin := secp256k1.GenPrivKey()
+
 	return GenesisState{
-		Slashes: []Slash{},
-		Params:  DefaultParams(),
+		Slashes:      []Slash{},
+		Params:       DefaultParams(),
+		AdminPubKeys: []crypto.PubKey{admin.PubKey()},
 	}
 }
 
@@ -28,6 +35,12 @@ func InitGenesis(ctx sdk.Context, keeper Keeper, data GenesisState) {
 	for _, slash := range data.Slashes {
 		keeper.Set(ctx, slash.ID, slash)
 	}
+
+	for _, admin := range data.AdminPubKeys {
+		appAccount := keeper.appAccountKeeper.NewAppAccount(ctx, sdk.AccAddress(admin.Address()), sdk.Coins{}, admin, 0, 0)
+		data.Params.SlashAdmins = append(data.Params.SlashAdmins, appAccount.GetAddress())
+	}
+
 	keeper.SetParams(ctx, data.Params)
 }
 
@@ -35,7 +48,7 @@ func InitGenesis(ctx sdk.Context, keeper Keeper, data GenesisState) {
 func ExportGenesis(ctx sdk.Context, keeper Keeper) GenesisState {
 	return GenesisState{
 		Slashes: keeper.Slashes(ctx),
-		Params: keeper.GetParams(ctx),
+		Params:  keeper.GetParams(ctx),
 	}
 }
 
@@ -49,8 +62,10 @@ func ValidateGenesis(data GenesisState) error {
 		return fmt.Errorf("Param: SlashMagnitude, must have a positive value")
 	}
 
-	if !data.Params.SlashMinStake.IsPositive() {
-		return fmt.Errorf("Param: SlashMinStake, must have a positive value")
+	for _, coin := range data.Params.SlashMinStake {
+		if coin.IsNegative() {
+			return fmt.Errorf("Param: SlashMinStake, cannot be a negative value")
+		}
 	}
 
 	if len(data.Params.SlashAdmins) < 1 {

@@ -12,10 +12,11 @@ const (
 
 	ErrorCodeSlashNotFound        sdk.CodeType = 501
 	ErrorCodeInvalidStake         sdk.CodeType = 502
-	ErrorCodeMaxSlashCountReached sdk.CodeType = 503
-	ErrorCodeInvalidCreator       sdk.CodeType = 504
-	ErrorCodeNotEnoughEarnedStake sdk.CodeType = 505
-	ErrorCodeAlreadySlashed       sdk.CodeType = 506
+	ErrorCodeInvalidClaim         sdk.CodeType = 503
+	ErrorCodeMaxSlashCountReached sdk.CodeType = 504
+	ErrorCodeInvalidCreator       sdk.CodeType = 505
+	ErrorCodeNotEnoughEarnedStake sdk.CodeType = 506
+	ErrorCodeAlreadySlashed       sdk.CodeType = 507
 )
 
 // ErrSlashNotFound throws an error when the searched slash is not found
@@ -26,6 +27,11 @@ func ErrSlashNotFound(id uint64) sdk.Error {
 // ErrInvalidStake throws an error when the stake is invalid
 func ErrInvalidStake(id uint64) sdk.Error {
 	return sdk.NewError(DefaultCodespace, ErrorCodeInvalidStake, fmt.Sprintf("Invalid stake with ID: %d", id))
+}
+
+// ErrInvalidClaim throws an error when the claim is invalid
+func ErrInvalidClaim(id uint64) sdk.Error {
+	return sdk.NewError(DefaultCodespace, ErrorCodeInvalidStake, fmt.Sprintf("Invalid claim with ID: %d", id))
 }
 
 // ErrMaxSlashCountReached throws an error when the max slash count on a stake is reached

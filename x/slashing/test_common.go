@@ -2,7 +2,8 @@ package slashing
 
 import (
 	"fmt"
-	"time"
+
+	"github.com/TruStory/truchain/x/auth"
 
 	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/cosmos/cosmos-sdk/store"
@@ -15,8 +16,23 @@ import (
 )
 
 // interface conformance check
+var _ ClaimKeeper = claimKeeper{}
 var _ StakeKeeper = stakeKeeper{}
-var _ AppAccountKeeper = appAccountKeeper{}
+var _ auth.BankKeeper = bankKeeper{}
+
+type claimKeeper struct {
+	Claims []Claim
+}
+
+// Claim ...
+func (ck claimKeeper) Claim(ctx sdk.Context, id uint64) (claim Claim, err sdk.Error) {
+	for _, claim := range ck.Claims {
+		if claim.ID == id {
+			return claim, nil
+		}
+	}
+	return claim, sdk.NewError(DefaultCodespace, 404, fmt.Sprintf("Claim not found with ID: %d", id))
+}
 
 type stakeKeeper struct {
 	Stakes []Stake
@@ -52,36 +68,17 @@ func (sk stakeKeeper) IncrementSlashCount(ctx sdk.Context, id uint64) (err sdk.E
 	return sdk.NewError(DefaultCodespace, 404, fmt.Sprintf("Stake not found with ID: %d", id))
 }
 
-type appAccountKeeper struct {
-	AppAccounts []AppAccount
+type bankKeeper struct {
 }
 
-func (aak appAccountKeeper) AppAccount(ctx sdk.Context, address sdk.AccAddress) (appAccount AppAccount, err sdk.Error) {
-	for _, appAccount := range aak.AppAccounts {
-		if appAccount.Address.Equals(address) {
-			return appAccount, nil
-		}
-	}
-	return appAccount, sdk.NewError(DefaultCodespace, 404, fmt.Sprintf("AppAccount not found with address: %d", address))
-}
-
-func (aak appAccountKeeper) IsJailed(ctx sdk.Context, address sdk.AccAddress) (isJailed bool, err sdk.Error) {
-	appAccount, err := aak.AppAccount(ctx, address)
-	if err != nil {
-		return
-	}
-
-	return appAccount.IsJailed, nil
-}
-
-func (aak appAccountKeeper) JailUntil(ctx sdk.Context, address sdk.AccAddress, until time.Time) sdk.Error {
-	// nothing here..
-	return nil
+func (bk bankKeeper) NewTransaction(ctx sdk.Context, to sdk.AccAddress, coins sdk.Coins) bool {
+	return true
 }
 
 func mockDB() (sdk.Context, Keeper) {
 	db := dbm.NewMemDB()
 
+	authKey := sdk.NewKVStoreKey(auth.ModuleName)
 	slashKey := sdk.NewKVStoreKey(ModuleName)
 	paramsKey := sdk.NewKVStoreKey(params.StoreKey)
 	transientParamsKey := sdk.NewTransientStoreKey(params.TStoreKey)
@@ -90,6 +87,7 @@ func mockDB() (sdk.Context, Keeper) {
 	ms.MountStoreWithDB(slashKey, sdk.StoreTypeIAVL, db)
 	ms.MountStoreWithDB(paramsKey, sdk.StoreTypeIAVL, db)
 	ms.MountStoreWithDB(transientParamsKey, sdk.StoreTypeTransient, db)
+	ms.MountStoreWithDB(authKey, sdk.StoreTypeIAVL, db)
 	ms.LoadLatestVersion()
 
 	ctx := sdk.NewContext(ms, abci.Header{}, false, log.NewNopLogger())
@@ -99,26 +97,24 @@ func mockDB() (sdk.Context, Keeper) {
 	RegisterCodec(codec)
 
 	paramsKeeper := params.NewKeeper(codec, paramsKey, transientParamsKey, params.DefaultCodespace)
+
+	bankKeeper := bankKeeper{}
+	authKeeper := auth.NewKeeper(authKey, paramsKeeper.Subspace(auth.ModuleName), codec, bankKeeper)
+
+	claimKeeper := claimKeeper{
+		Claims: []Claim{
+			Claim{ID: 1, CommunityID: 1},
+			Claim{ID: 2, CommunityID: 2},
+		},
+	}
 	stakeKeeper := stakeKeeper{
 		Stakes: []Stake{
-			Stake{ID: 1},
-			Stake{ID: 2},
-			Stake{ID: 3},
+			Stake{ID: 1, ClaimID: 1},
+			Stake{ID: 2, ClaimID: 2},
+			Stake{ID: 3, ClaimID: 2},
 		},
 	}
-	appAccountKeeper := appAccountKeeper{
-		AppAccounts: []AppAccount{
-			AppAccount{
-				Address: DefaultParams().SlashAdmins[0],
-				IsJailed: false,
-			},
-			AppAccount{
-				Address: sdk.AccAddress([]byte{3, 4}),
-				IsJailed: true,
-			},
-		},
-	}
-	slashKeeper := NewKeeper(slashKey, paramsKeeper.Subspace(ModuleName), codec, stakeKeeper, appAccountKeeper)
+	slashKeeper := NewKeeper(slashKey, paramsKeeper.Subspace(ModuleName), codec, claimKeeper, stakeKeeper, authKeeper)
 
 	InitGenesis(ctx, slashKeeper, DefaultGenesisState())
 

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/TruStory/truchain/x/auth"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/params"
 )
@@ -21,23 +22,22 @@ var (
 type Params struct {
 	MaxStakeSlashCount int              `json:"max_slash_stake_count"`
 	SlashMagnitude     sdk.Dec          `json:"slash_magnitude"`
-	SlashMinStake      sdk.Coin         `json:"slash_min_stake"`
+	SlashMinStake      auth.EarnedCoins `json:"slash_min_stake"`
 	SlashAdmins        []sdk.AccAddress `json:"slash_admins"`
 	JailTime           time.Duration    `json:"jail_time"`
 }
 
 // DefaultParams is the Slashing params for testing
 func DefaultParams() Params {
-	admin, err := sdk.AccAddressFromBech32("cosmos1xqc5gwzpgdr4wjz8xscnys2jx3f9x4zy223g9w")
-	if err != nil {
-		panic(err)
-	}
 	return Params{
 		MaxStakeSlashCount: 50,
 		SlashMagnitude:     sdk.NewDec(3),
-		SlashMinStake:      sdk.NewCoin("trustake", sdk.NewInt(50)),
-		JailTime:           time.Duration((7 * 24) * time.Hour),
-		SlashAdmins:        []sdk.AccAddress{admin},
+		SlashMinStake: auth.EarnedCoins{
+			{sdk.NewCoin("trustake", sdk.NewInt(0)), 1},
+			{sdk.NewCoin("trustake", sdk.NewInt(50)), 2},
+		},
+		JailTime:    time.Duration((7 * 24) * time.Hour),
+		SlashAdmins: []sdk.AccAddress{},
 	}
 }
 

@@ -12,7 +12,7 @@ func TestQuerySlash_Success(t *testing.T) {
 	ctx, keeper := mockDB()
 
 	stakeID := uint64(1)
-	creator := DefaultParams().SlashAdmins[0]
+	creator := keeper.GetParams(ctx).SlashAdmins[0]
 	createdSlash, err := keeper.NewSlash(ctx, stakeID, creator)
 	assert.Nil(t, err)
 
@@ -57,7 +57,7 @@ func TestQuerySlashes_Success(t *testing.T) {
 	ctx, keeper := mockDB()
 
 	stakeID := uint64(1)
-	creator := DefaultParams().SlashAdmins[0]
+	creator := keeper.GetParams(ctx).SlashAdmins[0]
 	first, err := keeper.NewSlash(ctx, stakeID, creator)
 	assert.Nil(t, err)
 
