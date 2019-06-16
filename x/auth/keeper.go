@@ -151,16 +151,6 @@ func (k Keeper) IncrementSlashCount(ctx sdk.Context, address sdk.AccAddress) sdk
 	return nil
 }
 
-func getEarnedStakeByCommunityID(earnedStake EarnedCoins, communityID uint64) EarnedCoin {
-	for _, current := range earnedStake {
-		if current.CommunityID == communityID {
-			return current
-		}
-	}
-
-	return EarnedCoin{sdk.NewCoin("trustake", sdk.NewInt(0)), communityID}
-}
-
 func getLogger(ctx sdk.Context) log.Logger {
 	return ctx.Logger().With("module", ModuleName)
 }
