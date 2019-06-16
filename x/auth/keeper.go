@@ -16,7 +16,7 @@ import (
 // Keeper data type storing keys to the KVStore
 type Keeper struct {
 	recordkeeper.RecordKeeper
-	
+
 	codec      *codec.Codec
 	paramStore params.Subspace
 
@@ -74,13 +74,37 @@ func (k Keeper) AppAccount(ctx sdk.Context, address sdk.AccAddress) (appAccount 
 	return appAccount, nil
 }
 
-// JailUntil puts an AppAccount in jail until a time
-func (k Keeper) JailUntil(ctx sdk.Context, address sdk.AccAddress, until time.Time) (sdk.Error) {
+// AddToEarnedStake adds an EarnedCoin to the EarnedStake
+func (k Keeper) AddToEarnedStake(ctx sdk.Context, address sdk.AccAddress, earnedCoin EarnedCoin) sdk.Error {
 	appAccount, err := k.AppAccount(ctx, address)
 	if err != nil {
 		return err
 	}
-	
+
+	added := false
+	for i, current := range appAccount.EarnedStake {
+		if current.CommunityID == earnedCoin.CommunityID {
+			appAccount.EarnedStake[i].Coin = current.Add(earnedCoin.Coin)
+			added = true
+		}
+	}
+
+	if !added {
+		appAccount.EarnedStake = append(appAccount.EarnedStake, earnedCoin)
+	}
+
+	k.StringSet(ctx, address.String(), appAccount)
+
+	return nil
+}
+
+// JailUntil puts an AppAccount in jail until a time
+func (k Keeper) JailUntil(ctx sdk.Context, address sdk.AccAddress, until time.Time) sdk.Error {
+	appAccount, err := k.AppAccount(ctx, address)
+	if err != nil {
+		return err
+	}
+
 	appAccount.IsJailed = true
 	appAccount.JailEndTime = until
 	k.StringSet(ctx, address.String(), appAccount)
@@ -112,6 +136,16 @@ func (k Keeper) AppAccounts(ctx sdk.Context) (appAccounts []AppAccount) {
 	}
 
 	return
+}
+
+func getEarnedStakeByCommunityID(earnedStake EarnedCoins, communityID uint64) EarnedCoin {
+	for _, current := range earnedStake {
+		if current.CommunityID == communityID {
+			return current
+		}
+	}
+
+	return EarnedCoin{sdk.NewCoin("trustake", sdk.NewInt(0)), communityID}
 }
 
 func getLogger(ctx sdk.Context) log.Logger {
