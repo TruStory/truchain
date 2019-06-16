@@ -74,6 +74,22 @@ func (k Keeper) AppAccount(ctx sdk.Context, address sdk.AccAddress) (appAccount 
 	return appAccount, nil
 }
 
+// AppAccounts gets all AppAccounts from the KVStore
+func (k Keeper) AppAccounts(ctx sdk.Context) (appAccounts []AppAccount) {
+	err := k.Each(ctx, func(bytes []byte) bool {
+		var appAccount AppAccount
+		k.codec.MustUnmarshalBinaryLengthPrefixed(bytes, &appAccount)
+		appAccounts = append(appAccounts, appAccount)
+		return true
+	})
+
+	if err != nil {
+		return
+	}
+
+	return
+}
+
 // AddToEarnedStake adds an EarnedCoin to the EarnedStake
 func (k Keeper) AddToEarnedStake(ctx sdk.Context, address sdk.AccAddress, earnedCoin EarnedCoin) sdk.Error {
 	appAccount, err := k.AppAccount(ctx, address)
@@ -122,20 +138,17 @@ func (k Keeper) IsJailed(ctx sdk.Context, address sdk.AccAddress) (bool, sdk.Err
 	return appAccount.IsJailed, nil
 }
 
-// AppAccounts gets all AppAccounts from the KVStore
-func (k Keeper) AppAccounts(ctx sdk.Context) (appAccounts []AppAccount) {
-	err := k.Each(ctx, func(bytes []byte) bool {
-		var appAccount AppAccount
-		k.codec.MustUnmarshalBinaryLengthPrefixed(bytes, &appAccount)
-		appAccounts = append(appAccounts, appAccount)
-		return true
-	})
-
+// IncrementSlashCount increments the slash count of the user
+func (k Keeper) IncrementSlashCount(ctx sdk.Context, address sdk.AccAddress) sdk.Error {
+	appAccount, err := k.AppAccount(ctx, address)
 	if err != nil {
-		return
+		return err
 	}
 
-	return
+	appAccount.SlashCount++
+	k.StringSet(ctx, address.String(), appAccount)
+
+	return nil
 }
 
 func getEarnedStakeByCommunityID(earnedStake EarnedCoins, communityID uint64) EarnedCoin {

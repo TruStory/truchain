@@ -15,9 +15,9 @@ func TestNewAppAccount_Success(t *testing.T) {
 
 	appAccount := keeper.NewAppAccount(ctx, address, coins, publicKey, 0, 0)
 
-	assert.Equal(t, appAccount.BaseAccount.Address, address)
-	assert.Equal(t, appAccount.BaseAccount.Coins, coins)
-	assert.Equal(t, appAccount.BaseAccount.PubKey, publicKey)
+	assert.Equal(t, appAccount.Address, address)
+	assert.Equal(t, appAccount.Coins, coins)
+	assert.Equal(t, appAccount.PubKey, publicKey)
 }
 
 func TestAppAccount_Success(t *testing.T) {
@@ -84,4 +84,25 @@ func TestAddToEarnedStake_Success(t *testing.T) {
 	assert.Nil(t, err)
 	assert.Len(t, returnedAppAccount.EarnedStake, 1)
 	assert.Equal(t, returnedAppAccount.EarnedStake[0].Coin, earnedCoin.Add(earnedCoin.Coin))
+}
+
+func TestIncrementSlashCount_Success(t *testing.T) {
+	ctx, keeper := mockDB()
+
+	_, publicKey, address, coins, _ := getFakeAppAccountParams()
+
+	createdAppAccount := keeper.NewAppAccount(ctx, address, coins, publicKey, 0, 0)
+	assert.Equal(t, createdAppAccount.SlashCount, 0)
+
+	// incrementing once
+	keeper.IncrementSlashCount(ctx, createdAppAccount.Address)
+	returnedAppAccount, err := keeper.AppAccount(ctx, createdAppAccount.Address)
+	assert.Nil(t, err)
+	assert.Equal(t, returnedAppAccount.SlashCount, 1)
+
+	// incrementing again
+	keeper.IncrementSlashCount(ctx, createdAppAccount.Address)
+	returnedAppAccount, err = keeper.AppAccount(ctx, createdAppAccount.Address)
+	assert.Nil(t, err)
+	assert.Equal(t, returnedAppAccount.SlashCount, 2)
 }
