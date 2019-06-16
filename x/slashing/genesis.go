@@ -3,6 +3,7 @@ package slashing
 import (
 	"fmt"
 
+	"github.com/TruStory/truchain/x/auth"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/tendermint/tendermint/crypto"
 	"github.com/tendermint/tendermint/crypto/secp256k1"
@@ -38,6 +39,10 @@ func InitGenesis(ctx sdk.Context, keeper Keeper, data GenesisState) {
 
 	for _, admin := range data.AdminPubKeys {
 		appAccount := keeper.appAccountKeeper.NewAppAccount(ctx, sdk.AccAddress(admin.Address()), sdk.Coins{}, admin, 0, 0)
+		err := keeper.appAccountKeeper.AddToEarnedStake(ctx, appAccount.Address, auth.EarnedCoin{Coin: sdk.NewCoin("default", sdk.NewInt(1)), CommunityID: 1})
+		if err != nil {
+			panic(err)
+		}
 		data.Params.SlashAdmins = append(data.Params.SlashAdmins, appAccount.GetAddress())
 	}
 

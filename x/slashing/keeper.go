@@ -110,14 +110,9 @@ func (k Keeper) validateParams(ctx sdk.Context, stakeID uint64, creator sdk.AccA
 	if authErr != nil {
 		return ErrInvalidCreator(creator)
 	}
-	if !hasEnoughEarnedStake(appAccount, claim.CommunityID, params.SlashMinStake) {
-		return ErrNotEnoughEarnedStake(creator)
-	}
-
-	if !isAdmin(creator, params.SlashAdmins) {
+	if !isAdmin(creator, params.SlashAdmins) && !hasEnoughEarnedStake(appAccount, claim.CommunityID, params.SlashMinStake) {
 		return ErrInvalidCreator(creator)
 	}
-
 	if hasPreviouslySlashed(creator) {
 		return ErrAlreadySlashed()
 	}
@@ -148,7 +143,7 @@ func hasEnoughEarnedStake(appAccount auth.AppAccount, communityID uint64, minimu
 	}
 
 	// in all other cases, return false
-	return true
+	return false
 }
 
 func hasPreviouslySlashed(creator sdk.AccAddress) bool {

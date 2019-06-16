@@ -33,8 +33,8 @@ func DefaultParams() Params {
 		MaxStakeSlashCount: 50,
 		SlashMagnitude:     sdk.NewDec(3),
 		SlashMinStake: auth.EarnedCoins{
-			{sdk.NewCoin("trustake", sdk.NewInt(0)), 1},
-			{sdk.NewCoin("trustake", sdk.NewInt(50)), 2},
+			{Coin: sdk.NewCoin("default", sdk.NewInt(0)), CommunityID: 1},
+			{Coin: sdk.NewCoin("default", sdk.NewInt(50)), CommunityID: 2},
 		},
 		JailTime:    time.Duration((7 * 24) * time.Hour),
 		SlashAdmins: []sdk.AccAddress{},
