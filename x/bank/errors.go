@@ -1,0 +1,40 @@
+package bank
+
+import (
+	"fmt"
+
+	sdk "github.com/cosmos/cosmos-sdk/types"
+)
+
+// Bank errors reserve 400 ~ 499.
+const (
+	DefaultCodespace sdk.CodespaceType = ModuleName
+
+	ErrorCodeInvalidTransactionType     sdk.CodeType = 401
+	ErrorCodeInvalidRewardBrokerAddress sdk.CodeType = 402
+	ErrorCodeInvalidQueryParams         sdk.CodeType = 403
+)
+
+// ErrInvalidRewardBrokerAddress throws an error when the address doesn't match with genesis param address.
+func ErrInvalidRewardBrokerAddress(address sdk.AccAddress) sdk.Error {
+	return sdk.NewError(DefaultCodespace,
+		ErrorCodeInvalidRewardBrokerAddress,
+		fmt.Sprintf("invalid broker reward address %s", address.String()),
+	)
+}
+
+// ErrInvalidTransactionType throws an error when the transaction type is invalid.
+func ErrInvalidTransactionType(txType TransactionType) sdk.Error {
+	return sdk.NewError(DefaultCodespace,
+		ErrorCodeInvalidTransactionType,
+		fmt.Sprintf("invalid transaction type %s", txType.String()),
+	)
+}
+
+// ErrInvalidQueryParams throws an error when the transaction type is invalid.
+func ErrInvalidQueryParams(err error) sdk.Error {
+	return sdk.NewError(DefaultCodespace,
+		ErrorCodeInvalidQueryParams,
+		fmt.Sprintf("invalid query params  %s", err.Error()),
+	)
+}

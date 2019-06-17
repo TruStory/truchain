@@ -8,9 +8,9 @@ All transactions in TruStory will go through the bank module. It is responsible 
 
 ```go
 type Transaction struct {
-    ID                  int64
+    ID                  uint64
     TransactionType     TransactionType
-    StakeID             int64
+    StakeID             uint64
     Amount              sdk.Coin
     Creator             sdk.AccAddress
     CreatedTime         time.Time
@@ -19,15 +19,16 @@ type Transaction struct {
 type TransactionType int8
 
 const (
-    Backing TransactionType = iota
-    BackingReturned
-    Challenge
-    ChallengeReturned
-    Upvote
-    UpvoteReturned
-    Interest
-    InviteAFriend
-    RewardPayout
+    TransactionRegistration TransactionType = iota
+    TransactionBacking
+    TransactionBackingReturned
+    TransactionChallenge
+    TransactionChallengeReturned
+    TransactionUpvote
+    TransactionUpvoteReturned
+    TransactionInterest
+    TransactionInviteAFriend
+    TransactionRewardPayout
 )
 ```
 

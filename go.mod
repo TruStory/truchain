@@ -12,6 +12,7 @@ require (
 	github.com/gogo/protobuf v1.1.1
 	github.com/google/go-querystring v1.0.0 // indirect
 	github.com/gorilla/securecookie v1.1.1
+	github.com/magiconair/properties v1.8.0
 	github.com/otiai10/copy v0.0.0-20180813032824-7e9a647135a1 // indirect
 	github.com/otiai10/curr v0.0.0-20150429015615-9b4961190c95 // indirect
 	github.com/otiai10/mint v1.2.3 // indirect
@@ -25,3 +26,5 @@ require (
 )
 
 replace golang.org/x/crypto => github.com/tendermint/crypto v0.0.0-20180820045704-3764759f34a5
+
+replace github.com/shanev/cosmos-record-keeper => github.com/jhernandezb/cosmos-record-keeper v0.0.0-20190616052852-f42f860d5c27
