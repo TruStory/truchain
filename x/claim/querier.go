@@ -1,8 +1,6 @@
 package claim
 
 import (
-	"encoding/json"
-
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	abci "github.com/tendermint/tendermint/abci/types"
@@ -17,12 +15,12 @@ const (
 
 // QueryClaimParams for a single claim
 type QueryClaimParams struct {
-	ID uint64
+	ID uint64 `json:"id"`
 }
 
 // QueryCommunityClaimsParams for community claims
 type QueryCommunityClaimsParams struct {
-	CommunityID uint64
+	CommunityID uint64 `json:"community_id"`
 }
 
 // NewQuerier creates a new querier
@@ -42,9 +40,9 @@ func NewQuerier(keeper Keeper) sdk.Querier {
 
 func queryClaim(ctx sdk.Context, req abci.RequestQuery, keeper Keeper) ([]byte, sdk.Error) {
 	var params QueryClaimParams
-	jsonErr := json.Unmarshal(req.Data, &params)
-	if jsonErr != nil {
-		return nil, ErrJSONParse(jsonErr)
+	codecErr := moduleCodec.UnmarshalJSON(req.Data, &params)
+	if codecErr != nil {
+		return nil, ErrJSONParse(codecErr)
 	}
 
 	claim, err := keeper.Claim(ctx, params.ID)
@@ -63,9 +61,9 @@ func queryClaims(ctx sdk.Context, req abci.RequestQuery, keeper Keeper) ([]byte,
 
 func queryCommunityClaims(ctx sdk.Context, req abci.RequestQuery, keeper Keeper) ([]byte, sdk.Error) {
 	var params QueryCommunityClaimsParams
-	jsonErr := json.Unmarshal(req.Data, &params)
-	if jsonErr != nil {
-		return nil, ErrJSONParse(jsonErr)
+	codecErr := moduleCodec.UnmarshalJSON(req.Data, &params)
+	if codecErr != nil {
+		return nil, ErrJSONParse(codecErr)
 	}
 
 	claims := keeper.CommunityClaims(ctx, params.CommunityID)

@@ -38,7 +38,7 @@ func handleMsgCreateClaim(ctx sdk.Context, keeper Keeper, msg MsgCreateClaim) sd
 		return err.Result()
 	}
 
-	res, codecErr := moduleCodec.MarshalBinaryLengthPrefixed(claim)
+	res, codecErr := moduleCodec.MarshalBinaryBare(claim)
 	if err != nil {
 		return sdk.ErrInternal(fmt.Sprintf("Marshal result error: %s", codecErr)).Result()
 	}
