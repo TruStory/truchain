@@ -143,8 +143,12 @@ func (k Keeper) validateLength(ctx sdk.Context, body string) sdk.Error {
 	k.paramStore.Get(ctx, KeyMinClaimLength, &minClaimLength)
 	k.paramStore.Get(ctx, KeyMaxClaimLength, &maxClaimLength)
 
-	if len := len([]rune(body)); len < minClaimLength || len > maxClaimLength {
-		return ErrInvalidBody(body)
+	len := len([]rune(body))
+	if len < minClaimLength {
+		return ErrInvalidBodyTooShort(body)
+	}
+	if len > maxClaimLength {
+		return ErrInvalidBodyTooLong()
 	}
 
 	return nil
