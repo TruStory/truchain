@@ -1,8 +1,6 @@
 package bank
 
 import (
-	"encoding/json"
-
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	abci "github.com/tendermint/tendermint/abci/types"
 )
@@ -34,7 +32,7 @@ func NewQuerier(keeper Keeper) sdk.Querier {
 
 func queryTransactionsByAddress(ctx sdk.Context, req abci.RequestQuery, keeper Keeper) ([]byte, sdk.Error) {
 	var params QueryTransactionsByAddressParams
-	err := json.Unmarshal(req.Data, &params)
+	err := keeper.codec.UnmarshalJSON(req.Data, &params)
 	if err != nil {
 		return nil, ErrInvalidQueryParams(err)
 	}
