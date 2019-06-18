@@ -4,7 +4,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
-// staking tags
+// bank tags
 var (
 	ActionPayReward = "pay-reward"
 	TxCategory      = "truchain-bank"
