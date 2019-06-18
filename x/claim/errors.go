@@ -6,29 +6,38 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
-// CodeType ...
+// CodeType is the error code type for the module
 type CodeType = sdk.CodeType
 
 // Claim error types
 const (
 	DefaultCodespace sdk.CodespaceType = ModuleName
 
-	ErrorCodeInvalidBody                 CodeType = 101
-	ErrorCodeInvalidID                   CodeType = 102
-	ErrorCodeNotFound                    CodeType = 103
-	ErrorCodeInvalidSType                CodeType = 106
-	ErrorCodeClaimsWithCommunityNotFound CodeType = 107
-	ErrorCodeInvalidSourceURL            CodeType = 108
-	ErrorCodeCreatorJailed               CodeType = 109
-	ErrorCodeJSONParsing                 CodeType = 110
+	ErrorCodeInvalidBodyTooShort         CodeType = 101
+	ErrorCodeInvalidBodyTooLong          CodeType = 102
+	ErrorCodeInvalidID                   CodeType = 103
+	ErrorCodeNotFound                    CodeType = 104
+	ErrorCodeInvalidSType                CodeType = 105
+	ErrorCodeClaimsWithCommunityNotFound CodeType = 106
+	ErrorCodeInvalidSourceURL            CodeType = 107
+	ErrorCodeCreatorJailed               CodeType = 108
+	ErrorCodeJSONParsing                 CodeType = 109
 )
 
-// ErrInvalidBody throws an error on invalid claim body
-func ErrInvalidBody(body string) sdk.Error {
+// ErrInvalidBodyTooShort throws an error on invalid claim body
+func ErrInvalidBodyTooShort(body string) sdk.Error {
 	return sdk.NewError(
 		DefaultCodespace,
-		ErrorCodeInvalidBody,
-		"Invalid claim body: "+body)
+		ErrorCodeInvalidBodyTooShort,
+		"Invalid claim body, too short: "+body)
+}
+
+// ErrInvalidBodyTooLong throws an error on invalid claim body
+func ErrInvalidBodyTooLong() sdk.Error {
+	return sdk.NewError(
+		DefaultCodespace,
+		ErrorCodeInvalidBodyTooLong,
+		"Invalid claim body, too long")
 }
 
 // ErrInvalidID throws an error on invalid claim body
@@ -43,7 +52,7 @@ func ErrInvalidID() sdk.Error {
 func ErrInvalidCommunityID(id uint64) sdk.Error {
 	return sdk.NewError(
 		DefaultCodespace,
-		ErrorCodeInvalidBody,
+		ErrorCodeClaimsWithCommunityNotFound,
 		fmt.Sprintf("Invalid community id: %d", id))
 }
 

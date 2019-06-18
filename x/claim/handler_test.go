@@ -1,7 +1,6 @@
 package claim
 
 import (
-	"encoding/json"
 	"testing"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -25,7 +24,7 @@ func TestMsgCreateClaim(t *testing.T) {
 	assert.NotNil(t, res)
 
 	var claim Claim
-	json.Unmarshal(res.Data, &claim)
+	moduleCodec.UnmarshalBinaryBare(res.Data, &claim)
 	assert.Equal(t, uint64(1), claim.ID)
 	assert.Equal(t, body, claim.Body)
 }

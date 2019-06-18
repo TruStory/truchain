@@ -38,7 +38,7 @@ func (msg MsgCreateClaim) Type() string {
 // ValidateBasic validates basic fields of the Msg
 func (msg MsgCreateClaim) ValidateBasic() sdk.Error {
 	if len(msg.Body) == 0 {
-		return ErrInvalidBody(msg.Body)
+		return ErrInvalidBodyTooShort(msg.Body)
 	}
 	if msg.CommunityID == 0 {
 		return ErrInvalidCommunityID(msg.CommunityID)

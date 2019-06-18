@@ -1,7 +1,6 @@
 package claim
 
 import (
-	"encoding/json"
 	"fmt"
 	"net/url"
 
@@ -39,9 +38,9 @@ func handleMsgCreateClaim(ctx sdk.Context, keeper Keeper, msg MsgCreateClaim) sd
 		return err.Result()
 	}
 
-	res, jsonErr := json.Marshal(claim)
-	if jsonErr != nil {
-		return sdk.ErrInternal(fmt.Sprintf("Marshal result error: %s", jsonErr)).Result()
+	res, codecErr := moduleCodec.MarshalBinaryBare(claim)
+	if err != nil {
+		return sdk.ErrInternal(fmt.Sprintf("Marshal result error: %s", codecErr)).Result()
 	}
 
 	return sdk.Result{

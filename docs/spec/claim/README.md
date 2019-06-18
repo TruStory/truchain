@@ -19,7 +19,7 @@ type Claim struct {
     Body                string
     Creator             sdk.AccAddress
     Source              url.URL
-    TotalParticipants   int64
+    TotalStakers        int64
     TotalBackingStake   sdk.Coin
     TotalChallengeStake sdk.Coin
     CreatedTime         time.Time

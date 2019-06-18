@@ -1,7 +1,6 @@
 package claim
 
 import (
-	"encoding/json"
 	"strings"
 	"testing"
 
@@ -57,7 +56,7 @@ func TestQueryCommunityClaims(t *testing.T) {
 	queryParams := QueryCommunityClaimsParams{
 		CommunityID: uint64(1),
 	}
-	queryParamsBytes, jsonErr := json.Marshal(queryParams)
+	queryParamsBytes, jsonErr := moduleCodec.MarshalJSON(queryParams)
 	require.Nil(t, jsonErr)
 
 	query := abci.RequestQuery{

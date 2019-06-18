@@ -8,7 +8,6 @@ def process_genesis(genesis, parsed_args):
     genesis['app_state']['claim'] = genesis['app_state']['story']
     # migrate story state
     migrate_story_data(genesis['app_state']['claim'])
-    del genesis['app_state']['story']
 
     # Set new chain ID and genesis start time
     genesis['chain_id'] = parsed_args.chain_id.strip()

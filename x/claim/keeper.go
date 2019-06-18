@@ -84,8 +84,8 @@ func (k Keeper) Claim(ctx sdk.Context, id uint64) (claim Claim, err sdk.Error) {
 
 // Claims gets all the claims
 func (k Keeper) Claims(ctx sdk.Context) (claims []Claim) {
-	var claim Claim
 	err := k.Each(ctx, func(val []byte) bool {
+		var claim Claim
 		k.codec.MustUnmarshalBinaryLengthPrefixed(val, &claim)
 		claims = append(claims, claim)
 		return true
@@ -117,20 +117,20 @@ func (k Keeper) AddBackingStake(ctx sdk.Context, id uint64, stake sdk.Coin) sdk.
 		return err
 	}
 	claim.TotalBacked.Add(stake)
-	claim.TotalParticipants++
+	claim.TotalStakers++
 	k.Set(ctx, id, claim)
 
 	return nil
 }
 
-// AddChallengeStake adds a stake amount to the total backing amount
+// AddChallengeStake adds a stake amount to the total challenge amount
 func (k Keeper) AddChallengeStake(ctx sdk.Context, id uint64, stake sdk.Coin) sdk.Error {
 	claim, err := k.Claim(ctx, id)
 	if err != nil {
 		return err
 	}
 	claim.TotalChallenged.Add(stake)
-	claim.TotalParticipants++
+	claim.TotalStakers++
 	k.Set(ctx, id, claim)
 
 	return nil
@@ -143,8 +143,12 @@ func (k Keeper) validateLength(ctx sdk.Context, body string) sdk.Error {
 	k.paramStore.Get(ctx, KeyMinClaimLength, &minClaimLength)
 	k.paramStore.Get(ctx, KeyMaxClaimLength, &maxClaimLength)
 
-	if len := len([]rune(body)); len < minClaimLength || len > maxClaimLength {
-		return ErrInvalidBody(body)
+	len := len([]rune(body))
+	if len < minClaimLength {
+		return ErrInvalidBodyTooShort(body)
+	}
+	if len > maxClaimLength {
+		return ErrInvalidBodyTooLong()
 	}
 
 	return nil

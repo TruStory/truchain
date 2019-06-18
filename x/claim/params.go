@@ -23,7 +23,7 @@ type Params struct {
 func DefaultParams() Params {
 	return Params{
 		MinClaimLength: 25,
-		MaxClaimLength: 350,
+		MaxClaimLength: 140,
 	}
 }
 
