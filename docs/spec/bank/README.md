@@ -38,7 +38,7 @@ const (
 
 ```go
 type PayRewardMsg struct {
-    Creator   sdk.AccAddress
+    Sender   sdk.AccAddress
     Recipient sdk.AccAddress
     Reward    sdk.Coin
     InviteID  uint64

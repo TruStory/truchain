@@ -13,15 +13,15 @@ var (
 )
 
 type MsgPayReward struct {
-	Creator   sdk.AccAddress
+	Sender    sdk.AccAddress
 	Recipient sdk.AccAddress
 	Reward    sdk.Coin
 	InviteID  uint64
 }
 
-func NewMsgPayReward(creator, recipient sdk.AccAddress, reward sdk.Coin, inviteID uint64) MsgPayReward {
+func NewMsgPayReward(sender, recipient sdk.AccAddress, reward sdk.Coin, inviteID uint64) MsgPayReward {
 	return MsgPayReward{
-		Creator:   creator,
+		Sender:    sender,
 		Recipient: recipient,
 		Reward:    reward,
 		InviteID:  inviteID,
@@ -34,7 +34,7 @@ func (msg MsgPayReward) Type() string {
 }
 
 func (msg MsgPayReward) ValidateBasic() sdk.Error {
-	if len(msg.Creator) == 0 {
+	if len(msg.Sender) == 0 {
 		return sdk.ErrInvalidAddress("invalid creator address")
 	}
 	if len(msg.Recipient) == 0 {
@@ -48,7 +48,7 @@ func (msg MsgPayReward) ValidateBasic() sdk.Error {
 }
 
 func (msg MsgPayReward) GetSigners() []sdk.AccAddress {
-	return []sdk.AccAddress{msg.Creator}
+	return []sdk.AccAddress{msg.Sender}
 }
 
 func (msg MsgPayReward) GetSignBytes() []byte {
