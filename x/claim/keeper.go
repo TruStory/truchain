@@ -84,8 +84,8 @@ func (k Keeper) Claim(ctx sdk.Context, id uint64) (claim Claim, err sdk.Error) {
 
 // Claims gets all the claims
 func (k Keeper) Claims(ctx sdk.Context) (claims []Claim) {
-	var claim Claim
 	err := k.Each(ctx, func(val []byte) bool {
+		var claim Claim
 		k.codec.MustUnmarshalBinaryLengthPrefixed(val, &claim)
 		claims = append(claims, claim)
 		return true
