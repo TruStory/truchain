@@ -14,6 +14,8 @@ import (
 // Keeper data type storing keys to the KVStore
 type Keeper struct {
 	recordkeeper.RecordKeeper
+
+	codec      *codec.Codec
 	paramStore params.Subspace
 }
 
@@ -21,6 +23,7 @@ type Keeper struct {
 func NewKeeper(storeKey sdk.StoreKey, paramStore params.Subspace, codec *codec.Codec) Keeper {
 	return Keeper{
 		recordkeeper.NewRecordKeeper(storeKey, codec),
+		codec,
 		paramStore.WithKeyTable(ParamKeyTable()),
 	}
 }
@@ -62,7 +65,7 @@ func (k Keeper) Community(ctx sdk.Context, id uint64) (community Community, err 
 func (k Keeper) Communities(ctx sdk.Context) (communities []Community) {
 	err := k.Each(ctx, func(bytes []byte) bool {
 		var community Community
-		k.Codec.MustUnmarshalBinaryLengthPrefixed(bytes, &community)
+		k.codec.MustUnmarshalBinaryLengthPrefixed(bytes, &community)
 		communities = append(communities, community)
 		return true
 	})
