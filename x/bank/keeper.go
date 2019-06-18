@@ -36,7 +36,14 @@ func (k Keeper) Codespace() sdk.CodespaceType {
 	return k.codespace
 }
 
-// AddCoin ...
+// Transaction gets a specific transaction by id.
+func (k Keeper) Transaction(ctx sdk.Context, id uint64) (Transaction, sdk.Error) {
+	tx := Transaction{}
+	err := k.Get(ctx, id, &tx)
+	return tx, err
+}
+
+// AddCoin adds a coin to an address and adds the transaction to the association list.
 func (k Keeper) AddCoin(ctx sdk.Context, addr sdk.AccAddress, amt sdk.Coin,
 	referenceID uint64, txType TransactionType) (sdk.Coins, sdk.Error) {
 	if !txType.allowedForAddition() {
@@ -60,14 +67,7 @@ func (k Keeper) AddCoin(ctx sdk.Context, addr sdk.AccAddress, amt sdk.Coin,
 	return coins, nil
 }
 
-// Transaction gets
-func (k Keeper) Transaction(ctx sdk.Context, id uint64) (Transaction, sdk.Error) {
-	tx := Transaction{}
-	err := k.Get(ctx, id, &tx)
-	return tx, err
-}
-
-// SubtractCoin ...
+// SubtractCoin subtracts a coin from an address and adds the transaction to the association list.
 func (k Keeper) SubtractCoin(ctx sdk.Context, addr sdk.AccAddress, amt sdk.Coin,
 	referenceID uint64, txType TransactionType) (sdk.Coins, sdk.Error) {
 	if !txType.allowedForDeduction() {
@@ -111,19 +111,21 @@ func (k Keeper) payReward(ctx sdk.Context,
 }
 
 // Transactions gets all the transactions
-func (k Keeper) Transactions(ctx sdk.Context) (txs []Transaction) {
-	var tx Transaction
+func (k Keeper) Transactions(ctx sdk.Context) []Transaction {
+	txs := make([]Transaction, 0)
 	err := k.Each(ctx, func(val []byte) bool {
+		var tx Transaction
 		k.codec.MustUnmarshalBinaryLengthPrefixed(val, &tx)
 		txs = append(txs, tx)
 		return true
 	})
 	if err != nil {
-		return
+		return nil
 	}
-	return
+	return txs
 }
 
+// TransactionsByAddress gets transactions for a given address and applies sent filters.
 func (k Keeper) TransactionsByAddress(ctx sdk.Context, address sdk.AccAddress, filterSetters ...Filter) []Transaction {
 	filters := getFilters(filterSetters...)
 	transactions := make([]Transaction, 0)

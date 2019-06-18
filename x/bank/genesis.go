@@ -13,19 +13,30 @@ type GenesisState struct {
 }
 
 // NewGenesisState creates a new genesis state.
-func NewGenesisState() GenesisState {
+func NewGenesisState(params Params, transactions []Transaction) GenesisState {
+	return GenesisState{
+		Params:       params,
+		Transactions: transactions,
+	}
+}
+
+// DefaultGenesisState returns a default genesis state
+func DefaultGenesisState() GenesisState {
 	return GenesisState{
 		Params:       DefaultParams(),
 		Transactions: make([]Transaction, 0),
 	}
 }
 
-// DefaultGenesisState returns a default genesis state
-func DefaultGenesisState() GenesisState { return NewGenesisState() }
-
 // InitGenesis initializes story state from genesis file
 func InitGenesis(ctx sdk.Context, keeper Keeper, data GenesisState) {
 	keeper.SetParams(ctx, data.Params)
+	for _, tx := range data.Transactions {
+		fmt.Println("init tx", tx)
+		keeper.Set(ctx, tx.ID, tx)
+		keeper.PushWithAddress(ctx, keeper.storeKey, accountKey, tx.ID, tx.AppAccountAddress)
+	}
+	keeper.SetLen(ctx, uint64(len(data.Transactions)))
 }
 
 // ExportGenesis exports the genesis state
