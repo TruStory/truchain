@@ -32,7 +32,6 @@ func DefaultGenesisState() GenesisState {
 func InitGenesis(ctx sdk.Context, keeper Keeper, data GenesisState) {
 	keeper.SetParams(ctx, data.Params)
 	for _, tx := range data.Transactions {
-		fmt.Println("init tx", tx)
 		keeper.Set(ctx, tx.ID, tx)
 		keeper.PushWithAddress(ctx, keeper.storeKey, accountKey, tx.ID, tx.AppAccountAddress)
 	}

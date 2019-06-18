@@ -1,7 +1,6 @@
 package bank
 
 import (
-	"fmt"
 	"testing"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -42,7 +41,6 @@ func TestInitGenesis(t *testing.T) {
 	genesisState := NewGenesisState(params, transactions)
 	InitGenesis(ctx, keeper, genesisState)
 	actualGenesis := ExportGenesis(ctx, keeper)
-	fmt.Println(actualGenesis.Transactions)
 	assert.Equal(t, genesisState, actualGenesis)
 
 	err := ValidateGenesis(genesisState)
