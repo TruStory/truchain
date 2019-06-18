@@ -38,7 +38,7 @@ func (k Keeper) Codespace() sdk.CodespaceType {
 
 // AddCoin ...
 func (k Keeper) AddCoin(ctx sdk.Context, addr sdk.AccAddress, amt sdk.Coin,
-	StakeID uint64, txType TransactionType) (sdk.Coins, sdk.Error) {
+	referenceID uint64, txType TransactionType) (sdk.Coins, sdk.Error) {
 	if !txType.allowedForAddition() {
 		return sdk.Coins{}, ErrInvalidTransactionType(txType)
 	}
@@ -48,12 +48,12 @@ func (k Keeper) AddCoin(ctx sdk.Context, addr sdk.AccAddress, amt sdk.Coin,
 	}
 
 	tx := Transaction{
-		ID:          k.IncrementID(ctx),
-		Type:        txType,
-		StakeID:     StakeID,
-		Amount:      amt,
-		Creator:     addr,
-		CreatedTime: ctx.BlockHeader().Time,
+		ID:                k.IncrementID(ctx),
+		Type:              txType,
+		ReferenceID:       referenceID,
+		Amount:            amt,
+		AppAccountAddress: addr,
+		CreatedTime:       ctx.BlockHeader().Time,
 	}
 	k.Set(ctx, tx.ID, tx)
 	k.PushWithAddress(ctx, k.storeKey, accountKey, tx.ID, addr)
@@ -69,7 +69,7 @@ func (k Keeper) Transaction(ctx sdk.Context, id uint64) (Transaction, sdk.Error)
 
 // SubtractCoin ...
 func (k Keeper) SubtractCoin(ctx sdk.Context, addr sdk.AccAddress, amt sdk.Coin,
-	StakeID uint64, txType TransactionType) (sdk.Coins, sdk.Error) {
+	referenceID uint64, txType TransactionType) (sdk.Coins, sdk.Error) {
 	if !txType.allowedForDeduction() {
 		return sdk.Coins{}, ErrInvalidTransactionType(txType)
 	}
@@ -79,12 +79,12 @@ func (k Keeper) SubtractCoin(ctx sdk.Context, addr sdk.AccAddress, amt sdk.Coin,
 	}
 
 	tx := Transaction{
-		ID:          k.IncrementID(ctx),
-		Type:        txType,
-		StakeID:     StakeID,
-		Amount:      amt,
-		Creator:     addr,
-		CreatedTime: ctx.BlockHeader().Time,
+		ID:                k.IncrementID(ctx),
+		Type:              txType,
+		ReferenceID:       referenceID,
+		Amount:            amt,
+		AppAccountAddress: addr,
+		CreatedTime:       ctx.BlockHeader().Time,
 	}
 	k.Set(ctx, tx.ID, tx)
 	k.PushWithAddress(ctx, k.storeKey, accountKey, tx.ID, addr)
@@ -97,15 +97,13 @@ func (k Keeper) rewardBrokerAddress(ctx sdk.Context) sdk.AccAddress {
 	return address
 }
 
-func (k Keeper) payReward(ctx sdk.Context, creator sdk.AccAddress, recipient sdk.AccAddress, amount sdk.Coin) sdk.Error {
-	if !k.rewardBrokerAddress(ctx).Equals(creator) {
-		return ErrInvalidRewardBrokerAddress(creator)
+func (k Keeper) payReward(ctx sdk.Context,
+	sender sdk.AccAddress, recipient sdk.AccAddress,
+	amount sdk.Coin, inviteID uint64) sdk.Error {
+	if !k.rewardBrokerAddress(ctx).Equals(sender) {
+		return ErrInvalidRewardBrokerAddress(sender)
 	}
-	_, err := k.SubtractCoin(ctx, creator, amount, 0, TransactionRewardPayout)
-	if err != nil {
-		return err
-	}
-	_, err = k.AddCoin(ctx, recipient, amount, 0, TransactionInviteAFriend)
+	_, err := k.AddCoin(ctx, recipient, amount, inviteID, TransactionRewardPayout)
 	if err != nil {
 		return err
 	}

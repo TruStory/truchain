@@ -25,6 +25,6 @@ func Test_getFilters(t *testing.T) {
 		Limit(-100),
 		Offset(-1),
 	)
-	assert.Equal(t, filters.Limit, -1)
+	assert.Equal(t, filters.Limit, 0)
 	assert.Equal(t, filters.Offset, 0)
 }

@@ -24,7 +24,7 @@ func handleMsgPayReward(ctx sdk.Context, keeper Keeper, msg MsgPayReward) sdk.Re
 	if err := msg.ValidateBasic(); err != nil {
 		return err.Result()
 	}
-	err := keeper.payReward(ctx, msg.Creator, msg.Recipient, msg.Reward)
+	err := keeper.payReward(ctx, msg.Creator, msg.Recipient, msg.Reward, msg.InviteID)
 	if err != nil {
 		return err.Result()
 	}

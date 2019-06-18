@@ -28,7 +28,7 @@ func TestKeeper_AddCoin(t *testing.T) {
 		assert.NoError(t, err)
 		assert.Equal(t, TransactionBackingReturned, tx.Type)
 		assert.Equal(t, amount, tx.Amount)
-		assert.Equal(t, uint64(100), tx.StakeID)
+		assert.Equal(t, uint64(100), tx.ReferenceID)
 		return true
 	})
 	coins, err = k.AddCoin(ctx,
@@ -61,7 +61,7 @@ func TestKeeper_SubtractCoin(t *testing.T) {
 		assert.NoError(t, err)
 		assert.Equal(t, TransactionBacking, tx.Type)
 		assert.Equal(t, amount, tx.Amount)
-		assert.Equal(t, uint64(200), tx.StakeID)
+		assert.Equal(t, uint64(200), tx.ReferenceID)
 		return true
 	})
 

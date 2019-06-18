@@ -19,7 +19,7 @@ const (
 func ErrInvalidRewardBrokerAddress(address sdk.AccAddress) sdk.Error {
 	return sdk.NewError(DefaultCodespace,
 		ErrorCodeInvalidRewardBrokerAddress,
-		fmt.Sprintf("invalid broker reward address %s", address.String()),
+		fmt.Sprintf("Invalid reward broker address %s", address.String()),
 	)
 }
 
@@ -27,7 +27,7 @@ func ErrInvalidRewardBrokerAddress(address sdk.AccAddress) sdk.Error {
 func ErrInvalidTransactionType(txType TransactionType) sdk.Error {
 	return sdk.NewError(DefaultCodespace,
 		ErrorCodeInvalidTransactionType,
-		fmt.Sprintf("invalid transaction type %s", txType.String()),
+		fmt.Sprintf("Invalid transaction type %s", txType.String()),
 	)
 }
 
@@ -35,6 +35,6 @@ func ErrInvalidTransactionType(txType TransactionType) sdk.Error {
 func ErrInvalidQueryParams(err error) sdk.Error {
 	return sdk.NewError(DefaultCodespace,
 		ErrorCodeInvalidQueryParams,
-		fmt.Sprintf("invalid query params  %s", err.Error()),
+		fmt.Sprintf("Invalid query params  %s", err.Error()),
 	)
 }

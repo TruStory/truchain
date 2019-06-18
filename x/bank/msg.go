@@ -16,10 +16,10 @@ type MsgPayReward struct {
 	Creator   sdk.AccAddress
 	Recipient sdk.AccAddress
 	Reward    sdk.Coin
-	InviteID  int64
+	InviteID  uint64
 }
 
-func NewMsgPayReward(creator, recipient sdk.AccAddress, reward sdk.Coin, inviteID int64) MsgPayReward {
+func NewMsgPayReward(creator, recipient sdk.AccAddress, reward sdk.Coin, inviteID uint64) MsgPayReward {
 	return MsgPayReward{
 		Creator:   creator,
 		Recipient: recipient,

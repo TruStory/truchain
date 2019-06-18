@@ -57,7 +57,7 @@ func getFilters(filterSetters ...Filter) Filters {
 	filters := Filters{
 		TransactionTypes: make([]TransactionType, 0),
 		SortOrder:        SortAsc,
-		Limit:            -1,
+		Limit:            0,
 		Offset:           0,
 	}
 	for _, filter := range filterSetters {

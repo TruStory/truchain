@@ -8,12 +8,12 @@ All transactions in TruStory will go through the bank module. It is responsible 
 
 ```go
 type Transaction struct {
-    ID                  uint64
-    TransactionType     TransactionType
-    StakeID             uint64
-    Amount              sdk.Coin
-    Creator             sdk.AccAddress
-    CreatedTime         time.Time
+    ID                    uint64
+    TransactionType       TransactionType
+    ReferenceID           uint64
+    Amount                sdk.Coin
+    AppAccountAddress     sdk.AccAddress
+    CreatedTime           time.Time
 }
 
 type TransactionType int8
@@ -27,7 +27,6 @@ const (
     TransactionUpvote
     TransactionUpvoteReturned
     TransactionInterest
-    TransactionInviteAFriend
     TransactionRewardPayout
 )
 ```
@@ -42,7 +41,7 @@ type PayRewardMsg struct {
     Creator   sdk.AccAddress
     Recipient sdk.AccAddress
     Reward    sdk.Coin
-    InviteID  int64
+    InviteID  uint64
 }
 ```
 Currently the bank module doesn't allow transfer out of TruStory.

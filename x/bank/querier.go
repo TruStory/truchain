@@ -8,7 +8,7 @@ import (
 )
 
 const (
-	QueryTransactionsByAddress = "transactions_by_creator"
+	QueryTransactionsByAddress = "transactions_by_address"
 )
 
 // QueryTransactionsByAddress query transactions params for a specific address.
@@ -27,7 +27,7 @@ func NewQuerier(keeper Keeper) sdk.Querier {
 		case QueryTransactionsByAddress:
 			return queryTransactionsByAddress(ctx, req, keeper)
 		default:
-			return nil, sdk.ErrUnknownRequest("unknown bank query endpoint")
+			return nil, sdk.ErrUnknownRequest("Unknown bank query endpoint")
 		}
 	}
 }

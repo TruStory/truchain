@@ -34,7 +34,6 @@ const (
 	TransactionUpvote
 	TransactionUpvoteReturned
 	TransactionInterest
-	TransactionInviteAFriend
 	TransactionRewardPayout
 )
 
@@ -47,7 +46,6 @@ var TransactionTypeName = map[TransactionType]string{
 	TransactionUpvote:            "TransactionUpvote",
 	TransactionUpvoteReturned:    "TransactionUpvoteReturned",
 	TransactionInterest:          "TransactionInterest",
-	TransactionInviteAFriend:     "TransactionInviteAFriend",
 	TransactionRewardPayout:      "TransactionRewardPayout",
 }
 
@@ -57,14 +55,13 @@ var allowedTransactionsForAddition = []TransactionType{
 	TransactionChallengeReturned,
 	TransactionUpvoteReturned,
 	TransactionInterest,
-	TransactionInviteAFriend,
+	TransactionRewardPayout,
 }
 
 var allowedTransactionsForDeduction = []TransactionType{
 	TransactionBacking,
 	TransactionChallenge,
 	TransactionUpvote,
-	TransactionRewardPayout,
 }
 
 func (t TransactionType) allowedForAddition() bool {
@@ -86,10 +83,10 @@ func (t TransactionType) oneOf(types []TransactionType) bool {
 
 // Transaction stores data related to a transaction
 type Transaction struct {
-	ID          uint64
-	Type        TransactionType
-	StakeID     uint64
-	Amount      sdk.Coin
-	Creator     sdk.AccAddress
-	CreatedTime time.Time
+	ID                uint64
+	Type              TransactionType
+	AppAccountAddress sdk.AccAddress
+	ReferenceID       uint64
+	Amount            sdk.Coin
+	CreatedTime       time.Time
 }

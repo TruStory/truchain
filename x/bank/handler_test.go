@@ -32,9 +32,7 @@ func TestHandle_MsgPayReward(t *testing.T) {
 	res = handler(ctx, msg)
 	assert.True(t, res.IsOK())
 
-	brokerCoins := keeper.bankKeeper.GetCoins(ctx, brokerAddress)
 	recipientCoins := keeper.bankKeeper.GetCoins(ctx, recipientAddr)
-	assert.True(t, brokerCoins.AmountOf(app.StakeDenom).Equal(sdk.NewInt(app.Shanev*85)))
 	assert.True(t, recipientCoins.AmountOf(app.StakeDenom).Equal(sdk.NewInt(app.Shanev*15)))
 
 }
