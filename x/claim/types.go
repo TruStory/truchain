@@ -14,6 +14,11 @@ const (
 	QuerierRoute = ModuleName
 )
 
+// Association list keys
+var (
+	communityKey = sdk.NewKVStoreKey("community")
+)
+
 // Claim stores data about a claim
 type Claim struct {
 	ID              uint64         `json:"id"`

@@ -7,6 +7,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/params"
+	"github.com/shanev/cosmos-record-keeper/recordkeeper"
 	log "github.com/tendermint/tendermint/libs/log"
 )
 
@@ -25,7 +26,7 @@ type Keeper struct {
 // NewKeeper creates a new claim keeper
 func NewKeeper(storeKey sdk.StoreKey, paramStore params.Subspace, codec *codec.Codec, accountKeeper AccountKeeper, communityKeeper community.Keeper) Keeper {
 	return Keeper{
-		RecordKeeper{StoreKey: storeKey, Codec: codec},
+		recordkeeper.NewRecordKeeper(storeKey, codec),
 		storeKey,
 		codec,
 		paramStore.WithKeyTable(ParamKeyTable()),
@@ -65,7 +66,7 @@ func (k Keeper) NewClaim(
 
 	k.Set(ctx, id, claim)
 	// add claim <-> community association
-	k.Push(ctx, k.StoreKey, k.communityKeeper.StoreKey, id, communityID)
+	k.Push(ctx, k.storeKey, communityKey, id, communityID)
 
 	logger(ctx).Info("Created " + claim.String())
 
@@ -99,7 +100,7 @@ func (k Keeper) Claims(ctx sdk.Context) (claims []Claim) {
 
 // CommunityClaims gets all the claims for a given community
 func (k Keeper) CommunityClaims(ctx sdk.Context, communityID uint64) (claims []Claim) {
-	k.Map(ctx, k.communityKeeper.StoreKey, communityID, func(id uint64) {
+	k.Map(ctx, communityKey, communityID, func(id uint64) {
 		claim, err := k.Claim(ctx, id)
 		if err != nil {
 			panic(err)

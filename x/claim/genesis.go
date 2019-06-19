@@ -27,7 +27,7 @@ func DefaultGenesisState() GenesisState { return NewGenesisState() }
 func InitGenesis(ctx sdk.Context, k Keeper, data GenesisState) {
 	for _, c := range data.Claims {
 		k.Set(ctx, c.ID, c)
-		k.Push(ctx, k.StoreKey, k.communityKeeper.StoreKey, c.ID, c.CommunityID)
+		k.Push(ctx, k.storeKey, communityKey, c.ID, c.CommunityID)
 	}
 	k.SetLen(ctx, uint64(len(data.Claims)))
 	k.SetParams(ctx, data.Params)
