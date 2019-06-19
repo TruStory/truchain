@@ -27,3 +27,4 @@ web/
 build/
 .testnet/
 *.pyc
+.idea/

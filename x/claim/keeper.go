@@ -100,12 +100,13 @@ func (k Keeper) Claims(ctx sdk.Context) (claims []Claim) {
 
 // CommunityClaims gets all the claims for a given community
 func (k Keeper) CommunityClaims(ctx sdk.Context, communityID uint64) (claims []Claim) {
-	k.Map(ctx, communityKey, communityID, func(id uint64) {
+	k.Map(ctx, communityKey, communityID, func(id uint64) bool {
 		claim, err := k.Claim(ctx, id)
 		if err != nil {
 			panic(err)
 		}
 		claims = append(claims, claim)
+		return true
 	})
 
 	return claims
