@@ -16,7 +16,7 @@ require (
 	github.com/otiai10/copy v0.0.0-20180813032824-7e9a647135a1 // indirect
 	github.com/otiai10/curr v0.0.0-20150429015615-9b4961190c95 // indirect
 	github.com/otiai10/mint v1.2.3 // indirect
-	github.com/shanev/cosmos-record-keeper v0.0.0-20190611183109-41312f3f70e8
+	github.com/shanev/cosmos-record-keeper v0.0.0-20190618225545-be10673bb24d
 	github.com/spf13/cobra v0.0.3
 	github.com/spf13/viper v1.0.3
 	github.com/stretchr/testify v1.3.0
@@ -26,5 +26,3 @@ require (
 )
 
 replace golang.org/x/crypto => github.com/tendermint/crypto v0.0.0-20180820045704-3764759f34a5
-
-replace github.com/shanev/cosmos-record-keeper => github.com/jhernandezb/cosmos-record-keeper v0.0.0-20190616052852-f42f860d5c27

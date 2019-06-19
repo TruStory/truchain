@@ -161,6 +161,8 @@ github.com/shanev/cosmos-record-keeper v0.0.0-20190603233255-3ef9f5358485 h1:iiM
 github.com/shanev/cosmos-record-keeper v0.0.0-20190603233255-3ef9f5358485/go.mod h1:a1tNXWZPDzSPY1iTEbjIWSsyoKC4kCjtlAQxra44cbc=
 github.com/shanev/cosmos-record-keeper v0.0.0-20190611183109-41312f3f70e8 h1:WZ2dtUfJ7UuB+bHw1cLmaPP5P48IIg03dVhQ2pdB9AM=
 github.com/shanev/cosmos-record-keeper v0.0.0-20190611183109-41312f3f70e8/go.mod h1:a1tNXWZPDzSPY1iTEbjIWSsyoKC4kCjtlAQxra44cbc=
+github.com/shanev/cosmos-record-keeper v0.0.0-20190618225545-be10673bb24d h1:V3t3oCkdrDfwZHNmUEjgEusir11HceAdksKULyNWm1w=
+github.com/shanev/cosmos-record-keeper v0.0.0-20190618225545-be10673bb24d/go.mod h1:a1tNXWZPDzSPY1iTEbjIWSsyoKC4kCjtlAQxra44cbc=
 github.com/sirupsen/logrus v1.2.0/go.mod h1:LxeOpSwHxABJmUn/MG1IvRgCAasNZTLOkJPxbbu5VWo=
 github.com/spf13/afero v1.2.1 h1:qgMbHoJbPbw579P+1zVY+6n4nIFuIchaIjzZ/I/Yq8M=
 github.com/spf13/afero v1.2.1/go.mod h1:9ZxEEn6pIJ8Rxe320qSDBk6AsU0r9pR7Q4OcevTdifk=
