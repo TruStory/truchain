@@ -128,3 +128,13 @@ make test
 # Generate a website with documentation
 make doc
 ```
+
+## Upgrades
+
+To migrate between different genesis schemas, use the python script in `contrib/migration`.
+
+```sh
+python 2-stories-to-claims.py \
+    --exported-genesis exported-genesis.json \
+    --chain-id devnet-1 > genesis.json 
+```
