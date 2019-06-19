@@ -21,6 +21,9 @@ var (
 type TransactionType int8
 
 func (t TransactionType) String() string {
+	if int(t) >= len(TransactionTypeName) {
+		return "Unknown transaction type"
+	}
 	return TransactionTypeName[t]
 }
 
@@ -37,7 +40,7 @@ const (
 	TransactionRewardPayout
 )
 
-var TransactionTypeName = map[TransactionType]string{
+var TransactionTypeName = []string{
 	TransactionRegistration:      "TransactionRegistration",
 	TransactionBacking:           "TransactionBacking",
 	TransactionBackingReturned:   "TransactionBackingReturned",

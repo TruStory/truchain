@@ -13,7 +13,7 @@ const (
 type QueryTransactionsByAddressParams struct {
 	Address   sdk.AccAddress    `json:"address"`
 	Types     []TransactionType `json:"types,omitempty"`
-	SortOrder SortOrderType     `json:"sortOrder,omitempty"`
+	SortOrder SortOrderType     `json:"sort_order,omitempty"`
 	Limit     int               `json:"limit,omitempty"`
 	Offset    int               `json:"offset,omitempty"`
 }
