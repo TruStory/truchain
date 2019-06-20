@@ -43,8 +43,17 @@ doc:
 export:
 	bin/truchaind export
 
+registrar:
+	bin/truchaincli keys add registrar --home ~/.octopus
+
 init:
+	rm -rf ~/.truchaind
 	bin/truchaind init trunode
+	bin/truchaind add-genesis-account $(shell bin/truchaincli keys show registrar -a --home ~/.octopus) 1000000000trusteak
+
+gentx:
+	bin/truchaind gentx --name=registrar --amount 100000000trusteak --home-client ~/.octopus
+	bin/truchaind collect-gentxs
 
 install:
 	@go install $(BUILD_FLAGS) ./cmd/truchaind
@@ -58,7 +67,7 @@ reset:
 restart: build_daemon reset start
 
 start:
-	bin/truchaind --log_level "main:info,state:info,*:error,app:info,argument:info,backing:info,category:info,challenge:info,expiration:info,stake:info,stories:info" start
+	bin/truchaind start --log_level "main:info,state:info,*:error,app:info,argument:info,backing:info,category:info,challenge:info,expiration:info,stake:info,stories:info"
 
 check:
 	@echo "--> Running golangci"

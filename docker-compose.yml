@@ -20,7 +20,6 @@ services:
     image: "trustory/truchaindnode"
     ports:
       - "26659-26660:26656-26657"
-    env_file: .env
     environment:
       - ID=1
       - LOG=${LOG:-truchaind.log}
@@ -33,7 +32,6 @@ services:
   truchaindnode2:
     container_name: truchaindnode2
     image: "trustory/truchaindnode"
-    env_file: .env
     environment:
       - ID=2
       - LOG=${LOG:-truchaind.log}
@@ -48,7 +46,6 @@ services:
   truchaindnode3:
     container_name: truchaindnode3
     image: "trustory/truchaindnode"
-    env_file: .env
     environment:
       - ID=3
       - LOG=${LOG:-truchaind.log}
