@@ -12,6 +12,7 @@ import (
 const (
 	RouterKey    = ModuleName
 	QuerierRoute = ModuleName
+	StoreKey     = ModuleName
 )
 
 // Association list keys
