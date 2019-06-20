@@ -81,21 +81,11 @@ Most chain operations are executed based on changes to data at certain block tim
 
 A queue of all new stories that haven't expired. These are stories in the pending state. When they expire they are handled in [`x/expiration`](x/expiration/README.md), where rewards and interested are distributed.
 
-## Local single-node development
-
-TruChain can be setup for local development.
-
-```
-# Create a genesis file in .chain
-make init
-
-# Start the chain with logging for all modules turned on
-make start
-```
-
 ## Local 4-node testnet
 
 A 4-node local testnet can be created with Docker Compose.
+
+NOTE: You will not be able to register accounts because each node won't have a registrar key setup. This restriction will go away after client-side signing.
 
 ```
 # Build daemon for linux so it can run inside a Docker container
