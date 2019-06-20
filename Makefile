@@ -41,7 +41,7 @@ doc:
 	godoc -http=:6060
 
 export:
-	bin/truchaind export
+	@bin/truchaind export
 
 registrar:
 	bin/truchaincli keys add registrar --home ~/.octopus
