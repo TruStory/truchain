@@ -40,26 +40,22 @@ This creates:
 
 `truchaincli`: TruStory blockchain client. Used for creating keys and lightweight interaction with the chain and underlying Tendermint node.
 
-### Setup genesis file
+### Run a single node
 
 TruChain currently needs a _registrar_ account to sign new user registration messages.
 
 ```
-# Initialize configuration files and genesis file
-truchaind init trustory --chain-id localnet-1
-
-# Configure the CLI to eliminate need for chain-id flag
-truchaincli config chain-id truchain --home ~/.octopus
-
 # Add a new key named registrar
-truchaincli keys add registrar --home ~/.octopus
+make registrar
 
-# Add the genesis account on the chain, giving it some trusteak
-truchaind add-genesis-account $(truchaincli keys show registrar -a --home ~/.octopus) 1000000000trusteak
+# Initialize configuration files and genesis file
+make init
 
-# Add genesis transactions that creates a test validator when the chain starts
-truchaind gentx --name=registrar --amount 100000000trusteak --home-client ~/.octopus
-truchaind collect-gentxs
+# Edit genesis file to rename bond_denom value to "trusteak"
+vi ~/.truchaind/config/genesis.json
+
+# Collect genesis transactions
+make gentx
 
 # Start the chain
 make start
@@ -85,21 +81,11 @@ Most chain operations are executed based on changes to data at certain block tim
 
 A queue of all new stories that haven't expired. These are stories in the pending state. When they expire they are handled in [`x/expiration`](x/expiration/README.md), where rewards and interested are distributed.
 
-## Local single-node development
-
-TruChain can be setup for local development.
-
-```
-# Create a genesis file in .chain
-make init
-
-# Start the chain with logging for all modules turned on
-make start
-```
-
 ## Local 4-node testnet
 
 A 4-node local testnet can be created with Docker Compose.
+
+NOTE: You will not be able to register accounts because each node won't have a registrar key setup. This restriction will go away after client-side signing.
 
 ```
 # Build daemon for linux so it can run inside a Docker container
@@ -108,8 +94,8 @@ make build-linux
 # Create 4-nodes with their own genesis files and configuration
 make localnet-start
 
-# Tail chain logs within Docker Compose
-docker-compose logs --tail=0 --follow
+# Tail Docker logs
+docker logs -f truchaindnodeN
 ```
 
 ## Testing
