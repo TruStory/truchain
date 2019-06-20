@@ -1,11 +1,13 @@
 #!/usr/bin/env python3
 
+import copy
+
 import lib
 
 
 def process_genesis(genesis, parsed_args):
     # rename story -> claim
-    genesis['app_state']['claim'] = genesis['app_state']['story']
+    genesis['app_state']['claim'] = copy.deepcopy(genesis['app_state']['story'])
     # migrate story state
     migrate_story_data(genesis['app_state']['claim'])
 
