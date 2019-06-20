@@ -52,7 +52,7 @@ func (msg MsgCreateClaim) ValidateBasic() sdk.Error {
 
 // GetSignBytes gets the bytes for Msg signer to sign on
 func (msg MsgCreateClaim) GetSignBytes() []byte {
-	msgBytes := moduleCodec.MustMarshalJSON(msg)
+	msgBytes := ModuleCodec.MustMarshalJSON(msg)
 	return sdk.MustSortJSON(msgBytes)
 }
 
@@ -91,7 +91,7 @@ func (msg MsgDeleteClaim) ValidateBasic() sdk.Error {
 
 // GetSignBytes gets the bytes for Msg signer to sign on
 func (msg MsgDeleteClaim) GetSignBytes() []byte {
-	msgBytes := moduleCodec.MustMarshalJSON(msg)
+	msgBytes := ModuleCodec.MustMarshalJSON(msg)
 	return sdk.MustSortJSON(msgBytes)
 }
 
