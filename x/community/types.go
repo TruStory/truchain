@@ -19,9 +19,9 @@ type Community struct {
 	ID               uint64    `json:"id"`
 	Name             string    `json:"name"`
 	Slug             string    `json:"slug"`
-	Description      string    `json:"description",omitempty`
+	Description      string    `json:"description,omitempty"`
 	TotalEarnedStake sdk.Coin  `json:"total_earned_stake"`
-	CreatedTime      time.Time `json:"created_time",omitempty`
+	CreatedTime      time.Time `json:"created_time,omitempty"`
 }
 
 func (c Community) String() string {
