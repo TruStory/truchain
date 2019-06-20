@@ -11,6 +11,7 @@ import (
 const (
 	RouterKey    = ModuleName
 	QuerierRoute = ModuleName
+	StoreKey     = ModuleName
 )
 
 // Community represents the state of a community on TruStory

@@ -8,6 +8,7 @@ import (
 	"github.com/TruStory/truchain/x/backing"
 	"github.com/TruStory/truchain/x/category"
 	"github.com/TruStory/truchain/x/challenge"
+	"github.com/TruStory/truchain/x/community"
 	"github.com/TruStory/truchain/x/expiration"
 	clientParams "github.com/TruStory/truchain/x/params"
 	"github.com/TruStory/truchain/x/stake"
@@ -98,6 +99,9 @@ type TruChain struct {
 	keyStoryQueue *sdk.KVStoreKey
 	keyTruBank    *sdk.KVStoreKey
 
+	// keys to access trustory V2 state
+	keyCommunity *sdk.KVStoreKey
+
 	// manage getting and setting accounts
 	accountKeeper       auth.AccountKeeper
 	feeCollectionKeeper auth.FeeCollectionKeeper
@@ -117,6 +121,9 @@ type TruChain struct {
 	storyKeeper        story.Keeper
 	stakeKeeper        stake.Keeper
 	truBankKeeper      trubank.Keeper
+
+	// access truchain V2 multistore
+	communityKeeper community.Keeper
 
 	// the module manager
 	mm *sdk.ModuleManager
@@ -159,6 +166,7 @@ func NewTruChain(logger log.Logger, db dbm.DB, loadLatest bool, options ...func(
 		keyFeeCollection: sdk.NewKVStoreKey(auth.FeeStoreKey),
 		keyStake:         sdk.NewKVStoreKey(stake.StoreKey),
 		keyTruBank:       sdk.NewKVStoreKey(trubank.StoreKey),
+		keyCommunity:     sdk.NewKVStoreKey(community.StoreKey),
 	}
 
 	// init params keeper and subspaces
@@ -252,6 +260,12 @@ func NewTruChain(logger log.Logger, db dbm.DB, loadLatest bool, options ...func(
 		app.storyKeeper,
 	)
 
+	app.communityKeeper = community.NewKeeper(
+		app.keyCommunity,
+		app.paramsKeeper.Subspace(community.StoreKey),
+		codec,
+	)
+
 	// The AnteHandler handles signature verification and transaction pre-processing
 	// TODO [shanev]: see https://github.com/TruStory/truchain/issues/364
 	// Add this back after fixing issues with signature verification
@@ -279,7 +293,8 @@ func NewTruChain(logger log.Logger, db dbm.DB, loadLatest bool, options ...func(
 		AddRoute(backing.QueryPath, backing.NewQuerier(app.backingKeeper)).
 		AddRoute(challenge.QueryPath, challenge.NewQuerier(app.challengeKeeper)).
 		AddRoute(clientParams.QueryPath, clientParams.NewQuerier(app.clientParamsKeeper)).
-		AddRoute(trubank.QueryPath, trubank.NewQuerier(app.truBankKeeper))
+		AddRoute(trubank.QueryPath, trubank.NewQuerier(app.truBankKeeper)).
+		AddRoute(community.QuerierRoute, community.NewQuerier(app.communityKeeper))
 
 	app.mm = sdk.NewModuleManager(
 		genaccounts.NewAppModule(app.accountKeeper),
@@ -296,6 +311,7 @@ func NewTruChain(logger log.Logger, db dbm.DB, loadLatest bool, options ...func(
 		challenge.NewAppModule(app.challengeKeeper),
 		expiration.NewAppModule(app.expirationKeeper),
 		trubank.NewAppModule(app.truBankKeeper),
+		community.NewAppModule(app.communityKeeper),
 	)
 
 	// During begin block slashing happens after distr.BeginBlocker so that

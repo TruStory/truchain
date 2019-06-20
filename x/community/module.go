@@ -54,6 +54,14 @@ type AppModule struct {
 	keeper Keeper
 }
 
+// NewAppModule creates a NewAppModule object
+func NewAppModule(keeper Keeper) AppModule {
+	return AppModule{
+		AppModuleBasic: AppModuleBasic{},
+		keeper:         keeper,
+	}
+}
+
 // RegisterInvariants enforces registering of invariants
 func (AppModule) RegisterInvariants(_ sdk.InvariantRouter) {}
 
