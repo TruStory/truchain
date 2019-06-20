@@ -18,6 +18,13 @@ def process_genesis(genesis, parsed_args):
     return genesis
 
 def migrate_category_data(category_data):
+    category_data['params'] = {
+        'min_name_length': '5',
+        'max_name_length': '25',
+        'min_slug_length': '3',
+        'max_slug_length': '15',
+        'max_description_length': '140',
+    }
     category_data['communities'] = category_data['categories']
     del category_data['categories']
     for s in category_data['communities']:
