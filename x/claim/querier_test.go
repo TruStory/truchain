@@ -23,7 +23,7 @@ func TestQueryClaims_NoneFound(t *testing.T) {
 	require.NoError(t, err)
 
 	var claims []Claim
-	cdcErr := moduleCodec.UnmarshalJSON(resBytes, &claims)
+	cdcErr := ModuleCodec.UnmarshalJSON(resBytes, &claims)
 	require.NoError(t, cdcErr)
 	require.Equal(t, 0, len(claims))
 }
@@ -43,7 +43,7 @@ func TestQueryClaims(t *testing.T) {
 	require.NoError(t, err)
 
 	var claims []Claim
-	cdcErr := moduleCodec.UnmarshalJSON(resBytes, &claims)
+	cdcErr := ModuleCodec.UnmarshalJSON(resBytes, &claims)
 	require.NoError(t, cdcErr)
 	require.Equal(t, 1, len(claims))
 }
@@ -56,7 +56,7 @@ func TestQueryCommunityClaims(t *testing.T) {
 	queryParams := QueryCommunityClaimsParams{
 		CommunityID: uint64(1),
 	}
-	queryParamsBytes, jsonErr := moduleCodec.MarshalJSON(queryParams)
+	queryParamsBytes, jsonErr := ModuleCodec.MarshalJSON(queryParams)
 	require.Nil(t, jsonErr)
 
 	query := abci.RequestQuery{
@@ -69,7 +69,7 @@ func TestQueryCommunityClaims(t *testing.T) {
 	require.NoError(t, err)
 
 	var claims []Claim
-	cdcErr := moduleCodec.UnmarshalJSON(resBytes, &claims)
+	cdcErr := ModuleCodec.UnmarshalJSON(resBytes, &claims)
 	require.NoError(t, cdcErr)
 	require.Equal(t, 1, len(claims))
 }

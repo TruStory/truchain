@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	abci "github.com/tendermint/tendermint/abci/types"
 )
@@ -44,12 +45,12 @@ func queryCommunity(ctx sdk.Context, request abci.RequestQuery, k Keeper) (resul
 		return
 	}
 
-	return mustMarshal(community), nil
+	return mustMarshal(community)
 }
 
 func queryCommunities(ctx sdk.Context, k Keeper) (result []byte, err sdk.Error) {
 	communities := k.Communities(ctx)
-	return mustMarshal(communities), nil
+	return mustMarshal(communities)
 }
 
 func unmarshalQueryParams(request abci.RequestQuery, params interface{}) (sdkErr sdk.Error) {
@@ -61,10 +62,11 @@ func unmarshalQueryParams(request abci.RequestQuery, params interface{}) (sdkErr
 	return
 }
 
-func mustMarshal(v interface{}) (result []byte) {
-	result, err := json.MarshalIndent(v, "", "  ")
-	if err != nil {
-		panic("Could not marshal result to JSON")
+func mustMarshal(v interface{}) (result []byte, err sdk.Error) {
+	result, jsonErr := codec.MarshalJSONIndent(ModuleCodec, v)
+	if jsonErr != nil {
+		return nil, ErrJSONParse(jsonErr)
 	}
+
 	return
 }

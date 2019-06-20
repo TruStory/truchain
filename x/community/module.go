@@ -34,13 +34,13 @@ func (AppModuleBasic) RegisterCodec(cdc *codec.Codec) {
 
 // DefaultGenesis creates the default genesis state for testing
 func (AppModuleBasic) DefaultGenesis() json.RawMessage {
-	return moduleCodec.MustMarshalJSON(DefaultGenesisState())
+	return ModuleCodec.MustMarshalJSON(DefaultGenesisState())
 }
 
 // ValidateGenesis validates the genesis state
 func (AppModuleBasic) ValidateGenesis(bz json.RawMessage) error {
 	var data GenesisState
-	err := moduleCodec.UnmarshalJSON(bz, &data)
+	err := ModuleCodec.UnmarshalJSON(bz, &data)
 	if err != nil {
 		return err
 	}
@@ -88,7 +88,7 @@ func (am AppModule) NewQuerierHandler() sdk.Querier {
 // InitGenesis enforces the creation of the genesis state for this module
 func (am AppModule) InitGenesis(ctx sdk.Context, data json.RawMessage) []abci.ValidatorUpdate {
 	var genesisState GenesisState
-	moduleCodec.MustUnmarshalJSON(data, &genesisState)
+	ModuleCodec.MustUnmarshalJSON(data, &genesisState)
 	InitGenesis(ctx, am.keeper, genesisState)
 	return []abci.ValidatorUpdate{}
 }
@@ -96,7 +96,7 @@ func (am AppModule) InitGenesis(ctx sdk.Context, data json.RawMessage) []abci.Va
 // ExportGenesis enforces exporting this module's data to a genesis file
 func (am AppModule) ExportGenesis(ctx sdk.Context) json.RawMessage {
 	gs := ExportGenesis(ctx, am.keeper)
-	return moduleCodec.MustMarshalJSON(gs)
+	return ModuleCodec.MustMarshalJSON(gs)
 }
 
 // BeginBlock runs before a block is processed
