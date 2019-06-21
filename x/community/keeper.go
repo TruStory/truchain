@@ -3,7 +3,6 @@ package community
 import (
 	"fmt"
 
-	app "github.com/TruStory/truchain/types"
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/params"
@@ -42,7 +41,7 @@ func (k Keeper) NewCommunity(ctx sdk.Context, name string, slug string, descript
 		Name:        name,
 		Slug:        slug,
 		Description: description,
-		Timestamp:   app.NewTimestamp(ctx.BlockHeader()),
+		CreatedTime: ctx.BlockHeader().Time,
 	}
 
 	k.Set(ctx, community.ID, community)

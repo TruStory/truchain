@@ -40,7 +40,7 @@ func NewQuerier(keeper Keeper) sdk.Querier {
 
 func queryClaim(ctx sdk.Context, req abci.RequestQuery, keeper Keeper) ([]byte, sdk.Error) {
 	var params QueryClaimParams
-	codecErr := moduleCodec.UnmarshalJSON(req.Data, &params)
+	codecErr := ModuleCodec.UnmarshalJSON(req.Data, &params)
 	if codecErr != nil {
 		return nil, ErrJSONParse(codecErr)
 	}
@@ -61,7 +61,7 @@ func queryClaims(ctx sdk.Context, req abci.RequestQuery, keeper Keeper) ([]byte,
 
 func queryCommunityClaims(ctx sdk.Context, req abci.RequestQuery, keeper Keeper) ([]byte, sdk.Error) {
 	var params QueryCommunityClaimsParams
-	codecErr := moduleCodec.UnmarshalJSON(req.Data, &params)
+	codecErr := ModuleCodec.UnmarshalJSON(req.Data, &params)
 	if codecErr != nil {
 		return nil, ErrJSONParse(codecErr)
 	}
@@ -71,7 +71,7 @@ func queryCommunityClaims(ctx sdk.Context, req abci.RequestQuery, keeper Keeper)
 }
 
 func mustMarshal(v interface{}) (result []byte, err sdk.Error) {
-	result, jsonErr := codec.MarshalJSONIndent(moduleCodec, v)
+	result, jsonErr := codec.MarshalJSONIndent(ModuleCodec, v)
 	if jsonErr != nil {
 		return nil, ErrJSONParse(jsonErr)
 	}
