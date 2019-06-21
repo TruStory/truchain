@@ -23,7 +23,6 @@ type QueryCommunityParams struct {
 // NewQuerier returns a function that handles queries on the KVStore
 func NewQuerier(k Keeper) sdk.Querier {
 	return func(ctx sdk.Context, path []string, request abci.RequestQuery) (result []byte, err sdk.Error) {
-		fmt.Println(request)
 		switch path[0] {
 		case QueryCommunity:
 			return queryCommunity(ctx, request, k)

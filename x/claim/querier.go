@@ -1,6 +1,9 @@
 package claim
 
 import (
+	"encoding/json"
+	"fmt"
+
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	abci "github.com/tendermint/tendermint/abci/types"
@@ -40,7 +43,7 @@ func NewQuerier(keeper Keeper) sdk.Querier {
 
 func queryClaim(ctx sdk.Context, req abci.RequestQuery, keeper Keeper) ([]byte, sdk.Error) {
 	var params QueryClaimParams
-	codecErr := ModuleCodec.UnmarshalJSON(req.Data, &params)
+	codecErr := unmarshalQueryParams(req, &params)
 	if codecErr != nil {
 		return nil, ErrJSONParse(codecErr)
 	}
@@ -61,13 +64,22 @@ func queryClaims(ctx sdk.Context, req abci.RequestQuery, keeper Keeper) ([]byte,
 
 func queryCommunityClaims(ctx sdk.Context, req abci.RequestQuery, keeper Keeper) ([]byte, sdk.Error) {
 	var params QueryCommunityClaimsParams
-	codecErr := ModuleCodec.UnmarshalJSON(req.Data, &params)
+	codecErr := unmarshalQueryParams(req, &params)
 	if codecErr != nil {
 		return nil, ErrJSONParse(codecErr)
 	}
 	claims := keeper.CommunityClaims(ctx, params.CommunityID)
 
 	return mustMarshal(claims)
+}
+
+func unmarshalQueryParams(request abci.RequestQuery, params interface{}) (sdkErr sdk.Error) {
+	err := json.Unmarshal(request.Data, params)
+	if err != nil {
+		sdkErr = sdk.ErrUnknownRequest(fmt.Sprintf("Incorrectly formatted request data - %s", err.Error()))
+		return
+	}
+	return
 }
 
 func mustMarshal(v interface{}) (result []byte, err sdk.Error) {
