@@ -1,7 +1,6 @@
 package community
 
 import (
-	"encoding/json"
 	"fmt"
 
 	"github.com/cosmos/cosmos-sdk/codec"
@@ -34,10 +33,11 @@ func NewQuerier(k Keeper) sdk.Querier {
 	}
 }
 
-func queryCommunity(ctx sdk.Context, request abci.RequestQuery, k Keeper) (result []byte, err sdk.Error) {
-	params := QueryCommunityParams{}
-	if err = unmarshalQueryParams(request, &params); err != nil {
-		return
+func queryCommunity(ctx sdk.Context, req abci.RequestQuery, k Keeper) (result []byte, err sdk.Error) {
+	var params QueryCommunityParams
+	codecErr := ModuleCodec.UnmarshalJSON(req.Data, &params)
+	if codecErr != nil {
+		return nil, ErrJSONParse(codecErr)
 	}
 
 	community, err := k.Community(ctx, params.ID)
@@ -51,15 +51,6 @@ func queryCommunity(ctx sdk.Context, request abci.RequestQuery, k Keeper) (resul
 func queryCommunities(ctx sdk.Context, k Keeper) (result []byte, err sdk.Error) {
 	communities := k.Communities(ctx)
 	return mustMarshal(communities)
-}
-
-func unmarshalQueryParams(request abci.RequestQuery, params interface{}) (sdkErr sdk.Error) {
-	err := json.Unmarshal(request.Data, params)
-	if err != nil {
-		sdkErr = sdk.ErrUnknownRequest(fmt.Sprintf("Incorrectly formatted request data - %s", err.Error()))
-		return
-	}
-	return
 }
 
 func mustMarshal(v interface{}) (result []byte, err sdk.Error) {

@@ -3,7 +3,6 @@ package community
 import (
 	"fmt"
 
-	app "github.com/TruStory/truchain/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
@@ -24,8 +23,8 @@ func NewGenesisState(communities []Community, params Params) GenesisState {
 // DefaultGenesisState returns a default genesis state
 func DefaultGenesisState() GenesisState {
 	communities := []Community{
-		{ID: 1, Name: "Cryptocurrency", Slug: "crypto", TotalEarnedStake: sdk.NewCoin(app.StakeDenom, sdk.ZeroInt())},
-		{ID: 2, Name: "Memes", Slug: "meme", TotalEarnedStake: sdk.NewCoin(app.StakeDenom, sdk.ZeroInt())},
+		// {ID: 1, Name: "Cryptocurrency", Slug: "crypto", TotalEarnedStake: sdk.NewCoin(app.StakeDenom, sdk.ZeroInt())},
+		// {ID: 2, Name: "Memes", Slug: "meme", TotalEarnedStake: sdk.NewCoin(app.StakeDenom, sdk.ZeroInt())},
 	}
 
 	return NewGenesisState(communities, DefaultParams())

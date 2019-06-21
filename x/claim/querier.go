@@ -55,7 +55,6 @@ func queryClaim(ctx sdk.Context, req abci.RequestQuery, keeper Keeper) ([]byte, 
 
 func queryClaims(ctx sdk.Context, req abci.RequestQuery, keeper Keeper) ([]byte, sdk.Error) {
 	claims := keeper.Claims(ctx)
-	fmt.Println(claims)
 
 	return mustMarshal(claims)
 }
