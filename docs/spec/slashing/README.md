@@ -2,7 +2,7 @@
 
 ## Summary
 
-The slashing module applies punishments to users who act badly on TruStory. After a user has been slashed a certain number of times, they are *jailed*. A user *unjails* themselves by creating a valid claim.
+The slashing module applies punishments to users who act badly on TruStory. After a user has been slashed a certain number of times, they are *jailed*. A user *unjails* themselves by creating a valid argument with a certain number of upvotes.
 
 ## State
 
