@@ -80,7 +80,7 @@ func (msg MsgDeleteClaim) Type() string {
 // ValidateBasic validates basic fields of the Msg
 func (msg MsgDeleteClaim) ValidateBasic() sdk.Error {
 	if msg.ID == 0 {
-		return ErrInvalidID()
+		return ErrUnknownClaim(msg.ID)
 	}
 	if len(msg.Creator) == 0 {
 		return sdk.ErrInvalidAddress("Invalid address: " + msg.Creator.String())

@@ -45,9 +45,9 @@ func queryClaim(ctx sdk.Context, req abci.RequestQuery, keeper Keeper) ([]byte, 
 		return nil, ErrJSONParse(codecErr)
 	}
 
-	claim, err := keeper.Claim(ctx, params.ID)
-	if err != nil {
-		return nil, err
+	claim, ok := keeper.Claim(ctx, params.ID)
+	if !ok {
+		return nil, ErrUnknownClaim(claim.ID)
 	}
 
 	return mustMarshal(claim)

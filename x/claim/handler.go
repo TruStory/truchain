@@ -33,7 +33,7 @@ func handleMsgCreateClaim(ctx sdk.Context, keeper Keeper, msg MsgCreateClaim) sd
 		return ErrInvalidSourceURL(msg.Source).Result()
 	}
 
-	claim, err := keeper.NewClaim(ctx, msg.Body, msg.CommunityID, msg.Creator, *sourceURL)
+	claim, err := keeper.SubmitClaim(ctx, msg.Body, msg.CommunityID, msg.Creator, *sourceURL)
 	if err != nil {
 		return err.Result()
 	}
@@ -53,7 +53,7 @@ func handleMsgDeleteClaim(ctx sdk.Context, keeper Keeper, msg MsgDeleteClaim) sd
 		return err.Result()
 	}
 
-	_ = keeper.Delete(ctx, msg.ID)
+	// _ = keeper.Delete(ctx, msg.ID)
 
 	return sdk.Result{}
 }
