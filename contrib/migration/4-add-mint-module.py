@@ -7,14 +7,14 @@ import lib
 def process_genesis(genesis, parsed_args):
     genesis['app_state']['mint'] = {
         'minter': {
-            'inflation': '1333000000',  # ~$5,000 worth of utrustake
-            'annual_provisions': 'utrustake',
+            'inflation': '0.200000000000000000',
+            'annual_provisions': '0.000000000000000000',
         },
         'params': {
             'mint_denom': 'trustake',
-            'inflation_rate_change': '0.130000000000000000',
-            'inflation_max': '0.200000000000000000',
-            'inflation_min': '0.070000000000000000',
+            'inflation_rate_change': '0.150000000000000000',
+            'inflation_max': '0.250000000000000000',
+            'inflation_min': '0.100000000000000000',
             'goal_bonded': '0.670000000000000000',
             'blocks_per_year': '6311520',
         }
