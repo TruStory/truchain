@@ -13,8 +13,6 @@ func NewHandler(keeper Keeper) sdk.Handler {
 		switch msg := msg.(type) {
 		case MsgCreateClaim:
 			return handleMsgCreateClaim(ctx, keeper, msg)
-		case MsgDeleteClaim:
-			return handleMsgDeleteClaim(ctx, keeper, msg)
 		default:
 			errMsg := fmt.Sprintf("Unrecognized claim message type: %T", msg)
 			return sdk.ErrUnknownRequest(errMsg).Result()
@@ -46,14 +44,4 @@ func handleMsgCreateClaim(ctx sdk.Context, keeper Keeper, msg MsgCreateClaim) sd
 	return sdk.Result{
 		Data: res,
 	}
-}
-
-func handleMsgDeleteClaim(ctx sdk.Context, keeper Keeper, msg MsgDeleteClaim) sdk.Result {
-	if err := msg.ValidateBasic(); err != nil {
-		return err.Result()
-	}
-
-	// _ = keeper.Delete(ctx, msg.ID)
-
-	return sdk.Result{}
 }
