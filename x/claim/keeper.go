@@ -1,7 +1,9 @@
 package claim
 
 import (
+	"fmt"
 	"net/url"
+	"time"
 
 	"github.com/TruStory/truchain/x/community"
 	"github.com/cosmos/cosmos-sdk/codec"
@@ -57,11 +59,13 @@ func (k Keeper) SubmitClaim(ctx sdk.Context, body string, communityID uint64,
 
 	// persist claim
 	k.setClaim(ctx, claim)
+	// increment claimID (primary key) for next claim
 	k.setClaimID(ctx, claimID+1)
 
 	// persist associations
 	k.setCommunityClaim(ctx, claim.CommunityID, claimID)
 	k.setCreatorClaim(ctx, claim.Creator, claimID)
+	k.setCreatedTimeClaim(ctx, claim.CreatedTime, claimID)
 
 	logger(ctx).Info("Submitted " + claim.String())
 
@@ -85,14 +89,28 @@ func (k Keeper) Claims(ctx sdk.Context) (claims Claims) {
 	store := ctx.KVStore(k.storeKey)
 	iterator := sdk.KVStorePrefixIterator(store, ClaimsKeyPrefix)
 
-	defer iterator.Close()
-	for ; iterator.Valid(); iterator.Next() {
-		var claim Claim
-		k.codec.MustUnmarshalBinaryLengthPrefixed(iterator.Value(), &claim)
-		claims = append(claims, claim)
-	}
+	return k.iterate(iterator)
+}
 
-	return
+// ClaimsBetweenIDs gets all claims between startClaimID to endClaimID
+func (k Keeper) ClaimsBetweenIDs(ctx sdk.Context, startClaimID, endClaimID uint64) (claims Claims) {
+	iterator := k.claimsIterator(ctx, startClaimID, endClaimID)
+
+	return k.iterate(iterator)
+}
+
+// ClaimsBetweenTimes gets all claims between startTime and endTime
+func (k Keeper) ClaimsBetweenTimes(ctx sdk.Context, startTime time.Time, endTime time.Time) (claims Claims) {
+	iterator := k.createdTimeRangeClaimsIterator(ctx, startTime, endTime)
+
+	return k.iterateAssociated(ctx, iterator)
+}
+
+// ClaimsAfterTime gets all claims after a certain CreatedTime
+func (k Keeper) ClaimsAfterTime(ctx sdk.Context, createdTime time.Time) (claims Claims) {
+	iterator := k.afterCreatedTimeClaimsIterator(ctx, createdTime)
+
+	return k.iterateAssociated(ctx, iterator)
 }
 
 // CommunityClaims gets all the claims for a given community
@@ -187,6 +205,29 @@ func (k Keeper) setCreatorClaim(ctx sdk.Context, creator sdk.AccAddress, claimID
 	store.Set(creatorClaimKey(creator, claimID), bz)
 }
 
+func (k Keeper) setCreatedTimeClaim(ctx sdk.Context, createdTime time.Time, claimID uint64) {
+	store := ctx.KVStore(k.storeKey)
+	bz := k.codec.MustMarshalBinaryLengthPrefixed(claimID)
+	store.Set(createdTimeClaimKey(createdTime, claimID), bz)
+}
+
+// claimsIterator returns an sdk.Iterator for claims from startClaimID to endClaimID
+func (k Keeper) claimsIterator(ctx sdk.Context, startClaimID, endClaimID uint64) sdk.Iterator {
+	store := ctx.KVStore(k.storeKey)
+	return store.Iterator(key(startClaimID), sdk.PrefixEndBytes(key(endClaimID)))
+}
+
+func (k Keeper) afterCreatedTimeClaimsIterator(ctx sdk.Context, createdTime time.Time) sdk.Iterator {
+	store := ctx.KVStore(k.storeKey)
+	return store.Iterator(createdTimeClaimsKey(createdTime), sdk.PrefixEndBytes(CreatedTimeClaimsPrefx))
+}
+
+// createdTimeRangeClaimsIterator returns an sdk.Iterator for all claims between startCreatedTime and endCreatedTime
+func (k Keeper) createdTimeRangeClaimsIterator(ctx sdk.Context, startCreatedTime, endCreatedTime time.Time) sdk.Iterator {
+	store := ctx.KVStore(k.storeKey)
+	return store.Iterator(createdTimeClaimsKey(startCreatedTime), sdk.PrefixEndBytes(createdTimeClaimsKey(endCreatedTime)))
+}
+
 func (k Keeper) associatedClaims(ctx sdk.Context, prefix []byte) (claims Claims) {
 	store := ctx.KVStore(k.storeKey)
 	iterator := sdk.KVStorePrefixIterator(store, prefix)
@@ -197,6 +238,32 @@ func (k Keeper) associatedClaims(ctx sdk.Context, prefix []byte) (claims Claims)
 		k.codec.MustUnmarshalBinaryLengthPrefixed(iterator.Value(), &claimID)
 		claim, ok := k.Claim(ctx, claimID)
 		if ok {
+			claims = append(claims, claim)
+		}
+	}
+
+	return
+}
+
+func (k Keeper) iterate(iterator sdk.Iterator) (claims Claims) {
+	defer iterator.Close()
+	for ; iterator.Valid(); iterator.Next() {
+		var claim Claim
+		k.codec.MustUnmarshalBinaryLengthPrefixed(iterator.Value(), &claim)
+		claims = append(claims, claim)
+	}
+
+	return
+}
+
+func (k Keeper) iterateAssociated(ctx sdk.Context, iterator sdk.Iterator) (claims Claims) {
+	defer iterator.Close()
+	for ; iterator.Valid(); iterator.Next() {
+		var claimID uint64
+		k.codec.MustUnmarshalBinaryLengthPrefixed(iterator.Value(), &claimID)
+		claim, ok := k.Claim(ctx, claimID)
+		if ok {
+			fmt.Println(claim)
 			claims = append(claims, claim)
 		}
 	}

@@ -34,6 +34,20 @@ func TestAddGetClaim(t *testing.T) {
 
 	claims = keeper.CommunityClaims(ctx, claim.CommunityID)
 	assert.Len(t, claims, 2)
+
+	claims = keeper.ClaimsBetweenIDs(ctx, 0, 100)
+	assert.Len(t, claims, 2)
+
+	claims = keeper.ClaimsBetweenIDs(ctx, 2, 100)
+	assert.Len(t, claims, 1)
+
+	tt := time.Now().UTC()
+	claims = keeper.ClaimsAfterTime(ctx, tt)
+	assert.Len(t, claims, 0)
+
+	tt = tt.Add(-60 * time.Minute)
+	claims = keeper.ClaimsAfterTime(ctx, tt)
+	assert.Len(t, claims, 2)
 }
 
 func createFakeClaim(ctx sdk.Context, keeper Keeper) Claim {
