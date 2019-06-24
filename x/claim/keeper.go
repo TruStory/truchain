@@ -7,14 +7,11 @@ import (
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/params"
-	"github.com/shanev/cosmos-record-keeper/recordkeeper"
 	log "github.com/tendermint/tendermint/libs/log"
 )
 
 // Keeper is the model object for the module
 type Keeper struct {
-	RecordKeeper
-
 	storeKey   sdk.StoreKey
 	codec      *codec.Codec
 	paramStore params.Subspace
@@ -26,7 +23,6 @@ type Keeper struct {
 // NewKeeper creates a new claim keeper
 func NewKeeper(storeKey sdk.StoreKey, paramStore params.Subspace, codec *codec.Codec, accountKeeper AccountKeeper, communityKeeper community.Keeper) Keeper {
 	return Keeper{
-		recordkeeper.NewRecordKeeper(storeKey, codec),
 		storeKey,
 		codec,
 		paramStore.WithKeyTable(ParamKeyTable()),
@@ -35,13 +31,9 @@ func NewKeeper(storeKey sdk.StoreKey, paramStore params.Subspace, codec *codec.C
 	}
 }
 
-// NewClaim creates a new claim in the claim key-value store
-func (k Keeper) NewClaim(
-	ctx sdk.Context,
-	body string,
-	communityID uint64,
-	creator sdk.AccAddress,
-	source url.URL) (claim Claim, err sdk.Error) {
+// SubmitClaim creates a new claim in the claim key-value store
+func (k Keeper) SubmitClaim(ctx sdk.Context, body string, communityID uint64,
+	creator sdk.AccAddress, source url.URL) (claim Claim, err sdk.Error) {
 
 	err = k.validateLength(ctx, body)
 	if err != nil {
@@ -55,85 +47,86 @@ func (k Keeper) NewClaim(
 		return claim, ErrInvalidCommunityID(community.ID)
 	}
 
-	id := k.IncrementID(ctx)
-	claim = NewClaim(
-		id,
-		communityID,
-		body,
-		creator,
-		source,
-		ctx.BlockHeader().Time)
+	claimID, err := k.claimID(ctx)
+	if err != nil {
+		return
+	}
+	claim = NewClaim(claimID, communityID, body, creator, source,
+		ctx.BlockHeader().Time,
+	)
 
-	k.Set(ctx, id, claim)
-	// add claim <-> community association
-	k.Push(ctx, k.storeKey, communityKey, id, communityID)
+	// persist claim
+	k.setClaim(ctx, claim)
+	k.setClaimID(ctx, claimID+1)
 
-	logger(ctx).Info("Created " + claim.String())
+	// persist associations
+	k.setCommunityClaim(ctx, claim.CommunityID, claimID)
+	k.setCreatorClaim(ctx, claim.Creator, claimID)
+
+	logger(ctx).Info("Submitted " + claim.String())
 
 	return claim, nil
 }
 
 // Claim gets a single claim by its ID
-func (k Keeper) Claim(ctx sdk.Context, id uint64) (claim Claim, err sdk.Error) {
-	err = k.Get(ctx, id, &claim)
-	if err != nil {
-		return
+func (k Keeper) Claim(ctx sdk.Context, id uint64) (claim Claim, ok bool) {
+	store := ctx.KVStore(k.storeKey)
+	claimBytes := store.Get(key(id))
+	if claimBytes == nil {
+		return claim, false
 	}
+	k.codec.MustUnmarshalBinaryLengthPrefixed(claimBytes, &claim)
 
-	return
+	return claim, true
 }
 
 // Claims gets all the claims
-func (k Keeper) Claims(ctx sdk.Context) (claims []Claim) {
-	err := k.Each(ctx, func(val []byte) bool {
+func (k Keeper) Claims(ctx sdk.Context) (claims Claims) {
+	store := ctx.KVStore(k.storeKey)
+	iterator := sdk.KVStorePrefixIterator(store, ClaimsKeyPrefix)
+
+	defer iterator.Close()
+	for ; iterator.Valid(); iterator.Next() {
 		var claim Claim
-		k.codec.MustUnmarshalBinaryLengthPrefixed(val, &claim)
+		k.codec.MustUnmarshalBinaryLengthPrefixed(iterator.Value(), &claim)
 		claims = append(claims, claim)
-		return true
-	})
-	if err != nil {
-		return
 	}
 
 	return
 }
 
 // CommunityClaims gets all the claims for a given community
-func (k Keeper) CommunityClaims(ctx sdk.Context, communityID uint64) (claims []Claim) {
-	k.Map(ctx, communityKey, communityID, func(id uint64) bool {
-		claim, err := k.Claim(ctx, id)
-		if err != nil {
-			panic(err)
-		}
-		claims = append(claims, claim)
-		return true
-	})
+func (k Keeper) CommunityClaims(ctx sdk.Context, communityID uint64) (claims Claims) {
+	return k.associatedClaims(ctx, communityClaimsKey(communityID))
+}
 
-	return claims
+// CreatorClaims gets all the claims for a given creator
+func (k Keeper) CreatorClaims(ctx sdk.Context, creator sdk.AccAddress) (claims Claims) {
+	return k.associatedClaims(ctx, creatorClaimsKey(creator))
 }
 
 // AddBackingStake adds a stake amount to the total backing amount
 func (k Keeper) AddBackingStake(ctx sdk.Context, id uint64, stake sdk.Coin) sdk.Error {
-	claim, err := k.Claim(ctx, id)
-	if err != nil {
-		return err
+	claim, ok := k.Claim(ctx, id)
+	if !ok {
+		return ErrUnknownClaim(id)
 	}
 	claim.TotalBacked.Add(stake)
 	claim.TotalStakers++
-	k.Set(ctx, id, claim)
+	k.setClaim(ctx, claim)
 
 	return nil
 }
 
 // AddChallengeStake adds a stake amount to the total challenge amount
 func (k Keeper) AddChallengeStake(ctx sdk.Context, id uint64, stake sdk.Coin) sdk.Error {
-	claim, err := k.Claim(ctx, id)
-	if err != nil {
-		return err
+	claim, ok := k.Claim(ctx, id)
+	if !ok {
+		return ErrUnknownClaim(id)
 	}
 	claim.TotalChallenged.Add(stake)
 	claim.TotalStakers++
-	k.Set(ctx, id, claim)
+	k.setClaim(ctx, claim)
 
 	return nil
 }
@@ -154,6 +147,61 @@ func (k Keeper) validateLength(ctx sdk.Context, body string) sdk.Error {
 	}
 
 	return nil
+}
+
+// claimID gets the highest claim ID
+func (k Keeper) claimID(ctx sdk.Context) (claimID uint64, err sdk.Error) {
+	store := ctx.KVStore(k.storeKey)
+	bz := store.Get(ClaimIDKey)
+	if bz == nil {
+		return 0, ErrUnknownClaim(claimID)
+	}
+	k.codec.MustUnmarshalBinaryLengthPrefixed(bz, &claimID)
+	return claimID, nil
+}
+
+// set the claim ID
+func (k Keeper) setClaimID(ctx sdk.Context, claimID uint64) {
+	store := ctx.KVStore(k.storeKey)
+	bz := k.codec.MustMarshalBinaryLengthPrefixed(claimID)
+	store.Set(ClaimIDKey, bz)
+}
+
+// setClaim sets a claim in store
+func (k Keeper) setClaim(ctx sdk.Context, claim Claim) {
+	store := ctx.KVStore(k.storeKey)
+	bz := k.codec.MustMarshalBinaryLengthPrefixed(claim)
+	store.Set(key(claim.ID), bz)
+}
+
+// setCommunityClaim sets a community <-> claim association in store
+func (k Keeper) setCommunityClaim(ctx sdk.Context, communityID, claimID uint64) {
+	store := ctx.KVStore(k.storeKey)
+	bz := k.codec.MustMarshalBinaryLengthPrefixed(claimID)
+	store.Set(communityClaimKey(communityID, claimID), bz)
+}
+
+func (k Keeper) setCreatorClaim(ctx sdk.Context, creator sdk.AccAddress, claimID uint64) {
+	store := ctx.KVStore(k.storeKey)
+	bz := k.codec.MustMarshalBinaryLengthPrefixed(claimID)
+	store.Set(creatorClaimKey(creator, claimID), bz)
+}
+
+func (k Keeper) associatedClaims(ctx sdk.Context, prefix []byte) (claims Claims) {
+	store := ctx.KVStore(k.storeKey)
+	iterator := sdk.KVStorePrefixIterator(store, prefix)
+
+	defer iterator.Close()
+	for ; iterator.Valid(); iterator.Next() {
+		var claimID uint64
+		k.codec.MustUnmarshalBinaryLengthPrefixed(iterator.Value(), &claimID)
+		claim, ok := k.Claim(ctx, claimID)
+		if ok {
+			claims = append(claims, claim)
+		}
+	}
+
+	return
 }
 
 func logger(ctx sdk.Context) log.Logger {

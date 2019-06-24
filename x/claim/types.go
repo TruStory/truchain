@@ -15,11 +15,6 @@ const (
 	StoreKey     = ModuleName
 )
 
-// Association list keys
-var (
-	communityKey = sdk.NewKVStoreKey("community")
-)
-
 // Claim stores data about a claim
 type Claim struct {
 	ID              uint64         `json:"id"`
@@ -32,6 +27,9 @@ type Claim struct {
 	TotalChallenged sdk.Coin       `json:"total_challenged,omitempty"`
 	CreatedTime     time.Time      `json:"created_time"`
 }
+
+// Claims is an array of claims
+type Claims []Claim
 
 // NewClaim creates a new claim object
 func NewClaim(id, communityID uint64, body string, creator sdk.AccAddress, source url.URL, createdTime time.Time) Claim {
@@ -46,5 +44,11 @@ func NewClaim(id, communityID uint64, body string, creator sdk.AccAddress, sourc
 }
 
 func (c Claim) String() string {
-	return fmt.Sprintf("Claim <%d %s %s>", c.ID, c.Body, c.CreatedTime)
+	return fmt.Sprintf(`Claim %d:
+  CommunityID: %d
+  Body:		   %s
+  Creator:     %s
+  Source:      %s
+  CreatedTime  %s`,
+		c.ID, c.CommunityID, c.Body, c.Creator.String(), c.Source.String(), c.CreatedTime.String())
 }

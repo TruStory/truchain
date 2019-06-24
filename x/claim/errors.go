@@ -40,12 +40,12 @@ func ErrInvalidBodyTooLong() sdk.Error {
 		"Invalid claim body, too long")
 }
 
-// ErrInvalidID throws an error on invalid claim body
-func ErrInvalidID() sdk.Error {
+// ErrUnknownClaim throws an error on an unknown claim id
+func ErrUnknownClaim(id uint64) sdk.Error {
 	return sdk.NewError(
 		DefaultCodespace,
 		ErrorCodeInvalidID,
-		"Invalid claim ID")
+		fmt.Sprintf("Unknown claim id: %d", id))
 }
 
 // ErrInvalidCommunityID throws an error on invalid community id

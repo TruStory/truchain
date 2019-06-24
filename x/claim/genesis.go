@@ -26,10 +26,11 @@ func DefaultGenesisState() GenesisState { return NewGenesisState() }
 // InitGenesis initializes story state from genesis file
 func InitGenesis(ctx sdk.Context, k Keeper, data GenesisState) {
 	for _, c := range data.Claims {
-		k.Set(ctx, c.ID, c)
-		k.Push(ctx, k.storeKey, communityKey, c.ID, c.CommunityID)
+		k.setClaim(ctx, c)
+		k.setCommunityClaim(ctx, c.CommunityID, c.ID)
+		k.setCreatorClaim(ctx, c.Creator, c.ID)
 	}
-	k.SetLen(ctx, uint64(len(data.Claims)))
+	k.setClaimID(ctx, uint64(len(data.Claims)+1))
 	k.SetParams(ctx, data.Params)
 }
 
