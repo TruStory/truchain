@@ -12,6 +12,7 @@ import (
 const (
 	RouterKey    = ModuleName
 	QuerierRoute = ModuleName
+	StoreKey     = ModuleName
 )
 
 // EarnedCoin is a representation of a coin associated with a community, or "earned trustake".

@@ -3,6 +3,7 @@ package claim
 import (
 	"net/url"
 
+	truauth "github.com/TruStory/truchain/x/auth"
 	"github.com/TruStory/truchain/x/community"
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -16,17 +17,17 @@ type Keeper struct {
 	codec      *codec.Codec
 	paramStore params.Subspace
 
-	accountKeeper   AccountKeeper
+	truAuthKeeper   truauth.Keeper
 	communityKeeper community.Keeper
 }
 
 // NewKeeper creates a new claim keeper
-func NewKeeper(storeKey sdk.StoreKey, paramStore params.Subspace, codec *codec.Codec, accountKeeper AccountKeeper, communityKeeper community.Keeper) Keeper {
+func NewKeeper(storeKey sdk.StoreKey, paramStore params.Subspace, codec *codec.Codec, truAuthKeeper truauth.Keeper, communityKeeper community.Keeper) Keeper {
 	return Keeper{
 		storeKey,
 		codec,
 		paramStore.WithKeyTable(ParamKeyTable()),
-		accountKeeper,
+		truAuthKeeper,
 		communityKeeper,
 	}
 }
@@ -39,9 +40,15 @@ func (k Keeper) SubmitClaim(ctx sdk.Context, body string, communityID uint64,
 	if err != nil {
 		return
 	}
-	if k.accountKeeper.IsJailed(ctx, creator) {
+
+	jailed, err := k.truAuthKeeper.IsJailed(ctx, creator)
+	if err != nil {
+		return
+	}
+	if jailed {
 		return claim, ErrCreatorJailed(creator)
 	}
+
 	community, err := k.communityKeeper.Community(ctx, communityID)
 	if err != nil {
 		return claim, ErrInvalidCommunityID(community.ID)

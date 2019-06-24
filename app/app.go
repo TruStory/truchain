@@ -5,6 +5,7 @@ import (
 
 	"github.com/TruStory/truchain/types"
 	"github.com/TruStory/truchain/x/argument"
+	truauth "github.com/TruStory/truchain/x/auth"
 	"github.com/TruStory/truchain/x/backing"
 	"github.com/TruStory/truchain/x/category"
 	"github.com/TruStory/truchain/x/challenge"
@@ -67,6 +68,7 @@ func init() {
 		stake.AppModuleBasic{},
 		story.AppModuleBasic{},
 		trubank.AppModuleBasic{},
+		truauth.AppModuleBasic{},
 		community.AppModuleBasic{},
 		claim.AppModuleBasic{},
 		mint.AppModuleBasic{},
@@ -106,6 +108,7 @@ type TruChain struct {
 	keyMint       *sdk.KVStoreKey
 
 	// keys to access trustory V2 state
+	keyTruAuth   *sdk.KVStoreKey
 	keyCommunity *sdk.KVStoreKey
 	keyClaim     *sdk.KVStoreKey
 
@@ -131,6 +134,7 @@ type TruChain struct {
 	mintKeeper         mint.Keeper
 
 	// access truchain V2 multistore
+	truAuthKeeper   truauth.Keeper
 	communityKeeper community.Keeper
 	claimKeeper     claim.Keeper
 
@@ -175,6 +179,7 @@ func NewTruChain(logger log.Logger, db dbm.DB, loadLatest bool, options ...func(
 		keyFeeCollection: sdk.NewKVStoreKey(auth.FeeStoreKey),
 		keyStake:         sdk.NewKVStoreKey(stake.StoreKey),
 		keyTruBank:       sdk.NewKVStoreKey(trubank.StoreKey),
+		keyTruAuth:       sdk.NewKVStoreKey(truauth.StoreKey),
 		keyCommunity:     sdk.NewKVStoreKey(community.StoreKey),
 		keyClaim:         sdk.NewKVStoreKey(claim.StoreKey),
 		keyMint:          sdk.NewKVStoreKey(mint.StoreKey),
@@ -274,6 +279,14 @@ func NewTruChain(logger log.Logger, db dbm.DB, loadLatest bool, options ...func(
 		app.storyKeeper,
 	)
 
+	app.truAuthKeeper = truauth.NewKeeper(
+		app.keyTruAuth,
+		app.paramsKeeper.Subspace(truauth.StoreKey),
+		codec,
+		nil,
+		app.accountKeeper,
+	)
+
 	app.communityKeeper = community.NewKeeper(
 		app.keyCommunity,
 		app.paramsKeeper.Subspace(community.StoreKey),
@@ -284,7 +297,7 @@ func NewTruChain(logger log.Logger, db dbm.DB, loadLatest bool, options ...func(
 		app.keyClaim,
 		app.paramsKeeper.Subspace(claim.StoreKey),
 		codec,
-		nil,
+		app.truAuthKeeper,
 		app.communityKeeper,
 	)
 
@@ -304,6 +317,7 @@ func NewTruChain(logger log.Logger, db dbm.DB, loadLatest bool, options ...func(
 		AddRoute("challenge", challenge.NewHandler(app.challengeKeeper)).
 		AddRoute("users", users.NewHandler(app.accountKeeper, app.categoryKeeper)).
 		AddRoute("trubank", trubank.NewHandler(app.truBankKeeper)).
+		AddRoute(truauth.RouterKey, truauth.NewHandler(app.truAuthKeeper)).
 		AddRoute(community.RouterKey, community.NewHandler(app.communityKeeper)).
 		AddRoute(claim.RouterKey, claim.NewHandler(app.claimKeeper))
 
@@ -318,6 +332,7 @@ func NewTruChain(logger log.Logger, db dbm.DB, loadLatest bool, options ...func(
 		AddRoute(challenge.QueryPath, challenge.NewQuerier(app.challengeKeeper)).
 		AddRoute(clientParams.QueryPath, clientParams.NewQuerier(app.clientParamsKeeper)).
 		AddRoute(trubank.QueryPath, trubank.NewQuerier(app.truBankKeeper)).
+		AddRoute(truauth.QuerierRoute, truauth.NewQuerier(app.truAuthKeeper)).
 		AddRoute(community.QuerierRoute, community.NewQuerier(app.communityKeeper)).
 		AddRoute(claim.QuerierRoute, claim.NewQuerier(app.claimKeeper))
 
@@ -336,6 +351,7 @@ func NewTruChain(logger log.Logger, db dbm.DB, loadLatest bool, options ...func(
 		challenge.NewAppModule(app.challengeKeeper),
 		expiration.NewAppModule(app.expirationKeeper),
 		trubank.NewAppModule(app.truBankKeeper),
+		truauth.NewAppModule(app.truAuthKeeper),
 		community.NewAppModule(app.communityKeeper),
 		claim.NewAppModule(app.claimKeeper),
 		mint.NewAppModule(app.mintKeeper),
@@ -353,7 +369,8 @@ func NewTruChain(logger log.Logger, db dbm.DB, loadLatest bool, options ...func(
 		staking.ModuleName, auth.ModuleName, bank.ModuleName,
 		genutil.ModuleName, category.ModuleName, story.ModuleName,
 		argument.ModuleName, stake.ModuleName, backing.ModuleName, challenge.ModuleName,
-		expiration.ModuleName, trubank.ModuleName, community.ModuleName, claim.ModuleName, mint.ModuleName)
+		expiration.ModuleName, trubank.ModuleName, truauth.ModuleName, community.ModuleName,
+		claim.ModuleName, mint.ModuleName)
 
 	app.SetInitChainer(app.InitChainer)
 
@@ -380,6 +397,7 @@ func NewTruChain(logger log.Logger, db dbm.DB, loadLatest bool, options ...func(
 		app.tkeyParams,
 		app.tkeyStaking,
 		app.tkeyDistr,
+		app.keyTruAuth,
 		app.keyCommunity,
 		app.keyClaim,
 		app.keyMint,
