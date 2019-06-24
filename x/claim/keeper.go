@@ -76,7 +76,7 @@ func (k Keeper) Claim(ctx sdk.Context, id uint64) (claim Claim, ok bool) {
 	if claimBytes == nil {
 		return claim, false
 	}
-	k.codec.UnmarshalBinaryLengthPrefixed(claimBytes, &claim)
+	k.codec.MustUnmarshalBinaryLengthPrefixed(claimBytes, &claim)
 
 	return claim, true
 }
