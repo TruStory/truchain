@@ -97,38 +97,12 @@ func (k Keeper) Claims(ctx sdk.Context) (claims Claims) {
 
 // CommunityClaims gets all the claims for a given community
 func (k Keeper) CommunityClaims(ctx sdk.Context, communityID uint64) (claims Claims) {
-	store := ctx.KVStore(k.storeKey)
-	iterator := sdk.KVStorePrefixIterator(store, communityClaimsKey(communityID))
-
-	defer iterator.Close()
-	for ; iterator.Valid(); iterator.Next() {
-		var claimID uint64
-		k.codec.MustUnmarshalBinaryLengthPrefixed(iterator.Value(), &claimID)
-		claim, ok := k.Claim(ctx, claimID)
-		if ok {
-			claims = append(claims, claim)
-		}
-	}
-
-	return
+	return k.associatedClaims(ctx, communityClaimsKey(communityID))
 }
 
 // CreatorClaims gets all the claims for a given creator
 func (k Keeper) CreatorClaims(ctx sdk.Context, creator sdk.AccAddress) (claims Claims) {
-	store := ctx.KVStore(k.storeKey)
-	iterator := sdk.KVStorePrefixIterator(store, creatorClaimsKey(creator))
-
-	defer iterator.Close()
-	for ; iterator.Valid(); iterator.Next() {
-		var claimID uint64
-		k.codec.MustUnmarshalBinaryLengthPrefixed(iterator.Value(), &claimID)
-		claim, ok := k.Claim(ctx, claimID)
-		if ok {
-			claims = append(claims, claim)
-		}
-	}
-
-	return
+	return k.associatedClaims(ctx, creatorClaimsKey(creator))
 }
 
 // AddBackingStake adds a stake amount to the total backing amount
@@ -211,6 +185,23 @@ func (k Keeper) setCreatorClaim(ctx sdk.Context, creator sdk.AccAddress, claimID
 	store := ctx.KVStore(k.storeKey)
 	bz := k.codec.MustMarshalBinaryLengthPrefixed(claimID)
 	store.Set(creatorClaimKey(creator, claimID), bz)
+}
+
+func (k Keeper) associatedClaims(ctx sdk.Context, prefix []byte) (claims Claims) {
+	store := ctx.KVStore(k.storeKey)
+	iterator := sdk.KVStorePrefixIterator(store, prefix)
+
+	defer iterator.Close()
+	for ; iterator.Valid(); iterator.Next() {
+		var claimID uint64
+		k.codec.MustUnmarshalBinaryLengthPrefixed(iterator.Value(), &claimID)
+		claim, ok := k.Claim(ctx, claimID)
+		if ok {
+			claims = append(claims, claim)
+		}
+	}
+
+	return
 }
 
 func logger(ctx sdk.Context) log.Logger {
