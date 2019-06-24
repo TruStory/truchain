@@ -63,8 +63,7 @@ func (k Keeper) SubmitClaim(ctx sdk.Context, body string, communityID uint64,
 	k.setCommunityClaim(ctx, claim.CommunityID, claimID)
 	k.setCreatorClaim(ctx, claim.Creator, claimID)
 
-	logger(ctx).Info("Created " + claim.String())
-	// fmt.Println(claim)
+	logger(ctx).Info("Submitted " + claim.String())
 
 	return claim, nil
 }
