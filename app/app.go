@@ -26,6 +26,7 @@ import (
 	distr "github.com/cosmos/cosmos-sdk/x/distribution"
 	"github.com/cosmos/cosmos-sdk/x/genutil"
 	"github.com/cosmos/cosmos-sdk/x/ibc"
+	"github.com/cosmos/cosmos-sdk/x/mint"
 	"github.com/cosmos/cosmos-sdk/x/params"
 	"github.com/cosmos/cosmos-sdk/x/staking"
 	abci "github.com/tendermint/tendermint/abci/types"
@@ -68,6 +69,7 @@ func init() {
 		trubank.AppModuleBasic{},
 		community.AppModuleBasic{},
 		claim.AppModuleBasic{},
+		mint.AppModuleBasic{},
 	)
 }
 
@@ -101,6 +103,7 @@ type TruChain struct {
 	keyStory      *sdk.KVStoreKey
 	keyStoryQueue *sdk.KVStoreKey
 	keyTruBank    *sdk.KVStoreKey
+	keyMint       *sdk.KVStoreKey
 
 	// keys to access trustory V2 state
 	keyCommunity *sdk.KVStoreKey
@@ -125,6 +128,7 @@ type TruChain struct {
 	storyKeeper        story.Keeper
 	stakeKeeper        stake.Keeper
 	truBankKeeper      trubank.Keeper
+	mintKeeper         mint.Keeper
 
 	// access truchain V2 multistore
 	communityKeeper community.Keeper
@@ -173,6 +177,7 @@ func NewTruChain(logger log.Logger, db dbm.DB, loadLatest bool, options ...func(
 		keyTruBank:       sdk.NewKVStoreKey(trubank.StoreKey),
 		keyCommunity:     sdk.NewKVStoreKey(community.StoreKey),
 		keyClaim:         sdk.NewKVStoreKey(claim.StoreKey),
+		keyMint:          sdk.NewKVStoreKey(mint.StoreKey),
 	}
 
 	// init params keeper and subspaces
@@ -183,6 +188,7 @@ func NewTruChain(logger log.Logger, db dbm.DB, loadLatest bool, options ...func(
 	distrSubspace := app.paramsKeeper.Subspace(distr.DefaultParamspace)
 	storySubspace := app.paramsKeeper.Subspace(story.StoreKey)
 	argumentSubspace := app.paramsKeeper.Subspace(argument.StoreKey)
+	mintSubspace := app.paramsKeeper.Subspace(mint.DefaultParamspace)
 
 	// add keepers
 	app.accountKeeper = auth.NewAccountKeeper(app.codec, app.keyAccount, authSubspace, auth.ProtoBaseAccount)
@@ -192,6 +198,8 @@ func NewTruChain(logger log.Logger, db dbm.DB, loadLatest bool, options ...func(
 
 	stakingKeeper := staking.NewKeeper(app.codec, app.keyStaking, app.tkeyStaking, app.bankKeeper,
 		stakingSubspace, staking.DefaultCodespace)
+
+	app.mintKeeper = mint.NewKeeper(app.codec, app.keyMint, mintSubspace, &stakingKeeper, app.feeCollectionKeeper)
 
 	app.distrKeeper = distr.NewKeeper(
 		app.codec,
@@ -328,12 +336,13 @@ func NewTruChain(logger log.Logger, db dbm.DB, loadLatest bool, options ...func(
 		trubank.NewAppModule(app.truBankKeeper),
 		community.NewAppModule(app.communityKeeper),
 		claim.NewAppModule(app.claimKeeper),
+		mint.NewAppModule(app.mintKeeper),
 	)
 
 	// During begin block slashing happens after distr.BeginBlocker so that
 	// there is nothing left over in the validator fee pool, so as to keep the
 	// CanWithdrawInvariant invariant.
-	app.mm.SetOrderBeginBlockers(distr.ModuleName)
+	app.mm.SetOrderBeginBlockers(mint.ModuleName, distr.ModuleName)
 	app.mm.SetOrderEndBlockers(staking.ModuleName, expiration.ModuleName)
 
 	// genutils must occur after staking so that pools are properly
@@ -342,7 +351,7 @@ func NewTruChain(logger log.Logger, db dbm.DB, loadLatest bool, options ...func(
 		staking.ModuleName, auth.ModuleName, bank.ModuleName,
 		genutil.ModuleName, category.ModuleName, story.ModuleName,
 		argument.ModuleName, stake.ModuleName, backing.ModuleName, challenge.ModuleName,
-		expiration.ModuleName, trubank.ModuleName, community.ModuleName, claim.ModuleName)
+		expiration.ModuleName, trubank.ModuleName, community.ModuleName, claim.ModuleName, mint.ModuleName)
 
 	app.SetInitChainer(app.InitChainer)
 
@@ -371,6 +380,7 @@ func NewTruChain(logger log.Logger, db dbm.DB, loadLatest bool, options ...func(
 		app.tkeyDistr,
 		app.keyCommunity,
 		app.keyClaim,
+		app.keyMint,
 	)
 
 	if loadLatest {
