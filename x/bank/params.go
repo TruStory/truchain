@@ -7,7 +7,7 @@ import (
 
 const (
 	// DefaultParamspace for params keeper
-	DefaultParamspace = "truchain/" + ModuleName
+	DefaultParamspace = ModuleName
 )
 
 var (
