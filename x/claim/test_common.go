@@ -4,9 +4,11 @@ import (
 	"net/url"
 
 	"github.com/TruStory/truchain/x/community"
+	truauth "github.com/TruStory/truchain/x/auth"
 	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/cosmos/cosmos-sdk/store"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/cosmos/cosmos-sdk/x/auth"
 	"github.com/cosmos/cosmos-sdk/x/params"
 	abci "github.com/tendermint/tendermint/abci/types"
 	"github.com/tendermint/tendermint/crypto/ed25519"
@@ -15,23 +17,13 @@ import (
 	"github.com/tendermint/tendermint/libs/log"
 )
 
-// interface conformance check
-var _ AccountKeeper = accKeeper{}
-
-type accKeeper struct {
-	Jailed bool
-}
-
-// IsJailed ...
-func (ak accKeeper) IsJailed(ctx sdk.Context, addr sdk.AccAddress) bool {
-	return ak.Jailed
-}
-
 func mockDB() (sdk.Context, Keeper) {
 	db := dbm.NewMemDB()
 
-	claimKey := sdk.NewKVStoreKey("claim")
-	communityKey := sdk.NewKVStoreKey("community")
+	claimKey := sdk.NewKVStoreKey(StoreKey)
+	communityKey := sdk.NewKVStoreKey(community.StoreKey)
+	truAuthKey := sdk.NewKVStoreKey(truauth.StoreKey)
+	accKey := sdk.NewKVStoreKey(auth.StoreKey)
 	paramsKey := sdk.NewKVStoreKey(params.StoreKey)
 	transientParamsKey := sdk.NewTransientStoreKey(params.TStoreKey)
 
@@ -61,15 +53,21 @@ func mockDB() (sdk.Context, Keeper) {
 		panic(err)
 	}
 
-	accountKeeper := accKeeper{
-		Jailed: false,
-	}
+	accountKeeper := auth.NewAccountKeeper(codec, accKey, pk.Subspace(auth.DefaultParamspace), auth.ProtoBaseAccount)
+
+	truAuthKeeper := truauth.NewKeeper(
+		truAuthKey,
+		pk.Subspace(truauth.ModuleName),
+		codec,
+		bankKeeper,
+		accountKeeper,
+	)
 
 	keeper := NewKeeper(
 		claimKey,
 		pk.Subspace(ModuleName),
 		codec,
-		accountKeeper,
+		truAuthKeeper,
 		communityKeeper,
 	)
 	InitGenesis(ctx, keeper, DefaultGenesisState())
