@@ -11,7 +11,7 @@ def process_genesis(genesis, parsed_args):
             'annual_provisions': '0.000000000000000000',
         },
         'params': {
-            'mint_denom': 'trustake',
+            'mint_denom': 'trusteak',
             'inflation_rate_change': '0.150000000000000000',
             'inflation_max': '0.250000000000000000',
             'inflation_min': '0.100000000000000000',
