@@ -27,7 +27,7 @@ func TestAddGetClaim(t *testing.T) {
 
 	// test incrementing id by adding another story
 	claim = createFakeClaim(ctx, keeper)
-	assert.Equal(t, uint64(1), claim.ID)
+	assert.Equal(t, uint64(2), claim.ID)
 
 	claims := keeper.CreatorClaims(ctx, claim.Creator)
 	assert.Len(t, claims, 2)

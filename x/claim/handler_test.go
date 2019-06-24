@@ -25,6 +25,6 @@ func TestMsgCreateClaim(t *testing.T) {
 
 	var claim Claim
 	ModuleCodec.UnmarshalBinaryBare(res.Data, &claim)
-	assert.Equal(t, uint64(0), claim.ID)
+	assert.Equal(t, uint64(1), claim.ID)
 	assert.Equal(t, body, claim.Body)
 }
