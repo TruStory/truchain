@@ -1,9 +1,10 @@
 package claim
 
-import "encoding/binary"
+import (
+	"encoding/binary"
 
-// TODO
-// user address -> total number of claims
+	sdk "github.com/cosmos/cosmos-sdk/types"
+)
 
 // Keys for claim store
 // Items are stored with the following key: values
@@ -12,6 +13,7 @@ import "encoding/binary"
 // - 0x01: nextClaimID_Bytes
 //
 // - 0x10<communityID_Bytes><claimID_Bytes>: claimID_Bytes
+// - 0x11<creator_Bytes><claimID_Bytes>: claimID_Bytes
 var (
 	ClaimsKeyPrefix = []byte{0x00}
 	ClaimIDKey      = []byte{0x01}
@@ -39,4 +41,14 @@ func communityClaimKey(communityID uint64, claimID uint64) []byte {
 	bz := make([]byte, 8)
 	binary.LittleEndian.PutUint64(bz, claimID)
 	return append(communityClaimsKey(communityID), bz...)
+}
+
+func creatorClaimsKey(creator sdk.AccAddress) []byte {
+	return append(CreatorClaimsPrefix, creator.Bytes()...)
+}
+
+func creatorClaimKey(creator sdk.AccAddress, claimID uint64) []byte {
+	bz := make([]byte, 8)
+	binary.LittleEndian.PutUint64(bz, claimID)
+	return append(creatorClaimsKey(creator), bz...)
 }

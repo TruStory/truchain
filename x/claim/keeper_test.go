@@ -25,9 +25,15 @@ func TestAddGetClaim(t *testing.T) {
 	_, ok = keeper.Claim(ctx, claim.ID)
 	assert.True(t, ok)
 
-	// // test incrementing id by adding another story
+	// test incrementing id by adding another story
 	claim = createFakeClaim(ctx, keeper)
 	assert.Equal(t, uint64(1), claim.ID)
+
+	claims := keeper.CreatorClaims(ctx, claim.Creator)
+	assert.Len(t, claims, 2)
+
+	claims = keeper.CommunityClaims(ctx, claim.CommunityID)
+	assert.Len(t, claims, 2)
 }
 
 func createFakeClaim(ctx sdk.Context, keeper Keeper) Claim {

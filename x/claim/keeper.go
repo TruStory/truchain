@@ -54,9 +54,14 @@ func (k Keeper) SubmitClaim(ctx sdk.Context, body string, communityID uint64,
 	claim = NewClaim(claimID, communityID, body, creator, source,
 		ctx.BlockHeader().Time,
 	)
+
+	// persist claim
 	k.setClaim(ctx, claim)
 	k.setClaimID(ctx, claimID+1)
+
+	// persist associations
 	k.setCommunityClaim(ctx, claim.CommunityID, claimID)
+	k.setCreatorClaim(ctx, claim.Creator, claimID)
 
 	logger(ctx).Info("Created " + claim.String())
 	// fmt.Println(claim)
@@ -95,6 +100,24 @@ func (k Keeper) Claims(ctx sdk.Context) (claims Claims) {
 func (k Keeper) CommunityClaims(ctx sdk.Context, communityID uint64) (claims Claims) {
 	store := ctx.KVStore(k.storeKey)
 	iterator := sdk.KVStorePrefixIterator(store, communityClaimsKey(communityID))
+
+	defer iterator.Close()
+	for ; iterator.Valid(); iterator.Next() {
+		var claimID uint64
+		k.codec.MustUnmarshalBinaryLengthPrefixed(iterator.Value(), &claimID)
+		claim, ok := k.Claim(ctx, claimID)
+		if ok {
+			claims = append(claims, claim)
+		}
+	}
+
+	return
+}
+
+// CreatorClaims gets all the claims for a given creator
+func (k Keeper) CreatorClaims(ctx sdk.Context, creator sdk.AccAddress) (claims Claims) {
+	store := ctx.KVStore(k.storeKey)
+	iterator := sdk.KVStorePrefixIterator(store, creatorClaimsKey(creator))
 
 	defer iterator.Close()
 	for ; iterator.Valid(); iterator.Next() {
@@ -183,6 +206,12 @@ func (k Keeper) setCommunityClaim(ctx sdk.Context, communityID, claimID uint64) 
 	store := ctx.KVStore(k.storeKey)
 	bz := k.codec.MustMarshalBinaryLengthPrefixed(claimID)
 	store.Set(communityClaimKey(communityID, claimID), bz)
+}
+
+func (k Keeper) setCreatorClaim(ctx sdk.Context, creator sdk.AccAddress, claimID uint64) {
+	store := ctx.KVStore(k.storeKey)
+	bz := k.codec.MustMarshalBinaryLengthPrefixed(claimID)
+	store.Set(creatorClaimKey(creator, claimID), bz)
 }
 
 func logger(ctx sdk.Context) log.Logger {

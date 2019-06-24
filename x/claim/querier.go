@@ -11,6 +11,7 @@ const (
 	QueryClaim           = "claim"
 	QueryClaims          = "claims"
 	QueryCommunityClaims = "community_claims"
+	QueryCreatorClaims   = "creator_claims"
 )
 
 // QueryClaimParams for a single claim
@@ -23,6 +24,11 @@ type QueryCommunityClaimsParams struct {
 	CommunityID uint64 `json:"community_id"`
 }
 
+// QueryCreatorClaimsParams for community claims
+type QueryCreatorClaimsParams struct {
+	Creator sdk.AccAddress `json:"creator"`
+}
+
 // NewQuerier returns a function that handles queries on the KVStore
 func NewQuerier(keeper Keeper) sdk.Querier {
 	return func(ctx sdk.Context, path []string, req abci.RequestQuery) ([]byte, sdk.Error) {
@@ -33,6 +39,8 @@ func NewQuerier(keeper Keeper) sdk.Querier {
 			return queryClaims(ctx, req, keeper)
 		case QueryCommunityClaims:
 			return queryCommunityClaims(ctx, req, keeper)
+		case QueryCreatorClaims:
+			return queryCreatorClaims(ctx, req, keeper)
 		}
 		return nil, sdk.ErrUnknownRequest("Unknown claim query endpoint")
 	}
@@ -66,6 +74,17 @@ func queryCommunityClaims(ctx sdk.Context, req abci.RequestQuery, keeper Keeper)
 		return nil, ErrJSONParse(codecErr)
 	}
 	claims := keeper.CommunityClaims(ctx, params.CommunityID)
+
+	return mustMarshal(claims)
+}
+
+func queryCreatorClaims(ctx sdk.Context, req abci.RequestQuery, keeper Keeper) ([]byte, sdk.Error) {
+	var params QueryCreatorClaimsParams
+	codecErr := ModuleCodec.UnmarshalJSON(req.Data, &params)
+	if codecErr != nil {
+		return nil, ErrJSONParse(codecErr)
+	}
+	claims := keeper.CreatorClaims(ctx, params.Creator)
 
 	return mustMarshal(claims)
 }
