@@ -1,7 +1,6 @@
 package claim
 
 import (
-	"fmt"
 	"net/url"
 	"time"
 
@@ -263,7 +262,6 @@ func (k Keeper) iterateAssociated(ctx sdk.Context, iterator sdk.Iterator) (claim
 		k.codec.MustUnmarshalBinaryLengthPrefixed(iterator.Value(), &claimID)
 		claim, ok := k.Claim(ctx, claimID)
 		if ok {
-			fmt.Println(claim)
 			claims = append(claims, claim)
 		}
 	}
