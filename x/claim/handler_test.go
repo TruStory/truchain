@@ -24,7 +24,7 @@ func TestMsgCreateClaim(t *testing.T) {
 	assert.NotNil(t, res)
 
 	var claim Claim
-	ModuleCodec.UnmarshalBinaryBare(res.Data, &claim)
+	ModuleCodec.UnmarshalJSON(res.Data, &claim)
 	assert.Equal(t, uint64(1), claim.ID)
 	assert.Equal(t, body, claim.Body)
 }
