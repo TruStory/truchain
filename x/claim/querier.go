@@ -10,12 +10,13 @@ import (
 
 // query endpoints
 const (
-	QueryClaim           = "claim"
-	QueryClaims          = "claims"
-	QueryCommunityClaims = "community_claims"
-	QueryCreatorClaims   = "creator_claims"
-	QueryClaimsIDRange   = "claims_id_range"
-	QueryClaimsAfterTime = "claims_after_time"
+	QueryClaim            = "claim"
+	QueryClaims           = "claims"
+	QueryCommunityClaims  = "community_claims"
+	QueryCreatorClaims    = "creator_claims"
+	QueryClaimsIDRange    = "claims_id_range"
+	QueryClaimsBeforeTime = "claims_before_time"
+	QueryClaimsAfterTime  = "claims_after_time"
 )
 
 // QueryClaimParams for a single claim
@@ -39,8 +40,8 @@ type QueryClaimsIDRangeParams struct {
 	EndID   uint64 `json:"end_id"`
 }
 
-// QueryClaimsAfterTimeParams for claims after a specific created time
-type QueryClaimsAfterTimeParams struct {
+// QueryClaimsTimeParams for claims by time
+type QueryClaimsTimeParams struct {
 	CreatedTime time.Time `json:"created_time"`
 }
 
@@ -58,8 +59,10 @@ func NewQuerier(keeper Keeper) sdk.Querier {
 			return queryCreatorClaims(ctx, req, keeper)
 		case QueryClaimsIDRange:
 			return queryClaimsByIDRange(ctx, req, keeper)
+		case QueryClaimsBeforeTime:
+			return queryClaimsBeforeTime(ctx, req, keeper)
 		case QueryClaimsAfterTime:
-			return queryClaimsByTime(ctx, req, keeper)
+			return queryClaimsAfterTime(ctx, req, keeper)
 		}
 
 		return nil, sdk.ErrUnknownRequest("Unknown claim query endpoint")
@@ -120,8 +123,19 @@ func queryClaimsByIDRange(ctx sdk.Context, req abci.RequestQuery, keeper Keeper)
 	return mustMarshal(claims)
 }
 
-func queryClaimsByTime(ctx sdk.Context, req abci.RequestQuery, keeper Keeper) ([]byte, sdk.Error) {
-	var params QueryClaimsAfterTimeParams
+func queryClaimsBeforeTime(ctx sdk.Context, req abci.RequestQuery, keeper Keeper) ([]byte, sdk.Error) {
+	var params QueryClaimsTimeParams
+	codecErr := ModuleCodec.UnmarshalJSON(req.Data, &params)
+	if codecErr != nil {
+		return nil, ErrJSONParse(codecErr)
+	}
+	claims := keeper.ClaimsBeforeTime(ctx, params.CreatedTime)
+
+	return mustMarshal(claims)
+}
+
+func queryClaimsAfterTime(ctx sdk.Context, req abci.RequestQuery, keeper Keeper) ([]byte, sdk.Error) {
+	var params QueryClaimsTimeParams
 	codecErr := ModuleCodec.UnmarshalJSON(req.Data, &params)
 	if codecErr != nil {
 		return nil, ErrJSONParse(codecErr)

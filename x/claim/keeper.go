@@ -105,6 +105,13 @@ func (k Keeper) ClaimsBetweenTimes(ctx sdk.Context, startTime time.Time, endTime
 	return k.iterateAssociated(ctx, iterator)
 }
 
+// ClaimsBeforeTime gets all claims after a certain CreatedTime
+func (k Keeper) ClaimsBeforeTime(ctx sdk.Context, createdTime time.Time) (claims Claims) {
+	iterator := k.beforeCreatedTimeClaimsIterator(ctx, createdTime)
+
+	return k.iterateAssociated(ctx, iterator)
+}
+
 // ClaimsAfterTime gets all claims after a certain CreatedTime
 func (k Keeper) ClaimsAfterTime(ctx sdk.Context, createdTime time.Time) (claims Claims) {
 	iterator := k.afterCreatedTimeClaimsIterator(ctx, createdTime)
@@ -214,6 +221,11 @@ func (k Keeper) setCreatedTimeClaim(ctx sdk.Context, createdTime time.Time, clai
 func (k Keeper) claimsIterator(ctx sdk.Context, startClaimID, endClaimID uint64) sdk.Iterator {
 	store := ctx.KVStore(k.storeKey)
 	return store.Iterator(key(startClaimID), sdk.PrefixEndBytes(key(endClaimID)))
+}
+
+func (k Keeper) beforeCreatedTimeClaimsIterator(ctx sdk.Context, createdTime time.Time) sdk.Iterator {
+	store := ctx.KVStore(k.storeKey)
+	return store.Iterator(CreatedTimeClaimsPrefix, sdk.PrefixEndBytes(createdTimeClaimsKey(createdTime)))
 }
 
 func (k Keeper) afterCreatedTimeClaimsIterator(ctx sdk.Context, createdTime time.Time) sdk.Iterator {

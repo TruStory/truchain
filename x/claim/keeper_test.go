@@ -48,6 +48,13 @@ func TestAddGetClaim(t *testing.T) {
 	tt = tt.Add(-60 * time.Minute)
 	claims = keeper.ClaimsAfterTime(ctx, tt)
 	assert.Len(t, claims, 2)
+
+	claims = keeper.ClaimsBeforeTime(ctx, tt)
+	assert.Len(t, claims, 0)
+
+	tt = tt.Add(60 * 60 * time.Minute)
+	claims = keeper.ClaimsBeforeTime(ctx, tt)
+	assert.Len(t, claims, 2)
 }
 
 func createFakeClaim(ctx sdk.Context, keeper Keeper) Claim {
