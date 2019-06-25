@@ -20,9 +20,9 @@ var (
 	ClaimsKeyPrefix = []byte{0x00}
 	ClaimIDKey      = []byte{0x01}
 
-	CommunityClaimsPrefix  = []byte{0x10}
-	CreatorClaimsPrefix    = []byte{0x11}
-	CreatedTimeClaimsPrefx = []byte{0x12}
+	CommunityClaimsPrefix   = []byte{0x10}
+	CreatorClaimsPrefix     = []byte{0x11}
+	CreatedTimeClaimsPrefix = []byte{0x12}
 )
 
 // key for getting a specific claim from the store
@@ -57,7 +57,7 @@ func creatorClaimKey(creator sdk.AccAddress, claimID uint64) []byte {
 }
 
 func createdTimeClaimsKey(createdTime time.Time) []byte {
-	return append(CreatedTimeClaimsPrefx, sdk.FormatTimeBytes(createdTime)...)
+	return append(CreatedTimeClaimsPrefix, sdk.FormatTimeBytes(createdTime)...)
 }
 
 func createdTimeClaimKey(createdTime time.Time, claimID uint64) []byte {
