@@ -121,7 +121,7 @@ func (k Keeper) SubmitUpvote(ctx sdk.Context, argumentID uint64, creator sdk.Acc
 	if err != nil {
 		return Stake{}, err
 	}
-	argument, ok := k.getArgument(ctx, argumentID)
+	argument, ok := k.Argument(ctx, argumentID)
 	if !ok {
 		return Stake{}, ErrCodeUnknownArgument(argumentID)
 	}
@@ -247,6 +247,16 @@ func (k Keeper) SubmitArgument(ctx sdk.Context, body, summary string,
 	return argument, nil
 }
 
+func (k Keeper) Argument(ctx sdk.Context, argumentID uint64) (Argument, bool) {
+	argument := Argument{}
+	bz := k.store(ctx).Get(argumentKey(argumentID))
+	if bz == nil {
+		return Argument{}, false
+	}
+	k.codec.MustUnmarshalBinaryLengthPrefixed(bz, &argument)
+	return argument, true
+}
+
 func (k Keeper) getArgument(ctx sdk.Context, argumentID uint64) (Argument, bool) {
 	argument := Argument{}
 	bz := k.store(ctx).Get(argumentKey(argumentID))
@@ -328,6 +338,16 @@ func (k Keeper) newStake(ctx sdk.Context, amount sdk.Coin, creator sdk.AccAddres
 	k.setCommunityStake(ctx, communityID, stake.ID)
 	k.setUserCommunityStake(ctx, stake.Creator, communityID, stakeID)
 	return stake, nil
+}
+
+func (k Keeper) Stake(ctx sdk.Context, stakeID uint64) (Stake, bool) {
+	stake := Stake{}
+	bz := k.store(ctx).Get(stakeKey(stakeID))
+	if bz == nil {
+		return stake, false
+	}
+	k.codec.MustUnmarshalBinaryLengthPrefixed(bz, &stake)
+	return stake, true
 }
 
 func (k Keeper) getStake(ctx sdk.Context, stakeID uint64) (Stake, bool) {
@@ -418,6 +438,12 @@ func (k Keeper) InsertActiveStakeQueue(ctx sdk.Context, stakeID uint64, endTime 
 // RemoveFromActiveStakeQueue removes a stakeID from the Active Stake Queue
 func (k Keeper) RemoveFromActiveStakeQueue(ctx sdk.Context, stakeID uint64, endTime time.Time) {
 	k.store(ctx).Delete(activeStakeQueueKey(stakeID, endTime))
+}
+
+// IsStakeActive returns true if a stake is active
+func (k Keeper) IsStakeActive(ctx sdk.Context, stakeID uint64, endTime time.Time) bool {
+	bz := k.store(ctx).Get(activeStakeQueueKey(stakeID, endTime))
+	return bz == nil
 }
 
 // Logger returns a module-specific logger.

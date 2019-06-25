@@ -44,5 +44,9 @@ func ValidateGenesis(data GenesisState) error {
 		return fmt.Errorf("Param: MaxSlashCount, must have a positive value")
 	}
 
+	if data.Params.JailDuration.Seconds() < 1 {
+		return fmt.Errorf("Param: JailTime, must have a positive value")
+	}
+
 	return nil
 }

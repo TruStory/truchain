@@ -19,7 +19,7 @@ func (k Keeper) IterateClaimArguments(ctx sdk.Context, claimID uint64, cb func(a
 	for ; iterator.Valid(); iterator.Next() {
 		var argumentID uint64
 		k.codec.MustUnmarshalBinaryLengthPrefixed(iterator.Value(), &argumentID)
-		arg, ok := k.getArgument(ctx, argumentID)
+		arg, ok := k.Argument(ctx, argumentID)
 		if !ok {
 			panic(fmt.Sprintf("unable to retrieve argument with id %d", argumentID))
 		}
@@ -41,7 +41,7 @@ func (k Keeper) IterateArgumentStakes(ctx sdk.Context, argumentID uint64, cb fun
 	for ; iterator.Valid(); iterator.Next() {
 		var stakeID uint64
 		k.codec.MustUnmarshalBinaryLengthPrefixed(iterator.Value(), &stakeID)
-		stake, ok := k.getStake(ctx, stakeID)
+		stake, ok := k.Stake(ctx, stakeID)
 		if !ok {
 			panic(fmt.Sprintf("unable to retrieve stake with id %d", stakeID))
 		}
@@ -85,7 +85,7 @@ func (k Keeper) IterateUserArguments(ctx sdk.Context, creator sdk.AccAddress, cb
 	for ; iterator.Valid(); iterator.Next() {
 		var argumentID uint64
 		k.codec.MustUnmarshalBinaryLengthPrefixed(iterator.Value(), &argumentID)
-		arg, ok := k.getArgument(ctx, argumentID)
+		arg, ok := k.Argument(ctx, argumentID)
 		if !ok {
 			panic(fmt.Sprintf("unable to retrieve argument with id %d", argumentID))
 		}
@@ -107,7 +107,7 @@ func (k Keeper) IterateUserStakes(ctx sdk.Context, creator sdk.AccAddress, cb fu
 	for ; iterator.Valid(); iterator.Next() {
 		var stakeID uint64
 		k.codec.MustUnmarshalBinaryLengthPrefixed(iterator.Value(), &stakeID)
-		stake, ok := k.getStake(ctx, stakeID)
+		stake, ok := k.Stake(ctx, stakeID)
 		if !ok {
 			panic(fmt.Sprintf("unable to retrieve stake with id %d", stakeID))
 		}
@@ -128,7 +128,7 @@ func (k Keeper) IterateUserCommunityStakes(ctx sdk.Context, creator sdk.AccAddre
 	for ; iterator.Valid(); iterator.Next() {
 		var stakeID uint64
 		k.codec.MustUnmarshalBinaryLengthPrefixed(iterator.Value(), &stakeID)
-		stake, ok := k.getStake(ctx, stakeID)
+		stake, ok := k.Stake(ctx, stakeID)
 		if !ok {
 			panic(fmt.Sprintf("unable to retrieve stake with id %d", stakeID))
 		}
@@ -148,7 +148,7 @@ func (k Keeper) IterateAfterCreatedTimeUserStakes(ctx sdk.Context,
 	for ; iterator.Valid(); iterator.Next() {
 		var stakeID uint64
 		k.codec.MustUnmarshalBinaryLengthPrefixed(iterator.Value(), &stakeID)
-		stake, ok := k.getStake(ctx, stakeID)
+		stake, ok := k.Stake(ctx, stakeID)
 		if !ok {
 			panic(fmt.Sprintf("unable to retrieve stake with id %d", stakeID))
 		}

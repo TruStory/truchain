@@ -1,4 +1,4 @@
-package account
+package slashing
 
 import (
 	"encoding/json"
@@ -14,7 +14,7 @@ var (
 )
 
 // ModuleName is the name of this module
-const ModuleName = "truaccount"
+const ModuleName = "truslashing"
 
 // AppModuleBasic defines the internal data for the module
 // ----------------------------------------------------------------------------
@@ -70,7 +70,7 @@ func (AppModule) Route() string {
 	return RouterKey
 }
 
-// NewHandler creates the handler for the auth module
+// NewHandler creates the handler for the slashing module
 func (am AppModule) NewHandler() sdk.Handler {
 	return NewHandler(am.keeper)
 }
@@ -85,7 +85,7 @@ func (am AppModule) NewQuerierHandler() sdk.Querier {
 	return NewQuerier(am.keeper)
 }
 
-// InitGenesis enforces the creation of the genesis state for the auth module
+// InitGenesis enforces the creation of the genesis state for the slashing module
 func (am AppModule) InitGenesis(ctx sdk.Context, data json.RawMessage) []abci.ValidatorUpdate {
 	var genesisState GenesisState
 	ModuleCodec.MustUnmarshalJSON(data, &genesisState)

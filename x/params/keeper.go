@@ -9,6 +9,7 @@ import (
 	"github.com/TruStory/truchain/x/claim"
 	"github.com/TruStory/truchain/x/community"
 	"github.com/TruStory/truchain/x/expiration"
+	"github.com/TruStory/truchain/x/slashing"
 	"github.com/TruStory/truchain/x/stake"
 	"github.com/TruStory/truchain/x/staking"
 	"github.com/TruStory/truchain/x/story"
@@ -33,6 +34,7 @@ type Keeper struct {
 	claimKeeper      claim.Keeper
 	bankKeeper       bank.Keeper
 	stakingKeeper    staking.Keeper
+	slashingKeeper   slashing.Keeper
 }
 
 // NewKeeper creates a new keeper with write and read access
@@ -47,7 +49,8 @@ func NewKeeper(
 	communityKeeper community.Keeper,
 	claimKeeper claim.Keeper,
 	bankKeeper bank.Keeper,
-	stakingKeeper staking.Keeper) Keeper {
+	stakingKeeper staking.Keeper,
+	slashingKeeper slashing.Keeper) Keeper {
 
 	return Keeper{
 		argumentKeeper,
@@ -61,6 +64,7 @@ func NewKeeper(
 		claimKeeper,
 		bankKeeper,
 		stakingKeeper,
+		slashingKeeper,
 	}
 }
 
@@ -117,6 +121,14 @@ func (k Keeper) Params(ctx sdk.Context) Params {
 			StakeLimitDays:           k.stakingKeeper.GetParams(ctx).StakeLimitDays,
 			UnjailUpvotes:            k.stakingKeeper.GetParams(ctx).UnjailUpvotes,
 			MaxArgumentsPerClaim:     k.stakingKeeper.GetParams(ctx).MaxArgumentsPerClaim,
+		},
+		SlashingParams: slashing.Params{
+			MaxStakeSlashCount: k.slashingKeeper.GetParams(ctx).MaxStakeSlashCount,
+			SlashMagnitude:     k.slashingKeeper.GetParams(ctx).SlashMagnitude,
+			SlashMinStake:      k.slashingKeeper.GetParams(ctx).SlashMinStake,
+			SlashAdmins:        k.slashingKeeper.GetParams(ctx).SlashAdmins,
+			JailTime:           k.slashingKeeper.GetParams(ctx).JailTime,
+			CuratorShare:       k.slashingKeeper.GetParams(ctx).CuratorShare,
 		},
 	}
 }

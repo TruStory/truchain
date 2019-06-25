@@ -32,6 +32,7 @@ import (
 	"github.com/TruStory/truchain/x/community"
 	"github.com/TruStory/truchain/x/expiration"
 	clientParams "github.com/TruStory/truchain/x/params"
+	truslashing "github.com/TruStory/truchain/x/slashing"
 	"github.com/TruStory/truchain/x/stake"
 	trustaking "github.com/TruStory/truchain/x/staking"
 	"github.com/TruStory/truchain/x/story"
@@ -77,6 +78,7 @@ func init() {
 		account.AppModuleBasic{},
 		trubank2.AppModuleBasic{},
 		trustaking.AppModuleBasic{},
+		truslashing.AppModuleBasic{},
 	)
 }
 
@@ -115,9 +117,10 @@ type TruChain struct {
 	keyAppAccount *sdk.KVStoreKey
 
 	// keys to access trustory V2 state
-	keyCommunity  *sdk.KVStoreKey
-	keyClaim      *sdk.KVStoreKey
-	keyTruStaking *sdk.KVStoreKey
+	keyCommunity   *sdk.KVStoreKey
+	keyClaim       *sdk.KVStoreKey
+	keyTruStaking  *sdk.KVStoreKey
+	keyTruSlashing *sdk.KVStoreKey
 
 	// manage getting and setting accounts
 	accountKeeper       auth.AccountKeeper
@@ -142,10 +145,11 @@ type TruChain struct {
 	appAccountKeeper   account.Keeper
 
 	// access truchain V2 multistore
-	communityKeeper  community.Keeper
-	claimKeeper      claim.Keeper
-	truBankKeeper2   trubank2.Keeper
-	truStakingKeeper trustaking.Keeper
+	communityKeeper   community.Keeper
+	claimKeeper       claim.Keeper
+	truBankKeeper2    trubank2.Keeper
+	truStakingKeeper  trustaking.Keeper
+	truSlashingKeeper truslashing.Keeper
 
 	// the module manager
 	mm *sdk.ModuleManager
@@ -194,6 +198,7 @@ func NewTruChain(logger log.Logger, db dbm.DB, loadLatest bool, options ...func(
 		keyAppAccount:    sdk.NewKVStoreKey(account.StoreKey),
 		keyTruStaking:    sdk.NewKVStoreKey(trustaking.StoreKey),
 		keyTruBank2:      sdk.NewKVStoreKey(trubank2.StoreKey),
+		keyTruSlashing:   sdk.NewKVStoreKey(truslashing.StoreKey),
 	}
 
 	// init params keeper and subspaces
@@ -208,6 +213,7 @@ func NewTruChain(logger log.Logger, db dbm.DB, loadLatest bool, options ...func(
 	appAccountSubspace := app.paramsKeeper.Subspace(account.DefaultParamspace)
 	trubank2Subspace := app.paramsKeeper.Subspace(trubank2.DefaultParamspace)
 	truStakingSubspace := app.paramsKeeper.Subspace(trustaking.DefaultParamspace)
+	truSlashingSubspace := app.paramsKeeper.Subspace(truslashing.DefaultParamspace)
 
 	// add keepers
 	app.accountKeeper = auth.NewAccountKeeper(app.codec, app.keyAccount, authSubspace, auth.ProtoBaseAccount)
@@ -296,6 +302,7 @@ func NewTruChain(logger log.Logger, db dbm.DB, loadLatest bool, options ...func(
 		app.claimKeeper,
 		app.truBankKeeper2,
 		app.truStakingKeeper,
+		app.truSlashingKeeper,
 	)
 
 	app.communityKeeper = community.NewKeeper(
@@ -323,9 +330,17 @@ func NewTruChain(logger log.Logger, db dbm.DB, loadLatest bool, options ...func(
 		app.communityKeeper,
 	)
 
-
 	app.truStakingKeeper = trustaking.NewKeeper(codec, app.keyTruStaking, app.appAccountKeeper,
 		app.truBankKeeper2, app.claimKeeper, truStakingSubspace, trustaking.DefaultCodespace)
+
+	app.truSlashingKeeper = truslashing.NewKeeper(
+		app.keyTruSlashing,
+		truSlashingSubspace,
+		codec,
+		app.truBankKeeper2,
+		app.truStakingKeeper,
+		app.appAccountKeeper,
+		)
 
 	// The AnteHandler handles signature verification and transaction pre-processing
 	// TODO [shanev]: see https://github.com/TruStory/truchain/issues/364
@@ -345,7 +360,8 @@ func NewTruChain(logger log.Logger, db dbm.DB, loadLatest bool, options ...func(
 		AddRoute("trubank", trubank.NewHandler(app.truBankKeeper)).
 		AddRoute(claim.RouterKey, claim.NewHandler(app.claimKeeper)).
 		AddRoute(account.RouterKey, account.NewHandler(app.appAccountKeeper)).
-		AddRoute(trustaking.RouterKey, trustaking.NewHandler(app.truStakingKeeper))
+		AddRoute(trustaking.RouterKey, trustaking.NewHandler(app.truStakingKeeper)).
+		AddRoute(truslashing.RouterKey, truslashing.NewHandler(app.truSlashingKeeper))
 
 	// The app.QueryRouter is the main query router where each module registers its routes
 	app.QueryRouter().
@@ -362,7 +378,8 @@ func NewTruChain(logger log.Logger, db dbm.DB, loadLatest bool, options ...func(
 		AddRoute(claim.QuerierRoute, claim.NewQuerier(app.claimKeeper)).
 		AddRoute(trubank2.QuerierRoute, trubank2.NewQuerier(app.truBankKeeper2)).
 		AddRoute(account.QuerierRoute, account.NewQuerier(app.appAccountKeeper)).
-		AddRoute(trustaking.QuerierRoute, trustaking.NewQuerier(app.truStakingKeeper))
+		AddRoute(trustaking.QuerierRoute, trustaking.NewQuerier(app.truStakingKeeper)).
+		AddRoute(truslashing.QuerierRoute, truslashing.NewQuerier(app.truSlashingKeeper))
 
 	app.mm = sdk.NewModuleManager(
 		genaccounts.NewAppModule(app.accountKeeper),
@@ -385,13 +402,14 @@ func NewTruChain(logger log.Logger, db dbm.DB, loadLatest bool, options ...func(
 		trubank2.NewAppModule(app.truBankKeeper2),
 		account.NewAppModule(app.appAccountKeeper),
 		trustaking.NewAppModule(app.truStakingKeeper),
+		truslashing.NewAppModule(app.truSlashingKeeper),
 	)
 
 	// During begin block slashing happens after distr.BeginBlocker so that
 	// there is nothing left over in the validator fee pool, so as to keep the
 	// CanWithdrawInvariant invariant.
 	app.mm.SetOrderBeginBlockers(mint.ModuleName, distr.ModuleName)
-	app.mm.SetOrderEndBlockers(staking.ModuleName, expiration.ModuleName, trustaking.ModuleName)
+	app.mm.SetOrderEndBlockers(staking.ModuleName, expiration.ModuleName, trustaking.ModuleName, truslashing.ModuleName)
 
 	// genutils must occur after staking so that pools are properly
 	// initialized with tokens from genesis accounts.
@@ -400,7 +418,7 @@ func NewTruChain(logger log.Logger, db dbm.DB, loadLatest bool, options ...func(
 		genutil.ModuleName, category.ModuleName, story.ModuleName,
 		argument.ModuleName, stake.ModuleName, backing.ModuleName, challenge.ModuleName,
 		expiration.ModuleName, trubank.ModuleName, community.ModuleName, claim.ModuleName,
-		trubank2.ModuleName, trustaking.ModuleName,
+		trubank2.ModuleName, trustaking.ModuleName, truslashing.ModuleName,
 		mint.ModuleName)
 
 	app.SetInitChainer(app.InitChainer)
@@ -434,6 +452,7 @@ func NewTruChain(logger log.Logger, db dbm.DB, loadLatest bool, options ...func(
 		app.keyAppAccount,
 		app.keyTruBank2,
 		app.keyTruStaking,
+		app.keyTruSlashing,
 	)
 
 	if loadLatest {

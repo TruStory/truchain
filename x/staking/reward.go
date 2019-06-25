@@ -31,7 +31,7 @@ type RewardResult struct {
 }
 
 func (k Keeper) distributeReward(ctx sdk.Context, stake Stake) (RewardResult, sdk.Error) {
-	argument, ok := k.getArgument(ctx, stake.ArgumentID)
+	argument, ok := k.Argument(ctx, stake.ArgumentID)
 	if !ok {
 		return RewardResult{}, ErrCodeUnknownArgument(stake.ArgumentID)
 	}

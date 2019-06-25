@@ -27,14 +27,6 @@ type Param struct {
 }
 ```
 
-### Associations
-
-`SlashedStakes` maintains an easily accessible list of all slashes for each stake.
-```go
-// "stake:id:XX:slash:id:XX:creator:XX" -> nil
-type SlashedStakes app.UserList
-```
-
 ## State Transitions
 
 ### Messages
@@ -45,7 +37,7 @@ Fail validation if the `SlashCount` already exceeds `MaxStakeSlashCount`, preven
 
 If `SlashCount` is equal to `MaxStakeSlashCount`, then remove the amount of this stake from the total backing or challenge stake count on the claim.
 
-Futhermore, the same user cannot slash the same argument more than once. Verify with the `SlashedStakes` list first.
+Futhermore, the same user cannot slash the same argument more than once.
 
 Punishment
 * Slash total interest of each staker

@@ -57,18 +57,18 @@ func TestIncrementSlashCount_Success(t *testing.T) {
 	_, publicKey, address, coins := getFakeAppAccountParams()
 
 	createdAppAccount, _ := keeper.CreateAppAccount(ctx, address, coins, publicKey)
-	assert.Equal(t, createdAppAccount.SlashCount, uint(0))
+	assert.Equal(t, createdAppAccount.SlashCount, 0)
 
 	// incrementing once
 	keeper.IncrementSlashCount(ctx, createdAppAccount.Address)
 	returnedAppAccount, err := keeper.getAccount(ctx, address)
 
 	assert.Nil(t, err)
-	assert.Equal(t, returnedAppAccount.SlashCount, uint(1))
+	assert.Equal(t, returnedAppAccount.SlashCount, 1)
 
 	// incrementing again
 	keeper.IncrementSlashCount(ctx, createdAppAccount.Address)
 	returnedAppAccount, err = keeper.getAccount(ctx, address)
 	assert.Nil(t, err)
-	assert.Equal(t, returnedAppAccount.SlashCount, uint(2))
+	assert.Equal(t, returnedAppAccount.SlashCount,2)
 }

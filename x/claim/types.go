@@ -11,9 +11,10 @@ import (
 
 // Defines module constants
 const (
-	RouterKey    = ModuleName
-	QuerierRoute = ModuleName
-	StoreKey     = ModuleName
+	RouterKey         = ModuleName
+	QuerierRoute      = ModuleName
+	StoreKey          = ModuleName
+	DefaultParamspace = ModuleName
 )
 
 // Claim stores data about a claim
