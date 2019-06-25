@@ -1,4 +1,5 @@
-package auth
+package account
+
 
 import (
 	"encoding/json"

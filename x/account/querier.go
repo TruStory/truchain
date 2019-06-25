@@ -1,4 +1,5 @@
-package auth
+package account
+
 
 import (
 	"encoding/json"
@@ -10,8 +11,7 @@ import (
 
 // query endpoints supported by the truchain Querier
 const (
-	QueryAppAccount  = "account"
-	QueryAppAccounts = "accounts"
+	QueryAppAccount = "account"
 )
 
 // QueryAppAccountParams are params for querying app accounts by address queries
@@ -25,8 +25,6 @@ func NewQuerier(keeper Keeper) sdk.Querier {
 		switch path[0] {
 		case QueryAppAccount:
 			return queryAppAccount(ctx, request, keeper)
-		case QueryAppAccounts:
-			return queryAppAccounts(ctx, keeper)
 		default:
 			return nil, sdk.ErrUnknownRequest(fmt.Sprintf("Unknown truchain query endpoint: auth/%s", path[0]))
 		}
@@ -39,22 +37,12 @@ func queryAppAccount(ctx sdk.Context, request abci.RequestQuery, k Keeper) (resu
 		return
 	}
 
-	appAccount, err := k.AppAccount(ctx, params.Address)
+	appAccount, err := k.getAccount(ctx, params.Address)
 	if err != nil {
 		return
 	}
 
 	result, jsonErr := k.codec.MarshalJSON(appAccount)
-	if jsonErr != nil {
-		panic(jsonErr)
-	}
-	return result, nil
-}
-
-func queryAppAccounts(ctx sdk.Context, k Keeper) (result []byte, err sdk.Error) {
-	appAccounts := k.AppAccounts(ctx)
-
-	result, jsonErr := k.codec.MarshalJSON(appAccounts)
 	if jsonErr != nil {
 		panic(jsonErr)
 	}

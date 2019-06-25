@@ -1,4 +1,5 @@
-package auth
+package account
+
 
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -6,5 +7,6 @@ import (
 
 // BankKeeper is the expected bank keeper interface for this module
 type BankKeeper interface {
-	NewTransaction(ctx sdk.Context, to sdk.AccAddress, coins sdk.Coins) bool
+	AddCoin(ctx sdk.Context, addr sdk.AccAddress, amt sdk.Coin,
+		referenceID uint64, txType int) (sdk.Coins, sdk.Error)
 }
