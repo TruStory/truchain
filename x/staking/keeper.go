@@ -1,8 +1,6 @@
 package staking
 
 import (
-	"fmt"
-
 	app "github.com/TruStory/truchain/types"
 	"github.com/TruStory/truchain/x/bank"
 
@@ -80,7 +78,7 @@ func (k Keeper) UserArguments(ctx sdk.Context, address sdk.AccAddress) []Argumen
 }
 
 func (k Keeper) SubmitUpvote(ctx sdk.Context, argumentID uint64, creator sdk.AccAddress) (Stake, sdk.Error) {
-	_, ok := k.getArgument(ctx, argumentID)
+	argument, ok := k.getArgument(ctx, argumentID)
 	if !ok {
 		return Stake{}, ErrCodeUnknownArgument(argumentID)
 	}
@@ -91,7 +89,15 @@ func (k Keeper) SubmitUpvote(ctx sdk.Context, argumentID uint64, creator sdk.Acc
 		}
 	}
 	upvoteStake := k.GetParams(ctx).UpvoteStake
-	return k.newStake(ctx, upvoteStake, creator, StakeUpvote, argumentID)
+	stake, err := k.newStake(ctx, upvoteStake, creator, StakeUpvote, argumentID)
+	if err != nil {
+		return stake, err
+	}
+	argument.UpvotedCount = argument.UpvotedCount + 1
+	argument.UpvotedStake = argument.UpvotedStake.Add(stake.Amount)
+	argument.UpdatedTime = ctx.BlockHeader().Time
+	k.setArgument(ctx, argument)
+	return stake, nil
 }
 
 func (k Keeper) SubmitArgument(ctx sdk.Context, body, summary string,
@@ -119,21 +125,21 @@ func (k Keeper) SubmitArgument(ctx sdk.Context, body, summary string,
 		return Argument{}, err
 	}
 	argument := Argument{
-		ID:          argumentID,
-		Creator:     creator,
-		ClaimID:     claimID,
-		Summary:     summary,
-		Body:        body,
-		StakeType:   stakeType,
-		CreatedTime: ctx.BlockHeader().Time,
-		UpdatedTime: ctx.BlockHeader().Time,
+		ID:           argumentID,
+		Creator:      creator,
+		ClaimID:      claimID,
+		Summary:      summary,
+		Body:         body,
+		StakeType:    stakeType,
+		CreatedTime:  ctx.BlockHeader().Time,
+		UpdatedTime:  ctx.BlockHeader().Time,
+		UpvotedStake: sdk.NewInt64Coin(app.StakeDenom, 0),
 	}
-	stake, err := k.newStake(ctx, creationAmount, creator, stakeType, argument.ID)
+	_, err = k.newStake(ctx, creationAmount, creator, stakeType, argument.ID)
 	if err != nil {
 		return Argument{}, err
 	}
-	argument.UpvotedCount = 1
-	argument.UpvotedStake = stake.Amount
+
 	k.setArgument(ctx, argument)
 	k.setArgumentID(ctx, argumentID+1)
 	k.setClaimArgument(ctx, claimID, argument.ID)
@@ -166,7 +172,6 @@ func (k Keeper) newStake(ctx sdk.Context, amount sdk.Coin, creator sdk.AccAddres
 	if err != nil {
 		return Stake{}, err
 	}
-	fmt.Println(stakeType.String(), stakeType.BankTransactionType().String())
 	_, err = k.bankKeeper.SubtractCoin(ctx, creator, amount, argumentID, stakeType.BankTransactionType())
 	if err != nil {
 		return Stake{}, err

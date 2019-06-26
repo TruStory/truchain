@@ -43,8 +43,8 @@ func TestKeeper_SubmitArgument(t *testing.T) {
 		StakeType:    StakeBacking,
 		CreatedTime:  ctx.BlockHeader().Time,
 		UpdatedTime:  ctx.BlockHeader().Time,
-		UpvotedCount: 1,
-		UpvotedStake: sdk.NewInt64Coin(app.StakeDenom, app.Shanev*50),
+		UpvotedCount: 0,
+		UpvotedStake: sdk.NewInt64Coin(app.StakeDenom, 0),
 	}
 	assert.Equal(t, expectedArgument, argument)
 	argument, ok := k.getArgument(ctx, expectedArgument.ID)
@@ -71,8 +71,7 @@ func TestKeeper_SubmitArgument(t *testing.T) {
 		StakeType:    StakeChallenge,
 		CreatedTime:  ctx.BlockHeader().Time,
 		UpdatedTime:  ctx.BlockHeader().Time,
-		UpvotedCount: 1,
-		UpvotedStake: sdk.NewInt64Coin(app.StakeDenom, app.Shanev*50),
+		UpvotedStake: sdk.NewInt64Coin(app.StakeDenom, 0),
 	}
 	expectedStake2 := Stake{
 		ID:          2,
@@ -140,6 +139,7 @@ func TestKeeper_SubmitUpvote(t *testing.T) {
 	ctx.WithBlockTime(time.Now())
 	addr := createFakeFundedAccount(ctx, accKeeper, sdk.Coins{sdk.NewInt64Coin(app.StakeDenom, app.Shanev*300)})
 	addr2 := createFakeFundedAccount(ctx, accKeeper, sdk.Coins{sdk.NewInt64Coin(app.StakeDenom, app.Shanev*300)})
+	addr3 := createFakeFundedAccount(ctx, accKeeper, sdk.Coins{sdk.NewInt64Coin(app.StakeDenom, app.Shanev*300)})
 	argument, err := k.SubmitArgument(ctx, "body", "summary", addr, 1, StakeBacking)
 	assert.NoError(t, err)
 	expectedStake := Stake{
@@ -211,6 +211,15 @@ func TestKeeper_SubmitUpvote(t *testing.T) {
 	assert.Equal(t, bank.TransactionUpvote, user2Txs[0].Type)
 	assert.Equal(t, sdk.NewInt64Coin(app.StakeDenom, app.Shanev*50), userTxs[0].Amount)
 	assert.Equal(t, sdk.NewInt64Coin(app.StakeDenom, app.Shanev*10), user2Txs[0].Amount)
+
+	_, err = k.SubmitUpvote(ctx, argument.ID, addr3)
+	assert.NoError(t, err)
+
+	argument, ok := k.getArgument(ctx, argument.ID)
+	assert.True(t, ok)
+	assert.Equal(t, uint64(2), argument.UpvotedCount)
+	assert.Equal(t, sdk.NewInt64Coin(app.StakeDenom, app.Shanev*20), argument.UpvotedStake)
+
 }
 
 func Test_interest(t *testing.T) {
