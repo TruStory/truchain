@@ -14,8 +14,8 @@ The `Stake` type stores all data necessarily for a staking action. It is designe
 
 ```go
 type Stake struct {
-    ID           int64
-    ArgumentID   int64
+    ID           uint64
+    ArgumentID   uint64
     Type         StakeType
     Amount       sdk.Coin
     Creator      sdk.AccAddress
@@ -33,7 +33,7 @@ const (
 
 // Params can be voted on by governance
 type Params struct {
-    Period                  time.Time       // default = 7 days
+    Period                  time.Duration       // default = 7 days
     ArgumentCreationStake   sdk.Coin        // default = 50 trustake
     UpvoteStake             sdk.Coin        // default = 10 trustake
     CreatorShare            sdk.Dec         // default = 50%
@@ -48,24 +48,17 @@ An `Argument` contains all data for an argument that either supports (back) or r
 
 ```go
 type Argument struct {
-    *Stake
-
-    ClaimID              int64
-    Summary              string
-    Body                 string
-    UpvotedCount         int64
-    UpvotedStake         sdk.Coin
-    SlashCount           int
-    IsUnhelpful          bool
-    UpdatedTime          time.Time
-}
-```
-
-An `Upvote` wraps a `Stake` and represents an upvote.
-
-```go
-type Upvote struct {
-    *Stake
+	ID           uint64
+	Creator      sdk.AccAddress
+	ClaimID      uint64
+	Summary      string
+	Body         string
+	UpvotedCount int64
+	UpvotedStake sdk.Coin
+	SlashCount   int64
+	IsUnhelpful  bool
+	CreatedTime  time.Time
+	UpdatedTime  time.Time
 }
 ```
 
