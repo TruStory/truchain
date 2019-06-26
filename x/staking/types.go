@@ -89,6 +89,7 @@ type Argument struct {
 	StakeType      StakeType
 	UpvotedCount   uint64
 	UpvotedStake   sdk.Coin
+	TotalStake     sdk.Coin
 	UnhelpfulCount uint64
 	IsUnhelpful    bool
 	CreatedTime    time.Time

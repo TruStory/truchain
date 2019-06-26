@@ -6,7 +6,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
-// Bank errors reserve 500 ~ 599.
+// Staking errors reserve 500 ~ 599.
 const (
 	DefaultCodespace sdk.CodespaceType = ModuleName
 
@@ -62,7 +62,7 @@ func ErrCodeUnknownArgument(argumentID uint64) sdk.Error {
 // ErrCodeUnknownStake throws an error when an invalid stake id
 func ErrCodeUnknownStake(argumentID uint64) sdk.Error {
 	return sdk.NewError(DefaultCodespace,
-		ErrorCodeUnknownArgument,
+		ErrorCodeUnknownStake,
 		fmt.Sprintf("Unknown stake id %d", argumentID),
 	)
 }

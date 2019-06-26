@@ -45,6 +45,7 @@ func TestKeeper_SubmitArgument(t *testing.T) {
 		UpdatedTime:  ctx.BlockHeader().Time,
 		UpvotedCount: 0,
 		UpvotedStake: sdk.NewInt64Coin(app.StakeDenom, 0),
+		TotalStake:   sdk.NewInt64Coin(app.StakeDenom, app.Shanev*50),
 	}
 	assert.Equal(t, expectedArgument, argument)
 	argument, ok := k.getArgument(ctx, expectedArgument.ID)
@@ -72,6 +73,7 @@ func TestKeeper_SubmitArgument(t *testing.T) {
 		CreatedTime:  ctx.BlockHeader().Time,
 		UpdatedTime:  ctx.BlockHeader().Time,
 		UpvotedStake: sdk.NewInt64Coin(app.StakeDenom, 0),
+		TotalStake:   sdk.NewInt64Coin(app.StakeDenom, app.Shanev*50),
 	}
 	expectedStake2 := Stake{
 		ID:          2,
@@ -219,7 +221,7 @@ func TestKeeper_SubmitUpvote(t *testing.T) {
 	assert.True(t, ok)
 	assert.Equal(t, uint64(2), argument.UpvotedCount)
 	assert.Equal(t, sdk.NewInt64Coin(app.StakeDenom, app.Shanev*20), argument.UpvotedStake)
-
+	assert.Equal(t, sdk.NewInt64Coin(app.StakeDenom, app.Shanev*70), argument.TotalStake)
 }
 
 func Test_interest(t *testing.T) {

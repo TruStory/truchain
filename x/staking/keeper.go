@@ -95,6 +95,7 @@ func (k Keeper) SubmitUpvote(ctx sdk.Context, argumentID uint64, creator sdk.Acc
 	}
 	argument.UpvotedCount = argument.UpvotedCount + 1
 	argument.UpvotedStake = argument.UpvotedStake.Add(stake.Amount)
+	argument.TotalStake = argument.TotalStake.Add(stake.Amount)
 	argument.UpdatedTime = ctx.BlockHeader().Time
 	k.setArgument(ctx, argument)
 	return stake, nil
@@ -134,6 +135,7 @@ func (k Keeper) SubmitArgument(ctx sdk.Context, body, summary string,
 		CreatedTime:  ctx.BlockHeader().Time,
 		UpdatedTime:  ctx.BlockHeader().Time,
 		UpvotedStake: sdk.NewInt64Coin(app.StakeDenom, 0),
+		TotalStake:   creationAmount,
 	}
 	_, err = k.newStake(ctx, creationAmount, creator, stakeType, argument.ID)
 	if err != nil {
