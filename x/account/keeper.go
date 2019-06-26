@@ -65,10 +65,10 @@ func (k Keeper) CreateAppAccount(ctx sdk.Context, address sdk.AccAddress,
 	return acc, nil
 }
 
-// JailedAccounts returns all jailed accounts before jailEndTime
-func (k Keeper) JailedAccounts(ctx sdk.Context, jailEndTime time.Time) (accounts AppAccounts, err sdk.Error) {
+// JailedAccountsAfter returns all jailed accounts after jailEndTime
+func (k Keeper) JailedAccountsAfter(ctx sdk.Context, jailEndTime time.Time) (accounts AppAccounts, err sdk.Error) {
 	store := ctx.KVStore(k.storeKey)
-	iterator := store.Iterator(JailEndTimeAccountPrefix, sdk.PrefixEndBytes(jailEndTimeAccountsKey(jailEndTime)))
+	iterator := store.Iterator(jailEndTimeAccountsKey(jailEndTime), sdk.PrefixEndBytes(JailEndTimeAccountPrefix))
 
 	defer iterator.Close()
 	for ; iterator.Valid(); iterator.Next() {
