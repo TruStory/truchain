@@ -65,6 +65,24 @@ func (k Keeper) CreateAppAccount(ctx sdk.Context, address sdk.AccAddress,
 	return acc, nil
 }
 
+// JailedAccounts returns all jailed accounts before jailEndTime
+func (k Keeper) JailedAccounts(ctx sdk.Context, jailEndTime time.Time) (accounts AppAccounts, err sdk.Error) {
+	store := ctx.KVStore(k.storeKey)
+	iterator := store.Iterator(JailEndTimeAccountPrefix, sdk.PrefixEndBytes(jailEndTimeAccountsKey(jailEndTime)))
+
+	defer iterator.Close()
+	for ; iterator.Valid(); iterator.Next() {
+		addr := iterator.Value()
+		user, err := k.getAccount(ctx, addr)
+		if err != nil {
+			panic(err)
+		}
+		accounts = append(accounts, user)
+	}
+
+	return accounts, nil
+}
+
 // JailUntil puts an AppAccount in jail until a time
 func (k Keeper) JailUntil(ctx sdk.Context, address sdk.AccAddress, until time.Time) sdk.Error {
 	user, err := k.getAccount(ctx, address)
@@ -76,6 +94,9 @@ func (k Keeper) JailUntil(ctx sdk.Context, address sdk.AccAddress, until time.Ti
 	user.JailEndTime = until
 
 	k.accountKeeper.SetAccount(ctx, user)
+
+	// persist in jail list (sorted by jail end time)
+	k.setJailEndTimeAccount(ctx, until, address)
 
 	return nil
 }
@@ -118,4 +139,9 @@ func (k Keeper) getAccount(ctx sdk.Context, addr sdk.AccAddress) (AppAccount, sd
 
 func getLogger(ctx sdk.Context) log.Logger {
 	return ctx.Logger().With("module", ModuleName)
+}
+
+func (k Keeper) setJailEndTimeAccount(ctx sdk.Context, jailEndTime time.Time, addr sdk.AccAddress) {
+	store := ctx.KVStore(k.storeKey)
+	store.Set(jailEndTimeAccountKey(jailEndTime, addr), addr)
 }

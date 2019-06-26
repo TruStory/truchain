@@ -36,6 +36,18 @@ func TestJailUntil_Success(t *testing.T) {
 	isJailed, err = keeper.IsJailed(ctx, createdAppAccount.GetAddress())
 	assert.Nil(t, err)
 	assert.Equal(t, true, isJailed)
+
+	accounts, err := keeper.JailedAccounts(ctx, time.Now().AddDate(0, 0, 10))
+	assert.NoError(t, err)
+	assert.Len(t, accounts, 1)
+
+	err = keeper.JailUntil(ctx, createdAppAccount.GetAddress(), time.Now().AddDate(0, 0, 10))
+	accounts, _ = keeper.JailedAccounts(ctx, time.Now().AddDate(0, 0, 110))
+	assert.Len(t, accounts, 2)
+
+	accounts, err = keeper.JailedAccounts(ctx, time.Now())
+	assert.NoError(t, err)
+	assert.Len(t, accounts, 0)
 }
 
 func TestIncrementSlashCount_Success(t *testing.T) {

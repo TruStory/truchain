@@ -1,6 +1,5 @@
 package account
 
-
 import (
 	"time"
 
@@ -24,3 +23,6 @@ type AppAccount struct {
 	JailEndTime time.Time
 	CreatedTime time.Time
 }
+
+// AppAccounts is a slice of AppAccounts
+type AppAccounts []AppAccount
