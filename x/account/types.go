@@ -10,8 +10,10 @@ var _ auth.Account = (*AppAccount)(nil)
 
 // Defines auth module constants
 const (
-	RouterKey    = ModuleName
-	QuerierRoute = ModuleName
+	StoreKey          = ModuleName
+	RouterKey         = ModuleName
+	QuerierRoute      = ModuleName
+	DefaultParamspace = ModuleName
 )
 
 // AppAccount is the main account for a TruStory user.

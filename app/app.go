@@ -4,6 +4,7 @@ import (
 	"os"
 
 	"github.com/TruStory/truchain/types"
+	"github.com/TruStory/truchain/x/account"
 	"github.com/TruStory/truchain/x/argument"
 	"github.com/TruStory/truchain/x/backing"
 	"github.com/TruStory/truchain/x/category"
@@ -70,6 +71,7 @@ func init() {
 		community.AppModuleBasic{},
 		claim.AppModuleBasic{},
 		mint.AppModuleBasic{},
+		account.AppModuleBasic{},
 	)
 }
 
@@ -104,6 +106,7 @@ type TruChain struct {
 	keyStoryQueue *sdk.KVStoreKey
 	keyTruBank    *sdk.KVStoreKey
 	keyMint       *sdk.KVStoreKey
+	keyAppAccount *sdk.KVStoreKey
 
 	// keys to access trustory V2 state
 	keyCommunity *sdk.KVStoreKey
@@ -129,6 +132,7 @@ type TruChain struct {
 	stakeKeeper        stake.Keeper
 	truBankKeeper      trubank.Keeper
 	mintKeeper         mint.Keeper
+	appAccountKeeper   account.Keeper
 
 	// access truchain V2 multistore
 	communityKeeper community.Keeper
@@ -178,6 +182,7 @@ func NewTruChain(logger log.Logger, db dbm.DB, loadLatest bool, options ...func(
 		keyCommunity:     sdk.NewKVStoreKey(community.StoreKey),
 		keyClaim:         sdk.NewKVStoreKey(claim.StoreKey),
 		keyMint:          sdk.NewKVStoreKey(mint.StoreKey),
+		keyAppAccount:    sdk.NewKVStoreKey(account.StoreKey),
 	}
 
 	// init params keeper and subspaces
@@ -189,6 +194,7 @@ func NewTruChain(logger log.Logger, db dbm.DB, loadLatest bool, options ...func(
 	storySubspace := app.paramsKeeper.Subspace(story.StoreKey)
 	argumentSubspace := app.paramsKeeper.Subspace(argument.StoreKey)
 	mintSubspace := app.paramsKeeper.Subspace(mint.DefaultParamspace)
+	appAccountSubspace := app.paramsKeeper.Subspace(account.DefaultParamspace)
 
 	// add keepers
 	app.accountKeeper = auth.NewAccountKeeper(app.codec, app.keyAccount, authSubspace, auth.ProtoBaseAccount)
@@ -288,6 +294,14 @@ func NewTruChain(logger log.Logger, db dbm.DB, loadLatest bool, options ...func(
 		app.communityKeeper,
 	)
 
+	app.appAccountKeeper = account.NewKeeper(
+		app.keyAppAccount,
+		appAccountSubspace,
+		codec,
+		nil,
+		app.accountKeeper,
+	)
+
 	// The AnteHandler handles signature verification and transaction pre-processing
 	// TODO [shanev]: see https://github.com/TruStory/truchain/issues/364
 	// Add this back after fixing issues with signature verification
@@ -304,7 +318,8 @@ func NewTruChain(logger log.Logger, db dbm.DB, loadLatest bool, options ...func(
 		AddRoute("challenge", challenge.NewHandler(app.challengeKeeper)).
 		AddRoute("users", users.NewHandler(app.accountKeeper, app.categoryKeeper)).
 		AddRoute("trubank", trubank.NewHandler(app.truBankKeeper)).
-		AddRoute(claim.QuerierRoute, claim.NewHandler(app.claimKeeper))
+		AddRoute(claim.QuerierRoute, claim.NewHandler(app.claimKeeper)).
+		AddRoute(account.RouterKey, account.NewHandler(app.appAccountKeeper))
 
 	// The app.QueryRouter is the main query router where each module registers its routes
 	app.QueryRouter().
@@ -318,7 +333,8 @@ func NewTruChain(logger log.Logger, db dbm.DB, loadLatest bool, options ...func(
 		AddRoute(clientParams.QueryPath, clientParams.NewQuerier(app.clientParamsKeeper)).
 		AddRoute(trubank.QueryPath, trubank.NewQuerier(app.truBankKeeper)).
 		AddRoute(community.QuerierRoute, community.NewQuerier(app.communityKeeper)).
-		AddRoute(claim.QuerierRoute, claim.NewQuerier(app.claimKeeper))
+		AddRoute(claim.QuerierRoute, claim.NewQuerier(app.claimKeeper)).
+		AddRoute(account.QuerierRoute, account.NewQuerier(app.appAccountKeeper))
 
 	app.mm = sdk.NewModuleManager(
 		genaccounts.NewAppModule(app.accountKeeper),
@@ -338,6 +354,7 @@ func NewTruChain(logger log.Logger, db dbm.DB, loadLatest bool, options ...func(
 		community.NewAppModule(app.communityKeeper),
 		claim.NewAppModule(app.claimKeeper),
 		mint.NewAppModule(app.mintKeeper),
+		account.NewAppModule(app.appAccountKeeper),
 	)
 
 	// During begin block slashing happens after distr.BeginBlocker so that
@@ -348,7 +365,7 @@ func NewTruChain(logger log.Logger, db dbm.DB, loadLatest bool, options ...func(
 
 	// genutils must occur after staking so that pools are properly
 	// initialized with tokens from genesis accounts.
-	app.mm.SetOrderInitGenesis(genaccounts.ModuleName, distr.ModuleName,
+	app.mm.SetOrderInitGenesis(genaccounts.ModuleName, account.ModuleName, distr.ModuleName,
 		staking.ModuleName, auth.ModuleName, bank.ModuleName,
 		genutil.ModuleName, category.ModuleName, story.ModuleName,
 		argument.ModuleName, stake.ModuleName, backing.ModuleName, challenge.ModuleName,
@@ -382,6 +399,7 @@ func NewTruChain(logger log.Logger, db dbm.DB, loadLatest bool, options ...func(
 		app.keyCommunity,
 		app.keyClaim,
 		app.keyMint,
+		app.keyAppAccount,
 	)
 
 	if loadLatest {

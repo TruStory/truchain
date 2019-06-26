@@ -1,6 +1,5 @@
 package account
 
-
 import (
 	"encoding/json"
 
@@ -15,7 +14,7 @@ var (
 )
 
 // ModuleName is the name of this module
-const ModuleName = "truchain_auth"
+const ModuleName = "account"
 
 // AppModuleBasic defines the internal data for the module
 // ----------------------------------------------------------------------------
@@ -53,6 +52,14 @@ func (AppModuleBasic) ValidateGenesis(bz json.RawMessage) error {
 type AppModule struct {
 	AppModuleBasic
 	keeper Keeper
+}
+
+// NewAppModule creates a NewAppModule object
+func NewAppModule(keeper Keeper) AppModule {
+	return AppModule{
+		AppModuleBasic: AppModuleBasic{},
+		keeper:         keeper,
+	}
 }
 
 // RegisterInvariants enforces registering of invariants
