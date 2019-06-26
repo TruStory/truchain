@@ -8,6 +8,7 @@ import (
 	"github.com/stretchr/testify/assert"
 
 	app "github.com/TruStory/truchain/types"
+	"github.com/TruStory/truchain/x/bank"
 )
 
 func TestKeeper_SubmitArgument(t *testing.T) {
@@ -43,7 +44,7 @@ func TestKeeper_SubmitArgument(t *testing.T) {
 		CreatedTime:  ctx.BlockHeader().Time,
 		UpdatedTime:  ctx.BlockHeader().Time,
 		UpvotedCount: 1,
-		UpvotedStake: sdk.NewInt64Coin(app.StakeDenom, 50),
+		UpvotedStake: sdk.NewInt64Coin(app.StakeDenom, app.Shanev*50),
 	}
 	assert.Equal(t, expectedArgument, argument)
 	argument, ok := k.getArgument(ctx, expectedArgument.ID)
@@ -54,7 +55,7 @@ func TestKeeper_SubmitArgument(t *testing.T) {
 		ID:          1,
 		ArgumentID:  1,
 		Type:        StakeBacking,
-		Amount:      sdk.NewInt64Coin(app.StakeDenom, 50),
+		Amount:      sdk.NewInt64Coin(app.StakeDenom, app.Shanev*50),
 		Creator:     addr,
 		CreatedTime: ctx.BlockHeader().Time,
 		EndTime:     ctx.BlockHeader().Time.Add(time.Hour * 24 * 7),
@@ -71,13 +72,13 @@ func TestKeeper_SubmitArgument(t *testing.T) {
 		CreatedTime:  ctx.BlockHeader().Time,
 		UpdatedTime:  ctx.BlockHeader().Time,
 		UpvotedCount: 1,
-		UpvotedStake: sdk.NewInt64Coin(app.StakeDenom, 50),
+		UpvotedStake: sdk.NewInt64Coin(app.StakeDenom, app.Shanev*50),
 	}
 	expectedStake2 := Stake{
 		ID:          2,
 		ArgumentID:  2,
 		Type:        StakeChallenge,
-		Amount:      sdk.NewInt64Coin(app.StakeDenom, 50),
+		Amount:      sdk.NewInt64Coin(app.StakeDenom, app.Shanev*50),
 		Creator:     addr2,
 		CreatedTime: ctx.BlockHeader().Time,
 		EndTime:     ctx.BlockHeader().Time.Add(time.Hour * 24 * 7),
@@ -145,7 +146,7 @@ func TestKeeper_SubmitUpvote(t *testing.T) {
 		ID:          1,
 		ArgumentID:  1,
 		Type:        StakeBacking,
-		Amount:      sdk.NewInt64Coin(app.StakeDenom, 50),
+		Amount:      sdk.NewInt64Coin(app.StakeDenom, app.Shanev*50),
 		Creator:     addr,
 		CreatedTime: ctx.BlockHeader().Time,
 		EndTime:     ctx.BlockHeader().Time.Add(time.Hour * 24 * 7),
@@ -157,7 +158,7 @@ func TestKeeper_SubmitUpvote(t *testing.T) {
 		ID:          2,
 		ArgumentID:  1,
 		Type:        StakeUpvote,
-		Amount:      sdk.NewInt64Coin(app.StakeDenom, 10),
+		Amount:      sdk.NewInt64Coin(app.StakeDenom, app.Shanev*10),
 		Creator:     addr2,
 		CreatedTime: ctx.BlockHeader().Time,
 		EndTime:     ctx.BlockHeader().Time.Add(time.Hour * 24 * 7),
@@ -201,6 +202,15 @@ func TestKeeper_SubmitUpvote(t *testing.T) {
 
 	assert.Len(t, expiringStakes, 2)
 	assert.Equal(t, []Stake{expectedStake, expectedStake2}, expiringStakes)
+
+	userTxs := k.bankKeeper.TransactionsByAddress(ctx, addr)
+	user2Txs := k.bankKeeper.TransactionsByAddress(ctx, addr2)
+	assert.Len(t, userTxs, 1)
+	assert.Len(t, user2Txs, 1)
+	assert.Equal(t, bank.TransactionBacking, userTxs[0].Type)
+	assert.Equal(t, bank.TransactionUpvote, user2Txs[0].Type)
+	assert.Equal(t, sdk.NewInt64Coin(app.StakeDenom, app.Shanev*50), userTxs[0].Amount)
+	assert.Equal(t, sdk.NewInt64Coin(app.StakeDenom, app.Shanev*10), user2Txs[0].Amount)
 }
 
 func Test_interest(t *testing.T) {

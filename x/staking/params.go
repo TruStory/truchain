@@ -44,10 +44,10 @@ type Params struct {
 func DefaultParams() Params {
 	return Params{
 		Period:                   time.Hour * 24 * 7,
-		ArgumentCreationStake:    sdk.NewInt64Coin(app.StakeDenom, 50),
+		ArgumentCreationStake:    sdk.NewInt64Coin(app.StakeDenom, app.Shanev*50),
 		ArgumentBodyMaxLength:    1200,
 		ArgumentSummaryMaxLength: 200,
-		UpvoteStake:              sdk.NewInt64Coin(app.StakeDenom, 10),
+		UpvoteStake:              sdk.NewInt64Coin(app.StakeDenom, app.Shanev*10),
 		CreatorShare:             sdk.NewDecWithPrec(50, 2),
 		InterestRate:             sdk.NewDecWithPrec(25, 2),
 		StakeLimitPercent:        sdk.NewDecWithPrec(667, 3),

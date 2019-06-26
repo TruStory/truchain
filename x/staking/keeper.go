@@ -1,6 +1,8 @@
 package staking
 
 import (
+	"fmt"
+
 	app "github.com/TruStory/truchain/types"
 	"github.com/TruStory/truchain/x/bank"
 
@@ -77,19 +79,19 @@ func (k Keeper) UserArguments(ctx sdk.Context, address sdk.AccAddress) []Argumen
 	return arguments
 }
 
-func (k Keeper) SubmitUpvote(ctx sdk.Context, argumentId uint64, creator sdk.AccAddress) (Stake, sdk.Error) {
-	_, ok := k.getArgument(ctx, argumentId)
+func (k Keeper) SubmitUpvote(ctx sdk.Context, argumentID uint64, creator sdk.AccAddress) (Stake, sdk.Error) {
+	_, ok := k.getArgument(ctx, argumentID)
 	if !ok {
-		return Stake{}, ErrCodeUnknownArgument(argumentId)
+		return Stake{}, ErrCodeUnknownArgument(argumentID)
 	}
-	stakes := k.ArgumentStakes(ctx, argumentId)
+	stakes := k.ArgumentStakes(ctx, argumentID)
 	for _, s := range stakes {
 		if s.Creator.Equals(creator) {
-			return Stake{}, ErrCodeDuplicateStake(argumentId)
+			return Stake{}, ErrCodeDuplicateStake(argumentID)
 		}
 	}
 	upvoteStake := k.GetParams(ctx).UpvoteStake
-	return k.newStake(ctx, upvoteStake, creator, StakeUpvote, argumentId)
+	return k.newStake(ctx, upvoteStake, creator, StakeUpvote, argumentID)
 }
 
 func (k Keeper) SubmitArgument(ctx sdk.Context, body, summary string,
@@ -112,10 +114,6 @@ func (k Keeper) SubmitArgument(ctx sdk.Context, body, summary string,
 	}
 
 	creationAmount := k.GetParams(ctx).ArgumentCreationStake
-	_, err = k.bankKeeper.SubtractCoin(ctx, creator, creationAmount, claimID, stakeType.BankTransactionType())
-	if err != nil {
-		return Argument{}, nil
-	}
 	argumentID, err := k.argumentID(ctx)
 	if err != nil {
 		return Argument{}, err
@@ -165,6 +163,11 @@ func (k Keeper) newStake(ctx sdk.Context, amount sdk.Coin, creator sdk.AccAddres
 	}
 	period := k.GetParams(ctx).Period
 	stakeID, err := k.stakeID(ctx)
+	if err != nil {
+		return Stake{}, err
+	}
+	fmt.Println(stakeType.String(), stakeType.BankTransactionType().String())
+	_, err = k.bankKeeper.SubtractCoin(ctx, creator, amount, argumentID, stakeType.BankTransactionType())
 	if err != nil {
 		return Stake{}, err
 	}
