@@ -120,7 +120,19 @@ func (k Keeper) SubmitArgument(ctx sdk.Context, body, summary string,
 		return Argument{}, claim.ErrUnknownClaim(claimID)
 	}
 
-	creationAmount := k.GetParams(ctx).ArgumentCreationStake
+	arguments := k.ClaimArguments(ctx, claimID)
+	count := 0
+	for _, a := range arguments {
+		if a.Creator.Equals(creator) {
+			count++
+		}
+	}
+	params := k.GetParams(ctx)
+	if count >= params.MaxArgumentsPerClaim {
+		return Argument{}, ErrCodeMaxNumOfArgumentsReached(params.MaxArgumentsPerClaim)
+	}
+
+	creationAmount := params.ArgumentCreationStake
 	argumentID, err := k.argumentID(ctx)
 	if err != nil {
 		return Argument{}, err

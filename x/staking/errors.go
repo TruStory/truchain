@@ -10,13 +10,14 @@ import (
 const (
 	DefaultCodespace sdk.CodespaceType = ModuleName
 
-	ErrorCodeInvalidStakeType     sdk.CodeType = 501
-	ErrorCodeAccountJailed        sdk.CodeType = 502
-	ErrorCodeInvalidBodyLength    sdk.CodeType = 503
-	ErrorCodeInvalidSummaryLength sdk.CodeType = 504
-	ErrorCodeUnknownArgument      sdk.CodeType = 505
-	ErrorCodeUnknownStake         sdk.CodeType = 506
-	ErrorCodeDuplicateStake       sdk.CodeType = 507
+	ErrorCodeInvalidStakeType         sdk.CodeType = 501
+	ErrorCodeAccountJailed            sdk.CodeType = 502
+	ErrorCodeInvalidBodyLength        sdk.CodeType = 503
+	ErrorCodeInvalidSummaryLength     sdk.CodeType = 504
+	ErrorCodeUnknownArgument          sdk.CodeType = 505
+	ErrorCodeUnknownStake             sdk.CodeType = 506
+	ErrorCodeDuplicateStake           sdk.CodeType = 507
+	ErrorCodeMaxNumOfArgumentsReached sdk.CodeType = 508
 )
 
 // ErrCodeAccountJailed throws an error is in jailed status when performing actions.
@@ -72,5 +73,13 @@ func ErrCodeDuplicateStake(argumentID uint64) sdk.Error {
 	return sdk.NewError(DefaultCodespace,
 		ErrorCodeDuplicateStake,
 		fmt.Sprintf("Already staked for argument id %d", argumentID),
+	)
+}
+
+// ErrCodeMaxNumOfArgumentsReached throws an error when you already staked.
+func ErrCodeMaxNumOfArgumentsReached(max int) sdk.Error {
+	return sdk.NewError(DefaultCodespace,
+		ErrorCodeMaxNumOfArgumentsReached,
+		fmt.Sprintf("You reached max number of %d arguments per claim", max),
 	)
 }

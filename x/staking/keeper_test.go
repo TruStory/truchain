@@ -11,6 +11,26 @@ import (
 	"github.com/TruStory/truchain/x/bank"
 )
 
+func TestKeeper_SubmitArgumentMaxLimit(t *testing.T) {
+	ctx, k, accKeeper, _ := mockDB()
+	addr := createFakeFundedAccount(ctx, accKeeper, sdk.Coins{sdk.NewInt64Coin(app.StakeDenom, app.Shanev*300)})
+
+	// max number of arguments
+	arg1, err := k.SubmitArgument(ctx, "arg1", "summary1", addr, 1, StakeChallenge)
+	arg2, err := k.SubmitArgument(ctx, "arg2", "summary2", addr, 1, StakeBacking)
+	assert.NoError(t, err)
+	arg3, err := k.SubmitArgument(ctx, "arg3", "summary3", addr, 1, StakeChallenge)
+	assert.NoError(t, err)
+	arg4, err := k.SubmitArgument(ctx, "arg4", "summary4", addr, 1, StakeBacking)
+	assert.NoError(t, err)
+	arg5, err := k.SubmitArgument(ctx, "arg5", "summary5", addr, 1, StakeChallenge)
+	assert.NoError(t, err)
+	_, err = k.SubmitArgument(ctx, "arg6", "summary6", addr, 1, StakeBacking)
+	assert.Error(t, err)
+	assert.Equal(t, ErrorCodeMaxNumOfArgumentsReached, err.Code())
+	userArguments := k.UserArguments(ctx, addr)
+	assert.Equal(t, []Argument{arg1, arg2, arg3, arg4, arg5}, userArguments)
+}
 func TestKeeper_SubmitArgument(t *testing.T) {
 	ctx, k, accKeeper, authKeeper := mockDB()
 	ctx.WithBlockTime(time.Now())
