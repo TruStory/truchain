@@ -6,8 +6,11 @@ import (
 )
 
 const (
-	QueryClaimArguments = "claim_arguments"
-	QueryUserArguments  = "user_arguments"
+	QueryClaimArguments   = "claim_arguments"
+	QueryUserArguments    = "user_arguments"
+	QueryArgumentStakes   = "argument_stakes"
+	QueryUserStakes       = "user_stakes"
+	QueryClaimTopArgument = "claim_top_argument"
 )
 
 type QueryClaimArgumentsParams struct {
@@ -15,7 +18,19 @@ type QueryClaimArgumentsParams struct {
 }
 
 type QueryUserArgumentsParams struct {
-	address sdk.AccAddress `json:"address"`
+	Address sdk.AccAddress `json:"address"`
+}
+
+type QueryArgumentStakesParams struct {
+	ArgumentID uint64 `json:"argument_id"`
+}
+
+type QueryUserStakesParams struct {
+	Address sdk.AccAddress `json:"address"`
+}
+
+type QueryClaimTopArgumentParams struct {
+	ClaimID uint64 `json:"claim_id"`
 }
 
 // NewQuerier creates a new querier
@@ -26,6 +41,12 @@ func NewQuerier(keeper Keeper) sdk.Querier {
 			return queryClaimArguments(ctx, req, keeper)
 		case QueryUserArguments:
 			return queryUserArguments(ctx, req, keeper)
+		case QueryArgumentStakes:
+			return queryArgumentStakes(ctx, req, keeper)
+		case QueryUserStakes:
+			return queryUserStakes(ctx, req, keeper)
+		case QueryClaimTopArgument:
+			return queryClaimTopArgument(ctx, req, keeper)
 		default:
 			return nil, sdk.ErrUnknownRequest("Unknown staking query endpoint")
 		}
@@ -38,7 +59,7 @@ func queryUserArguments(ctx sdk.Context, req abci.RequestQuery, keeper Keeper) (
 	if err != nil {
 		return nil, ErrInvalidQueryParams(err)
 	}
-	arguments := keeper.UserArguments(ctx, params.address)
+	arguments := keeper.UserArguments(ctx, params.Address)
 	bz, err := keeper.codec.MarshalJSON(arguments)
 	if err != nil {
 		return nil, ErrJSONParse(err)
@@ -54,6 +75,64 @@ func queryClaimArguments(ctx sdk.Context, req abci.RequestQuery, keeper Keeper) 
 	}
 	arguments := keeper.ClaimArguments(ctx, params.ClaimID)
 	bz, err := keeper.codec.MarshalJSON(arguments)
+	if err != nil {
+		return nil, ErrJSONParse(err)
+	}
+	return bz, nil
+}
+
+func queryArgumentStakes(ctx sdk.Context, req abci.RequestQuery, keeper Keeper) ([]byte, sdk.Error) {
+	var params QueryArgumentStakesParams
+	err := keeper.codec.UnmarshalJSON(req.Data, &params)
+	if err != nil {
+		return nil, ErrInvalidQueryParams(err)
+	}
+	stakes := keeper.ArgumentStakes(ctx, params.ArgumentID)
+	bz, err := keeper.codec.MarshalJSON(stakes)
+	if err != nil {
+		return nil, ErrJSONParse(err)
+	}
+	return bz, nil
+}
+
+func queryUserStakes(ctx sdk.Context, req abci.RequestQuery, keeper Keeper) ([]byte, sdk.Error) {
+	var params QueryUserStakesParams
+	err := keeper.codec.UnmarshalJSON(req.Data, &params)
+	if err != nil {
+		return nil, ErrInvalidQueryParams(err)
+	}
+	stakes := keeper.UserStakes(ctx, params.Address)
+	bz, err := keeper.codec.MarshalJSON(stakes)
+	if err != nil {
+		return nil, ErrJSONParse(err)
+	}
+	return bz, nil
+}
+
+func queryClaimTopArgument(ctx sdk.Context, req abci.RequestQuery, keeper Keeper) ([]byte, sdk.Error) {
+	var params QueryClaimTopArgumentParams
+	err := keeper.codec.UnmarshalJSON(req.Data, &params)
+	if err != nil {
+		return nil, ErrInvalidQueryParams(err)
+	}
+	arguments := keeper.ClaimArguments(ctx, params.ClaimID)
+	topArgument := Argument{}
+	if len(arguments) > 0 {
+		bz, err := keeper.codec.MarshalJSON(topArgument)
+		if err != nil {
+			return nil, ErrJSONParse(err)
+		}
+		return bz, nil
+	}
+	for _, a := range arguments {
+		if topArgument.ID == 0 {
+			topArgument = a
+		}
+		if topArgument.UpvotedStake.IsLT(a.UpvotedStake) {
+			topArgument = a
+		}
+	}
+	bz, err := keeper.codec.MarshalJSON(topArgument)
 	if err != nil {
 		return nil, ErrJSONParse(err)
 	}
