@@ -41,6 +41,30 @@ func NewKeeper(codec *codec.Codec, storeKey sdk.StoreKey,
 	}
 }
 
+func (k Keeper) Arguments(ctx sdk.Context) []Argument {
+	arguments := make([]Argument, 0)
+	iterator := sdk.KVStorePrefixIterator(k.store(ctx), ArgumentsKeyPrefix)
+	defer iterator.Close()
+	for ; iterator.Valid(); iterator.Next() {
+		var argument Argument
+		k.codec.MustUnmarshalBinaryLengthPrefixed(iterator.Value(), &argument)
+		arguments = append(arguments, argument)
+	}
+	return arguments
+}
+
+func (k Keeper) Stakes(ctx sdk.Context) []Stake {
+	stakes := make([]Stake, 0)
+	iterator := sdk.KVStorePrefixIterator(k.store(ctx), StakesKeyPrefix)
+	defer iterator.Close()
+	for ; iterator.Valid(); iterator.Next() {
+		var stake Stake
+		k.codec.MustUnmarshalBinaryLengthPrefixed(iterator.Value(), &stake)
+		stakes = append(stakes, stake)
+	}
+	return stakes
+}
+
 func (k Keeper) ClaimArguments(ctx sdk.Context, claimID uint64) []Argument {
 	arguments := make([]Argument, 0)
 	k.IterateClaimArguments(ctx, claimID, func(argument Argument) bool {
@@ -127,12 +151,12 @@ func (k Keeper) SubmitArgument(ctx sdk.Context, body, summary string,
 			count++
 		}
 	}
-	params := k.GetParams(ctx)
-	if count >= params.MaxArgumentsPerClaim {
-		return Argument{}, ErrCodeMaxNumOfArgumentsReached(params.MaxArgumentsPerClaim)
+	p := k.GetParams(ctx)
+	if count >= p.MaxArgumentsPerClaim {
+		return Argument{}, ErrCodeMaxNumOfArgumentsReached(p.MaxArgumentsPerClaim)
 	}
 
-	creationAmount := params.ArgumentCreationStake
+	creationAmount := p.ArgumentCreationStake
 	argumentID, err := k.argumentID(ctx)
 	if err != nil {
 		return Argument{}, err
@@ -293,17 +317,6 @@ func (k Keeper) getID(ctx sdk.Context, key []byte) (uint64, sdk.Error) {
 	return id, nil
 }
 
-// Interest calculates interest for staked amount
-func (k Keeper) interest(ctx sdk.Context, amount sdk.Coin, period time.Duration) sdk.Dec {
-	interestRate := k.GetParams(ctx).InterestRate
-	periodDec := sdk.NewDec(period.Nanoseconds())
-	amountDec := sdk.NewDecFromInt(amount.Amount)
-	oneYear := time.Hour * 24 * 365
-	oneYearDec := sdk.NewDec(oneYear.Nanoseconds())
-	interest := interestRate.Mul(periodDec.Quo(oneYearDec)).Mul(amountDec)
-	return interest
-}
-
 // InsertActiveStakeQueue inserts a stakeID into the active stake queue at endTime
 func (k Keeper) InsertActiveStakeQueue(ctx sdk.Context, stakeID uint64, endTime time.Time) {
 	bz := k.codec.MustMarshalBinaryLengthPrefixed(stakeID)
@@ -318,65 +331,4 @@ func (k Keeper) RemoveFromActiveStakeQueue(ctx sdk.Context, stakeID uint64, endT
 // Logger returns a module-specific logger.
 func (k Keeper) Logger(ctx sdk.Context) log.Logger {
 	return ctx.Logger().With("module", "x/"+ModuleName)
-}
-
-func (k Keeper) splitReward(ctx sdk.Context, interest sdk.Dec) (creator, staker sdk.Int) {
-	p := k.GetParams(ctx)
-	creatorShare := interest.Mul(p.CreatorShare)
-	stakerShare := interest.Sub(creatorShare)
-	return creatorShare.RoundInt(), stakerShare.RoundInt()
-}
-
-type RewardResult struct {
-	ArgumentCreator       sdk.AccAddress
-	ArgumentCreatorReward sdk.Coin
-	StakeCreator          sdk.AccAddress
-	StakeCreatorReward    sdk.Coin
-}
-
-func (k Keeper) distributeReward(ctx sdk.Context, stake Stake) (RewardResult, sdk.Error) {
-	argument, ok := k.getArgument(ctx, stake.ArgumentID)
-	if !ok {
-		return RewardResult{}, ErrCodeUnknownArgument(stake.ArgumentID)
-	}
-	interest := k.interest(ctx, stake.Amount, ctx.BlockHeader().Time.Sub(stake.CreatedTime))
-	// creator receives 100% interest of his own stake
-	if !argument.Creator.Equals(stake.Creator) {
-		reward := sdk.NewCoin(app.StakeDenom, interest.RoundInt())
-		_, err := k.bankKeeper.AddCoin(ctx,
-			argument.Creator,
-			reward,
-			argument.ID,
-			bank.TransactionInterest)
-		if err != nil {
-			return RewardResult{}, err
-		}
-		return RewardResult{ArgumentCreator: argument.Creator, ArgumentCreatorReward: reward}, nil
-	}
-	creatorReward, stakerReward := k.splitReward(ctx, interest)
-	creatorRewardCoin := sdk.NewCoin(app.StakeDenom, creatorReward)
-	stakerRewardCoin := sdk.NewCoin(app.StakeDenom, stakerReward)
-	_, err := k.bankKeeper.AddCoin(ctx,
-		argument.Creator,
-		creatorRewardCoin,
-		argument.ID,
-		bank.TransactionInterest)
-	if err != nil {
-		return RewardResult{}, err
-	}
-	_, err = k.bankKeeper.AddCoin(ctx,
-		stake.Creator,
-		stakerRewardCoin,
-		argument.ID,
-		bank.TransactionInterest)
-	if err != nil {
-		return RewardResult{}, err
-	}
-	rewardResult := RewardResult{
-		ArgumentCreator:       argument.Creator,
-		ArgumentCreatorReward: creatorRewardCoin,
-		StakeCreator:          stake.Creator,
-		StakeCreatorReward:    stakerRewardCoin,
-	}
-	return rewardResult, nil
 }

@@ -52,7 +52,9 @@ func InitGenesis(ctx sdk.Context, k Keeper, data GenesisState) {
 // ExportGenesis exports the genesis state
 func ExportGenesis(ctx sdk.Context, keeper Keeper) GenesisState {
 	return GenesisState{
-		Params: keeper.GetParams(ctx),
+		Params:    keeper.GetParams(ctx),
+		Arguments: keeper.Arguments(ctx),
+		Stakes:    keeper.Stakes(ctx),
 	}
 }
 
