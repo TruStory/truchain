@@ -12,7 +12,7 @@ type GenesisState struct {
 }
 
 // NewGenesisState creates a new genesis state.
-func NewGenesisState(arguments []Argument, params Params, stakes []Stake) GenesisState {
+func NewGenesisState(arguments []Argument, stakes []Stake, params Params) GenesisState {
 	return GenesisState{
 		Arguments: arguments,
 		Params:    params,
