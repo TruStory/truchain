@@ -14,13 +14,14 @@ The `Stake` type stores all data necessarily for a staking action. It is designe
 
 ```go
 type Stake struct {
-    ID           uint64
-    ArgumentID   uint64
-    Type         StakeType
-    Amount       sdk.Coin
-    Creator      sdk.AccAddress
-    CreatedTime  time.Time
-    EndTime      time.Time
+	ID          uint64
+	ArgumentID  uint64
+	Type        StakeType
+	Amount      sdk.Coin
+	Creator     sdk.AccAddress
+	CreatedTime time.Time
+	EndTime     time.Time
+	Expired     bool
 }
 
 // stake type enum
@@ -33,51 +34,53 @@ const (
 
 // Params can be voted on by governance
 type Params struct {
-    Period                  time.Duration       // default = 7 days
-    ArgumentCreationStake   sdk.Coin        // default = 50 trustake
-    UpvoteStake             sdk.Coin        // default = 10 trustake
-    CreatorShare            sdk.Dec         // default = 50%
-    InterestRate            sdk.Dec         // default = 25%
-    StakeLimitPercent       sdk.Dec         // default = 66.7%
-    StakeLimitDays          time.Duration   // default = 7 days
-    UnjailUpvotes           int             // default = 1
+    Period                      time.Duration       // default = 7 days
+    ArgumentCreationStake       sdk.Coin        // default = 50 trustake
+    ArgumentBodyMaxLength       int           
+    ArgumentSummaryMaxLength    int           
+    UpvoteStake                 sdk.Coin        // default = 10 trustake
+    CreatorShare                sdk.Dec         // default = 50%
+    InterestRate                sdk.Dec         // default = 25%
+    StakeLimitPercent           sdk.Dec         // default = 66.7%
+    StakeLimitDays              time.Duration   // default = 7 days
+    UnjailUpvotes               int             // default = 1
+    MaxArgumentsPerClaim        int            // default = 5
 }
 ```
 
-An `Argument` contains all data for an argument that either supports (back) or refutes (challenge) a claim. It also embeds a `Stake` type for staking data storage.
+An `Argument` contains all data for an argument that either supports (back) or refutes (challenge) a claim.
 
 ```go
 type Argument struct {
-	ID           uint64
-	Creator      sdk.AccAddress
-	ClaimID      uint64
-	Summary      string
-	Body         string
-	UpvotedCount int64
-	UpvotedStake sdk.Coin
-	SlashCount   int64
-	IsUnhelpful  bool
-	CreatedTime  time.Time
-	UpdatedTime  time.Time
+	ID             uint64
+	Creator        sdk.AccAddress
+	ClaimID        uint64
+	Summary        string
+	Body           string
+	StakeType      StakeType
+	UpvotedCount   uint64
+	UpvotedStake   sdk.Coin
+	TotalStake     sdk.Coin
+	UnhelpfulCount uint64
+	IsUnhelpful    bool
+	CreatedTime    time.Time
+	UpdatedTime    time.Time
 }
 ```
 
 ### Associations
 
+`ClaimArguments` maintains an easily accessible list of all arguments for each claim.
 `ArgumentStakes` maintains an easily accessible list of all stakes for each argument.
+`UserStakes` maintains an easily accessible list of all user stakes sortable by `created_time`
+`UserArguments` maintains an easily accessible list of all user arguments
 
-```go
-// "argument:id:XX:staketype:XX:creator:XX" -> nil
-type ArgumentStakes app.UserList
-```
+
 
 ### Queues
 
 `ActiveStakes` maintains a queue of all currently active stakes, sorted by `EndTime`.
 
-```go
-type ActiveStakes Queue
-```
 
 ## State Transitions
 ### Messages
@@ -99,6 +102,7 @@ type CreateArgumentMsg struct {
     Creator       sdk.AccAddress
 }
 ```
+A user can create multiple arguments on both sides with a max number configurable through params (default is 5)
 
 An argument currently cannot be edited.
 
