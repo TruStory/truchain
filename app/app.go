@@ -309,7 +309,7 @@ func NewTruChain(logger log.Logger, db dbm.DB, loadLatest bool, options ...func(
 
 	// The app.Router is the main transaction router where each module registers its routes
 	app.Router().
-		AddRoute("bank", bank.NewHandler(app.bankKeeper)).
+		AddRoute(bank.RouterKey, bank.NewHandler(app.bankKeeper)).
 		AddRoute(staking.RouterKey, staking.NewHandler(app.stakingKeeper)).
 		AddRoute("ibc", ibc.NewHandler(app.ibcMapper, app.bankKeeper)).
 		AddRoute("story", story.NewHandler(app.storyKeeper)).
@@ -318,7 +318,7 @@ func NewTruChain(logger log.Logger, db dbm.DB, loadLatest bool, options ...func(
 		AddRoute("challenge", challenge.NewHandler(app.challengeKeeper)).
 		AddRoute("users", users.NewHandler(app.accountKeeper, app.categoryKeeper)).
 		AddRoute("trubank", trubank.NewHandler(app.truBankKeeper)).
-		AddRoute(claim.QuerierRoute, claim.NewHandler(app.claimKeeper)).
+		AddRoute(claim.RouterKey, claim.NewHandler(app.claimKeeper)).
 		AddRoute(account.RouterKey, account.NewHandler(app.appAccountKeeper))
 
 	// The app.QueryRouter is the main query router where each module registers its routes
