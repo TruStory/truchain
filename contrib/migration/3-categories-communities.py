@@ -19,10 +19,10 @@ def process_genesis(genesis, parsed_args):
 
 def migrate_category_data(category_data):
     category_data['params'] = {
+        'min_id_length': '3',
+        'max_id_length': '15',
         'min_name_length': '5',
         'max_name_length': '25',
-        'min_slug_length': '3',
-        'max_slug_length': '15',
         'max_description_length': '140',
     }
     category_data['communities'] = category_data['categories']
@@ -31,15 +31,13 @@ def migrate_category_data(category_data):
         s['id'] = s['id']
         s['name'] = s['title']
         del s['title']
-        s['slug'] = s['slug']
         if 'description' in s:
           s['description'] = s['description']
         if 'timestamp' in s:
           s['created_time'] = s['timestamp']['created_time']
           del s['timestamp']
-        s['total_earned_stake'] = s['total_cred']
         del s['total_cred']
-        s['total_earned_stake']['denom'] = 'trusteak'
+        
 
 if __name__ == '__main__':
     parser = lib.init_default_argument_parser(
