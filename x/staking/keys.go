@@ -82,16 +82,21 @@ func userArgumentKey(creator sdk.AccAddress, argumentID uint64) []byte {
 }
 
 // userStakesPrefix
-// 0x23<creator>
+// 0x23<creator><created_time>
 func userStakesPrefix(creator sdk.AccAddress) []byte {
 	return append(UserStakesKeyPrefix, creator.Bytes()...)
 }
 
-// userStakeKey builds the key for user->stake association
-func userStakeKey(creator sdk.AccAddress, stakeID uint64) []byte {
+func userStakesCreatedTimePrefix(creator sdk.AccAddress, createdTime time.Time) []byte {
+	bz := sdk.FormatTimeBytes(createdTime)
+	return append(userStakesPrefix(creator), bz...)
+}
+
+// userStakeKey builds the key for <user><creationTime>->stake association
+func userStakeKey(creator sdk.AccAddress, createdTime time.Time, stakeID uint64) []byte {
 	bz := make([]byte, 8)
 	binary.LittleEndian.PutUint64(bz, stakeID)
-	return append(userStakesPrefix(creator), bz...)
+	return append(userStakesCreatedTimePrefix(creator, createdTime), bz...)
 }
 
 // ActiveStakeQueueKey

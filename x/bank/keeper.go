@@ -91,6 +91,10 @@ func (k Keeper) SubtractCoin(ctx sdk.Context, addr sdk.AccAddress, amt sdk.Coin,
 	return coins, nil
 }
 
+func (k Keeper) GetCoins(ctx sdk.Context, address sdk.AccAddress) sdk.Coins {
+	return k.bankKeeper.GetCoins(ctx, address)
+}
+
 func (k Keeper) rewardBrokerAddress(ctx sdk.Context) sdk.AccAddress {
 	address := sdk.AccAddress{}
 	k.paramStore.GetIfExists(ctx, ParamKeyRewardBrokerAddress, &address)

@@ -42,7 +42,7 @@ func InitGenesis(ctx sdk.Context, k Keeper, data GenesisState) {
 			k.InsertActiveStakeQueue(ctx, s.ID, s.EndTime)
 		}
 		k.setArgumentStake(ctx, s.ArgumentID, s.ID)
-		k.setUserStake(ctx, s.Creator, s.ID)
+		k.setUserStake(ctx, s.Creator, s.CreatedTime, s.ID)
 	}
 	k.setArgumentID(ctx, uint64(len(data.Arguments)+1))
 	k.setStakeID(ctx, uint64(len(data.Stakes)+1))

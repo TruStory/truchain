@@ -31,6 +31,7 @@ func TestKeeper_SubmitArgumentMaxLimit(t *testing.T) {
 	userArguments := k.UserArguments(ctx, addr)
 	assert.Equal(t, []Argument{arg1, arg2, arg3, arg4, arg5}, userArguments)
 }
+
 func TestKeeper_SubmitArgument(t *testing.T) {
 	ctx, k, accKeeper, authKeeper := mockDB()
 	ctx.WithBlockTime(time.Now())
@@ -50,7 +51,7 @@ func TestKeeper_SubmitArgument(t *testing.T) {
 	_, err = k.SubmitArgument(ctx, "body", "summary", addr, 1, StakeBacking)
 	assert.Error(t, err)
 	assert.Equal(t, ErrorCodeAccountJailed, err.Code())
-	authKeeper.UnJail(ctx, addr)
+	_ = authKeeper.UnJail(ctx, addr)
 
 	argument, err := k.SubmitArgument(ctx, "body", "summary", addr, 1, StakeBacking)
 	assert.NoError(t, err)
@@ -277,4 +278,28 @@ func Test_splitReward(t *testing.T) {
 		interest.Sub(expectedCreatorReward).RoundInt(),
 		stakerReward,
 	)
+}
+
+func TestKeeper_StakePeriodAmountLimit(t *testing.T) {
+	ctx, k, accKeeper, _ := mockDB()
+	addr := createFakeFundedAccount(ctx, accKeeper, sdk.Coins{sdk.NewInt64Coin(app.StakeDenom, app.Shanev*250)})
+
+	_, err := k.SubmitArgument(ctx.WithBlockTime(mustParseTime("2019-01-01")),
+		"arg1", "summary1", addr, 1, StakeChallenge)
+	_, err = k.SubmitArgument(ctx.WithBlockTime(mustParseTime("2019-01-05")),
+		"arg2", "summary2", addr, 2, StakeBacking)
+	assert.NoError(t, err)
+	_, err = k.SubmitArgument(ctx.WithBlockTime(mustParseTime("2019-01-07")),
+		"arg3", "summary3", addr, 3, StakeChallenge)
+	assert.NoError(t, err)
+	_, err = k.SubmitArgument(ctx.WithBlockTime(mustParseTime("2019-01-08")),
+		"arg4", "summary4", addr, 4, StakeBacking)
+
+	// should mark first stake as expired and refund stake
+	EndBlocker(ctx.WithBlockTime(mustParseTime("2019-01-10")), k)
+	_, err = k.SubmitArgument(ctx.WithBlockTime(mustParseTime("2019-01-10")),
+		"arg5", "summary5", addr, 5, StakeChallenge)
+	assert.Error(t, err)
+	assert.Equal(t, ErrorCodeMaxAmountStakingReached, err.Code())
+
 }

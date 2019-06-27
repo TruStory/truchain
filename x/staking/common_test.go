@@ -1,6 +1,8 @@
 package staking
 
 import (
+	"time"
+
 	trubank "github.com/TruStory/truchain/x/bank"
 	"github.com/TruStory/truchain/x/claim"
 
@@ -120,4 +122,20 @@ func keyPubAddr() (crypto.PrivKey, crypto.PubKey, sdk.AccAddress) {
 	pub := key.PubKey()
 	addr := sdk.AccAddress(pub.Address())
 	return key, pub, addr
+}
+
+func mustParseTime(date string) time.Time {
+	t, err := time.Parse("2006-01-02", date)
+	if err != nil {
+		panic(err)
+	}
+	return t
+}
+
+func afterCreatedTimeStakes(ctx sdk.Context, k Keeper, addr sdk.AccAddress, after time.Time) (stakes []Stake) {
+	k.IterateAfterCreatedTimeUserStakes(ctx, addr, after, func(stake Stake) bool {
+		stakes = append(stakes, stake)
+		return false
+	})
+	return
 }

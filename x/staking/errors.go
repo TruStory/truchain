@@ -18,6 +18,7 @@ const (
 	ErrorCodeUnknownStake             sdk.CodeType = 506
 	ErrorCodeDuplicateStake           sdk.CodeType = 507
 	ErrorCodeMaxNumOfArgumentsReached sdk.CodeType = 508
+	ErrorCodeMaxAmountStakingReached  sdk.CodeType = 509
 )
 
 // ErrCodeAccountJailed throws an error is in jailed status when performing actions.
@@ -80,6 +81,14 @@ func ErrCodeDuplicateStake(argumentID uint64) sdk.Error {
 func ErrCodeMaxNumOfArgumentsReached(max int) sdk.Error {
 	return sdk.NewError(DefaultCodespace,
 		ErrorCodeMaxNumOfArgumentsReached,
-		fmt.Sprintf("You reached max number of %d arguments per claim", max),
+		fmt.Sprintf("You have reached max number of %d arguments per claim", max),
+	)
+}
+
+// ErrCodeMaxAmountStakingReached throws an error when you already staked.
+func ErrCodeMaxAmountStakingReached(days int) sdk.Error {
+	return sdk.NewError(DefaultCodespace,
+		ErrorCodeMaxAmountStakingReached,
+		fmt.Sprintf("You have reached the max amout for staking for a period of %d hours", days),
 	)
 }

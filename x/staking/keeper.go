@@ -176,10 +176,43 @@ func (k Keeper) setArgument(ctx sdk.Context, argument Argument) {
 	k.store(ctx).Set(ArgumentKey(argument.ID), bz)
 }
 
+func (k Keeper) checkStakeThreshold(ctx sdk.Context, address sdk.AccAddress) sdk.Error {
+	balance := k.bankKeeper.GetCoins(ctx, address).AmountOf(app.StakeDenom)
+	if balance.IsZero() {
+		return sdk.ErrInsufficientFunds("Insufficient coins")
+	}
+	p := k.GetParams(ctx)
+	period := p.StakeLimitDays
+
+	staked := sdk.NewInt(0)
+	fromDate := ctx.BlockHeader().Time.Add(time.Duration(-1) * period)
+	k.IterateAfterCreatedTimeUserStakes(ctx, address,
+		fromDate, func(stake Stake) bool {
+			// only account for non expired since expired would already have refunded the stake
+			if stake.Expired {
+				return false
+			}
+			staked = staked.Add(stake.Amount.Amount)
+			return false
+		},
+	)
+
+	total := sdk.NewDecFromInt(balance.Add(staked))
+	stakedDec := sdk.NewDecFromInt(staked)
+	if stakedDec.Quo(total).GTE(p.StakeLimitPercent) {
+		return ErrCodeMaxAmountStakingReached(int(ctx.BlockHeader().Time.Sub(fromDate).Hours()))
+	}
+	return nil
+}
+
 func (k Keeper) newStake(ctx sdk.Context, amount sdk.Coin, creator sdk.AccAddress,
 	stakeType StakeType, argumentID uint64) (Stake, sdk.Error) {
 	if !stakeType.Valid() {
 		return Stake{}, ErrCodeInvalidStakeType(stakeType)
+	}
+	err := k.checkStakeThreshold(ctx, creator)
+	if err != nil {
+		return Stake{}, err
 	}
 	period := k.GetParams(ctx).Period
 	stakeID, err := k.stakeID(ctx)
@@ -203,7 +236,7 @@ func (k Keeper) newStake(ctx sdk.Context, amount sdk.Coin, creator sdk.AccAddres
 	k.setStakeID(ctx, stakeID+1)
 	k.InsertActiveStakeQueue(ctx, stakeID, stake.EndTime)
 	k.setArgumentStake(ctx, argumentID, stake.ID)
-	k.setUserStake(ctx, creator, stake.ID)
+	k.setUserStake(ctx, creator, stake.CreatedTime, stake.ID)
 	return stake, nil
 }
 

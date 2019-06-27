@@ -70,13 +70,29 @@ func (k Keeper) IterateUserArguments(ctx sdk.Context, creator sdk.AccAddress, cb
 }
 
 // setUserStake sets a user <-> stake association in the store
-func (k Keeper) setUserStake(ctx sdk.Context, creator sdk.AccAddress, stakeID uint64) {
+func (k Keeper) setUserStake(ctx sdk.Context, creator sdk.AccAddress, creationTime time.Time, stakeID uint64) {
 	bz := k.codec.MustMarshalBinaryLengthPrefixed(stakeID)
-	k.store(ctx).Set(userStakeKey(creator, stakeID), bz)
+	k.store(ctx).Set(userStakeKey(creator, creationTime, stakeID), bz)
 }
 
 func (k Keeper) IterateUserStakes(ctx sdk.Context, creator sdk.AccAddress, cb func(stake Stake) (stop bool)) {
 	iterator := sdk.KVStorePrefixIterator(k.store(ctx), userStakesPrefix(creator))
+	defer iterator.Close()
+	for ; iterator.Valid(); iterator.Next() {
+		var stakeID uint64
+		k.codec.MustUnmarshalBinaryLengthPrefixed(iterator.Value(), &stakeID)
+		if cb(k.getStake(ctx, stakeID)) {
+			break
+		}
+	}
+}
+
+func (k Keeper) IterateAfterCreatedTimeUserStakes(ctx sdk.Context,
+	creator sdk.AccAddress, createdTime time.Time,
+	cb func(stake Stake) (stop bool)) {
+	iterator := k.store(ctx).Iterator(userStakesCreatedTimePrefix(creator, createdTime),
+		sdk.PrefixEndBytes(UserStakesKeyPrefix),
+	)
 	defer iterator.Close()
 	for ; iterator.Valid(); iterator.Next() {
 		var stakeID uint64
