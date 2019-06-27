@@ -19,6 +19,8 @@ const (
 	ErrorCodeDuplicateStake           sdk.CodeType = 507
 	ErrorCodeMaxNumOfArgumentsReached sdk.CodeType = 508
 	ErrorCodeMaxAmountStakingReached  sdk.CodeType = 509
+	ErrorCodeInvalidQueryParams       sdk.CodeType = 510
+	ErrorCodeJSONParsing              sdk.CodeType = 511
 )
 
 // ErrCodeAccountJailed throws an error is in jailed status when performing actions.
@@ -91,4 +93,20 @@ func ErrCodeMaxAmountStakingReached(hours int) sdk.Error {
 		ErrorCodeMaxAmountStakingReached,
 		fmt.Sprintf("You have reached the max amout for staking for a period of %d hours", hours),
 	)
+}
+
+// ErrInvalidQueryParams throws an error when the transaction type is invalid.
+func ErrInvalidQueryParams(err error) sdk.Error {
+	return sdk.NewError(DefaultCodespace,
+		ErrorCodeInvalidQueryParams,
+		fmt.Sprintf("Invalid query params  %s", err.Error()),
+	)
+}
+
+// ErrJSONParse throws an error on failed JSON parsing
+func ErrJSONParse(err error) sdk.Error {
+	return sdk.NewError(
+		DefaultCodespace,
+		ErrorCodeJSONParsing,
+		"JSON parsing error: "+err.Error())
 }
