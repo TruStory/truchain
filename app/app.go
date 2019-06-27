@@ -290,7 +290,7 @@ func NewTruChain(logger log.Logger, db dbm.DB, loadLatest bool, options ...func(
 		app.keyClaim,
 		app.paramsKeeper.Subspace(claim.StoreKey),
 		codec,
-		nil,
+		app.appAccountKeeper,
 		app.communityKeeper,
 	)
 

@@ -22,7 +22,7 @@ func NewGenesisState() GenesisState {
 // DefaultGenesisState returns a default genesis state
 func DefaultGenesisState() GenesisState { return NewGenesisState() }
 
-// InitGenesis initializes story state from genesis file
+// InitGenesis initializes account state from genesis file
 func InitGenesis(ctx sdk.Context, keeper Keeper, data GenesisState) {
 	keeper.SetParams(ctx, data.Params)
 }
