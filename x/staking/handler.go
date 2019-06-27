@@ -42,5 +42,15 @@ func handleMsgSubmitUpvote(ctx sdk.Context, keeper Keeper, msg MsgSubmitUpvote) 
 	if err := msg.ValidateBasic(); err != nil {
 		return err.Result()
 	}
-	return sdk.Result{}
+	stake, err := keeper.SubmitUpvote(ctx, msg.ArgumentID, msg.Creator)
+	if err != nil {
+		return err.Result()
+	}
+	res, codecErr := ModuleCodec.MarshalBinaryBare(stake)
+	if codecErr != nil {
+		return sdk.ErrInternal(fmt.Sprintf("Marshal result error: %s", codecErr)).Result()
+	}
+	return sdk.Result{
+		Data: res,
+	}
 }

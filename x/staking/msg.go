@@ -26,6 +26,16 @@ type MsgSubmitArgument struct {
 	Creator   sdk.AccAddress `json:"creator"`
 }
 
+// NewMsgSubmitArgument returns a new submit argument message.
+func NewMsgSubmitArgument(creator sdk.AccAddress, claimID uint64, summary, body string, stakeType StakeType) MsgSubmitArgument {
+	return MsgSubmitArgument{
+		ClaimID:   claimID,
+		Summary:   summary,
+		Body:      body,
+		StakeType: stakeType,
+		Creator:   creator,
+	}
+}
 func (MsgSubmitArgument) Route() string {
 	return RouterKey
 }
@@ -64,6 +74,13 @@ func (msg MsgSubmitArgument) GetSigners() []sdk.AccAddress {
 type MsgSubmitUpvote struct {
 	ArgumentID uint64         `json:"argument_id"`
 	Creator    sdk.AccAddress `json:"creator"`
+}
+
+func NewMsgSubmitUpvote(creator sdk.AccAddress, argumentID uint64) MsgSubmitUpvote {
+	return MsgSubmitUpvote{
+		ArgumentID: argumentID,
+		Creator:    creator,
+	}
 }
 
 func (MsgSubmitUpvote) Route() string {

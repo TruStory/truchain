@@ -255,14 +255,14 @@ func (k Keeper) store(ctx sdk.Context) sdk.KVStore {
 }
 
 func (k Keeper) setStakeID(ctx sdk.Context, stakeID uint64) {
-	k.setLength(ctx, StakeIDKey, stakeID)
+	k.setID(ctx, StakeIDKey, stakeID)
 }
 
 func (k Keeper) setArgumentID(ctx sdk.Context, argumentID uint64) {
-	k.setLength(ctx, ArgumentIDKey, argumentID)
+	k.setID(ctx, ArgumentIDKey, argumentID)
 }
 
-func (k Keeper) setLength(ctx sdk.Context, key []byte, length uint64) {
+func (k Keeper) setID(ctx sdk.Context, key []byte, length uint64) {
 	b := k.codec.MustMarshalBinaryBare(length)
 	k.store(ctx).Set(key, b)
 }
