@@ -86,9 +86,9 @@ func ErrCodeMaxNumOfArgumentsReached(max int) sdk.Error {
 }
 
 // ErrCodeMaxAmountStakingReached throws an error when you already staked.
-func ErrCodeMaxAmountStakingReached(days int) sdk.Error {
+func ErrCodeMaxAmountStakingReached(hours int) sdk.Error {
 	return sdk.NewError(DefaultCodespace,
 		ErrorCodeMaxAmountStakingReached,
-		fmt.Sprintf("You have reached the max amout for staking for a period of %d hours", days),
+		fmt.Sprintf("You have reached the max amout for staking for a period of %d hours", hours),
 	)
 }
