@@ -33,14 +33,12 @@ func key(claimID uint64) []byte {
 }
 
 // communityClaimsKey gets the first part of the community claims key based on the communityID
-func communityClaimsKey(communityID uint64) []byte {
-	bz := make([]byte, 8)
-	binary.LittleEndian.PutUint64(bz, communityID)
-	return append(CommunityClaimsPrefix, bz...)
+func communityClaimsKey(communityID string) []byte {
+	return append(CommunityClaimsPrefix, []byte(communityID)...)
 }
 
 // communityClaimKey key of a specific community <-> claim association from the store
-func communityClaimKey(communityID uint64, claimID uint64) []byte {
+func communityClaimKey(communityID string, claimID uint64) []byte {
 	bz := make([]byte, 8)
 	binary.LittleEndian.PutUint64(bz, claimID)
 	return append(communityClaimsKey(communityID), bz...)

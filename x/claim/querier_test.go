@@ -54,7 +54,7 @@ func TestQueryCommunityClaims(t *testing.T) {
 	fakeClaim(ctx, keeper)
 
 	queryParams := QueryCommunityClaimsParams{
-		CommunityID: uint64(1),
+		CommunityID: "crypto",
 	}
 	queryParamsBytes, jsonErr := ModuleCodec.MarshalJSON(queryParams)
 	require.Nil(t, jsonErr)

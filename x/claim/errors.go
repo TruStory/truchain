@@ -49,11 +49,11 @@ func ErrUnknownClaim(id uint64) sdk.Error {
 }
 
 // ErrInvalidCommunityID throws an error on invalid community id
-func ErrInvalidCommunityID(id uint64) sdk.Error {
+func ErrInvalidCommunityID(id string) sdk.Error {
 	return sdk.NewError(
 		DefaultCodespace,
 		ErrorCodeClaimsWithCommunityNotFound,
-		fmt.Sprintf("Invalid community id: %d", id))
+		fmt.Sprintf("Invalid community id: %s", id))
 }
 
 // ErrInvalidSourceURL throws an error when a URL in invalid
