@@ -16,28 +16,28 @@ import (
 
 // Keeper is the model object for the package staking module
 type Keeper struct {
-	storeKey    sdk.StoreKey
-	codec       *codec.Codec
-	paramStore  params.Subspace
-	codespace   sdk.CodespaceType
-	bankKeeper  bank.Keeper
-	authKeeper  AuthKeeper
-	claimKeeper ClaimKeeper
+	storeKey      sdk.StoreKey
+	codec         *codec.Codec
+	paramStore    params.Subspace
+	codespace     sdk.CodespaceType
+	bankKeeper    bank.Keeper
+	accountKeeper AccountKeeper
+	claimKeeper   ClaimKeeper
 }
 
 // NewKeeper creates a staking keeper.
 func NewKeeper(codec *codec.Codec, storeKey sdk.StoreKey,
-	authKeeper AuthKeeper, bankKeeper bank.Keeper, claimKeeper ClaimKeeper,
+	accountKeeper AccountKeeper, bankKeeper bank.Keeper, claimKeeper ClaimKeeper,
 	paramStore params.Subspace,
 	codespace sdk.CodespaceType) Keeper {
 	return Keeper{
-		storeKey:    storeKey,
-		codec:       codec,
-		paramStore:  paramStore.WithKeyTable(ParamKeyTable()),
-		codespace:   codespace,
-		bankKeeper:  bankKeeper,
-		authKeeper:  authKeeper,
-		claimKeeper: claimKeeper,
+		storeKey:      storeKey,
+		codec:         codec,
+		paramStore:    paramStore.WithKeyTable(ParamKeyTable()),
+		codespace:     codespace,
+		bankKeeper:    bankKeeper,
+		accountKeeper: accountKeeper,
+		claimKeeper:   claimKeeper,
 	}
 }
 
@@ -132,7 +132,7 @@ func (k Keeper) SubmitArgument(ctx sdk.Context, body, summary string,
 		return Argument{}, ErrCodeInvalidStakeType(stakeType)
 	}
 	//  reject jailed accounts
-	jailed, err := k.authKeeper.IsJailed(ctx, creator)
+	jailed, err := k.accountKeeper.IsJailed(ctx, creator)
 	if err != nil {
 		return Argument{}, err
 	}

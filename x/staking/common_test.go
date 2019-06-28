@@ -19,25 +19,25 @@ import (
 	"github.com/tendermint/tendermint/libs/log"
 )
 
-type mockAuth struct {
+type mockedAccountKeeper struct {
 	jailStatus   map[string]bool
 	forceFailure bool
 }
 
-func newAuth() *mockAuth {
-	return &mockAuth{
+func newAccountKeeper() *mockedAccountKeeper {
+	return &mockedAccountKeeper{
 		jailStatus: make(map[string]bool),
 	}
 }
 
-func (m *mockAuth) jail(address sdk.AccAddress) {
+func (m *mockedAccountKeeper) jail(address sdk.AccAddress) {
 	m.jailStatus[address.String()] = true
 }
 
-func (m *mockAuth) fail() {
+func (m *mockedAccountKeeper) fail() {
 	m.forceFailure = true
 }
-func (m *mockAuth) IsJailed(ctx sdk.Context, address sdk.AccAddress) (bool, sdk.Error) {
+func (m *mockedAccountKeeper) IsJailed(ctx sdk.Context, address sdk.AccAddress) (bool, sdk.Error) {
 	if m.forceFailure {
 		m.forceFailure = false
 		return false, sdk.ErrInternal("error")
@@ -49,7 +49,7 @@ func (m *mockAuth) IsJailed(ctx sdk.Context, address sdk.AccAddress) (bool, sdk.
 	return false, nil
 }
 
-func (m *mockAuth) UnJail(ctx sdk.Context, address sdk.AccAddress) sdk.Error {
+func (m *mockedAccountKeeper) UnJail(ctx sdk.Context, address sdk.AccAddress) sdk.Error {
 	if m.forceFailure {
 		m.forceFailure = false
 		return sdk.ErrInternal("error")
@@ -65,7 +65,7 @@ func (mockClaimKeeper) Claim(ctx sdk.Context, id uint64) (claim.Claim, bool) {
 	return claim.Claim{}, true
 }
 
-func mockDB() (sdk.Context, Keeper, auth.AccountKeeper, AuthKeeper) {
+func mockDB() (sdk.Context, Keeper, auth.AccountKeeper, AccountKeeper) {
 	db := dbm.NewMemDB()
 	storeKey := sdk.NewKVStoreKey(ModuleName)
 	accKey := sdk.NewKVStoreKey(auth.StoreKey)
@@ -102,10 +102,10 @@ func mockDB() (sdk.Context, Keeper, auth.AccountKeeper, AuthKeeper) {
 
 	trubankKeeper := trubank.NewKeeper(cdc, bankKey, bankKeeper, pk.Subspace(trubank.DefaultParamspace), trubank.DefaultCodespace)
 
-	mockedAuth := newAuth()
-	keeper := NewKeeper(cdc, storeKey, mockedAuth, trubankKeeper, mockClaimKeeper{}, pk.Subspace(DefaultParamspace), DefaultCodespace)
+	mockedAccountKeeper := newAccountKeeper()
+	keeper := NewKeeper(cdc, storeKey, mockedAccountKeeper, trubankKeeper, mockClaimKeeper{}, pk.Subspace(DefaultParamspace), DefaultCodespace)
 	InitGenesis(ctx, keeper, DefaultGenesisState())
-	return ctx, keeper, accKeeper, mockedAuth
+	return ctx, keeper, accKeeper, mockedAccountKeeper
 }
 
 func createFakeFundedAccount(ctx sdk.Context, am auth.AccountKeeper, coins sdk.Coins) sdk.AccAddress {

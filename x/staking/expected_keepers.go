@@ -6,7 +6,7 @@ import (
 	"github.com/TruStory/truchain/x/claim"
 )
 
-type AuthKeeper interface {
+type AccountKeeper interface {
 	IsJailed(ctx sdk.Context, address sdk.AccAddress) (bool, sdk.Error)
 	UnJail(ctx sdk.Context, address sdk.AccAddress) sdk.Error
 }

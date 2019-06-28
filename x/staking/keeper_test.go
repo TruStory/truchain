@@ -35,10 +35,10 @@ func TestKeeper_SubmitArgumentMaxLimit(t *testing.T) {
 func TestKeeper_SubmitArgument(t *testing.T) {
 	ctx, k, accKeeper, authKeeper := mockDB()
 	ctx.WithBlockTime(time.Now())
-	mockedAuth := authKeeper.(*mockAuth)
+	mockedAccountKeeper := authKeeper.(*mockedAccountKeeper)
 	addr := createFakeFundedAccount(ctx, accKeeper, sdk.Coins{sdk.NewInt64Coin(app.StakeDenom, app.Shanev*300)})
 	addr2 := createFakeFundedAccount(ctx, accKeeper, sdk.Coins{sdk.NewInt64Coin(app.StakeDenom, app.Shanev*300)})
-	mockedAuth.jail(addr)
+	mockedAccountKeeper.jail(addr)
 
 	_, err := k.SubmitArgument(ctx, "body", "summary", addr, 1, StakeUpvote)
 	assert.Error(t, err)
