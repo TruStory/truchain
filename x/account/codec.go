@@ -1,11 +1,12 @@
-package auth
+package account
 
-import "github.com/cosmos/cosmos-sdk/codec"
+import (
+	"github.com/cosmos/cosmos-sdk/codec"
+)
 
 // RegisterCodec registers all the necessary types and interfaces for the module
 func RegisterCodec(cdc *codec.Codec) {
 	cdc.RegisterConcrete(MsgRegisterKey{}, "truchain/MsgRegisterKey", nil)
-
 	cdc.RegisterConcrete(AppAccount{}, "truchain/AppAccount", nil)
 }
 

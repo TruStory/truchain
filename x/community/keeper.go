@@ -6,14 +6,12 @@ import (
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/params"
-	recordkeeper "github.com/shanev/cosmos-record-keeper/recordkeeper"
 	log "github.com/tendermint/tendermint/libs/log"
 )
 
 // Keeper data type storing keys to the KVStore
 type Keeper struct {
-	recordkeeper.RecordKeeper
-
+	storeKey   sdk.StoreKey
 	codec      *codec.Codec
 	paramStore params.Subspace
 }
@@ -21,71 +19,69 @@ type Keeper struct {
 // NewKeeper creates a new keeper of the community Keeper
 func NewKeeper(storeKey sdk.StoreKey, paramStore params.Subspace, codec *codec.Codec) Keeper {
 	return Keeper{
-		recordkeeper.NewRecordKeeper(storeKey, codec),
+		storeKey,
 		codec,
 		paramStore.WithKeyTable(ParamKeyTable()),
 	}
 }
 
 // NewCommunity creates a new community
-func (k Keeper) NewCommunity(ctx sdk.Context, name string, slug string, description string) (community Community, err sdk.Error) {
-	logger := getLogger(ctx)
-
-	err = k.validateParams(ctx, name, slug, description)
+func (k Keeper) NewCommunity(ctx sdk.Context, id string, name string, description string) (community Community, err sdk.Error) {
+	err = k.validateParams(ctx, id, name, description)
 	if err != nil {
 		return
 	}
 
 	community = Community{
-		ID:          k.IncrementID(ctx),
+		ID:          id,
 		Name:        name,
-		Slug:        slug,
 		Description: description,
 		CreatedTime: ctx.BlockHeader().Time,
 	}
 
-	k.Set(ctx, community.ID, community)
-	logger.Info(fmt.Sprintf("Created new community: %s", community.String()))
+	k.setCommunity(ctx, community)
+	logger(ctx).Info(fmt.Sprintf("Created %s", community))
 
 	return
 }
 
 // Community returns a community by its ID
-func (k Keeper) Community(ctx sdk.Context, id uint64) (community Community, err sdk.Error) {
-	err = k.Get(ctx, id, &community)
-	if err != nil {
-		return community, ErrCommunityNotFound(id)
+func (k Keeper) Community(ctx sdk.Context, id string) (community Community, err sdk.Error) {
+	store := ctx.KVStore(k.storeKey)
+	communityBytes := store.Get(key(id))
+	if communityBytes == nil {
+		return community, ErrCommunityNotFound(community.ID)
 	}
+	k.codec.MustUnmarshalBinaryLengthPrefixed(communityBytes, &community)
 
 	return community, nil
 }
 
 // Communities gets all communities from the KVStore
 func (k Keeper) Communities(ctx sdk.Context) (communities []Community) {
-	err := k.Each(ctx, func(bytes []byte) bool {
-		var community Community
-		k.codec.MustUnmarshalBinaryLengthPrefixed(bytes, &community)
-		communities = append(communities, community)
-		return true
-	})
+	store := ctx.KVStore(k.storeKey)
+	iterator := sdk.KVStorePrefixIterator(store, CommunityKeyPrefix)
 
-	if err != nil {
-		return
+	defer iterator.Close()
+	for ; iterator.Valid(); iterator.Next() {
+		var community Community
+		k.codec.MustUnmarshalBinaryLengthPrefixed(iterator.Value(), &community)
+		communities = append(communities, community)
 	}
 
 	return
 }
 
-func (k Keeper) validateParams(ctx sdk.Context, name, slug, description string) (err sdk.Error) {
+func (k Keeper) validateParams(ctx sdk.Context, id, name, description string) (err sdk.Error) {
 	params := k.GetParams(ctx)
+	if len(id) < params.MinIDLength || len(id) > params.MaxIDLength {
+		err = ErrInvalidCommunityMsg(
+			fmt.Sprintf("ID must be between %d-%d chars in length", params.MinIDLength, params.MaxIDLength),
+		)
+	}
 	if len(name) < params.MinNameLength || len(name) > params.MaxNameLength {
 		err = ErrInvalidCommunityMsg(
 			fmt.Sprintf("Name must be between %d-%d chars in length", params.MinNameLength, params.MaxNameLength),
-		)
-	}
-	if len(slug) < params.MinSlugLength || len(slug) > params.MaxSlugLength {
-		err = ErrInvalidCommunityMsg(
-			fmt.Sprintf("Slug must be between %d-%d chars in length", params.MinSlugLength, params.MaxSlugLength),
 		)
 	}
 	if len(description) > params.MaxDescriptionLength {
@@ -97,6 +93,12 @@ func (k Keeper) validateParams(ctx sdk.Context, name, slug, description string) 
 	return
 }
 
-func getLogger(ctx sdk.Context) log.Logger {
+func (k Keeper) setCommunity(ctx sdk.Context, community Community) {
+	store := ctx.KVStore(k.storeKey)
+	bz := k.codec.MustMarshalBinaryLengthPrefixed(community)
+	store.Set(key(community.ID), bz)
+}
+
+func logger(ctx sdk.Context) log.Logger {
 	return ctx.Logger().With("module", ModuleName)
 }

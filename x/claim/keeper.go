@@ -33,14 +33,18 @@ func NewKeeper(storeKey sdk.StoreKey, paramStore params.Subspace, codec *codec.C
 }
 
 // SubmitClaim creates a new claim in the claim key-value store
-func (k Keeper) SubmitClaim(ctx sdk.Context, body string, communityID uint64,
+func (k Keeper) SubmitClaim(ctx sdk.Context, body, communityID string,
 	creator sdk.AccAddress, source url.URL) (claim Claim, err sdk.Error) {
 
 	err = k.validateLength(ctx, body)
 	if err != nil {
 		return
 	}
-	if k.accountKeeper.IsJailed(ctx, creator) {
+	jailed, err := k.accountKeeper.IsJailed(ctx, creator)
+	if err != nil {
+		return
+	}
+	if jailed {
 		return claim, ErrCreatorJailed(creator)
 	}
 	community, err := k.communityKeeper.Community(ctx, communityID)
@@ -120,7 +124,7 @@ func (k Keeper) ClaimsAfterTime(ctx sdk.Context, createdTime time.Time) (claims 
 }
 
 // CommunityClaims gets all the claims for a given community
-func (k Keeper) CommunityClaims(ctx sdk.Context, communityID uint64) (claims Claims) {
+func (k Keeper) CommunityClaims(ctx sdk.Context, communityID string) (claims Claims) {
 	return k.associatedClaims(ctx, communityClaimsKey(communityID))
 }
 
@@ -199,7 +203,7 @@ func (k Keeper) setClaim(ctx sdk.Context, claim Claim) {
 }
 
 // setCommunityClaim sets a community <-> claim association in store
-func (k Keeper) setCommunityClaim(ctx sdk.Context, communityID, claimID uint64) {
+func (k Keeper) setCommunityClaim(ctx sdk.Context, communityID string, claimID uint64) {
 	store := ctx.KVStore(k.storeKey)
 	bz := k.codec.MustMarshalBinaryLengthPrefixed(claimID)
 	store.Set(communityClaimKey(communityID, claimID), bz)

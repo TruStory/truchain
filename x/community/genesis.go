@@ -2,6 +2,7 @@ package community
 
 import (
 	"fmt"
+	"time"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
@@ -22,18 +23,16 @@ func NewGenesisState(communities []Community, params Params) GenesisState {
 
 // DefaultGenesisState returns a default genesis state
 func DefaultGenesisState() GenesisState {
-	communities := []Community{
-		// {ID: 1, Name: "Cryptocurrency", Slug: "crypto", TotalEarnedStake: sdk.NewCoin(app.StakeDenom, sdk.ZeroInt())},
-		// {ID: 2, Name: "Memes", Slug: "meme", TotalEarnedStake: sdk.NewCoin(app.StakeDenom, sdk.ZeroInt())},
-	}
+	community1 := NewCommunity("crypto", "Cryptocurrency", "description string", time.Now())
+	community2 := NewCommunity("meme", "Memes", "description string", time.Now())
 
-	return NewGenesisState(communities, DefaultParams())
+	return NewGenesisState(Communities{community1, community2}, DefaultParams())
 }
 
 // InitGenesis initializes community state from genesis file
 func InitGenesis(ctx sdk.Context, keeper Keeper, data GenesisState) {
 	for _, community := range data.Communities {
-		keeper.Set(ctx, community.ID, community)
+		keeper.setCommunity(ctx, community)
 	}
 	keeper.SetParams(ctx, data.Params)
 }
@@ -56,12 +55,12 @@ func ValidateGenesis(data GenesisState) error {
 		return fmt.Errorf("Param: MaxNameLength, must have a positive value and be larger than MinNameLength")
 	}
 
-	if data.Params.MinSlugLength < 1 {
-		return fmt.Errorf("Param: MinSlugLength, must have a positive value")
+	if data.Params.MinIDLength < 1 {
+		return fmt.Errorf("Param: MinIDLength, must have a positive value")
 	}
 
-	if data.Params.MaxSlugLength < 1 || data.Params.MaxSlugLength < data.Params.MinSlugLength {
-		return fmt.Errorf("Param: MaxSlugLength, must have a positive value and be larger than MinSlugLength")
+	if data.Params.MaxIDLength < 1 || data.Params.MaxIDLength < data.Params.MinIDLength {
+		return fmt.Errorf("Param: MaxIDLength, must have a positive value and be larger than MinIDLength")
 	}
 
 	if data.Params.MaxDescriptionLength < 1 {

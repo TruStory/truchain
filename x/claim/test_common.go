@@ -23,8 +23,8 @@ type accKeeper struct {
 }
 
 // IsJailed ...
-func (ak accKeeper) IsJailed(ctx sdk.Context, addr sdk.AccAddress) bool {
-	return ak.Jailed
+func (ak accKeeper) IsJailed(ctx sdk.Context, addr sdk.AccAddress) (bool, sdk.Error) {
+	return ak.Jailed, nil
 }
 
 func mockDB() (sdk.Context, Keeper) {
@@ -81,7 +81,7 @@ func fakeClaim(ctx sdk.Context, keeper Keeper) Claim {
 	body := "body string ajsdkhfakjsdfhd"
 	creator := sdk.AccAddress(ed25519.GenPrivKey().PubKey().Address())
 	source := url.URL{}
-	claim, err := keeper.SubmitClaim(ctx, body, uint64(1), creator, source)
+	claim, err := keeper.SubmitClaim(ctx, body, "crypto", creator, source)
 	if err != nil {
 		panic(err)
 	}

@@ -9,14 +9,14 @@ var _ sdk.Msg = &MsgCreateClaim{}
 
 // MsgCreateClaim defines a message to submit a story
 type MsgCreateClaim struct {
-	CommunityID uint64         `json:"community_id"`
+	CommunityID string         `json:"community_id"`
 	Body        string         `json:"body"`
 	Creator     sdk.AccAddress `json:"creator"`
 	Source      string         `json:"source,omitempty"`
 }
 
 // NewMsgCreateClaim creates a new message to create a claim
-func NewMsgCreateClaim(communityID uint64, body string, creator sdk.AccAddress, source string) MsgCreateClaim {
+func NewMsgCreateClaim(communityID, body string, creator sdk.AccAddress, source string) MsgCreateClaim {
 	return MsgCreateClaim{
 		CommunityID: communityID,
 		Body:        body,
@@ -40,7 +40,7 @@ func (msg MsgCreateClaim) ValidateBasic() sdk.Error {
 	if len(msg.Body) == 0 {
 		return ErrInvalidBodyTooShort(msg.Body)
 	}
-	if msg.CommunityID == 0 {
+	if len(msg.CommunityID) == 0 {
 		return ErrInvalidCommunityID(msg.CommunityID)
 	}
 	if len(msg.Creator) == 0 {

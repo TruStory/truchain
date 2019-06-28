@@ -1,4 +1,5 @@
-package auth
+package account
+
 
 import (
 	"testing"
@@ -12,8 +13,8 @@ func TestHandleMsgRegisterKey(t *testing.T) {
 	handler := NewHandler(keeper)
 	assert.NotNil(t, handler) // assert handler is present
 
-	_, publicKey, address, coins, _ := getFakeAppAccountParams()
-	
+	_, publicKey, address, coins := getFakeAppAccountParams()
+
 	registrar := keeper.GetParams(ctx).Registrar
 
 	msg := NewMsgRegisterKey(registrar, address, publicKey, "secp256k1", coins)

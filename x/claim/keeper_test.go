@@ -60,7 +60,7 @@ func TestAddGetClaim(t *testing.T) {
 func createFakeClaim(ctx sdk.Context, keeper Keeper) Claim {
 	ctx = ctx.WithBlockHeader(abci.Header{Time: time.Now().UTC()})
 	body := "Preethi can handle liquor better than Aamir."
-	communityID := uint64(1)
+	communityID := "crypto"
 	creator := sdk.AccAddress([]byte{1, 2})
 	source := url.URL{}
 

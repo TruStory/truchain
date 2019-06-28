@@ -26,7 +26,7 @@ type QueryClaimParams struct {
 
 // QueryCommunityClaimsParams for community claims
 type QueryCommunityClaimsParams struct {
-	CommunityID uint64 `json:"community_id"`
+	CommunityID string `json:"community_id"`
 }
 
 // QueryCreatorClaimsParams for community claims
