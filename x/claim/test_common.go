@@ -23,8 +23,8 @@ type accKeeper struct {
 }
 
 // IsJailed ...
-func (ak accKeeper) IsJailed(ctx sdk.Context, addr sdk.AccAddress) bool {
-	return ak.Jailed
+func (ak accKeeper) IsJailed(ctx sdk.Context, addr sdk.AccAddress) (bool, sdk.Error) {
+	return ak.Jailed, nil
 }
 
 func mockDB() (sdk.Context, Keeper) {

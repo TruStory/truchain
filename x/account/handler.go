@@ -1,4 +1,4 @@
-package auth
+package account
 
 import (
 	"fmt"
@@ -24,7 +24,10 @@ func handleMsgRegisterKey(ctx sdk.Context, k Keeper, msg MsgRegisterKey) sdk.Res
 		return err.Result()
 	}
 
-	appAccount := k.NewAppAccount(ctx, msg.Address, msg.Coins, msg.PubKey)
+	appAccount, err := k.CreateAppAccount(ctx, msg.Address, msg.Coins, msg.PubKey)
+	if err != nil {
+		return err.Result()
+	}
 
 	res, jsonErr := k.codec.MarshalJSON(appAccount)
 	if jsonErr != nil {

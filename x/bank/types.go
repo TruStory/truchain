@@ -18,6 +18,7 @@ var (
 )
 
 // TransactionType defines the type of transaction.
+// NOTE: This needs to stay in sync with x/account/expected_keepers.go
 type TransactionType int8
 
 func (t TransactionType) String() string {

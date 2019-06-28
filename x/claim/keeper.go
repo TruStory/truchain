@@ -40,7 +40,11 @@ func (k Keeper) SubmitClaim(ctx sdk.Context, body string, communityID uint64,
 	if err != nil {
 		return
 	}
-	if k.accountKeeper.IsJailed(ctx, creator) {
+	jailed, err := k.accountKeeper.IsJailed(ctx, creator)
+	if err != nil {
+		return
+	}
+	if jailed {
 		return claim, ErrCreatorJailed(creator)
 	}
 	community, err := k.communityKeeper.Community(ctx, communityID)

@@ -1,10 +1,11 @@
-package auth
+package account
 
 import (
+	app "github.com/TruStory/truchain/types"
 	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/cosmos/cosmos-sdk/store"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	sdkAuth "github.com/cosmos/cosmos-sdk/x/auth"
+	"github.com/cosmos/cosmos-sdk/x/auth"
 	"github.com/cosmos/cosmos-sdk/x/params"
 	abci "github.com/tendermint/tendermint/abci/types"
 	"github.com/tendermint/tendermint/crypto"
@@ -19,24 +20,26 @@ var _ BankKeeper = bankKeeper{}
 
 type transaction struct {
 	Address sdk.Address
-	Coins   sdk.Coins
+	Coin    sdk.Coin
 }
 type bankKeeper struct {
 	Transactions []transaction
 }
 
-// NewTransaction ...
-func (bk bankKeeper) NewTransaction(ctx sdk.Context, to sdk.AccAddress, coins sdk.Coins) bool {
-	txn := transaction{to, coins}
+// AddCoin mock for bank keeper
+func (bk bankKeeper) AddCoin(ctx sdk.Context, to sdk.AccAddress, coin sdk.Coin,
+	referenceID uint64, txType TransactionType) (sdk.Coins, sdk.Error) {
+
+	txn := transaction{to, coin}
 	bk.Transactions = append(bk.Transactions, txn)
-	return true
+	return sdk.Coins{coin}, nil
 }
 
 func mockDB() (sdk.Context, Keeper) {
 	db := dbm.NewMemDB()
 
 	authKey := sdk.NewKVStoreKey(ModuleName)
-	accountKey := sdk.NewKVStoreKey(sdkAuth.StoreKey)
+	accountKey := sdk.NewKVStoreKey(auth.StoreKey)
 	paramsKey := sdk.NewKVStoreKey(params.StoreKey)
 	transientParamsKey := sdk.NewTransientStoreKey(params.TStoreKey)
 
@@ -52,12 +55,13 @@ func mockDB() (sdk.Context, Keeper) {
 	codec := codec.New()
 	cryptoAmino.RegisterAmino(codec)
 	RegisterCodec(codec)
+	codec.RegisterInterface((*auth.Account)(nil), nil)
 
 	paramsKeeper := params.NewKeeper(codec, paramsKey, transientParamsKey, params.DefaultCodespace)
 	bankKeeper := bankKeeper{
 		Transactions: []transaction{},
 	}
-	accountKeeper := sdkAuth.NewAccountKeeper(codec, accountKey, paramsKeeper.Subspace(sdkAuth.DefaultParamspace), sdkAuth.ProtoBaseAccount)
+	accountKeeper := auth.NewAccountKeeper(codec, accountKey, paramsKeeper.Subspace(auth.DefaultParamspace), auth.ProtoBaseAccount)
 	authKeeper := NewKeeper(authKey, paramsKeeper.Subspace(ModuleName), codec, bankKeeper, accountKeeper)
 
 	InitGenesis(ctx, authKeeper, DefaultGenesisState())
@@ -70,29 +74,16 @@ func mockDB() (sdk.Context, Keeper) {
 	return ctx, authKeeper
 }
 
-func getFakeAppAccountParams() (
-	privateKey crypto.PrivKey, publicKey crypto.PubKey, address sdk.AccAddress,
-	coins sdk.Coins, earnedCoins EarnedCoins,
-) {
+func getFakeAppAccountParams() (privateKey crypto.PrivKey, publicKey crypto.PubKey, address sdk.AccAddress, coins sdk.Coins) {
 	privateKey, publicKey, address = getFakeKeyPubAddr()
 	coins = getFakeCoins()
-	earnedCoins = getFakeEarnedCoins()
 
 	return
 }
 
 func getFakeCoins() sdk.Coins {
 	return sdk.Coins{
-		sdk.NewInt64Coin("fake", 10000000),
-	}
-}
-
-func getFakeEarnedCoins() EarnedCoins {
-	return EarnedCoins{
-		EarnedCoin{
-			sdk.NewInt64Coin("fake", 10000000),
-			uint64(1), // CommunityID
-		},
+		sdk.NewInt64Coin(app.StakeDenom, 10000000),
 	}
 }
 
