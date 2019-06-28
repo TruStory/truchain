@@ -6,6 +6,10 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
+type Error string
+
+func (e Error) Error() string { return string(e) }
+
 // Staking errors reserve 500 ~ 599.
 const (
 	DefaultCodespace sdk.CodespaceType = ModuleName
@@ -21,6 +25,12 @@ const (
 	ErrorCodeMaxAmountStakingReached  sdk.CodeType = 509
 	ErrorCodeInvalidQueryParams       sdk.CodeType = 510
 	ErrorCodeJSONParsing              sdk.CodeType = 511
+)
+
+// GenesisErrors
+const (
+	ErrInvalidArgumentStakeDenom = Error("invalid denomination for argument stake")
+	ErrInvalidUpvoteStakeDenom   = Error("invalid denomination for upvote stake")
 )
 
 // ErrCodeAccountJailed throws an error is in jailed status when performing actions.

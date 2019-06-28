@@ -4,9 +4,10 @@ import (
 	"testing"
 	"time"
 
-	app "github.com/TruStory/truchain/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/stretchr/testify/assert"
+
+	app "github.com/TruStory/truchain/types"
 )
 
 func TestDefaultGenesisState(t *testing.T) {
@@ -86,4 +87,17 @@ func TestInitGenesis(t *testing.T) {
 
 	assert.Equal(t, stakes, expiringStakes)
 
+}
+
+func TestValidateGenesis(t *testing.T) {
+	genesisState := NewGenesisState(nil, nil, DefaultParams())
+	genesisState.Params.ArgumentCreationStake.Denom = "my-denom"
+	err := ValidateGenesis(genesisState)
+	assert.Error(t, err)
+	assert.Equal(t, ErrInvalidArgumentStakeDenom, err)
+	genesisState.Params.ArgumentCreationStake.Denom = app.StakeDenom
+	genesisState.Params.UpvoteStake.Denom = "my-denom"
+	err = ValidateGenesis(genesisState)
+	assert.Error(t, err)
+	assert.Equal(t, ErrInvalidUpvoteStakeDenom, err)
 }

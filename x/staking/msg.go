@@ -56,6 +56,10 @@ func (msg MsgSubmitArgument) ValidateBasic() sdk.Error {
 	if len(msg.Body) == 0 {
 		return ErrCodeInvalidBodyLength()
 	}
+
+	if len(msg.Summary) == 0 {
+		return ErrCodeInvalidSummaryLength()
+	}
 	return nil
 }
 

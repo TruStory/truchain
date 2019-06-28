@@ -19,7 +19,9 @@ var (
 	ParamKeyPeriod                   = []byte("period")
 	ParamKeyArgumentCreationStake    = []byte("argumentCreationStake")
 	ParamKeyArgumentBodyMaxLength    = []byte("argumentBodyMaxLength")
+	ParamKeyArgumentBodyMinLength    = []byte("argumentBodyMinLength")
 	ParamKeyArgumentSummaryMaxLength = []byte("argumentSummaryMaxLength")
+	ParamKeyArgumentSummaryMinLength = []byte("argumentSummaryMinLength")
 	ParamKeyUpvoteStake              = []byte("upvoteStake")
 	ParamKeyCreatorShare             = []byte("creatorShare")
 	ParamKeyInterestRate             = []byte("interestRate")
@@ -33,7 +35,9 @@ type Params struct {
 	Period                   time.Duration `json:"period"`
 	ArgumentCreationStake    sdk.Coin      `json:"argument_creation_stake"`
 	ArgumentBodyMaxLength    int           `json:"argument_body_max_length"`
+	ArgumentBodyMinLength    int           `json:"argument_body_min_length"`
 	ArgumentSummaryMaxLength int           `json:"argument_summary_max_length"`
+	ArgumentSummaryMinLength int           `json:"argument_summary_min_length"`
 	UpvoteStake              sdk.Coin      `json:"upvote_stake"`
 	CreatorShare             sdk.Dec       `json:"creator_share"`
 	InterestRate             sdk.Dec       `json:"interest_rate"`
@@ -47,8 +51,10 @@ func DefaultParams() Params {
 	return Params{
 		Period:                   time.Hour * 24 * 7,
 		ArgumentCreationStake:    sdk.NewInt64Coin(app.StakeDenom, app.Shanev*50),
-		ArgumentBodyMaxLength:    1200,
-		ArgumentSummaryMaxLength: 200,
+		ArgumentBodyMaxLength:    1250,
+		ArgumentBodyMinLength:    25,
+		ArgumentSummaryMaxLength: 140,
+		ArgumentSummaryMinLength: 25,
 		UpvoteStake:              sdk.NewInt64Coin(app.StakeDenom, app.Shanev*10),
 		CreatorShare:             sdk.NewDecWithPrec(50, 2),
 		InterestRate:             sdk.NewDecWithPrec(25, 2),
@@ -64,7 +70,9 @@ func (p *Params) ParamSetPairs() params.ParamSetPairs {
 		{Key: ParamKeyPeriod, Value: &p.Period},
 		{Key: ParamKeyArgumentCreationStake, Value: &p.ArgumentCreationStake},
 		{Key: ParamKeyArgumentBodyMaxLength, Value: &p.ArgumentBodyMaxLength},
+		{Key: ParamKeyArgumentBodyMinLength, Value: &p.ArgumentBodyMinLength},
 		{Key: ParamKeyArgumentSummaryMaxLength, Value: &p.ArgumentSummaryMaxLength},
+		{Key: ParamKeyArgumentSummaryMinLength, Value: &p.ArgumentSummaryMinLength},
 		{Key: ParamKeyUpvoteStake, Value: &p.UpvoteStake},
 		{Key: ParamKeyCreatorShare, Value: &p.CreatorShare},
 		{Key: ParamKeyInterestRate, Value: &p.InterestRate},

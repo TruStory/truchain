@@ -2,6 +2,8 @@ package staking
 
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
+
+	app "github.com/TruStory/truchain/types"
 )
 
 // GenesisState defines genesis data for the module
@@ -60,5 +62,11 @@ func ExportGenesis(ctx sdk.Context, keeper Keeper) GenesisState {
 
 // ValidateGenesis validates the genesis state data
 func ValidateGenesis(data GenesisState) error {
+	if data.Params.ArgumentCreationStake.Denom != app.StakeDenom {
+		return ErrInvalidArgumentStakeDenom
+	}
+	if data.Params.UpvoteStake.Denom != app.StakeDenom {
+		return ErrInvalidUpvoteStakeDenom
+	}
 	return nil
 }
