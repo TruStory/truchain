@@ -1,8 +1,6 @@
 package staking
 
 import (
-	"fmt"
-
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
@@ -50,7 +48,7 @@ func (msg MsgSubmitArgument) ValidateBasic() sdk.Error {
 	}
 
 	if len(msg.Creator) == 0 {
-		return sdk.ErrInvalidAddress(fmt.Sprintf("Invalid address %s", msg.Creator.String()))
+		return sdk.ErrInvalidAddress("Must provide a valid address")
 	}
 
 	if len(msg.Body) == 0 {
@@ -95,7 +93,10 @@ func (MsgSubmitUpvote) Type() string {
 	return TypeMsgSubmitUpvote
 }
 
-func (MsgSubmitUpvote) ValidateBasic() sdk.Error {
+func (msg MsgSubmitUpvote) ValidateBasic() sdk.Error {
+	if len(msg.Creator) == 0 {
+		return sdk.ErrInvalidAddress("Must provide a valid address")
+	}
 	return nil
 }
 

@@ -71,6 +71,8 @@ func (k Keeper) distributeReward(ctx sdk.Context, stake Stake) (RewardResult, sd
 }
 
 func (k Keeper) interest(ctx sdk.Context, amount sdk.Coin, period time.Duration) sdk.Dec {
+	// TODO: https://github.com/TruStory/truchain/issues/677
+	// use interest from distribution module
 	interestRate := k.GetParams(ctx).InterestRate
 	periodDec := sdk.NewDec(period.Nanoseconds())
 	amountDec := sdk.NewDecFromInt(amount.Amount)
