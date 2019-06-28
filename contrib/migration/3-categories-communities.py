@@ -37,13 +37,13 @@ def migrate_category_data(category_data):
           del s['timestamp']
         del s['total_cred']
         if s['slug'] == 'crypto':
-          s['description'] = 'Satoshi inspired a new generation of technologists to rethink how the world’s financial and economic system works. But the toxicity on crypto Twitter leaves little room for constructive debate. Until now.'
+          s['description'] = 'Satoshi inspired a new generation of technologists to rethink how the world\'s financial and economic system works. But the toxicity on crypto Twitter leaves little room for constructive debate. Until now.'
         if s['slug'] == 'product':
-          s['description'] = 'TruStory is a startup. We make critical product decisions every week and want you to be a part of the process. Let’s debate how to make TruStory better together.'
+          s['description'] = 'TruStory is a startup. We make critical product decisions every week and want you to be a part of the process. Let\'s debate how to make TruStory better together.'
         if s['slug'] == 'tech':
-          s['description'] = 'Technology has revolutionized our lives in every facet. What are the pros & cons of the latest innovations and applications that shape our future?'
+          s['description'] = 'Technology has revolutionized our lives in every facet. What are the pros and cons of the latest innovations and applications that shape our future?'
         if s['slug'] == 'entertainment':
-          s['description'] = 'Content is being created and consumed at a breakneck pace, whether it’s via videos, podcasts, books or music. Debate the value of specific content or the medium itself.'
+          s['description'] = 'Content is being created and consumed at a breakneck pace, whether it\'s via videos, podcasts, books or music. Debate the value of specific content or the medium itself.'
         if s['slug'] == 'sports':
           s['description'] = 'Sports inspire, motivate, and capture the attention of young kids and senior citizens alike. The estimated size of the global sports industry is over a trillion dollars. Ready, set, go!'
         s['id'] = s['slug']
