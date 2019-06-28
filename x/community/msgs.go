@@ -14,16 +14,16 @@ const (
 // MsgNewCommunity defines the message to create new community
 type MsgNewCommunity struct {
 	Name        string         `json:"name"`
-	Slug        string         `json:"slug"`
+	ID          string         `json:"id"`
 	Description string         `json:"description"`
 	Creator     sdk.AccAddress `json:"creator"`
 }
 
 // NewMsgNewCommunity returns the messages to create a new community
-func NewMsgNewCommunity(name, slug, description string, creator sdk.AccAddress) MsgNewCommunity {
+func NewMsgNewCommunity(name, id, description string, creator sdk.AccAddress) MsgNewCommunity {
 	return MsgNewCommunity{
 		Name:        name,
-		Slug:        slug,
+		ID:          id,
 		Description: description,
 		Creator:     creator,
 	}

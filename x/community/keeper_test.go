@@ -9,35 +9,34 @@ import (
 func TestNewCommunity_Success(t *testing.T) {
 	ctx, keeper := mockDB()
 
-	name, slug, description := getFakeCommunityParams()
+	id, name, description := getFakeCommunityParams()
 
-	community, err := keeper.NewCommunity(ctx, name, slug, description)
+	community, err := keeper.NewCommunity(ctx, id, name, description)
 	assert.Nil(t, err)
 
-	assert.NotZero(t, community.ID)
 	assert.Equal(t, community.Name, name)
-	assert.Equal(t, community.Slug, slug)
+	assert.Equal(t, community.ID, id)
 	assert.Equal(t, community.Description, description)
 }
 
 func TestNewCommunity_InvalidName(t *testing.T) {
 	ctx, keeper := mockDB()
 
-	_, slug, description := getFakeCommunityParams()
+	id, _, description := getFakeCommunityParams()
 	invalidName := "Some really really really long name for a community"
 
-	_, err := keeper.NewCommunity(ctx, invalidName, slug, description)
+	_, err := keeper.NewCommunity(ctx, id, invalidName, description)
 	assert.NotNil(t, err)
 	assert.Equal(t, ErrInvalidCommunityMsg("").Code(), err.Code())
 }
 
-func TestNewCommunity_InvalidSlug(t *testing.T) {
+func TestNewCommunity_InvalidID(t *testing.T) {
 	ctx, keeper := mockDB()
 
-	name, _, description := getFakeCommunityParams()
-	invalidSlug := "some-really-really-really-long-name-for-a-community"
+	_, name, description := getFakeCommunityParams()
+	invalidID := "some-really-really-really-long-name-for-a-community"
 
-	_, err := keeper.NewCommunity(ctx, name, invalidSlug, description)
+	_, err := keeper.NewCommunity(ctx, invalidID, name, description)
 	assert.NotNil(t, err)
 	assert.Equal(t, ErrInvalidCommunityMsg("").Code(), err.Code())
 }
@@ -45,10 +44,10 @@ func TestNewCommunity_InvalidSlug(t *testing.T) {
 func TestNewCommunity_InvalidDescription(t *testing.T) {
 	ctx, keeper := mockDB()
 
-	name, slug, _ := getFakeCommunityParams()
+	id, name, _ := getFakeCommunityParams()
 	invalidDescription := "If I could ever think of a really silly day of my life, I would choose the day when I tried fitting in more than 140 chars in a tweet. How silly it was!"
 
-	_, err := keeper.NewCommunity(ctx, name, slug, invalidDescription)
+	_, err := keeper.NewCommunity(ctx, id, name, invalidDescription)
 	assert.NotNil(t, err)
 	assert.Equal(t, ErrInvalidCommunityMsg("").Code(), err.Code())
 }
@@ -56,22 +55,21 @@ func TestNewCommunity_InvalidDescription(t *testing.T) {
 func TestCommunity_Success(t *testing.T) {
 	ctx, keeper := mockDB()
 
-	name, slug, description := getFakeCommunityParams()
+	id, name, description := getFakeCommunityParams()
 
-	createdCommunity, err := keeper.NewCommunity(ctx, name, slug, description)
+	createdCommunity, err := keeper.NewCommunity(ctx, id, name, description)
 	assert.Nil(t, err)
 
-	returnedCommunity, err := keeper.Community(ctx, createdCommunity.ID)
+	returnedCommunity, err := keeper.Community(ctx, id)
 	assert.Nil(t, err)
-	assert.Equal(t, createdCommunity.ID, returnedCommunity.ID)
 	assert.Equal(t, createdCommunity.Name, returnedCommunity.Name)
-	assert.Equal(t, createdCommunity.Slug, returnedCommunity.Slug)
+	assert.Equal(t, createdCommunity.ID, returnedCommunity.ID)
 	assert.Equal(t, createdCommunity.Description, returnedCommunity.Description)
 }
 
 func TestCommunity_ErrCommunityNotFound(t *testing.T) {
 	ctx, keeper := mockDB()
-	id := uint64(314) // any random number, what better than a pie 🥧
+	id := "id"
 
 	_, err := keeper.Community(ctx, id)
 	assert.NotNil(t, err)
@@ -81,17 +79,19 @@ func TestCommunity_ErrCommunityNotFound(t *testing.T) {
 func TestCommunities_Success(t *testing.T) {
 	ctx, keeper := mockDB()
 
-	name, slug, description := getFakeCommunityParams()
-	first, err := keeper.NewCommunity(ctx, name, slug, description)
+	id, name, description := getFakeCommunityParams()
+	first, err := keeper.NewCommunity(ctx, id, name, description)
 	assert.Nil(t, err)
 
-	name2, slug2, description2 := getAnotherFakeCommunityParams()
-	another, err := keeper.NewCommunity(ctx, name2, slug2, description2)
+	id2, name2, description2 := getAnotherFakeCommunityParams()
+	another, err := keeper.NewCommunity(ctx, id2, name2, description2)
 	assert.Nil(t, err)
 
 	all := keeper.Communities(ctx)
 
-	assert.Len(t, all, 2)
-	assert.Equal(t, all[0].ID, first.ID)
-	assert.Equal(t, all[1].ID, another.ID)
+	assert.Len(t, all, 4)
+	assert.Equal(t, all[0].ID, "crypto")
+	assert.Equal(t, all[1].ID, "meme")
+	assert.Equal(t, all[2].ID, first.ID)
+	assert.Equal(t, all[3].ID, another.ID)
 }

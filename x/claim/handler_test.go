@@ -13,7 +13,7 @@ func TestMsgCreateClaim(t *testing.T) {
 	handler := NewHandler(keeper)
 	assert.NotNil(t, handler)
 
-	communityID := uint64(1)
+	communityID := "crypto"
 	body := "fake story body with minimum length"
 	creator := sdk.AccAddress([]byte{1, 2})
 	source := "http://trustory.io"
@@ -22,6 +22,7 @@ func TestMsgCreateClaim(t *testing.T) {
 
 	res := handler(ctx, msg)
 	assert.NotNil(t, res)
+	assert.True(t, res.IsOK())
 
 	var claim Claim
 	ModuleCodec.UnmarshalJSON(res.Data, &claim)

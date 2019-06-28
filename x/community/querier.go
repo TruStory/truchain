@@ -16,7 +16,7 @@ const (
 
 // QueryCommunityParams are params for querying communities by id queries
 type QueryCommunityParams struct {
-	ID uint64
+	ID string
 }
 
 // NewQuerier returns a function that handles queries on the KVStore

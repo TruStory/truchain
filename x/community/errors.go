@@ -16,8 +16,8 @@ const (
 )
 
 // ErrCommunityNotFound throws an error when the searched category is not found
-func ErrCommunityNotFound(id uint64) sdk.Error {
-	return sdk.NewError(DefaultCodespace, ErrorCodeCommunityNotFound, fmt.Sprintf("Community not found with ID: %d", id))
+func ErrCommunityNotFound(id string) sdk.Error {
+	return sdk.NewError(DefaultCodespace, ErrorCodeCommunityNotFound, fmt.Sprintf("Community not found with id: %s", id))
 }
 
 // ErrInvalidCommunityMsg throws an error when the searched category is not found

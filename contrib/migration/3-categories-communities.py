@@ -19,27 +19,35 @@ def process_genesis(genesis, parsed_args):
 
 def migrate_category_data(category_data):
     category_data['params'] = {
+        'min_id_length': '3',
+        'max_id_length': '15',
         'min_name_length': '5',
         'max_name_length': '25',
-        'min_slug_length': '3',
-        'max_slug_length': '15',
         'max_description_length': '140',
     }
     category_data['communities'] = category_data['categories']
     del category_data['categories']
     for s in category_data['communities']:
-        s['id'] = s['id']
         s['name'] = s['title']
         del s['title']
-        s['slug'] = s['slug']
         if 'description' in s:
           s['description'] = s['description']
         if 'timestamp' in s:
           s['created_time'] = s['timestamp']['created_time']
           del s['timestamp']
-        s['total_earned_stake'] = s['total_cred']
         del s['total_cred']
-        s['total_earned_stake']['denom'] = 'trusteak'
+        if s['slug'] == 'crypto':
+          s['description'] = 'Satoshi inspired a new generation of technologists to rethink how the world’s financial and economic system works. But the toxicity on crypto Twitter leaves little room for constructive debate. Until now.'
+        if s['slug'] == 'product':
+          s['description'] = 'TruStory is a startup. We make critical product decisions every week and want you to be a part of the process. Let’s debate how to make TruStory better together.'
+        if s['slug'] == 'tech':
+          s['description'] = 'Technology has revolutionized our lives in every facet. What are the pros & cons of the latest innovations and applications that shape our future?'
+        if s['slug'] == 'entertainment':
+          s['description'] = 'Content is being created and consumed at a breakneck pace, whether it’s via videos, podcasts, books or music. Debate the value of specific content or the medium itself.'
+        if s['slug'] == 'sports':
+          s['description'] = 'Sports inspire, motivate, and capture the attention of young kids and senior citizens alike. The estimated size of the global sports industry is over a trillion dollars. Ready, set, go!'
+        s['id'] = s['slug']
+        del s['slug']
 
 if __name__ == '__main__':
     parser = lib.init_default_argument_parser(

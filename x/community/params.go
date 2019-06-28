@@ -9,19 +9,19 @@ import (
 
 // Keys for params
 var (
+	KeyMinIDLength          = []byte("minIDLength")
+	KeyMaxIDLength          = []byte("maxIDLength")
 	KeyMinNameLength        = []byte("minNameLength")
 	KeyMaxNameLength        = []byte("maxNameLength")
-	KeyMinSlugLength        = []byte("minSlugLength")
-	KeyMaxSlugLength        = []byte("maxSlugLength")
 	KeyMaxDescriptionLength = []byte("maxDescriptionLength")
 )
 
 // Params holds parameters for a Community
 type Params struct {
+	MinIDLength          int `json:"min_id_length"`
+	MaxIDLength          int `json:"max_id_length"`
 	MinNameLength        int `json:"min_name_length"`
 	MaxNameLength        int `json:"max_name_length"`
-	MinSlugLength        int `json:"min_slug_length"`
-	MaxSlugLength        int `json:"max_slug_length"`
 	MaxDescriptionLength int `json:"max_description_length"`
 }
 
@@ -30,8 +30,8 @@ func DefaultParams() Params {
 	return Params{
 		MinNameLength:        5,
 		MaxNameLength:        25,
-		MinSlugLength:        3,
-		MaxSlugLength:        15,
+		MinIDLength:          3,
+		MaxIDLength:          15,
 		MaxDescriptionLength: 140,
 	}
 }
@@ -41,8 +41,8 @@ func (p *Params) ParamSetPairs() params.ParamSetPairs {
 	return params.ParamSetPairs{
 		{Key: KeyMinNameLength, Value: &p.MinNameLength},
 		{Key: KeyMaxNameLength, Value: &p.MaxNameLength},
-		{Key: KeyMinSlugLength, Value: &p.MinSlugLength},
-		{Key: KeyMaxSlugLength, Value: &p.MaxSlugLength},
+		{Key: KeyMinIDLength, Value: &p.MinIDLength},
+		{Key: KeyMaxIDLength, Value: &p.MaxIDLength},
 		{Key: KeyMaxDescriptionLength, Value: &p.MaxDescriptionLength},
 	}
 }

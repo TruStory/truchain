@@ -81,7 +81,7 @@ func fakeClaim(ctx sdk.Context, keeper Keeper) Claim {
 	body := "body string ajsdkhfakjsdfhd"
 	creator := sdk.AccAddress(ed25519.GenPrivKey().PubKey().Address())
 	source := url.URL{}
-	claim, err := keeper.SubmitClaim(ctx, body, uint64(1), creator, source)
+	claim, err := keeper.SubmitClaim(ctx, body, "crypto", creator, source)
 	if err != nil {
 		panic(err)
 	}

@@ -14,6 +14,11 @@ type IDResult struct {
 	ID int64 `json:"id"`
 }
 
+// IDStringResult is when the result ID is a string
+type IDStringResult struct {
+	ID string `json:"id"`
+}
+
 // ErrMsgHandler returns an unknown Msg request error result
 func ErrMsgHandler(msg sdk.Msg) sdk.Result {
 	if mType := reflect.TypeOf(msg); mType != nil {
