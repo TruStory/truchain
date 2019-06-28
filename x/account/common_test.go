@@ -1,6 +1,7 @@
 package account
 
 import (
+	app "github.com/TruStory/truchain/types"
 	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/cosmos/cosmos-sdk/store"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -82,7 +83,7 @@ func getFakeAppAccountParams() (privateKey crypto.PrivKey, publicKey crypto.PubK
 
 func getFakeCoins() sdk.Coins {
 	return sdk.Coins{
-		sdk.NewInt64Coin("fake", 10000000),
+		sdk.NewInt64Coin(app.StakeDenom, 10000000),
 	}
 }
 

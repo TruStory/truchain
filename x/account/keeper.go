@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"time"
 
+	app "github.com/TruStory/truchain/types"
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth"
@@ -57,9 +58,15 @@ func (k Keeper) CreateAppAccount(ctx sdk.Context, address sdk.AccAddress,
 
 	getLogger(ctx).Info(fmt.Sprintf("Created %s", acc.String()))
 
-	_, sdkErr = k.bankKeeper.AddCoin(ctx, address, coins[0], 0, TransactionRegistration)
-	if sdkErr != nil {
-		return
+	initialCoinAmount := coins.AmountOf(app.StakeDenom)
+	if initialCoinAmount.IsPositive() {
+		coin := sdk.NewCoin(app.StakeDenom, initialCoinAmount)
+		_, sdkErr = k.bankKeeper.AddCoin(ctx, address, coin, 0, TransactionRegistration)
+		if sdkErr != nil {
+			return
+		}
+	} else {
+		return acc, sdk.ErrInvalidCoins("Invalid initial coins")
 	}
 
 	return acc, nil
