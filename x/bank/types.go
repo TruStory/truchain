@@ -23,7 +23,7 @@ type TransactionType int8
 
 func (t TransactionType) String() string {
 	if int(t) >= len(TransactionTypeName) {
-		return "Unknown transaction type"
+		return "Unknown"
 	}
 	return TransactionTypeName[t]
 }
@@ -37,20 +37,24 @@ const (
 	TransactionChallengeReturned
 	TransactionUpvote
 	TransactionUpvoteReturned
-	TransactionInterest
+	TransactionInterestArgumentCreation
+	TransactionInterestUpvoteReceived
+	TransactionInterestUpvoteGiven
 	TransactionRewardPayout
 )
 
 var TransactionTypeName = []string{
-	TransactionRegistration:      "TransactionRegistration",
-	TransactionBacking:           "TransactionBacking",
-	TransactionBackingReturned:   "TransactionBackingReturned",
-	TransactionChallenge:         "TransactionChallenge",
-	TransactionChallengeReturned: "TransactionChallengeReturned",
-	TransactionUpvote:            "TransactionUpvote",
-	TransactionUpvoteReturned:    "TransactionUpvoteReturned",
-	TransactionInterest:          "TransactionInterest",
-	TransactionRewardPayout:      "TransactionRewardPayout",
+	TransactionRegistration:             "TransactionRegistration",
+	TransactionBacking:                  "TransactionBacking",
+	TransactionBackingReturned:          "TransactionBackingReturned",
+	TransactionChallenge:                "TransactionChallenge",
+	TransactionChallengeReturned:        "TransactionChallengeReturned",
+	TransactionUpvote:                   "TransactionUpvote",
+	TransactionUpvoteReturned:           "TransactionUpvoteReturned",
+	TransactionInterestArgumentCreation: "TransactionInterestArgumentCreation",
+	TransactionInterestUpvoteReceived:   "TransactionInterestUpvoteReceived",
+	TransactionInterestUpvoteGiven:      "TransactionInterestUpvoteGiven",
+	TransactionRewardPayout:             "TransactionRewardPayout",
 }
 
 var allowedTransactionsForAddition = []TransactionType{
@@ -58,7 +62,9 @@ var allowedTransactionsForAddition = []TransactionType{
 	TransactionBackingReturned,
 	TransactionChallengeReturned,
 	TransactionUpvoteReturned,
-	TransactionInterest,
+	TransactionInterestArgumentCreation,
+	TransactionInterestUpvoteReceived,
+	TransactionInterestUpvoteGiven,
 	TransactionRewardPayout,
 }
 

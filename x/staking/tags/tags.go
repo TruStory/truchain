@@ -6,12 +6,13 @@ import (
 
 // staking tags
 var (
-	ArgumentCreator = "argument-creator"
-	UpvoteCreator   = "upvote-creator"
+	Creator       = "creator"
+	RewardResults = "reward-results"
 
-	ActionCreateArgument    = "create-argument"
-	ActionCreateUpvote      = "create-upvote"
-	ActionUnhelpfulArgument = "unhelpful-argument"
+	ActionCreateArgument     = "create-argument"
+	ActionCreateUpvote       = "create-upvote"
+	ActionInterestRewardPaid = "interest-reward-paid"
+	ActionUnhelpfulArgument  = "unhelpful-argument"
 
 	TxCategory = "truchain-staking"
 	Action     = sdk.TagAction

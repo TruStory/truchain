@@ -16,11 +16,19 @@ func (k Keeper) splitReward(ctx sdk.Context, interest sdk.Dec) (creator, staker 
 	return creatorShare.RoundInt(), stakerShare.RoundInt()
 }
 
+type RewardResultType byte
+
+const (
+	RewardResultArgumentCreation RewardResultType = iota
+	RewardResultUpvoteSplit
+)
+
 type RewardResult struct {
-	ArgumentCreator       sdk.AccAddress
-	ArgumentCreatorReward sdk.Coin
-	StakeCreator          sdk.AccAddress
-	StakeCreatorReward    sdk.Coin
+	Type                  RewardResultType `json:"type"`
+	ArgumentCreator       sdk.AccAddress   `json:"argument_creator"`
+	ArgumentCreatorReward sdk.Coin         `json:"argument_creator_reward"`
+	StakeCreator          sdk.AccAddress   `json:"stake_creator"`
+	StakeCreatorReward    sdk.Coin         `json:"stake_creator_reward"`
 }
 
 func (k Keeper) distributeReward(ctx sdk.Context, stake Stake) (RewardResult, sdk.Error) {
@@ -36,11 +44,13 @@ func (k Keeper) distributeReward(ctx sdk.Context, stake Stake) (RewardResult, sd
 			argument.Creator,
 			reward,
 			argument.ID,
-			bank.TransactionInterest)
+			bank.TransactionInterestArgumentCreation)
 		if err != nil {
 			return RewardResult{}, err
 		}
-		return RewardResult{ArgumentCreator: argument.Creator, ArgumentCreatorReward: reward}, nil
+		return RewardResult{Type: RewardResultArgumentCreation,
+			ArgumentCreator:       argument.Creator,
+			ArgumentCreatorReward: reward}, nil
 	}
 	creatorReward, stakerReward := k.splitReward(ctx, interest)
 	creatorRewardCoin := sdk.NewCoin(app.StakeDenom, creatorReward)
@@ -49,7 +59,7 @@ func (k Keeper) distributeReward(ctx sdk.Context, stake Stake) (RewardResult, sd
 		argument.Creator,
 		creatorRewardCoin,
 		argument.ID,
-		bank.TransactionInterest)
+		bank.TransactionInterestUpvoteReceived)
 	if err != nil {
 		return RewardResult{}, err
 	}
@@ -57,11 +67,12 @@ func (k Keeper) distributeReward(ctx sdk.Context, stake Stake) (RewardResult, sd
 		stake.Creator,
 		stakerRewardCoin,
 		argument.ID,
-		bank.TransactionInterest)
+		bank.TransactionInterestUpvoteGiven)
 	if err != nil {
 		return RewardResult{}, err
 	}
 	rewardResult := RewardResult{
+		Type:                  RewardResultUpvoteSplit,
 		ArgumentCreator:       argument.Creator,
 		ArgumentCreatorReward: creatorRewardCoin,
 		StakeCreator:          stake.Creator,

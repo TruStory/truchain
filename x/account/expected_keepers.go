@@ -17,7 +17,9 @@ const (
 	TransactionChallengeReturned
 	TransactionUpvote
 	TransactionUpvoteReturned
-	TransactionInterest
+	TransactionInterestArgumentCreation
+	TransactionInterestUpvoteReceived
+	TransactionInterestUpvoteGiven
 	TransactionRewardPayout
 )
 

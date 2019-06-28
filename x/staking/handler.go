@@ -4,6 +4,8 @@ import (
 	"fmt"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
+
+	"github.com/TruStory/truchain/x/staking/tags"
 )
 
 // NewHandler creates a new handler for staking module
@@ -33,8 +35,14 @@ func handleMsgSubmitArgument(ctx sdk.Context, keeper Keeper, msg MsgSubmitArgume
 	if codecErr != nil {
 		return sdk.ErrInternal(fmt.Sprintf("Marshal result error: %s", codecErr)).Result()
 	}
+	tags := sdk.NewTags(
+		tags.Category, tags.TxCategory,
+		tags.Action, tags.ActionCreateArgument,
+		tags.Creator, msg.Creator.String(),
+	)
 	return sdk.Result{
 		Data: res,
+		Tags: tags,
 	}
 }
 
@@ -50,7 +58,13 @@ func handleMsgSubmitUpvote(ctx sdk.Context, keeper Keeper, msg MsgSubmitUpvote) 
 	if codecErr != nil {
 		return sdk.ErrInternal(fmt.Sprintf("Marshal result error: %s", codecErr)).Result()
 	}
+	tags := sdk.NewTags(
+		tags.Category, tags.TxCategory,
+		tags.Action, tags.ActionCreateUpvote,
+		tags.Creator, msg.Creator.String(),
+	)
 	return sdk.Result{
 		Data: res,
+		Tags: tags,
 	}
 }
