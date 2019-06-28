@@ -20,10 +20,10 @@ const (
 type AppAccount struct {
 	*auth.BaseAccount
 
-	SlashCount  uint
-	IsJailed    bool
-	JailEndTime time.Time
-	CreatedTime time.Time
+	SlashCount  uint      `json:"slash_count"`
+	IsJailed    bool      `json:"is_jailed"`
+	JailEndTime time.Time `json:"jail_end_time"`
+	CreatedTime time.Time `json:"created_time"`
 }
 
 // AppAccounts is a slice of AppAccounts

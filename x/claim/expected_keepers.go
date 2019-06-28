@@ -6,5 +6,5 @@ import (
 
 // AccountKeeper is the expected account keeper interface for this module
 type AccountKeeper interface {
-	IsJailed(ctx sdk.Context, addr sdk.AccAddress) bool
+	IsJailed(ctx sdk.Context, addr sdk.AccAddress) (bool, sdk.Error)
 }
