@@ -57,7 +57,7 @@ func (k Keeper) CreateAppAccount(ctx sdk.Context, address sdk.AccAddress,
 
 	getLogger(ctx).Info(fmt.Sprintf("Created %s", acc.String()))
 
-	_, sdkErr = k.bankKeeper.AddCoin(ctx, address, coins[0], 0, 0)
+	_, sdkErr = k.bankKeeper.AddCoin(ctx, address, coins[0], 0, TransactionRegistration)
 	if sdkErr != nil {
 		return
 	}

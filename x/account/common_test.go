@@ -27,7 +27,7 @@ type bankKeeper struct {
 
 // AddCoin mock for bank keeper
 func (bk bankKeeper) AddCoin(ctx sdk.Context, to sdk.AccAddress, coin sdk.Coin,
-	referenceID uint64, txType int) (sdk.Coins, sdk.Error) {
+	referenceID uint64, txType TransactionType) (sdk.Coins, sdk.Error) {
 
 	txn := transaction{to, coin}
 	bk.Transactions = append(bk.Transactions, txn)
