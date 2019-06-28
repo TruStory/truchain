@@ -22,23 +22,19 @@ var (
 	UserArgumentsKeyPrefix  = []byte{0x22}
 	UserStakesKeyPrefix     = []byte{0x23}
 
-	// Totals
-	TotalUserArgumentsKey = []byte{0x30}
-	TotalClaimsKey        = []byte{0x31}
-
 	// Queue
 	ActiveStakeQueuePrefix = []byte{0x40}
 )
 
-// StakeKey gets a key for a stake.
+// stakeKey gets a key for a stake.
 // 0x02<stake_id>
-func StakeKey(id uint64) []byte {
+func stakeKey(id uint64) []byte {
 	return buildKey(StakesKeyPrefix, id)
 }
 
-// ArgumentKey gets a key for an argument
+// argumentKey gets a key for an argument
 // 0x01<argument_id>
-func ArgumentKey(id uint64) []byte {
+func argumentKey(id uint64) []byte {
 	return buildKey(ArgumentsKeyPrefix, id)
 }
 
@@ -99,16 +95,16 @@ func userStakeKey(creator sdk.AccAddress, createdTime time.Time, stakeID uint64)
 	return append(userStakesCreatedTimePrefix(creator, createdTime), bz...)
 }
 
-// ActiveStakeQueueKey
+// activeStakeQueueKey
 // 0x40<end_time><stake_id>
-func ActiveStakeQueueKey(stakeID uint64, endTime time.Time) []byte {
+func activeStakeQueueKey(stakeID uint64, endTime time.Time) []byte {
 	bz := make([]byte, 8)
 	binary.LittleEndian.PutUint64(bz, stakeID)
-	return append(ActiveStakeByTimeKey(endTime), bz...)
+	return append(activeStakeByTimeKey(endTime), bz...)
 }
 
-// ActiveStakeByTimeKey gets the active proposal queue key by endTime
-func ActiveStakeByTimeKey(endTime time.Time) []byte {
+// activeStakeByTimeKey gets the active proposal queue key by endTime
+func activeStakeByTimeKey(endTime time.Time) []byte {
 	return append(ActiveStakeQueuePrefix, sdk.FormatTimeBytes(endTime)...)
 }
 

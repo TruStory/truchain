@@ -187,7 +187,7 @@ func (k Keeper) SubmitArgument(ctx sdk.Context, body, summary string,
 
 func (k Keeper) getArgument(ctx sdk.Context, argumentID uint64) (Argument, bool) {
 	argument := Argument{}
-	bz := k.store(ctx).Get(ArgumentKey(argumentID))
+	bz := k.store(ctx).Get(argumentKey(argumentID))
 	if bz == nil {
 		return Argument{}, false
 	}
@@ -197,7 +197,7 @@ func (k Keeper) getArgument(ctx sdk.Context, argumentID uint64) (Argument, bool)
 
 func (k Keeper) setArgument(ctx sdk.Context, argument Argument) {
 	bz := k.codec.MustMarshalBinaryLengthPrefixed(argument)
-	k.store(ctx).Set(ArgumentKey(argument.ID), bz)
+	k.store(ctx).Set(argumentKey(argument.ID), bz)
 }
 
 func (k Keeper) checkStakeThreshold(ctx sdk.Context, address sdk.AccAddress) sdk.Error {
@@ -266,12 +266,12 @@ func (k Keeper) newStake(ctx sdk.Context, amount sdk.Coin, creator sdk.AccAddres
 
 func (k Keeper) getStake(ctx sdk.Context, stakeID uint64) Stake {
 	stake := Stake{}
-	k.codec.MustUnmarshalBinaryLengthPrefixed(k.store(ctx).Get(StakeKey(stakeID)), &stake)
+	k.codec.MustUnmarshalBinaryLengthPrefixed(k.store(ctx).Get(stakeKey(stakeID)), &stake)
 	return stake
 }
 func (k Keeper) setStake(ctx sdk.Context, stake Stake) {
 	bz := k.codec.MustMarshalBinaryLengthPrefixed(stake)
-	k.store(ctx).Set(StakeKey(stake.ID), bz)
+	k.store(ctx).Set(stakeKey(stake.ID), bz)
 }
 
 func (k Keeper) store(ctx sdk.Context) sdk.KVStore {
@@ -320,12 +320,12 @@ func (k Keeper) getID(ctx sdk.Context, key []byte) (uint64, sdk.Error) {
 // InsertActiveStakeQueue inserts a stakeID into the active stake queue at endTime
 func (k Keeper) InsertActiveStakeQueue(ctx sdk.Context, stakeID uint64, endTime time.Time) {
 	bz := k.codec.MustMarshalBinaryLengthPrefixed(stakeID)
-	k.store(ctx).Set(ActiveStakeQueueKey(stakeID, endTime), bz)
+	k.store(ctx).Set(activeStakeQueueKey(stakeID, endTime), bz)
 }
 
 // RemoveFromActiveStakeQueue removes a stakeID from the Active Stake Queue
 func (k Keeper) RemoveFromActiveStakeQueue(ctx sdk.Context, stakeID uint64, endTime time.Time) {
-	k.store(ctx).Delete(ActiveStakeQueueKey(stakeID, endTime))
+	k.store(ctx).Delete(activeStakeQueueKey(stakeID, endTime))
 }
 
 // Logger returns a module-specific logger.

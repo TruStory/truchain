@@ -106,7 +106,7 @@ func (k Keeper) IterateAfterCreatedTimeUserStakes(ctx sdk.Context,
 // ActiveStakeQueueIterator returns an sdk.Iterator for all the stakes in the Active Queue that expire by endTime
 func (k Keeper) ActiveStakeQueueIterator(ctx sdk.Context, endTime time.Time) sdk.Iterator {
 	store := k.store(ctx)
-	return store.Iterator(ActiveStakeQueuePrefix, sdk.PrefixEndBytes(ActiveStakeByTimeKey(endTime)))
+	return store.Iterator(ActiveStakeQueuePrefix, sdk.PrefixEndBytes(activeStakeByTimeKey(endTime)))
 }
 
 func (k Keeper) IterateActiveStakeQueue(ctx sdk.Context, endTime time.Time, cb func(stake Stake) (stop bool)) {
