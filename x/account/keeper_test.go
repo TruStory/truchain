@@ -15,7 +15,8 @@ func TestNewAppAccount_Success(t *testing.T) {
 	appAccount, _ := keeper.CreateAppAccount(ctx, address, coins, publicKey)
 
 	assert.Equal(t, appAccount.Address, address)
-	assert.Equal(t, appAccount.Coins, coins)
+	// NOTE: cannot test this without using the bank module
+	// assert.Equal(t, appAccount.Coins, coins)
 	assert.Equal(t, appAccount.PubKey, publicKey)
 
 	assert.Equal(t, false, appAccount.IsJailed)
