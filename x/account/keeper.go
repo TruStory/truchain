@@ -48,10 +48,6 @@ func (k Keeper) CreateAppAccount(ctx sdk.Context, address sdk.AccAddress,
 	if err != nil {
 		return acc, ErrAppAccountCreateFailed(address)
 	}
-	err = baseAccount.SetCoins(coins)
-	if err != nil {
-		return acc, ErrAppAccountCreateFailed(address)
-	}
 	acc = NewAppAccount(baseAccount)
 	acc.CreatedTime = ctx.BlockHeader().Time
 	k.accountKeeper.SetAccount(ctx, acc)
