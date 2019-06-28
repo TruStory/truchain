@@ -28,7 +28,6 @@ def migrate_category_data(category_data):
     category_data['communities'] = category_data['categories']
     del category_data['categories']
     for s in category_data['communities']:
-        s['id'] = s['id']
         s['name'] = s['title']
         del s['title']
         if 'description' in s:
@@ -47,6 +46,7 @@ def migrate_category_data(category_data):
           s['description'] = 'Content is being created and consumed at a breakneck pace, whether it’s via videos, podcasts, books or music. Debate the value of specific content or the medium itself.'
         if s['slug'] == 'sports':
           s['description'] = 'Sports inspire, motivate, and capture the attention of young kids and senior citizens alike. The estimated size of the global sports industry is over a trillion dollars. Ready, set, go!'
+        s['id'] = s['slug']
         del s['slug']
 
 if __name__ == '__main__':

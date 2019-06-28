@@ -76,7 +76,7 @@ func (k Keeper) validateParams(ctx sdk.Context, id, name, description string) (e
 	params := k.GetParams(ctx)
 	if len(id) < params.MinIDLength || len(id) > params.MaxIDLength {
 		err = ErrInvalidCommunityMsg(
-			fmt.Sprintf("Slug must be between %d-%d chars in length", params.MinIDLength, params.MaxIDLength),
+			fmt.Sprintf("ID must be between %d-%d chars in length", params.MinIDLength, params.MaxIDLength),
 		)
 	}
 	if len(name) < params.MinNameLength || len(name) > params.MaxNameLength {

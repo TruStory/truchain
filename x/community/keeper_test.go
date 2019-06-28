@@ -69,11 +69,11 @@ func TestCommunity_Success(t *testing.T) {
 
 func TestCommunity_ErrCommunityNotFound(t *testing.T) {
 	ctx, keeper := mockDB()
-	slug := "slug"
+	id := "slug"
 
-	_, err := keeper.Community(ctx, slug)
+	_, err := keeper.Community(ctx, id)
 	assert.NotNil(t, err)
-	assert.Equal(t, ErrCommunityNotFound(slug).Code(), err.Code())
+	assert.Equal(t, ErrCommunityNotFound(id).Code(), err.Code())
 }
 
 func TestCommunities_Success(t *testing.T) {
