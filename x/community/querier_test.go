@@ -14,8 +14,8 @@ const custom = "custom"
 func TestQueryCommunity_Success(t *testing.T) {
 	ctx, keeper := mockDB()
 
-	name, slug, description := getFakeCommunityParams()
-	createdCommunity, err := keeper.NewCommunity(ctx, name, slug, description)
+	name, id, description := getFakeCommunityParams()
+	createdCommunity, err := keeper.NewCommunity(ctx, name, id, description)
 	assert.Nil(t, err)
 
 	params, jsonErr := ModuleCodec.MarshalJSON(QueryCommunityParams{

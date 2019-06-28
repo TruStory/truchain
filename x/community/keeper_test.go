@@ -69,7 +69,7 @@ func TestCommunity_Success(t *testing.T) {
 
 func TestCommunity_ErrCommunityNotFound(t *testing.T) {
 	ctx, keeper := mockDB()
-	id := "slug"
+	id := "id"
 
 	_, err := keeper.Community(ctx, id)
 	assert.NotNil(t, err)
