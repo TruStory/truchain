@@ -17,6 +17,7 @@ func TestKeeper_SubmitArgumentMaxLimit(t *testing.T) {
 
 	// max number of arguments
 	arg1, err := k.SubmitArgument(ctx, "arg1", "summary1", addr, 1, StakeChallenge)
+	assert.NoError(t, err)
 	arg2, err := k.SubmitArgument(ctx, "arg2", "summary2", addr, 1, StakeBacking)
 	assert.NoError(t, err)
 	arg3, err := k.SubmitArgument(ctx, "arg3", "summary3", addr, 1, StakeChallenge)

@@ -14,7 +14,7 @@ var (
 )
 
 // ModuleName is the name of this module
-const ModuleName = "truchain/staking"
+const ModuleName = "trustaking"
 
 // AppModuleBasic defines the internal data for the module
 // ----------------------------------------------------------------------------

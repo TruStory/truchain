@@ -17,7 +17,7 @@ func NewHandler(keeper Keeper) sdk.Handler {
 		case MsgSubmitUpvote:
 			return handleMsgSubmitUpvote(ctx, keeper, msg)
 		default:
-			errMsg := fmt.Sprintf("Unrecognized bank message type: %T", msg)
+			errMsg := fmt.Sprintf("Unrecognized staking message type: %T", msg)
 			return sdk.ErrUnknownRequest(errMsg).Result()
 		}
 	}
@@ -31,7 +31,7 @@ func handleMsgSubmitArgument(ctx sdk.Context, keeper Keeper, msg MsgSubmitArgume
 	if err != nil {
 		return err.Result()
 	}
-	res, codecErr := ModuleCodec.MarshalBinaryBare(argument)
+	res, codecErr := ModuleCodec.MarshalJSON(argument)
 	if codecErr != nil {
 		return sdk.ErrInternal(fmt.Sprintf("Marshal result error: %s", codecErr)).Result()
 	}
@@ -54,7 +54,7 @@ func handleMsgSubmitUpvote(ctx sdk.Context, keeper Keeper, msg MsgSubmitUpvote) 
 	if err != nil {
 		return err.Result()
 	}
-	res, codecErr := ModuleCodec.MarshalBinaryBare(stake)
+	res, codecErr := ModuleCodec.MarshalJSON(stake)
 	if codecErr != nil {
 		return sdk.ErrInternal(fmt.Sprintf("Marshal result error: %s", codecErr)).Result()
 	}

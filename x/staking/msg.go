@@ -111,7 +111,7 @@ func (msg MsgSubmitUpvote) GetSigners() []sdk.AccAddress {
 	return []sdk.AccAddress{msg.Creator}
 }
 
-// MsgDeleteArgument msg for upvoting an argument.
+// MsgDeleteArgument msg for deleting an argument.
 type MsgDeleteArgument struct {
 	ArgumentID uint64         `json:"argument_id"`
 	Creator    sdk.AccAddress `json:"creator"`
