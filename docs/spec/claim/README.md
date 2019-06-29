@@ -71,3 +71,15 @@ type MsgDeleteClaim struct {
     Creator     sdk.AccAddress
 }
 ```
+
+A claim can be funded by a user. The funding amount is rewarded to the best argument writers. Funding messages require a time when the funds are distributed to argument writers. This is represented by the duration.
+
+```go
+type MsgFundClaim struct {
+	ClaimID         uint64
+	Funder          sdk.AccAddress
+	Amount          sdk.Coin
+	Duration        time.Duration
+	CreatedTime     time.Time
+}
+```
