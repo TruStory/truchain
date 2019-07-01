@@ -117,7 +117,7 @@ func queryClaimTopArgument(ctx sdk.Context, req abci.RequestQuery, keeper Keeper
 	}
 	arguments := keeper.ClaimArguments(ctx, params.ClaimID)
 	topArgument := Argument{}
-	if len(arguments) > 0 {
+	if len(arguments) == 0 {
 		bz, err := keeper.codec.MarshalJSON(topArgument)
 		if err != nil {
 			return nil, ErrJSONParse(err)
