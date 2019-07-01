@@ -104,6 +104,18 @@ func (k Keeper) JailUntil(ctx sdk.Context, address sdk.AccAddress, until time.Ti
 	return nil
 }
 
+// UnJail unjails an AppAccount.
+func (k Keeper) UnJail(ctx sdk.Context, address sdk.AccAddress) sdk.Error {
+	user, err := k.getAccount(ctx, address)
+	if err != nil {
+		return err
+	}
+	user.IsJailed = false
+	k.deleteJailEndTimeAccount(ctx, user.JailEndTime, user.Address)
+	k.accountKeeper.SetAccount(ctx, user)
+	return nil
+}
+
 // IsJailed tells whether an AppAccount is jailed by its address
 func (k Keeper) IsJailed(ctx sdk.Context, address sdk.AccAddress) (bool, sdk.Error) {
 	user, err := k.getAccount(ctx, address)
@@ -162,4 +174,9 @@ func getLogger(ctx sdk.Context) log.Logger {
 func (k Keeper) setJailEndTimeAccount(ctx sdk.Context, jailEndTime time.Time, addr sdk.AccAddress) {
 	store := ctx.KVStore(k.storeKey)
 	store.Set(jailEndTimeAccountKey(jailEndTime, addr), addr)
+}
+
+func (k Keeper) deleteJailEndTimeAccount(ctx sdk.Context, jailEndTime time.Time, addr sdk.AccAddress) {
+	store := ctx.KVStore(k.storeKey)
+	store.Delete(jailEndTimeAccountKey(jailEndTime, addr))
 }

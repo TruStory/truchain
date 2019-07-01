@@ -5,11 +5,6 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/params"
 )
 
-const (
-	// DefaultParamspace for params keeper
-	DefaultParamspace = ModuleName
-)
-
 var (
 	ParamKeyRewardBrokerAddress = []byte("rewardBrokerAddress")
 )
