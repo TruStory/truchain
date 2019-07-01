@@ -10,8 +10,8 @@ import (
 
 // query endpoints supported by the truchain Querier
 const (
-	QueryCommunity   = "id"
-	QueryCommunities = "all"
+	QueryCommunity   = "community"
+	QueryCommunities = "communities"
 )
 
 // QueryCommunityParams are params for querying communities by id queries
