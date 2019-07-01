@@ -10,7 +10,7 @@ import (
 )
 
 func TestHandle_SubmitArgument(t *testing.T) {
-	ctx, k, accKeeper, _ := mockDB()
+	ctx, k, accKeeper, _, _ := mockDB()
 	handler := NewHandler(k)
 	addr1 := createFakeFundedAccount(ctx, accKeeper, sdk.Coins{sdk.NewInt64Coin(app.StakeDenom, app.Shanev*300)})
 
@@ -25,7 +25,7 @@ func TestHandle_SubmitArgument(t *testing.T) {
 }
 
 func TestHandle_SubmitUpvote(t *testing.T) {
-	ctx, k, accKeeper, _ := mockDB()
+	ctx, k, accKeeper, _, _ := mockDB()
 	handler := NewHandler(k)
 	addr1 := createFakeFundedAccount(ctx, accKeeper, sdk.Coins{sdk.NewInt64Coin(app.StakeDenom, app.Shanev*300)})
 	addr2 := createFakeFundedAccount(ctx, accKeeper, sdk.Coins{sdk.NewInt64Coin(app.StakeDenom, app.Shanev*300)})
@@ -48,7 +48,7 @@ func TestHandle_SubmitUpvote(t *testing.T) {
 
 }
 func TestByzantineMsg(t *testing.T) {
-	ctx, k, _, _ := mockDB()
+	ctx, k, _, _, _ := mockDB()
 
 	handler := NewHandler(k)
 	assert.NotNil(t, handler)

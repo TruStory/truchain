@@ -59,13 +59,22 @@ func (m *mockedAccountKeeper) UnJail(ctx sdk.Context, address sdk.AccAddress) sd
 }
 
 type mockClaimKeeper struct {
+	claims map[uint64]claim.Claim
 }
 
-func (mockClaimKeeper) Claim(ctx sdk.Context, id uint64) (claim.Claim, bool) {
-	return claim.Claim{}, true
+func (m *mockClaimKeeper) SetClaims(claims map[uint64]claim.Claim) {
+	m.claims = claims
 }
 
-func mockDB() (sdk.Context, Keeper, auth.AccountKeeper, AccountKeeper) {
+func (m *mockClaimKeeper) Claim(ctx sdk.Context, id uint64) (claim.Claim, bool) {
+	if len(m.claims) == 0 {
+		return claim.Claim{CommunityID: "testunit"}, true
+	}
+	c, ok := m.claims[id]
+	return c, ok
+}
+
+func mockDB() (sdk.Context, Keeper, auth.AccountKeeper, AccountKeeper, ClaimKeeper) {
 	db := dbm.NewMemDB()
 	storeKey := sdk.NewKVStoreKey(ModuleName)
 	accKey := sdk.NewKVStoreKey(auth.StoreKey)
@@ -103,9 +112,10 @@ func mockDB() (sdk.Context, Keeper, auth.AccountKeeper, AccountKeeper) {
 	trubankKeeper := trubank.NewKeeper(cdc, bankKey, bankKeeper, pk.Subspace(trubank.DefaultParamspace), trubank.DefaultCodespace)
 
 	mockedAccountKeeper := newAccountKeeper()
-	keeper := NewKeeper(cdc, storeKey, mockedAccountKeeper, trubankKeeper, mockClaimKeeper{}, pk.Subspace(DefaultParamspace), DefaultCodespace)
+	mockedClaimKeeper := &mockClaimKeeper{}
+	keeper := NewKeeper(cdc, storeKey, mockedAccountKeeper, trubankKeeper, mockedClaimKeeper, pk.Subspace(DefaultParamspace), DefaultCodespace)
 	InitGenesis(ctx, keeper, DefaultGenesisState())
-	return ctx, keeper, accKeeper, mockedAccountKeeper
+	return ctx, keeper, accKeeper, mockedAccountKeeper, mockedClaimKeeper
 }
 
 func createFakeFundedAccount(ctx sdk.Context, am auth.AccountKeeper, coins sdk.Coins) sdk.AccAddress {

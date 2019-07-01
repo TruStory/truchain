@@ -18,7 +18,7 @@ func TestDefaultGenesisState(t *testing.T) {
 }
 
 func TestInitGenesis(t *testing.T) {
-	ctx, k, _, _ := mockDB()
+	ctx, k, _, _, _ := mockDB()
 
 	_, _, addr1 := keyPubAddr()
 	_, _, addr2 := keyPubAddr()
@@ -59,7 +59,8 @@ func TestInitGenesis(t *testing.T) {
 		TotalStake:   sdk.NewInt64Coin(app.StakeDenom, app.Shanev*60),
 	}
 	arguments := []Argument{argument1}
-	genesisState := NewGenesisState(arguments, stakes, DefaultParams())
+	usersEarnings := make([]UserEarnedCoins, 0)
+	genesisState := NewGenesisState(arguments, stakes, usersEarnings, DefaultParams())
 	InitGenesis(ctx, k, genesisState)
 	actualGenesis := ExportGenesis(ctx, k)
 	assert.Equal(t, genesisState, actualGenesis)
@@ -90,7 +91,7 @@ func TestInitGenesis(t *testing.T) {
 }
 
 func TestValidateGenesis(t *testing.T) {
-	genesisState := NewGenesisState(nil, nil, DefaultParams())
+	genesisState := NewGenesisState(nil, nil, nil, DefaultParams())
 	genesisState.Params.ArgumentCreationStake.Denom = "my-denom"
 	err := ValidateGenesis(genesisState)
 	assert.Error(t, err)

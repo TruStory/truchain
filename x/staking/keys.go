@@ -2,6 +2,7 @@ package staking
 
 import (
 	"encoding/binary"
+	"fmt"
 	"time"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -9,8 +10,9 @@ import (
 
 // Define keys
 var (
-	StakesKeyPrefix    = []byte{0x00}
-	ArgumentsKeyPrefix = []byte{0x01}
+	StakesKeyPrefix      = []byte{0x00}
+	ArgumentsKeyPrefix   = []byte{0x01}
+	EarnedCoinsKeyPrefix = []byte{0x02}
 
 	// ID Keys
 	StakeIDKey    = []byte{0x10}
@@ -27,7 +29,7 @@ var (
 )
 
 // stakeKey gets a key for a stake.
-// 0x02<stake_id>
+// 0x00<stake_id>
 func stakeKey(id uint64) []byte {
 	return buildKey(StakesKeyPrefix, id)
 }
@@ -36,6 +38,19 @@ func stakeKey(id uint64) []byte {
 // 0x01<argument_id>
 func argumentKey(id uint64) []byte {
 	return buildKey(ArgumentsKeyPrefix, id)
+}
+
+// 0x02<user>
+func userEarnedCoinsKey(user sdk.AccAddress) []byte {
+	return append(EarnedCoinsKeyPrefix, user.Bytes()...)
+}
+
+func splitKeyWithAddress(key []byte) (addr sdk.AccAddress) {
+	if len(key[1:]) != sdk.AddrLen {
+		panic(fmt.Sprintf("unexpected key length (%d ≠ %d)", len(key), 8+sdk.AddrLen))
+	}
+	addr = sdk.AccAddress(key[1:])
+	return
 }
 
 // ClaimArgumentsPrefix
@@ -88,7 +103,7 @@ func userStakesCreatedTimePrefix(creator sdk.AccAddress, createdTime time.Time) 
 	return append(userStakesPrefix(creator), bz...)
 }
 
-// userStakeKey builds the key for <user><creationTime>->stake association
+// userStakeKey builds the key for <user><creationTime><stakeID>->stake association
 func userStakeKey(creator sdk.AccAddress, createdTime time.Time, stakeID uint64) []byte {
 	bz := make([]byte, 8)
 	binary.LittleEndian.PutUint64(bz, stakeID)

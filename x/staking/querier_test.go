@@ -9,7 +9,7 @@ import (
 )
 
 func TestQuerier_EmptyTopArgument(t *testing.T) {
-	ctx, k, _, _ := mockDB()
+	ctx, k, _, _, _ := mockDB()
 
 	querier := NewQuerier(k)
 	queryParams := QueryClaimTopArgumentParams{

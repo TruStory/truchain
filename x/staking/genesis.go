@@ -6,28 +6,36 @@ import (
 	app "github.com/TruStory/truchain/types"
 )
 
+type UserEarnedCoins struct {
+	Address sdk.AccAddress
+	Coins   sdk.Coins
+}
+
 // GenesisState defines genesis data for the module
 type GenesisState struct {
-	Arguments []Argument `json:"arguments"`
-	Params    Params     `json:"params"`
-	Stakes    []Stake    `json:"stakes"`
+	Arguments     []Argument        `json:"arguments"`
+	Params        Params            `json:"params"`
+	Stakes        []Stake           `json:"stakes"`
+	UsersEarnings []UserEarnedCoins `json:"users_earnings"`
 }
 
 // NewGenesisState creates a new genesis state.
-func NewGenesisState(arguments []Argument, stakes []Stake, params Params) GenesisState {
+func NewGenesisState(arguments []Argument, stakes []Stake, userEarnings []UserEarnedCoins, params Params) GenesisState {
 	return GenesisState{
-		Arguments: arguments,
-		Params:    params,
-		Stakes:    stakes,
+		Arguments:     arguments,
+		Params:        params,
+		Stakes:        stakes,
+		UsersEarnings: userEarnings,
 	}
 }
 
 // DefaultGenesisState returns a default genesis state
 func DefaultGenesisState() GenesisState {
 	return GenesisState{
-		Params:    DefaultParams(),
-		Stakes:    make([]Stake, 0),
-		Arguments: make([]Argument, 0),
+		Params:        DefaultParams(),
+		Stakes:        make([]Stake, 0),
+		Arguments:     make([]Argument, 0),
+		UsersEarnings: make([]UserEarnedCoins, 0),
 	}
 }
 
@@ -48,15 +56,20 @@ func InitGenesis(ctx sdk.Context, k Keeper, data GenesisState) {
 	}
 	k.setArgumentID(ctx, uint64(len(data.Arguments)+1))
 	k.setStakeID(ctx, uint64(len(data.Stakes)+1))
+
+	for _, e := range data.UsersEarnings {
+		k.setEarnedCoins(ctx, e.Address, e.Coins)
+	}
 	k.SetParams(ctx, data.Params)
 }
 
 // ExportGenesis exports the genesis state
 func ExportGenesis(ctx sdk.Context, keeper Keeper) GenesisState {
 	return GenesisState{
-		Params:    keeper.GetParams(ctx),
-		Arguments: keeper.Arguments(ctx),
-		Stakes:    keeper.Stakes(ctx),
+		Params:        keeper.GetParams(ctx),
+		Arguments:     keeper.Arguments(ctx),
+		Stakes:        keeper.Stakes(ctx),
+		UsersEarnings: keeper.UsersEarnings(ctx),
 	}
 }
 

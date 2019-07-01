@@ -36,9 +36,14 @@ func (k Keeper) distributeReward(ctx sdk.Context, stake Stake) (RewardResult, sd
 	if !ok {
 		return RewardResult{}, ErrCodeUnknownArgument(stake.ArgumentID)
 	}
-	interest := k.interest(ctx, stake.Amount, ctx.BlockHeader().Time.Sub(stake.CreatedTime))
+	claim, ok := k.claimKeeper.Claim(ctx, argument.ClaimID)
+	if !ok {
+		return RewardResult{}, ErrCodeUnknownClaim(claim.ID)
+	}
+
+	interest := k.interest(ctx, stake.Amount, stake.EndTime.Sub(stake.CreatedTime))
 	// creator receives 100% interest of his own stake
-	if !argument.Creator.Equals(stake.Creator) {
+	if argument.Creator.Equals(stake.Creator) {
 		reward := sdk.NewCoin(app.StakeDenom, interest.RoundInt())
 		_, err := k.bankKeeper.AddCoin(ctx,
 			argument.Creator,
@@ -48,6 +53,7 @@ func (k Keeper) distributeReward(ctx sdk.Context, stake Stake) (RewardResult, sd
 		if err != nil {
 			return RewardResult{}, err
 		}
+		k.addEarnedCoin(ctx, argument.Creator, claim.CommunityID, reward.Amount)
 		return RewardResult{Type: RewardResultArgumentCreation,
 			ArgumentCreator:       argument.Creator,
 			ArgumentCreatorReward: reward}, nil
@@ -71,6 +77,8 @@ func (k Keeper) distributeReward(ctx sdk.Context, stake Stake) (RewardResult, sd
 	if err != nil {
 		return RewardResult{}, err
 	}
+	k.addEarnedCoin(ctx, argument.Creator, claim.CommunityID, creatorRewardCoin.Amount)
+	k.addEarnedCoin(ctx, stake.Creator, claim.CommunityID, stakerRewardCoin.Amount)
 	rewardResult := RewardResult{
 		Type:                  RewardResultUpvoteSplit,
 		ArgumentCreator:       argument.Creator,

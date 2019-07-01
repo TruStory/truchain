@@ -307,6 +307,27 @@ func (k Keeper) setID(ctx sdk.Context, key []byte, length uint64) {
 	k.store(ctx).Set(key, b)
 }
 
+func (k Keeper) gerEarnedCoins(ctx sdk.Context, user sdk.AccAddress) sdk.Coins {
+	earnedCoins := sdk.Coins{}
+	bz := k.store(ctx).Get(userEarnedCoinsKey(user))
+	if bz == nil {
+		return sdk.NewCoins()
+	}
+	k.codec.MustUnmarshalBinaryLengthPrefixed(bz, &earnedCoins)
+	return earnedCoins
+}
+
+func (k Keeper) setEarnedCoins(ctx sdk.Context, user sdk.AccAddress, earnedCoins sdk.Coins) {
+	b := k.codec.MustMarshalBinaryLengthPrefixed(earnedCoins)
+	k.store(ctx).Set(userEarnedCoinsKey(user), b)
+}
+
+func (k Keeper) addEarnedCoin(ctx sdk.Context, user sdk.AccAddress, communityID string, amount sdk.Int) {
+	earnedCoins := k.gerEarnedCoins(ctx, user)
+	earnedCoins = earnedCoins.Add(sdk.NewCoins(sdk.NewCoin(communityID, amount)))
+	k.setEarnedCoins(ctx, user, earnedCoins)
+}
+
 func (k Keeper) stakeID(ctx sdk.Context) (uint64, sdk.Error) {
 	id, err := k.getID(ctx, StakeIDKey)
 	if err != nil {
@@ -347,4 +368,16 @@ func (k Keeper) RemoveFromActiveStakeQueue(ctx sdk.Context, stakeID uint64, endT
 // Logger returns a module-specific logger.
 func (k Keeper) Logger(ctx sdk.Context) log.Logger {
 	return ctx.Logger().With("module", "x/"+ModuleName)
+}
+
+func (k Keeper) UsersEarnings(ctx sdk.Context) []UserEarnedCoins {
+	userEarnedCoins := make([]UserEarnedCoins, 0)
+	k.IterateUserEarnedCoins(ctx, func(address sdk.AccAddress, coins sdk.Coins) bool {
+		userEarnedCoins = append(userEarnedCoins, UserEarnedCoins{
+			Address: address,
+			Coins:   coins,
+		})
+		return false
+	})
+	return userEarnedCoins
 }

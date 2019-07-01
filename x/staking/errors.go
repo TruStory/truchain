@@ -25,6 +25,7 @@ const (
 	ErrorCodeMaxAmountStakingReached  sdk.CodeType = 509
 	ErrorCodeInvalidQueryParams       sdk.CodeType = 510
 	ErrorCodeJSONParsing              sdk.CodeType = 511
+	ErrorCodeUnknownClaim             sdk.CodeType = 512
 )
 
 // GenesisErrors
@@ -70,6 +71,14 @@ func ErrCodeUnknownArgument(argumentID uint64) sdk.Error {
 	return sdk.NewError(DefaultCodespace,
 		ErrorCodeUnknownArgument,
 		fmt.Sprintf("Unknown argument id %d", argumentID),
+	)
+}
+
+// ErrCodeUnknownClaim throws an error when an invalid claim id
+func ErrCodeUnknownClaim(claimID uint64) sdk.Error {
+	return sdk.NewError(DefaultCodespace,
+		ErrorCodeUnknownClaim,
+		fmt.Sprintf("Unknown argument id %d", claimID),
 	)
 }
 

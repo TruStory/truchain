@@ -136,3 +136,19 @@ func (k Keeper) IterateActiveStakeQueue(ctx sdk.Context, endTime time.Time, cb f
 		}
 	}
 }
+
+type userEarnedCoinsCallback func(address sdk.AccAddress, coins sdk.Coins) (stop bool)
+
+func (k Keeper) IterateUserEarnedCoins(ctx sdk.Context, cb userEarnedCoinsCallback) {
+	iterator := sdk.KVStorePrefixIterator(k.store(ctx), EarnedCoinsKeyPrefix)
+	defer iterator.Close()
+	for ; iterator.Valid(); iterator.Next() {
+		address := splitKeyWithAddress(iterator.Key())
+		coins := sdk.NewCoins()
+
+		k.codec.MustUnmarshalBinaryLengthPrefixed(iterator.Value(), &coins)
+		if cb(address, coins) {
+			break
+		}
+	}
+}
