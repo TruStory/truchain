@@ -102,6 +102,10 @@ func (k Keeper) UserArguments(ctx sdk.Context, address sdk.AccAddress) []Argumen
 }
 
 func (k Keeper) SubmitUpvote(ctx sdk.Context, argumentID uint64, creator sdk.AccAddress) (Stake, sdk.Error) {
+	err := k.checkJailed(ctx, creator)
+	if err != nil {
+		return Stake{}, err
+	}
 	argument, ok := k.getArgument(ctx, argumentID)
 	if !ok {
 		return Stake{}, ErrCodeUnknownArgument(argumentID)
@@ -125,19 +129,26 @@ func (k Keeper) SubmitUpvote(ctx sdk.Context, argumentID uint64, creator sdk.Acc
 	return stake, nil
 }
 
+func (k Keeper) checkJailed(ctx sdk.Context, address sdk.AccAddress) sdk.Error {
+	jailed, err := k.accountKeeper.IsJailed(ctx, address)
+	if err != nil {
+		return err
+	}
+	if jailed {
+		return ErrCodeAccountJailed(address)
+	}
+	return nil
+}
+
 func (k Keeper) SubmitArgument(ctx sdk.Context, body, summary string,
 	creator sdk.AccAddress, claimID uint64, stakeType StakeType) (Argument, sdk.Error) {
 	// only backing or challenge
 	if !stakeType.ValidForArgument() {
 		return Argument{}, ErrCodeInvalidStakeType(stakeType)
 	}
-	//  reject jailed accounts
-	jailed, err := k.accountKeeper.IsJailed(ctx, creator)
+	err := k.checkJailed(ctx, creator)
 	if err != nil {
 		return Argument{}, err
-	}
-	if jailed {
-		return Argument{}, ErrCodeAccountJailed(creator)
 	}
 	_, ok := k.claimKeeper.Claim(ctx, claimID)
 	if !ok {
@@ -264,11 +275,16 @@ func (k Keeper) newStake(ctx sdk.Context, amount sdk.Coin, creator sdk.AccAddres
 	return stake, nil
 }
 
-func (k Keeper) getStake(ctx sdk.Context, stakeID uint64) Stake {
+func (k Keeper) getStake(ctx sdk.Context, stakeID uint64) (Stake, bool) {
 	stake := Stake{}
-	k.codec.MustUnmarshalBinaryLengthPrefixed(k.store(ctx).Get(stakeKey(stakeID)), &stake)
-	return stake
+	bz := k.store(ctx).Get(stakeKey(stakeID))
+	if bz == nil {
+		return stake, false
+	}
+	k.codec.MustUnmarshalBinaryLengthPrefixed(bz, &stake)
+	return stake, true
 }
+
 func (k Keeper) setStake(ctx sdk.Context, stake Stake) {
 	bz := k.codec.MustMarshalBinaryLengthPrefixed(stake)
 	k.store(ctx).Set(stakeKey(stake.ID), bz)

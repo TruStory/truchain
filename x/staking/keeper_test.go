@@ -83,7 +83,8 @@ func TestKeeper_SubmitArgument(t *testing.T) {
 		CreatedTime: ctx.BlockHeader().Time,
 		EndTime:     ctx.BlockHeader().Time.Add(time.Hour * 24 * 7),
 	}
-	assert.Equal(t, expectedStake, k.getStake(ctx, 1))
+	s, _ := k.getStake(ctx, 1)
+	assert.Equal(t, expectedStake, s)
 	argument2, err := k.SubmitArgument(ctx, "body2", "summary2", addr2, 1, StakeChallenge)
 	expectedArgument2 := Argument{
 		ID:           2,
@@ -108,7 +109,9 @@ func TestKeeper_SubmitArgument(t *testing.T) {
 	}
 	assert.NoError(t, err)
 	assert.Equal(t, expectedArgument2, argument2)
-	assert.Equal(t, expectedStake2, k.getStake(ctx, 2))
+	s, ok = k.getStake(ctx, 2)
+	assert.True(t, ok)
+	assert.Equal(t, expectedStake2, s)
 	associatedArguments := k.ClaimArguments(ctx, 1)
 	assert.Len(t, associatedArguments, 2)
 	assert.Equal(t, expectedArgument, associatedArguments[0])
@@ -175,7 +178,9 @@ func TestKeeper_SubmitUpvote(t *testing.T) {
 		CreatedTime: ctx.BlockHeader().Time,
 		EndTime:     ctx.BlockHeader().Time.Add(time.Hour * 24 * 7),
 	}
-	assert.Equal(t, expectedStake, k.getStake(ctx, 1))
+	s, ok := k.getStake(ctx, 1)
+	assert.True(t, ok)
+	assert.Equal(t, expectedStake, s)
 	_, err = k.SubmitUpvote(ctx, argument.ID, addr2)
 	assert.NoError(t, err)
 	expectedStake2 := Stake{
@@ -239,7 +244,7 @@ func TestKeeper_SubmitUpvote(t *testing.T) {
 	_, err = k.SubmitUpvote(ctx, argument.ID, addr3)
 	assert.NoError(t, err)
 
-	argument, ok := k.getArgument(ctx, argument.ID)
+	argument, ok = k.getArgument(ctx, argument.ID)
 	assert.True(t, ok)
 	assert.Equal(t, uint64(2), argument.UpvotedCount)
 	assert.Equal(t, sdk.NewInt64Coin(app.StakeDenom, app.Shanev*20), argument.UpvotedStake)
@@ -303,4 +308,20 @@ func TestKeeper_StakePeriodAmountLimit(t *testing.T) {
 	assert.Error(t, err)
 	assert.Equal(t, ErrorCodeMaxAmountStakingReached, err.Code())
 
+}
+
+func TestKeeper_InsufficientCoins(t *testing.T) {
+	ctx, k, accKeeper, _ := mockDB()
+	_, _, unfundedAddress := keyPubAddr()
+	addr := createFakeFundedAccount(ctx, accKeeper, sdk.Coins{sdk.NewInt64Coin(app.StakeDenom, app.Shanev*300)})
+	_, err := k.SubmitArgument(ctx, "body", "summary", unfundedAddress, 1, StakeBacking)
+	assert.Error(t, err)
+	assert.Equal(t, sdk.CodeInsufficientFunds, err.Code())
+
+	argument, err := k.SubmitArgument(ctx, "body", "summary", addr, 1, StakeBacking)
+	assert.NoError(t, err)
+
+	_, err = k.SubmitUpvote(ctx, argument.ID, unfundedAddress)
+	assert.Error(t, err)
+	assert.Equal(t, sdk.CodeInsufficientFunds, err.Code())
 }
