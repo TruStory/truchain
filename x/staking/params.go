@@ -10,11 +10,6 @@ import (
 	app "github.com/TruStory/truchain/types"
 )
 
-const (
-	// DefaultParamspace for params keeper
-	DefaultParamspace = ModuleName
-)
-
 var (
 	ParamKeyPeriod                   = []byte("period")
 	ParamKeyArgumentCreationStake    = []byte("argumentCreationStake")

@@ -10,8 +10,10 @@ import (
 
 // Defines staking module constants
 const (
-	RouterKey    = ModuleName
-	QuerierRoute = ModuleName
+	StoreKey          = ModuleName
+	RouterKey         = ModuleName
+	QuerierRoute      = ModuleName
+	DefaultParamspace = ModuleName
 )
 
 type StakeType byte

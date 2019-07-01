@@ -8,8 +8,10 @@ import (
 
 // Defines bank module constants
 const (
-	RouterKey    = ModuleName
-	QuerierRoute = ModuleName
+	StoreKey          = ModuleName
+	RouterKey         = ModuleName
+	QuerierRoute      = ModuleName
+	DefaultParamspace = ModuleName
 )
 
 // Association list keys
