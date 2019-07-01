@@ -13,7 +13,7 @@ def process_genesis(genesis, parsed_args):
     totals = total_backed_challenged_stakers_by_story_id(genesis)
 
     # migrate story state
-    migrate_story_data(genesis['app_state']['claim'], totals)
+    migrate_story_data(genesis['app_state']['claim'], totals, genesis['app_state']['category']['categories'])
 
     # Set new chain ID and genesis start time
     genesis['chain_id'] = parsed_args.chain_id.strip()
@@ -21,7 +21,7 @@ def process_genesis(genesis, parsed_args):
 
     return genesis
 
-def migrate_story_data(story_data, totals):
+def migrate_story_data(story_data, totals, categories):
     del story_data['story_queue']
     story_data['params'] = {
         'min_claim_length': story_data['params']['min_story_length'],
@@ -31,7 +31,7 @@ def migrate_story_data(story_data, totals):
     del story_data['stories']
     for s in story_data['claims']:
         s['id'] = s['id']
-        s['community_id'] = s['category_id']
+        s['community_id'] = get_category_slug(categories, s['category_id'])
         del s['category_id']
         s['body'] = s['body']
         s['creator'] = s['creator']
@@ -45,6 +45,12 @@ def migrate_story_data(story_data, totals):
         del s['status']
         del s['expire_time']
         del s['type']
+
+def get_category_slug(categories, category_id):
+    for s in categories:
+        if s['id'] == category_id:
+            return s['slug']
+    raise Exception('Category not found')
 
 def total_backed_challenged_stakers_by_story_id(genesis):
     totals = dict()
