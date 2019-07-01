@@ -72,28 +72,28 @@ func (t StakeType) oneOf(types []StakeType) bool {
 }
 
 type Stake struct {
-	ID          uint64
-	ArgumentID  uint64
-	Type        StakeType
-	Amount      sdk.Coin
-	Creator     sdk.AccAddress
-	CreatedTime time.Time
-	EndTime     time.Time
-	Expired     bool
+	ID          uint64         `json:"id"`
+	ArgumentID  uint64         `json:"argument_id"`
+	Type        StakeType      `json:"type"`
+	Amount      sdk.Coin       `json:"amount"`
+	Creator     sdk.AccAddress `json:"creator"`
+	CreatedTime time.Time      `json:"created_time"`
+	EndTime     time.Time      `json:"end_time"`
+	Expired     bool           `json:"expired"`
 }
 
 type Argument struct {
-	ID             uint64
-	Creator        sdk.AccAddress
-	ClaimID        uint64
-	Summary        string
-	Body           string
-	StakeType      StakeType
-	UpvotedCount   uint64
-	UpvotedStake   sdk.Coin
-	TotalStake     sdk.Coin
-	UnhelpfulCount uint64
-	IsUnhelpful    bool
-	CreatedTime    time.Time
-	UpdatedTime    time.Time
+	ID             uint64         `json:"id"`
+	Creator        sdk.AccAddress `json:"creator"`
+	ClaimID        uint64         `json:"claim_id"`
+	Summary        string         `json:"summary"`
+	Body           string         `json:"body"`
+	StakeType      StakeType      `json:"stake_type"`
+	UpvotedCount   uint64         `json:"upvoted_count"`
+	UpvotedStake   sdk.Coin       `json:"upvoted_stake"`
+	TotalStake     sdk.Coin       `json:"total_stake"`
+	UnhelpfulCount uint64         `json:"unhelpful_count"`
+	IsUnhelpful    bool           `json:"is_unhelpful"`
+	CreatedTime    time.Time      `json:"created_time"`
+	UpdatedTime    time.Time      `json:"updated_time"`
 }
