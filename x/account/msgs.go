@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/tendermint/tendermint/crypto"
+	tcmn "github.com/tendermint/tendermint/libs/common"
 )
 
 const (
@@ -17,13 +17,13 @@ const (
 type MsgRegisterKey struct {
 	Registrar  sdk.AccAddress `json:"registrar"`
 	Address    sdk.AccAddress `json:"address"`
-	PubKey     crypto.PubKey  `json:"public_key"`
+	PubKey     tcmn.HexBytes  `json:"public_key"`
 	PubKeyAlgo string         `json:"public_key_algo"`
 	Coins      sdk.Coins      `json:"coins"`
 }
 
 // NewMsgRegisterKey returns the messages to register a new key
-func NewMsgRegisterKey(registrar, address sdk.AccAddress, publicKey crypto.PubKey, publicKeyAlgo string, coins sdk.Coins) MsgRegisterKey {
+func NewMsgRegisterKey(registrar, address sdk.AccAddress, publicKey tcmn.HexBytes, publicKeyAlgo string, coins sdk.Coins) MsgRegisterKey {
 	return MsgRegisterKey{
 		Registrar:  registrar,
 		Address:    address,

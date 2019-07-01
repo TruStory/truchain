@@ -2,6 +2,9 @@ package account
 
 import (
 	"fmt"
+	"github.com/tendermint/tendermint/crypto"
+	"github.com/tendermint/tendermint/crypto/ed25519"
+	"github.com/tendermint/tendermint/crypto/secp256k1"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
@@ -20,13 +23,14 @@ func NewHandler(keeper Keeper) sdk.Handler {
 }
 
 func handleMsgRegisterKey(ctx sdk.Context, k Keeper, msg MsgRegisterKey) sdk.Result {
-	if err := msg.ValidateBasic(); err != nil {
-		return err.Result()
+	pubKey, err := toPubKey(msg.PubKeyAlgo, msg.PubKey.Bytes())
+	if err != nil {
+		return sdk.Result{Code: 1, Data: []byte("Registration Error: parsing public key: " + err.Error())}
 	}
 
-	appAccount, err := k.CreateAppAccount(ctx, msg.Address, msg.Coins, msg.PubKey)
-	if err != nil {
-		return err.Result()
+	appAccount, sdkErr := k.CreateAppAccount(ctx, msg.Address, msg.Coins, pubKey)
+	if sdkErr != nil {
+		return sdkErr.Result()
 	}
 
 	res, jsonErr := k.codec.MarshalJSON(appAccount)
@@ -37,4 +41,25 @@ func handleMsgRegisterKey(ctx sdk.Context, k Keeper, msg MsgRegisterKey) sdk.Res
 	return sdk.Result{
 		Data: res,
 	}
+}
+
+// toPubKey returns an instance of `crypto.PubKey` using the given algorithm
+func toPubKey(algo string, rawPubKeyBytes []byte) (crypto.PubKey, error) {
+	switch algo {
+	case "ed25519":
+		ek := ed25519.PubKeyEd25519{}
+		copy(ek[:], rawPubKeyBytes)
+		return ek, nil
+	case "secp256k1":
+		sk := secp256k1.PubKeySecp256k1{}
+		copy(sk[:], rawPubKeyBytes)
+		return sk, nil
+	default:
+		return secp256k1.PubKeySecp256k1{}, unsupportedAlgoError(algo, []string{"ed25519", "secp256k1"})
+	}
+}
+
+func unsupportedAlgoError(name string, supported []string) error {
+	s := "Tx Error: Unsupported public key algorithm \"%s\" (supported: %v)"
+	return fmt.Errorf(s, name, supported)
 }

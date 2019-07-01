@@ -17,7 +17,7 @@ func TestHandleMsgRegisterKey(t *testing.T) {
 
 	registrar := keeper.GetParams(ctx).Registrar
 
-	msg := NewMsgRegisterKey(registrar, address, publicKey, "secp256k1", coins)
+	msg := NewMsgRegisterKey(registrar, address, publicKey.Bytes(), "secp256k1", coins)
 	assert.NotNil(t, msg) // assert msgs can be created
 
 	result := handler(ctx, msg)
@@ -25,7 +25,8 @@ func TestHandleMsgRegisterKey(t *testing.T) {
 	err := keeper.codec.UnmarshalJSON(result.Data, &appAccount)
 	assert.NoError(t, err)
 	t.Log(appAccount)
-	assert.Equal(t, appAccount.PubKey, publicKey)
+	convertedPubKey, _ := toPubKey("secp256k1", publicKey.Bytes())
+	assert.Equal(t, appAccount.PubKey, convertedPubKey)
 }
 
 func TestByzantineMsg(t *testing.T) {

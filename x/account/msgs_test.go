@@ -15,7 +15,7 @@ func TestMsgRegisterKey_Success(t *testing.T) {
 
 	registrar := keeper.GetParams(ctx).Registrar
 
-	msg := NewMsgRegisterKey(registrar, address, publicKey, "secp256k1", coins)
+	msg := NewMsgRegisterKey(registrar, address, publicKey.Bytes(), "secp256k1", coins)
 	err := msg.ValidateBasic()
 	assert.Nil(t, err)
 	assert.Equal(t, ModuleName, msg.Route())
@@ -30,7 +30,7 @@ func TestMsgNewCommunity_InvalidAddress(t *testing.T) {
 
 	registrar := keeper.GetParams(ctx).Registrar
 
-	msg := NewMsgRegisterKey(registrar, invalidAddress, publicKey, "secp256k1", coins)
+	msg := NewMsgRegisterKey(registrar, invalidAddress, publicKey.Bytes(), "secp256k1", coins)
 	err := msg.ValidateBasic()
 	assert.NotNil(t, err)
 	assert.Equal(t, sdk.ErrInvalidAddress("").Code(), err.Code())
