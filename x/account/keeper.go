@@ -10,7 +10,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/auth"
 	"github.com/cosmos/cosmos-sdk/x/params"
 	"github.com/tendermint/tendermint/crypto"
-	log "github.com/tendermint/tendermint/libs/log"
+	"github.com/tendermint/tendermint/libs/log"
 )
 
 // Keeper data type storing keys to the KVStore
@@ -129,15 +129,30 @@ func (k Keeper) IncrementSlashCount(ctx sdk.Context, address sdk.AccAddress) sdk
 
 func (k Keeper) getAccount(ctx sdk.Context, addr sdk.AccAddress) (AppAccount, sdk.Error) {
 	acc := k.accountKeeper.GetAccount(ctx, addr)
-	if acc != nil {
-		user, ok := acc.(AppAccount)
-		if !ok {
-			return user, ErrAppAccountNotFound(acc.GetAddress())
-		}
-		return user, nil
+	switch appAcc := acc.(type) {
+	case AppAccount:
+		return appAcc, nil
+	case *auth.BaseAccount:
+		return ToAppAccount(acc), nil
+	default:
+		return AppAccount{}, ErrAppAccountNotFound(addr)
 	}
+}
 
-	return AppAccount{}, ErrAppAccountNotFound(addr)
+func ToAppAccount(acc auth.Account) AppAccount {
+	return AppAccount{
+		BaseAccount: &auth.BaseAccount{
+			Address:       acc.GetAddress(),
+			Coins:         acc.GetCoins(),
+			PubKey:        acc.GetPubKey(),
+			AccountNumber: acc.GetAccountNumber(),
+			Sequence:      acc.GetSequence(),
+		},
+		SlashCount:  0,
+		IsJailed:    false,
+		JailEndTime: time.Time{},
+		CreatedTime: time.Time{},
+	}
 }
 
 func getLogger(ctx sdk.Context) log.Logger {

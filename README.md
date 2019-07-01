@@ -52,6 +52,7 @@ make registrar
 make init
 
 # Edit genesis file to rename bond_denom value to "trusteak"
+# Also add the registrar address to "account->params->registrar"
 vi ~/.truchaind/config/genesis.json
 
 # Collect genesis transactions
