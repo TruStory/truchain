@@ -40,7 +40,6 @@ func TestKeeper_TestEarnedCoins(t *testing.T) {
 	_, err = k.SubmitUpvote(ctx.WithBlockTime(mustParseTime("2019-01-03")), arg2.ID, addr)
 	assert.NoError(t, err)
 
-	// should mark first stake as expired and refund stake
 	EndBlocker(ctx.WithBlockTime(mustParseTime("2019-01-13")), k)
 	usersEarnings := k.UsersEarnings(ctx)
 	assert.Len(t, usersEarnings, 2)

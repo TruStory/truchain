@@ -325,27 +325,3 @@ func TestKeeper_InsufficientCoins(t *testing.T) {
 	assert.Error(t, err)
 	assert.Equal(t, sdk.CodeInsufficientFunds, err.Code())
 }
-
-func TestKeeper_EarnedCoins(t *testing.T) {
-	ctx, k, accKeeper, _, _ := mockDB()
-	addr := createFakeFundedAccount(ctx, accKeeper, sdk.Coins{sdk.NewInt64Coin(app.StakeDenom, app.Shanev*250)})
-
-	_, err := k.SubmitArgument(ctx.WithBlockTime(mustParseTime("2019-01-01")),
-		"arg1", "summary1", addr, 1, StakeChallenge)
-	_, err = k.SubmitArgument(ctx.WithBlockTime(mustParseTime("2019-01-05")),
-		"arg2", "summary2", addr, 2, StakeBacking)
-	assert.NoError(t, err)
-	_, err = k.SubmitArgument(ctx.WithBlockTime(mustParseTime("2019-01-07")),
-		"arg3", "summary3", addr, 3, StakeChallenge)
-	assert.NoError(t, err)
-	_, err = k.SubmitArgument(ctx.WithBlockTime(mustParseTime("2019-01-08")),
-		"arg4", "summary4", addr, 4, StakeBacking)
-
-	// should mark first stake as expired and refund stake
-	EndBlocker(ctx.WithBlockTime(mustParseTime("2019-01-10")), k)
-	_, err = k.SubmitArgument(ctx.WithBlockTime(mustParseTime("2019-01-10")),
-		"arg5", "summary5", addr, 5, StakeChallenge)
-	assert.Error(t, err)
-	assert.Equal(t, ErrorCodeMaxAmountStakingReached, err.Code())
-
-}
