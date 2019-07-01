@@ -307,7 +307,7 @@ func (k Keeper) setID(ctx sdk.Context, key []byte, length uint64) {
 	k.store(ctx).Set(key, b)
 }
 
-func (k Keeper) gerEarnedCoins(ctx sdk.Context, user sdk.AccAddress) sdk.Coins {
+func (k Keeper) getEarnedCoins(ctx sdk.Context, user sdk.AccAddress) sdk.Coins {
 	earnedCoins := sdk.Coins{}
 	bz := k.store(ctx).Get(userEarnedCoinsKey(user))
 	if bz == nil {
@@ -323,7 +323,7 @@ func (k Keeper) setEarnedCoins(ctx sdk.Context, user sdk.AccAddress, earnedCoins
 }
 
 func (k Keeper) addEarnedCoin(ctx sdk.Context, user sdk.AccAddress, communityID string, amount sdk.Int) {
-	earnedCoins := k.gerEarnedCoins(ctx, user)
+	earnedCoins := k.getEarnedCoins(ctx, user)
 	earnedCoins = earnedCoins.Add(sdk.NewCoins(sdk.NewCoin(communityID, amount)))
 	k.setEarnedCoins(ctx, user, earnedCoins)
 }

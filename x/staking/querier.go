@@ -3,6 +3,8 @@ package staking
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	abci "github.com/tendermint/tendermint/abci/types"
+
+	app "github.com/TruStory/truchain/types"
 )
 
 const (
@@ -11,6 +13,8 @@ const (
 	QueryArgumentStakes   = "argument_stakes"
 	QueryUserStakes       = "user_stakes"
 	QueryClaimTopArgument = "claim_top_argument"
+	QueryEarnedCoins      = "earned_coins"
+	QueryTotalEarnedCoins = "total_earned_coins"
 )
 
 type QueryClaimArgumentsParams struct {
@@ -33,6 +37,14 @@ type QueryClaimTopArgumentParams struct {
 	ClaimID uint64 `json:"claim_id"`
 }
 
+type QueryEarnedCoinsParams struct {
+	Address sdk.AccAddress `json:"address"`
+}
+
+type QueryTotalEarnedCoinsParams struct {
+	Address sdk.AccAddress `json:"address"`
+}
+
 // NewQuerier creates a new querier
 func NewQuerier(keeper Keeper) sdk.Querier {
 	return func(ctx sdk.Context, path []string, req abci.RequestQuery) ([]byte, sdk.Error) {
@@ -47,6 +59,10 @@ func NewQuerier(keeper Keeper) sdk.Querier {
 			return queryUserStakes(ctx, req, keeper)
 		case QueryClaimTopArgument:
 			return queryClaimTopArgument(ctx, req, keeper)
+		case QueryEarnedCoins:
+			return queryEarnedCoins(ctx, req, keeper)
+		case QueryTotalEarnedCoins:
+			return queryTotalEarnedCoins(ctx, req, keeper)
 		default:
 			return nil, sdk.ErrUnknownRequest("Unknown staking query endpoint")
 		}
@@ -133,6 +149,39 @@ func queryClaimTopArgument(ctx sdk.Context, req abci.RequestQuery, keeper Keeper
 		}
 	}
 	bz, err := keeper.codec.MarshalJSON(topArgument)
+	if err != nil {
+		return nil, ErrJSONParse(err)
+	}
+	return bz, nil
+}
+
+func queryEarnedCoins(ctx sdk.Context, req abci.RequestQuery, keeper Keeper) ([]byte, sdk.Error) {
+	var params QueryEarnedCoinsParams
+	err := keeper.codec.UnmarshalJSON(req.Data, &params)
+	if err != nil {
+		return nil, ErrInvalidQueryParams(err)
+	}
+	earnedCoins := keeper.getEarnedCoins(ctx, params.Address)
+	bz, err := keeper.codec.MarshalJSON(earnedCoins)
+	if err != nil {
+		return nil, ErrJSONParse(err)
+	}
+	return bz, nil
+}
+
+func queryTotalEarnedCoins(ctx sdk.Context, req abci.RequestQuery, keeper Keeper) ([]byte, sdk.Error) {
+	var params QueryTotalEarnedCoinsParams
+	err := keeper.codec.UnmarshalJSON(req.Data, &params)
+	if err != nil {
+		return nil, ErrInvalidQueryParams(err)
+	}
+	earnedCoins := keeper.getEarnedCoins(ctx, params.Address)
+	total := sdk.NewInt(0)
+	for _, e := range earnedCoins {
+		total = total.Add(e.Amount)
+	}
+	totalStakeEarned := sdk.NewCoin(app.StakeDenom, total)
+	bz, err := keeper.codec.MarshalJSON(totalStakeEarned)
 	if err != nil {
 		return nil, ErrJSONParse(err)
 	}
