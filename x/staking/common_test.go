@@ -126,6 +126,11 @@ func createFakeFundedAccount(ctx sdk.Context, am auth.AccountKeeper, coins sdk.C
 
 	return addr
 }
+func setCoins(ctx sdk.Context, am auth.AccountKeeper, coins sdk.Coins, addr sdk.AccAddress) {
+	baseAcct := auth.NewBaseAccountWithAddress(addr)
+	_ = baseAcct.SetCoins(coins)
+	am.SetAccount(ctx, &baseAcct)
+}
 
 func keyPubAddr() (crypto.PrivKey, crypto.PubKey, sdk.AccAddress) {
 	key := ed25519.GenPrivKey()
