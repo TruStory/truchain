@@ -7,8 +7,8 @@ import (
 )
 
 type UserEarnedCoins struct {
-	Address sdk.AccAddress
-	Coins   sdk.Coins
+	Address sdk.AccAddress `json:"address"`
+	Coins   sdk.Coins      `json:"coins"`
 }
 
 // GenesisState defines genesis data for the module
