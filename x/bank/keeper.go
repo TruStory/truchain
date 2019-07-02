@@ -46,7 +46,7 @@ func (k Keeper) Transaction(ctx sdk.Context, id uint64) (Transaction, sdk.Error)
 // AddCoin adds a coin to an address and adds the transaction to the association list.
 func (k Keeper) AddCoin(ctx sdk.Context, addr sdk.AccAddress, amt sdk.Coin,
 	referenceID uint64, txType TransactionType) (sdk.Coins, sdk.Error) {
-	if !txType.allowedForAddition() {
+	if !txType.AllowedForAddition() {
 		return sdk.Coins{}, ErrInvalidTransactionType(txType)
 	}
 	coins, err := k.bankKeeper.AddCoins(ctx, addr, sdk.Coins{amt})
@@ -70,7 +70,7 @@ func (k Keeper) AddCoin(ctx sdk.Context, addr sdk.AccAddress, amt sdk.Coin,
 // SubtractCoin subtracts a coin from an address and adds the transaction to the association list.
 func (k Keeper) SubtractCoin(ctx sdk.Context, addr sdk.AccAddress, amt sdk.Coin,
 	referenceID uint64, txType TransactionType) (sdk.Coins, sdk.Error) {
-	if !txType.allowedForDeduction() {
+	if !txType.AllowedForDeduction() {
 		return sdk.Coins{}, ErrInvalidTransactionType(txType)
 	}
 	coins, err := k.bankKeeper.SubtractCoins(ctx, addr, sdk.Coins{amt})
@@ -131,13 +131,13 @@ func (k Keeper) Transactions(ctx sdk.Context) []Transaction {
 
 // TransactionsByAddress gets transactions for a given address and applies sent filters.
 func (k Keeper) TransactionsByAddress(ctx sdk.Context, address sdk.AccAddress, filterSetters ...Filter) []Transaction {
-	filters := getFilters(filterSetters...)
+	filters := GetFilters(filterSetters...)
 	transactions := make([]Transaction, 0)
 	filterByType := len(filters.TransactionTypes) > 0
 
 	offsetCount := filters.Offset
 	count := 0
-	mapFunc := func(txID uint64) bool {
+	mapFunc := func(txID uint64) bool     {
 		if offsetCount > 0 {
 			offsetCount = offsetCount - 1
 			return true
@@ -152,7 +152,7 @@ func (k Keeper) TransactionsByAddress(ctx sdk.Context, address sdk.AccAddress, f
 			panic(err)
 		}
 		count++
-		if filterByType && !tx.Type.oneOf(filters.TransactionTypes) {
+		if filterByType && !tx.Type.OneOf(filters.TransactionTypes) {
 			return true
 		}
 		transactions = append(transactions, tx)
