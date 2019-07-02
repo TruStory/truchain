@@ -1,13 +1,13 @@
 package staking
 
 import (
+	app "github.com/TruStory/truchain/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	abci "github.com/tendermint/tendermint/abci/types"
-
-	app "github.com/TruStory/truchain/types"
 )
 
 const (
+	QueryClaimArgument    = "claim_argument"
 	QueryClaimArguments   = "claim_arguments"
 	QueryUserArguments    = "user_arguments"
 	QueryArgumentStakes   = "argument_stakes"
@@ -16,6 +16,10 @@ const (
 	QueryEarnedCoins      = "earned_coins"
 	QueryTotalEarnedCoins = "total_earned_coins"
 )
+
+type QueryClaimArgumentParams struct {
+	ArgumentID uint64 `json:"argument_id"`
+}
 
 type QueryClaimArgumentsParams struct {
 	ClaimID uint64 `json:"claim_id"`
@@ -49,6 +53,8 @@ type QueryTotalEarnedCoinsParams struct {
 func NewQuerier(keeper Keeper) sdk.Querier {
 	return func(ctx sdk.Context, path []string, req abci.RequestQuery) ([]byte, sdk.Error) {
 		switch path[0] {
+		case QueryClaimArgument:
+			return queryClaimArgument(ctx, req, keeper)
 		case QueryClaimArguments:
 			return queryClaimArguments(ctx, req, keeper)
 		case QueryUserArguments:
@@ -67,6 +73,23 @@ func NewQuerier(keeper Keeper) sdk.Querier {
 			return nil, sdk.ErrUnknownRequest("Unknown staking query endpoint")
 		}
 	}
+}
+
+func queryClaimArgument(ctx sdk.Context, req abci.RequestQuery, keeper Keeper) ([]byte, sdk.Error) {
+	var params QueryClaimArgumentParams
+	err := keeper.codec.UnmarshalJSON(req.Data, &params)
+	if err != nil {
+		return nil, ErrInvalidQueryParams(err)
+	}
+	argument, ok := keeper.getArgument(ctx, params.ArgumentID)
+	if !ok {
+		return nil, ErrCodeUnknownArgument(params.ArgumentID)
+	}
+	bz, err := keeper.codec.MarshalJSON(argument)
+	if err != nil {
+		return nil, ErrJSONParse(err)
+	}
+	return bz, nil
 }
 
 func queryUserArguments(ctx sdk.Context, req abci.RequestQuery, keeper Keeper) ([]byte, sdk.Error) {

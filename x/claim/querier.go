@@ -1,6 +1,7 @@
 package claim
 
 import (
+	"sort"
 	"time"
 
 	"github.com/cosmos/cosmos-sdk/codec"
@@ -87,6 +88,10 @@ func queryClaim(ctx sdk.Context, req abci.RequestQuery, keeper Keeper) ([]byte, 
 func queryClaims(ctx sdk.Context, req abci.RequestQuery, keeper Keeper) ([]byte, sdk.Error) {
 	claims := keeper.Claims(ctx)
 
+	sort.Slice(claims, func(i, j int) bool {
+		return claims[i].ID > claims[j].ID
+	})
+
 	return mustMarshal(claims)
 }
 
@@ -98,6 +103,10 @@ func queryCommunityClaims(ctx sdk.Context, req abci.RequestQuery, keeper Keeper)
 	}
 	claims := keeper.CommunityClaims(ctx, params.CommunityID)
 
+	sort.Slice(claims, func(i, j int) bool {
+		return claims[i].ID > claims[j].ID
+	})
+
 	return mustMarshal(claims)
 }
 
@@ -108,6 +117,10 @@ func queryCreatorClaims(ctx sdk.Context, req abci.RequestQuery, keeper Keeper) (
 		return nil, ErrJSONParse(codecErr)
 	}
 	claims := keeper.CreatorClaims(ctx, params.Creator)
+
+	sort.Slice(claims, func(i, j int) bool {
+		return claims[i].ID > claims[j].ID
+	})
 
 	return mustMarshal(claims)
 }

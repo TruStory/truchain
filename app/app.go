@@ -299,20 +299,20 @@ func NewTruChain(logger log.Logger, db dbm.DB, loadLatest bool, options ...func(
 		codec,
 	)
 
+	app.appAccountKeeper = account.NewKeeper(
+		app.keyAppAccount,
+		appAccountSubspace,
+		codec,
+		app.truBankKeeper2,
+		app.accountKeeper,
+	)
+
 	app.claimKeeper = claim.NewKeeper(
 		app.keyClaim,
 		app.paramsKeeper.Subspace(claim.StoreKey),
 		codec,
 		app.appAccountKeeper,
 		app.communityKeeper,
-	)
-
-	app.appAccountKeeper = account.NewKeeper(
-		app.keyAppAccount,
-		appAccountSubspace,
-		codec,
-		nil,
-		app.accountKeeper,
 	)
 
 	app.truBankKeeper2 = trubank2.NewKeeper(codec, app.keyTruBank2, app.bankKeeper,
@@ -337,7 +337,8 @@ func NewTruChain(logger log.Logger, db dbm.DB, loadLatest bool, options ...func(
 		AddRoute("users", users.NewHandler(app.accountKeeper, app.categoryKeeper)).
 		AddRoute("trubank", trubank.NewHandler(app.truBankKeeper)).
 		AddRoute(claim.RouterKey, claim.NewHandler(app.claimKeeper)).
-		AddRoute(account.RouterKey, account.NewHandler(app.appAccountKeeper))
+		AddRoute(account.RouterKey, account.NewHandler(app.appAccountKeeper)).
+		AddRoute(trustaking.RouterKey, trustaking.NewHandler(app.truStakingKeeper))
 
 	// The app.QueryRouter is the main query router where each module registers its routes
 	app.QueryRouter().
