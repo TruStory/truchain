@@ -161,6 +161,47 @@ func TestKeeper_SubmitArgument(t *testing.T) {
 	assert.Equal(t, []Stake{expectedStake, expectedStake2}, expiringStakes)
 }
 
+func TestKeeper_AfterTimeStakesIterator(t *testing.T) {
+	ctx, k, accKeeper, _, _ := mockDB()
+	ctx = ctx.WithBlockTime(mustParseTime("2019-01-15"))
+	addr, _ := sdk.AccAddressFromBech32("cosmos18pkfm85y3v65rrmn8f2y2z2ytenhq0943q5unm")
+	addr2, _ := sdk.AccAddressFromBech32("cosmos16nycdfk7293jrj42rke9dg9ffz5qmj3kzrcddc")
+	setCoins(ctx, accKeeper, sdk.Coins{sdk.NewInt64Coin(app.StakeDenom, app.Shanev*300)}, addr)
+	setCoins(ctx, accKeeper, sdk.Coins{sdk.NewInt64Coin(app.StakeDenom, app.Shanev*300)}, addr2)
+
+	_, err := k.SubmitArgument(ctx, "body", "summary", addr, 1, StakeBacking)
+	assert.NoError(t, err)
+	ctx = ctx.WithBlockTime(mustParseTime("2019-01-17"))
+	_, err = k.SubmitArgument(ctx, "body", "summary", addr2, 2, StakeChallenge)
+	assert.NoError(t, err)
+	_, err = k.SubmitArgument(ctx, "body", "summary", addr2, 2, StakeBacking)
+	assert.NoError(t, err)
+	ctx = ctx.WithBlockTime(mustParseTime("2019-01-18"))
+	_, err = k.SubmitArgument(ctx, "body", "summary", addr, 3, StakeBacking)
+	assert.NoError(t, err)
+	ctx = ctx.WithBlockTime(mustParseTime("2019-01-19"))
+	_, err = k.SubmitArgument(ctx, "body", "summary", addr2, 4, StakeChallenge)
+	assert.NoError(t, err)
+	ctx = ctx.WithBlockTime(mustParseTime("2019-01-20"))
+	_, err = k.SubmitArgument(ctx, "body", "summary", addr2, 5, StakeChallenge)
+	assert.NoError(t, err)
+	_, err = k.SubmitArgument(ctx, "body", "summary", addr2, 6, StakeBacking)
+	assert.NoError(t, err)
+	ctx = ctx.WithBlockTime(mustParseTime("2019-01-21"))
+	_, err = k.SubmitArgument(ctx, "body", "summary", addr, 7, StakeBacking)
+	assert.NoError(t, err)
+
+	stakes := make([]Stake, 0)
+	ctx = ctx.WithBlockTime(mustParseTime("2019-01-22"))
+	k.IterateAfterCreatedTimeUserStakes(ctx, addr,
+		mustParseTime("2019-01-17"), func(stake Stake) bool {
+			stakes = append(stakes, stake)
+			return false
+		},
+	)
+	assert.Len(t, stakes, 2)
+}
+
 func TestKeeper_SubmitUpvote(t *testing.T) {
 	ctx, k, accKeeper, _, _ := mockDB()
 	ctx.WithBlockTime(time.Now())
