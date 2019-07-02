@@ -5,7 +5,6 @@ import (
 	"testing"
 	"time"
 
-	// sdk "github.com/cosmos/cosmos-sdk/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/stretchr/testify/assert"
 	abci "github.com/tendermint/tendermint/abci/types"
@@ -55,6 +54,66 @@ func TestAddGetClaim(t *testing.T) {
 	tt = tt.Add(60 * 60 * time.Minute)
 	claims = keeper.ClaimsBeforeTime(ctx, tt)
 	assert.Len(t, claims, 2)
+}
+
+func TestClaims(t *testing.T) {
+	ctx, keeper := mockDB()
+
+	for i := 0; i <= 1000; i++  {
+		createFakeClaim(ctx, keeper)
+	}
+
+	claims := keeper.Claims(ctx)
+	assert.Equal(t, uint64(1), claims[0].ID)
+	assert.Equal(t, uint64(2), claims[1].ID)
+	assert.Equal(t, uint64(100), claims[99].ID)
+	assert.Equal(t, uint64(1000), claims[999].ID)
+}
+
+func TestCommunityClaims(t *testing.T) {
+	ctx, keeper := mockDB()
+
+	for i := 0; i <= 1000; i++  {
+		createFakeClaim(ctx, keeper)
+	}
+
+	claims := keeper.CommunityClaims(ctx, "crypto")
+	assert.Equal(t, uint64(1), claims[0].ID)
+	assert.Equal(t, uint64(2), claims[1].ID)
+	assert.Equal(t, uint64(100), claims[99].ID)
+	assert.Equal(t, uint64(1000), claims[999].ID)
+}
+
+func TestCreatorClaims(t *testing.T) {
+	ctx, keeper := mockDB()
+
+	for i := 0; i <= 1000; i++  {
+		createFakeClaim(ctx, keeper)
+	}
+
+	creator := sdk.AccAddress([]byte{1, 2})
+
+	claims := keeper.CreatorClaims(ctx, creator)
+	assert.Equal(t, uint64(1), claims[0].ID)
+	assert.Equal(t, uint64(2), claims[1].ID)
+	assert.Equal(t, uint64(100), claims[99].ID)
+	assert.Equal(t, uint64(1000), claims[999].ID)
+}
+
+func TestCreatedTimeClaims(t *testing.T) {
+	ctx, keeper := mockDB()
+
+	for i := 0; i <= 1000; i++  {
+		createFakeClaim(ctx, keeper)
+	}
+
+	createdTime := time.Now().UTC()
+
+	claims := keeper.ClaimsBeforeTime(ctx, createdTime)
+	assert.Equal(t, uint64(1), claims[0].ID)
+	assert.Equal(t, uint64(2), claims[1].ID)
+	assert.Equal(t, uint64(100), claims[99].ID)
+	assert.Equal(t, uint64(1000), claims[999].ID)
 }
 
 func createFakeClaim(ctx sdk.Context, keeper Keeper) Claim {

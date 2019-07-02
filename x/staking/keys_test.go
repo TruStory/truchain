@@ -1,9 +1,9 @@
 package staking
 
 import (
-	"testing"
+"testing"
 
-	"github.com/magiconair/properties/assert"
+"github.com/magiconair/properties/assert"
 )
 
 func TestStakeKey(t *testing.T) {
