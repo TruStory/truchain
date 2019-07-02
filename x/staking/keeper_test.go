@@ -192,6 +192,7 @@ func TestKeeper_AfterTimeStakesIterator(t *testing.T) {
 	assert.NoError(t, err)
 
 	stakes := make([]Stake, 0)
+	ctx = ctx.WithBlockTime(mustParseTime("2019-01-22"))
 	k.IterateAfterCreatedTimeUserStakes(ctx, addr,
 		mustParseTime("2019-01-17"), func(stake Stake) bool {
 			stakes = append(stakes, stake)

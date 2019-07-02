@@ -99,7 +99,7 @@ func (k Keeper) IterateAfterCreatedTimeUserStakes(ctx sdk.Context,
 	creator sdk.AccAddress, createdTime time.Time,
 	cb func(stake Stake) (stop bool)) {
 	iterator := k.store(ctx).Iterator(userStakesCreatedTimePrefix(creator, createdTime),
-		sdk.PrefixEndBytes(UserStakesKeyPrefix),
+		sdk.PrefixEndBytes(userStakesPrefix(creator)),
 	)
 	defer iterator.Close()
 	for ; iterator.Valid(); iterator.Next() {
