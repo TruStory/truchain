@@ -2,7 +2,6 @@ package staking
 
 import (
 	app "github.com/TruStory/truchain/types"
-	"github.com/TruStory/truchain/x/bank"
 
 	"time"
 
@@ -49,7 +48,7 @@ func (k Keeper) distributeReward(ctx sdk.Context, stake Stake) (RewardResult, sd
 			argument.Creator,
 			reward,
 			argument.ID,
-			bank.TransactionInterestArgumentCreation)
+			TransactionInterestArgumentCreation)
 		if err != nil {
 			return RewardResult{}, err
 		}
@@ -65,7 +64,7 @@ func (k Keeper) distributeReward(ctx sdk.Context, stake Stake) (RewardResult, sd
 		argument.Creator,
 		creatorRewardCoin,
 		argument.ID,
-		bank.TransactionInterestUpvoteReceived)
+		TransactionInterestUpvoteReceived)
 	if err != nil {
 		return RewardResult{}, err
 	}
@@ -73,7 +72,7 @@ func (k Keeper) distributeReward(ctx sdk.Context, stake Stake) (RewardResult, sd
 		stake.Creator,
 		stakerRewardCoin,
 		argument.ID,
-		bank.TransactionInterestUpvoteGiven)
+		TransactionInterestUpvoteGiven)
 	if err != nil {
 		return RewardResult{}, err
 	}

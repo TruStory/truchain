@@ -37,10 +37,10 @@ var StakeTypeName = []string{
 	StakeUpvote:    "StakeUpvote",
 }
 
-var bankTransactionMappings = []bank.TransactionType{
-	StakeBacking:   bank.TransactionBacking,
-	StakeChallenge: bank.TransactionChallenge,
-	StakeUpvote:    bank.TransactionUpvote,
+var bankTransactionMappings = []TransactionType{
+	StakeBacking:   TransactionBacking,
+	StakeChallenge: TransactionChallenge,
+	StakeUpvote:    TransactionUpvote,
 }
 
 func (t StakeType) BankTransactionType() bank.TransactionType {

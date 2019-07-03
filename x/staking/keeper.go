@@ -2,8 +2,6 @@ package staking
 
 import (
 	app "github.com/TruStory/truchain/types"
-	"github.com/TruStory/truchain/x/bank"
-
 	"time"
 
 	"github.com/cosmos/cosmos-sdk/codec"
@@ -20,14 +18,14 @@ type Keeper struct {
 	codec         *codec.Codec
 	paramStore    params.Subspace
 	codespace     sdk.CodespaceType
-	bankKeeper    bank.Keeper
+	bankKeeper    BankKeeper
 	accountKeeper AccountKeeper
 	claimKeeper   ClaimKeeper
 }
 
 // NewKeeper creates a staking keeper.
 func NewKeeper(codec *codec.Codec, storeKey sdk.StoreKey,
-	accountKeeper AccountKeeper, bankKeeper bank.Keeper, claimKeeper ClaimKeeper,
+	accountKeeper AccountKeeper, bankKeeper BankKeeper, claimKeeper ClaimKeeper,
 	paramStore params.Subspace,
 	codespace sdk.CodespaceType) Keeper {
 	return Keeper{

@@ -1,4 +1,4 @@
-package bank
+package exported
 
 import (
 	"testing"
@@ -7,7 +7,7 @@ import (
 )
 
 func Test_getFilters(t *testing.T) {
-	filters := getFilters(
+	filters := GetFilters(
 		FilterByTransactionType(TransactionBacking, TransactionChallenge, TransactionUpvote),
 		SortOrder(SortDesc),
 		Limit(10),
@@ -21,7 +21,7 @@ func Test_getFilters(t *testing.T) {
 	assert.Equal(t, filters.Limit, 10)
 	assert.Equal(t, filters.Offset, 100)
 
-	filters = getFilters(
+	filters = GetFilters(
 		Limit(-100),
 		Offset(-1),
 	)
