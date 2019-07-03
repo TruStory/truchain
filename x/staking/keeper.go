@@ -253,7 +253,11 @@ func (k Keeper) newStake(ctx sdk.Context, amount sdk.Coin, creator sdk.AccAddres
 	if err != nil {
 		return Stake{}, err
 	}
-	_, err = k.bankKeeper.SubtractCoin(ctx, creator, amount, argumentID, stakeType.BankTransactionType())
+	referenceID := argumentID
+	if stakeType == StakeUpvote {
+		referenceID = stakeID
+	}
+	_, err = k.bankKeeper.SubtractCoin(ctx, creator, amount, referenceID, stakeType.BankTransactionType())
 	if err != nil {
 		return Stake{}, err
 	}

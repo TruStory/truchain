@@ -42,18 +42,23 @@ func (k Keeper) distributeReward(ctx sdk.Context, stake Stake) (RewardResult, sd
 
 	// refund
 	var refundType TransactionType
+	var referenceID uint64
 
 	switch stake.Type {
 	case StakeBacking:
 		refundType = TransactionBackingReturned
+		referenceID = stake.ArgumentID
 	case StakeChallenge:
 		refundType = TransactionChallengeReturned
+		referenceID = stake.ArgumentID
 	case StakeUpvote:
 		refundType = TransactionUpvoteReturned
+		referenceID = stake.ID
 	default:
 		return RewardResult{}, ErrCodeUnknownStakeType()
+		referenceID = 0
 	}
-	_, err := k.bankKeeper.AddCoin(ctx, stake.Creator, stake.Amount, stake.ArgumentID, refundType)
+	_, err := k.bankKeeper.AddCoin(ctx, stake.Creator, stake.Amount, referenceID, refundType)
 	if err != nil {
 		return RewardResult{}, err
 	}
@@ -80,7 +85,7 @@ func (k Keeper) distributeReward(ctx sdk.Context, stake Stake) (RewardResult, sd
 	_, err = k.bankKeeper.AddCoin(ctx,
 		argument.Creator,
 		creatorRewardCoin,
-		argument.ID,
+		stake.ID,
 		TransactionInterestUpvoteReceived)
 	if err != nil {
 		return RewardResult{}, err
@@ -88,7 +93,7 @@ func (k Keeper) distributeReward(ctx sdk.Context, stake Stake) (RewardResult, sd
 	_, err = k.bankKeeper.AddCoin(ctx,
 		stake.Creator,
 		stakerRewardCoin,
-		argument.ID,
+		stake.ID,
 		TransactionInterestUpvoteGiven)
 	if err != nil {
 		return RewardResult{}, err
