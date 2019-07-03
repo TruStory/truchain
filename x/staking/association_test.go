@@ -10,8 +10,8 @@ import (
 )
 
 func TestKeeper_IterateAfterCreatedTimeUserStakes(t *testing.T) {
-	ctx, k, accKeeper, _, _ := mockDB()
-	addr := createFakeFundedAccount(ctx, accKeeper, sdk.Coins{sdk.NewInt64Coin(app.StakeDenom, app.Shanev*300)})
+	ctx, k, mdb := mockDB()
+	addr := createFakeFundedAccount(ctx, mdb.authAccKeeper, sdk.Coins{sdk.NewInt64Coin(app.StakeDenom, app.Shanev*300)})
 
 	_, err := k.SubmitArgument(ctx.WithBlockTime(mustParseTime("2019-01-01")),
 		"arg1", "summary1", addr, 1, StakeChallenge)

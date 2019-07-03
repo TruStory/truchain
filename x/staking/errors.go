@@ -26,6 +26,7 @@ const (
 	ErrorCodeInvalidQueryParams       sdk.CodeType = 510
 	ErrorCodeJSONParsing              sdk.CodeType = 511
 	ErrorCodeUnknownClaim             sdk.CodeType = 512
+	ErrorCodeUnknownStakeType         sdk.CodeType = 513
 )
 
 // GenesisErrors
@@ -87,6 +88,14 @@ func ErrCodeUnknownStake(argumentID uint64) sdk.Error {
 	return sdk.NewError(DefaultCodespace,
 		ErrorCodeUnknownStake,
 		fmt.Sprintf("Unknown stake id %d", argumentID),
+	)
+}
+
+// ErrCodeUnknownStakeType throws an error when an invalid stake type
+func ErrCodeUnknownStakeType() sdk.Error {
+	return sdk.NewError(DefaultCodespace,
+		ErrorCodeUnknownStakeType,
+		fmt.Sprintf("Unknown stake type"),
 	)
 }
 

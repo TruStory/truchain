@@ -10,9 +10,9 @@ import (
 )
 
 func TestHandle_SubmitArgument(t *testing.T) {
-	ctx, k, accKeeper, _, _ := mockDB()
+	ctx, k, mdb := mockDB()
 	handler := NewHandler(k)
-	addr1 := createFakeFundedAccount(ctx, accKeeper, sdk.Coins{sdk.NewInt64Coin(app.StakeDenom, app.Shanev*300)})
+	addr1 := createFakeFundedAccount(ctx, mdb.authAccKeeper, sdk.Coins{sdk.NewInt64Coin(app.StakeDenom, app.Shanev*300)})
 
 	msg1 := NewMsgSubmitArgument(addr1, 1, "summary 1", "body 1", StakeBacking)
 
@@ -25,10 +25,10 @@ func TestHandle_SubmitArgument(t *testing.T) {
 }
 
 func TestHandle_SubmitUpvote(t *testing.T) {
-	ctx, k, accKeeper, _, _ := mockDB()
+	ctx, k, mdb := mockDB()
 	handler := NewHandler(k)
-	addr1 := createFakeFundedAccount(ctx, accKeeper, sdk.Coins{sdk.NewInt64Coin(app.StakeDenom, app.Shanev*300)})
-	addr2 := createFakeFundedAccount(ctx, accKeeper, sdk.Coins{sdk.NewInt64Coin(app.StakeDenom, app.Shanev*300)})
+	addr1 := createFakeFundedAccount(ctx, mdb.authAccKeeper, sdk.Coins{sdk.NewInt64Coin(app.StakeDenom, app.Shanev*300)})
+	addr2 := createFakeFundedAccount(ctx, mdb.authAccKeeper, sdk.Coins{sdk.NewInt64Coin(app.StakeDenom, app.Shanev*300)})
 
 	msg1 := NewMsgSubmitArgument(addr1, 1, "summary 1", "body 1", StakeBacking)
 
@@ -48,7 +48,7 @@ func TestHandle_SubmitUpvote(t *testing.T) {
 
 }
 func TestByzantineMsg(t *testing.T) {
-	ctx, k, _, _, _ := mockDB()
+	ctx, k, _ := mockDB()
 
 	handler := NewHandler(k)
 	assert.NotNil(t, handler)

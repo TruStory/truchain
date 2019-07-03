@@ -40,6 +40,23 @@ func (k Keeper) distributeReward(ctx sdk.Context, stake Stake) (RewardResult, sd
 		return RewardResult{}, ErrCodeUnknownClaim(claim.ID)
 	}
 
+	// refund
+	var refundType TransactionType
+
+	switch stake.Type {
+	case StakeBacking:
+		refundType = TransactionBackingReturned
+	case StakeChallenge:
+		refundType = TransactionChallengeReturned
+	case StakeUpvote:
+		refundType = TransactionUpvoteReturned
+	default:
+		return RewardResult{}, ErrCodeUnknownStakeType()
+	}
+	_, err := k.bankKeeper.AddCoin(ctx, stake.Creator, stake.Amount, stake.ArgumentID, refundType)
+	if err != nil {
+		return RewardResult{}, err
+	}
 	interest := k.interest(ctx, stake.Amount, stake.EndTime.Sub(stake.CreatedTime))
 	// creator receives 100% interest of his own stake
 	if argument.Creator.Equals(stake.Creator) {
@@ -60,7 +77,7 @@ func (k Keeper) distributeReward(ctx sdk.Context, stake Stake) (RewardResult, sd
 	creatorReward, stakerReward := k.splitReward(ctx, interest)
 	creatorRewardCoin := sdk.NewCoin(app.StakeDenom, creatorReward)
 	stakerRewardCoin := sdk.NewCoin(app.StakeDenom, stakerReward)
-	_, err := k.bankKeeper.AddCoin(ctx,
+	_, err = k.bankKeeper.AddCoin(ctx,
 		argument.Creator,
 		creatorRewardCoin,
 		argument.ID,

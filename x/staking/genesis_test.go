@@ -18,7 +18,7 @@ func TestDefaultGenesisState(t *testing.T) {
 }
 
 func TestInitGenesis(t *testing.T) {
-	ctx, k, _, _, _ := mockDB()
+	ctx, k, _ := mockDB()
 
 	_, _, addr1 := keyPubAddr()
 	_, _, addr2 := keyPubAddr()
