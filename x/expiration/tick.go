@@ -10,8 +10,8 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
-// EndBlock is called at the end of every block
-func (k Keeper) EndBlock(ctx sdk.Context) sdk.Tags {
+// EndBlocker is called at the end of every block
+func EndBlocker(ctx sdk.Context, k Keeper) sdk.Tags {
 	completed, err := k.processStoryQueue(ctx, make([]app.CompletedStory, 0))
 	if err != nil {
 		panic(err)

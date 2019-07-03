@@ -109,6 +109,7 @@ func (AppModule) BeginBlock(_ sdk.Context, _ abci.RequestBeginBlock) sdk.Tags {
 }
 
 // EndBlock runs at the end of each block
-func (AppModule) EndBlock(_ sdk.Context, _ abci.RequestEndBlock) ([]abci.ValidatorUpdate, sdk.Tags) {
-	return []abci.ValidatorUpdate{}, sdk.EmptyTags()
+func (am AppModule) EndBlock(ctx sdk.Context, _ abci.RequestEndBlock) ([]abci.ValidatorUpdate, sdk.Tags) {
+	tags := EndBlocker(ctx, am.keeper)
+	return []abci.ValidatorUpdate{}, tags
 }
