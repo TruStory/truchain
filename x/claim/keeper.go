@@ -87,10 +87,10 @@ func (k Keeper) Claim(ctx sdk.Context, id uint64) (claim Claim, ok bool) {
 	return claim, true
 }
 
-// Claims gets all the claims
+// Claims gets all the claims in reverse order
 func (k Keeper) Claims(ctx sdk.Context) (claims Claims) {
 	store := ctx.KVStore(k.storeKey)
-	iterator := sdk.KVStorePrefixIterator(store, ClaimsKeyPrefix)
+	iterator := sdk.KVStoreReversePrefixIterator(store, ClaimsKeyPrefix)
 
 	return k.iterate(iterator)
 }
@@ -245,7 +245,7 @@ func (k Keeper) createdTimeRangeClaimsIterator(ctx sdk.Context, startCreatedTime
 
 func (k Keeper) associatedClaims(ctx sdk.Context, prefix []byte) (claims Claims) {
 	store := ctx.KVStore(k.storeKey)
-	iterator := sdk.KVStorePrefixIterator(store, prefix)
+	iterator := sdk.KVStoreReversePrefixIterator(store, prefix)
 
 	defer iterator.Close()
 	for ; iterator.Valid(); iterator.Next() {

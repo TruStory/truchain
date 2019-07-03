@@ -1,7 +1,6 @@
 package claim
 
 import (
-	"encoding/binary"
 	"time"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -27,8 +26,7 @@ var (
 
 // key for getting a specific claim from the store
 func key(claimID uint64) []byte {
-	bz := make([]byte, 8)
-	binary.LittleEndian.PutUint64(bz, claimID)
+	bz := sdk.Uint64ToBigEndian(claimID)
 	return append(ClaimsKeyPrefix, bz...)
 }
 
@@ -39,8 +37,7 @@ func communityClaimsKey(communityID string) []byte {
 
 // communityClaimKey key of a specific community <-> claim association from the store
 func communityClaimKey(communityID string, claimID uint64) []byte {
-	bz := make([]byte, 8)
-	binary.LittleEndian.PutUint64(bz, claimID)
+	bz := sdk.Uint64ToBigEndian(claimID)
 	return append(communityClaimsKey(communityID), bz...)
 }
 
@@ -49,8 +46,7 @@ func creatorClaimsKey(creator sdk.AccAddress) []byte {
 }
 
 func creatorClaimKey(creator sdk.AccAddress, claimID uint64) []byte {
-	bz := make([]byte, 8)
-	binary.LittleEndian.PutUint64(bz, claimID)
+	bz := sdk.Uint64ToBigEndian(claimID)
 	return append(creatorClaimsKey(creator), bz...)
 }
 
@@ -59,8 +55,6 @@ func createdTimeClaimsKey(createdTime time.Time) []byte {
 }
 
 func createdTimeClaimKey(createdTime time.Time, claimID uint64) []byte {
-	bz := make([]byte, 8)
-	binary.LittleEndian.PutUint64(bz, claimID)
-
+	bz := sdk.Uint64ToBigEndian(claimID)
 	return append(createdTimeClaimsKey(createdTime), bz...)
 }
