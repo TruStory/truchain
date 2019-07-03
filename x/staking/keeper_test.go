@@ -329,7 +329,7 @@ func Test_splitReward(t *testing.T) {
 
 func TestKeeper_StakePeriodAmountLimit(t *testing.T) {
 	ctx, k, mdb := mockDB()
-	addr := createFakeFundedAccount(ctx, mdb.authAccKeeper, sdk.Coins{sdk.NewInt64Coin(app.StakeDenom, app.Shanev*250)})
+	addr := createFakeFundedAccount(ctx, mdb.authAccKeeper, sdk.Coins{sdk.NewInt64Coin(app.StakeDenom, app.Shanev*215)})
 
 	_, err := k.SubmitArgument(ctx.WithBlockTime(mustParseTime("2019-01-01")),
 		"arg1", "summary1", addr, 1, StakeChallenge)
@@ -339,11 +339,12 @@ func TestKeeper_StakePeriodAmountLimit(t *testing.T) {
 	_, err = k.SubmitArgument(ctx.WithBlockTime(mustParseTime("2019-01-07")),
 		"arg3", "summary3", addr, 3, StakeChallenge)
 	assert.NoError(t, err)
+
+	// should mark first stake as expired and refund stake
+	EndBlocker(ctx.WithBlockTime(mustParseTime("2019-01-08")), k)
 	_, err = k.SubmitArgument(ctx.WithBlockTime(mustParseTime("2019-01-08")),
 		"arg4", "summary4", addr, 4, StakeBacking)
 
-	// should mark first stake as expired and refund stake
-	EndBlocker(ctx.WithBlockTime(mustParseTime("2019-01-10")), k)
 	_, err = k.SubmitArgument(ctx.WithBlockTime(mustParseTime("2019-01-10")),
 		"arg5", "summary5", addr, 5, StakeChallenge)
 	assert.Error(t, err)

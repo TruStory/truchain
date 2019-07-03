@@ -1,8 +1,9 @@
 package staking
 
 import (
-	app "github.com/TruStory/truchain/types"
 	"time"
+
+	app "github.com/TruStory/truchain/types"
 
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
