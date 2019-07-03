@@ -48,6 +48,36 @@ func TestQueryClaims(t *testing.T) {
 	require.Equal(t, 1, len(claims))
 }
 
+func TestQueryClaimsByIDs(t *testing.T) {
+	ctx, keeper := mockDB()
+
+	fakeClaim(ctx, keeper)
+	fakeClaim(ctx, keeper)
+	fakeClaim(ctx, keeper)
+	fakeClaim(ctx, keeper)
+	fakeClaim(ctx, keeper)
+
+	queryParams := QueryClaimsParams{
+		IDs: []uint64{1,3,4},
+	}
+	queryParamsBytes, jsonErr := ModuleCodec.MarshalJSON(queryParams)
+	require.Nil(t, jsonErr)
+
+	query := abci.RequestQuery{
+		Path: strings.Join([]string{custom, QueryClaimsByIDs}, "/"),
+		Data: queryParamsBytes,
+	}
+
+	querier := NewQuerier(keeper)
+	resBytes, err := querier(ctx, []string{QueryClaimsByIDs}, query)
+	require.NoError(t, err)
+
+	var claims Claims
+	cdcErr := ModuleCodec.UnmarshalJSON(resBytes, &claims)
+	require.NoError(t, cdcErr)
+	require.Equal(t, 3, len(claims))
+}
+
 func TestQueryCommunityClaims(t *testing.T) {
 	ctx, keeper := mockDB()
 
