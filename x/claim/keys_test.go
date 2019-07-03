@@ -3,7 +3,7 @@ package claim
 import (
 	"testing"
 
-	"github.com/magiconair/properties/assert"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestClaimIDKey(t *testing.T) {
