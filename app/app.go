@@ -464,10 +464,8 @@ func (app *TruChain) BeginBlocker(ctx sdk.Context, req abci.RequestBeginBlock) a
 
 // EndBlocker reflects logic to run after all TXs are processed by the
 // application.
-func (app *TruChain) EndBlocker(ctx sdk.Context, _ abci.RequestEndBlock) abci.ResponseEndBlock {
-	tags := app.expirationKeeper.EndBlock(ctx)
-
-	return abci.ResponseEndBlock{Tags: tags}
+func (app *TruChain) EndBlocker(ctx sdk.Context, req abci.RequestEndBlock) abci.ResponseEndBlock {
+	return app.mm.EndBlock(ctx, req)
 }
 
 // InitChainer application update at chain initialization
