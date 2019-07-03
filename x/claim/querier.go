@@ -13,6 +13,7 @@ import (
 const (
 	QueryClaim            = "claim"
 	QueryClaims           = "claims"
+	QueryClaimsByIDs      = "claims_ids"
 	QueryCommunityClaims  = "community_claims"
 	QueryCreatorClaims    = "creator_claims"
 	QueryClaimsIDRange    = "claims_id_range"
@@ -23,6 +24,11 @@ const (
 // QueryClaimParams for a single claim
 type QueryClaimParams struct {
 	ID uint64 `json:"id"`
+}
+
+// QueryClaimsParams for many claim
+type QueryClaimsParams struct {
+	IDs []uint64 `json:"ids"`
 }
 
 // QueryCommunityClaimsParams for community claims
@@ -54,6 +60,8 @@ func NewQuerier(keeper Keeper) sdk.Querier {
 			return queryClaim(ctx, req, keeper)
 		case QueryClaims:
 			return queryClaims(ctx, req, keeper)
+		case QueryClaimsByIDs:
+			return queryClaimsByIDs(ctx, req, keeper)
 		case QueryCommunityClaims:
 			return queryCommunityClaims(ctx, req, keeper)
 		case QueryCreatorClaims:
@@ -79,7 +87,7 @@ func queryClaim(ctx sdk.Context, req abci.RequestQuery, keeper Keeper) ([]byte, 
 
 	claim, ok := keeper.Claim(ctx, params.ID)
 	if !ok {
-		return nil, ErrUnknownClaim(claim.ID)
+		return nil, ErrUnknownClaim(params.ID)
 	}
 
 	return mustMarshal(claim)
@@ -91,6 +99,25 @@ func queryClaims(ctx sdk.Context, req abci.RequestQuery, keeper Keeper) ([]byte,
 	sort.Slice(claims, func(i, j int) bool {
 		return claims[i].ID > claims[j].ID
 	})
+
+	return mustMarshal(claims)
+}
+
+func queryClaimsByIDs(ctx sdk.Context, req abci.RequestQuery, keeper Keeper) ([]byte, sdk.Error) {
+	var params QueryClaimsParams
+	codecErr := ModuleCodec.UnmarshalJSON(req.Data, &params)
+	if codecErr != nil {
+		return nil, ErrJSONParse(codecErr)
+	}
+
+	var claims Claims
+	for _,id := range params.IDs  {
+		claim, ok := keeper.Claim(ctx, id)
+		if !ok {
+			return nil, ErrUnknownClaim(id)
+		}
+		claims = append(claims, claim)
+	}
 
 	return mustMarshal(claims)
 }
