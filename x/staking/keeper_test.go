@@ -12,8 +12,8 @@ import (
 )
 
 func TestKeeper_SubmitArgumentMaxLimit(t *testing.T) {
-	ctx, k, accKeeper, _, _ := mockDB()
-	addr := createFakeFundedAccount(ctx, accKeeper, sdk.Coins{sdk.NewInt64Coin(app.StakeDenom, app.Shanev*300)})
+	ctx, k, mdb := mockDB()
+	addr := createFakeFundedAccount(ctx, mdb.authAccKeeper, sdk.Coins{sdk.NewInt64Coin(app.StakeDenom, app.Shanev*300)})
 
 	// max number of arguments
 	arg1, err := k.SubmitArgument(ctx, "arg1", "summary1", addr, 1, StakeChallenge)
@@ -34,11 +34,11 @@ func TestKeeper_SubmitArgumentMaxLimit(t *testing.T) {
 }
 
 func TestKeeper_SubmitArgument(t *testing.T) {
-	ctx, k, accKeeper, authKeeper, _ := mockDB()
+	ctx, k, mdb := mockDB()
 	ctx.WithBlockTime(time.Now())
-	mockedAccountKeeper := authKeeper.(*mockedAccountKeeper)
-	addr := createFakeFundedAccount(ctx, accKeeper, sdk.Coins{sdk.NewInt64Coin(app.StakeDenom, app.Shanev*300)})
-	addr2 := createFakeFundedAccount(ctx, accKeeper, sdk.Coins{sdk.NewInt64Coin(app.StakeDenom, app.Shanev*300)})
+	mockedAccountKeeper := mdb.accountKeeper.(*mockedAccountKeeper)
+	addr := createFakeFundedAccount(ctx, mdb.authAccKeeper, sdk.Coins{sdk.NewInt64Coin(app.StakeDenom, app.Shanev*300)})
+	addr2 := createFakeFundedAccount(ctx, mdb.authAccKeeper, sdk.Coins{sdk.NewInt64Coin(app.StakeDenom, app.Shanev*300)})
 	mockedAccountKeeper.jail(addr)
 
 	_, err := k.SubmitArgument(ctx, "body", "summary", addr, 1, StakeUpvote)
@@ -52,7 +52,7 @@ func TestKeeper_SubmitArgument(t *testing.T) {
 	_, err = k.SubmitArgument(ctx, "body", "summary", addr, 1, StakeBacking)
 	assert.Error(t, err)
 	assert.Equal(t, ErrorCodeAccountJailed, err.Code())
-	_ = authKeeper.UnJail(ctx, addr)
+	_ = mdb.accountKeeper.UnJail(ctx, addr)
 
 	argument, err := k.SubmitArgument(ctx, "body", "summary", addr, 1, StakeBacking)
 	assert.NoError(t, err)
@@ -162,12 +162,12 @@ func TestKeeper_SubmitArgument(t *testing.T) {
 }
 
 func TestKeeper_AfterTimeStakesIterator(t *testing.T) {
-	ctx, k, accKeeper, _, _ := mockDB()
+	ctx, k, mdb := mockDB()
 	ctx = ctx.WithBlockTime(mustParseTime("2019-01-15"))
 	addr, _ := sdk.AccAddressFromBech32("cosmos18pkfm85y3v65rrmn8f2y2z2ytenhq0943q5unm")
 	addr2, _ := sdk.AccAddressFromBech32("cosmos16nycdfk7293jrj42rke9dg9ffz5qmj3kzrcddc")
-	setCoins(ctx, accKeeper, sdk.Coins{sdk.NewInt64Coin(app.StakeDenom, app.Shanev*300)}, addr)
-	setCoins(ctx, accKeeper, sdk.Coins{sdk.NewInt64Coin(app.StakeDenom, app.Shanev*300)}, addr2)
+	setCoins(ctx, mdb.authAccKeeper, sdk.Coins{sdk.NewInt64Coin(app.StakeDenom, app.Shanev*300)}, addr)
+	setCoins(ctx, mdb.authAccKeeper, sdk.Coins{sdk.NewInt64Coin(app.StakeDenom, app.Shanev*300)}, addr2)
 
 	_, err := k.SubmitArgument(ctx, "body", "summary", addr, 1, StakeBacking)
 	assert.NoError(t, err)
@@ -203,11 +203,11 @@ func TestKeeper_AfterTimeStakesIterator(t *testing.T) {
 }
 
 func TestKeeper_SubmitUpvote(t *testing.T) {
-	ctx, k, accKeeper, _, _ := mockDB()
+	ctx, k, mdb := mockDB()
 	ctx.WithBlockTime(time.Now())
-	addr := createFakeFundedAccount(ctx, accKeeper, sdk.Coins{sdk.NewInt64Coin(app.StakeDenom, app.Shanev*300)})
-	addr2 := createFakeFundedAccount(ctx, accKeeper, sdk.Coins{sdk.NewInt64Coin(app.StakeDenom, app.Shanev*300)})
-	addr3 := createFakeFundedAccount(ctx, accKeeper, sdk.Coins{sdk.NewInt64Coin(app.StakeDenom, app.Shanev*300)})
+	addr := createFakeFundedAccount(ctx, mdb.authAccKeeper, sdk.Coins{sdk.NewInt64Coin(app.StakeDenom, app.Shanev*300)})
+	addr2 := createFakeFundedAccount(ctx, mdb.authAccKeeper, sdk.Coins{sdk.NewInt64Coin(app.StakeDenom, app.Shanev*300)})
+	addr3 := createFakeFundedAccount(ctx, mdb.authAccKeeper, sdk.Coins{sdk.NewInt64Coin(app.StakeDenom, app.Shanev*300)})
 	argument, err := k.SubmitArgument(ctx, "body", "summary", addr, 1, StakeBacking)
 	assert.NoError(t, err)
 	expectedStake := Stake{
@@ -293,7 +293,7 @@ func TestKeeper_SubmitUpvote(t *testing.T) {
 }
 
 func Test_interest(t *testing.T) {
-	ctx, k, _, _, _ := mockDB()
+	ctx, k, _ := mockDB()
 	amount := sdk.NewInt64Coin(app.StakeDenom, 50000000000)
 	now := time.Now()
 	p := k.GetParams(ctx)
@@ -303,7 +303,7 @@ func Test_interest(t *testing.T) {
 }
 
 func Test_splitReward(t *testing.T) {
-	ctx, k, _, _, _ := mockDB()
+	ctx, k, _ := mockDB()
 	amount := sdk.NewInt64Coin(app.StakeDenom, 500000000000000)
 	now := time.Now()
 	p := k.GetParams(ctx)
@@ -328,8 +328,8 @@ func Test_splitReward(t *testing.T) {
 }
 
 func TestKeeper_StakePeriodAmountLimit(t *testing.T) {
-	ctx, k, accKeeper, _, _ := mockDB()
-	addr := createFakeFundedAccount(ctx, accKeeper, sdk.Coins{sdk.NewInt64Coin(app.StakeDenom, app.Shanev*250)})
+	ctx, k, mdb := mockDB()
+	addr := createFakeFundedAccount(ctx, mdb.authAccKeeper, sdk.Coins{sdk.NewInt64Coin(app.StakeDenom, app.Shanev*250)})
 
 	_, err := k.SubmitArgument(ctx.WithBlockTime(mustParseTime("2019-01-01")),
 		"arg1", "summary1", addr, 1, StakeChallenge)
@@ -352,9 +352,9 @@ func TestKeeper_StakePeriodAmountLimit(t *testing.T) {
 }
 
 func TestKeeper_InsufficientCoins(t *testing.T) {
-	ctx, k, accKeeper, _, _ := mockDB()
+	ctx, k, mdb := mockDB()
 	_, _, unfundedAddress := keyPubAddr()
-	addr := createFakeFundedAccount(ctx, accKeeper, sdk.Coins{sdk.NewInt64Coin(app.StakeDenom, app.Shanev*300)})
+	addr := createFakeFundedAccount(ctx, mdb.authAccKeeper, sdk.Coins{sdk.NewInt64Coin(app.StakeDenom, app.Shanev*300)})
 	_, err := k.SubmitArgument(ctx, "body", "summary", unfundedAddress, 1, StakeBacking)
 	assert.Error(t, err)
 	assert.Equal(t, sdk.CodeInsufficientFunds, err.Code())

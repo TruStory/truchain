@@ -12,7 +12,7 @@ import (
 )
 
 func TestQuerier_EmptyTopArgument(t *testing.T) {
-	ctx, k, _, _, _ := mockDB()
+	ctx, k, _ := mockDB()
 
 	querier := NewQuerier(k)
 	queryParams := QueryClaimTopArgumentParams{
@@ -35,7 +35,7 @@ func TestQuerier_EmptyTopArgument(t *testing.T) {
 }
 
 func TestQuerier_EarnedCoins(t *testing.T) {
-	ctx, k, _, _, _ := mockDB()
+	ctx, k, _ := mockDB()
 	_, _, address := keyPubAddr()
 	usersEarnings := make([]UserEarnedCoins, 0)
 	coins := sdk.NewCoins(sdk.NewInt64Coin("crypto", app.Shanev*10),

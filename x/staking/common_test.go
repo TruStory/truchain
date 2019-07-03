@@ -74,7 +74,14 @@ func (m *mockClaimKeeper) Claim(ctx sdk.Context, id uint64) (claim.Claim, bool) 
 	return c, ok
 }
 
-func mockDB() (sdk.Context, Keeper, auth.AccountKeeper, AccountKeeper, ClaimKeeper) {
+type mockedDB struct {
+	authAccKeeper auth.AccountKeeper
+	accountKeeper AccountKeeper
+	claimKeeper   ClaimKeeper
+	bankKeeper    BankKeeper
+}
+
+func mockDB() (sdk.Context, Keeper, *mockedDB) {
 	db := dbm.NewMemDB()
 	storeKey := sdk.NewKVStoreKey(ModuleName)
 	accKey := sdk.NewKVStoreKey(auth.StoreKey)
@@ -115,7 +122,14 @@ func mockDB() (sdk.Context, Keeper, auth.AccountKeeper, AccountKeeper, ClaimKeep
 	mockedClaimKeeper := &mockClaimKeeper{}
 	keeper := NewKeeper(cdc, storeKey, mockedAccountKeeper, trubankKeeper, mockedClaimKeeper, pk.Subspace(DefaultParamspace), DefaultCodespace)
 	InitGenesis(ctx, keeper, DefaultGenesisState())
-	return ctx, keeper, accKeeper, mockedAccountKeeper, mockedClaimKeeper
+
+	mockedDB := &mockedDB{
+		claimKeeper:   mockedClaimKeeper,
+		accountKeeper: mockedAccountKeeper,
+		authAccKeeper: accKeeper,
+		bankKeeper:    trubankKeeper,
+	}
+	return ctx, keeper, mockedDB
 }
 
 func createFakeFundedAccount(ctx sdk.Context, am auth.AccountKeeper, coins sdk.Coins) sdk.AccAddress {
