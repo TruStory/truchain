@@ -38,7 +38,7 @@ type QueryArgumentStakesParams struct {
 type QueryStakeParams struct {
 	StakeID uint64 `json:"stake_id"`
 type QueryArgumentsByIDsParams struct {
-	IDs []uint64 `json:"ids"`
+	ArgumentIDs []uint64 `json:"argument_ids"`
 }
 
 type QueryUserStakesParams struct {
@@ -161,7 +161,7 @@ func queryArgumentsByIDs(ctx sdk.Context, req abci.RequestQuery, keeper Keeper) 
 	bz, err := keeper.codec.MarshalJSON(stakes)
 
 	var arguments []Argument
-	for _, id := range params.IDs {
+	for _, id := range params.ArgumentIDs {
 		a, ok := keeper.getArgument(ctx, id)
 		if !ok {
 			return nil, ErrCodeUnknownArgument(id)

@@ -100,7 +100,7 @@ func TestQuerier_ArgumentsByIDs(t *testing.T) {
 
 	querier := NewQuerier(k)
 	queryParams := QueryArgumentsByIDsParams{
-		IDs: []uint64{argument1.ID, argument2.ID},
+		ArgumentIDs: []uint64{argument1.ID, argument2.ID},
 	}
 
 	query := abci.RequestQuery{
