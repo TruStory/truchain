@@ -13,9 +13,6 @@ var (
 	_ sdk.AppModuleBasic = AppModuleBasic{}
 )
 
-// ModuleName is the name of this module
-const ModuleName = "trubank2"
-
 // AppModuleBasic defines the internal data for the module
 // ----------------------------------------------------------------------------
 type AppModuleBasic struct{}

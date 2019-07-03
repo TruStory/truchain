@@ -2,6 +2,7 @@ package exported
 
 import (
 	"time"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
@@ -152,4 +153,25 @@ func GetFilters(filterSetters ...Filter) Filters {
 		filter(&filters)
 	}
 	return filters
+}
+
+// ModuleName is the name of this module
+const ModuleName = "trubank2"
+
+// Defines bank module constants
+const (
+	QueryTransactionsByAddress = "transactions_by_address"
+	StoreKey                   = ModuleName
+	RouterKey                  = ModuleName
+	QuerierRoute               = ModuleName
+	DefaultParamspace          = ModuleName
+)
+
+// QueryTransactionsByAddress query transactions params for a specific address.
+type QueryTransactionsByAddressParams struct {
+	Address   sdk.AccAddress    `json:"address"`
+	Types     []TransactionType `json:"types,omitempty"`
+	SortOrder SortOrderType     `json:"sort_order,omitempty"`
+	Limit     int               `json:"limit,omitempty"`
+	Offset    int               `json:"offset,omitempty"`
 }
