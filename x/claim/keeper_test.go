@@ -64,10 +64,10 @@ func TestClaims(t *testing.T) {
 	}
 
 	claims := keeper.Claims(ctx)
-	assert.Equal(t, uint64(1), claims[0].ID)
-	assert.Equal(t, uint64(2), claims[1].ID)
-	assert.Equal(t, uint64(100), claims[99].ID)
-	assert.Equal(t, uint64(1000), claims[999].ID)
+	assert.Equal(t, uint64(1001), claims[0].ID)
+	assert.Equal(t, uint64(1000), claims[1].ID)
+	assert.Equal(t, uint64(2), claims[999].ID)
+	assert.Equal(t, uint64(1), claims[1000].ID)
 }
 
 func TestCommunityClaims(t *testing.T) {
@@ -78,10 +78,10 @@ func TestCommunityClaims(t *testing.T) {
 	}
 
 	claims := keeper.CommunityClaims(ctx, "crypto")
-	assert.Equal(t, uint64(1), claims[0].ID)
-	assert.Equal(t, uint64(2), claims[1].ID)
-	assert.Equal(t, uint64(100), claims[99].ID)
-	assert.Equal(t, uint64(1000), claims[999].ID)
+	assert.Equal(t, uint64(1001), claims[0].ID)
+	assert.Equal(t, uint64(1000), claims[1].ID)
+	assert.Equal(t, uint64(2), claims[999].ID)
+	assert.Equal(t, uint64(1), claims[1000].ID)
 }
 
 func TestCreatorClaims(t *testing.T) {
@@ -94,10 +94,10 @@ func TestCreatorClaims(t *testing.T) {
 	creator := sdk.AccAddress([]byte{1, 2})
 
 	claims := keeper.CreatorClaims(ctx, creator)
-	assert.Equal(t, uint64(1), claims[0].ID)
-	assert.Equal(t, uint64(2), claims[1].ID)
-	assert.Equal(t, uint64(100), claims[99].ID)
-	assert.Equal(t, uint64(1000), claims[999].ID)
+	assert.Equal(t, uint64(1001), claims[0].ID)
+	assert.Equal(t, uint64(1000), claims[1].ID)
+	assert.Equal(t, uint64(2), claims[999].ID)
+	assert.Equal(t, uint64(1), claims[1000].ID)
 }
 
 func TestCreatedTimeClaims(t *testing.T) {
