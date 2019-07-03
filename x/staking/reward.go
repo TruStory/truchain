@@ -56,7 +56,6 @@ func (k Keeper) distributeReward(ctx sdk.Context, stake Stake) (RewardResult, sd
 		referenceID = stake.ID
 	default:
 		return RewardResult{}, ErrCodeUnknownStakeType()
-		referenceID = 0
 	}
 	_, err := k.bankKeeper.AddCoin(ctx, stake.Creator, stake.Amount, referenceID, refundType)
 	if err != nil {
