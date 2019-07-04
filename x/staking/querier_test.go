@@ -3,6 +3,7 @@ package staking
 import (
 	"strings"
 	"testing"
+	"time"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/stretchr/testify/assert"
@@ -83,5 +84,36 @@ func TestQuerier_EarnedCoins(t *testing.T) {
 	jsonErr = k.codec.UnmarshalJSON(bz, &totalEarned)
 	assert.NoError(t, jsonErr)
 	assert.Equal(t, sdk.NewInt64Coin(app.StakeDenom, app.Shanev*40), totalEarned)
+
+}
+
+func TestQuerier_ArgumentsByIDs(t *testing.T) {
+	ctx, k, mdb := mockDB()
+	ctx.WithBlockTime(time.Now())
+	addr := createFakeFundedAccount(ctx, mdb.authAccKeeper, sdk.Coins{sdk.NewInt64Coin(app.StakeDenom, app.Shanev*300)})
+
+	argument1, err := k.SubmitArgument(ctx, "body", "summary", addr, 1, StakeBacking)
+	assert.NoError(t, err)
+
+	argument2, err := k.SubmitArgument(ctx, "body", "summary", addr, 1, StakeBacking)
+	assert.NoError(t, err)
+
+	querier := NewQuerier(k)
+	queryParams := QueryArgumentsByIDsParams{
+		ArgumentIDs: []uint64{argument1.ID, argument2.ID},
+	}
+
+	query := abci.RequestQuery{
+		Path: strings.Join([]string{"custom", QuerierRoute, QueryArgumentsByIDs}, "/"),
+		Data: []byte{},
+	}
+
+	query.Data = k.codec.MustMarshalJSON(&queryParams)
+	bz, err := querier(ctx, []string{QueryArgumentsByIDs}, query)
+	assert.NoError(t, err)
+
+	var arguments []Argument
+	k.codec.UnmarshalJSON(bz, &arguments)
+	assert.Len(t, arguments, 2)
 
 }
