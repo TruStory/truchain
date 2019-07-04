@@ -1,6 +1,7 @@
 package exported
 
 import (
+	"github.com/TruStory/truchain/x/bank/types"
 	"time"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -155,12 +156,10 @@ func GetFilters(filterSetters ...Filter) Filters {
 	return filters
 }
 
-// ModuleName is the name of this module
-const ModuleName = "trubank2"
-
 // Defines bank module constants
 const (
 	QueryTransactionsByAddress = "transactions_by_address"
+	ModuleName                 = types.ModuleName
 	StoreKey                   = ModuleName
 	RouterKey                  = ModuleName
 	QuerierRoute               = ModuleName

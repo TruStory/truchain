@@ -2,7 +2,6 @@ package bank
 
 import (
 	"fmt"
-
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
@@ -33,7 +32,7 @@ func InitGenesis(ctx sdk.Context, keeper Keeper, data GenesisState) {
 	keeper.SetParams(ctx, data.Params)
 	for _, tx := range data.Transactions {
 		keeper.Set(ctx, tx.ID, tx)
-		keeper.PushWithAddress(ctx, keeper.storeKey, accountKey, tx.ID, tx.AppAccountAddress)
+		keeper.PushWithAddress(ctx, keeper.storeKey, AccountKey, tx.ID, tx.AppAccountAddress)
 	}
 	keeper.SetLen(ctx, uint64(len(data.Transactions)))
 }
