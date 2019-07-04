@@ -1,7 +1,9 @@
 package exported
 
 import (
+	"github.com/TruStory/truchain/x/bank/types"
 	"time"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
@@ -152,4 +154,23 @@ func GetFilters(filterSetters ...Filter) Filters {
 		filter(&filters)
 	}
 	return filters
+}
+
+// Defines bank module constants
+const (
+	QueryTransactionsByAddress = "transactions_by_address"
+	ModuleName                 = types.ModuleName
+	StoreKey                   = ModuleName
+	RouterKey                  = ModuleName
+	QuerierRoute               = ModuleName
+	DefaultParamspace          = ModuleName
+)
+
+// QueryTransactionsByAddress query transactions params for a specific address.
+type QueryTransactionsByAddressParams struct {
+	Address   sdk.AccAddress    `json:"address"`
+	Types     []TransactionType `json:"types,omitempty"`
+	SortOrder SortOrderType     `json:"sort_order,omitempty"`
+	Limit     int               `json:"limit,omitempty"`
+	Offset    int               `json:"offset,omitempty"`
 }

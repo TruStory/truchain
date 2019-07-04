@@ -84,10 +84,10 @@ func ErrCodeUnknownClaim(claimID uint64) sdk.Error {
 }
 
 // ErrCodeUnknownStake throws an error when an invalid stake id
-func ErrCodeUnknownStake(argumentID uint64) sdk.Error {
+func ErrCodeUnknownStake(stakeID uint64) sdk.Error {
 	return sdk.NewError(DefaultCodespace,
 		ErrorCodeUnknownStake,
-		fmt.Sprintf("Unknown stake id %d", argumentID),
+		fmt.Sprintf("Unknown stake id %d", stakeID),
 	)
 }
 

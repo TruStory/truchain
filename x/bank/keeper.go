@@ -63,7 +63,7 @@ func (k Keeper) AddCoin(ctx sdk.Context, addr sdk.AccAddress, amt sdk.Coin,
 		CreatedTime:       ctx.BlockHeader().Time,
 	}
 	k.Set(ctx, tx.ID, tx)
-	k.PushWithAddress(ctx, k.storeKey, accountKey, tx.ID, addr)
+	k.PushWithAddress(ctx, k.storeKey, AccountKey, tx.ID, addr)
 	return coins, nil
 }
 
@@ -87,7 +87,7 @@ func (k Keeper) SubtractCoin(ctx sdk.Context, addr sdk.AccAddress, amt sdk.Coin,
 		CreatedTime:       ctx.BlockHeader().Time,
 	}
 	k.Set(ctx, tx.ID, tx)
-	k.PushWithAddress(ctx, k.storeKey, accountKey, tx.ID, addr)
+	k.PushWithAddress(ctx, k.storeKey, AccountKey, tx.ID, addr)
 	return coins, nil
 }
 
@@ -159,9 +159,9 @@ func (k Keeper) TransactionsByAddress(ctx sdk.Context, address sdk.AccAddress, f
 		return true
 	}
 	if filters.SortOrder == SortDesc {
-		k.ReverseMapByAddress(ctx, accountKey, address, mapFunc)
+		k.ReverseMapByAddress(ctx, AccountKey, address, mapFunc)
 		return transactions
 	}
-	k.MapByAddress(ctx, accountKey, address, mapFunc)
+	k.MapByAddress(ctx, AccountKey, address, mapFunc)
 	return transactions
 }

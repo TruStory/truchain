@@ -1,11 +1,12 @@
-package bank
+package types
 
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
-// Defines bank module constants
+
 const (
+	ModuleName        = "trubank2"
 	StoreKey          = ModuleName
 	RouterKey         = ModuleName
 	QuerierRoute      = ModuleName
@@ -14,5 +15,5 @@ const (
 
 // Association list keys
 var (
-	accountKey = sdk.NewKVStoreKey("account")
+	AccountKey = sdk.NewKVStoreKey("account")
 )

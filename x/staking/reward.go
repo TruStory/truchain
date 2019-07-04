@@ -80,7 +80,7 @@ func (k Keeper) distributeReward(ctx sdk.Context, stake Stake) (RewardResult, sd
 	_, err = k.bankKeeper.AddCoin(ctx,
 		argument.Creator,
 		creatorRewardCoin,
-		argument.ID,
+		stake.ID,
 		TransactionInterestUpvoteReceived)
 	if err != nil {
 		return RewardResult{}, err

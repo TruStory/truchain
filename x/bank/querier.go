@@ -5,19 +5,6 @@ import (
 	abci "github.com/tendermint/tendermint/abci/types"
 )
 
-const (
-	QueryTransactionsByAddress = "transactions_by_address"
-)
-
-// QueryTransactionsByAddress query transactions params for a specific address.
-type QueryTransactionsByAddressParams struct {
-	Address   sdk.AccAddress    `json:"address"`
-	Types     []TransactionType `json:"types,omitempty"`
-	SortOrder SortOrderType     `json:"sort_order,omitempty"`
-	Limit     int               `json:"limit,omitempty"`
-	Offset    int               `json:"offset,omitempty"`
-}
-
 // NewQuerier creates a new querier
 func NewQuerier(keeper Keeper) sdk.Querier {
 	return func(ctx sdk.Context, path []string, req abci.RequestQuery) ([]byte, sdk.Error) {
