@@ -37,6 +37,8 @@ type QueryArgumentStakesParams struct {
 
 type QueryStakeParams struct {
 	StakeID uint64 `json:"stake_id"`
+}
+
 type QueryArgumentsByIDsParams struct {
 	ArgumentIDs []uint64 `json:"argument_ids"`
 }
@@ -148,18 +150,29 @@ func queryArgumentStakes(ctx sdk.Context, req abci.RequestQuery, keeper Keeper) 
 
 func queryStake(ctx sdk.Context, req abci.RequestQuery, keeper Keeper) ([]byte, sdk.Error) {
 	var params QueryStakeParams
+	err := keeper.codec.UnmarshalJSON(req.Data, &params)
+	if err != nil {
+		return nil, ErrInvalidQueryParams(err)
+	}
+
+	stakes, ok := keeper.getStake(ctx, params.StakeID)
+	if !ok {
+		return nil, ErrCodeUnknownStake(params.StakeID)
+	}
+
+	bz, err := keeper.codec.MarshalJSON(stakes)
+	if err != nil {
+		return nil, ErrJSONParse(err)
+	}
+	return bz, nil
+}
+
 func queryArgumentsByIDs(ctx sdk.Context, req abci.RequestQuery, keeper Keeper) ([]byte, sdk.Error) {
 	var params QueryArgumentsByIDsParams
 	err := keeper.codec.UnmarshalJSON(req.Data, &params)
 	if err != nil {
 		return nil, ErrInvalidQueryParams(err)
 	}
-	stakes, ok := keeper.getStake(ctx, params.StakeID)
-	if !ok {
-		return nil, ErrCodeUnknownStake(params.StakeID)
-	}
-	bz, err := keeper.codec.MarshalJSON(stakes)
-
 	var arguments []Argument
 	for _, id := range params.ArgumentIDs {
 		a, ok := keeper.getArgument(ctx, id)
