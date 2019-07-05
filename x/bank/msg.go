@@ -52,6 +52,6 @@ func (msg MsgPayReward) GetSigners() []sdk.AccAddress {
 }
 
 func (msg MsgPayReward) GetSignBytes() []byte {
-	bz := moduleCodec.MustMarshalJSON(msg)
+	bz := ModuleCodec.MustMarshalJSON(msg)
 	return sdk.MustSortJSON(bz)
 }

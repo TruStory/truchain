@@ -36,6 +36,7 @@ var (
 	SortOrder               = exported.SortOrder
 	Limit                   = exported.Limit
 	Offset                  = exported.Offset
+	ModuleCodec             = types.ModuleCodec
 )
 
 type (
