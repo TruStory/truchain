@@ -291,6 +291,11 @@ func NewTruChain(logger log.Logger, db dbm.DB, loadLatest bool, options ...func(
 		app.expirationKeeper,
 		app.stakeKeeper,
 		app.storyKeeper,
+		app.appAccountKeeper,
+		app.communityKeeper,
+		app.claimKeeper,
+		app.truBankKeeper2,
+		app.truStakingKeeper,
 	)
 
 	app.communityKeeper = community.NewKeeper(
