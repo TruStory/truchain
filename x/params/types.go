@@ -1,10 +1,15 @@
 package params
 
 import (
+	"github.com/TruStory/truchain/x/account"
 	"github.com/TruStory/truchain/x/argument"
+	"github.com/TruStory/truchain/x/bank"
 	"github.com/TruStory/truchain/x/challenge"
+	"github.com/TruStory/truchain/x/claim"
+	"github.com/TruStory/truchain/x/community"
 	"github.com/TruStory/truchain/x/expiration"
 	"github.com/TruStory/truchain/x/stake"
+	"github.com/TruStory/truchain/x/staking"
 	"github.com/TruStory/truchain/x/story"
 )
 
@@ -19,6 +24,11 @@ type Params struct {
 	ExpirationParams expiration.Params
 	StakeParams      stake.Params
 	StoryParams      story.Params
+	AccountParams    account.Params
+	CommunityParams  community.Params
+	ClaimParams      claim.Params
+	BankParams       bank.Params
+	StakingParams    staking.Params
 }
 
 // DefaultParams creates the default params
@@ -29,5 +39,10 @@ func DefaultParams() Params {
 		ExpirationParams: expiration.DefaultParams(),
 		StakeParams:      stake.DefaultParams(),
 		StoryParams:      story.DefaultParams(),
+		AccountParams:    account.DefaultParams(),
+		CommunityParams:  community.DefaultParams(),
+		ClaimParams:      claim.DefaultParams(),
+		BankParams:       bank.DefaultParams(),
+		StakingParams:    staking.DefaultParams(),
 	}
 }
