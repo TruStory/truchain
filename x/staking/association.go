@@ -51,6 +51,28 @@ func (k Keeper) IterateArgumentStakes(ctx sdk.Context, argumentID uint64, cb fun
 	}
 }
 
+// setCommunityStake sets a community <-> stake association in the store
+func (k Keeper) setCommunityStake(ctx sdk.Context, communityID string, stakeID uint64) {
+	bz := k.codec.MustMarshalBinaryLengthPrefixed(stakeID)
+	k.store(ctx).Set(communityStakeKey(communityID, stakeID), bz)
+}
+
+func (k Keeper) IterateCommunityStakes(ctx sdk.Context, communityID string, cb func(stake Stake) (stop bool)) {
+	iterator := sdk.KVStorePrefixIterator(k.store(ctx), communityStakesPrefix(communityID))
+	defer iterator.Close()
+	for ; iterator.Valid(); iterator.Next() {
+		var stakeID uint64
+		k.codec.MustUnmarshalBinaryLengthPrefixed(iterator.Value(), &stakeID)
+		stake, ok := k.getStake(ctx, stakeID)
+		if !ok {
+			panic(fmt.Sprintf("unable to retrieve stake with id %d", stakeID))
+		}
+		if cb(stake) {
+			break
+		}
+	}
+}
+
 // serUserArgument sets a user <-> argument association in the store
 func (k Keeper) serUserArgument(ctx sdk.Context, creator sdk.AccAddress, argumentID uint64) {
 	bz := k.codec.MustMarshalBinaryLengthPrefixed(argumentID)

@@ -11,6 +11,7 @@ const (
 	QueryClaimArguments   = "claim_arguments"
 	QueryUserArguments    = "user_arguments"
 	QueryArgumentStakes   = "argument_stakes"
+	QueryCommunityStakes  = "community_stakes"
 	QueryStake            = "stake"
 	QueryArgumentsByIDs   = "arguments_ids"
 	QueryUserStakes       = "user_stakes"
@@ -33,6 +34,10 @@ type QueryUserArgumentsParams struct {
 
 type QueryArgumentStakesParams struct {
 	ArgumentID uint64 `json:"argument_id"`
+}
+
+type QueryCommunityStakesParams struct {
+	CommunityID string `json:"community_id"`
 }
 
 type QueryStakeParams struct {
@@ -71,6 +76,8 @@ func NewQuerier(keeper Keeper) sdk.Querier {
 			return queryUserArguments(ctx, req, keeper)
 		case QueryArgumentStakes:
 			return queryArgumentStakes(ctx, req, keeper)
+		case QueryCommunityStakes:
+			return queryCommunityStakes(ctx, req, keeper)
 		case QueryStake:
 			return queryStake(ctx, req, keeper)
 		case QueryArgumentsByIDs:
@@ -141,6 +148,20 @@ func queryArgumentStakes(ctx sdk.Context, req abci.RequestQuery, keeper Keeper) 
 		return nil, ErrInvalidQueryParams(err)
 	}
 	stakes := keeper.ArgumentStakes(ctx, params.ArgumentID)
+	bz, err := keeper.codec.MarshalJSON(stakes)
+	if err != nil {
+		return nil, ErrJSONParse(err)
+	}
+	return bz, nil
+}
+
+func queryCommunityStakes(ctx sdk.Context, req abci.RequestQuery, keeper Keeper) ([]byte, sdk.Error) {
+	var params QueryCommunityStakesParams
+	err := keeper.codec.UnmarshalJSON(req.Data, &params)
+	if err != nil {
+		return nil, ErrInvalidQueryParams(err)
+	}
+	stakes := keeper.CommunityStakes(ctx, params.CommunityID)
 	bz, err := keeper.codec.MarshalJSON(stakes)
 	if err != nil {
 		return nil, ErrJSONParse(err)

@@ -9,8 +9,6 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/params"
 	"github.com/tendermint/tendermint/libs/log"
-
-	"github.com/TruStory/truchain/x/claim"
 )
 
 // Keeper is the model object for the package staking module
@@ -82,6 +80,15 @@ func (k Keeper) ArgumentStakes(ctx sdk.Context, argumentID uint64) []Stake {
 	return stakes
 }
 
+func (k Keeper) CommunityStakes(ctx sdk.Context, communityID string) []Stake {
+	stakes := make([]Stake, 0)
+	k.IterateCommunityStakes(ctx, communityID, func(stake Stake) bool {
+		stakes = append(stakes, stake)
+		return false
+	})
+	return stakes
+}
+
 func (k Keeper) UserStakes(ctx sdk.Context, address sdk.AccAddress) []Stake {
 	stakes := make([]Stake, 0)
 	k.IterateUserStakes(ctx, address, func(stake Stake) bool {
@@ -115,8 +122,13 @@ func (k Keeper) SubmitUpvote(ctx sdk.Context, argumentID uint64, creator sdk.Acc
 			return Stake{}, ErrCodeDuplicateStake(argumentID)
 		}
 	}
+	claim, ok := k.claimKeeper.Claim(ctx, argument.ClaimID)
+	if !ok {
+		return Stake{}, ErrCodeUnknownClaim(argument.ClaimID)
+	}
+
 	upvoteStake := k.GetParams(ctx).UpvoteStake
-	stake, err := k.newStake(ctx, upvoteStake, creator, StakeUpvote, argumentID)
+	stake, err := k.newStake(ctx, upvoteStake, creator, StakeUpvote, argumentID, claim.CommunityID)
 	if err != nil {
 		return stake, err
 	}
@@ -149,9 +161,9 @@ func (k Keeper) SubmitArgument(ctx sdk.Context, body, summary string,
 	if err != nil {
 		return Argument{}, err
 	}
-	_, ok := k.claimKeeper.Claim(ctx, claimID)
+	claim, ok := k.claimKeeper.Claim(ctx, claimID)
 	if !ok {
-		return Argument{}, claim.ErrUnknownClaim(claimID)
+		return Argument{}, ErrCodeUnknownClaim(claimID)
 	}
 
 	arguments := k.ClaimArguments(ctx, claimID)
@@ -183,7 +195,7 @@ func (k Keeper) SubmitArgument(ctx sdk.Context, body, summary string,
 		UpvotedStake: sdk.NewInt64Coin(app.StakeDenom, 0),
 		TotalStake:   creationAmount,
 	}
-	_, err = k.newStake(ctx, creationAmount, creator, stakeType, argument.ID)
+	_, err = k.newStake(ctx, creationAmount, creator, stakeType, argument.ID, claim.CommunityID)
 	if err != nil {
 		return Argument{}, err
 	}
@@ -240,7 +252,7 @@ func (k Keeper) checkStakeThreshold(ctx sdk.Context, address sdk.AccAddress) sdk
 }
 
 func (k Keeper) newStake(ctx sdk.Context, amount sdk.Coin, creator sdk.AccAddress,
-	stakeType StakeType, argumentID uint64) (Stake, sdk.Error) {
+	stakeType StakeType, argumentID uint64, communityID string) (Stake, sdk.Error) {
 	if !stakeType.Valid() {
 		return Stake{}, ErrCodeInvalidStakeType(stakeType)
 	}
@@ -271,6 +283,7 @@ func (k Keeper) newStake(ctx sdk.Context, amount sdk.Coin, creator sdk.AccAddres
 	k.InsertActiveStakeQueue(ctx, stakeID, stake.EndTime)
 	k.setArgumentStake(ctx, argumentID, stake.ID)
 	k.setUserStake(ctx, creator, stake.CreatedTime, stake.ID)
+	k.setCommunityStake(ctx, communityID, stake.ID)
 	return stake, nil
 }
 
