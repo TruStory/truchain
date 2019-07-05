@@ -1,20 +1,21 @@
 package exported
 
 import (
-	"github.com/TruStory/truchain/x/bank/types"
 	"time"
+
+	"github.com/TruStory/truchain/x/bank/types"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
 // Transaction stores data related to a transaction
 type Transaction struct {
-	ID                uint64
-	Type              TransactionType
-	AppAccountAddress sdk.AccAddress
-	ReferenceID       uint64
-	Amount            sdk.Coin
-	CreatedTime       time.Time
+	ID                uint64          `json:"id"`
+	Type              TransactionType `json:"type"`
+	AppAccountAddress sdk.AccAddress  `json:"app_account_address"`
+	ReferenceID       uint64          `json:"reference_id"`
+	Amount            sdk.Coin        `json:"amount"`
+	CreatedTime       time.Time       `json:"created_time"`
 }
 
 // TransactionType defines the type of transaction.
