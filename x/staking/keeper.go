@@ -98,6 +98,15 @@ func (k Keeper) UserStakes(ctx sdk.Context, address sdk.AccAddress) []Stake {
 	return stakes
 }
 
+func (k Keeper) UserCommunityStakes(ctx sdk.Context, address sdk.AccAddress, communityID string) []Stake {
+	stakes := make([]Stake, 0)
+	k.IterateUserCommunityStakes(ctx, address, communityID, func(stake Stake) bool {
+		stakes = append(stakes, stake)
+		return false
+	})
+	return stakes
+}
+
 func (k Keeper) UserArguments(ctx sdk.Context, address sdk.AccAddress) []Argument {
 	arguments := make([]Argument, 0)
 	k.IterateUserArguments(ctx, address, func(argument Argument) bool {
@@ -284,6 +293,7 @@ func (k Keeper) newStake(ctx sdk.Context, amount sdk.Coin, creator sdk.AccAddres
 	k.setArgumentStake(ctx, argumentID, stake.ID)
 	k.setUserStake(ctx, creator, stake.CreatedTime, stake.ID)
 	k.setCommunityStake(ctx, communityID, stake.ID)
+	k.setUserCommunityStake(ctx, stake.Creator, communityID, stakeID)
 	return stake, nil
 }
 

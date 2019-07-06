@@ -7,17 +7,18 @@ import (
 )
 
 const (
-	QueryClaimArgument    = "claim_argument"
-	QueryClaimArguments   = "claim_arguments"
-	QueryUserArguments    = "user_arguments"
-	QueryArgumentStakes   = "argument_stakes"
-	QueryCommunityStakes  = "community_stakes"
-	QueryStake            = "stake"
-	QueryArgumentsByIDs   = "arguments_ids"
-	QueryUserStakes       = "user_stakes"
-	QueryClaimTopArgument = "claim_top_argument"
-	QueryEarnedCoins      = "earned_coins"
-	QueryTotalEarnedCoins = "total_earned_coins"
+	QueryClaimArgument       = "claim_argument"
+	QueryClaimArguments      = "claim_arguments"
+	QueryUserArguments       = "user_arguments"
+	QueryArgumentStakes      = "argument_stakes"
+	QueryCommunityStakes     = "community_stakes"
+	QueryStake               = "stake"
+	QueryArgumentsByIDs      = "arguments_ids"
+	QueryUserStakes          = "user_stakes"
+	QueryUserCommunityStakes = "user_community_stakes"
+	QueryClaimTopArgument    = "claim_top_argument"
+	QueryEarnedCoins         = "earned_coins"
+	QueryTotalEarnedCoins    = "total_earned_coins"
 )
 
 type QueryClaimArgumentParams struct {
@@ -52,6 +53,11 @@ type QueryUserStakesParams struct {
 	Address sdk.AccAddress `json:"address"`
 }
 
+type QueryUserCommunityStakesParams struct {
+	Address     sdk.AccAddress `json:"address"`
+	CommunityID string         `json:"community_id"`
+}
+
 type QueryClaimTopArgumentParams struct {
 	ClaimID uint64 `json:"claim_id"`
 }
@@ -84,6 +90,8 @@ func NewQuerier(keeper Keeper) sdk.Querier {
 			return queryArgumentsByIDs(ctx, req, keeper)
 		case QueryUserStakes:
 			return queryUserStakes(ctx, req, keeper)
+		case QueryUserCommunityStakes:
+			return queryUserCommunityStakes(ctx, req, keeper)
 		case QueryClaimTopArgument:
 			return queryClaimTopArgument(ctx, req, keeper)
 		case QueryEarnedCoins:
@@ -217,6 +225,20 @@ func queryUserStakes(ctx sdk.Context, req abci.RequestQuery, keeper Keeper) ([]b
 		return nil, ErrInvalidQueryParams(err)
 	}
 	stakes := keeper.UserStakes(ctx, params.Address)
+	bz, err := keeper.codec.MarshalJSON(stakes)
+	if err != nil {
+		return nil, ErrJSONParse(err)
+	}
+	return bz, nil
+}
+
+func queryUserCommunityStakes(ctx sdk.Context, req abci.RequestQuery, keeper Keeper) ([]byte, sdk.Error) {
+	var params QueryUserCommunityStakesParams
+	err := keeper.codec.UnmarshalJSON(req.Data, &params)
+	if err != nil {
+		return nil, ErrInvalidQueryParams(err)
+	}
+	stakes := keeper.UserCommunityStakes(ctx, params.Address, params.CommunityID)
 	bz, err := keeper.codec.MarshalJSON(stakes)
 	if err != nil {
 		return nil, ErrJSONParse(err)

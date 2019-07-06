@@ -65,6 +65,7 @@ func InitGenesis(ctx sdk.Context, k Keeper, data GenesisState) {
 			panic(fmt.Sprintf("failed getting claim %d", arg.ClaimID))
 		}
 		k.setCommunityStake(ctx, claim.CommunityID, s.ID)
+		k.setUserCommunityStake(ctx, s.Creator, claim.CommunityID, s.ID)
 
 	}
 	k.setArgumentID(ctx, uint64(len(data.Arguments)+1))
