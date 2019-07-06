@@ -53,6 +53,9 @@ func TestKeeper_TestEarnedCoins(t *testing.T) {
 
 	assert.Equal(t, argumentInterest.String(), earnings[addr.String()].Coins.AmountOf("crypto").String())
 	assert.Equal(t, upvoteAfterSplitInterest.String(), earnings[addr.String()].Coins.AmountOf("random").String())
+	t.Log(argumentInterest.String())
+	t.Log(upvoteInterest.String())
+	t.Log(upvoteAfterSplitInterest.String())
 
 	assert.Equal(t, sdk.NewInt(0), earnings[addr2.String()].Coins.AmountOf("crypto"))
 	argumentAndUpvoteReceived := argumentInterest.Add(upvoteAfterSplitInterest)

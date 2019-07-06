@@ -52,7 +52,7 @@ func DefaultParams() Params {
 		ArgumentSummaryMinLength: 25,
 		UpvoteStake:              sdk.NewInt64Coin(app.StakeDenom, app.Shanev*10),
 		CreatorShare:             sdk.NewDecWithPrec(50, 2),
-		InterestRate:             sdk.NewDecWithPrec(25, 2),
+		InterestRate:             sdk.NewDecWithPrec(105, 2),
 		StakeLimitPercent:        sdk.NewDecWithPrec(667, 3),
 		StakeLimitDays:           time.Hour * 24 * 7,
 		UnjailUpvotes:            1,
