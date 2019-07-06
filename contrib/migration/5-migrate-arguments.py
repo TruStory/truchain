@@ -50,7 +50,7 @@ def process_genesis(genesis, parsed_args):
     genesis['app_state']['trustaking']['params']['argument_summary_min_length'] = "25"
     genesis['app_state']['trustaking']['params']['upvote_stake'] = { 'denom': 'trusteak', 'amount': '10000000000' }
     genesis['app_state']['trustaking']['params']['creator_share'] = "0.500000000000000000"
-    genesis['app_state']['trustaking']['params']['interest_rate'] = "0.250000000000000000"
+    genesis['app_state']['trustaking']['params']['interest_rate'] = "1.050000000000000000"
     genesis['app_state']['trustaking']['params']['stake_limit_percent'] = "0.667000000000000000"
     genesis['app_state']['trustaking']['params']['stake_limit_days'] = "604800000000000"
     genesis['app_state']['trustaking']['params']['unjail_upvotes'] = "1"
