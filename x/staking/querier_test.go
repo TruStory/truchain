@@ -115,5 +115,69 @@ func TestQuerier_ArgumentsByIDs(t *testing.T) {
 	var arguments []Argument
 	k.codec.UnmarshalJSON(bz, &arguments)
 	assert.Len(t, arguments, 2)
+}
 
+func TestQuerier_CommunityStakes(t *testing.T) {
+	ctx, k, mdb := mockDB()
+	ctx.WithBlockTime(time.Now())
+	addr := createFakeFundedAccount(ctx, mdb.authAccKeeper, sdk.Coins{sdk.NewInt64Coin(app.StakeDenom, app.Shanev*300)})
+
+	argument1, err := k.SubmitArgument(ctx, "body", "summary", addr, 1, StakeBacking)
+	assert.NoError(t, err)
+
+	_, err = k.SubmitArgument(ctx, "body", "summary", addr, 1, StakeBacking)
+	assert.NoError(t, err)
+
+	claim1, _ := k.claimKeeper.Claim(ctx, argument1.ClaimID)
+
+	querier := NewQuerier(k)
+	queryParams := QueryCommunityStakesParams{
+		CommunityID: claim1.CommunityID,
+	}
+
+	query := abci.RequestQuery{
+		Path: strings.Join([]string{"custom", QuerierRoute, QueryCommunityStakes}, "/"),
+		Data: []byte{},
+	}
+
+	query.Data = k.codec.MustMarshalJSON(&queryParams)
+	bz, err := querier(ctx, []string{QueryCommunityStakes}, query)
+	assert.NoError(t, err)
+
+	var stakes []Stake
+	k.codec.UnmarshalJSON(bz, &stakes)
+	assert.Len(t, stakes, 2)
+}
+
+func TestQuerier_UserCommunityStakes(t *testing.T) {
+	ctx, k, mdb := mockDB()
+	ctx.WithBlockTime(time.Now())
+	addr := createFakeFundedAccount(ctx, mdb.authAccKeeper, sdk.Coins{sdk.NewInt64Coin(app.StakeDenom, app.Shanev*300)})
+
+	argument1, err := k.SubmitArgument(ctx, "body", "summary", addr, 1, StakeBacking)
+	assert.NoError(t, err)
+
+	_, err = k.SubmitArgument(ctx, "body", "summary", addr, 1, StakeBacking)
+	assert.NoError(t, err)
+
+	claim1, _ := k.claimKeeper.Claim(ctx, argument1.ClaimID)
+
+	querier := NewQuerier(k)
+	queryParams := QueryUserCommunityStakesParams{
+		Address: argument1.Creator,
+		CommunityID: claim1.CommunityID,
+	}
+
+	query := abci.RequestQuery{
+		Path: strings.Join([]string{"custom", QuerierRoute, QueryUserCommunityStakes}, "/"),
+		Data: []byte{},
+	}
+
+	query.Data = k.codec.MustMarshalJSON(&queryParams)
+	bz, err := querier(ctx, []string{QueryUserCommunityStakes}, query)
+	assert.NoError(t, err)
+
+	var stakes []Stake
+	k.codec.UnmarshalJSON(bz, &stakes)
+	assert.Len(t, stakes, 2)
 }

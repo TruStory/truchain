@@ -19,10 +19,12 @@ var (
 	ArgumentIDKey = []byte{0x11}
 
 	// AssociationKeys
-	ClaimArgumentsKeyPrefix = []byte{0x20}
-	ArgumentStakesKeyPrefix = []byte{0x21}
-	UserArgumentsKeyPrefix  = []byte{0x22}
-	UserStakesKeyPrefix     = []byte{0x23}
+	ClaimArgumentsKeyPrefix  = []byte{0x20}
+	ArgumentStakesKeyPrefix  = []byte{0x21}
+	UserArgumentsKeyPrefix   = []byte{0x22}
+	UserStakesKeyPrefix      = []byte{0x23}
+	CommunityStakesKeyPrefix = []byte{0x24}
+	UserCommunityStakesKeyPrefix = []byte{0x25}
 
 	// Queue
 	ActiveStakeQueuePrefix = []byte{0x40}
@@ -93,9 +95,20 @@ func userArgumentKey(creator sdk.AccAddress, argumentID uint64) []byte {
 }
 
 // userStakesPrefix
-// 0x23<creator><created_time>
+// 0x23<creator>
 func userStakesPrefix(creator sdk.AccAddress) []byte {
 	return append(UserStakesKeyPrefix, creator.Bytes()...)
+}
+
+// 0x24<community_id>
+func communityStakesPrefix(communityID string) []byte {
+	return append(CommunityStakesKeyPrefix, []byte(communityID)...)
+}
+
+// 0x24<community_id><stake_id>
+func communityStakeKey(communityID string, stakeID uint64) []byte {
+	bz := sdk.Uint64ToBigEndian(stakeID)
+	return append(communityStakesPrefix(communityID), bz...)
 }
 
 func userStakesCreatedTimePrefix(creator sdk.AccAddress, createdTime time.Time) []byte {
@@ -108,6 +121,22 @@ func userStakeKey(creator sdk.AccAddress, createdTime time.Time, stakeID uint64)
 	bz := make([]byte, 8)
 	binary.LittleEndian.PutUint64(bz, stakeID)
 	return append(userStakesCreatedTimePrefix(creator, createdTime), bz...)
+}
+
+// 0x25<creator>
+func userCommunityPrefix(creator sdk.AccAddress) []byte {
+	return append(UserCommunityStakesKeyPrefix, creator.Bytes()...)
+}
+
+// 0x25<creator><community_id>
+func userCommunityStakesPrefix(creator sdk.AccAddress, communityID string) []byte {
+	return append(userCommunityPrefix(creator), []byte(communityID)...)
+}
+
+// 0x25<creator><community_id><stake_id>
+func userCommunityStakeKey(creator sdk.AccAddress, communityID string, stakeID uint64) []byte {
+	bz := sdk.Uint64ToBigEndian(stakeID)
+	return append(userCommunityStakesPrefix(creator, communityID), bz...)
 }
 
 // activeStakeQueueKey
