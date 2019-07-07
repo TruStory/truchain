@@ -45,7 +45,7 @@ func TestKeeper_SubmitArgument(t *testing.T) {
 	assert.Error(t, err)
 	assert.Equal(t, ErrorCodeInvalidStakeType, err.Code())
 
-	_, err = k.SubmitArgument(ctx, "body", "summary", addr, 1, StakeType(0xFF))
+	_, err = k.SubmitArgument(ctx, "body", "summary", addr, 1, 127)
 	assert.Error(t, err)
 	assert.Equal(t, ErrorCodeInvalidStakeType, err.Code())
 

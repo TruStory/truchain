@@ -16,7 +16,7 @@ const (
 	DefaultParamspace = ModuleName
 )
 
-type StakeType byte
+type StakeType int8
 
 func (t StakeType) String() string {
 	if int(t) >= len(StakeTypeName) {
