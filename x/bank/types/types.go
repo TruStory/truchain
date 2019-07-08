@@ -15,8 +15,3 @@ const (
 	QuerierRoute      = ModuleName
 	DefaultParamspace = ModuleName
 )
-
-// Association list keys
-var (
-	AccountKey = sdk.NewKVStoreKey("account")
-)

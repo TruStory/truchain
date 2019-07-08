@@ -29,7 +29,6 @@ const (
 )
 
 var (
-	AccountKey              = types.AccountKey
 	GetFilters              = exported.GetFilters
 	FilterByTransactionType = exported.FilterByTransactionType
 	SortOrder               = exported.SortOrder
