@@ -4,7 +4,7 @@ executors:
   go:
     docker:
       - image: circleci/golang:1.12
-    working_directory: /tmp/octopus
+    working_directory: /tmp/truchain
 
 defaults: &defaults
   docker:
@@ -34,7 +34,7 @@ jobs:
           name: List built binaries
           command: |
             pwd
-            ls -l ./bin/
+            ls -l ./build/
       - save_cache:
           key: go-mod-v3-{{ checksum "go.sum" }}
           paths:
@@ -43,7 +43,7 @@ jobs:
       - persist_to_workspace:
           # Must be an absolute path, or relative path from working_directory. This is a directory on the container which is
           # taken to be the root directory of the workspace.
-          root: bin
+          root: build
           # Must be relative path from root
           paths:
             - truchaind
@@ -63,8 +63,8 @@ jobs:
                 mkdir -p ~/.ssh
                 ssh-keyscan $BETA_HOST >> ~/.ssh/known_hosts
                 ssh $BETA_USER@$BETA_HOST "sudo systemctl stop truchaind.service"
-                scp bin/truchaind "$BETA_USER@$BETA_HOST:/home/ubuntu/go/bin/truchaind"
-                scp bin/truchaincli "$BETA_USER@$BETA_HOST:/home/ubuntu/go/bin/truchaincli"
+                scp build/truchaind "$BETA_USER@$BETA_HOST:/home/ubuntu/go/bin/truchaind"
+                scp build/truchaincli "$BETA_USER@$BETA_HOST:/home/ubuntu/go/bin/truchaincli"
                 ssh $BETA_USER@$BETA_HOST "sudo systemctl start truchaind.service"
                 echo "deploying to beta.trustory.io"
             elif [ "${CIRCLE_BRANCH}" == "develop" ]
@@ -72,8 +72,8 @@ jobs:
                 mkdir -p ~/.ssh
                 ssh-keyscan $DEVNET_HOST >> ~/.ssh/known_hosts
                 ssh $DEVNET_USER@$DEVNET_HOST "sudo systemctl stop truchaind.service"
-                scp bin/truchaind "$DEVNET_USER@$DEVNET_HOST:/home/ubuntu/go/bin/truchaind"
-                scp bin/truchaincli "$DEVNET_USER@$DEVNET_HOST:/home/ubuntu/go/bin/truchaincli"
+                scp build/truchaind "$DEVNET_USER@$DEVNET_HOST:/home/ubuntu/go/bin/truchaind"
+                scp build/truchaincli "$DEVNET_USER@$DEVNET_HOST:/home/ubuntu/go/bin/truchaincli"
                 ssh $DEVNET_USER@$DEVNET_HOST "sudo systemctl start truchaind.service"
                 echo "deployed to devnet"
             fi
