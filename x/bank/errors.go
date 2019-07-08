@@ -13,6 +13,7 @@ const (
 	ErrorCodeInvalidTransactionType     sdk.CodeType = 401
 	ErrorCodeInvalidRewardBrokerAddress sdk.CodeType = 402
 	ErrorCodeInvalidQueryParams         sdk.CodeType = 403
+	ErrorCodeUnknownTransaction         sdk.CodeType = 404
 )
 
 // ErrInvalidRewardBrokerAddress throws an error when the address doesn't match with genesis param address.
@@ -36,5 +37,13 @@ func ErrInvalidQueryParams(err error) sdk.Error {
 	return sdk.NewError(DefaultCodespace,
 		ErrorCodeInvalidQueryParams,
 		fmt.Sprintf("Invalid query params  %s", err.Error()),
+	)
+}
+
+// ErrCodeUnknownTransaction throws an error when an invalid transaction id
+func ErrCodeUnknownTransaction(transactionID uint64) sdk.Error {
+	return sdk.NewError(DefaultCodespace,
+		ErrorCodeUnknownTransaction,
+		fmt.Sprintf("Unknown transaction id %d", transactionID),
 	)
 }

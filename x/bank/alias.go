@@ -3,7 +3,6 @@ package bank
 import (
 	"github.com/TruStory/truchain/x/bank/exported"
 	"github.com/TruStory/truchain/x/bank/types"
-	"github.com/shanev/cosmos-record-keeper/recordkeeper"
 )
 
 const (
@@ -40,8 +39,6 @@ var (
 )
 
 type (
-	// RecordKeeper alias
-	RecordKeeper                     = recordkeeper.RecordKeeper
 	TransactionType                  = exported.TransactionType
 	Filter                           = exported.Filter
 	SortOrderType                    = exported.SortOrderType

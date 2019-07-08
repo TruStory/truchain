@@ -5,12 +5,10 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/bank"
 	"github.com/cosmos/cosmos-sdk/x/params"
-	"github.com/shanev/cosmos-record-keeper/recordkeeper"
 )
 
 // Keeper is the model object for the package bank module
 type Keeper struct {
-	RecordKeeper
 	storeKey   sdk.StoreKey
 	codec      *codec.Codec
 	paramStore params.Subspace
@@ -22,25 +20,17 @@ type Keeper struct {
 func NewKeeper(codec *codec.Codec, storeKey sdk.StoreKey, bankKeeper bank.Keeper,
 	paramStore params.Subspace, codespace sdk.CodespaceType) Keeper {
 	return Keeper{
-		RecordKeeper: recordkeeper.NewRecordKeeper(storeKey, codec),
-		storeKey:     storeKey,
-		codec:        codec,
-		bankKeeper:   bankKeeper,
-		paramStore:   paramStore.WithKeyTable(ParamKeyTable()),
-		codespace:    codespace,
+		storeKey:   storeKey,
+		codec:      codec,
+		bankKeeper: bankKeeper,
+		paramStore: paramStore.WithKeyTable(ParamKeyTable()),
+		codespace:  codespace,
 	}
 }
 
 // Codespace returns the codespace
 func (k Keeper) Codespace() sdk.CodespaceType {
 	return k.codespace
-}
-
-// Transaction gets a specific transaction by id.
-func (k Keeper) Transaction(ctx sdk.Context, id uint64) (Transaction, sdk.Error) {
-	tx := Transaction{}
-	err := k.Get(ctx, id, &tx)
-	return tx, err
 }
 
 // AddCoin adds a coin to an address and adds the transaction to the association list.
@@ -53,17 +43,21 @@ func (k Keeper) AddCoin(ctx sdk.Context, addr sdk.AccAddress, amt sdk.Coin,
 	if err != nil {
 		return coins, err
 	}
-
+	transactionID, err := k.transactionID(ctx)
+	if err != nil {
+		return sdk.Coins{}, err
+	}
 	tx := Transaction{
-		ID:                k.IncrementID(ctx),
+		ID:                transactionID,
 		Type:              txType,
 		ReferenceID:       referenceID,
 		Amount:            amt,
 		AppAccountAddress: addr,
 		CreatedTime:       ctx.BlockHeader().Time,
 	}
-	k.Set(ctx, tx.ID, tx)
-	k.PushWithAddress(ctx, k.storeKey, AccountKey, tx.ID, addr)
+	k.setTransaction(ctx, tx)
+	k.setTransactionID(ctx, transactionID+1)
+	k.setUserTransaction(ctx, addr, tx.CreatedTime, tx.ID)
 	return coins, nil
 }
 
@@ -78,16 +72,21 @@ func (k Keeper) SubtractCoin(ctx sdk.Context, addr sdk.AccAddress, amt sdk.Coin,
 		return coins, err
 	}
 
+	transactionID, err := k.transactionID(ctx)
+	if err != nil {
+		return sdk.Coins{}, err
+	}
 	tx := Transaction{
-		ID:                k.IncrementID(ctx),
+		ID:                transactionID,
 		Type:              txType,
 		ReferenceID:       referenceID,
 		Amount:            amt,
 		AppAccountAddress: addr,
 		CreatedTime:       ctx.BlockHeader().Time,
 	}
-	k.Set(ctx, tx.ID, tx)
-	k.PushWithAddress(ctx, k.storeKey, AccountKey, tx.ID, addr)
+	k.setTransaction(ctx, tx)
+	k.setTransactionID(ctx, transactionID+1)
+	k.setUserTransaction(ctx, addr, tx.CreatedTime, tx.ID)
 	return coins, nil
 }
 
@@ -116,17 +115,15 @@ func (k Keeper) payReward(ctx sdk.Context,
 
 // Transactions gets all the transactions
 func (k Keeper) Transactions(ctx sdk.Context) []Transaction {
-	txs := make([]Transaction, 0)
-	err := k.Each(ctx, func(val []byte) bool {
-		var tx Transaction
-		k.codec.MustUnmarshalBinaryLengthPrefixed(val, &tx)
-		txs = append(txs, tx)
-		return true
-	})
-	if err != nil {
-		return nil
+	transactions := make([]Transaction, 0)
+	iterator := sdk.KVStorePrefixIterator(k.store(ctx), TransactionsKeyPrefix)
+	defer iterator.Close()
+	for ; iterator.Valid(); iterator.Next() {
+		var transaction Transaction
+		k.codec.MustUnmarshalBinaryLengthPrefixed(iterator.Value(), &transaction)
+		transactions = append(transactions, transaction)
 	}
-	return txs
+	return transactions
 }
 
 // TransactionsByAddress gets transactions for a given address and applies sent filters.
@@ -137,31 +134,67 @@ func (k Keeper) TransactionsByAddress(ctx sdk.Context, address sdk.AccAddress, f
 
 	offsetCount := filters.Offset
 	count := 0
-	mapFunc := func(txID uint64) bool     {
-		if offsetCount > 0 {
-			offsetCount = offsetCount - 1
-			return true
-		}
-
-		if filters.Limit > 0 && count == filters.Limit {
+	callbackFunc := func(tx Transaction) bool {
+		if filterByType && !tx.Type.OneOf(filters.TransactionTypes) {
 			return false
 		}
-
-		tx, err := k.Transaction(ctx, txID)
-		if err != nil {
-			panic(err)
+		if offsetCount > 0 {
+			offsetCount = offsetCount - 1
+			return false
 		}
-		count++
-		if filterByType && !tx.Type.OneOf(filters.TransactionTypes) {
+		if filters.Limit > 0 && count == filters.Limit {
 			return true
 		}
+		count++
 		transactions = append(transactions, tx)
-		return true
+		return false
 	}
-	if filters.SortOrder == SortDesc {
-		k.ReverseMapByAddress(ctx, AccountKey, address, mapFunc)
-		return transactions
-	}
-	k.MapByAddress(ctx, AccountKey, address, mapFunc)
+	k.IterateUserTransactions(ctx, address, filters.SortOrder == SortDesc, callbackFunc)
 	return transactions
+}
+
+func (k Keeper) transactionID(ctx sdk.Context) (uint64, sdk.Error) {
+	id, err := k.getID(ctx, TransactionIDKey)
+	if err != nil {
+		return 0, ErrCodeUnknownTransaction(id)
+	}
+	return id, nil
+}
+
+func (k Keeper) setTransactionID(ctx sdk.Context, transactionID uint64) {
+	k.setID(ctx, TransactionIDKey, transactionID)
+}
+
+func (k Keeper) setID(ctx sdk.Context, key []byte, length uint64) {
+	b := k.codec.MustMarshalBinaryBare(length)
+	k.store(ctx).Set(key, b)
+}
+
+func (k Keeper) getID(ctx sdk.Context, key []byte) (uint64, sdk.Error) {
+	var id uint64
+	b := k.store(ctx).Get(key)
+	if b == nil {
+		return 0, sdk.ErrInternal("unknown id")
+	}
+	k.codec.MustUnmarshalBinaryBare(b, &id)
+	return id, nil
+}
+
+func (k Keeper) store(ctx sdk.Context) sdk.KVStore {
+	return ctx.KVStore(k.storeKey)
+}
+
+func (k Keeper) getTransaction(ctx sdk.Context, transactionID uint64) (Transaction, bool) {
+	transaction := Transaction{}
+	bz := k.store(ctx).Get(transactionKey(transactionID))
+	if bz == nil {
+		return transaction, false
+	}
+	k.codec.MustUnmarshalBinaryLengthPrefixed(bz, &transaction)
+	return transaction, true
+}
+
+func (k Keeper) setTransaction(ctx sdk.Context, transaction Transaction) {
+	bz := k.codec.MustMarshalBinaryLengthPrefixed(transaction)
+	k.store(ctx).Set(transactionKey(transaction.ID), bz)
 }
