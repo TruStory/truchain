@@ -1,7 +1,6 @@
 package staking
 
 import (
-	"encoding/binary"
 	"fmt"
 	"time"
 
@@ -19,10 +18,12 @@ var (
 	ArgumentIDKey = []byte{0x11}
 
 	// AssociationKeys
-	ClaimArgumentsKeyPrefix = []byte{0x20}
-	ArgumentStakesKeyPrefix = []byte{0x21}
-	UserArgumentsKeyPrefix  = []byte{0x22}
-	UserStakesKeyPrefix     = []byte{0x23}
+	ClaimArgumentsKeyPrefix      = []byte{0x20}
+	ArgumentStakesKeyPrefix      = []byte{0x21}
+	UserArgumentsKeyPrefix       = []byte{0x22}
+	UserStakesKeyPrefix          = []byte{0x23}
+	CommunityStakesKeyPrefix     = []byte{0x24}
+	UserCommunityStakesKeyPrefix = []byte{0x25}
 
 	// Queue
 	ActiveStakeQueuePrefix = []byte{0x40}
@@ -61,8 +62,7 @@ func claimArgumentsPrefix(claimID uint64) []byte {
 
 // claimArgumentKey builds the key for claim->argument association
 func claimArgumentKey(claimID, argumentID uint64) []byte {
-	bz := make([]byte, 8)
-	binary.LittleEndian.PutUint64(bz, argumentID)
+	bz := sdk.Uint64ToBigEndian(argumentID)
 	return append(claimArgumentsPrefix(claimID), bz...)
 }
 
@@ -74,8 +74,7 @@ func argumentStakesPrefix(argumentID uint64) []byte {
 
 // argumentStakeKey builds the key for argument->stake association
 func argumentStakeKey(argumentID, stakeID uint64) []byte {
-	bz := make([]byte, 8)
-	binary.LittleEndian.PutUint64(bz, stakeID)
+	bz := sdk.Uint64ToBigEndian(stakeID)
 	return append(argumentStakesPrefix(argumentID), bz...)
 }
 
@@ -87,15 +86,25 @@ func userArgumentsPrefix(creator sdk.AccAddress) []byte {
 
 // userArgumentKey builds the key for user->argument association
 func userArgumentKey(creator sdk.AccAddress, argumentID uint64) []byte {
-	bz := make([]byte, 8)
-	binary.LittleEndian.PutUint64(bz, argumentID)
+	bz := sdk.Uint64ToBigEndian(argumentID)
 	return append(userArgumentsPrefix(creator), bz...)
 }
 
 // userStakesPrefix
-// 0x23<creator><created_time>
+// 0x23<creator>
 func userStakesPrefix(creator sdk.AccAddress) []byte {
 	return append(UserStakesKeyPrefix, creator.Bytes()...)
+}
+
+// 0x24<community_id>
+func communityStakesPrefix(communityID string) []byte {
+	return append(CommunityStakesKeyPrefix, []byte(communityID)...)
+}
+
+// 0x24<community_id><stake_id>
+func communityStakeKey(communityID string, stakeID uint64) []byte {
+	bz := sdk.Uint64ToBigEndian(stakeID)
+	return append(communityStakesPrefix(communityID), bz...)
 }
 
 func userStakesCreatedTimePrefix(creator sdk.AccAddress, createdTime time.Time) []byte {
@@ -105,16 +114,30 @@ func userStakesCreatedTimePrefix(creator sdk.AccAddress, createdTime time.Time) 
 
 // userStakeKey builds the key for <user><creationTime><stakeID>->stake association
 func userStakeKey(creator sdk.AccAddress, createdTime time.Time, stakeID uint64) []byte {
-	bz := make([]byte, 8)
-	binary.LittleEndian.PutUint64(bz, stakeID)
+	bz := sdk.Uint64ToBigEndian(stakeID)
 	return append(userStakesCreatedTimePrefix(creator, createdTime), bz...)
+}
+
+// 0x25<creator>
+func userCommunityPrefix(creator sdk.AccAddress) []byte {
+	return append(UserCommunityStakesKeyPrefix, creator.Bytes()...)
+}
+
+// 0x25<creator><community_id>
+func userCommunityStakesPrefix(creator sdk.AccAddress, communityID string) []byte {
+	return append(userCommunityPrefix(creator), []byte(communityID)...)
+}
+
+// 0x25<creator><community_id><stake_id>
+func userCommunityStakeKey(creator sdk.AccAddress, communityID string, stakeID uint64) []byte {
+	bz := sdk.Uint64ToBigEndian(stakeID)
+	return append(userCommunityStakesPrefix(creator, communityID), bz...)
 }
 
 // activeStakeQueueKey
 // 0x40<end_time><stake_id>
 func activeStakeQueueKey(stakeID uint64, endTime time.Time) []byte {
-	bz := make([]byte, 8)
-	binary.LittleEndian.PutUint64(bz, stakeID)
+	bz := sdk.Uint64ToBigEndian(stakeID)
 	return append(activeStakeByTimeKey(endTime), bz...)
 }
 
@@ -124,7 +147,6 @@ func activeStakeByTimeKey(endTime time.Time) []byte {
 }
 
 func buildKey(prefix []byte, id uint64) []byte {
-	bz := make([]byte, 8)
-	binary.LittleEndian.PutUint64(bz, id)
+	bz := sdk.Uint64ToBigEndian(id)
 	return append(prefix, bz...)
 }

@@ -299,7 +299,7 @@ func Test_interest(t *testing.T) {
 	p := k.GetParams(ctx)
 	after7days := now.Add(p.Period)
 	interest := k.interest(ctx, amount, after7days.Sub(now))
-	assert.Equal(t, sdk.NewInt(239726027), interest.RoundInt())
+	assert.Equal(t, sdk.NewInt(1006849315), interest.RoundInt())
 }
 
 func Test_splitReward(t *testing.T) {
@@ -309,22 +309,28 @@ func Test_splitReward(t *testing.T) {
 	p := k.GetParams(ctx)
 	after7days := now.Add(p.Period)
 	interest := k.interest(ctx, amount, after7days.Sub(now))
+	t.Log("interest: " + interest.String())
+
 	creatorReward, stakerReward := k.splitReward(ctx, interest)
-	expectedCreatorReward := sdk.NewDecFromInt(sdk.NewInt(2397260273973)).
+	expectedCreatorReward := sdk.NewDecFromInt(sdk.NewInt(10068493150685)).
 		Mul(sdk.NewDecWithPrec(50, 2))
+	t.Log("expected creator reward: " + expectedCreatorReward.String())
 
 	assert.True(t, amount.Amount.GT(interest.RoundInt()))
 	assert.True(t, interest.RoundInt().GT(creatorReward))
 	assert.True(t, interest.RoundInt().GT(stakerReward))
 	assert.True(t, creatorReward.Equal(stakerReward))
 	assert.Equal(t,
-		expectedCreatorReward.RoundInt(),
-		creatorReward,
+		expectedCreatorReward.RoundInt().String(),
+		creatorReward.String(),
 	)
+	t.Log("actual creator reward: " + creatorReward.String())
+
 	assert.Equal(t,
-		interest.Sub(expectedCreatorReward).RoundInt(),
-		stakerReward,
+		interest.Sub(expectedCreatorReward).RoundInt().String(),
+		stakerReward.String(),
 	)
+	t.Log("actual staker reward: " + stakerReward.String())
 }
 
 func TestKeeper_StakePeriodAmountLimit(t *testing.T) {

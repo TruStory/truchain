@@ -1,6 +1,7 @@
 package staking
 
 import (
+	"fmt"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	app "github.com/TruStory/truchain/types"
@@ -53,6 +54,19 @@ func InitGenesis(ctx sdk.Context, k Keeper, data GenesisState) {
 		}
 		k.setArgumentStake(ctx, s.ArgumentID, s.ID)
 		k.setUserStake(ctx, s.Creator, s.CreatedTime, s.ID)
+
+		arg, ok := k.getArgument(ctx, s.ArgumentID)
+		if !ok {
+			panic(fmt.Sprintf("failed getting argument %d", s.ArgumentID))
+		}
+		// NOTE: this InitGenesis must run *after* claim InitGenesis
+		claim, ok := k.claimKeeper.Claim(ctx, arg.ClaimID)
+		if !ok {
+			panic(fmt.Sprintf("failed getting claim %d", arg.ClaimID))
+		}
+		k.setCommunityStake(ctx, claim.CommunityID, s.ID)
+		k.setUserCommunityStake(ctx, s.Creator, claim.CommunityID, s.ID)
+
 	}
 	k.setArgumentID(ctx, uint64(len(data.Arguments)+1))
 	k.setStakeID(ctx, uint64(len(data.Stakes)+1))

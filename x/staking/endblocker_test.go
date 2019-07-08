@@ -53,6 +53,9 @@ func TestKeeper_TestEarnedCoins(t *testing.T) {
 
 	assert.Equal(t, argumentInterest.String(), earnings[addr.String()].Coins.AmountOf("crypto").String())
 	assert.Equal(t, upvoteAfterSplitInterest.String(), earnings[addr.String()].Coins.AmountOf("random").String())
+	t.Log(argumentInterest.String())
+	t.Log(upvoteInterest.String())
+	t.Log(upvoteAfterSplitInterest.String())
 
 	assert.Equal(t, sdk.NewInt(0), earnings[addr2.String()].Coins.AmountOf("crypto"))
 	argumentAndUpvoteReceived := argumentInterest.Add(upvoteAfterSplitInterest)
@@ -123,4 +126,56 @@ func TestKeeper_TestRefundStake(t *testing.T) {
 	expected = []TransactionType{TransactionBacking, TransactionBackingReturned,
 		TransactionInterestArgumentCreation, TransactionInterestUpvoteReceived}
 	assert.Equal(t, expected, txTypes)
+}
+
+func TestKeeper_TestStakeRewardResult(t *testing.T) {
+	ctx, k, mdb := mockDB()
+	mockedClaimKeeper := mdb.claimKeeper.(*mockClaimKeeper)
+	claims := make(map[uint64]claim.Claim)
+	addr := createFakeFundedAccount(ctx, mdb.authAccKeeper, sdk.Coins{sdk.NewInt64Coin(app.StakeDenom, app.Shanev*250)})
+	addr2 := createFakeFundedAccount(ctx, mdb.authAccKeeper, sdk.Coins{sdk.NewInt64Coin(app.StakeDenom, app.Shanev*250)})
+
+	claims[1] = claim.Claim{
+		ID:          1,
+		CommunityID: "crypto",
+		Body:        "body",
+		Creator:     addr,
+	}
+	claims[2] = claim.Claim{
+		ID:          2,
+		CommunityID: "random",
+		Body:        "body",
+		Creator:     addr,
+	}
+	mockedClaimKeeper.SetClaims(claims)
+
+	_, err := k.SubmitArgument(ctx.WithBlockTime(mustParseTime("2019-01-01")),
+		"arg1", "summary1", addr, 1, StakeChallenge)
+	assert.NoError(t, err)
+	EndBlocker(ctx.WithBlockTime(mustParseTime("2019-01-08")), k)
+	arg2, err := k.SubmitArgument(ctx.WithBlockTime(mustParseTime("2019-01-03")),
+		"arg2", "summary2", addr2, 2, StakeBacking)
+	assert.NoError(t, err)
+	EndBlocker(ctx.WithBlockTime(mustParseTime("2019-01-11")), k)
+	_, err = k.SubmitUpvote(ctx.WithBlockTime(mustParseTime("2019-01-05")), arg2.ID, addr)
+	assert.NoError(t, err)
+	EndBlocker(ctx.WithBlockTime(mustParseTime("2019-01-13")), k)
+
+	stakes := k.UserStakes(ctx, addr)
+	assert.Len(t, stakes, 2)
+	assert.NotNil(t, stakes[0].Result)
+	assert.NotNil(t, stakes[1].Result)
+
+	assert.Equal(t, RewardResultArgumentCreation, stakes[0].Result.Type)
+	assert.Equal(t, RewardResultUpvoteSplit, stakes[1].Result.Type)
+
+	argumentInterest := k.interest(ctx, sdk.NewInt64Coin(app.StakeDenom, app.Shanev*50), time.Hour*24*7).RoundInt()
+	upvoteInterest := k.interest(ctx, sdk.NewInt64Coin(app.StakeDenom, app.Shanev*10), time.Hour*24*7)
+	upvoteAfterSplitInterest := upvoteInterest.Mul(sdk.NewDecWithPrec(50, 2)).RoundInt()
+
+	assert.Equal(t, argumentInterest.String(), stakes[0].Result.ArgumentCreatorReward.Amount.String())
+	assert.Equal(t, upvoteAfterSplitInterest.String(), stakes[1].Result.ArgumentCreatorReward.Amount.String())
+	assert.Equal(t, upvoteAfterSplitInterest.String(), stakes[1].Result.StakeCreatorReward.Amount.String())
+	assert.Equal(t, addr, stakes[1].Result.StakeCreator)
+	assert.Equal(t, addr2, stakes[1].Result.ArgumentCreator)
 }

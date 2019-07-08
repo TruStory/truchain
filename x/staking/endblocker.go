@@ -20,6 +20,7 @@ func EndBlocker(ctx sdk.Context, keeper Keeper) sdk.Tags {
 			panic(err)
 		}
 		stake.Expired = true
+		stake.Result = &result
 		keeper.setStake(ctx, stake)
 		keeper.RemoveFromActiveStakeQueue(ctx, stake.ID, stake.EndTime)
 		results = append(results, result)
