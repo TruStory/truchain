@@ -6,14 +6,6 @@ executors:
       - image: circleci/golang:1.12
     working_directory: /tmp/truchain
 
-defaults: &defaults
-  docker:
-    - image: circleci/golang:1.12
-  working_directory: /go/src/github.com/TruStory/truchain
-  environment:
-    GOBIN: /tmp/workspace/bin
-    GO111MODULE: 'on'
-
 jobs:
   build: # runs not using Workflows must have a `build` job as entry point
     executor: go
@@ -24,9 +16,9 @@ jobs:
           keys:
             - go-mod-v3-{{ checksum "go.sum" }}
       - run:
-          name: Get golangci
+          name: Install linter
           command: |
-            curl -sfL https://install.goreleaser.com/github.com/golangci/golangci-lint.sh | sh -s -- -b $(go env GOPATH)/bin v1.16.0
+            GO111MODULE=on go get github.com/golangci/golangci-lint/cmd/golangci-lint@v1.17.0
       - run: make download
       - run: make check
       - run: make build-linux
@@ -51,11 +43,16 @@ jobs:
   deploy:
     executor: go
     steps:
-      - attach_workspace:
-          at: /tmp/workspace
       - add_ssh_keys:
           fingerprints:
             - '7a:fe:42:64:1d:e4:c0:1a:cc:aa:8c:5e:5e:e8:f8:03'
+      - attach_workspace:
+          at: /tmp/truchain/build
+      - run:
+          name: List built binaries
+          command: |
+            pwd
+            ls -l ./build/
       - run:
           name: Deploy
           command: |
@@ -78,7 +75,7 @@ jobs:
                 echo "deployed to devnet"
             fi
   test_unit:
-    <<: *defaults
+    executor: go
     parallelism: 2
     steps:
       - attach_workspace:
@@ -96,7 +93,7 @@ jobs:
           command: |
             bash <(curl -s https://codecov.io/bash)
   data_dump:
-    <<: *defaults
+    executor: go
     working_directory: /tmp/truchaind
     steps:
       - add_ssh_keys:
