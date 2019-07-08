@@ -1,7 +1,6 @@
 package staking
 
 import (
-	"fmt"
 	"testing"
 	"time"
 
@@ -104,7 +103,6 @@ func TestKeeper_TestRefundStake(t *testing.T) {
 	txTypes := make([]TransactionType, 0)
 
 	for _, tx := range addr1Txs {
-		fmt.Println(tx.CreatedTime, tx.Type)
 		txTypes = append(txTypes, tx.Type)
 	}
 	expected := []TransactionType{
