@@ -1,7 +1,6 @@
 package staking
 
 import (
-	"sort"
 	"testing"
 	"time"
 
@@ -86,33 +85,35 @@ func TestKeeper_TestRefundStake(t *testing.T) {
 	_, err := k.SubmitArgument(ctx.WithBlockTime(mustParseTime("2019-01-01")),
 		"arg1", "summary1", addr, 1, StakeChallenge)
 	assert.NoError(t, err)
-	EndBlocker(ctx.WithBlockTime(mustParseTime("2019-01-08")), k)
 	arg2, err := k.SubmitArgument(ctx.WithBlockTime(mustParseTime("2019-01-03")),
 		"arg2", "summary2", addr2, 2, StakeBacking)
 	assert.NoError(t, err)
-	EndBlocker(ctx.WithBlockTime(mustParseTime("2019-01-11")), k)
 	_, err = k.SubmitUpvote(ctx.WithBlockTime(mustParseTime("2019-01-05")), arg2.ID, addr)
+	assert.NoError(t, err)
+	EndBlocker(ctx.WithBlockTime(mustParseTime("2019-01-08")), k)
+	_, err = k.SubmitArgument(ctx.WithBlockTime(mustParseTime("2019-01-11")),
+		"arg2", "summary2", addr, 2, StakeBacking)
 	assert.NoError(t, err)
 	EndBlocker(ctx.WithBlockTime(mustParseTime("2019-01-13")), k)
 	addr1Txs := k.bankKeeper.TransactionsByAddress(ctx, addr)
 	addr2Txs := k.bankKeeper.TransactionsByAddress(ctx, addr2)
-	sort.Slice(addr1Txs, func(i, j int) bool {
-		return addr1Txs[i].ID < addr1Txs[j].ID
-	})
 
-	sort.Slice(addr2Txs, func(i, j int) bool {
-		return addr2Txs[i].ID < addr2Txs[j].ID
-	})
-	// 2 stakes + 2 interest + 2 refund
-	assert.Len(t, addr1Txs, 6)
+	// 3 stakes + 2 interest + 2 refund
+	assert.Len(t, addr1Txs, 7)
 	txTypes := make([]TransactionType, 0)
 
 	for _, tx := range addr1Txs {
-
 		txTypes = append(txTypes, tx.Type)
 	}
-	expected := []TransactionType{TransactionChallenge, TransactionChallengeReturned,
-		TransactionInterestArgumentCreation, TransactionUpvote, TransactionUpvoteReturned, TransactionInterestUpvoteGiven}
+	expected := []TransactionType{
+		// first interactions
+		TransactionChallenge, TransactionUpvote,
+		// first end block
+		TransactionChallengeReturned, TransactionInterestArgumentCreation,
+		// second interactions
+		TransactionBacking,
+		// second end block
+		TransactionUpvoteReturned, TransactionInterestUpvoteGiven}
 	assert.Equal(t, expected, txTypes)
 
 	// 1 stakes + 2 interest + 1 refund

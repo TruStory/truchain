@@ -22,10 +22,8 @@ func TestKeeper_AddCoin(t *testing.T) {
 	assert.NoError(t, err)
 
 	assert.Equal(t, sdk.NewInt(app.Shanev*20), coins.AmountOf(app.StakeDenom))
-	k.MapByAddress(ctx, AccountKey, addr, func(id uint64) bool {
-		assert.Equal(t, uint64(1), id)
-		tx, err := k.Transaction(ctx, id)
-		assert.NoError(t, err)
+	k.IterateUserTransactions(ctx, addr, false, func(tx Transaction) bool {
+		assert.Equal(t, uint64(1), tx.ID)
 		assert.Equal(t, TransactionBackingReturned, tx.Type)
 		assert.Equal(t, amount, tx.Amount)
 		assert.Equal(t, uint64(100), tx.ReferenceID)
@@ -55,10 +53,8 @@ func TestKeeper_SubtractCoin(t *testing.T) {
 	)
 	assert.NoError(t, err)
 	assert.Equal(t, sdk.NewInt(app.Shanev*20), coins.AmountOf(app.StakeDenom))
-	k.MapByAddress(ctx, AccountKey, addr, func(id uint64) bool {
-		assert.Equal(t, uint64(1), id)
-		tx, err := k.Transaction(ctx, id)
-		assert.NoError(t, err)
+	k.IterateUserTransactions(ctx, addr, false, func(tx Transaction) bool {
+		assert.Equal(t, uint64(1), tx.ID)
 		assert.Equal(t, TransactionBacking, tx.Type)
 		assert.Equal(t, amount, tx.Amount)
 		assert.Equal(t, uint64(200), tx.ReferenceID)

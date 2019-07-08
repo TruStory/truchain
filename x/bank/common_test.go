@@ -52,6 +52,8 @@ func mockDB() (sdk.Context, Keeper, auth.AccountKeeper) {
 		pk.Subspace(DefaultParamspace),
 		DefaultCodespace,
 	)
+
+	InitGenesis(ctx, keeper, DefaultGenesisState())
 	return ctx, keeper, accKeeper
 }
 
