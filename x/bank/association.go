@@ -9,7 +9,7 @@ import (
 
 // setUserTransaction sets a user <-> transaction association in the store
 func (k Keeper) setUserTransaction(ctx sdk.Context, creator sdk.AccAddress, creationTime time.Time, transactionID uint64) {
-	bz := k.codec.MustMarshalBinaryLengthPrefixed(transactionID)
+	bz := k.codec.MustMarshalBinaryBare(transactionID)
 	k.store(ctx).Set(userTransactionKey(creator, creationTime, transactionID), bz)
 }
 
@@ -27,7 +27,7 @@ func (k Keeper) IterateUserTransactions(ctx sdk.Context, creator sdk.AccAddress,
 	defer iterator.Close()
 	for ; iterator.Valid(); iterator.Next() {
 		var transactionID uint64
-		k.codec.MustUnmarshalBinaryLengthPrefixed(iterator.Value(), &transactionID)
+		k.codec.MustUnmarshalBinaryBare(iterator.Value(), &transactionID)
 		transaction, ok := k.getTransaction(ctx, transactionID)
 		if !ok {
 			panic(fmt.Sprintf("unable to retrieve transaction with id %d", transactionID))

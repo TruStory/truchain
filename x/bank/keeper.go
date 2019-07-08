@@ -120,7 +120,7 @@ func (k Keeper) Transactions(ctx sdk.Context) []Transaction {
 	defer iterator.Close()
 	for ; iterator.Valid(); iterator.Next() {
 		var transaction Transaction
-		k.codec.MustUnmarshalBinaryLengthPrefixed(iterator.Value(), &transaction)
+		k.codec.MustUnmarshalBinaryBare(iterator.Value(), &transaction)
 		transactions = append(transactions, transaction)
 	}
 	return transactions
@@ -190,11 +190,11 @@ func (k Keeper) getTransaction(ctx sdk.Context, transactionID uint64) (Transacti
 	if bz == nil {
 		return transaction, false
 	}
-	k.codec.MustUnmarshalBinaryLengthPrefixed(bz, &transaction)
+	k.codec.MustUnmarshalBinaryBare(bz, &transaction)
 	return transaction, true
 }
 
 func (k Keeper) setTransaction(ctx sdk.Context, transaction Transaction) {
-	bz := k.codec.MustMarshalBinaryLengthPrefixed(transaction)
+	bz := k.codec.MustMarshalBinaryBare(transaction)
 	k.store(ctx).Set(transactionKey(transaction.ID), bz)
 }
