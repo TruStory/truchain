@@ -4,84 +4,78 @@ executors:
   go:
     docker:
       - image: circleci/golang:1.12
-    working_directory: /tmp/octopus
-
-defaults: &defaults
-  docker:
-    - image: circleci/golang:1.12
-  working_directory: /go/src/github.com/TruStory/truchain
-  environment:
-    GOBIN: /tmp/workspace/bin
-    GO111MODULE: 'on'
+    working_directory: /tmp/truchain
 
 jobs:
-  setup_dependencies:
-    <<: *defaults
-    steps:
-      - run: mkdir -p /tmp/workspace/bin
-      - run: mkdir -p /tmp/workspace/profiles
-      - checkout
-      - restore_cache:
+  build: # runs not using Workflows must have a `build` job as entry point
+    executor: go
+    parallelism: 2
+    steps: # steps that comprise the `build` job
+      - checkout # check out source code to working directory
+      - restore_cache: # restores saved cache if no changes are detected since last run
           keys:
-            - go-mod-v1-{{ checksum "go.sum" }}
+            - go-mod-v3-{{ checksum "go.sum" }}
       - run:
-          name: dependencies
+          name: Install linter
           command: |
-            make download
+            GO111MODULE=on go get github.com/golangci/golangci-lint/cmd/golangci-lint@v1.17.0
+      - run: make download
+      - run: make check
+      - run: make build-linux
+      - run:
+          name: List built binaries
+          command: |
+            pwd
+            ls -l ./build/
       - save_cache:
-          key: go-mod-v1-{{ checksum "go.sum" }}
+          key: go-mod-v3-{{ checksum "go.sum" }}
           paths:
-            - '/go/pkg/mod'
+            - "/go/pkg/mod"
+          # Persist the specified paths (workspace/echo-output) into the workspace for use in downstream job.
       - persist_to_workspace:
-          root: /tmp/workspace
+          # Must be an absolute path, or relative path from working_directory. This is a directory on the container which is
+          # taken to be the root directory of the workspace.
+          root: build
+          # Must be relative path from root
           paths:
-            - bin
-            - profiles
-  check:
-    <<: *defaults
-    parallelism: 1
-    steps:
-      - attach_workspace:
-          at: /tmp/workspace
-      - checkout
-      - restore_cache:
-          keys:
-            - go-mod-v1-{{ checksum "go.sum" }}
-      - run:
-          name: Get golangci
-          command: |
-            curl -sfL https://install.goreleaser.com/github.com/golangci/golangci-lint.sh | sh -s -- -b $(go env GOPATH)/bin v1.16.0
-      - run:
-          name: Lint source
-          command: |
-            make check
+            - truchaind
+            - truchaincli
   deploy:
     executor: go
     steps:
       - add_ssh_keys:
           fingerprints:
             - '7a:fe:42:64:1d:e4:c0:1a:cc:aa:8c:5e:5e:e8:f8:03'
+      - attach_workspace:
+          at: /tmp/truchain/build
+      - run:
+          name: List built binaries
+          command: |
+            pwd
+            ls -l ./build/
       - run:
           name: Deploy
           command: |
             if [ "${CIRCLE_BRANCH}" == "master" ]; then
                 mkdir -p ~/.ssh
-                ssh-keyscan $VENICE4_HOST >> ~/.ssh/known_hosts
-                ssh $VENICE4_USER@$VENICE4_HOST "sudo systemctl stop truchaind.service"
-                ssh $VENICE4_USER@$VENICE4_HOST "cd /home/ubuntu/go/src/github.com/TruStory/truchain && git pull && PATH=/home/ubuntu/go/bin:$PATH && GO111MODULE=on make download && GO111MODULE=on PATH=/usr/local/go/bin:$PATH make build-linux && cp build/truchaind /home/ubuntu/go/bin/ && cp build/truchaincli /home/ubuntu/go/bin/"
-                ssh $VENICE4_USER@$VENICE4_HOST "sudo systemctl start truchaind.service"
-                echo "deploying to venice4"
+                ssh-keyscan $BETA_HOST >> ~/.ssh/known_hosts
+                ssh $BETA_USER@$BETA_HOST "sudo systemctl stop truchaind.service"
+                scp build/truchaind "$BETA_USER@$BETA_HOST:/home/ubuntu/go/bin/truchaind"
+                scp build/truchaincli "$BETA_USER@$BETA_HOST:/home/ubuntu/go/bin/truchaincli"
+                ssh $BETA_USER@$BETA_HOST "sudo systemctl start truchaind.service"
+                echo "deploying to beta.trustory.io"
             elif [ "${CIRCLE_BRANCH}" == "develop" ]
             then
                 mkdir -p ~/.ssh
                 ssh-keyscan $DEVNET_HOST >> ~/.ssh/known_hosts
                 ssh $DEVNET_USER@$DEVNET_HOST "sudo systemctl stop truchaind.service"
-                ssh $DEVNET_USER@$DEVNET_HOST "cd /home/ubuntu/go/src/github.com/TruStory/truchain && git pull && PATH=/home/ubuntu/go/bin:$PATH && GO111MODULE=on make download && GO111MODULE=on PATH=/usr/local/go/bin:$PATH  make build-linux && cp build/truchaind /home/ubuntu/go/bin/ && cp build/truchaincli /home/ubuntu/go/bin/"
+                scp build/truchaind "$DEVNET_USER@$DEVNET_HOST:/home/ubuntu/go/bin/truchaind"
+                scp build/truchaincli "$DEVNET_USER@$DEVNET_HOST:/home/ubuntu/go/bin/truchaincli"
                 ssh $DEVNET_USER@$DEVNET_HOST "sudo systemctl start truchaind.service"
                 echo "deployed to devnet"
             fi
   test_unit:
-    <<: *defaults
+    executor: go
     parallelism: 2
     steps:
       - attach_workspace:
@@ -99,7 +93,7 @@ jobs:
           command: |
             bash <(curl -s https://codecov.io/bash)
   data_dump:
-    <<: *defaults
+    executor: go
     working_directory: /tmp/truchaind
     steps:
       - add_ssh_keys:
@@ -145,14 +139,11 @@ workflows:
   version: 2
   deploy-flow:
     jobs:
-      - setup_dependencies
-      - check:
-          requires:
-            - setup_dependencies
+      - build
       - test_unit:
           context: truchain-context
           requires:
-            - setup_dependencies
+            - build
       - data_dump:
           filters:
             branches:
@@ -167,7 +158,7 @@ workflows:
                 - master
       - deploy:
           requires:
-            - check
+            - build
             - test_unit
           filters:
             branches:
