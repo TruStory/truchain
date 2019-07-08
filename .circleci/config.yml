@@ -15,49 +15,44 @@ defaults: &defaults
     GO111MODULE: 'on'
 
 jobs:
-  setup_dependencies:
-    <<: *defaults
-    steps:
-      - run: mkdir -p /tmp/workspace/bin
-      - run: mkdir -p /tmp/workspace/profiles
-      - checkout
-      - restore_cache:
+  build: # runs not using Workflows must have a `build` job as entry point
+    executor: go
+    parallelism: 2
+    steps: # steps that comprise the `build` job
+      - checkout # check out source code to working directory
+      - restore_cache: # restores saved cache if no changes are detected since last run
           keys:
-            - go-mod-v1-{{ checksum "go.sum" }}
-      - run:
-          name: dependencies
-          command: |
-            make download
-      - save_cache:
-          key: go-mod-v1-{{ checksum "go.sum" }}
-          paths:
-            - '/go/pkg/mod'
-      - persist_to_workspace:
-          root: /tmp/workspace
-          paths:
-            - bin
-            - profiles
-  check:
-    <<: *defaults
-    parallelism: 1
-    steps:
-      - attach_workspace:
-          at: /tmp/workspace
-      - checkout
-      - restore_cache:
-          keys:
-            - go-mod-v1-{{ checksum "go.sum" }}
+            - go-mod-v3-{{ checksum "go.sum" }}
       - run:
           name: Get golangci
           command: |
             curl -sfL https://install.goreleaser.com/github.com/golangci/golangci-lint.sh | sh -s -- -b $(go env GOPATH)/bin v1.16.0
+      - run: make download
+      - run: make check
+      - run: make build-linux
       - run:
-          name: Lint source
+          name: List built binaries
           command: |
-            make check
+            pwd
+            ls -l ./bin/
+      - save_cache:
+          key: go-mod-v3-{{ checksum "go.sum" }}
+          paths:
+            - "/go/pkg/mod"
+          # Persist the specified paths (workspace/echo-output) into the workspace for use in downstream job.
+      - persist_to_workspace:
+          # Must be an absolute path, or relative path from working_directory. This is a directory on the container which is
+          # taken to be the root directory of the workspace.
+          root: bin
+          # Must be relative path from root
+          paths:
+            - truchaind
+            - truchaincli
   deploy:
     executor: go
     steps:
+      - attach_workspace:
+          at: /tmp/workspace
       - add_ssh_keys:
           fingerprints:
             - '7a:fe:42:64:1d:e4:c0:1a:cc:aa:8c:5e:5e:e8:f8:03'
@@ -68,7 +63,8 @@ jobs:
                 mkdir -p ~/.ssh
                 ssh-keyscan $BETA_HOST >> ~/.ssh/known_hosts
                 ssh $BETA_USER@$BETA_HOST "sudo systemctl stop truchaind.service"
-                ssh $BETA_USER@$BETA_HOST "cd /home/ubuntu/go/src/github.com/TruStory/truchain && git pull && PATH=/home/ubuntu/go/bin:$PATH && GO111MODULE=on make download && GO111MODULE=on PATH=/usr/local/go/bin:$PATH make build-linux && cp build/truchaind /home/ubuntu/go/bin/ && cp build/truchaincli /home/ubuntu/go/bin/"
+                scp bin/truchaind "$BETA_USER@$BETA_HOST:/home/ubuntu/go/bin/truchaind"
+                scp bin/truchaincli "$BETA_USER@$BETA_HOST:/home/ubuntu/go/bin/truchaincli"
                 ssh $BETA_USER@$BETA_HOST "sudo systemctl start truchaind.service"
                 echo "deploying to beta.trustory.io"
             elif [ "${CIRCLE_BRANCH}" == "develop" ]
@@ -76,7 +72,8 @@ jobs:
                 mkdir -p ~/.ssh
                 ssh-keyscan $DEVNET_HOST >> ~/.ssh/known_hosts
                 ssh $DEVNET_USER@$DEVNET_HOST "sudo systemctl stop truchaind.service"
-                ssh $DEVNET_USER@$DEVNET_HOST "cd /home/ubuntu/go/src/github.com/TruStory/truchain && git pull && PATH=/home/ubuntu/go/bin:$PATH && GO111MODULE=on make download && GO111MODULE=on PATH=/usr/local/go/bin:$PATH  make build-linux && cp build/truchaind /home/ubuntu/go/bin/ && cp build/truchaincli /home/ubuntu/go/bin/"
+                scp bin/truchaind "$DEVNET_USER@$DEVNET_HOST:/home/ubuntu/go/bin/truchaind"
+                scp bin/truchaincli "$DEVNET_USER@$DEVNET_HOST:/home/ubuntu/go/bin/truchaincli"
                 ssh $DEVNET_USER@$DEVNET_HOST "sudo systemctl start truchaind.service"
                 echo "deployed to devnet"
             fi
@@ -145,14 +142,11 @@ workflows:
   version: 2
   deploy-flow:
     jobs:
-      - setup_dependencies
-      - check:
-          requires:
-            - setup_dependencies
+      - build
       - test_unit:
           context: truchain-context
           requires:
-            - setup_dependencies
+            - build
       - data_dump:
           filters:
             branches:
@@ -167,7 +161,7 @@ workflows:
                 - master
       - deploy:
           requires:
-            - check
+            - build
             - test_unit
           filters:
             branches:
