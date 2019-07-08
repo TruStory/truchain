@@ -66,11 +66,11 @@ jobs:
           command: |
             if [ "${CIRCLE_BRANCH}" == "master" ]; then
                 mkdir -p ~/.ssh
-                ssh-keyscan $VENICE4_HOST >> ~/.ssh/known_hosts
-                ssh $VENICE4_USER@$VENICE4_HOST "sudo systemctl stop truchaind.service"
-                ssh $VENICE4_USER@$VENICE4_HOST "cd /home/ubuntu/go/src/github.com/TruStory/truchain && git pull && PATH=/home/ubuntu/go/bin:$PATH && GO111MODULE=on make download && GO111MODULE=on PATH=/usr/local/go/bin:$PATH make build-linux && cp build/truchaind /home/ubuntu/go/bin/ && cp build/truchaincli /home/ubuntu/go/bin/"
-                ssh $VENICE4_USER@$VENICE4_HOST "sudo systemctl start truchaind.service"
-                echo "deploying to venice4"
+                ssh-keyscan $BETA_HOST >> ~/.ssh/known_hosts
+                ssh $BETA_USER@$BETA_HOST "sudo systemctl stop truchaind.service"
+                ssh $BETA_USER@$BETA_HOST "cd /home/ubuntu/go/src/github.com/TruStory/truchain && git pull && PATH=/home/ubuntu/go/bin:$PATH && GO111MODULE=on make download && GO111MODULE=on PATH=/usr/local/go/bin:$PATH make build-linux && cp build/truchaind /home/ubuntu/go/bin/ && cp build/truchaincli /home/ubuntu/go/bin/"
+                ssh $BETA_USER@$BETA_HOST "sudo systemctl start truchaind.service"
+                echo "deploying to beta.trustory.io"
             elif [ "${CIRCLE_BRANCH}" == "develop" ]
             then
                 mkdir -p ~/.ssh
