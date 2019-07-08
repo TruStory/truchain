@@ -18,19 +18,20 @@ var (
 )
 
 // stakeKey gets a key for a stake.
-// 0x00<stake_id>
+// 0x00<transaction_id>
 func transactionKey(id uint64) []byte {
 	bz := sdk.Uint64ToBigEndian(id)
 	return append(TransactionsKeyPrefix, bz...)
 }
 
-// UserTransactionsPrefix
+// userTransactionsPrefix
 // 0x20<creator>
 func userTransactionsPrefix(creator sdk.AccAddress) []byte {
 	return append(UserTransactionKeyPrefix, creator.Bytes()...)
 }
 
 // userTransactionKey builds the key for user->transaction association
+// 0x20<creator><created_time><transaction_id>
 func userTransactionKey(creator sdk.AccAddress, createdTime time.Time, transactionID uint64) []byte {
 	bz := sdk.Uint64ToBigEndian(transactionID)
 	timeBz := sdk.FormatTimeBytes(createdTime)
