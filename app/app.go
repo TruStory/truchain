@@ -304,6 +304,9 @@ func NewTruChain(logger log.Logger, db dbm.DB, loadLatest bool, options ...func(
 		codec,
 	)
 
+	app.truBankKeeper2 = trubank2.NewKeeper(codec, app.keyTruBank2, app.bankKeeper,
+		trubank2Subspace, trubank2.DefaultCodespace)
+
 	app.appAccountKeeper = account.NewKeeper(
 		app.keyAppAccount,
 		appAccountSubspace,
@@ -320,8 +323,7 @@ func NewTruChain(logger log.Logger, db dbm.DB, loadLatest bool, options ...func(
 		app.communityKeeper,
 	)
 
-	app.truBankKeeper2 = trubank2.NewKeeper(codec, app.keyTruBank2, app.bankKeeper,
-		trubank2Subspace, trubank2.DefaultCodespace)
+
 	app.truStakingKeeper = trustaking.NewKeeper(codec, app.keyTruStaking, app.appAccountKeeper,
 		app.truBankKeeper2, app.claimKeeper, truStakingSubspace, trustaking.DefaultCodespace)
 
@@ -358,8 +360,8 @@ func NewTruChain(logger log.Logger, db dbm.DB, loadLatest bool, options ...func(
 		AddRoute(trubank.QueryPath, trubank.NewQuerier(app.truBankKeeper)).
 		AddRoute(community.QuerierRoute, community.NewQuerier(app.communityKeeper)).
 		AddRoute(claim.QuerierRoute, claim.NewQuerier(app.claimKeeper)).
-		AddRoute(account.QuerierRoute, account.NewQuerier(app.appAccountKeeper)).
 		AddRoute(trubank2.QuerierRoute, trubank2.NewQuerier(app.truBankKeeper2)).
+		AddRoute(account.QuerierRoute, account.NewQuerier(app.appAccountKeeper)).
 		AddRoute(trustaking.QuerierRoute, trustaking.NewQuerier(app.truStakingKeeper))
 
 	app.mm = sdk.NewModuleManager(
@@ -380,8 +382,8 @@ func NewTruChain(logger log.Logger, db dbm.DB, loadLatest bool, options ...func(
 		community.NewAppModule(app.communityKeeper),
 		claim.NewAppModule(app.claimKeeper),
 		mint.NewAppModule(app.mintKeeper),
-		account.NewAppModule(app.appAccountKeeper),
 		trubank2.NewAppModule(app.truBankKeeper2),
+		account.NewAppModule(app.appAccountKeeper),
 		trustaking.NewAppModule(app.truStakingKeeper),
 	)
 
