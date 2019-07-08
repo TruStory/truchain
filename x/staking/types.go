@@ -80,6 +80,7 @@ type Stake struct {
 	CreatedTime time.Time      `json:"created_time"`
 	EndTime     time.Time      `json:"end_time"`
 	Expired     bool           `json:"expired"`
+	Result      *RewardResult  `json:"result,omitempty"`
 }
 
 type Argument struct {
