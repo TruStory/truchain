@@ -10,8 +10,7 @@ def process_genesis(genesis, parsed_args):
             'max_slash_stake_count': '50',
             'slash_magnitude': '3',
             'slash_min_stake': '10000000000trusteak',
-            'slash_admins': ['3EABF142A31227CDBAF30F5EF13F3D326AF17561','C56EF60E1B74247B65B28AA07535747D285FACC6'],
-            'jail_time': '168h0m0s',
+            'slash_admins': ['cosmos1xqc5gwzpg3fyv5en2fzyx36z2se5ks33tt57e7', 'cosmos1xqc5gwz923znjvzyg3pnxdfsgcu4jv34mep8hp'],
             'curator_share': '0.250000000000000000',
         }
     }

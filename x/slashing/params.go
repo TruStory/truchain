@@ -2,7 +2,6 @@ package slashing
 
 import (
 	"fmt"
-	"time"
 
 	"github.com/tendermint/tendermint/crypto"
 	"github.com/tendermint/tendermint/crypto/secp256k1"
@@ -18,7 +17,6 @@ var (
 	KeySlashMagnitude     = []byte("slashMagnitude")
 	KeySlashMinStake      = []byte("slashMinStake")
 	KeySlashAdmins        = []byte("slashAdmins")
-	KeyJailTime           = []byte("jailTime")
 	KeyCuratorShare       = []byte("curatorShare")
 )
 
@@ -28,7 +26,6 @@ type Params struct {
 	SlashMagnitude     int              `json:"slash_magnitude"`
 	SlashMinStake      sdk.Coin         `json:"slash_min_stake"`
 	SlashAdmins        []sdk.AccAddress `json:"slash_admins"`
-	JailTime           time.Duration    `json:"jail_time"`
 	CuratorShare       sdk.Dec          `json:"curator_share"`
 }
 
@@ -40,7 +37,6 @@ func DefaultParams() Params {
 		MaxStakeSlashCount: 50,
 		SlashMagnitude:     3,
 		SlashMinStake:      sdk.NewCoin(app.StakeDenom, sdk.NewInt(10*app.Shanev)),
-		JailTime:           time.Duration((7 * 24) * time.Hour),
 		SlashAdmins:        []sdk.AccAddress{adminAddr1, adminAddr2},
 		CuratorShare:       sdk.NewDecWithPrec(25, 2),
 	}
@@ -53,7 +49,6 @@ func (p *Params) ParamSetPairs() params.ParamSetPairs {
 		{Key: KeySlashMagnitude, Value: &p.SlashMagnitude},
 		{Key: KeySlashMinStake, Value: &p.SlashMinStake},
 		{Key: KeySlashAdmins, Value: &p.SlashAdmins},
-		{Key: KeyJailTime, Value: &p.JailTime},
 		{Key: KeyCuratorShare, Value: &p.CuratorShare},
 	}
 }

@@ -1,6 +1,5 @@
 package account
 
-
 import (
 	"fmt"
 	"time"
@@ -13,22 +12,22 @@ import (
 var (
 	KeyRegistrar     = []byte("registrar")
 	KeyMaxSlashCount = []byte("maxSlashCount")
-	KeyJailDuration           = []byte("jailTime")
+	KeyJailDuration  = []byte("jailTime")
 )
 
 // Params holds parameters for Auth
 type Params struct {
 	Registrar     sdk.AccAddress `json:"registrar"`
 	MaxSlashCount int            `json:"max_slash_count"`
-	JailDuration  time.Duration `json:"jail_duration"`
+	JailDuration  time.Duration  `json:"jail_duration"`
 }
 
 // DefaultParams is the auth params for testing
 func DefaultParams() Params {
 	return Params{
-		Registrar: nil,
+		Registrar:     nil,
 		MaxSlashCount: 50,
-		JailDuration: 24 * time.Hour * 7,
+		JailDuration:  24 * time.Hour * 7,
 	}
 }
 

@@ -8,15 +8,15 @@ import (
 
 // GenesisState defines genesis data for the module
 type GenesisState struct {
-	Slashes      []Slash         `json:"slashes"`
-	Params       Params          `json:"params"`
+	Slashes []Slash `json:"slashes"`
+	Params  Params  `json:"params"`
 }
 
 // NewGenesisState creates a new genesis state.
 func NewGenesisState() GenesisState {
 	return GenesisState{
-		Slashes:      []Slash{},
-		Params:       DefaultParams(),
+		Slashes: []Slash{},
+		Params:  DefaultParams(),
 	}
 }
 
@@ -65,10 +65,6 @@ func ValidateGenesis(data GenesisState) error {
 
 	if len(data.Params.SlashAdmins) < 1 {
 		return fmt.Errorf("Param: SlashAdmins, must have atleast one admin")
-	}
-
-	if data.Params.JailTime.Seconds() < 1 {
-		return fmt.Errorf("Param: JailTime, must have a positive value")
 	}
 
 	if data.Params.CuratorShare.IsNegative() {
