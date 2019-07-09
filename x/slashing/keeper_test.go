@@ -88,6 +88,23 @@ func TestSlashes_Success(t *testing.T) {
 	assert.Equal(t, all[1], another)
 }
 
+func Test_punishment(t *testing.T) {
+	ctx, keeper := mockDB()
+
+	stakeID := uint64(1)
+	creator := keeper.GetParams(ctx).SlashAdmins[0]
+	_, err := keeper.CreateSlash(ctx, stakeID, creator)
+	//_, err = keeper.CreateSlash(ctx, stakeID, creator)
+	//_, err = keeper.CreateSlash(ctx, stakeID, creator)
+	//_, err = keeper.CreateSlash(ctx, stakeID, creator)
+	//_, err = keeper.CreateSlash(ctx, stakeID, creator)
+	//_, err = keeper.CreateSlash(ctx, stakeID, creator)
+	assert.NoError(t, err)
+
+	err = keeper.punish(ctx, stakeID)
+	assert.NoError(t, err)
+}
+
 //func TestSlashes_ErrAlreadySlashed(t *testing.T) {
 //	ctx, keeper := mockDB()
 //

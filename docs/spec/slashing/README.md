@@ -19,7 +19,7 @@ type Slash struct {
 
 // Params can be changed by governance vote
 type Param struct {
-    MaxStakeSlashCount   int
+    MinSlashCount        int
     SlashMagnitude       sdk.Dec            // 3x
     SlashMinStake        types.EarnedCoin   // 50 earned trustake
     SlashAdmins          []sdk.AccAddress   // list of admin addresses who can slash
@@ -31,13 +31,13 @@ type Param struct {
 
 ### Messages
 
-`SlashArgumentMsg` increments the `SlashCount` of an `Argument`. If `SlashCount` exceeds the `MaxStakeSlashCount` param, implement punishments. Only a user with an earned trustake of greater than `SlashMinStake` can slash *or* `SlashAdmins`. In the future, this value will be based on the total earned trustake in the community and user reputation.
+`SlashArgumentMsg` increments the `SlashCount` of an `Argument`. If `SlashCount` exceeds the `MaxSlashCount` param, implement punishments. Only a user with an earned trustake of greater than `SlashMinStake` can slash *or* `SlashAdmins`. In the future, this value will be based on the total earned trustake in the community and user reputation.
 
-Fail validation if the `SlashCount` already exceeds `MaxStakeSlashCount`, preventing further slashing on the argument.
+Fail validation if the `SlashCount` already exceeds `MinSlashCount`, preventing further slashing on the argument.
 
-If `SlashCount` is equal to `MaxStakeSlashCount`, then remove the amount of this stake from the total backing or challenge stake count on the claim.
+If `SlashCount` is equal to `MinSlashCount`, then remove the amount of this stake from the total backing or challenge stake count on the claim.
 
-Futhermore, the same user cannot slash the same argument more than once.
+Furthermore, the same user cannot slash the same argument more than once.
 
 Punishment
 * Slash total interest of each staker

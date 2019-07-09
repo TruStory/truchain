@@ -51,8 +51,8 @@ func ExportGenesis(ctx sdk.Context, keeper Keeper) GenesisState {
 
 // ValidateGenesis validates the genesis state data
 func ValidateGenesis(data GenesisState) error {
-	if data.Params.MaxStakeSlashCount < 1 {
-		return fmt.Errorf("Param: MaxStakeSlashCount, must have a positive value")
+	if data.Params.MinSlashCount < 1 {
+		return fmt.Errorf("Param: MinSlashCount, must have a positive value")
 	}
 
 	if data.Params.SlashMagnitude < 1 {

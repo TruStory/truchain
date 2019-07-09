@@ -13,20 +13,20 @@ import (
 
 // Keys for params
 var (
-	KeyMaxStakeSlashCount = []byte("maxStakeSlashCount")
-	KeySlashMagnitude     = []byte("slashMagnitude")
-	KeySlashMinStake      = []byte("slashMinStake")
-	KeySlashAdmins        = []byte("slashAdmins")
-	KeyCuratorShare       = []byte("curatorShare")
+	KeyMinSlashCount  = []byte("minStakeSlashCount")
+	KeySlashMagnitude = []byte("slashMagnitude")
+	KeySlashMinStake  = []byte("slashMinStake")
+	KeySlashAdmins    = []byte("slashAdmins")
+	KeyCuratorShare   = []byte("curatorShare")
 )
 
 // Params holds parameters for Slashing
 type Params struct {
-	MaxStakeSlashCount int              `json:"max_slash_stake_count"`
-	SlashMagnitude     int              `json:"slash_magnitude"`
-	SlashMinStake      sdk.Coin         `json:"slash_min_stake"`
-	SlashAdmins        []sdk.AccAddress `json:"slash_admins"`
-	CuratorShare       sdk.Dec          `json:"curator_share"`
+	MinSlashCount  int              `json:"min_slash_count"`
+	SlashMagnitude int              `json:"slash_magnitude"`
+	SlashMinStake  sdk.Coin         `json:"slash_min_stake"`
+	SlashAdmins    []sdk.AccAddress `json:"slash_admins"`
+	CuratorShare   sdk.Dec          `json:"curator_share"`
 }
 
 // DefaultParams is the Slashing params for testing
@@ -34,18 +34,18 @@ func DefaultParams() Params {
 	_, _, adminAddr1 := getFakeKeyPubAddr()
 	_, _, adminAddr2 := getFakeKeyPubAddr()
 	return Params{
-		MaxStakeSlashCount: 50,
-		SlashMagnitude:     3,
-		SlashMinStake:      sdk.NewCoin(app.StakeDenom, sdk.NewInt(10*app.Shanev)),
-		SlashAdmins:        []sdk.AccAddress{adminAddr1, adminAddr2},
-		CuratorShare:       sdk.NewDecWithPrec(25, 2),
+		MinSlashCount:  5,
+		SlashMagnitude: 3,
+		SlashMinStake:  sdk.NewCoin(app.StakeDenom, sdk.NewInt(10*app.Shanev)),
+		SlashAdmins:    []sdk.AccAddress{adminAddr1, adminAddr2},
+		CuratorShare:   sdk.NewDecWithPrec(25, 2),
 	}
 }
 
 // ParamSetPairs implements params.ParamSet
 func (p *Params) ParamSetPairs() params.ParamSetPairs {
 	return params.ParamSetPairs{
-		{Key: KeyMaxStakeSlashCount, Value: &p.MaxStakeSlashCount},
+		{Key: KeyMinSlashCount, Value: &p.MinSlashCount},
 		{Key: KeySlashMagnitude, Value: &p.SlashMagnitude},
 		{Key: KeySlashMinStake, Value: &p.SlashMinStake},
 		{Key: KeySlashAdmins, Value: &p.SlashAdmins},

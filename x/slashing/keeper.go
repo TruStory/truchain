@@ -2,6 +2,7 @@ package slashing
 
 import (
 	"fmt"
+
 	"github.com/TruStory/truchain/x/account"
 	"github.com/TruStory/truchain/x/staking"
 
@@ -76,7 +77,7 @@ func (k Keeper) CreateSlash(ctx sdk.Context, stakeID uint64, creator sdk.AccAddr
 	k.setArgumentSlasherSlash(ctx, stake.ArgumentID, slashID, creator)
 
 	slashCount := k.getSlashCount(ctx, stakeID)
-	if slashCount >= k.GetParams(ctx).MaxStakeSlashCount {
+	if slashCount >= k.GetParams(ctx).MinSlashCount {
 		err = k.punish(ctx, stakeID)
 		if err != nil {
 			return slash, err
@@ -90,7 +91,8 @@ func (k Keeper) CreateSlash(ctx sdk.Context, stakeID uint64, creator sdk.AccAddr
 
 func (k Keeper) punish(ctx sdk.Context, stakeID uint64) sdk.Error {
 	slashCount := k.getSlashCount(ctx, stakeID)
-	if slashCount >= k.GetParams(ctx).MaxStakeSlashCount {
+	fmt.Println(k.GetParams(ctx).MinSlashCount)
+	if slashCount >= k.GetParams(ctx).MinSlashCount {
 		stake, ok := k.stakingKeeper.Stake(ctx, stakeID)
 		if !ok {
 			return ErrInvalidStake(stakeID)
@@ -242,7 +244,7 @@ func (k Keeper) validateParams(ctx sdk.Context, stakeID uint64, creator sdk.AccA
 	if !ok {
 		return ErrInvalidStake(stakeID)
 	}
-	if k.getSlashCount(ctx, stake.ID) > params.MaxStakeSlashCount {
+	if k.getSlashCount(ctx, stake.ID) > params.MinSlashCount {
 		return ErrMaxSlashCountReached(stakeID)
 	}
 
@@ -317,7 +319,7 @@ func (k Keeper) setArgumentSlasherSlash(ctx sdk.Context, argumentID, slashID uin
 
 func (k Keeper) ArgumentSlashes(ctx sdk.Context, slasher sdk.AccAddress, argumentID uint64) []Slash {
 	slashes := make([]Slash, 0)
-	k.IterateArgumentSlashes(ctx, argumentID,slasher, func(slash Slash) bool {
+	k.IterateArgumentSlashes(ctx, argumentID, slasher, func(slash Slash) bool {
 		slashes = append(slashes, slash)
 		return false
 	})
