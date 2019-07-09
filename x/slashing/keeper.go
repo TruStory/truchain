@@ -39,7 +39,7 @@ func NewKeeper(
 	}
 }
 
-// CreateSlash creates a new slash
+// CreateSlash creates a new slash on an argument (mark as "Unhelpful" in app)
 func (k Keeper) CreateSlash(ctx sdk.Context, stakeID uint64, creator sdk.AccAddress) (slash Slash, err sdk.Error) {
 	logger := getLogger(ctx)
 
@@ -68,6 +68,12 @@ func (k Keeper) CreateSlash(ctx sdk.Context, stakeID uint64, creator sdk.AccAddr
 	k.setCreatorSlash(ctx, creator, slashID)
 	k.setStakeSlash(ctx, stakeID, slashID)
 	k.incrementSlashCount(ctx, stakeID)
+
+	stake, ok := k.stakingKeeper.Stake(ctx, stakeID)
+	if !ok {
+		return slash, ErrInvalidStake(stakeID)
+	}
+	k.setArgumentSlasherSlash(ctx, stake.ArgumentID, slashID, creator)
 
 	slashCount := k.getSlashCount(ctx, stakeID)
 	if slashCount >= k.GetParams(ctx).MaxStakeSlashCount {
@@ -302,6 +308,38 @@ func (k Keeper) associatedSlashes(ctx sdk.Context, prefix []byte) (slashes Slash
 	}
 
 	return
+}
+
+func (k Keeper) setArgumentSlasherSlash(ctx sdk.Context, argumentID, slashID uint64, slasher sdk.AccAddress) {
+	bz := k.codec.MustMarshalBinaryLengthPrefixed(slashID)
+	k.store(ctx).Set(argumentSlasherSlashKey(argumentID, slasher, slashID), bz)
+}
+
+func (k Keeper) ArgumentSlashes(ctx sdk.Context, slasher sdk.AccAddress, argumentID uint64) []Slash {
+	slashes := make([]Slash, 0)
+	k.IterateArgumentSlashes(ctx, argumentID,slasher, func(slash Slash) bool {
+		slashes = append(slashes, slash)
+		return false
+	})
+	return slashes
+}
+
+type slashCallback func(slash Slash) (stop bool)
+
+func (k Keeper) IterateArgumentSlashes(ctx sdk.Context, argumentID uint64, address sdk.AccAddress, cb slashCallback) {
+	iterator := k.store(ctx).Iterator(ArgumentCreatorPrefix, sdk.PrefixEndBytes(argumentSlasherPrefix(argumentID, address)))
+	defer iterator.Close()
+	for ; iterator.Valid(); iterator.Next() {
+		var slash Slash
+		k.codec.MustUnmarshalBinaryLengthPrefixed(iterator.Value(), &slash)
+		if cb(slash) {
+			break
+		}
+	}
+}
+
+func (k Keeper) store(ctx sdk.Context) sdk.KVStore {
+	return ctx.KVStore(k.storeKey)
 }
 
 func getLogger(ctx sdk.Context) log.Logger {

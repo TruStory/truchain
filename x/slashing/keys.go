@@ -9,19 +9,21 @@ import (
 // Keys for slashing store
 // Items are stored with the following key: values
 //
-// - 0x00<slashID_Bytes>: Slash_Bytes
-// - 0x01: nextSlashID_Bytes
-// - 0x02<stakeID_Bytes>: slashCount_Bytes
+// - 0x00<slashID>: Slash{}
+// - 0x01: nextSlashID
+// - 0x02<stakeID>: slashCount
 //
-// - 0x10<stakeID_Bytes><slashID_Bytes>: slashID_Bytes
-// - 0x11<creator_Bytes><slashID_Bytes>: slashID_Bytes
+// - 0x10<stakeID><slashID>: slashID
+// - 0x11<creator><slashID>: slashID
+// - 0x12<argumentID><slashCreator><slashID>: slashID
 var (
 	SlashesKeyPrefix = []byte{0x00}
 	SlashIDKey       = []byte{0x01}
 	SlashCountPrefix = []byte{0x02}
 
-	StakeSlashesPrefix   = []byte{0x10}
-	CreatorSlashesPrefix = []byte{0x11}
+	StakeSlashesPrefix    = []byte{0x10}
+	CreatorSlashesPrefix  = []byte{0x11}
+	ArgumentCreatorPrefix = []byte{0x12}
 )
 
 // key for getting a specific slash from the store
@@ -62,4 +64,12 @@ func slashCountKey(stakeID uint64) []byte {
 	bz := make([]byte, 8)
 	binary.LittleEndian.PutUint64(bz, stakeID)
 	return append(SlashCountPrefix, bz...)
+}
+
+func argumentSlasherPrefix(argumentID uint64, slasher sdk.AccAddress) []byte {
+	return append(ArgumentCreatorPrefix, append(sdk.Uint64ToBigEndian(argumentID), slasher.Bytes()...)...)
+}
+
+func argumentSlasherSlashKey(argumentID uint64, slasher sdk.AccAddress, slashID uint64) []byte {
+	return append(argumentSlasherPrefix(argumentID, slasher), sdk.Uint64ToBigEndian(slashID)...)
 }

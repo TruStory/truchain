@@ -37,6 +37,13 @@ func InitGenesis(ctx sdk.Context, keeper Keeper, data GenesisState) {
 		keeper.setSlash(ctx, slash)
 		keeper.setCreatorSlash(ctx, slash.Creator, slash.ID)
 		keeper.setStakeSlash(ctx, slash.StakeID, slash.ID)
+
+		stake, ok := keeper.stakingKeeper.Stake(ctx, slash.StakeID)
+		if !ok {
+			panic("can't find stake during genesis")
+		}
+		keeper.setArgumentSlasherSlash(ctx, stake.ArgumentID, slash.ID, slash.Creator)
+
 	}
 	keeper.setSlashID(ctx, uint64(len(data.Slashes)+1))
 

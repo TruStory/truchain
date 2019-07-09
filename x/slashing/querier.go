@@ -9,9 +9,10 @@ import (
 
 // query endpoints supported by the truchain Querier
 const (
-	QuerySlash        = "slash"
-	QuerySlashes      = "slashes"
-	QueryStakeSlashes = "stake_slashes"
+	QuerySlash           = "slash"
+	QuerySlashes         = "slashes"
+	QueryStakeSlashes    = "stake_slashes"
+	QueryArgumentSlashes = "argument_slashes"
 )
 
 // QuerySlashParams are params for querying slashes by id queries
@@ -24,6 +25,12 @@ type QueryStakeSlashesParams struct {
 	StakeID uint64 `json:"stake_id"`
 }
 
+// QueryArgumentSlashesParams are params for querying slashes by argument id and slasher
+type QueryArgumentSlashesParams struct {
+	ArgumentID uint64         `json:"argument_id"`
+	Slasher    sdk.AccAddress `json:"slasher"`
+}
+
 // NewQuerier creates a new querier
 func NewQuerier(keeper Keeper) sdk.Querier {
 	return func(ctx sdk.Context, path []string, request abci.RequestQuery) ([]byte, sdk.Error) {
@@ -34,6 +41,8 @@ func NewQuerier(keeper Keeper) sdk.Querier {
 			return querySlashes(ctx, keeper)
 		case QueryStakeSlashes:
 			return queryStakeSlashes(ctx, request, keeper)
+		case QueryArgumentSlashes:
+			return queryArgumentSlashes(ctx, request, keeper)
 		default:
 			return nil, sdk.ErrUnknownRequest(fmt.Sprintf("Unknown truchain query endpoint: slashing/%s", path[0]))
 		}
@@ -73,6 +82,20 @@ func queryStakeSlashes(ctx sdk.Context, request abci.RequestQuery, k Keeper) (re
 	}
 
 	slashes := k.StakeSlashes(ctx, params.StakeID)
+	bz, jsonErr := k.codec.MarshalJSON(slashes)
+	if jsonErr != nil {
+		return nil, sdk.ErrInternal(sdk.AppendMsgToErr("could not marshal result to JSON", jsonErr.Error()))
+	}
+	return bz, nil
+}
+
+func queryArgumentSlashes(ctx sdk.Context, request abci.RequestQuery, k Keeper) (result []byte, err sdk.Error) {
+	params := QueryArgumentSlashesParams{}
+	if err = unmarshalQueryParams(request, &params); err != nil {
+		return
+	}
+
+	slashes := k.ArgumentSlashes(ctx, params.Slasher, params.ArgumentID)
 	bz, jsonErr := k.codec.MarshalJSON(slashes)
 	if jsonErr != nil {
 		return nil, sdk.ErrInternal(sdk.AppendMsgToErr("could not marshal result to JSON", jsonErr.Error()))
