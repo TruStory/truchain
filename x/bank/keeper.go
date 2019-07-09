@@ -77,6 +77,10 @@ func (k Keeper) SubtractCoin(ctx sdk.Context, addr sdk.AccAddress, amt sdk.Coin,
 		return sdk.Coins{}, ErrInvalidTransactionType(txType)
 	}
 
+	if amt.IsNegative() {
+		return sdk.Coins{}, sdk.ErrInvalidCoins("amount can't be negative")
+	}
+
 	adjustedCoin := amt
 	balanceCoins := k.bankKeeper.GetCoins(ctx, addr)
 	fmt.Printf("balance: %s\n", balanceCoins.String())
