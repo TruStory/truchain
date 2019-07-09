@@ -74,7 +74,15 @@ func (k Keeper) SubtractCoin(ctx sdk.Context, addr sdk.AccAddress, amt sdk.Coin,
 	if !txType.AllowedForDeduction() {
 		return sdk.Coins{}, ErrInvalidTransactionType(txType)
 	}
-	coins, err := k.bankKeeper.SubtractCoins(ctx, addr, sdk.Coins{amt})
+
+	adjustedCoin := amt
+	balanceCoins := k.bankKeeper.GetCoins(ctx, addr)
+	balance := balanceCoins.AmountOf(amt.Denom)
+	if balance.LT(amt.Amount) {
+		adjustedCoin = sdk.NewCoin(amt.Denom, balance)
+	}
+
+	coins, err := k.bankKeeper.SubtractCoins(ctx, addr, sdk.Coins{adjustedCoin})
 	if err != nil {
 		return coins, err
 	}
@@ -87,7 +95,7 @@ func (k Keeper) SubtractCoin(ctx sdk.Context, addr sdk.AccAddress, amt sdk.Coin,
 	tx.ID = transactionID
 	tx.Type = txType
 	tx.ReferenceID = referenceID
-	tx.Amount = amt
+	tx.Amount = adjustedCoin
 	tx.AppAccountAddress = addr
 	tx.CreatedTime = ctx.BlockHeader().Time
 
