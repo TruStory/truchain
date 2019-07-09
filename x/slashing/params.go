@@ -3,9 +3,6 @@ package slashing
 import (
 	"fmt"
 
-	"github.com/tendermint/tendermint/crypto"
-	"github.com/tendermint/tendermint/crypto/secp256k1"
-
 	app "github.com/TruStory/truchain/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/params"
@@ -31,13 +28,11 @@ type Params struct {
 
 // DefaultParams is the Slashing params for testing
 func DefaultParams() Params {
-	_, _, adminAddr1 := getFakeKeyPubAddr()
-	_, _, adminAddr2 := getFakeKeyPubAddr()
 	return Params{
 		MinSlashCount:  5,
 		SlashMagnitude: 3,
 		SlashMinStake:  sdk.NewCoin(app.StakeDenom, sdk.NewInt(10*app.Shanev)),
-		SlashAdmins:    []sdk.AccAddress{adminAddr1, adminAddr2},
+		SlashAdmins:    []sdk.AccAddress{},
 		CuratorShare:   sdk.NewDecWithPrec(25, 2),
 	}
 }
@@ -70,12 +65,4 @@ func (k Keeper) SetParams(ctx sdk.Context, params Params) {
 	logger := ctx.Logger().With("module", ModuleName)
 	k.paramStore.SetParamSet(ctx, &params)
 	logger.Info(fmt.Sprintf("Loaded slashing params: %+v", params))
-}
-
-// unexported and used for testing...
-func getFakeKeyPubAddr() (crypto.PrivKey, crypto.PubKey, sdk.AccAddress) {
-	key := secp256k1.GenPrivKey()
-	pub := key.PubKey()
-	addr := sdk.AccAddress(pub.Address())
-	return key, pub, addr
 }
