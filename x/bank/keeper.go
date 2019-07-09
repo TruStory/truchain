@@ -1,6 +1,8 @@
 package bank
 
 import (
+	"fmt"
+
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/bank"
@@ -77,32 +79,40 @@ func (k Keeper) SubtractCoin(ctx sdk.Context, addr sdk.AccAddress, amt sdk.Coin,
 
 	adjustedCoin := amt
 	balanceCoins := k.bankKeeper.GetCoins(ctx, addr)
+	fmt.Printf("balance: %s\n", balanceCoins.String())
 	balance := balanceCoins.AmountOf(amt.Denom)
 	if balance.LT(amt.Amount) {
 		adjustedCoin = sdk.NewCoin(amt.Denom, balance)
 	}
 
-	coins, err := k.bankKeeper.SubtractCoins(ctx, addr, sdk.Coins{adjustedCoin})
-	if err != nil {
-		return coins, err
+	fmt.Printf("adjusted coin: %s\n", adjustedCoin.String())
+
+	if adjustedCoin.IsPositive() {
+		coins, err := k.bankKeeper.SubtractCoins(ctx, addr, sdk.Coins{adjustedCoin})
+		if err != nil {
+			return coins, err
+		}
+
+		transactionID, err := k.transactionID(ctx)
+		if err != nil {
+			return sdk.Coins{}, err
+		}
+		
+		tx.ID = transactionID
+		tx.Type = txType
+		tx.ReferenceID = referenceID
+		tx.Amount = adjustedCoin
+		tx.AppAccountAddress = addr
+		tx.CreatedTime = ctx.BlockHeader().Time
+
+		k.setTransaction(ctx, tx)
+		k.setTransactionID(ctx, transactionID+1)
+		k.setUserTransaction(ctx, addr, tx.CreatedTime, tx.ID)
+		return coins, nil
+	} else {
+		return balanceCoins, nil
 	}
 
-	transactionID, err := k.transactionID(ctx)
-	if err != nil {
-		return sdk.Coins{}, err
-	}
-
-	tx.ID = transactionID
-	tx.Type = txType
-	tx.ReferenceID = referenceID
-	tx.Amount = adjustedCoin
-	tx.AppAccountAddress = addr
-	tx.CreatedTime = ctx.BlockHeader().Time
-
-	k.setTransaction(ctx, tx)
-	k.setTransactionID(ctx, transactionID+1)
-	k.setUserTransaction(ctx, addr, tx.CreatedTime, tx.ID)
-	return coins, nil
 }
 
 func (k Keeper) GetCoins(ctx sdk.Context, address sdk.AccAddress) sdk.Coins {

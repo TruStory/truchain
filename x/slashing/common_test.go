@@ -1,10 +1,11 @@
 package slashing
 
 import (
+	"net/url"
+
 	"github.com/TruStory/truchain/x/account"
 	"github.com/TruStory/truchain/x/staking"
 	"github.com/tendermint/tendermint/crypto"
-	"net/url"
 
 	trubank "github.com/TruStory/truchain/x/bank"
 	"github.com/TruStory/truchain/x/claim"

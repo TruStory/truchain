@@ -1,6 +1,7 @@
 package staking
 
 import (
+	"fmt"
 	"time"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -82,6 +83,14 @@ type Stake struct {
 	EndTime     time.Time      `json:"end_time"`
 	Expired     bool           `json:"expired"`
 	Result      *RewardResult  `json:"result,omitempty"`
+}
+
+func (s Stake) String() string {
+	return fmt.Sprintf(`Stake %d:
+  ArgumentID: %d
+  Amount: %s
+  Creator: %s`,
+		s.ID, s.ArgumentID, s.Amount.String(), s.Creator.String())
 }
 
 type Argument struct {

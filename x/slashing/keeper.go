@@ -74,11 +74,12 @@ func (k Keeper) CreateSlash(ctx sdk.Context, stakeID uint64, creator sdk.AccAddr
 	if !ok {
 		return slash, ErrInvalidStake(stakeID)
 	}
+	fmt.Println(stake.String())
 	k.setArgumentSlasherSlash(ctx, stake.ArgumentID, slashID, creator)
 
 	slashCount := k.getSlashCount(ctx, stakeID)
-	if slashCount >= k.GetParams(ctx).MinSlashCount {
-		err = k.punish(ctx, stakeID)
+	if slashCount >= k.GetParams(ctx).MinSlashCount || k.isAdmin(ctx, creator) {
+		err = k.punish(ctx, stake)
 		if err != nil {
 			return slash, err
 		}
@@ -89,48 +90,50 @@ func (k Keeper) CreateSlash(ctx sdk.Context, stakeID uint64, creator sdk.AccAddr
 	return
 }
 
-func (k Keeper) punish(ctx sdk.Context, stakeID uint64) sdk.Error {
-	slashCount := k.getSlashCount(ctx, stakeID)
-	fmt.Println(k.GetParams(ctx).MinSlashCount)
-	if slashCount >= k.GetParams(ctx).MinSlashCount {
-		stake, ok := k.stakingKeeper.Stake(ctx, stakeID)
-		if !ok {
-			return ErrInvalidStake(stakeID)
-		}
-		var stakingPool sdk.Coin
-		for _, s := range k.stakingKeeper.ArgumentStakes(ctx, stake.ArgumentID) {
-			stakingPool.Add(s.Amount)
-			if k.stakingKeeper.IsStakeActive(ctx, s.ID, s.EndTime) {
-				k.stakingKeeper.RemoveFromActiveStakeQueue(ctx, s.ID, s.EndTime)
-			} else {
+func (k Keeper) punish(ctx sdk.Context, stake staking.Stake) sdk.Error {
+	stakingPool := stake.Amount
+	for _, s := range k.stakingKeeper.ArgumentStakes(ctx, stake.ArgumentID) {
+		stakingPool.Add(s.Amount)
+		if k.stakingKeeper.IsStakeActive(ctx, s.ID, s.EndTime) {
+			k.stakingKeeper.RemoveFromActiveStakeQueue(ctx, s.ID, s.EndTime)
+		} else {
+			if s.Result != nil {
 				stakeInterest := s.Result.ArgumentCreatorReward.Add(s.Result.StakeCreatorReward)
 				_, err := k.bankKeeper.SubtractCoin(ctx, s.Creator, stakeInterest, s.ID, bank.TransactionInterestSlashed)
 				if err != nil {
 					return err
 				}
 			}
-			slashMagnitude := int64(k.GetParams(ctx).SlashMagnitude)
-			slashCoin := sdk.NewCoin(stake.Amount.Denom, stake.Amount.Amount.MulRaw(slashMagnitude))
-			_, err := k.bankKeeper.SubtractCoin(ctx, s.Creator, slashCoin, s.ID, bank.TransactionStakeSlashed)
-			if err != nil {
-				return err
-			}
-			// increment slash count for user (and jail if needed)
-			_, err = k.accountKeeper.IncrementSlashCount(ctx, s.Creator)
-			if err != nil {
-				return err
-			}
 		}
+		slashMagnitude := int64(k.GetParams(ctx).SlashMagnitude)
+		slashCoin := sdk.NewCoin(stake.Amount.Denom, stake.Amount.Amount.MulRaw(slashMagnitude))
+		fmt.Printf("slash coin: %s\n", slashCoin.String())
+		_, err := k.bankKeeper.SubtractCoin(ctx, s.Creator, slashCoin, s.ID, bank.TransactionStakeSlashed)
+		if err != nil {
+			return err
+		}
+		// increment slash count for user (and jail if needed)
+		_, err = k.accountKeeper.IncrementSlashCount(ctx, s.Creator)
+		if err != nil {
+			return err
+		}
+	}
 
-		slashes := k.StakeSlashes(ctx, stakeID)
-		curatorShare := (k.GetParams(ctx).CuratorShare).Int64()
-		curatorAmount := stakingPool.Amount.QuoRaw(curatorShare).QuoRaw(int64(len(slashes)))
-		curatorCoin := sdk.NewCoin(app.StakeDenom, curatorAmount)
-		for _, slash := range k.StakeSlashes(ctx, stakeID) {
-			_, err := k.bankKeeper.AddCoin(ctx, slash.Creator, curatorCoin, slash.ID, bank.TransactionCuratorReward)
-			if err != nil {
-				return err
-			}
+	fmt.Printf("staking pool: %s\n", stakingPool.String())
+	if !stakingPool.IsPositive() {
+		return sdk.ErrInsufficientCoins("staking pool cannot be empty")
+	}
+
+	slashes := k.StakeSlashes(ctx, stake.ID)
+	curatorShareDec := k.GetParams(ctx).CuratorShare
+	totalCuratorAmountDec := stakingPool.Amount.ToDec().Mul(curatorShareDec)
+	curatorAmount := totalCuratorAmountDec.QuoInt64(int64(len(slashes))).TruncateInt()
+	curatorCoin := sdk.NewCoin(app.StakeDenom, curatorAmount)
+	fmt.Printf("curator share: %s\n", curatorCoin.String())
+	for _, slash := range slashes {
+		_, err := k.bankKeeper.AddCoin(ctx, slash.Creator, curatorCoin, slash.ID, bank.TransactionCuratorReward)
+		if err != nil {
+			return err
 		}
 	}
 
@@ -255,7 +258,7 @@ func (k Keeper) validateParams(ctx sdk.Context, stakeID uint64, creator sdk.AccA
 	}
 
 	// validating creator
-	isAdmin := isAdmin(creator, params.SlashAdmins)
+	isAdmin := k.isAdmin(ctx, creator)
 	hasEnoughCoins := k.hasEnoughEarnedStake(ctx, creator, params.SlashMinStake)
 
 	if !isAdmin && !hasEnoughCoins {
@@ -286,8 +289,8 @@ func (k Keeper) hasPreviouslySlashed(ctx sdk.Context, stakeID uint64, creator sd
 	return false
 }
 
-func isAdmin(address sdk.AccAddress, admins []sdk.AccAddress) bool {
-	for _, admin := range admins {
+func (k Keeper) isAdmin(ctx sdk.Context, address sdk.AccAddress) bool {
+	for _, admin := range k.GetParams(ctx).SlashAdmins {
 		if address.Equals(admin) {
 			return true
 		}
