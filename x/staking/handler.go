@@ -5,6 +5,7 @@ import (
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
+	app "github.com/TruStory/truchain/types"
 	"github.com/TruStory/truchain/x/staking/tags"
 )
 
@@ -35,14 +36,16 @@ func handleMsgSubmitArgument(ctx sdk.Context, keeper Keeper, msg MsgSubmitArgume
 	if codecErr != nil {
 		return sdk.ErrInternal(fmt.Sprintf("Marshal result error: %s", codecErr)).Result()
 	}
-	tags := sdk.NewTags(
-		tags.Category, tags.TxCategory,
-		tags.Action, tags.ActionCreateArgument,
-		tags.Creator, msg.Creator.String(),
+	resultTags := append(app.PushTag,
+		sdk.NewTags(
+			tags.Category, tags.TxCategory,
+			tags.Action, tags.ActionCreateArgument,
+			tags.Creator, msg.Creator.String(),
+		)...,
 	)
 	return sdk.Result{
 		Data: res,
-		Tags: tags,
+		Tags: resultTags,
 	}
 }
 
@@ -58,13 +61,15 @@ func handleMsgSubmitUpvote(ctx sdk.Context, keeper Keeper, msg MsgSubmitUpvote) 
 	if codecErr != nil {
 		return sdk.ErrInternal(fmt.Sprintf("Marshal result error: %s", codecErr)).Result()
 	}
-	tags := sdk.NewTags(
-		tags.Category, tags.TxCategory,
-		tags.Action, tags.ActionCreateUpvote,
-		tags.Creator, msg.Creator.String(),
+	resultTags := append(app.PushTag,
+		sdk.NewTags(
+			tags.Category, tags.TxCategory,
+			tags.Action, tags.ActionCreateUpvote,
+			tags.Creator, msg.Creator.String(),
+		)...,
 	)
 	return sdk.Result{
 		Data: res,
-		Tags: tags,
+		Tags: resultTags,
 	}
 }

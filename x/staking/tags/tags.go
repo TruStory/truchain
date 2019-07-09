@@ -7,7 +7,7 @@ import (
 // staking tags
 var (
 	Creator       = "creator"
-	RewardResults = "reward-results"
+	ExpiredStakes = "expired-stakes"
 
 	ActionCreateArgument     = "create-argument"
 	ActionCreateUpvote       = "create-upvote"
