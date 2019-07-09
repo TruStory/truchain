@@ -6,6 +6,7 @@ import (
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
+	app "github.com/TruStory/truchain/types"
 	"github.com/TruStory/truchain/x/staking/tags"
 )
 
@@ -34,9 +35,11 @@ func EndBlocker(ctx sdk.Context, keeper Keeper) sdk.Tags {
 	if err != nil {
 		panic(err)
 	}
-	return sdk.NewTags(
-		tags.Category, tags.TxCategory,
-		tags.Action, tags.ActionInterestRewardPaid,
-		tags.RewardResults, b,
+	return append(app.PushTag,
+		sdk.NewTags(
+			tags.Category, tags.TxCategory,
+			tags.Action, tags.ActionInterestRewardPaid,
+			tags.RewardResults, b,
+		)...,
 	)
 }
