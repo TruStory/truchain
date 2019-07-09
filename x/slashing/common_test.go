@@ -4,7 +4,6 @@ import (
 	"github.com/TruStory/truchain/x/account"
 	"github.com/TruStory/truchain/x/staking"
 	"github.com/tendermint/tendermint/crypto"
-	"github.com/tendermint/tendermint/crypto/secp256k1"
 	"net/url"
 
 	trubank "github.com/TruStory/truchain/x/bank"
@@ -151,11 +150,4 @@ func getFakeCoins() sdk.Coins {
 	return sdk.Coins{
 		sdk.NewInt64Coin(app.StakeDenom, 100000000000),
 	}
-}
-
-func getFakeKeyPubAddr() (crypto.PrivKey, crypto.PubKey, sdk.AccAddress) {
-	key := secp256k1.GenPrivKey()
-	pub := key.PubKey()
-	addr := sdk.AccAddress(pub.Address())
-	return key, pub, addr
 }
