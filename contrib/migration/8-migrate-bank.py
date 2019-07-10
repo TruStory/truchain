@@ -60,6 +60,7 @@ def process_genesis(genesis, parsed_args):
                     'amount': str(earned_amount),
                     'denom': 'trusteak'
                 },
+                'community_id': claim['community_id'],
                 'created_time': s['end_time']
             }
             genesis['app_state']['trubank2']['transactions'].append(transaction)
