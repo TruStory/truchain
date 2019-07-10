@@ -62,7 +62,7 @@ def process_genesis(genesis, parsed_args):
     totals = total_stakes_by_argument_id(genesis)
 
     # migrate argument state
-    migrate_argument_data(genesis['app_state']['trustaking']['arguments'], totals)
+    migrate_argument_data(genesis, genesis['app_state']['trustaking']['arguments'], totals)
 
     # Set new chain ID and genesis start time
     genesis['chain_id'] = parsed_args.chain_id.strip()
@@ -70,11 +70,13 @@ def process_genesis(genesis, parsed_args):
 
     return genesis
 
-def migrate_argument_data(argument_data, totals):
+def migrate_argument_data(genesis, argument_data, totals):
     for a in argument_data:
         a['id'] = a['id']
         a['creator'] = a['creator']
         a['claim_id'] = a['story_id']
+        claim = get_argument_claim(genesis, a['claim_id'])
+        a['community_id'] = claim['community_id'] 
         del a['story_id']
         a['summary'] = a['body'][0:140]
         a['body'] = a['body']
@@ -127,6 +129,12 @@ def total_stakes_by_argument_id(genesis):
             raise Exception('Upvoted stake is bigger than total stake for argument id: ' + s['id'])
 
     return totals
+
+def get_argument_claim(genesis, claim_id):
+    for c in genesis['app_state']['claim']['claims']:
+        if c['id'] == claim_id:
+            return c
+    raise Exception('Claim not found with claim id: ' + claim_id)
 
 if __name__ == '__main__':
     parser = lib.init_default_argument_parser(

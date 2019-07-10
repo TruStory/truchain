@@ -46,6 +46,9 @@ def migrate_votes_to_stakes(genesis, votes):
       vote = v['vote']
       stake['id'] = str(stake_id)
       stake['argument_id'] = vote['argument_id']
+      argument = get_stake_argument(genesis, vote['argument_id'])
+      claim = get_argument_claim(genesis, argument['claim_id'])
+      stake['community_id'] = claim['community_id']
       stake['type'] = get_vote_type(genesis, vote)
       stake['amount'] = vote['amount']
       stake['creator'] = vote['creator']
@@ -71,6 +74,18 @@ def is_vote_expired(genesis, vote):
     if s['id'] == vote['story_id']:
       return s['status'] == EXPIRED
   raise Exception('Story status not found for story id: ' + vote['story_id'])
+
+def get_stake_argument(genesis, argument_id):
+    for a in genesis['app_state']['trustaking']['arguments']:
+        if a['id'] == argument_id:
+            return a
+    raise Exception('Argument not found with argument id: ' + argument_id)
+
+def get_argument_claim(genesis, claim_id):
+    for c in genesis['app_state']['claim']['claims']:
+        if c['id'] == claim_id:
+            return c
+    raise Exception('Claim not found with claim id: ' + claim_id)
 
 if __name__ == '__main__':
     parser = lib.init_default_argument_parser(
