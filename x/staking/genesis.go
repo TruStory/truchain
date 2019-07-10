@@ -2,9 +2,10 @@ package staking
 
 import (
 	"fmt"
-	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	app "github.com/TruStory/truchain/types"
+	sdk "github.com/cosmos/cosmos-sdk/types"
+	stripmd "github.com/writeas/go-strip-markdown"
 )
 
 type UserEarnedCoins struct {
@@ -43,6 +44,7 @@ func DefaultGenesisState() GenesisState {
 // InitGenesis initializes staking state from genesis file
 func InitGenesis(ctx sdk.Context, k Keeper, data GenesisState) {
 	for _, a := range data.Arguments {
+		a.Summary = stripmd.Strip(a.Summary)
 		k.setArgument(ctx, a)
 		k.setClaimArgument(ctx, a.ClaimID, a.ID)
 		k.serUserArgument(ctx, a.Creator, a.ID)
