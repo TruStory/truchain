@@ -149,9 +149,15 @@ func (k Keeper) SubmitUpvote(ctx sdk.Context, argumentID uint64, creator sdk.Acc
 
 	switch {
 	case argument.StakeType == StakeBacking:
-		k.claimKeeper.AddBackingStake(ctx, argument.ClaimID, stake.Amount)
+		err := k.claimKeeper.AddBackingStake(ctx, argument.ClaimID, stake.Amount)
+		if err != nil {
+			return Stake{}, err
+		}
 	case argument.StakeType == StakeChallenge:
 		k.claimKeeper.AddChallengeStake(ctx, argument.ClaimID, stake.Amount)
+		if err != nil {
+			return Stake{}, err
+		}
 	}
 
 	return stake, nil
@@ -225,9 +231,15 @@ func (k Keeper) SubmitArgument(ctx sdk.Context, body, summary string,
 
 	switch {
 	case stakeType == StakeBacking:
-		k.claimKeeper.AddBackingStake(ctx, claimID, creationAmount)
+		err := k.claimKeeper.AddBackingStake(ctx, claimID, creationAmount)
+		if err != nil {
+			return Argument{}, err
+		}
 	case stakeType == StakeChallenge:
-		k.claimKeeper.AddChallengeStake(ctx, claimID, creationAmount)
+		err := k.claimKeeper.AddChallengeStake(ctx, claimID, creationAmount)
+		if err != nil {
+			return Argument{}, err
+		}
 	}
 
 	return argument, nil
