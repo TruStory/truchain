@@ -50,7 +50,7 @@ func TestInitGenesis(t *testing.T) {
 		Creator:      addr1,
 		ClaimID:      1,
 		Summary:      "summary",
-		Body:         "body",
+		Body:         "summary with *markdown* [trustory](http://trustory.io). and body, testing cuttoff on a [URL](http://somereally.long.url.even.longer.to.get.140.chars)",
 		StakeType:    StakeBacking,
 		CreatedTime:  ctx.BlockHeader().Time,
 		UpdatedTime:  ctx.BlockHeader().Time,
@@ -58,7 +58,11 @@ func TestInitGenesis(t *testing.T) {
 		UpvotedStake: sdk.NewInt64Coin(app.StakeDenom, app.Shanev*10),
 		TotalStake:   sdk.NewInt64Coin(app.StakeDenom, app.Shanev*60),
 	}
+
+	expectedSummary := "summary with markdown trustory. and body, testing cuttoff on a URL"
 	arguments := []Argument{argument1}
+	arguments[0].Summary = expectedSummary
+
 	usersEarnings := make([]UserEarnedCoins, 0)
 	genesisState := NewGenesisState(arguments, stakes, usersEarnings, DefaultParams())
 	InitGenesis(ctx, k, genesisState)
@@ -69,6 +73,8 @@ func TestInitGenesis(t *testing.T) {
 
 	claimArguments := k.ClaimArguments(ctx, 1)
 	assert.Equal(t, arguments, claimArguments)
+
+	assert.Equal(t, expectedSummary, claimArguments[0].Summary)
 
 	argumentStakes := k.ArgumentStakes(ctx, 1)
 	assert.Equal(t, stakes, argumentStakes)
