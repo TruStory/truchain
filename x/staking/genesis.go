@@ -81,7 +81,11 @@ func InitGenesis(ctx sdk.Context, k Keeper, data GenesisState) {
 	k.setStakeID(ctx, uint64(len(data.Stakes)+1))
 
 	for _, e := range data.UsersEarnings {
-		k.setEarnedCoins(ctx, e.Address, e.Coins)
+		e.Coins.Sort()
+		if !e.Coins.IsValid() {
+			panic(fmt.Sprintf("user earnings for account %s are invalid %s", e.Address.String(), e.Coins.String()))
+		}
+		k.setEarnedCoins(ctx, e.Address, e.Coins.Sort())
 	}
 	k.SetParams(ctx, data.Params)
 }

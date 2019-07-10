@@ -73,10 +73,11 @@ def process_genesis(genesis, parsed_args):
         earnings['address'] = a['address']
         earnings['coins'] = []
         for community_id, amount in earned_coins[a['address']].items():
-            earnings['coins'].append({
-                'amount': str(amount),
-                'denom': community_id
-            })
+            if amount != 0:
+                earnings['coins'].append({
+                    'amount': str(amount),
+                    'denom': community_id
+                })
         genesis['app_state']['trustaking']['users_earnings'].append(earnings)
 
     # Set new chain ID and genesis start time
