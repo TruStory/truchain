@@ -74,6 +74,7 @@ func (t StakeType) oneOf(types []StakeType) bool {
 type Stake struct {
 	ID          uint64         `json:"id"`
 	ArgumentID  uint64         `json:"argument_id"`
+	CommunityID string         `json:"community_id"`
 	Type        StakeType      `json:"type"`
 	Amount      sdk.Coin       `json:"amount"`
 	Creator     sdk.AccAddress `json:"creator"`
@@ -87,6 +88,7 @@ type Argument struct {
 	ID             uint64         `json:"id"`
 	Creator        sdk.AccAddress `json:"creator"`
 	ClaimID        uint64         `json:"claim_id"`
+	CommunityID    string         `json:"community_id"`
 	Summary        string         `json:"summary"`
 	Body           string         `json:"body"`
 	StakeType      StakeType      `json:"stake_type"`

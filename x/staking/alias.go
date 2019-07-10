@@ -17,3 +17,7 @@ const (
 type (
 	TransactionType = exported.TransactionType
 )
+
+var (
+	WithCommunityID = exported.WithCommunityID
+)

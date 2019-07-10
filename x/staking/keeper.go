@@ -196,6 +196,7 @@ func (k Keeper) SubmitArgument(ctx sdk.Context, body, summary string,
 		ID:           argumentID,
 		Creator:      creator,
 		ClaimID:      claimID,
+		CommunityID:  claim.CommunityID,
 		Summary:      summary,
 		Body:         body,
 		StakeType:    stakeType,
@@ -274,13 +275,15 @@ func (k Keeper) newStake(ctx sdk.Context, amount sdk.Coin, creator sdk.AccAddres
 	if err != nil {
 		return Stake{}, err
 	}
-	_, err = k.bankKeeper.SubtractCoin(ctx, creator, amount, argumentID, stakeType.BankTransactionType())
+	_, err = k.bankKeeper.SubtractCoin(ctx, creator, amount,
+		argumentID, stakeType.BankTransactionType(), WithCommunityID(communityID))
 	if err != nil {
 		return Stake{}, err
 	}
 	stake := Stake{
 		ID:          stakeID,
 		ArgumentID:  argumentID,
+		CommunityID: communityID,
 		CreatedTime: ctx.BlockHeader().Time,
 		EndTime:     ctx.BlockHeader().Time.Add(period),
 		Creator:     creator,

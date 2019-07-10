@@ -39,6 +39,7 @@ var (
 
 type (
 	TransactionType                  = exported.TransactionType
+	TransactionSetter                = exported.TransactionSetter
 	Filter                           = exported.Filter
 	SortOrderType                    = exported.SortOrderType
 	Transaction                      = exported.Transaction

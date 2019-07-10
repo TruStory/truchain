@@ -35,7 +35,11 @@ func (k Keeper) Codespace() sdk.CodespaceType {
 
 // AddCoin adds a coin to an address and adds the transaction to the association list.
 func (k Keeper) AddCoin(ctx sdk.Context, addr sdk.AccAddress, amt sdk.Coin,
-	referenceID uint64, txType TransactionType) (sdk.Coins, sdk.Error) {
+	referenceID uint64, txType TransactionType, txSetters ...TransactionSetter) (sdk.Coins, sdk.Error) {
+	tx := Transaction{}
+	for _, setter := range txSetters {
+		setter(&tx)
+	}
 	if !txType.AllowedForAddition() {
 		return sdk.Coins{}, ErrInvalidTransactionType(txType)
 	}
@@ -47,14 +51,13 @@ func (k Keeper) AddCoin(ctx sdk.Context, addr sdk.AccAddress, amt sdk.Coin,
 	if err != nil {
 		return sdk.Coins{}, err
 	}
-	tx := Transaction{
-		ID:                transactionID,
-		Type:              txType,
-		ReferenceID:       referenceID,
-		Amount:            amt,
-		AppAccountAddress: addr,
-		CreatedTime:       ctx.BlockHeader().Time,
-	}
+	tx.ID = transactionID
+	tx.Type = txType
+	tx.ReferenceID = referenceID
+	tx.Amount = amt
+	tx.AppAccountAddress = addr
+	tx.CreatedTime = ctx.BlockHeader().Time
+
 	k.setTransaction(ctx, tx)
 	k.setTransactionID(ctx, transactionID+1)
 	k.setUserTransaction(ctx, addr, tx.CreatedTime, tx.ID)
@@ -63,7 +66,11 @@ func (k Keeper) AddCoin(ctx sdk.Context, addr sdk.AccAddress, amt sdk.Coin,
 
 // SubtractCoin subtracts a coin from an address and adds the transaction to the association list.
 func (k Keeper) SubtractCoin(ctx sdk.Context, addr sdk.AccAddress, amt sdk.Coin,
-	referenceID uint64, txType TransactionType) (sdk.Coins, sdk.Error) {
+	referenceID uint64, txType TransactionType, txSetters ...TransactionSetter) (sdk.Coins, sdk.Error) {
+	tx := Transaction{}
+	for _, setter := range txSetters {
+		setter(&tx)
+	}
 	if !txType.AllowedForDeduction() {
 		return sdk.Coins{}, ErrInvalidTransactionType(txType)
 	}
@@ -76,14 +83,14 @@ func (k Keeper) SubtractCoin(ctx sdk.Context, addr sdk.AccAddress, amt sdk.Coin,
 	if err != nil {
 		return sdk.Coins{}, err
 	}
-	tx := Transaction{
-		ID:                transactionID,
-		Type:              txType,
-		ReferenceID:       referenceID,
-		Amount:            amt,
-		AppAccountAddress: addr,
-		CreatedTime:       ctx.BlockHeader().Time,
-	}
+
+	tx.ID = transactionID
+	tx.Type = txType
+	tx.ReferenceID = referenceID
+	tx.Amount = amt
+	tx.AppAccountAddress = addr
+	tx.CreatedTime = ctx.BlockHeader().Time
+
 	k.setTransaction(ctx, tx)
 	k.setTransactionID(ctx, transactionID+1)
 	k.setUserTransaction(ctx, addr, tx.CreatedTime, tx.ID)

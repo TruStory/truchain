@@ -7,6 +7,7 @@ import (
 	"github.com/stretchr/testify/assert"
 
 	app "github.com/TruStory/truchain/types"
+	"github.com/TruStory/truchain/x/bank/exported"
 )
 
 func TestKeeper_AddCoin(t *testing.T) {
@@ -27,6 +28,7 @@ func TestKeeper_AddCoin(t *testing.T) {
 		assert.Equal(t, TransactionBackingReturned, tx.Type)
 		assert.Equal(t, amount, tx.Amount)
 		assert.Equal(t, uint64(100), tx.ReferenceID)
+		assert.Equal(t, "", tx.CommunityID)
 		return true
 	})
 	coins, err = k.AddCoin(ctx,
@@ -37,6 +39,46 @@ func TestKeeper_AddCoin(t *testing.T) {
 	)
 	assert.Error(t, err)
 
+}
+func TestKeeper_AddSubtractCoinWithCommunity(t *testing.T) {
+	ctx, k, _ := mockDB()
+	addr := []byte("cosmos123456789")
+	amount := sdk.NewCoin(app.StakeDenom, sdk.NewInt(app.Shanev*20))
+	coins, err := k.AddCoin(ctx,
+		sdk.AccAddress(addr),
+		amount,
+		100,
+		TransactionBackingReturned,
+		exported.WithCommunityID("cryptotest"),
+	)
+	assert.NoError(t, err)
+	assert.Equal(t, sdk.NewInt(app.Shanev*20), coins.AmountOf(app.StakeDenom))
+
+	_, err = k.SubtractCoin(ctx,
+		sdk.AccAddress(addr),
+		amount,
+		100,
+		TransactionBacking,
+		exported.WithCommunityID("cryptotestsubtract"),
+	)
+	assert.NoError(t, err)
+	txs := make([]Transaction, 0)
+	k.IterateUserTransactions(ctx, addr, false, func(tx Transaction) bool {
+		txs = append(txs, tx)
+		return false
+	})
+	assert.Len(t, txs, 2)
+	assert.Equal(t, uint64(1), txs[0].ID)
+	assert.Equal(t, TransactionBackingReturned, txs[0].Type)
+	assert.Equal(t, amount, txs[0].Amount)
+	assert.Equal(t, uint64(100), txs[0].ReferenceID)
+	assert.Equal(t, "cryptotest", txs[0].CommunityID)
+
+	assert.Equal(t, uint64(2), txs[1].ID)
+	assert.Equal(t, TransactionBacking, txs[1].Type)
+	assert.Equal(t, amount, txs[1].Amount)
+	assert.Equal(t, uint64(100), txs[1].ReferenceID)
+	assert.Equal(t, "cryptotestsubtract", txs[1].CommunityID)
 }
 
 func TestKeeper_SubtractCoin(t *testing.T) {
@@ -58,6 +100,7 @@ func TestKeeper_SubtractCoin(t *testing.T) {
 		assert.Equal(t, TransactionBacking, tx.Type)
 		assert.Equal(t, amount, tx.Amount)
 		assert.Equal(t, uint64(200), tx.ReferenceID)
+		assert.Equal(t, "", tx.CommunityID)
 		return true
 	})
 

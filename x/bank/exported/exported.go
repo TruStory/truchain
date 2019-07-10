@@ -14,6 +14,7 @@ type Transaction struct {
 	Type              TransactionType `json:"type"`
 	AppAccountAddress sdk.AccAddress  `json:"app_account_address"`
 	ReferenceID       uint64          `json:"reference_id"`
+	CommunityID       string          `json:"community_id"`
 	Amount            sdk.Coin        `json:"amount"`
 	CreatedTime       time.Time       `json:"created_time"`
 }
@@ -89,6 +90,14 @@ func (t TransactionType) OneOf(types []TransactionType) bool {
 		}
 	}
 	return false
+}
+
+type TransactionSetter func(*Transaction)
+
+func WithCommunityID(communityID string) TransactionSetter {
+	return func(tx *Transaction) {
+		tx.CommunityID = communityID
+	}
 }
 
 type SortOrderType int8

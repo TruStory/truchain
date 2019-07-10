@@ -60,6 +60,7 @@ func TestKeeper_SubmitArgument(t *testing.T) {
 		ID:           1,
 		Creator:      addr,
 		ClaimID:      1,
+		CommunityID:  "testunit",
 		Summary:      "summary",
 		Body:         "body",
 		StakeType:    StakeBacking,
@@ -77,6 +78,7 @@ func TestKeeper_SubmitArgument(t *testing.T) {
 	expectedStake := Stake{
 		ID:          1,
 		ArgumentID:  1,
+		CommunityID: "testunit",
 		Type:        StakeBacking,
 		Amount:      sdk.NewInt64Coin(app.StakeDenom, app.Shanev*50),
 		Creator:     addr,
@@ -90,6 +92,7 @@ func TestKeeper_SubmitArgument(t *testing.T) {
 		ID:           2,
 		Creator:      addr2,
 		ClaimID:      1,
+		CommunityID:  "testunit",
 		Summary:      "summary2",
 		Body:         "body2",
 		StakeType:    StakeChallenge,
@@ -101,6 +104,7 @@ func TestKeeper_SubmitArgument(t *testing.T) {
 	expectedStake2 := Stake{
 		ID:          2,
 		ArgumentID:  2,
+		CommunityID: "testunit",
 		Type:        StakeChallenge,
 		Amount:      sdk.NewInt64Coin(app.StakeDenom, app.Shanev*50),
 		Creator:     addr2,
@@ -213,6 +217,7 @@ func TestKeeper_SubmitUpvote(t *testing.T) {
 	expectedStake := Stake{
 		ID:          1,
 		ArgumentID:  1,
+		CommunityID: "testunit",
 		Type:        StakeBacking,
 		Amount:      sdk.NewInt64Coin(app.StakeDenom, app.Shanev*50),
 		Creator:     addr,
@@ -227,6 +232,7 @@ func TestKeeper_SubmitUpvote(t *testing.T) {
 	expectedStake2 := Stake{
 		ID:          2,
 		ArgumentID:  1,
+		CommunityID: "testunit",
 		Type:        StakeUpvote,
 		Amount:      sdk.NewInt64Coin(app.StakeDenom, app.Shanev*10),
 		Creator:     addr2,
