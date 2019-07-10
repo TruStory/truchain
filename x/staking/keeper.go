@@ -154,7 +154,7 @@ func (k Keeper) SubmitUpvote(ctx sdk.Context, argumentID uint64, creator sdk.Acc
 			return Stake{}, err
 		}
 	case argument.StakeType == StakeChallenge:
-		k.claimKeeper.AddChallengeStake(ctx, argument.ClaimID, stake.Amount)
+		err := k.claimKeeper.AddChallengeStake(ctx, argument.ClaimID, stake.Amount)
 		if err != nil {
 			return Stake{}, err
 		}
