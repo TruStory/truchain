@@ -48,6 +48,14 @@ def migrate_category_data(category_data):
           s['description'] = 'Sports inspire, motivate, and capture the attention of young kids and senior citizens alike. The estimated size of the global sports industry is over a trillion dollars. Ready, set, go!'
         s['id'] = s['slug']
         del s['slug']
+        if s['name'] == 'Product':
+            s['name'] = 'TruStory'
+        if s['id'] == 'product':
+            s['id'] = 'trustory'
+        if s['name'] == 'Random':
+            s['name'] = 'General'
+        if s['id'] == 'random':
+            s['id'] = 'general'
 
 if __name__ == '__main__':
     parser = lib.init_default_argument_parser(
