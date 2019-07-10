@@ -49,6 +49,10 @@ def migrate_story_data(story_data, totals, categories):
 def get_category_slug(categories, category_id):
     for s in categories:
         if s['id'] == category_id:
+            if s['slug'] == 'product':
+                return 'trustory'
+            if s['slug'] == 'random':
+                return 'general'
             return s['slug']
     raise Exception('Category not found')
 
