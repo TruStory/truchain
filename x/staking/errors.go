@@ -79,7 +79,7 @@ func ErrCodeUnknownArgument(argumentID uint64) sdk.Error {
 func ErrCodeUnknownClaim(claimID uint64) sdk.Error {
 	return sdk.NewError(DefaultCodespace,
 		ErrorCodeUnknownClaim,
-		fmt.Sprintf("Unknown argument id %d", claimID),
+		fmt.Sprintf("Unknown claim id %d", claimID),
 	)
 }
 

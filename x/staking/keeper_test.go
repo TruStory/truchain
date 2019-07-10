@@ -9,6 +9,7 @@ import (
 
 	app "github.com/TruStory/truchain/types"
 	"github.com/TruStory/truchain/x/bank"
+	"github.com/TruStory/truchain/x/claim"
 )
 
 func TestKeeper_SubmitArgumentMaxLimit(t *testing.T) {
@@ -378,4 +379,53 @@ func TestKeeper_InsufficientCoins(t *testing.T) {
 	_, err = k.SubmitUpvote(ctx, argument.ID, unfundedAddress)
 	assert.Error(t, err)
 	assert.Equal(t, sdk.CodeInsufficientFunds, err.Code())
+}
+
+func TestKeeper_ClaimTotalsAdded(t *testing.T) {
+	ctx, k, mdb := mockDB()
+	mockedClaimKeeper := mdb.claimKeeper.(*mockClaimKeeper)
+	mockedClaimKeeper.enableTrackStake = true
+	claims := make(map[uint64]claim.Claim)
+	addr := createFakeFundedAccount(ctx, mdb.authAccKeeper, sdk.Coins{sdk.NewInt64Coin(app.StakeDenom, app.Shanev*250)})
+	addr2 := createFakeFundedAccount(ctx, mdb.authAccKeeper, sdk.Coins{sdk.NewInt64Coin(app.StakeDenom, app.Shanev*250)})
+	addr3 := createFakeFundedAccount(ctx, mdb.authAccKeeper, sdk.Coins{sdk.NewInt64Coin(app.StakeDenom, app.Shanev*250)})
+	claims[1] = claim.Claim{
+		ID:              1,
+		CommunityID:     "crypto",
+		Body:            "body",
+		Creator:         addr,
+		TotalBacked:     sdk.NewInt64Coin(app.StakeDenom, 0),
+		TotalChallenged: sdk.NewInt64Coin(app.StakeDenom, 0),
+	}
+	claims[2] = claim.Claim{
+		ID:              2,
+		CommunityID:     "random",
+		Body:            "body",
+		Creator:         addr,
+		TotalBacked:     sdk.NewInt64Coin(app.StakeDenom, 0),
+		TotalChallenged: sdk.NewInt64Coin(app.StakeDenom, 0),
+	}
+	mockedClaimKeeper.SetClaims(claims)
+
+	_, err := k.SubmitArgument(ctx, "arg1", "summary1", addr, 1, StakeChallenge)
+	assert.NoError(t, err)
+
+	arg2, err := k.SubmitArgument(ctx, "arg2", "summary2", addr2, 2, StakeBacking)
+	assert.NoError(t, err)
+	_, err = k.SubmitUpvote(ctx, arg2.ID, addr)
+	_, err = k.SubmitUpvote(ctx, arg2.ID, addr3)
+	assert.NoError(t, err)
+
+	arg3, err := k.SubmitArgument(ctx,
+		"arg3", "summary3", addr, 2, StakeChallenge)
+	_, err = k.SubmitUpvote(ctx, arg3.ID, addr3)
+	claim1, ok := mockedClaimKeeper.Claim(ctx, 1)
+	assert.True(t, ok)
+	assert.Equal(t, claim1.TotalChallenged, sdk.NewInt64Coin(app.StakeDenom, app.Shanev*50))
+
+	claim2, ok := mockedClaimKeeper.Claim(ctx, 2)
+	assert.Equal(t, sdk.NewInt64Coin(app.StakeDenom, app.Shanev*60).String(), claim2.TotalChallenged.String())
+	assert.Equal(t, sdk.NewInt64Coin(app.StakeDenom, app.Shanev*70).String(), claim2.TotalBacked.String())
+	assert.True(t, ok)
+	assert.NoError(t, err)
 }
