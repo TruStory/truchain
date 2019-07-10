@@ -3,6 +3,7 @@ package slashing
 import (
 	"testing"
 
+	"github.com/TruStory/truchain/x/staking"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/stretchr/testify/assert"
 )
@@ -88,22 +89,37 @@ func TestSlashes_Success(t *testing.T) {
 	assert.Equal(t, all[1], another)
 }
 
-//func Test_punishment(t *testing.T) {
-//	ctx, keeper := mockDB()
-//
-//	stakeID := uint64(1)
-//	creator := keeper.GetParams(ctx).SlashAdmins[0]
-//	_, err := keeper.CreateSlash(ctx, stakeID, creator)
-//	//_, err = keeper.CreateSlash(ctx, stakeID, creator)
-//	//_, err = keeper.CreateSlash(ctx, stakeID, creator)
-//	//_, err = keeper.CreateSlash(ctx, stakeID, creator)
-//	//_, err = keeper.CreateSlash(ctx, stakeID, creator)
-//	//_, err = keeper.CreateSlash(ctx, stakeID, creator)
-//	assert.NoError(t, err)
-//
-//	err = keeper.punish(ctx, stakeID)
-//	assert.NoError(t, err)
-//}
+func Test_punishment(t *testing.T) {
+	ctx, keeper := mockDB()
+
+	staker := keeper.GetParams(ctx).SlashAdmins[0]
+	slasher := keeper.GetParams(ctx).SlashAdmins[1]
+	stakerStartingBalance := keeper.bankKeeper.GetCoins(ctx, staker)
+	slasherStartingBalance := keeper.bankKeeper.GetCoins(ctx, staker)
+	assert.Equal(t, "100000000000trusteak", stakerStartingBalance.String())
+
+	_, err := keeper.stakingKeeper.SubmitArgument(ctx, "arg1", "summary1", staker, 1, staking.StakeChallenge)
+	assert.NoError(t, err)
+
+	stake, _ := keeper.stakingKeeper.Stake(ctx, 1)
+	assert.Equal(t, "50000000000trusteak", stake.Amount.String())
+	_, err = keeper.CreateSlash(ctx, stake.ID, slasher)
+	assert.NoError(t, err)
+
+	err = keeper.punish(ctx, stake)
+
+	// staker should have = starting balance - stake amount
+	stakerEndingBalance := keeper.bankKeeper.GetCoins(ctx, staker)
+	expectedBalance := stakerStartingBalance.Sub(sdk.Coins{stake.Amount})
+	assert.Equal(t, expectedBalance.String(), stakerEndingBalance.String())
+
+	// slasher should have = starting balance + reward (25% stake)
+	slasherEndingBalance := keeper.bankKeeper.GetCoins(ctx, slasher)
+	reward := stake.Amount.Amount.ToDec().Mul(sdk.NewDecWithPrec(25, 2)).TruncateInt()
+	rewardCoin := sdk.NewCoin(stake.Amount.Denom, reward)
+	expectedBalance = slasherStartingBalance.Add(sdk.Coins{rewardCoin})
+	assert.Equal(t, expectedBalance.String(), slasherEndingBalance.String())
+}
 
 //func TestSlashes_ErrAlreadySlashed(t *testing.T) {
 //	ctx, keeper := mockDB()

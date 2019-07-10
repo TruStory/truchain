@@ -124,6 +124,7 @@ func (k Keeper) punish(ctx sdk.Context, stake staking.Stake) sdk.Error {
 		return sdk.ErrInsufficientCoins("staking pool cannot be empty")
 	}
 
+	// reward curators who marked "unhelpful"
 	slashes := k.StakeSlashes(ctx, stake.ID)
 	curatorShareDec := k.GetParams(ctx).CuratorShare
 	totalCuratorAmountDec := stakingPool.Amount.ToDec().Mul(curatorShareDec)
