@@ -101,9 +101,10 @@ func TestKeeper_TestRefundStake(t *testing.T) {
 	// 3 stakes + 2 interest + 2 refund
 	assert.Len(t, addr1Txs, 7)
 	txTypes := make([]TransactionType, 0)
-
+	txCommunities := make([]string, 0)
 	for _, tx := range addr1Txs {
 		txTypes = append(txTypes, tx.Type)
+		txCommunities = append(txCommunities, tx.CommunityID)
 	}
 	expected := []TransactionType{
 		// first interactions
@@ -114,7 +115,9 @@ func TestKeeper_TestRefundStake(t *testing.T) {
 		TransactionBacking,
 		// second end block
 		TransactionUpvoteReturned, TransactionInterestUpvoteGiven}
+	expectedTxCommunities := []string{"crypto", "random", "crypto", "crypto", "random", "random", "random"}
 	assert.Equal(t, expected, txTypes)
+	assert.Equal(t, expectedTxCommunities, txCommunities)
 
 	// 1 stakes + 2 interest + 1 refund
 	assert.Len(t, addr2Txs, 4)
