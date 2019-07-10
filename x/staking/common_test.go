@@ -3,6 +3,7 @@ package staking
 import (
 	"time"
 
+	app "github.com/TruStory/truchain/types"
 	trubank "github.com/TruStory/truchain/x/bank"
 	"github.com/TruStory/truchain/x/claim"
 
@@ -59,7 +60,15 @@ func (m *mockedAccountKeeper) UnJail(ctx sdk.Context, address sdk.AccAddress) sd
 }
 
 type mockClaimKeeper struct {
-	claims map[uint64]claim.Claim
+	claims           map[uint64]claim.Claim
+	enableTrackStake bool
+}
+
+func newMockedClaimKeeper() *mockClaimKeeper {
+	return &mockClaimKeeper{
+		claims:           make(map[uint64]claim.Claim),
+		enableTrackStake: false,
+	}
 }
 
 func (m *mockClaimKeeper) SetClaims(claims map[uint64]claim.Claim) {
@@ -68,10 +77,38 @@ func (m *mockClaimKeeper) SetClaims(claims map[uint64]claim.Claim) {
 
 func (m *mockClaimKeeper) Claim(ctx sdk.Context, id uint64) (claim.Claim, bool) {
 	if len(m.claims) == 0 {
-		return claim.Claim{CommunityID: "testunit"}, true
+		return claim.Claim{CommunityID: "testunit",
+			TotalBacked:     sdk.NewInt64Coin(app.StakeDenom, 0),
+			TotalChallenged: sdk.NewInt64Coin(app.StakeDenom, 0),
+		}, true
 	}
 	c, ok := m.claims[id]
 	return c, ok
+}
+func (m *mockClaimKeeper) AddBackingStake(ctx sdk.Context, id uint64, stake sdk.Coin) sdk.Error {
+	if !m.enableTrackStake {
+		return nil
+	}
+	c, ok := m.Claim(ctx, id)
+	if !ok {
+		return sdk.ErrInternal("unknown claim")
+	}
+	c.TotalBacked = c.TotalBacked.Add(stake)
+	m.claims[id] = c
+	return nil
+}
+
+func (m *mockClaimKeeper) AddChallengeStake(ctx sdk.Context, id uint64, stake sdk.Coin) sdk.Error {
+	if !m.enableTrackStake {
+		return nil
+	}
+	c, ok := m.Claim(ctx, id)
+	if !ok {
+		return sdk.ErrInternal("unknown claim")
+	}
+	c.TotalChallenged = c.TotalChallenged.Add(stake)
+	m.claims[id] = c
+	return nil
 }
 
 type mockedDB struct {
@@ -119,7 +156,8 @@ func mockDB() (sdk.Context, Keeper, *mockedDB) {
 	trubankKeeper := trubank.NewKeeper(cdc, bankKey, bankKeeper, pk.Subspace(trubank.DefaultParamspace), trubank.DefaultCodespace)
 
 	mockedAccountKeeper := newAccountKeeper()
-	mockedClaimKeeper := &mockClaimKeeper{}
+	mockedClaimKeeper := newMockedClaimKeeper()
+	mockedClaimKeeper.claims = make(map[uint64]claim.Claim)
 	keeper := NewKeeper(cdc, storeKey, mockedAccountKeeper, trubankKeeper, mockedClaimKeeper, pk.Subspace(DefaultParamspace), DefaultCodespace)
 	InitGenesis(ctx, keeper, DefaultGenesisState())
 	trubank.InitGenesis(ctx, trubankKeeper, trubank.DefaultGenesisState())
