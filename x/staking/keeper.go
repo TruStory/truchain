@@ -146,6 +146,14 @@ func (k Keeper) SubmitUpvote(ctx sdk.Context, argumentID uint64, creator sdk.Acc
 	argument.TotalStake = argument.TotalStake.Add(stake.Amount)
 	argument.UpdatedTime = ctx.BlockHeader().Time
 	k.setArgument(ctx, argument)
+
+	switch {
+	case argument.StakeType == StakeBacking:
+		k.claimKeeper.AddBackingStake(ctx, argument.ClaimID, stake.Amount)
+	case argument.StakeType == StakeChallenge:
+		k.claimKeeper.AddChallengeStake(ctx, argument.ClaimID, stake.Amount)
+	}
+
 	return stake, nil
 }
 
@@ -214,6 +222,14 @@ func (k Keeper) SubmitArgument(ctx sdk.Context, body, summary string,
 	k.setArgumentID(ctx, argumentID+1)
 	k.setClaimArgument(ctx, claimID, argument.ID)
 	k.serUserArgument(ctx, creator, argument.ID)
+
+	switch {
+	case stakeType == StakeBacking:
+		k.claimKeeper.AddBackingStake(ctx, claimID, creationAmount)
+	case stakeType == StakeChallenge:
+		k.claimKeeper.AddChallengeStake(ctx, claimID, creationAmount)
+	}
+
 	return argument, nil
 }
 
