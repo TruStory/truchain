@@ -361,16 +361,6 @@ func (k Keeper) Stake(ctx sdk.Context, stakeID uint64) (Stake, bool) {
 	return stake, true
 }
 
-func (k Keeper) getStake(ctx sdk.Context, stakeID uint64) (Stake, bool) {
-	stake := Stake{}
-	bz := k.store(ctx).Get(stakeKey(stakeID))
-	if bz == nil {
-		return stake, false
-	}
-	k.codec.MustUnmarshalBinaryLengthPrefixed(bz, &stake)
-	return stake, true
-}
-
 func (k Keeper) setStake(ctx sdk.Context, stake Stake) {
 	bz := k.codec.MustMarshalBinaryLengthPrefixed(stake)
 	k.store(ctx).Set(stakeKey(stake.ID), bz)
