@@ -5,6 +5,7 @@ import (
 	"net/url"
 	"time"
 
+	app "github.com/TruStory/truchain/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
@@ -34,12 +35,15 @@ type Claims []Claim
 // NewClaim creates a new claim object
 func NewClaim(id uint64, communityID string, body string, creator sdk.AccAddress, source url.URL, createdTime time.Time) Claim {
 	return Claim{
-		ID:          id,
-		CommunityID: communityID,
-		Body:        body,
-		Creator:     creator,
-		Source:      source,
-		CreatedTime: createdTime,
+		ID:              id,
+		CommunityID:     communityID,
+		Body:            body,
+		Creator:         creator,
+		Source:          source,
+		TotalStakers:    0,
+		TotalBacked:     sdk.NewCoin(app.StakeDenom, sdk.ZeroInt()),
+		TotalChallenged: sdk.NewCoin(app.StakeDenom, sdk.ZeroInt()),
+		CreatedTime:     createdTime,
 	}
 }
 
