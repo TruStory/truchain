@@ -74,7 +74,6 @@ func (k Keeper) CreateSlash(ctx sdk.Context, stakeID uint64, creator sdk.AccAddr
 	if !ok {
 		return slash, ErrInvalidStake(stakeID)
 	}
-	fmt.Println(stake.String())
 	k.setArgumentSlasherSlash(ctx, stake.ArgumentID, slashID, creator)
 
 	slashCount := k.getSlashCount(ctx, stakeID)
@@ -91,9 +90,9 @@ func (k Keeper) CreateSlash(ctx sdk.Context, stakeID uint64, creator sdk.AccAddr
 }
 
 func (k Keeper) punish(ctx sdk.Context, stake staking.Stake) sdk.Error {
-	stakingPool := stake.Amount
+	stakingPool := sdk.NewCoin(stake.Amount.Denom, sdk.ZeroInt())
 	for _, s := range k.stakingKeeper.ArgumentStakes(ctx, stake.ArgumentID) {
-		stakingPool.Add(s.Amount)
+		stakingPool = stakingPool.Add(s.Amount)
 		if k.stakingKeeper.IsStakeActive(ctx, s.ID, s.EndTime) {
 			k.stakingKeeper.RemoveFromActiveStakeQueue(ctx, s.ID, s.EndTime)
 		} else {
@@ -107,7 +106,6 @@ func (k Keeper) punish(ctx sdk.Context, stake staking.Stake) sdk.Error {
 		}
 		slashMagnitude := int64(k.GetParams(ctx).SlashMagnitude)
 		slashCoin := sdk.NewCoin(stake.Amount.Denom, stake.Amount.Amount.MulRaw(slashMagnitude))
-		fmt.Printf("slash coin: %s\n", slashCoin.String())
 		_, err := k.bankKeeper.SubtractCoin(ctx, s.Creator, slashCoin, s.ID, bank.TransactionStakeSlashed)
 		if err != nil {
 			return err
@@ -119,7 +117,6 @@ func (k Keeper) punish(ctx sdk.Context, stake staking.Stake) sdk.Error {
 		}
 	}
 
-	fmt.Printf("staking pool: %s\n", stakingPool.String())
 	if !stakingPool.IsPositive() {
 		return sdk.ErrInsufficientCoins("staking pool cannot be empty")
 	}
@@ -130,7 +127,6 @@ func (k Keeper) punish(ctx sdk.Context, stake staking.Stake) sdk.Error {
 	totalCuratorAmountDec := stakingPool.Amount.ToDec().Mul(curatorShareDec)
 	curatorAmount := totalCuratorAmountDec.QuoInt64(int64(len(slashes))).TruncateInt()
 	curatorCoin := sdk.NewCoin(app.StakeDenom, curatorAmount)
-	fmt.Printf("curator share: %s\n", curatorCoin.String())
 	for _, slash := range slashes {
 		_, err := k.bankKeeper.AddCoin(ctx, slash.Creator, curatorCoin, slash.ID, bank.TransactionCuratorReward)
 		if err != nil {

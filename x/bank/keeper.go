@@ -1,8 +1,6 @@
 package bank
 
 import (
-	"fmt"
-
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/bank"
@@ -83,13 +81,10 @@ func (k Keeper) SubtractCoin(ctx sdk.Context, addr sdk.AccAddress, amt sdk.Coin,
 
 	adjustedCoin := amt
 	balanceCoins := k.bankKeeper.GetCoins(ctx, addr)
-	fmt.Printf("balance: %s\n", balanceCoins.String())
 	balance := balanceCoins.AmountOf(amt.Denom)
 	if balance.LT(amt.Amount) {
 		adjustedCoin = sdk.NewCoin(amt.Denom, balance)
 	}
-
-	fmt.Printf("adjusted coin: %s\n", adjustedCoin.String())
 
 	if adjustedCoin.IsPositive() {
 		coins, err := k.bankKeeper.SubtractCoins(ctx, addr, sdk.Coins{adjustedCoin})
@@ -101,7 +96,7 @@ func (k Keeper) SubtractCoin(ctx sdk.Context, addr sdk.AccAddress, amt sdk.Coin,
 		if err != nil {
 			return sdk.Coins{}, err
 		}
-		
+
 		tx.ID = transactionID
 		tx.Type = txType
 		tx.ReferenceID = referenceID

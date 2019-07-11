@@ -95,20 +95,21 @@ func Test_punishment(t *testing.T) {
 	staker := keeper.GetParams(ctx).SlashAdmins[0]
 	slasher := keeper.GetParams(ctx).SlashAdmins[1]
 	stakerStartingBalance := keeper.bankKeeper.GetCoins(ctx, staker)
-	slasherStartingBalance := keeper.bankKeeper.GetCoins(ctx, staker)
+	slasherStartingBalance := keeper.bankKeeper.GetCoins(ctx, slasher)
 	assert.Equal(t, "100000000000trusteak", stakerStartingBalance.String())
+	assert.Equal(t, "100000000000trusteak", slasherStartingBalance.String())
 
 	_, err := keeper.stakingKeeper.SubmitArgument(ctx, "arg1", "summary1", staker, 1, staking.StakeChallenge)
 	assert.NoError(t, err)
 
 	stake, _ := keeper.stakingKeeper.Stake(ctx, 1)
 	assert.Equal(t, "50000000000trusteak", stake.Amount.String())
+
+	// this also does a punish because slasher is an admin
 	_, err = keeper.CreateSlash(ctx, stake.ID, slasher)
 	assert.NoError(t, err)
 
-	err = keeper.punish(ctx, stake)
-
-	// staker should have = starting balance - stake amount
+	//staker should have = starting balance - stake amount
 	stakerEndingBalance := keeper.bankKeeper.GetCoins(ctx, staker)
 	expectedBalance := stakerStartingBalance.Sub(sdk.Coins{stake.Amount})
 	assert.Equal(t, expectedBalance.String(), stakerEndingBalance.String())
@@ -120,19 +121,3 @@ func Test_punishment(t *testing.T) {
 	expectedBalance = slasherStartingBalance.Add(sdk.Coins{rewardCoin})
 	assert.Equal(t, expectedBalance.String(), slasherEndingBalance.String())
 }
-
-//func TestSlashes_ErrAlreadySlashed(t *testing.T) {
-//	ctx, keeper := mockDB()
-//
-//	stakeID := uint64(1)
-//	//creator := keeper.GetParams(ctx).SlashAdmins[0]
-//	_, _, creator, _ := getFakeAppAccountParams()
-//	t.Log(creator)
-//	_, err := keeper.CreateSlash(ctx, stakeID, creator)
-//	assert.NoError(t, err)
-//
-//	// this should not be created as same creator is slashing same stake
-//	_, err = keeper.CreateSlash(ctx, stakeID, creator)
-//	assert.Error(t, err)
-//	assert.Equal(t, ErrNotEnoughEarnedStake(creator).Code(), err.Code())
-//}
