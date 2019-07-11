@@ -11,6 +11,10 @@ import (
 func TestNewSlash_Success(t *testing.T) {
 	ctx, keeper := mockDB()
 
+	staker := keeper.GetParams(ctx).SlashAdmins[0]
+	_, err := keeper.stakingKeeper.SubmitArgument(ctx, "arg1", "summary1", staker, 1, staking.StakeChallenge)
+	assert.NoError(t, err)
+
 	stakeID := uint64(1)
 	creator := keeper.GetParams(ctx).SlashAdmins[0]
 	slash, err := keeper.CreateSlash(ctx, stakeID, creator)

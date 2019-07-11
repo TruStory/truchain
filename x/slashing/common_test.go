@@ -136,7 +136,7 @@ func mockDB() (sdk.Context, Keeper) {
 		panic(err)
 	}
 
-	slashKeeper := NewKeeper(slashKey, paramsKeeper.Subspace(ModuleName), codec, trubankKeeper, stakingKeeper, accountKeeper)
+	slashKeeper := NewKeeper(slashKey, paramsKeeper.Subspace(ModuleName), codec, trubankKeeper, stakingKeeper, accountKeeper, claimKeeper)
 	// create fake admins
 	_, pubKey, addr1, coins := getFakeAppAccountParams()
 	accountKeeper.CreateAppAccount(ctx, addr1, coins, pubKey)

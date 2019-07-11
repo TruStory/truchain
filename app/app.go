@@ -340,7 +340,8 @@ func NewTruChain(logger log.Logger, db dbm.DB, loadLatest bool, options ...func(
 		app.truBankKeeper2,
 		app.truStakingKeeper,
 		app.appAccountKeeper,
-		)
+		app.claimKeeper,
+	)
 
 	// The AnteHandler handles signature verification and transaction pre-processing
 	// TODO [shanev]: see https://github.com/TruStory/truchain/issues/364

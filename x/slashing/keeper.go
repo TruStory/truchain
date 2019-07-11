@@ -3,6 +3,8 @@ package slashing
 import (
 	"fmt"
 
+	"github.com/TruStory/truchain/x/claim"
+
 	"github.com/TruStory/truchain/x/account"
 	"github.com/TruStory/truchain/x/staking"
 
@@ -23,12 +25,13 @@ type Keeper struct {
 	bankKeeper    bank.Keeper
 	stakingKeeper staking.Keeper
 	accountKeeper account.Keeper
+	claimKeeper   claim.Keeper
 }
 
 // NewKeeper creates a new keeper of the slashing Keeper
 func NewKeeper(
 	storeKey sdk.StoreKey, paramStore params.Subspace, codec *codec.Codec,
-	bankKeeper bank.Keeper, stakingKeeper staking.Keeper, accountKeeper account.Keeper,
+	bankKeeper bank.Keeper, stakingKeeper staking.Keeper, accountKeeper account.Keeper, claimKeeper claim.Keeper,
 ) Keeper {
 	return Keeper{
 		storeKey,
@@ -37,6 +40,7 @@ func NewKeeper(
 		bankKeeper,
 		stakingKeeper,
 		accountKeeper,
+		claimKeeper,
 	}
 }
 
@@ -110,6 +114,20 @@ func (k Keeper) punish(ctx sdk.Context, stake staking.Stake) sdk.Error {
 		if err != nil {
 			return err
 		}
+
+		if stake.Type == staking.StakeBacking {
+			err = k.claimKeeper.SubtractBackingStake(ctx, stake.ID, stake.Amount)
+			if err != nil {
+				return err
+			}
+		}
+		if stake.Type == staking.StakeChallenge {
+			err = k.claimKeeper.SubtractChallengeStake(ctx, stake.ID, stake.Amount)
+			if err != nil {
+				return err
+			}
+		}
+
 		// increment slash count for user (and jail if needed)
 		_, err = k.accountKeeper.IncrementSlashCount(ctx, s.Creator)
 		if err != nil {
