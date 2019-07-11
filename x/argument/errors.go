@@ -29,7 +29,7 @@ func ErrNotFound(id int64) sdk.Error {
 
 // ErrArgumentTooShortMsg throws for an invalid argument
 func ErrArgumentTooShortMsg(length int) sdk.Error {
-	msg := "getArgument body too short. Must be greater than %d characters."
+	msg := "Argument body too short. Must be greater than %d characters."
 
 	return sdk.NewError(
 		DefaultCodespace,
@@ -39,7 +39,7 @@ func ErrArgumentTooShortMsg(length int) sdk.Error {
 
 // ErrArgumentTooLongMsg throws for an invalid argument
 func ErrArgumentTooLongMsg(length int, maxLength int) sdk.Error {
-	msg := "getArgument is %d character%s too long. Must be less than %d characters."
+	msg := "Argument is %d character%s too long. Must be less than %d characters."
 	plural := "s"
 	if (length - maxLength) == 1 {
 		plural = ""
