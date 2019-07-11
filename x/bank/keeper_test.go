@@ -130,7 +130,7 @@ func TestKeeper_SubtractMoreThanBalanceCoin(t *testing.T) {
 	addr := createFakeFundedAccount(ctx, auth, sdk.NewCoins(balance))
 
 	amount := sdk.NewCoin(app.StakeDenom, sdk.NewInt(app.Shanev*200))
-	coins, err := k.SubtractCoin(ctx,
+	coins, err := k.SafeSubtractCoin(ctx,
 		addr,
 		amount,
 		200,

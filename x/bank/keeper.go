@@ -74,6 +74,32 @@ func (k Keeper) SubtractCoin(ctx sdk.Context, addr sdk.AccAddress, amt sdk.Coin,
 	if !txType.AllowedForDeduction() {
 		return sdk.Coins{}, ErrInvalidTransactionType(txType)
 	}
+	coins, err := k.bankKeeper.SubtractCoins(ctx, addr, sdk.Coins{amt})
+	if err != nil {
+		return coins, err
+	}
+
+	transactionID, err := k.transactionID(ctx)
+	if err != nil {
+		return sdk.Coins{}, err
+	}
+
+	tx.ID = transactionID
+	tx.Type = txType
+	tx.ReferenceID = referenceID
+	tx.Amount = amt
+	tx.AppAccountAddress = addr
+	tx.CreatedTime = ctx.BlockHeader().Time
+
+	k.setTransaction(ctx, tx)
+	k.setTransactionID(ctx, transactionID+1)
+	k.setUserTransaction(ctx, addr, tx.CreatedTime, tx.ID)
+	return coins, nil
+}
+
+// SafeSubtractCoin subtracts a coin without going below zero
+func (k Keeper) SafeSubtractCoin(ctx sdk.Context, addr sdk.AccAddress, amt sdk.Coin,
+	referenceID uint64, txType TransactionType, txSetters ...TransactionSetter) (sdk.Coins, sdk.Error) {
 
 	if amt.IsNegative() {
 		return sdk.Coins{}, sdk.ErrInvalidCoins("amount can't be negative")
@@ -87,31 +113,14 @@ func (k Keeper) SubtractCoin(ctx sdk.Context, addr sdk.AccAddress, amt sdk.Coin,
 	}
 
 	if adjustedCoin.IsPositive() {
-		coins, err := k.bankKeeper.SubtractCoins(ctx, addr, sdk.Coins{adjustedCoin})
+		coins, err := k.SubtractCoin(ctx, addr, adjustedCoin, referenceID, txType, txSetters...)
 		if err != nil {
 			return coins, err
 		}
-
-		transactionID, err := k.transactionID(ctx)
-		if err != nil {
-			return sdk.Coins{}, err
-		}
-
-		tx.ID = transactionID
-		tx.Type = txType
-		tx.ReferenceID = referenceID
-		tx.Amount = adjustedCoin
-		tx.AppAccountAddress = addr
-		tx.CreatedTime = ctx.BlockHeader().Time
-
-		k.setTransaction(ctx, tx)
-		k.setTransactionID(ctx, transactionID+1)
-		k.setUserTransaction(ctx, addr, tx.CreatedTime, tx.ID)
 		return coins, nil
 	} else {
 		return balanceCoins, nil
 	}
-
 }
 
 func (k Keeper) GetCoins(ctx sdk.Context, address sdk.AccAddress) sdk.Coins {

@@ -111,7 +111,7 @@ func (k Keeper) punish(ctx sdk.Context, stake staking.Stake) sdk.Error {
 		} else {
 			if s.Result != nil {
 				stakeInterest := s.Result.ArgumentCreatorReward.Add(s.Result.StakeCreatorReward)
-				_, err := k.bankKeeper.SubtractCoin(
+				_, err := k.bankKeeper.SafeSubtractCoin(
 					ctx,
 					s.Creator,
 					stakeInterest,
@@ -125,7 +125,8 @@ func (k Keeper) punish(ctx sdk.Context, stake staking.Stake) sdk.Error {
 		}
 		slashMagnitude := int64(k.GetParams(ctx).SlashMagnitude)
 		slashCoin := sdk.NewCoin(stake.Amount.Denom, stake.Amount.Amount.MulRaw(slashMagnitude))
-		_, err := k.bankKeeper.SubtractCoin(
+
+		_, err := k.bankKeeper.SafeSubtractCoin(
 			ctx,
 			s.Creator,
 			slashCoin,
