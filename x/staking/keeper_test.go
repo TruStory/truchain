@@ -294,7 +294,7 @@ func TestKeeper_SubmitUpvote(t *testing.T) {
 
 	argument, ok = k.Argument(ctx, argument.ID)
 	assert.True(t, ok)
-	assert.Equal(t, uint64(2), argument.UpvotedCount)
+	assert.Equal(t, 2, argument.UpvotedCount)
 	assert.Equal(t, sdk.NewInt64Coin(app.StakeDenom, app.Shanev*20), argument.UpvotedStake)
 	assert.Equal(t, sdk.NewInt64Coin(app.StakeDenom, app.Shanev*70), argument.TotalStake)
 }

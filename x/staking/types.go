@@ -104,7 +104,7 @@ type Argument struct {
 	UpvotedCount   uint64         `json:"upvoted_count"`
 	UpvotedStake   sdk.Coin       `json:"upvoted_stake"`
 	TotalStake     sdk.Coin       `json:"total_stake"`
-	UnhelpfulCount uint64         `json:"unhelpful_count"`
+	DownvotedCount int            `json:"downvote_count"`
 	IsUnhelpful    bool           `json:"is_unhelpful"`
 	CreatedTime    time.Time      `json:"created_time"`
 	UpdatedTime    time.Time      `json:"updated_time"`

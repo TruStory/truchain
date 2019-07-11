@@ -165,7 +165,7 @@ func (k Keeper) SubtractBackingStake(ctx sdk.Context, id uint64, stake sdk.Coin)
 	if !ok {
 		return ErrUnknownClaim(id)
 	}
-	claim.TotalBacked.Sub(stake)
+	claim.TotalBacked = claim.TotalBacked.Sub(stake)
 	k.setClaim(ctx, claim)
 
 	return nil
@@ -177,7 +177,7 @@ func (k Keeper) SubtractChallengeStake(ctx sdk.Context, id uint64, stake sdk.Coi
 	if !ok {
 		return ErrUnknownClaim(id)
 	}
-	claim.TotalChallenged.Sub(stake)
+	claim.TotalChallenged = claim.TotalChallenged.Sub(stake)
 	k.setClaim(ctx, claim)
 
 	return nil

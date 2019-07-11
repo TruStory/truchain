@@ -80,10 +80,17 @@ func (k Keeper) CreateSlash(ctx sdk.Context, stakeID uint64, creator sdk.AccAddr
 	}
 	k.setArgumentSlasherSlash(ctx, stake.ArgumentID, slashID, creator)
 
-	//k.stakingKeeper.s
+	err = k.stakingKeeper.DownvoteArgument(ctx, stake.ArgumentID)
+	if err != nil {
+		return slash, err
+	}
 
 	slashCount := k.getSlashCount(ctx, stakeID)
 	if slashCount >= k.GetParams(ctx).MinSlashCount || k.isAdmin(ctx, creator) {
+		err = k.stakingKeeper.MarkUnhelpfulArgument(ctx, stake.ArgumentID)
+		if err != nil {
+			return slash, err
+		}
 		err = k.punish(ctx, stake)
 		if err != nil {
 			return slash, err

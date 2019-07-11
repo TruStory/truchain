@@ -257,6 +257,27 @@ func (k Keeper) Argument(ctx sdk.Context, argumentID uint64) (Argument, bool) {
 	return argument, true
 }
 
+func (k Keeper) MarkUnhelpfulArgument(ctx sdk.Context, argumentID uint64) sdk.Error {
+	arg, ok := k.Argument(ctx, argumentID)
+	if !ok {
+		return ErrCodeUnknownArgument(argumentID)
+	}
+	arg.IsUnhelpful = true
+	k.setArgument(ctx, arg)
+
+	return nil
+}
+
+func (k Keeper) DownvoteArgument(ctx sdk.Context, argumentID uint64) sdk.Error {
+	arg, ok := k.Argument(ctx, argumentID)
+	if !ok {
+		return ErrCodeUnknownArgument(argumentID)
+	}
+	arg.DownvoteCount++
+	k.setArgument(ctx, arg)
+	return nil
+}
+
 func (k Keeper) setArgument(ctx sdk.Context, argument Argument) {
 	bz := k.codec.MustMarshalBinaryLengthPrefixed(argument)
 	k.store(ctx).Set(argumentKey(argument.ID), bz)

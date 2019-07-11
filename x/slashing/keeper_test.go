@@ -78,6 +78,10 @@ func TestSlash_ErrNotFound(t *testing.T) {
 func TestSlashes_Success(t *testing.T) {
 	ctx, keeper := mockDB()
 
+	staker := keeper.GetParams(ctx).SlashAdmins[0]
+	_, err := keeper.stakingKeeper.SubmitArgument(ctx, "arg1", "summary1", staker, 1, staking.StakeBacking)
+	assert.NoError(t, err)
+
 	stakeID := uint64(1)
 	creator := keeper.GetParams(ctx).SlashAdmins[0]
 	first, err := keeper.CreateSlash(ctx, stakeID, creator)
