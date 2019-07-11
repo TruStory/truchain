@@ -17,7 +17,7 @@ def process_genesis(genesis, parsed_args):
 
     genesis['app_state']['trubank2'] = {
         'params': {
-            'reward_broker_address': None,
+            'reward_broker_address': 'cosmos1xqc5gwzpg3fyv5en2fzyx36z2se5ks33tt57e7',
         }
     }
 
