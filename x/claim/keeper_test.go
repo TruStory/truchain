@@ -8,6 +8,8 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/stretchr/testify/assert"
 	abci "github.com/tendermint/tendermint/abci/types"
+
+	app "github.com/TruStory/truchain/types"
 )
 
 func TestAddGetClaim(t *testing.T) {
@@ -59,7 +61,7 @@ func TestAddGetClaim(t *testing.T) {
 func TestClaims(t *testing.T) {
 	ctx, keeper := mockDB()
 
-	for i := 0; i <= 1000; i++  {
+	for i := 0; i <= 1000; i++ {
 		createFakeClaim(ctx, keeper)
 	}
 
@@ -73,7 +75,7 @@ func TestClaims(t *testing.T) {
 func TestCommunityClaims(t *testing.T) {
 	ctx, keeper := mockDB()
 
-	for i := 0; i <= 1000; i++  {
+	for i := 0; i <= 1000; i++ {
 		createFakeClaim(ctx, keeper)
 	}
 
@@ -87,7 +89,7 @@ func TestCommunityClaims(t *testing.T) {
 func TestCreatorClaims(t *testing.T) {
 	ctx, keeper := mockDB()
 
-	for i := 0; i <= 1000; i++  {
+	for i := 0; i <= 1000; i++ {
 		createFakeClaim(ctx, keeper)
 	}
 
@@ -103,7 +105,7 @@ func TestCreatorClaims(t *testing.T) {
 func TestCreatedTimeClaims(t *testing.T) {
 	ctx, keeper := mockDB()
 
-	for i := 0; i <= 1000; i++  {
+	for i := 0; i <= 1000; i++ {
 		createFakeClaim(ctx, keeper)
 	}
 
@@ -129,4 +131,18 @@ func createFakeClaim(ctx sdk.Context, keeper Keeper) Claim {
 	}
 
 	return claim
+}
+
+func TestKeeper_AddBackingChallengeStake(t *testing.T) {
+	ctx, keeper := mockDB()
+	claim := createFakeClaim(ctx, keeper)
+	keeper.AddBackingStake(ctx, claim.ID, sdk.NewInt64Coin(app.StakeDenom, 50*app.Shanev))
+	keeper.AddChallengeStake(ctx, claim.ID, sdk.NewInt64Coin(app.StakeDenom, 50*app.Shanev))
+	keeper.AddChallengeStake(ctx, claim.ID, sdk.NewInt64Coin(app.StakeDenom, 10*app.Shanev))
+	keeper.AddChallengeStake(ctx, claim.ID, sdk.NewInt64Coin(app.StakeDenom, 15*app.Shanev))
+	keeper.AddBackingStake(ctx, claim.ID, sdk.NewInt64Coin(app.StakeDenom, 35*app.Shanev))
+	c, ok := keeper.Claim(ctx, claim.ID)
+	assert.True(t, ok)
+	assert.Equal(t, sdk.NewInt64Coin(app.StakeDenom, 85*app.Shanev).String(), c.TotalBacked.String())
+	assert.Equal(t, sdk.NewInt64Coin(app.StakeDenom, 75*app.Shanev).String(), c.TotalChallenged.String())
 }
