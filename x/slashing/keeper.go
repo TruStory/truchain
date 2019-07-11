@@ -111,7 +111,13 @@ func (k Keeper) punish(ctx sdk.Context, stake staking.Stake) sdk.Error {
 		} else {
 			if s.Result != nil {
 				stakeInterest := s.Result.ArgumentCreatorReward.Add(s.Result.StakeCreatorReward)
-				_, err := k.bankKeeper.SubtractCoin(ctx, s.Creator, stakeInterest, s.ID, bank.TransactionInterestSlashed)
+				_, err := k.bankKeeper.SubtractCoin(
+					ctx,
+					s.Creator,
+					stakeInterest,
+					s.ID,
+					bank.TransactionInterestSlashed,
+					WithCommunityID(s.CommunityID))
 				if err != nil {
 					return err
 				}
@@ -119,7 +125,13 @@ func (k Keeper) punish(ctx sdk.Context, stake staking.Stake) sdk.Error {
 		}
 		slashMagnitude := int64(k.GetParams(ctx).SlashMagnitude)
 		slashCoin := sdk.NewCoin(stake.Amount.Denom, stake.Amount.Amount.MulRaw(slashMagnitude))
-		_, err := k.bankKeeper.SubtractCoin(ctx, s.Creator, slashCoin, s.ID, bank.TransactionStakeSlashed)
+		_, err := k.bankKeeper.SubtractCoin(
+			ctx,
+			s.Creator,
+			slashCoin,
+			s.ID,
+			bank.TransactionStakeSlashed,
+			WithCommunityID(s.CommunityID))
 		if err != nil {
 			return err
 		}
@@ -155,7 +167,13 @@ func (k Keeper) punish(ctx sdk.Context, stake staking.Stake) sdk.Error {
 	curatorAmount := totalCuratorAmountDec.QuoInt64(int64(len(slashes))).TruncateInt()
 	curatorCoin := sdk.NewCoin(app.StakeDenom, curatorAmount)
 	for _, slash := range slashes {
-		_, err := k.bankKeeper.AddCoin(ctx, slash.Creator, curatorCoin, slash.ID, bank.TransactionCuratorReward)
+		_, err := k.bankKeeper.AddCoin(
+			ctx,
+			slash.Creator,
+			curatorCoin,
+			slash.ID,
+			bank.TransactionCuratorReward,
+			WithCommunityID(stake.CommunityID))
 		if err != nil {
 			return err
 		}
