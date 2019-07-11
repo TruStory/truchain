@@ -110,7 +110,7 @@ func queryClaimArgument(ctx sdk.Context, req abci.RequestQuery, keeper Keeper) (
 	if err != nil {
 		return nil, ErrInvalidQueryParams(err)
 	}
-	argument, ok := keeper.getArgument(ctx, params.ArgumentID)
+	argument, ok := keeper.Argument(ctx, params.ArgumentID)
 	if !ok {
 		return nil, ErrCodeUnknownArgument(params.ArgumentID)
 	}
@@ -204,7 +204,7 @@ func queryArgumentsByIDs(ctx sdk.Context, req abci.RequestQuery, keeper Keeper) 
 	}
 	var arguments []Argument
 	for _, id := range params.ArgumentIDs {
-		a, ok := keeper.getArgument(ctx, id)
+		a, ok := keeper.Argument(ctx, id)
 		if !ok {
 			return nil, ErrCodeUnknownArgument(id)
 		}

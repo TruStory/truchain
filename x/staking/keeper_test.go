@@ -72,7 +72,7 @@ func TestKeeper_SubmitArgument(t *testing.T) {
 		TotalStake:   sdk.NewInt64Coin(app.StakeDenom, app.Shanev*50),
 	}
 	assert.Equal(t, expectedArgument, argument)
-	argument, ok := k.getArgument(ctx, expectedArgument.ID)
+	argument, ok := k.Argument(ctx, expectedArgument.ID)
 	assert.True(t, ok)
 	assert.Equal(t, expectedArgument, argument)
 
@@ -292,7 +292,7 @@ func TestKeeper_SubmitUpvote(t *testing.T) {
 	_, err = k.SubmitUpvote(ctx, argument.ID, addr3)
 	assert.NoError(t, err)
 
-	argument, ok = k.getArgument(ctx, argument.ID)
+	argument, ok = k.Argument(ctx, argument.ID)
 	assert.True(t, ok)
 	assert.Equal(t, uint64(2), argument.UpvotedCount)
 	assert.Equal(t, sdk.NewInt64Coin(app.StakeDenom, app.Shanev*20), argument.UpvotedStake)

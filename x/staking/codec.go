@@ -9,7 +9,7 @@ func RegisterCodec(c *codec.Codec) {
 	c.RegisterConcrete(MsgEditArgument{}, "truchain/MsgEditArgument", nil)
 
 	c.RegisterConcrete(Stake{}, "truchain/Stake", nil)
-	c.RegisterConcrete(Argument{}, "truchain/getArgument", nil)
+	c.RegisterConcrete(Argument{}, "truchain/Argument", nil)
 
 }
 

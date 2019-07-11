@@ -80,6 +80,8 @@ func (k Keeper) CreateSlash(ctx sdk.Context, stakeID uint64, creator sdk.AccAddr
 	}
 	k.setArgumentSlasherSlash(ctx, stake.ArgumentID, slashID, creator)
 
+	//k.stakingKeeper.s
+
 	slashCount := k.getSlashCount(ctx, stakeID)
 	if slashCount >= k.GetParams(ctx).MinSlashCount || k.isAdmin(ctx, creator) {
 		err = k.punish(ctx, stake)

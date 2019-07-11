@@ -121,7 +121,7 @@ func (k Keeper) SubmitUpvote(ctx sdk.Context, argumentID uint64, creator sdk.Acc
 	if err != nil {
 		return Stake{}, err
 	}
-	argument, ok := k.getArgument(ctx, argumentID)
+	argument, ok := k.Argument(ctx, argumentID)
 	if !ok {
 		return Stake{}, ErrCodeUnknownArgument(argumentID)
 	}
@@ -247,7 +247,7 @@ func (k Keeper) SubmitArgument(ctx sdk.Context, body, summary string,
 	return argument, nil
 }
 
-func (k Keeper) getArgument(ctx sdk.Context, argumentID uint64) (Argument, bool) {
+func (k Keeper) Argument(ctx sdk.Context, argumentID uint64) (Argument, bool) {
 	argument := Argument{}
 	bz := k.store(ctx).Get(argumentKey(argumentID))
 	if bz == nil {
