@@ -22,7 +22,7 @@ type Stake struct {
 	Expired     bool
 }
 
-// Argument ..
+// getArgument ..
 type Argument struct {
 	ID             uint64         `json:"id"`
 	Creator        sdk.AccAddress `json:"creator"`

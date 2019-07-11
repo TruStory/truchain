@@ -110,7 +110,7 @@ func queryClaimArgument(ctx sdk.Context, req abci.RequestQuery, keeper Keeper) (
 	if err != nil {
 		return nil, ErrInvalidQueryParams(err)
 	}
-	argument, ok := keeper.Argument(ctx, params.ArgumentID)
+	argument, ok := keeper.getArgument(ctx, params.ArgumentID)
 	if !ok {
 		return nil, ErrCodeUnknownArgument(params.ArgumentID)
 	}

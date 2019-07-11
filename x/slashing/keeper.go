@@ -248,12 +248,6 @@ func (k Keeper) validateParams(ctx sdk.Context, stakeID uint64, creator sdk.AccA
 		return ErrMaxSlashCountReached(stakeID)
 	}
 
-	// validating argument
-	_, argumentOK := k.stakingKeeper.Argument(ctx, stake.ArgumentID)
-	if !argumentOK {
-		return ErrInvalidArgument(stake.ArgumentID)
-	}
-
 	// validating creator
 	isAdmin := k.isAdmin(ctx, creator)
 	hasEnoughCoins := k.hasEnoughEarnedStake(ctx, creator, params.SlashMinStake)

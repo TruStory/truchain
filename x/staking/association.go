@@ -19,7 +19,7 @@ func (k Keeper) IterateClaimArguments(ctx sdk.Context, claimID uint64, cb func(a
 	for ; iterator.Valid(); iterator.Next() {
 		var argumentID uint64
 		k.codec.MustUnmarshalBinaryLengthPrefixed(iterator.Value(), &argumentID)
-		arg, ok := k.Argument(ctx, argumentID)
+		arg, ok := k.getArgument(ctx, argumentID)
 		if !ok {
 			panic(fmt.Sprintf("unable to retrieve argument with id %d", argumentID))
 		}
@@ -85,7 +85,7 @@ func (k Keeper) IterateUserArguments(ctx sdk.Context, creator sdk.AccAddress, cb
 	for ; iterator.Valid(); iterator.Next() {
 		var argumentID uint64
 		k.codec.MustUnmarshalBinaryLengthPrefixed(iterator.Value(), &argumentID)
-		arg, ok := k.Argument(ctx, argumentID)
+		arg, ok := k.getArgument(ctx, argumentID)
 		if !ok {
 			panic(fmt.Sprintf("unable to retrieve argument with id %d", argumentID))
 		}
@@ -123,7 +123,7 @@ func (k Keeper) setUserCommunityStake(ctx sdk.Context, creator sdk.AccAddress, c
 }
 
 func (k Keeper) IterateUserCommunityStakes(ctx sdk.Context, creator sdk.AccAddress, communityID string, cb func(stake Stake) (stop bool)) {
-	iterator := sdk.KVStorePrefixIterator(k.store(ctx), userCommunityStakesPrefix(creator ,communityID))
+	iterator := sdk.KVStorePrefixIterator(k.store(ctx), userCommunityStakesPrefix(creator, communityID))
 	defer iterator.Close()
 	for ; iterator.Valid(); iterator.Next() {
 		var stakeID uint64

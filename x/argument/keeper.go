@@ -37,7 +37,7 @@ func NewKeeper(
 	}
 }
 
-// Argument returns the argument for the given id
+// getArgument returns the argument for the given id
 func (k Keeper) Argument(ctx sdk.Context, id int64) (argument Argument, err sdk.Error) {
 	store := k.GetStore(ctx)
 	bz := store.Get(k.GetIDKey(id))
