@@ -105,12 +105,12 @@ jobs:
           name: Dump chain data
           command: |
             mkdir -p ~/.ssh
-            ssh-keyscan $VENICE4_HOST >> ~/.ssh/known_hosts
-            ssh $VENICE4_USER@$VENICE4_HOST "sudo systemctl stop truchaind.service"
-            ssh $VENICE4_USER@$VENICE4_HOST "tar -zcvf .truchaind.tar.gz .truchaind"
-            ssh $VENICE4_USER@$VENICE4_HOST "sudo systemctl start truchaind.service"
+            ssh-keyscan $BETA_HOST >> ~/.ssh/known_hosts
+            ssh $BETA_USER@$BETA_HOST "sudo systemctl stop truchaind.service"
+            ssh $BETA_USER@$BETA_HOST "tar -zcvf .truchaind.tar.gz .truchaind"
+            ssh $BETA_USER@$BETA_HOST "sudo systemctl start truchaind.service"
             mkdir -p backups
-            scp "$VENICE4_USER@$VENICE4_HOST:/home/ubuntu/.truchaind.tar.gz" "/tmp/truchaind/backups/.truchaind.tar.gz"
+            scp "$BETA_USER@$BETA_HOST:/home/ubuntu/.truchaind.tar.gz" "/tmp/truchaind/backups/.truchaind.tar.gz"
             echo "Backed up chain data"
       - persist_to_workspace:
           root: backups
@@ -168,7 +168,8 @@ workflows:
   nightly-backup:
     triggers:
       - schedule:
-          cron: '0 0 * * *'
+          # 4 am in PST 
+          cron: '0 11 * * *'
           filters:
             branches:
               only:
