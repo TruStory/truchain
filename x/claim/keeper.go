@@ -139,7 +139,7 @@ func (k Keeper) AddBackingStake(ctx sdk.Context, id uint64, stake sdk.Coin) sdk.
 	if !ok {
 		return ErrUnknownClaim(id)
 	}
-	claim.TotalBacked.Add(stake)
+	claim.TotalBacked = claim.TotalBacked.Add(stake)
 	claim.TotalStakers++
 	k.setClaim(ctx, claim)
 
@@ -152,7 +152,7 @@ func (k Keeper) AddChallengeStake(ctx sdk.Context, id uint64, stake sdk.Coin) sd
 	if !ok {
 		return ErrUnknownClaim(id)
 	}
-	claim.TotalChallenged.Add(stake)
+	claim.TotalChallenged = claim.TotalChallenged.Add(stake)
 	claim.TotalStakers++
 	k.setClaim(ctx, claim)
 
