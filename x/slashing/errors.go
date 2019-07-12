@@ -10,20 +10,14 @@ import (
 const (
 	DefaultCodespace sdk.CodespaceType = ModuleName
 
-	ErrorCodeUnknownSlashID       sdk.CodeType = 501
-	ErrorCodeSlashNotFound        sdk.CodeType = 502
-	ErrorCodeInvalidStake         sdk.CodeType = 503
-	ErrorCodeInvalidArgument      sdk.CodeType = 504
-	ErrorCodeMaxSlashCountReached sdk.CodeType = 505
-	ErrorCodeInvalidCreator       sdk.CodeType = 506
-	ErrorCodeNotEnoughEarnedStake sdk.CodeType = 507
-	ErrorCodeAlreadySlashed       sdk.CodeType = 508
+	ErrorCodeSlashNotFound        sdk.CodeType = 501
+	ErrorCodeInvalidStake         sdk.CodeType = 502
+	ErrorCodeInvalidArgument      sdk.CodeType = 503
+	ErrorCodeMaxSlashCountReached sdk.CodeType = 504
+	ErrorCodeInvalidCreator       sdk.CodeType = 505
+	ErrorCodeNotEnoughEarnedStake sdk.CodeType = 506
+	ErrorCodeAlreadySlashed       sdk.CodeType = 507
 )
-
-// ErrUnknownSlash throws an error when the slash ID is unknown
-func ErrUnknownSlash(id uint64) sdk.Error {
-	return sdk.NewError(DefaultCodespace, ErrorCodeSlashNotFound, fmt.Sprintf("Unknown slash ID: %d", id))
-}
 
 // ErrSlashNotFound throws an error when the searched slash is not found
 func ErrSlashNotFound(id uint64) sdk.Error {

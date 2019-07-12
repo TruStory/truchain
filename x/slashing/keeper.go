@@ -213,7 +213,7 @@ func (k Keeper) slashID(ctx sdk.Context) (slashID uint64, err sdk.Error) {
 	store := ctx.KVStore(k.storeKey)
 	bz := store.Get(SlashIDKey)
 	if bz == nil {
-		return 0, ErrUnknownSlash(slashID)
+		return 0, ErrSlashNotFound(slashID)
 	}
 	k.codec.MustUnmarshalBinaryLengthPrefixed(bz, &slashID)
 	return slashID, nil
