@@ -218,6 +218,8 @@ func (k Keeper) SubmitArgument(ctx sdk.Context, body, summary string,
 		UpdatedTime:  ctx.BlockHeader().Time,
 		UpvotedStake: sdk.NewInt64Coin(app.StakeDenom, 0),
 		TotalStake:   creationAmount,
+		EditedTime:   ctx.BlockHeader().Time,
+		Edited:       false,
 	}
 	_, err = k.newStake(ctx, creationAmount, creator, stakeType, argument.ID, claim.CommunityID)
 	if err != nil {
@@ -433,4 +435,47 @@ func (k Keeper) UsersEarnings(ctx sdk.Context) []UserEarnedCoins {
 		return false
 	})
 	return userEarnedCoins
+}
+
+// EditArgument lets a creator edit an argument as long it hasn't been staked on
+func (k Keeper) EditArgument(ctx sdk.Context, body, summary string,
+	creator sdk.AccAddress, argumentID uint64) (Argument, sdk.Error) {
+
+	err := k.checkJailed(ctx, creator)
+	if err != nil {
+		return Argument{}, err
+	}
+
+	argument, ok := k.getArgument(ctx, argumentID)
+	if !ok {
+		return Argument{}, ErrCodeUnknownArgument(argumentID)
+	}
+
+	if !argument.Creator.Equals(creator) {
+		return Argument{}, ErrCodeCannotEditArgumentWrongCreator(argumentID)
+	}
+
+	stakes := k.ArgumentStakes(ctx, argumentID)
+	if len(stakes) > 1 {
+		return Argument{}, ErrCodeCannotEditArgumentAlreadyStaked(argumentID)
+	}
+
+	editedArgument := Argument{
+		ID:           argumentID,
+		Creator:      argument.Creator,
+		ClaimID:      argument.ClaimID,
+		CommunityID:  argument.CommunityID,
+		Summary:      summary,
+		Body:         body,
+		StakeType:    argument.StakeType,
+		CreatedTime:  argument.CreatedTime,
+		UpdatedTime:  argument.UpdatedTime,
+		UpvotedStake: argument.UpvotedStake,
+		TotalStake:   argument.TotalStake,
+		EditedTime:   ctx.BlockHeader().Time,
+		Edited:       true,
+	}
+
+	k.setArgument(ctx, editedArgument)
+	return argument, nil
 }

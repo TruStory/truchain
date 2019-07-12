@@ -8,11 +8,13 @@ import (
 var _ sdk.Msg = &MsgSubmitArgument{}
 var _ sdk.Msg = &MsgSubmitUpvote{}
 var _ sdk.Msg = &MsgDeleteArgument{}
+var _ sdk.Msg = &MsgEditArgument{}
 
 const (
 	TypeMsgSubmitArgument = "submit_argument"
 	TypeMsgSubmitUpvote   = "submit_upvote"
 	TypeMsgDeleteArgument = "delete_argument"
+	TypeMsgEditArgument   = "edit_argument"
 )
 
 // MsgSubmitArgument msg for creating an argument.
@@ -140,5 +142,59 @@ func (msg MsgDeleteArgument) GetSignBytes() []byte {
 
 // GetSigners gets the signs of the Msg
 func (msg MsgDeleteArgument) GetSigners() []sdk.AccAddress {
+	return []sdk.AccAddress{msg.Creator}
+}
+
+// MsgEditArgument msg for creating an argument.
+type MsgEditArgument struct {
+	Creator    sdk.AccAddress `json:"creator"`
+	ArgumentID uint64         `json:"argument_id"`
+	Summary    string         `json:"summary"`
+	Body       string         `json:"body"`
+}
+
+// NewMsgEditArgument returns a new edit argument message.
+func NewMsgEditArgument(creator sdk.AccAddress, argumentID uint64, summary string, body string) MsgEditArgument {
+	return MsgEditArgument{
+		Creator:    creator,
+		ArgumentID: argumentID,
+		Summary:    summary,
+		Body:       body,
+	}
+}
+
+func (MsgEditArgument) Route() string {
+	return RouterKey
+}
+
+func (MsgEditArgument) Type() string {
+	return TypeMsgEditArgument
+}
+
+func (msg MsgEditArgument) ValidateBasic() sdk.Error {
+
+	if len(msg.Body) == 0 {
+		return ErrCodeInvalidBodyLength()
+	}
+
+	if len(msg.Summary) == 0 {
+		return ErrCodeInvalidSummaryLength()
+	}
+
+	if len(msg.Creator) == 0 {
+		return sdk.ErrInvalidAddress("Must provide a valid address")
+	}
+
+	return nil
+}
+
+// GetSignBytes gets the bytes for Msg signer to sign on
+func (msg MsgEditArgument) GetSignBytes() []byte {
+	msgBytes := ModuleCodec.MustMarshalJSON(msg)
+	return sdk.MustSortJSON(msgBytes)
+}
+
+// GetSigners gets the address of the signer of the Msg
+func (msg MsgEditArgument) GetSigners() []sdk.AccAddress {
 	return []sdk.AccAddress{msg.Creator}
 }
