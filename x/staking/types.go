@@ -99,4 +99,6 @@ type Argument struct {
 	IsUnhelpful    bool           `json:"is_unhelpful"`
 	CreatedTime    time.Time      `json:"created_time"`
 	UpdatedTime    time.Time      `json:"updated_time"`
+	EditedTime     time.Time      `json:"edited_time"`
+	Edited         bool           `json:"edited"`
 }

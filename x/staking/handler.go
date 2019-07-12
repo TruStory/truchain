@@ -17,6 +17,8 @@ func NewHandler(keeper Keeper) sdk.Handler {
 			return handleMsgSubmitArgument(ctx, keeper, msg)
 		case MsgSubmitUpvote:
 			return handleMsgSubmitUpvote(ctx, keeper, msg)
+		case MsgEditArgument:
+			return handleMsgEditArgument(ctx, keeper, msg)
 		default:
 			errMsg := fmt.Sprintf("Unrecognized staking message type: %T", msg)
 			return sdk.ErrUnknownRequest(errMsg).Result()
@@ -71,5 +73,22 @@ func handleMsgSubmitUpvote(ctx sdk.Context, keeper Keeper, msg MsgSubmitUpvote) 
 	return sdk.Result{
 		Data: res,
 		Tags: resultTags,
+	}
+}
+
+func handleMsgEditArgument(ctx sdk.Context, keeper Keeper, msg MsgEditArgument) sdk.Result {
+	if err := msg.ValidateBasic(); err != nil {
+		return err.Result()
+	}
+	argument, err := keeper.EditArgument(ctx, msg.Body, msg.Summary, msg.Creator, msg.ArgumentID)
+	if err != nil {
+		return err.Result()
+	}
+	res, codecErr := ModuleCodec.MarshalJSON(argument)
+	if codecErr != nil {
+		return sdk.ErrInternal(fmt.Sprintf("Marshal result error: %s", codecErr)).Result()
+	}
+	return sdk.Result{
+		Data: res,
 	}
 }

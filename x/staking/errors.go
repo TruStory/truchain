@@ -14,19 +14,21 @@ func (e Error) Error() string { return string(e) }
 const (
 	DefaultCodespace sdk.CodespaceType = ModuleName
 
-	ErrorCodeInvalidStakeType         sdk.CodeType = 501
-	ErrorCodeAccountJailed            sdk.CodeType = 502
-	ErrorCodeInvalidBodyLength        sdk.CodeType = 503
-	ErrorCodeInvalidSummaryLength     sdk.CodeType = 504
-	ErrorCodeUnknownArgument          sdk.CodeType = 505
-	ErrorCodeUnknownStake             sdk.CodeType = 506
-	ErrorCodeDuplicateStake           sdk.CodeType = 507
-	ErrorCodeMaxNumOfArgumentsReached sdk.CodeType = 508
-	ErrorCodeMaxAmountStakingReached  sdk.CodeType = 509
-	ErrorCodeInvalidQueryParams       sdk.CodeType = 510
-	ErrorCodeJSONParsing              sdk.CodeType = 511
-	ErrorCodeUnknownClaim             sdk.CodeType = 512
-	ErrorCodeUnknownStakeType         sdk.CodeType = 513
+	ErrorCodeInvalidStakeType                sdk.CodeType = 501
+	ErrorCodeAccountJailed                   sdk.CodeType = 502
+	ErrorCodeInvalidBodyLength               sdk.CodeType = 503
+	ErrorCodeInvalidSummaryLength            sdk.CodeType = 504
+	ErrorCodeUnknownArgument                 sdk.CodeType = 505
+	ErrorCodeUnknownStake                    sdk.CodeType = 506
+	ErrorCodeDuplicateStake                  sdk.CodeType = 507
+	ErrorCodeMaxNumOfArgumentsReached        sdk.CodeType = 508
+	ErrorCodeMaxAmountStakingReached         sdk.CodeType = 509
+	ErrorCodeInvalidQueryParams              sdk.CodeType = 510
+	ErrorCodeJSONParsing                     sdk.CodeType = 511
+	ErrorCodeUnknownClaim                    sdk.CodeType = 512
+	ErrorCodeUnknownStakeType                sdk.CodeType = 513
+	ErrorCodeCannotEditArgumentAlreadyStaked sdk.CodeType = 514
+	ErrorCodeCannotEditArgumentWrongCreator  sdk.CodeType = 515
 )
 
 // GenesisErrors
@@ -112,6 +114,22 @@ func ErrCodeMaxNumOfArgumentsReached(max int) sdk.Error {
 	return sdk.NewError(DefaultCodespace,
 		ErrorCodeMaxNumOfArgumentsReached,
 		fmt.Sprintf("You have reached max number of %d arguments per claim", max),
+	)
+}
+
+// ErrCodeCannotEditArgumentAlreadyStaked throws an error when an argument cannot be edited because it has already been staked
+func ErrCodeCannotEditArgumentAlreadyStaked(argumentID uint64) sdk.Error {
+	return sdk.NewError(DefaultCodespace,
+		ErrorCodeCannotEditArgumentAlreadyStaked,
+		fmt.Sprintf("This argument cannot be edited because someone else has already agreed to it"),
+	)
+}
+
+// ErrCodeCannotEditArgumentWrongCreator throws an error when an argument cannot be edited because the edit is not coming from the creator
+func ErrCodeCannotEditArgumentWrongCreator(argumentID uint64) sdk.Error {
+	return sdk.NewError(DefaultCodespace,
+		ErrorCodeCannotEditArgumentWrongCreator,
+		fmt.Sprintf("This argument cannot be edited because you are not the writer of the Argument"),
 	)
 }
 
