@@ -9,7 +9,10 @@ def process_genesis(genesis, parsed_args):
         'params': {
             'min_slash_count': '5',
             'slash_magnitude': '3',
-            'slash_min_stake': '10000000000trusteak',
+            'slash_min_stake': {
+                'amount': '10000000000',
+                'denom': 'trusteak',
+            },
             'slash_admins': ['cosmos1xqc5gwzpg3fyv5en2fzyx36z2se5ks33tt57e7', 'cosmos1xqc5gwz923znjvzyg3pnxdfsgcu4jv34mep8hp'],
             'curator_share': '0.250000000000000000',
         }
