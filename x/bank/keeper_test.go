@@ -123,7 +123,7 @@ func TestKeeper_SubtractCoin(t *testing.T) {
 	assert.Equal(t, ErrorCodeInvalidTransactionType, err.Code())
 }
 
-func TestKeeper_SubtractMoreThanBalanceCoin(t *testing.T) {
+func TestKeeper_SafeSubtractCoin(t *testing.T) {
 	ctx, k, auth := mockDB()
 
 	balance := sdk.NewCoin(app.StakeDenom, sdk.NewInt(app.Shanev*30))
