@@ -8,7 +8,7 @@ import lib
 def process_genesis(genesis, parsed_args):
     genesis['app_state']['account'] = {
         'params': {
-            'registrar': None,
+            'registrar': 'cosmos1em44grl9ylmmnwawwp5fjn079kesatwp67rxjx',
             'max_slash_count': '3',
         }
     }
