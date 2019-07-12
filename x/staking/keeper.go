@@ -273,7 +273,7 @@ func (k Keeper) DownvoteArgument(ctx sdk.Context, argumentID uint64) sdk.Error {
 	if !ok {
 		return ErrCodeUnknownArgument(argumentID)
 	}
-	arg.DownvoteCount++
+	arg.DownvotedCount++
 	k.setArgument(ctx, arg)
 	return nil
 }
