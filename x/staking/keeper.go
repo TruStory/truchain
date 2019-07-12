@@ -473,7 +473,7 @@ func (k Keeper) EditArgument(ctx sdk.Context, body, summary string,
 		return Argument{}, err
 	}
 
-	argument, ok := k.getArgument(ctx, argumentID)
+	argument, ok := k.Argument(ctx, argumentID)
 	if !ok {
 		return Argument{}, ErrCodeUnknownArgument(argumentID)
 	}
