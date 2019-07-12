@@ -15,6 +15,8 @@ def process_genesis(genesis, parsed_args):
         }
     }
 
+    genesis['app_state']['account']['params']['jail_duration'] = '604800000000000'
+
     # Set new chain ID and genesis start time
     genesis['chain_id'] = parsed_args.chain_id.strip()
     genesis['genesis_time'] = parsed_args.start_time

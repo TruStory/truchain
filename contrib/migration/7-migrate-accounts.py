@@ -10,7 +10,6 @@ def process_genesis(genesis, parsed_args):
         'params': {
             'registrar': 'cosmos1em44grl9ylmmnwawwp5fjn079kesatwp67rxjx',
             'max_slash_count': '3',
-            'jail_duration': '604800000000000',
         }
     }
 
