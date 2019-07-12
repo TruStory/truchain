@@ -14,7 +14,7 @@ var (
 )
 
 // ModuleName is the name of this module
-const ModuleName = "truaccount"
+const ModuleName = "account"
 
 // AppModuleBasic defines the internal data for the module
 // ----------------------------------------------------------------------------

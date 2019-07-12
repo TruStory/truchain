@@ -26,7 +26,7 @@ type Params struct {
 func DefaultParams() Params {
 	return Params{
 		Registrar:     nil,
-		MaxSlashCount: 50,
+		MaxSlashCount: 3,
 		JailDuration:  24 * time.Hour * 7,
 	}
 }
