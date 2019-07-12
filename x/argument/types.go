@@ -11,7 +11,7 @@ const (
 	QuerierRoute = ModuleName
 )
 
-// getArgument for a story
+// Argument for a story
 type Argument struct {
 	ID      int64 `json:"id"`
 	StoryID int64 `json:"story_id"`
