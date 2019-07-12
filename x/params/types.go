@@ -8,6 +8,7 @@ import (
 	"github.com/TruStory/truchain/x/claim"
 	"github.com/TruStory/truchain/x/community"
 	"github.com/TruStory/truchain/x/expiration"
+	"github.com/TruStory/truchain/x/slashing"
 	"github.com/TruStory/truchain/x/stake"
 	"github.com/TruStory/truchain/x/staking"
 	"github.com/TruStory/truchain/x/story"
@@ -29,6 +30,7 @@ type Params struct {
 	ClaimParams      claim.Params
 	BankParams       bank.Params
 	StakingParams    staking.Params
+	SlashingParams   slashing.Params
 }
 
 // DefaultParams creates the default params
@@ -44,5 +46,6 @@ func DefaultParams() Params {
 		ClaimParams:      claim.DefaultParams(),
 		BankParams:       bank.DefaultParams(),
 		StakingParams:    staking.DefaultParams(),
+		SlashingParams:   slashing.DefaultParams(),
 	}
 }

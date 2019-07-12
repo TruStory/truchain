@@ -64,7 +64,7 @@ func InitGenesis(ctx sdk.Context, k Keeper, data GenesisState) {
 		k.setArgumentStake(ctx, s.ArgumentID, s.ID)
 		k.setUserStake(ctx, s.Creator, s.CreatedTime, s.ID)
 
-		arg, ok := k.getArgument(ctx, s.ArgumentID)
+		arg, ok := k.Argument(ctx, s.ArgumentID)
 		if !ok {
 			panic(fmt.Sprintf("failed getting argument %d", s.ArgumentID))
 		}

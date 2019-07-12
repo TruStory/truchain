@@ -97,6 +97,32 @@ func (k Keeper) SubtractCoin(ctx sdk.Context, addr sdk.AccAddress, amt sdk.Coin,
 	return coins, nil
 }
 
+// SafeSubtractCoin subtracts a coin without going below zero
+func (k Keeper) SafeSubtractCoin(ctx sdk.Context, addr sdk.AccAddress, amt sdk.Coin,
+	referenceID uint64, txType TransactionType, txSetters ...TransactionSetter) (sdk.Coins, sdk.Error) {
+
+	if amt.IsNegative() {
+		return sdk.Coins{}, sdk.ErrInvalidCoins("amount can't be negative")
+	}
+
+	adjustedCoin := amt
+	balanceCoins := k.bankKeeper.GetCoins(ctx, addr)
+	balance := balanceCoins.AmountOf(amt.Denom)
+	if balance.LT(amt.Amount) {
+		adjustedCoin = sdk.NewCoin(amt.Denom, balance)
+	}
+
+	if adjustedCoin.IsPositive() {
+		coins, err := k.SubtractCoin(ctx, addr, adjustedCoin, referenceID, txType, txSetters...)
+		if err != nil {
+			return coins, err
+		}
+		return coins, nil
+	} else {
+		return balanceCoins, nil
+	}
+}
+
 func (k Keeper) GetCoins(ctx sdk.Context, address sdk.AccAddress) sdk.Coins {
 	return k.bankKeeper.GetCoins(ctx, address)
 }

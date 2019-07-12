@@ -1,6 +1,7 @@
 package staking
 
 import (
+	"fmt"
 	"time"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -84,6 +85,14 @@ type Stake struct {
 	Result      *RewardResult  `json:"result,omitempty"`
 }
 
+func (s Stake) String() string {
+	return fmt.Sprintf(`Stake %d:
+  ArgumentID: %d
+  Amount: %s
+  Creator: %s`,
+		s.ID, s.ArgumentID, s.Amount.String(), s.Creator.String())
+}
+
 type Argument struct {
 	ID             uint64         `json:"id"`
 	Creator        sdk.AccAddress `json:"creator"`
@@ -92,10 +101,10 @@ type Argument struct {
 	Summary        string         `json:"summary"`
 	Body           string         `json:"body"`
 	StakeType      StakeType      `json:"stake_type"`
-	UpvotedCount   uint64         `json:"upvoted_count"`
+	UpvotedCount   int            `json:"upvoted_count"`
 	UpvotedStake   sdk.Coin       `json:"upvoted_stake"`
 	TotalStake     sdk.Coin       `json:"total_stake"`
-	UnhelpfulCount uint64         `json:"unhelpful_count"`
+	DownvotedCount int            `json:"downvoted_count"`
 	IsUnhelpful    bool           `json:"is_unhelpful"`
 	CreatedTime    time.Time      `json:"created_time"`
 	UpdatedTime    time.Time      `json:"updated_time"`

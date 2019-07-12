@@ -111,6 +111,30 @@ func (m *mockClaimKeeper) AddChallengeStake(ctx sdk.Context, id uint64, stake sd
 	return nil
 }
 
+// SubtractBackingStake adds a stake amount to the total backing amount
+func (m *mockClaimKeeper) SubtractBackingStake(ctx sdk.Context, id uint64, stake sdk.Coin) sdk.Error {
+	c, ok := m.Claim(ctx, id)
+	if !ok {
+		return sdk.ErrInternal("unknown claim")
+	}
+	c.TotalBacked = c.TotalBacked.Sub(stake)
+	m.claims[id] = c
+
+	return nil
+}
+
+// SubtractChallengeStake adds a stake amount to the total challenge amount
+func (m *mockClaimKeeper) SubtractChallengeStake(ctx sdk.Context, id uint64, stake sdk.Coin) sdk.Error {
+	c, ok := m.Claim(ctx, id)
+	if !ok {
+		return sdk.ErrInternal("unknown claim")
+	}
+	c.TotalChallenged = c.TotalChallenged.Sub(stake)
+	m.claims[id] = c
+
+	return nil
+}
+
 type mockedDB struct {
 	authAccKeeper auth.AccountKeeper
 	accountKeeper AccountKeeper

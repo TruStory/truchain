@@ -15,6 +15,8 @@ type ClaimKeeper interface {
 	Claim(ctx sdk.Context, id uint64) (claim claim.Claim, ok bool)
 	AddBackingStake(ctx sdk.Context, id uint64, stake sdk.Coin) sdk.Error
 	AddChallengeStake(ctx sdk.Context, id uint64, stake sdk.Coin) sdk.Error
+	SubtractBackingStake(ctx sdk.Context, id uint64, stake sdk.Coin) sdk.Error
+	SubtractChallengeStake(ctx sdk.Context, id uint64, stake sdk.Coin) sdk.Error
 }
 
 // BankKeeper is the expected bank keeper interface for this module

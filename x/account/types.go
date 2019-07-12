@@ -21,7 +21,7 @@ const (
 type AppAccount struct {
 	*auth.BaseAccount
 
-	SlashCount  uint      `json:"slash_count"`
+	SlashCount  int       `json:"slash_count"`
 	IsJailed    bool      `json:"is_jailed"`
 	JailEndTime time.Time `json:"jail_end_time"`
 	CreatedTime time.Time `json:"created_time"`

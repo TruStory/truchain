@@ -72,7 +72,7 @@ func TestKeeper_SubmitArgument(t *testing.T) {
 		TotalStake:   sdk.NewInt64Coin(app.StakeDenom, app.Shanev*50),
 	}
 	assert.Equal(t, expectedArgument, argument)
-	argument, ok := k.getArgument(ctx, expectedArgument.ID)
+	argument, ok := k.Argument(ctx, expectedArgument.ID)
 	assert.True(t, ok)
 	assert.Equal(t, expectedArgument, argument)
 
@@ -86,7 +86,7 @@ func TestKeeper_SubmitArgument(t *testing.T) {
 		CreatedTime: ctx.BlockHeader().Time,
 		EndTime:     ctx.BlockHeader().Time.Add(time.Hour * 24 * 7),
 	}
-	s, _ := k.getStake(ctx, 1)
+	s, _ := k.Stake(ctx, 1)
 	assert.Equal(t, expectedStake, s)
 	argument2, err := k.SubmitArgument(ctx, "body2", "summary2", addr2, 1, StakeChallenge)
 	expectedArgument2 := Argument{
@@ -114,7 +114,7 @@ func TestKeeper_SubmitArgument(t *testing.T) {
 	}
 	assert.NoError(t, err)
 	assert.Equal(t, expectedArgument2, argument2)
-	s, ok = k.getStake(ctx, 2)
+	s, ok = k.Stake(ctx, 2)
 	assert.True(t, ok)
 	assert.Equal(t, expectedStake2, s)
 	associatedArguments := k.ClaimArguments(ctx, 1)
@@ -225,7 +225,7 @@ func TestKeeper_SubmitUpvote(t *testing.T) {
 		CreatedTime: ctx.BlockHeader().Time,
 		EndTime:     ctx.BlockHeader().Time.Add(time.Hour * 24 * 7),
 	}
-	s, ok := k.getStake(ctx, 1)
+	s, ok := k.Stake(ctx, 1)
 	assert.True(t, ok)
 	assert.Equal(t, expectedStake, s)
 	_, err = k.SubmitUpvote(ctx, argument.ID, addr2)
@@ -292,9 +292,9 @@ func TestKeeper_SubmitUpvote(t *testing.T) {
 	_, err = k.SubmitUpvote(ctx, argument.ID, addr3)
 	assert.NoError(t, err)
 
-	argument, ok = k.getArgument(ctx, argument.ID)
+	argument, ok = k.Argument(ctx, argument.ID)
 	assert.True(t, ok)
-	assert.Equal(t, uint64(2), argument.UpvotedCount)
+	assert.Equal(t, 2, argument.UpvotedCount)
 	assert.Equal(t, sdk.NewInt64Coin(app.StakeDenom, app.Shanev*20), argument.UpvotedStake)
 	assert.Equal(t, sdk.NewInt64Coin(app.StakeDenom, app.Shanev*70), argument.TotalStake)
 }

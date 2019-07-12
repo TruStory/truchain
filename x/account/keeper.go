@@ -52,7 +52,7 @@ func (k Keeper) CreateAppAccount(ctx sdk.Context, address sdk.AccAddress,
 	acc.CreatedTime = ctx.BlockHeader().Time
 	k.accountKeeper.SetAccount(ctx, acc)
 
-	getLogger(ctx).Info(fmt.Sprintf("Created %s", acc.String()))
+	logger(ctx).Info(fmt.Sprintf("Created %s", acc.String()))
 
 	initialCoinAmount := coins.AmountOf(app.StakeDenom)
 	if initialCoinAmount.IsPositive() {
@@ -127,16 +127,24 @@ func (k Keeper) IsJailed(ctx sdk.Context, address sdk.AccAddress) (bool, sdk.Err
 }
 
 // IncrementSlashCount increments the slash count of the user
-func (k Keeper) IncrementSlashCount(ctx sdk.Context, address sdk.AccAddress) sdk.Error {
+func (k Keeper) IncrementSlashCount(ctx sdk.Context, address sdk.AccAddress) (int, sdk.Error) {
 	user, err := k.getAccount(ctx, address)
 	if err != nil {
-		return err
+		return 0, err
 	}
 
 	user.SlashCount++
 	k.accountKeeper.SetAccount(ctx, user)
 
-	return nil
+	if user.SlashCount >= k.GetParams(ctx).MaxSlashCount {
+		jailEndTime := ctx.BlockHeader().Time.Add(k.GetParams(ctx).JailDuration)
+		err = k.JailUntil(ctx, user.GetAddress(), jailEndTime)
+		if err != nil {
+			return 0, err
+		}
+	}
+
+	return user.SlashCount, nil
 }
 
 func (k Keeper) getAccount(ctx sdk.Context, addr sdk.AccAddress) (AppAccount, sdk.Error) {
@@ -167,7 +175,7 @@ func ToAppAccount(acc auth.Account) AppAccount {
 	}
 }
 
-func getLogger(ctx sdk.Context) log.Logger {
+func logger(ctx sdk.Context) log.Logger {
 	return ctx.Logger().With("module", ModuleName)
 }
 

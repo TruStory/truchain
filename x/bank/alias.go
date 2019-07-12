@@ -22,10 +22,14 @@ const (
 	TransactionInterestUpvoteReceived   = exported.TransactionInterestUpvoteReceived
 	TransactionInterestUpvoteGiven      = exported.TransactionInterestUpvoteGiven
 	TransactionRewardPayout             = exported.TransactionRewardPayout
-	SortAsc                             = exported.SortAsc
-	SortDesc                            = exported.SortDesc
-	QueryTransactionsByAddress          = exported.QueryTransactionsByAddress
-	RouterKey                           = exported.RouterKey
+	TransactionInterestSlashed          = exported.TransactionInterestSlashed
+	TransactionStakeSlashed             = exported.TransactionStakeSlashed
+	TransactionCuratorReward            = exported.TransactionCuratorReward
+
+	SortAsc                    = exported.SortAsc
+	SortDesc                   = exported.SortDesc
+	QueryTransactionsByAddress = exported.QueryTransactionsByAddress
+	RouterKey                  = exported.RouterKey
 )
 
 var (

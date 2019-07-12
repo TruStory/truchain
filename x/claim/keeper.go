@@ -159,6 +159,30 @@ func (k Keeper) AddChallengeStake(ctx sdk.Context, id uint64, stake sdk.Coin) sd
 	return nil
 }
 
+// SubtractBackingStake adds a stake amount to the total backing amount
+func (k Keeper) SubtractBackingStake(ctx sdk.Context, id uint64, stake sdk.Coin) sdk.Error {
+	claim, ok := k.Claim(ctx, id)
+	if !ok {
+		return ErrUnknownClaim(id)
+	}
+	claim.TotalBacked = claim.TotalBacked.Sub(stake)
+	k.setClaim(ctx, claim)
+
+	return nil
+}
+
+// SubtractChallengeStake adds a stake amount to the total challenge amount
+func (k Keeper) SubtractChallengeStake(ctx sdk.Context, id uint64, stake sdk.Coin) sdk.Error {
+	claim, ok := k.Claim(ctx, id)
+	if !ok {
+		return ErrUnknownClaim(id)
+	}
+	claim.TotalChallenged = claim.TotalChallenged.Sub(stake)
+	k.setClaim(ctx, claim)
+
+	return nil
+}
+
 func (k Keeper) validateLength(ctx sdk.Context, body string) sdk.Error {
 	var minClaimLength int
 	var maxClaimLength int
