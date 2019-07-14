@@ -45,7 +45,7 @@ func NewKeeper(
 }
 
 // CreateSlash creates a new slash on an argument (mark as "Unhelpful" in app)
-func (k Keeper) CreateSlash(ctx sdk.Context, stakeID uint64, creator sdk.AccAddress) (slash Slash, err sdk.Error) {
+func (k Keeper) CreateSlash(ctx sdk.Context, stakeID uint64, slashType SlashType, slashReason SlashReason, slashDetailedReason string, creator sdk.AccAddress) (slash Slash, err sdk.Error) {
 	logger := getLogger(ctx)
 
 	err = k.validateParams(ctx, stakeID, creator)
@@ -59,10 +59,13 @@ func (k Keeper) CreateSlash(ctx sdk.Context, stakeID uint64, creator sdk.AccAddr
 	}
 
 	slash = Slash{
-		ID:          slashID,
-		StakeID:     stakeID,
-		Creator:     creator,
-		CreatedTime: ctx.BlockHeader().Time,
+		ID:             slashID,
+		StakeID:        stakeID,
+		Type:           slashType,
+		Reason:         slashReason,
+		DetailedReason: slashDetailedReason,
+		Creator:        creator,
+		CreatedTime:    ctx.BlockHeader().Time,
 	}
 
 	// persist the slash

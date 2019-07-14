@@ -13,17 +13,21 @@ const (
 
 // MsgSlashArgument defines the message to slash an argument
 type MsgSlashArgument struct {
-	StakeID   uint64
-	SlashType SlashType
-	Creator   sdk.AccAddress
+	StakeID             uint64
+	SlashType           SlashType
+	SlashReason         SlashReason
+	SlashDetailedReason string
+	Creator             sdk.AccAddress
 }
 
 // NewMsgSlashArgument returns the messages to slash an argument
-func NewMsgSlashArgument(stakeID uint64, slashType SlashType, creator sdk.AccAddress) MsgSlashArgument {
+func NewMsgSlashArgument(stakeID uint64, slashType SlashType, slashReason SlashReason, slashDetailedReason string, creator sdk.AccAddress) MsgSlashArgument {
 	return MsgSlashArgument{
-		StakeID:   stakeID,
-		SlashType: slashType,
-		Creator:   creator,
+		StakeID:             stakeID,
+		SlashType:           slashType,
+		SlashReason:         slashReason,
+		SlashDetailedReason: slashDetailedReason,
+		Creator:             creator,
 	}
 }
 
@@ -31,6 +35,10 @@ func NewMsgSlashArgument(stakeID uint64, slashType SlashType, creator sdk.AccAdd
 func (msg MsgSlashArgument) ValidateBasic() sdk.Error {
 	if len(msg.Creator) == 0 {
 		return sdk.ErrInvalidAddress(fmt.Sprintf("Invalid address: %s", msg.Creator.String()))
+	}
+
+	if msg.SlashReason == SlashReasonOthers && len(msg.SlashDetailedReason) == 0 {
+		return ErrInvalidSlashReason("Need to have detailed reason when chosen Others")
 	}
 
 	return nil
