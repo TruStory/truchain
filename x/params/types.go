@@ -13,24 +13,29 @@ import (
 // MinBackingAmount : '1000000000',
 // MaxBackingAmount:  '100000000000',
 
+// Defines module constants
+const (
+	QuerierRoute = ModuleName
+)
+
 // Params defines defaults for a story
 type Params struct {
-	AccountParams    account.Params
-	CommunityParams  community.Params
-	ClaimParams      claim.Params
-	BankParams       bank.Params
-	StakingParams    staking.Params
-	SlashingParams   slashing.Params
+	AccountParams   account.Params
+	CommunityParams community.Params
+	ClaimParams     claim.Params
+	BankParams      bank.Params
+	StakingParams   staking.Params
+	SlashingParams  slashing.Params
 }
 
 // DefaultParams creates the default params
 func DefaultParams() Params {
 	return Params{
-		AccountParams:    account.DefaultParams(),
-		CommunityParams:  community.DefaultParams(),
-		ClaimParams:      claim.DefaultParams(),
-		BankParams:       bank.DefaultParams(),
-		StakingParams:    staking.DefaultParams(),
-		SlashingParams:   slashing.DefaultParams(),
+		AccountParams:   account.DefaultParams(),
+		CommunityParams: community.DefaultParams(),
+		ClaimParams:     claim.DefaultParams(),
+		BankParams:      bank.DefaultParams(),
+		StakingParams:   staking.DefaultParams(),
+		SlashingParams:  slashing.DefaultParams(),
 	}
 }

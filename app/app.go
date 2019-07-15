@@ -367,8 +367,8 @@ func NewTruChain(logger log.Logger, db dbm.DB, loadLatest bool, options ...func(
 		AddRoute(users.QueryPath, users.NewQuerier(codec, app.accountKeeper)).
 		AddRoute(backing.QueryPath, backing.NewQuerier(app.backingKeeper)).
 		AddRoute(challenge.QueryPath, challenge.NewQuerier(app.challengeKeeper)).
-		AddRoute(clientParams.QueryPath, clientParams.NewQuerier(app.clientParamsKeeper)).
 		AddRoute(trubank.QueryPath, trubank.NewQuerier(app.truBankKeeper)).
+		AddRoute(clientParams.QuerierRoute, clientParams.NewQuerier(app.clientParamsKeeper)).
 		AddRoute(community.QuerierRoute, community.NewQuerier(app.communityKeeper)).
 		AddRoute(claim.QuerierRoute, claim.NewQuerier(app.claimKeeper)).
 		AddRoute(trubank2.QuerierRoute, trubank2.NewQuerier(app.truBankKeeper2)).

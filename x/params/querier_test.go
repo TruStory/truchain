@@ -1,6 +1,7 @@
 package params
 
 import (
+	"strings"
 	"testing"
 
 	"github.com/TruStory/truchain/x/slashing"
@@ -15,7 +16,7 @@ func TestQueryPath_Success(t *testing.T) {
 	ctx, keeper := mockDB()
 
 	query := abci.RequestQuery{
-		Path: QueryPath,
+		Path: strings.Join([]string{custom, QueryPath}, "/"),
 	}
 
 	querier := NewQuerier(keeper)
