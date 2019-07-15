@@ -300,6 +300,7 @@ var tierLimitsStakeAmounts = []sdk.Int{
 }
 
 var defaultStakeLimit = sdk.NewInt(app.Shanev * 300)
+var defaultMinimumBalance = sdk.NewInt(app.Shanev * 50)
 
 func (k Keeper) checkStakeThreshold(ctx sdk.Context, address sdk.AccAddress, amount sdk.Int) sdk.Error {
 	balance := k.bankKeeper.GetCoins(ctx, address).AmountOf(app.StakeDenom)
@@ -321,7 +322,7 @@ func (k Keeper) checkStakeThreshold(ctx sdk.Context, address sdk.AccAddress, amo
 			return false
 		},
 	)
-	if balance.Sub(amount).LT(sdk.NewInt(app.Shanev * 50)) {
+	if balance.Sub(amount).LT(defaultMinimumBalance) {
 		return ErrCodeMinBalance()
 	}
 
