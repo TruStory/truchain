@@ -124,11 +124,12 @@ func (k Keeper) Params(ctx sdk.Context) Params {
 			MaxArgumentsPerClaim:     k.stakingKeeper.GetParams(ctx).MaxArgumentsPerClaim,
 		},
 		SlashingParams: slashing.Params{
-			MinSlashCount:  k.slashingKeeper.GetParams(ctx).MinSlashCount,
-			SlashMagnitude: k.slashingKeeper.GetParams(ctx).SlashMagnitude,
-			SlashMinStake:  k.slashingKeeper.GetParams(ctx).SlashMinStake,
-			SlashAdmins:    k.slashingKeeper.GetParams(ctx).SlashAdmins,
-			CuratorShare:   k.slashingKeeper.GetParams(ctx).CuratorShare,
+			MinSlashCount:           k.slashingKeeper.GetParams(ctx).MinSlashCount,
+			SlashMagnitude:          k.slashingKeeper.GetParams(ctx).SlashMagnitude,
+			SlashMinStake:           k.slashingKeeper.GetParams(ctx).SlashMinStake,
+			SlashAdmins:             k.slashingKeeper.GetParams(ctx).SlashAdmins,
+			CuratorShare:            k.slashingKeeper.GetParams(ctx).CuratorShare,
+			MaxDetailedReasonLength: k.slashingKeeper.GetParams(ctx).MaxDetailedReasonLength,
 		},
 	}
 }
