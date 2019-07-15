@@ -37,7 +37,7 @@ func (msg MsgSlashArgument) ValidateBasic() sdk.Error {
 		return sdk.ErrInvalidAddress(fmt.Sprintf("Invalid address: %s", msg.Creator.String()))
 	}
 
-	if msg.SlashReason == SlashReasonOthers && len(msg.SlashDetailedReason) == 0 {
+	if msg.SlashReason == SlashReasonOther && len(msg.SlashDetailedReason) == 0 {
 		return ErrInvalidSlashReason("Need to have detailed reason when chosen Others")
 	}
 

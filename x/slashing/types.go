@@ -57,6 +57,6 @@ const (
 	SlashReasonFocusedOnPerson
 	// SlashReasonPlagiarism represents the reason when the argument is plagiarised
 	SlashReasonPlagiarism
-	// SlashReasonOthers represents the reason that is any other than the above
-	SlashReasonOthers
+	// SlashReasonOther represents the reason that is any other than the above
+	SlashReasonOther
 )

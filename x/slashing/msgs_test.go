@@ -23,7 +23,7 @@ func TestMsgSlashArgument_InvalidCreator(t *testing.T) {
 }
 
 func TestMsgSlashArgument_InvalidSlashReason(t *testing.T) {
-	msg := NewMsgSlashArgument(1, SlashTypeUnhelpful, SlashReasonOthers, "", sdk.AccAddress([]byte{1, 2}))
+	msg := NewMsgSlashArgument(1, SlashTypeUnhelpful, SlashReasonOther, "", sdk.AccAddress([]byte{1, 2}))
 	err := msg.ValidateBasic()
 	assert.NotNil(t, err)
 	assert.Equal(t, ErrInvalidSlashReason("").Code(), err.Code())

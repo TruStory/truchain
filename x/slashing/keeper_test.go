@@ -36,6 +36,18 @@ func TestNewSlash_InvalidStake(t *testing.T) {
 	assert.Equal(t, ErrInvalidStake(invalidStakeID).Code(), err.Code())
 }
 
+func TestNewSlash_InvalidDetailedReason(t *testing.T) {
+	ctx, keeper := mockDB()
+
+	stakeID := uint64(1)
+	creator := keeper.GetParams(ctx).SlashAdmins[0]
+	longDetailedReason := "This is a very very very descriptive reason to slash an argument. I am writing it in this detail to make the validation fail. I hope it works!"
+	_, err := keeper.CreateSlash(ctx, stakeID, SlashTypeUnhelpful, SlashReasonOther, longDetailedReason, creator)
+
+	assert.NotNil(t, err)
+	assert.Equal(t, ErrInvalidSlashReason("").Code(), err.Code())
+}
+
 func TestNewSlash_ErrNotEnoughEarnedStake(t *testing.T) {
 	ctx, keeper := mockDB()
 
