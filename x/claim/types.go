@@ -24,7 +24,7 @@ type Claim struct {
 	Body            string         `json:"body"`
 	Creator         sdk.AccAddress `json:"creator"`
 	Source          url.URL        `json:"source,omitempty"`
-	TotalStakers    uint64         `json:"total_stakers,omitempty"`
+	TotalStakers    uint64         `json:"total_stakers"`
 	TotalBacked     sdk.Coin       `json:"total_backed,omitempty"`
 	TotalChallenged sdk.Coin       `json:"total_challenged,omitempty"`
 	CreatedTime     time.Time      `json:"created_time"`
