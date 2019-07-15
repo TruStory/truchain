@@ -290,6 +290,7 @@ var tierLimitsEarnedCoins = []sdk.Int{
 	sdk.NewInt(app.Shanev * 40),
 	sdk.NewInt(app.Shanev * 50),
 }
+
 var tierLimitsStakeAmounts = []sdk.Int{
 	sdk.NewInt(app.Shanev * 500),
 	sdk.NewInt(app.Shanev * 1000),
@@ -306,7 +307,7 @@ func (k Keeper) checkStakeThreshold(ctx sdk.Context, address sdk.AccAddress, amo
 		return sdk.ErrInsufficientFunds("Insufficient coins")
 	}
 	p := k.GetParams(ctx)
-	period := p.StakeLimitDays
+	period := p.Period
 
 	staked := sdk.NewInt(0)
 	fromDate := ctx.BlockHeader().Time.Add(time.Duration(-1) * period)
