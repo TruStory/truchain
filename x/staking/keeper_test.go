@@ -340,28 +340,96 @@ func Test_splitReward(t *testing.T) {
 	t.Log("actual staker reward: " + stakerReward.String())
 }
 
-func TestKeeper_StakePeriodAmountLimit(t *testing.T) {
+func TestKeeper_StakeLimitTiers(t *testing.T) {
+
+	type tierTest struct {
+		name        string
+		balance     int64
+		nArguments  int
+		earnedCoins int64
+	}
+
+	var tierTests = []tierTest{
+		{"500 limit", 700, 11, 12},
+		{"1000 limit", 1200, 21, 20},
+
+		{"1500 limit", 1800, 31, 35},
+
+		{"2000 limit", 2100, 41, 49},
+
+		{"2500 limit", 5000, 51, 51},
+	}
+	assert.Len(t, tierTests, len(tierLimitsEarnedCoins))
+	for _, tt := range tierTests {
+		t.Run(tt.name, func(t *testing.T) {
+			ctx, k, mdb := mockDB()
+			addr := createFakeFundedAccount(ctx, mdb.authAccKeeper, sdk.Coins{sdk.NewInt64Coin(app.StakeDenom, app.Shanev*tt.balance)})
+			k.setEarnedCoins(ctx, addr, sdk.NewCoins(sdk.NewInt64Coin("crypto", app.Shanev*tt.earnedCoins)))
+			argumentsToBeCreated := tt.nArguments
+			for i := 1; i < tt.nArguments; i++ {
+				_, err := k.SubmitArgument(ctx, "arg1", "summary1", addr, uint64(i), StakeChallenge)
+				assert.NoError(t, err)
+				argumentsToBeCreated--
+			}
+			_, err := k.SubmitArgument(ctx, "arg1", "summary1", addr, uint64(tt.nArguments), StakeChallenge)
+			argumentsToBeCreated--
+			assert.Error(t, err)
+			assert.Equal(t, ErrorCodeMaxAmountStakingReached, err.Code())
+			assert.Zero(t, argumentsToBeCreated)
+
+		})
+	}
+
+}
+func TestKeeper_StakeLimitDefaultTier(t *testing.T) {
 	ctx, k, mdb := mockDB()
-	addr := createFakeFundedAccount(ctx, mdb.authAccKeeper, sdk.Coins{sdk.NewInt64Coin(app.StakeDenom, app.Shanev*215)})
+	addr := createFakeFundedAccount(ctx, mdb.authAccKeeper, sdk.Coins{sdk.NewInt64Coin(app.StakeDenom, app.Shanev*500)})
 
-	_, err := k.SubmitArgument(ctx.WithBlockTime(mustParseTime("2019-01-01")),
-		"arg1", "summary1", addr, 1, StakeChallenge)
-	_, err = k.SubmitArgument(ctx.WithBlockTime(mustParseTime("2019-01-05")),
-		"arg2", "summary2", addr, 2, StakeBacking)
-	assert.NoError(t, err)
-	_, err = k.SubmitArgument(ctx.WithBlockTime(mustParseTime("2019-01-07")),
-		"arg3", "summary3", addr, 3, StakeChallenge)
+	_, err := k.SubmitArgument(ctx, "arg1", "summary1", addr, 1, StakeChallenge)
 	assert.NoError(t, err)
 
-	// should mark first stake as expired and refund stake
-	EndBlocker(ctx.WithBlockTime(mustParseTime("2019-01-08")), k)
-	_, err = k.SubmitArgument(ctx.WithBlockTime(mustParseTime("2019-01-08")),
-		"arg4", "summary4", addr, 4, StakeBacking)
+	_, err = k.SubmitArgument(ctx, "arg1", "summary1", addr, 2, StakeChallenge)
+	assert.NoError(t, err)
 
-	_, err = k.SubmitArgument(ctx.WithBlockTime(mustParseTime("2019-01-10")),
-		"arg5", "summary5", addr, 5, StakeChallenge)
+	_, err = k.SubmitArgument(ctx, "arg1", "summary1", addr, 3, StakeChallenge)
+	assert.NoError(t, err)
+
+	_, err = k.SubmitArgument(ctx, "arg1", "summary1", addr, 4, StakeChallenge)
+	assert.NoError(t, err)
+
+	_, err = k.SubmitArgument(ctx, "arg1", "summary1", addr, 5, StakeChallenge)
+	assert.NoError(t, err)
+
+	_, err = k.SubmitArgument(ctx, "arg1", "summary1", addr, 6, StakeChallenge)
+	assert.NoError(t, err)
+
+	_, err = k.SubmitArgument(ctx, "arg1", "summary1", addr, 7, StakeChallenge)
 	assert.Error(t, err)
 	assert.Equal(t, ErrorCodeMaxAmountStakingReached, err.Code())
+}
+
+func TestKeeper_StakeMinBalance(t *testing.T) {
+	ctx, k, mdb := mockDB()
+	addr := createFakeFundedAccount(ctx, mdb.authAccKeeper, sdk.Coins{sdk.NewInt64Coin(app.StakeDenom, app.Shanev*300)})
+
+	_, err := k.SubmitArgument(ctx, "arg1", "summary1", addr, 1, StakeChallenge)
+	assert.NoError(t, err)
+
+	_, err = k.SubmitArgument(ctx, "arg1", "summary1", addr, 2, StakeChallenge)
+	assert.NoError(t, err)
+
+	_, err = k.SubmitArgument(ctx, "arg1", "summary1", addr, 3, StakeChallenge)
+	assert.NoError(t, err)
+
+	_, err = k.SubmitArgument(ctx, "arg1", "summary1", addr, 4, StakeChallenge)
+	assert.NoError(t, err)
+
+	_, err = k.SubmitArgument(ctx, "arg1", "summary1", addr, 5, StakeChallenge)
+	assert.NoError(t, err)
+
+	_, err = k.SubmitArgument(ctx, "arg1", "summary1", addr, 6, StakeChallenge)
+	assert.Error(t, err)
+	assert.Equal(t, ErrorCodeMinBalance, err.Code())
 
 }
 

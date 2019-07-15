@@ -29,6 +29,7 @@ const (
 	ErrorCodeUnknownStakeType                sdk.CodeType = 513
 	ErrorCodeCannotEditArgumentAlreadyStaked sdk.CodeType = 514
 	ErrorCodeCannotEditArgumentWrongCreator  sdk.CodeType = 515
+	ErrorCodeMinBalance                      sdk.CodeType = 516
 )
 
 // GenesisErrors
@@ -134,10 +135,18 @@ func ErrCodeCannotEditArgumentWrongCreator(argumentID uint64) sdk.Error {
 }
 
 // ErrCodeMaxAmountStakingReached throws an error when you already staked.
-func ErrCodeMaxAmountStakingReached(hours int) sdk.Error {
+func ErrCodeMaxAmountStakingReached() sdk.Error {
 	return sdk.NewError(DefaultCodespace,
 		ErrorCodeMaxAmountStakingReached,
-		fmt.Sprintf("You have reached the max amout for staking for a period of %d hours", hours),
+		fmt.Sprintf("You have reached the maximum amount for staking"),
+	)
+}
+
+// ErrCodeMinBalance throws an error when you have the minimum balance.
+func ErrCodeMinBalance() sdk.Error {
+	return sdk.NewError(DefaultCodespace,
+		ErrorCodeMinBalance,
+		fmt.Sprintf("You don't the minimum balance required for staking"),
 	)
 }
 
