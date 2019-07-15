@@ -2,17 +2,11 @@ package params
 
 import (
 	"github.com/TruStory/truchain/x/account"
-	"github.com/TruStory/truchain/x/argument"
-	"github.com/TruStory/truchain/x/backing"
 	"github.com/TruStory/truchain/x/bank"
-	"github.com/TruStory/truchain/x/challenge"
 	"github.com/TruStory/truchain/x/claim"
 	"github.com/TruStory/truchain/x/community"
-	"github.com/TruStory/truchain/x/expiration"
 	"github.com/TruStory/truchain/x/slashing"
-	"github.com/TruStory/truchain/x/stake"
 	"github.com/TruStory/truchain/x/staking"
-	"github.com/TruStory/truchain/x/story"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
@@ -23,28 +17,16 @@ const (
 
 // Keeper data type storing keys to the key-value store
 type Keeper struct {
-	argumentKeeper   argument.Keeper
-	backingKeeper    backing.ReadKeeper
-	challengeKeeper  challenge.ReadKeeper
-	expirationKeeper expiration.Keeper
-	stakeKeeper      stake.Keeper
-	storyKeeper      story.ReadKeeper
-	accountKeeper    account.Keeper
-	communityKeeper  community.Keeper
-	claimKeeper      claim.Keeper
-	bankKeeper       bank.Keeper
-	stakingKeeper    staking.Keeper
-	slashingKeeper   slashing.Keeper
+	accountKeeper   account.Keeper
+	communityKeeper community.Keeper
+	claimKeeper     claim.Keeper
+	bankKeeper      bank.Keeper
+	stakingKeeper   staking.Keeper
+	slashingKeeper  slashing.Keeper
 }
 
 // NewKeeper creates a new keeper with write and read access
 func NewKeeper(
-	argumentKeeper argument.Keeper,
-	backingKeeper backing.WriteKeeper,
-	challengeKeeper challenge.WriteKeeper,
-	expirationKeeper expiration.Keeper,
-	stakeKeeper stake.Keeper,
-	storyKeeper story.WriteKeeper,
 	accountKeeper account.Keeper,
 	communityKeeper community.Keeper,
 	claimKeeper claim.Keeper,
@@ -53,12 +35,6 @@ func NewKeeper(
 	slashingKeeper slashing.Keeper) Keeper {
 
 	return Keeper{
-		argumentKeeper,
-		backingKeeper,
-		challengeKeeper,
-		expirationKeeper,
-		stakeKeeper,
-		storyKeeper,
 		accountKeeper,
 		communityKeeper,
 		claimKeeper,
@@ -71,24 +47,6 @@ func NewKeeper(
 // Params returns all parameters for clients
 func (k Keeper) Params(ctx sdk.Context) Params {
 	return Params{
-		ArgumentParams: argument.Params{
-			MinArgumentLength: k.argumentKeeper.GetParams(ctx).MinArgumentLength,
-			MaxArgumentLength: k.argumentKeeper.GetParams(ctx).MaxArgumentLength,
-		},
-		ChallengeParams: challenge.Params{
-			MinChallengeStake: k.challengeKeeper.GetParams(ctx).MinChallengeStake,
-		},
-		StakeParams: stake.Params{
-			MaxAmount:        k.stakeKeeper.GetParams(ctx).MaxAmount,
-			InterestRate:     k.stakeKeeper.GetParams(ctx).InterestRate,
-			MajorityPercent:  k.stakeKeeper.GetParams(ctx).MajorityPercent,
-			StakeToCredRatio: k.stakeKeeper.GetParams(ctx).StakeToCredRatio,
-		},
-		StoryParams: story.Params{
-			ExpireDuration: k.storyKeeper.GetParams(ctx).ExpireDuration,
-			MinStoryLength: k.storyKeeper.GetParams(ctx).MinStoryLength,
-			MaxStoryLength: k.storyKeeper.GetParams(ctx).MaxStoryLength,
-		},
 		AccountParams: account.Params{
 			Registrar:     k.accountKeeper.GetParams(ctx).Registrar,
 			MaxSlashCount: k.accountKeeper.GetParams(ctx).MaxSlashCount,
