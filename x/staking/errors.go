@@ -146,7 +146,7 @@ func ErrCodeMaxAmountStakingReached() sdk.Error {
 func ErrCodeMinBalance() sdk.Error {
 	return sdk.NewError(DefaultCodespace,
 		ErrorCodeMinBalance,
-		fmt.Sprintf("You don't the minimum balance required for staking"),
+		fmt.Sprintf("You don't have the minimum balance required for staking"),
 	)
 }
 
