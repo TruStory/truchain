@@ -296,12 +296,7 @@ func queryTotalEarnedCoins(ctx sdk.Context, req abci.RequestQuery, keeper Keeper
 	if err != nil {
 		return nil, ErrInvalidQueryParams(err)
 	}
-	earnedCoins := keeper.getEarnedCoins(ctx, params.Address)
-	total := sdk.NewInt(0)
-	for _, e := range earnedCoins {
-		total = total.Add(e.Amount)
-	}
-	totalStakeEarned := sdk.NewCoin(app.StakeDenom, total)
+	totalStakeEarned := sdk.NewCoin(app.StakeDenom, keeper.totalEarnedCoins(ctx, params.Address))
 	bz, err := keeper.codec.MarshalJSON(totalStakeEarned)
 	if err != nil {
 		return nil, ErrJSONParse(err)

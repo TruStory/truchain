@@ -36,10 +36,12 @@ type Params struct {
 	UpvoteStake              sdk.Coin      `json:"upvote_stake"`
 	CreatorShare             sdk.Dec       `json:"creator_share"`
 	InterestRate             sdk.Dec       `json:"interest_rate"`
-	StakeLimitPercent        sdk.Dec       `json:"stake_limit_percent"`
-	StakeLimitDays           time.Duration `json:"stake_limit_days"`
-	UnjailUpvotes            int           `json:"unjail_upvotes"`
-	MaxArgumentsPerClaim     int           `json:"max_arguments_per_claim"`
+	// deprecated
+	StakeLimitPercent sdk.Dec `json:"stake_limit_percent"`
+	// deprecated
+	StakeLimitDays       time.Duration `json:"stake_limit_days"`
+	UnjailUpvotes        int           `json:"unjail_upvotes"`
+	MaxArgumentsPerClaim int           `json:"max_arguments_per_claim"`
 }
 
 func DefaultParams() Params {
