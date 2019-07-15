@@ -1,7 +1,7 @@
 package params
 
 import (
-	app "github.com/TruStory/truchain/types"
+	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	abci "github.com/tendermint/tendermint/abci/types"
 )
@@ -21,5 +21,14 @@ func NewQuerier(k Keeper) sdk.Querier {
 // ============================================================================
 
 func queryParams(ctx sdk.Context, req abci.RequestQuery, k Keeper) (res []byte, err sdk.Error) {
-	return app.MustMarshal(k.Params(ctx)), nil
+	return mustMarshal(k.Params(ctx))
+}
+
+func mustMarshal(v interface{}) (result []byte, err sdk.Error) {
+	result, jsonErr := codec.MarshalJSONIndent(ModuleCodec, v)
+	if jsonErr != nil {
+		return nil, ErrJSONParse(jsonErr)
+	}
+
+	return
 }

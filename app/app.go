@@ -291,12 +291,6 @@ func NewTruChain(logger log.Logger, db dbm.DB, loadLatest bool, options ...func(
 	)
 
 	app.clientParamsKeeper = clientParams.NewKeeper(
-		app.argumentKeeper,
-		app.backingKeeper,
-		app.challengeKeeper,
-		app.expirationKeeper,
-		app.stakeKeeper,
-		app.storyKeeper,
 		app.appAccountKeeper,
 		app.communityKeeper,
 		app.claimKeeper,

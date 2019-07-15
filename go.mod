@@ -1,8 +1,12 @@
 module github.com/TruStory/truchain
 
 require (
+	github.com/btcsuite/btcd v0.0.0-20190115013929-ed77733ec07d
 	github.com/cosmos/cosmos-sdk v0.28.2-0.20190601143109-dcdabc7e6e20
 	github.com/davecgh/go-spew v1.1.1
+	github.com/dghubble/go-twitter v0.0.0-20190711044719-dc9b50841e5b
+	github.com/dghubble/oauth1 v0.6.0
+	github.com/gorilla/securecookie v1.1.1
 	github.com/magiconair/properties v1.8.0
 	github.com/spf13/cobra v0.0.3
 	github.com/spf13/viper v1.0.3
