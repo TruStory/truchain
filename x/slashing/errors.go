@@ -17,6 +17,7 @@ const (
 	ErrorCodeInvalidCreator       sdk.CodeType = 505
 	ErrorCodeNotEnoughEarnedStake sdk.CodeType = 506
 	ErrorCodeAlreadySlashed       sdk.CodeType = 507
+	ErrorCodeInvalidSlashReason   sdk.CodeType = 508
 )
 
 // ErrSlashNotFound throws an error when the searched slash is not found
@@ -52,4 +53,9 @@ func ErrNotEnoughEarnedStake(address sdk.AccAddress) sdk.Error {
 // ErrAlreadySlashed throws an error when the creator has already slashed the stake previously
 func ErrAlreadySlashed() sdk.Error {
 	return sdk.NewError(DefaultCodespace, ErrorCodeAlreadySlashed, "Creator cannot slash a stake more than once")
+}
+
+// ErrInvalidSlashReason throws an error when the slash reason is not valid
+func ErrInvalidSlashReason(because string) sdk.Error {
+	return sdk.NewError(DefaultCodespace, ErrorCodeAlreadySlashed, fmt.Sprintf("Slash reason is not valid: %s", because))
 }

@@ -17,7 +17,7 @@ func TestNewSlash_Success(t *testing.T) {
 
 	stakeID := uint64(1)
 	creator := keeper.GetParams(ctx).SlashAdmins[0]
-	slash, err := keeper.CreateSlash(ctx, stakeID, creator)
+	slash, err := keeper.CreateSlash(ctx, stakeID, SlashTypeUnhelpful, SlashReasonPlagiarism, "", creator)
 	assert.NoError(t, err)
 
 	assert.NotZero(t, slash.ID)
@@ -30,10 +30,22 @@ func TestNewSlash_InvalidStake(t *testing.T) {
 
 	invalidStakeID := uint64(404)
 	creator := keeper.GetParams(ctx).SlashAdmins[0]
-	_, err := keeper.CreateSlash(ctx, invalidStakeID, creator)
+	_, err := keeper.CreateSlash(ctx, invalidStakeID, SlashTypeUnhelpful, SlashReasonPlagiarism, "", creator)
 
 	assert.NotNil(t, err)
 	assert.Equal(t, ErrInvalidStake(invalidStakeID).Code(), err.Code())
+}
+
+func TestNewSlash_InvalidDetailedReason(t *testing.T) {
+	ctx, keeper := mockDB()
+
+	stakeID := uint64(1)
+	creator := keeper.GetParams(ctx).SlashAdmins[0]
+	longDetailedReason := "This is a very very very descriptive reason to slash an argument. I am writing it in this detail to make the validation fail. I hope it works!"
+	_, err := keeper.CreateSlash(ctx, stakeID, SlashTypeUnhelpful, SlashReasonOther, longDetailedReason, creator)
+
+	assert.NotNil(t, err)
+	assert.Equal(t, ErrInvalidSlashReason("").Code(), err.Code())
 }
 
 func TestNewSlash_ErrNotEnoughEarnedStake(t *testing.T) {
@@ -41,7 +53,7 @@ func TestNewSlash_ErrNotEnoughEarnedStake(t *testing.T) {
 
 	stakeID := uint64(1)
 	invalidCreator := sdk.AccAddress([]byte{1, 2})
-	_, err := keeper.CreateSlash(ctx, stakeID, invalidCreator)
+	_, err := keeper.CreateSlash(ctx, stakeID, SlashTypeUnhelpful, SlashReasonPlagiarism, "", invalidCreator)
 
 	assert.NotNil(t, err)
 	assert.Equal(t, ErrNotEnoughEarnedStake(invalidCreator).Code(), err.Code())
@@ -52,7 +64,7 @@ func TestSlash_Success(t *testing.T) {
 
 	stakeID := uint64(1)
 	creator := keeper.GetParams(ctx).SlashAdmins[0]
-	createdSlash, err := keeper.CreateSlash(ctx, stakeID, creator)
+	createdSlash, err := keeper.CreateSlash(ctx, stakeID, SlashTypeUnhelpful, SlashReasonPlagiarism, "", creator)
 	assert.Nil(t, err)
 
 	returnedSlash, err := keeper.Slash(ctx, createdSlash.ID)
@@ -66,7 +78,7 @@ func TestSlash_ErrNotFound(t *testing.T) {
 
 	stakeID := uint64(1)
 	creator := keeper.GetParams(ctx).SlashAdmins[0]
-	_, err := keeper.CreateSlash(ctx, stakeID, creator)
+	_, err := keeper.CreateSlash(ctx, stakeID, SlashTypeUnhelpful, SlashReasonPlagiarism, "", creator)
 	assert.Nil(t, err)
 
 	_, err = keeper.Slash(ctx, uint64(404))
@@ -84,11 +96,11 @@ func TestSlashes_Success(t *testing.T) {
 
 	stakeID := uint64(1)
 	creator := keeper.GetParams(ctx).SlashAdmins[0]
-	first, err := keeper.CreateSlash(ctx, stakeID, creator)
+	first, err := keeper.CreateSlash(ctx, stakeID, SlashTypeUnhelpful, SlashReasonPlagiarism, "", creator)
 	assert.NoError(t, err)
 
 	creator2 := keeper.GetParams(ctx).SlashAdmins[1]
-	another, err := keeper.CreateSlash(ctx, stakeID, creator2)
+	another, err := keeper.CreateSlash(ctx, stakeID, SlashTypeUnhelpful, SlashReasonPlagiarism, "", creator2)
 	assert.NoError(t, err)
 
 	all := keeper.Slashes(ctx)
@@ -114,7 +126,7 @@ func Test_punishment(t *testing.T) {
 	assert.Equal(t, "50000000000trusteak", stake.Amount.String())
 
 	// this also does a punish because slasher is an admin
-	_, err = keeper.CreateSlash(ctx, stake.ID, slasher)
+	_, err = keeper.CreateSlash(ctx, stake.ID, SlashTypeUnhelpful, SlashReasonPlagiarism, "", slasher)
 	assert.NoError(t, err)
 
 	//staker should have = starting balance - stake amount
