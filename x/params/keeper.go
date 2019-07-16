@@ -44,8 +44,8 @@ func (k Keeper) Params(ctx sdk.Context) Params {
 	return Params{
 		AccountParams: account.Params{
 			// Registrar:     k.accountKeeper.GetParams(ctx).Registrar,
-			MaxSlashCount: k.accountKeeper.GetParams(ctx).MaxSlashCount,
-			JailDuration:  k.accountKeeper.GetParams(ctx).JailDuration,
+			// MaxSlashCount: k.accountKeeper.GetParams(ctx).MaxSlashCount,
+			// JailDuration:  k.accountKeeper.GetParams(ctx).JailDuration,
 		},
 		CommunityParams: community.Params{
 			MinIDLength:          k.communityKeeper.GetParams(ctx).MinIDLength,
@@ -77,11 +77,11 @@ func (k Keeper) Params(ctx sdk.Context) Params {
 			MaxArgumentsPerClaim:     k.stakingKeeper.GetParams(ctx).MaxArgumentsPerClaim,
 		},
 		SlashingParams: slashing.Params{
-			MinSlashCount:  k.slashingKeeper.GetParams(ctx).MinSlashCount,
-			SlashMagnitude: k.slashingKeeper.GetParams(ctx).SlashMagnitude,
-			SlashMinStake:  k.slashingKeeper.GetParams(ctx).SlashMinStake,
+			// MinSlashCount:  k.slashingKeeper.GetParams(ctx).MinSlashCount,
+			// SlashMagnitude: k.slashingKeeper.GetParams(ctx).SlashMagnitude,
+			// SlashMinStake:  k.slashingKeeper.GetParams(ctx).SlashMinStake,
 			// SlashAdmins:    k.slashingKeeper.GetParams(ctx).SlashAdmins,
-			CuratorShare: k.slashingKeeper.GetParams(ctx).CuratorShare,
+			// CuratorShare: k.slashingKeeper.GetParams(ctx).CuratorShare,
 		},
 	}
 }

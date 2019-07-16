@@ -1,7 +1,9 @@
 package app
 
 import (
+	"fmt"
 	"os"
+	"strings"
 
 	bam "github.com/cosmos/cosmos-sdk/baseapp"
 	"github.com/cosmos/cosmos-sdk/codec"
@@ -368,7 +370,7 @@ func NewTruChain(logger log.Logger, db dbm.DB, loadLatest bool, options ...func(
 		AddRoute(backing.QueryPath, backing.NewQuerier(app.backingKeeper)).
 		AddRoute(challenge.QueryPath, challenge.NewQuerier(app.challengeKeeper)).
 		AddRoute(trubank.QueryPath, trubank.NewQuerier(app.truBankKeeper)).
-		AddRoute(clientParams.QuerierRoute, clientParams.NewQuerier(app.clientParamsKeeper)).
+		AddRoute(clientParams.QueryPath, clientParams.NewQuerier(app.clientParamsKeeper)).
 		AddRoute(community.QuerierRoute, community.NewQuerier(app.communityKeeper)).
 		AddRoute(claim.QuerierRoute, claim.NewQuerier(app.claimKeeper)).
 		AddRoute(trubank2.QuerierRoute, trubank2.NewQuerier(app.truBankKeeper2)).
@@ -456,6 +458,13 @@ func NewTruChain(logger log.Logger, db dbm.DB, loadLatest bool, options ...func(
 			cmn.Exit(err.Error())
 		}
 	}
+
+	// cliCtx := context.NewCLIContext().WithCodec(app.codec).WithAccountDecoder(app.codec)
+	// queryRoute := path.Join(community.QuerierRoute, community.QueryCommunities)
+	res := app.Query(abci.RequestQuery{
+		Path: strings.Join([]string{"custom", clientParams.QueryPath}, "/"),
+	})
+	fmt.Println(res)
 
 	return app
 }
