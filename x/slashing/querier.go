@@ -11,7 +11,6 @@ import (
 const (
 	QuerySlash           = "slash"
 	QuerySlashes         = "slashes"
-	QueryStakeSlashes    = "stake_slashes"
 	QueryArgumentSlashes = "argument_slashes"
 )
 
@@ -39,8 +38,6 @@ func NewQuerier(keeper Keeper) sdk.Querier {
 			return querySlash(ctx, request, keeper)
 		case QuerySlashes:
 			return querySlashes(ctx, keeper)
-		case QueryStakeSlashes:
-			return queryStakeSlashes(ctx, request, keeper)
 		case QueryArgumentSlashes:
 			return queryArgumentSlashes(ctx, request, keeper)
 		default:
@@ -75,27 +72,13 @@ func querySlashes(ctx sdk.Context, k Keeper) (result []byte, err sdk.Error) {
 	return bz, nil
 }
 
-func queryStakeSlashes(ctx sdk.Context, request abci.RequestQuery, k Keeper) (result []byte, err sdk.Error) {
-	params := QueryStakeSlashesParams{}
-	if err = unmarshalQueryParams(request, &params); err != nil {
-		return
-	}
-
-	slashes := k.StakeSlashes(ctx, params.StakeID)
-	bz, jsonErr := k.codec.MarshalJSON(slashes)
-	if jsonErr != nil {
-		return nil, sdk.ErrInternal(sdk.AppendMsgToErr("could not marshal result to JSON", jsonErr.Error()))
-	}
-	return bz, nil
-}
-
 func queryArgumentSlashes(ctx sdk.Context, request abci.RequestQuery, k Keeper) (result []byte, err sdk.Error) {
 	params := QueryArgumentSlashesParams{}
 	if err = unmarshalQueryParams(request, &params); err != nil {
 		return
 	}
 
-	slashes := k.ArgumentSlashes(ctx, params.Slasher, params.ArgumentID)
+	slashes := k.ArgumentSlashes(ctx, params.ArgumentID)
 	bz, jsonErr := k.codec.MarshalJSON(slashes)
 	if jsonErr != nil {
 		return nil, sdk.ErrInternal(sdk.AppendMsgToErr("could not marshal result to JSON", jsonErr.Error()))

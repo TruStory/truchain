@@ -25,7 +25,7 @@ func handleMsgSlashArgument(ctx sdk.Context, k Keeper, msg MsgSlashArgument) sdk
 		return err.Result()
 	}
 
-	slash, err := k.CreateSlash(ctx, msg.StakeID, msg.SlashType, msg.SlashReason, msg.SlashDetailedReason, msg.Creator)
+	slash, err := k.CreateSlash(ctx, msg.ArgumentID, msg.SlashType, msg.SlashReason, msg.SlashDetailedReason, msg.Creator)
 	if err != nil {
 		return err.Result()
 	}
