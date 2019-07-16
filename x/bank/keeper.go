@@ -5,6 +5,8 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/bank"
 	"github.com/cosmos/cosmos-sdk/x/params"
+
+	app "github.com/TruStory/truchain/types"
 )
 
 // Keeper is the model object for the package bank module
@@ -131,6 +133,22 @@ func (k Keeper) rewardBrokerAddress(ctx sdk.Context) sdk.AccAddress {
 	address := sdk.AccAddress{}
 	k.paramStore.GetIfExists(ctx, ParamKeyRewardBrokerAddress, &address)
 	return address
+}
+func (k Keeper) sendGift(ctx sdk.Context,
+	sender sdk.AccAddress, recipient sdk.AccAddress,
+	amount sdk.Coin) sdk.Error {
+
+	if !k.rewardBrokerAddress(ctx).Equals(sender) {
+		return ErrInvalidRewardBrokerAddress(sender)
+	}
+	if amount.Denom != app.StakeDenom {
+		return sdk.ErrInvalidCoins("Invalid denomination coin")
+	}
+	_, err := k.AddCoin(ctx, recipient, amount, 0, TransactionGiftPayout)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func (k Keeper) payReward(ctx sdk.Context,

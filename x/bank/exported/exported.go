@@ -38,6 +38,7 @@ const (
 	TransactionInterestSlashed
 	TransactionStakeSlashed
 	TransactionCuratorReward
+	TransactionGiftPayout
 )
 
 var TransactionTypeName = []string{
@@ -55,6 +56,7 @@ var TransactionTypeName = []string{
 	TransactionInterestSlashed:          "TransactionInterestSlashed",
 	TransactionStakeSlashed:             "TransactionStakeSlashed",
 	TransactionCuratorReward:            "TransactionCuratorReward",
+	TransactionGiftPayout:               "TransactionGiftPayout",
 }
 
 func (t TransactionType) String() string {
@@ -74,6 +76,7 @@ var AllowedTransactionsForAddition = []TransactionType{
 	TransactionInterestUpvoteGiven,
 	TransactionRewardPayout,
 	TransactionCuratorReward,
+	TransactionGiftPayout,
 }
 
 var AllowedTransactionsForDeduction = []TransactionType{
