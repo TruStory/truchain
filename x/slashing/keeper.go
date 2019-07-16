@@ -45,10 +45,10 @@ func NewKeeper(
 }
 
 // CreateSlash creates a new slash on an argument (mark as "Unhelpful" in app)
-func (k Keeper) CreateSlash(ctx sdk.Context, stakeID uint64, creator sdk.AccAddress) (slash Slash, err sdk.Error) {
+func (k Keeper) CreateSlash(ctx sdk.Context, stakeID uint64, slashType SlashType, slashReason SlashReason, slashDetailedReason string, creator sdk.AccAddress) (slash Slash, err sdk.Error) {
 	logger := getLogger(ctx)
 
-	err = k.validateParams(ctx, stakeID, creator)
+	err = k.validateParams(ctx, stakeID, slashDetailedReason, creator)
 	if err != nil {
 		return
 	}
@@ -59,10 +59,13 @@ func (k Keeper) CreateSlash(ctx sdk.Context, stakeID uint64, creator sdk.AccAddr
 	}
 
 	slash = Slash{
-		ID:          slashID,
-		StakeID:     stakeID,
-		Creator:     creator,
-		CreatedTime: ctx.BlockHeader().Time,
+		ID:             slashID,
+		StakeID:        stakeID,
+		Type:           slashType,
+		Reason:         slashReason,
+		DetailedReason: slashDetailedReason,
+		Creator:        creator,
+		CreatedTime:    ctx.BlockHeader().Time,
 	}
 
 	// persist the slash
@@ -282,7 +285,7 @@ func (k Keeper) iterate(iterator sdk.Iterator) (slashes Slashes) {
 	return
 }
 
-func (k Keeper) validateParams(ctx sdk.Context, stakeID uint64, creator sdk.AccAddress) (err sdk.Error) {
+func (k Keeper) validateParams(ctx sdk.Context, stakeID uint64, detailedReason string, creator sdk.AccAddress) (err sdk.Error) {
 	params := k.GetParams(ctx)
 
 	// validating stake
@@ -292,6 +295,10 @@ func (k Keeper) validateParams(ctx sdk.Context, stakeID uint64, creator sdk.AccA
 	}
 	if k.getSlashCount(ctx, stake.ID) > params.MinSlashCount {
 		return ErrMaxSlashCountReached(stakeID)
+	}
+
+	if len(detailedReason) > params.MaxDetailedReasonLength {
+		return ErrInvalidSlashReason(fmt.Sprintf("Detailed reason must be under %d chars.", params.MaxDetailedReasonLength))
 	}
 
 	// validating creator

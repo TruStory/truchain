@@ -283,13 +283,32 @@ func (k Keeper) setArgument(ctx sdk.Context, argument Argument) {
 	k.store(ctx).Set(argumentKey(argument.ID), bz)
 }
 
-func (k Keeper) checkStakeThreshold(ctx sdk.Context, address sdk.AccAddress) sdk.Error {
+var tierLimitsEarnedCoins = []sdk.Int{
+	sdk.NewInt(app.Shanev * 10),
+	sdk.NewInt(app.Shanev * 20),
+	sdk.NewInt(app.Shanev * 30),
+	sdk.NewInt(app.Shanev * 40),
+	sdk.NewInt(app.Shanev * 50),
+}
+
+var tierLimitsStakeAmounts = []sdk.Int{
+	sdk.NewInt(app.Shanev * 500),
+	sdk.NewInt(app.Shanev * 1000),
+	sdk.NewInt(app.Shanev * 1500),
+	sdk.NewInt(app.Shanev * 2000),
+	sdk.NewInt(app.Shanev * 2500),
+}
+
+var defaultStakeLimit = sdk.NewInt(app.Shanev * 300)
+var defaultMinimumBalance = sdk.NewInt(app.Shanev * 50)
+
+func (k Keeper) checkStakeThreshold(ctx sdk.Context, address sdk.AccAddress, amount sdk.Int) sdk.Error {
 	balance := k.bankKeeper.GetCoins(ctx, address).AmountOf(app.StakeDenom)
 	if balance.IsZero() {
 		return sdk.ErrInsufficientFunds("Insufficient coins")
 	}
 	p := k.GetParams(ctx)
-	period := p.StakeLimitDays
+	period := p.Period
 
 	staked := sdk.NewInt(0)
 	fromDate := ctx.BlockHeader().Time.Add(time.Duration(-1) * period)
@@ -303,13 +322,56 @@ func (k Keeper) checkStakeThreshold(ctx sdk.Context, address sdk.AccAddress) sdk
 			return false
 		},
 	)
-
-	total := sdk.NewDecFromInt(balance.Add(staked))
-	stakedDec := sdk.NewDecFromInt(staked)
-	if stakedDec.Quo(total).GTE(p.StakeLimitPercent) {
-		return ErrCodeMaxAmountStakingReached(int(ctx.BlockHeader().Time.Sub(fromDate).Hours()))
+	if balance.Sub(amount).LT(defaultMinimumBalance) {
+		return ErrCodeMinBalance()
 	}
-	return nil
+
+	switch totalEarned := k.totalEarnedCoins(ctx, address); {
+	// if total earned >= 50
+	case totalEarned.GTE(tierLimitsEarnedCoins[4]):
+		if staked.Add(amount).GT(tierLimitsStakeAmounts[4]) {
+			return ErrCodeMaxAmountStakingReached()
+		}
+		return nil
+	// if total earned >= 40
+	case totalEarned.GTE(tierLimitsEarnedCoins[3]):
+		if staked.Add(amount).GT(tierLimitsStakeAmounts[3]) {
+			return ErrCodeMaxAmountStakingReached()
+		}
+		return nil
+	// if total earned >= 30
+	case totalEarned.GTE(tierLimitsEarnedCoins[2]):
+		if staked.Add(amount).GT(tierLimitsStakeAmounts[2]) {
+			return ErrCodeMaxAmountStakingReached()
+		}
+		return nil
+	// if total earned >= 20
+	case totalEarned.GTE(tierLimitsEarnedCoins[1]):
+		if staked.Add(amount).GT(tierLimitsStakeAmounts[1]) {
+			return ErrCodeMaxAmountStakingReached()
+		}
+		return nil
+	// if total earned >= 10
+	case totalEarned.GTE(tierLimitsEarnedCoins[0]):
+		if staked.Add(amount).GT(tierLimitsStakeAmounts[0]) {
+			return ErrCodeMaxAmountStakingReached()
+		}
+		return nil
+	default:
+		if staked.Add(amount).GT(defaultStakeLimit) {
+			return ErrCodeMaxAmountStakingReached()
+		}
+		return nil
+	}
+}
+
+func (k Keeper) totalEarnedCoins(ctx sdk.Context, creator sdk.AccAddress) sdk.Int {
+	earnedCoins := k.getEarnedCoins(ctx, creator)
+	total := sdk.NewInt(0)
+	for _, e := range earnedCoins {
+		total = total.Add(e.Amount)
+	}
+	return total
 }
 
 func (k Keeper) newStake(ctx sdk.Context, amount sdk.Coin, creator sdk.AccAddress,
@@ -317,7 +379,7 @@ func (k Keeper) newStake(ctx sdk.Context, amount sdk.Coin, creator sdk.AccAddres
 	if !stakeType.Valid() {
 		return Stake{}, ErrCodeInvalidStakeType(stakeType)
 	}
-	err := k.checkStakeThreshold(ctx, creator)
+	err := k.checkStakeThreshold(ctx, creator, amount.Amount)
 	if err != nil {
 		return Stake{}, err
 	}
