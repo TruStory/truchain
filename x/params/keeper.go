@@ -42,11 +42,9 @@ func NewKeeper(
 // Params returns all parameters for clients
 func (k Keeper) Params(ctx sdk.Context) Params {
 	return Params{
-		AccountParams: account.Params{
-			// Registrar:     k.accountKeeper.GetParams(ctx).Registrar,
-			// MaxSlashCount: k.accountKeeper.GetParams(ctx).MaxSlashCount,
-			// JailDuration:  k.accountKeeper.GetParams(ctx).JailDuration,
-		},
+		AccountParams:  account.Params{},
+		BankParams:     bank.Params{},
+		SlashingParams: slashing.Params{},
 		CommunityParams: community.Params{
 			MinIDLength:          k.communityKeeper.GetParams(ctx).MinIDLength,
 			MaxIDLength:          k.communityKeeper.GetParams(ctx).MaxIDLength,
@@ -57,9 +55,6 @@ func (k Keeper) Params(ctx sdk.Context) Params {
 		ClaimParams: claim.Params{
 			MinClaimLength: k.claimKeeper.GetParams(ctx).MinClaimLength,
 			MaxClaimLength: k.claimKeeper.GetParams(ctx).MaxClaimLength,
-		},
-		BankParams: bank.Params{
-			// RewardBrokerAddress: k.bankKeeper.GetParams(ctx).RewardBrokerAddress,
 		},
 		StakingParams: staking.Params{
 			Period:                   k.stakingKeeper.GetParams(ctx).Period,
@@ -75,13 +70,6 @@ func (k Keeper) Params(ctx sdk.Context) Params {
 			StakeLimitDays:           k.stakingKeeper.GetParams(ctx).StakeLimitDays,
 			UnjailUpvotes:            k.stakingKeeper.GetParams(ctx).UnjailUpvotes,
 			MaxArgumentsPerClaim:     k.stakingKeeper.GetParams(ctx).MaxArgumentsPerClaim,
-		},
-		SlashingParams: slashing.Params{
-			// MinSlashCount:  k.slashingKeeper.GetParams(ctx).MinSlashCount,
-			// SlashMagnitude: k.slashingKeeper.GetParams(ctx).SlashMagnitude,
-			// SlashMinStake:  k.slashingKeeper.GetParams(ctx).SlashMinStake,
-			// SlashAdmins:    k.slashingKeeper.GetParams(ctx).SlashAdmins,
-			// CuratorShare: k.slashingKeeper.GetParams(ctx).CuratorShare,
 		},
 	}
 }
