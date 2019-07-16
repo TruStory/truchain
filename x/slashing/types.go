@@ -55,6 +55,8 @@ const (
 	SlashReasonIssueNotAddressed
 	// SlashReasonFocusedOnPerson represents the reason when the argument is focused on the person, not the idea
 	SlashReasonFocusedOnPerson
+	// SlashNoOriginalThought represents the reasons when a thought isn't original;
+	SlashNoOriginalThought
 	// SlashReasonPlagiarism represents the reason when the argument is plagiarised
 	SlashReasonPlagiarism
 	// SlashReasonOther represents the reason that is any other than the above
