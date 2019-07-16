@@ -12,6 +12,9 @@ def process_genesis(genesis, parsed_args):
     # update argument length to 1500
     genesis['app_state']['trustaking']['params']['argument_body_max_length'] = '1500'
 
+    # update reward broker address
+    genesis['app_state']['trubank2']['params']['reward_broker_address'] = 'cosmos1tfpcnjzkthft3ynewqvn7mtdk7guf3knjdqg4d'
+
     # get total_backed, total_challenged per story id
     totals = total_backed_challenged_by_claim_id(genesis)
 
