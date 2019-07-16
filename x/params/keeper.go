@@ -43,7 +43,7 @@ func NewKeeper(
 func (k Keeper) Params(ctx sdk.Context) Params {
 	return Params{
 		AccountParams: account.Params{
-			Registrar:     k.accountKeeper.GetParams(ctx).Registrar,
+			// Registrar:     k.accountKeeper.GetParams(ctx).Registrar,
 			MaxSlashCount: k.accountKeeper.GetParams(ctx).MaxSlashCount,
 			JailDuration:  k.accountKeeper.GetParams(ctx).JailDuration,
 		},
@@ -59,7 +59,7 @@ func (k Keeper) Params(ctx sdk.Context) Params {
 			MaxClaimLength: k.claimKeeper.GetParams(ctx).MaxClaimLength,
 		},
 		BankParams: bank.Params{
-			RewardBrokerAddress: k.bankKeeper.GetParams(ctx).RewardBrokerAddress,
+			// RewardBrokerAddress: k.bankKeeper.GetParams(ctx).RewardBrokerAddress,
 		},
 		StakingParams: staking.Params{
 			Period:                   k.stakingKeeper.GetParams(ctx).Period,
@@ -80,8 +80,8 @@ func (k Keeper) Params(ctx sdk.Context) Params {
 			MinSlashCount:  k.slashingKeeper.GetParams(ctx).MinSlashCount,
 			SlashMagnitude: k.slashingKeeper.GetParams(ctx).SlashMagnitude,
 			SlashMinStake:  k.slashingKeeper.GetParams(ctx).SlashMinStake,
-			SlashAdmins:    k.slashingKeeper.GetParams(ctx).SlashAdmins,
-			CuratorShare:   k.slashingKeeper.GetParams(ctx).CuratorShare,
+			// SlashAdmins:    k.slashingKeeper.GetParams(ctx).SlashAdmins,
+			CuratorShare: k.slashingKeeper.GetParams(ctx).CuratorShare,
 		},
 	}
 }
