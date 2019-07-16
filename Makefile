@@ -27,14 +27,14 @@ download:
 	go mod download
 
 build_cli:
-	@go build -mod=readonly $(BUILD_FLAGS) -o bin/truchaincli cmd/truchaincli/main.go
+	@go build -mod=readonly $(BUILD_FLAGS) -o bin/truchaincli cmd/truchaincli/*.go
 
 build_daemon:
 	@go build -mod=readonly $(BUILD_FLAGS) -o bin/truchaind cmd/truchaind/*.go
 
 build-linux:
 	GOOS=linux GOARCH=amd64 go build -mod=readonly $(BUILD_FLAGS) -o build/truchaind cmd/truchaind/*.go
-	GOOS=linux GOARCH=amd64 go build -mod=readonly $(BUILD_FLAGS) -o build/truchaincli cmd/truchaincli/main.go
+	GOOS=linux GOARCH=amd64 go build -mod=readonly $(BUILD_FLAGS) -o build/truchaincli cmd/truchaincli/*.go
 
 doc:
 	@echo "--> Wait a few seconds and visit http://localhost:6060/pkg/github.com/TruStory/truchain/"
@@ -67,7 +67,7 @@ reset:
 restart: build_daemon reset start
 
 start:
-	bin/truchaind start --log_level "main:info,state:info,*:error,app:info,argument:info,backing:info,category:info,challenge:info,expiration:info,stake:info,stories:info"
+	bin/truchaind start --log_level "main:info,state:info,*:error,app:info,argument:info,backing:info,category:info,challenge:info,expiration:info,stake:info,stories:info" --home /development/truapp/chain
 
 check:
 	@echo "--> Running golangci"
