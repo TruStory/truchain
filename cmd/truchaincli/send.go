@@ -16,11 +16,6 @@ import (
 	"github.com/TruStory/truchain/x/bank"
 )
 
-const (
-	flagTo     = "to"
-	flagAmount = "amount"
-)
-
 // SendGiftCmd will create a send tx and sign it with the given key.
 func SendGiftCmd(cdc *codec.Codec) *cobra.Command {
 	cmd := &cobra.Command{

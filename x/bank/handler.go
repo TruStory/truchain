@@ -23,7 +23,6 @@ func NewHandler(keeper Keeper) sdk.Handler {
 	}
 }
 func handleMsgSendGift(ctx sdk.Context, keeper Keeper, msg MsgSendGift) sdk.Result {
-	fmt.Println("receiving gift transaction")
 	if err := msg.ValidateBasic(); err != nil {
 		return err.Result()
 	}
