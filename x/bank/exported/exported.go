@@ -83,6 +83,13 @@ var AllowedTransactionsForEarning = []TransactionType{
 	TransactionCuratorReward,
 }
 
+var AllowedTransactionsForEarning = []TransactionType{
+	TransactionInterestArgumentCreation,
+	TransactionInterestUpvoteReceived,
+	TransactionInterestUpvoteGiven,
+	TransactionCuratorReward,
+}
+
 var AllowedTransactionsForDeduction = []TransactionType{
 	TransactionBacking,
 	TransactionChallenge,
