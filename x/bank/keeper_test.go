@@ -155,7 +155,7 @@ func TestKeeper_TransactionsByAddress(t *testing.T) {
 
 	amount := sdk.NewCoin(app.StakeDenom, sdk.NewInt(app.Shanev*10))
 
-	_, err := k.AddCoin(ctx, addr, amount, 200, TransactionRegistration)
+	_, err := k.AddCoin(ctx, addr, amount, 200, TransactionGift)
 	assert.NoError(t, err)
 	_, err = k.SubtractCoin(ctx, addr, amount, 200, TransactionBacking)
 	assert.NoError(t, err)
@@ -173,18 +173,18 @@ func TestKeeper_TransactionsByAddress(t *testing.T) {
 		txTypes = append(txTypes, tx.Type)
 	}
 	assert.Equal(t,
-		[]TransactionType{TransactionRegistration,
+		[]TransactionType{TransactionGift,
 			TransactionBacking, TransactionBackingReturned,
 			TransactionUpvote, TransactionUpvoteReturned},
 		txTypes)
 
-	txs = k.TransactionsByAddress(ctx, addr, FilterByTransactionType(TransactionRegistration, TransactionUpvote))
+	txs = k.TransactionsByAddress(ctx, addr, FilterByTransactionType(TransactionGift, TransactionUpvote))
 	txTypes = make([]TransactionType, 0)
 	for _, tx := range txs {
 		txTypes = append(txTypes, tx.Type)
 	}
 	assert.Equal(t,
-		[]TransactionType{TransactionRegistration, TransactionUpvote},
+		[]TransactionType{TransactionGift, TransactionUpvote},
 		txTypes)
 
 	// Test Reverse
@@ -199,7 +199,7 @@ func TestKeeper_TransactionsByAddress(t *testing.T) {
 	assert.Equal(t,
 		[]TransactionType{TransactionUpvoteReturned, TransactionUpvote,
 			TransactionBackingReturned, TransactionBacking,
-			TransactionRegistration,
+			TransactionGift,
 		},
 		txTypes)
 
@@ -221,7 +221,7 @@ func TestKeeper_TransactionsByAddress(t *testing.T) {
 		txTypes = append(txTypes, tx.Type)
 	}
 	assert.Equal(t,
-		[]TransactionType{TransactionBacking, TransactionRegistration},
+		[]TransactionType{TransactionBacking, TransactionGift},
 		txTypes)
 
 }

@@ -24,7 +24,7 @@ type TransactionType int8
 
 // Types of transactions
 const (
-	TransactionRegistration TransactionType = iota
+	TransactionGift TransactionType = iota
 	TransactionBacking
 	TransactionBackingReturned
 	TransactionChallenge
@@ -38,11 +38,10 @@ const (
 	TransactionInterestSlashed
 	TransactionStakeSlashed
 	TransactionCuratorReward
-	TransactionGiftPayout
 )
 
 var TransactionTypeName = []string{
-	TransactionRegistration:             "TransactionRegistration",
+	TransactionGift:                     "TransactionGift",
 	TransactionBacking:                  "TransactionBacking",
 	TransactionBackingReturned:          "TransactionBackingReturned",
 	TransactionChallenge:                "TransactionChallenge",
@@ -56,7 +55,6 @@ var TransactionTypeName = []string{
 	TransactionInterestSlashed:          "TransactionInterestSlashed",
 	TransactionStakeSlashed:             "TransactionStakeSlashed",
 	TransactionCuratorReward:            "TransactionCuratorReward",
-	TransactionGiftPayout:               "TransactionGiftPayout",
 }
 
 func (t TransactionType) String() string {
@@ -67,7 +65,7 @@ func (t TransactionType) String() string {
 }
 
 var AllowedTransactionsForAddition = []TransactionType{
-	TransactionRegistration,
+	TransactionGift,
 	TransactionBackingReturned,
 	TransactionChallengeReturned,
 	TransactionUpvoteReturned,
@@ -76,7 +74,13 @@ var AllowedTransactionsForAddition = []TransactionType{
 	TransactionInterestUpvoteGiven,
 	TransactionRewardPayout,
 	TransactionCuratorReward,
-	TransactionGiftPayout,
+}
+
+var AllowedTransactionsForEarning = []TransactionType{
+	TransactionInterestArgumentCreation,
+	TransactionInterestUpvoteReceived,
+	TransactionInterestUpvoteGiven,
+	TransactionCuratorReward,
 }
 
 var AllowedTransactionsForDeduction = []TransactionType{

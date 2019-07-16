@@ -11,7 +11,7 @@ const (
 	QuerierRoute      = types.QuerierRoute
 	DefaultParamspace = types.DefaultParamspace
 
-	TransactionRegistration             = exported.TransactionRegistration
+	TransactionGift                     = exported.TransactionGift
 	TransactionBacking                  = exported.TransactionBacking
 	TransactionBackingReturned          = exported.TransactionBackingReturned
 	TransactionChallenge                = exported.TransactionChallenge
@@ -22,7 +22,6 @@ const (
 	TransactionInterestUpvoteReceived   = exported.TransactionInterestUpvoteReceived
 	TransactionInterestUpvoteGiven      = exported.TransactionInterestUpvoteGiven
 	TransactionRewardPayout             = exported.TransactionRewardPayout
-	TransactionGiftPayout               = exported.TransactionGiftPayout
 	TransactionInterestSlashed          = exported.TransactionInterestSlashed
 	TransactionStakeSlashed             = exported.TransactionStakeSlashed
 	TransactionCuratorReward            = exported.TransactionCuratorReward
