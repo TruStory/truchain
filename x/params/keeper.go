@@ -10,11 +10,6 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
-const (
-	// StoreKey is string representation of the store key
-	StoreKey = "params"
-)
-
 // Keeper data type storing keys to the key-value store
 type Keeper struct {
 	accountKeeper   account.Keeper

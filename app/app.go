@@ -117,10 +117,11 @@ type TruChain struct {
 	keyAppAccount *sdk.KVStoreKey
 
 	// keys to access trustory V2 state
-	keyCommunity   *sdk.KVStoreKey
-	keyClaim       *sdk.KVStoreKey
-	keyTruStaking  *sdk.KVStoreKey
-	keyTruSlashing *sdk.KVStoreKey
+	keyCommunity    *sdk.KVStoreKey
+	keyClaim        *sdk.KVStoreKey
+	keyTruStaking   *sdk.KVStoreKey
+	keyTruSlashing  *sdk.KVStoreKey
+	keyClientParams *sdk.KVStoreKey
 
 	// manage getting and setting accounts
 	accountKeeper       auth.AccountKeeper
@@ -199,6 +200,7 @@ func NewTruChain(logger log.Logger, db dbm.DB, loadLatest bool, options ...func(
 		keyTruStaking:    sdk.NewKVStoreKey(trustaking.StoreKey),
 		keyTruBank2:      sdk.NewKVStoreKey(trubank2.StoreKey),
 		keyTruSlashing:   sdk.NewKVStoreKey(truslashing.StoreKey),
+		keyClientParams:  sdk.NewKVStoreKey(clientParams.StoreKey),
 	}
 
 	// init params keeper and subspaces
@@ -290,15 +292,6 @@ func NewTruChain(logger log.Logger, db dbm.DB, loadLatest bool, options ...func(
 		codec,
 	)
 
-	app.clientParamsKeeper = clientParams.NewKeeper(
-		app.appAccountKeeper,
-		app.communityKeeper,
-		app.claimKeeper,
-		app.truBankKeeper2,
-		app.truStakingKeeper,
-		app.truSlashingKeeper,
-	)
-
 	app.communityKeeper = community.NewKeeper(
 		app.keyCommunity,
 		app.paramsKeeper.Subspace(community.StoreKey),
@@ -335,6 +328,15 @@ func NewTruChain(logger log.Logger, db dbm.DB, loadLatest bool, options ...func(
 		app.truStakingKeeper,
 		app.appAccountKeeper,
 		app.claimKeeper,
+	)
+
+	app.clientParamsKeeper = clientParams.NewKeeper(
+		app.appAccountKeeper,
+		app.communityKeeper,
+		app.claimKeeper,
+		app.truBankKeeper2,
+		app.truStakingKeeper,
+		app.truSlashingKeeper,
 	)
 
 	// The AnteHandler handles signature verification and transaction pre-processing

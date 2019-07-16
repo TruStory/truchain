@@ -16,6 +16,7 @@ import (
 // Defines module constants
 const (
 	QuerierRoute = ModuleName
+	StoreKey     = ModuleName
 )
 
 // Params defines defaults for a story
