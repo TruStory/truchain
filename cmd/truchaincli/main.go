@@ -64,6 +64,8 @@ func main() {
 		client.LineBreak,
 		keys.Commands(),
 		client.LineBreak,
+		SendGiftCmd(cdc),
+		client.LineBreak,
 		version.Cmd,
 	)
 
