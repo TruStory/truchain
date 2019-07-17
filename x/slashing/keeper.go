@@ -344,7 +344,7 @@ func (k Keeper) ArgumentSlashes(ctx sdk.Context, argumentID uint64) []Slash {
 }
 
 func (k Keeper) IterateArgumentSlashes(ctx sdk.Context, argumentID uint64, cb slashCallback) {
-	iterator := k.store(ctx).Iterator(ArgumentSlashesPrefix, sdk.PrefixEndBytes(argumentSlashPrefix(argumentID)))
+	iterator := sdk.KVStorePrefixIterator(k.store(ctx), argumentSlashPrefix(argumentID))
 	defer iterator.Close()
 	for ; iterator.Valid(); iterator.Next() {
 		var slashID uint64
@@ -376,7 +376,7 @@ func (k Keeper) ArgumentSlasherSlashes(ctx sdk.Context, slasher sdk.AccAddress, 
 type slashCallback func(slash Slash) (stop bool)
 
 func (k Keeper) IterateArgumentSlasherSlashes(ctx sdk.Context, argumentID uint64, address sdk.AccAddress, cb slashCallback) {
-	iterator := k.store(ctx).Iterator(ArgumentCreatorPrefix, sdk.PrefixEndBytes(argumentSlasherPrefix(argumentID, address)))
+	iterator := sdk.KVStorePrefixIterator(k.store(ctx), argumentSlasherPrefix(argumentID, address))
 	defer iterator.Close()
 	for ; iterator.Valid(); iterator.Next() {
 		var slash Slash
