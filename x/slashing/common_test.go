@@ -84,9 +84,13 @@ func mockDB() (sdk.Context, Keeper) {
 		communityKey,
 		paramsKeeper.Subspace(community.ModuleName),
 		codec)
+	_, _, cAdmin1, _ := getFakeAppAccountParams()
+	_, _, cAdmin2, _ := getFakeAppAccountParams()
+	cGenesis := community.DefaultGenesisState()
+	cGenesis.Params.CommunityAdmins = append(cGenesis.Params.CommunityAdmins, cAdmin1, cAdmin2)
+	community.InitGenesis(ctx, communityKeeper, cGenesis)
 	communityID := "furry"
-	community.InitGenesis(ctx, communityKeeper, community.DefaultGenesisState())
-	_, err := communityKeeper.NewCommunity(ctx, communityID, "Furries", "")
+	_, err := communityKeeper.NewCommunity(ctx, communityID, "Furries", "", cAdmin1)
 	if err != nil {
 		panic(err)
 	}

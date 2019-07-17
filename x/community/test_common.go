@@ -7,6 +7,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/params"
 	abci "github.com/tendermint/tendermint/abci/types"
 	cryptoAmino "github.com/tendermint/tendermint/crypto/encoding/amino"
+	"github.com/tendermint/tendermint/crypto/secp256k1"
 	dbm "github.com/tendermint/tendermint/libs/db"
 	"github.com/tendermint/tendermint/libs/log"
 )
@@ -33,9 +34,20 @@ func mockDB() (sdk.Context, Keeper) {
 	paramsKeeper := params.NewKeeper(codec, paramsKey, transientParamsKey, params.DefaultCodespace)
 	communityKeeper := NewKeeper(communityKey, paramsKeeper.Subspace(ModuleName), codec)
 
-	InitGenesis(ctx, communityKeeper, DefaultGenesisState())
+	admin1 := getFakeAdmin()
+	admin2 := getFakeAdmin()
+	genesis := DefaultGenesisState()
+	genesis.Params.CommunityAdmins = append(genesis.Params.CommunityAdmins, admin1, admin2)
+	InitGenesis(ctx, communityKeeper, genesis)
 
 	return ctx, communityKeeper
+}
+
+func getFakeAdmin() (address sdk.AccAddress) {
+	key := secp256k1.GenPrivKey()
+	pub := key.PubKey()
+	addr := sdk.AccAddress(pub.Address())
+	return addr
 }
 
 func getFakeCommunityParams() (id string, name string, description string) {

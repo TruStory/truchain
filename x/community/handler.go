@@ -25,7 +25,7 @@ func handleMsgNewCommunity(ctx sdk.Context, k Keeper, msg MsgNewCommunity) sdk.R
 		return err.Result()
 	}
 
-	community, err := k.NewCommunity(ctx, msg.Name, msg.ID, msg.Description)
+	community, err := k.NewCommunity(ctx, msg.ID, msg.Name, msg.Description, msg.Creator)
 	if err != nil {
 		return err.Result()
 	}
