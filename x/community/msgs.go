@@ -20,7 +20,7 @@ type MsgNewCommunity struct {
 }
 
 // NewMsgNewCommunity returns the messages to create a new community
-func NewMsgNewCommunity(name, id, description string, creator sdk.AccAddress) MsgNewCommunity {
+func NewMsgNewCommunity(id, name, description string, creator sdk.AccAddress) MsgNewCommunity {
 	return MsgNewCommunity{
 		Name:        name,
 		ID:          id,

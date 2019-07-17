@@ -66,6 +66,8 @@ func main() {
 		client.LineBreak,
 		SendGiftCmd(cdc),
 		client.LineBreak,
+		NewCommunityCmd(cdc),
+		client.LineBreak,
 		version.Cmd,
 	)
 
