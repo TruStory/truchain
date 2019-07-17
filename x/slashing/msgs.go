@@ -13,7 +13,7 @@ const (
 
 // MsgSlashArgument defines the message to slash an argument
 type MsgSlashArgument struct {
-	StakeID             uint64
+	ArgumentID          uint64
 	SlashType           SlashType
 	SlashReason         SlashReason
 	SlashDetailedReason string
@@ -21,9 +21,9 @@ type MsgSlashArgument struct {
 }
 
 // NewMsgSlashArgument returns the messages to slash an argument
-func NewMsgSlashArgument(stakeID uint64, slashType SlashType, slashReason SlashReason, slashDetailedReason string, creator sdk.AccAddress) MsgSlashArgument {
+func NewMsgSlashArgument(argumentID uint64, slashType SlashType, slashReason SlashReason, slashDetailedReason string, creator sdk.AccAddress) MsgSlashArgument {
 	return MsgSlashArgument{
-		StakeID:             stakeID,
+		ArgumentID:          argumentID,
 		SlashType:           slashType,
 		SlashReason:         slashReason,
 		SlashDetailedReason: slashDetailedReason,

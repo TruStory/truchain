@@ -12,7 +12,7 @@ func TestNewSlash_Success(t *testing.T) {
 	ctx, keeper := mockDB()
 
 	staker := keeper.GetParams(ctx).SlashAdmins[0]
-	_, err := keeper.stakingKeeper.SubmitArgument(ctx, "arg1", "summary1", staker, 1, staking.StakeChallenge)
+	arg, err := keeper.stakingKeeper.SubmitArgument(ctx, "arg1", "summary1", staker, 1, staking.StakeChallenge)
 	assert.NoError(t, err)
 
 	stakeID := uint64(1)
@@ -21,19 +21,19 @@ func TestNewSlash_Success(t *testing.T) {
 	assert.NoError(t, err)
 
 	assert.NotZero(t, slash.ID)
-	assert.Equal(t, slash.StakeID, stakeID)
+	assert.Equal(t, uint64(2), arg.ID)
 	assert.Equal(t, slash.Creator, creator)
 }
 
-func TestNewSlash_InvalidStake(t *testing.T) {
+func TestNewSlash_InvalidArgument(t *testing.T) {
 	ctx, keeper := mockDB()
 
-	invalidStakeID := uint64(404)
+	invalidArgumentID := uint64(404)
 	creator := keeper.GetParams(ctx).SlashAdmins[0]
-	_, err := keeper.CreateSlash(ctx, invalidStakeID, SlashTypeUnhelpful, SlashReasonPlagiarism, "", creator)
+	_, err := keeper.CreateSlash(ctx, invalidArgumentID, SlashTypeUnhelpful, SlashReasonPlagiarism, "", creator)
 
 	assert.NotNil(t, err)
-	assert.Equal(t, ErrInvalidStake(invalidStakeID).Code(), err.Code())
+	assert.Equal(t, ErrInvalidArgument(invalidArgumentID).Code(), err.Code())
 }
 
 func TestNewSlash_InvalidDetailedReason(t *testing.T) {
