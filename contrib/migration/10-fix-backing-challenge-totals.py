@@ -23,11 +23,11 @@ def process_genesis(genesis, parsed_args):
       if totals[c['id']]['total_backed'] != c['total_backed']['amount']:
         if int(totals[c['id']]['total_backed']) < int(c['total_backed']['amount']):
           raise Exception('Total backed decreased', totals[c['id']]['total_backed'], c['total_backed']['amount'])
-        c['total_backed'] = totals[c['id']]['total_backed']
+        c['total_backed']['amount'] = totals[c['id']]['total_backed']
       if totals[c['id']]['total_challenged'] != c['total_challenged']['amount']:
         if int(totals[c['id']]['total_challenged']) < int(c['total_challenged']['amount']):
           raise Exception('Total challenged decreased', totals[c['id']]['total_challenged'], c['total_challenged']['amount'])
-        c['total_challenged'] = totals[c['id']]['total_challenged']
+        c['total_challenged']['amount'] = totals[c['id']]['total_challenged']
 
     # Set new chain ID and genesis start time
     genesis['chain_id'] = parsed_args.chain_id.strip()
