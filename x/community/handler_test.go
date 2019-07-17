@@ -15,8 +15,8 @@ func TestHandleMsgNewCommunity(t *testing.T) {
 	assert.NotNil(t, handler) // assert handler is present
 
 	name, id, description := getFakeCommunityParams()
-	creator := sdk.AccAddress([]byte{1, 2})
-	msg := NewMsgNewCommunity(name, id, description, creator)
+	creator := keeper.GetParams(ctx).CommunityAdmins[0]
+	msg := NewMsgNewCommunity(id, name, description, creator)
 	assert.NotNil(t, msg) // assert msgs can be created
 
 	result := handler(ctx, msg)

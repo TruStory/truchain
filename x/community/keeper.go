@@ -26,8 +26,8 @@ func NewKeeper(storeKey sdk.StoreKey, paramStore params.Subspace, codec *codec.C
 }
 
 // NewCommunity creates a new community
-func (k Keeper) NewCommunity(ctx sdk.Context, id string, name string, description string) (community Community, err sdk.Error) {
-	err = k.validateParams(ctx, id, name, description)
+func (k Keeper) NewCommunity(ctx sdk.Context, id string, name string, description string, creator sdk.AccAddress) (community Community, err sdk.Error) {
+	err = k.validateParams(ctx, id, name, description, creator)
 	if err != nil {
 		return
 	}
@@ -72,7 +72,7 @@ func (k Keeper) Communities(ctx sdk.Context) (communities []Community) {
 	return
 }
 
-func (k Keeper) validateParams(ctx sdk.Context, id, name, description string) (err sdk.Error) {
+func (k Keeper) validateParams(ctx sdk.Context, id, name, description string, creator sdk.AccAddress) (err sdk.Error) {
 	params := k.GetParams(ctx)
 	if len(id) < params.MinIDLength || len(id) > params.MaxIDLength {
 		err = ErrInvalidCommunityMsg(
@@ -90,6 +90,10 @@ func (k Keeper) validateParams(ctx sdk.Context, id, name, description string) (e
 		)
 	}
 
+	if !k.isAdmin(ctx, creator) {
+		err = ErrCreatorNotAuthorised()
+	}
+
 	return
 }
 
@@ -97,6 +101,15 @@ func (k Keeper) setCommunity(ctx sdk.Context, community Community) {
 	store := ctx.KVStore(k.storeKey)
 	bz := k.codec.MustMarshalBinaryLengthPrefixed(community)
 	store.Set(key(community.ID), bz)
+}
+
+func (k Keeper) isAdmin(ctx sdk.Context, address sdk.AccAddress) bool {
+	for _, admin := range k.GetParams(ctx).CommunityAdmins {
+		if address.Equals(admin) {
+			return true
+		}
+	}
+	return false
 }
 
 func logger(ctx sdk.Context) log.Logger {

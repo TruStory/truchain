@@ -15,7 +15,8 @@ func TestQueryCommunity_Success(t *testing.T) {
 	ctx, keeper := mockDB()
 
 	name, id, description := getFakeCommunityParams()
-	createdCommunity, err := keeper.NewCommunity(ctx, name, id, description)
+	creator := keeper.GetParams(ctx).CommunityAdmins[0]
+	createdCommunity, err := keeper.NewCommunity(ctx, name, id, description, creator)
 	assert.Nil(t, err)
 
 	params, jsonErr := ModuleCodec.MarshalJSON(QueryCommunityParams{

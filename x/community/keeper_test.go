@@ -10,8 +10,9 @@ func TestNewCommunity_Success(t *testing.T) {
 	ctx, keeper := mockDB()
 
 	id, name, description := getFakeCommunityParams()
+	creator := keeper.GetParams(ctx).CommunityAdmins[0]
 
-	community, err := keeper.NewCommunity(ctx, id, name, description)
+	community, err := keeper.NewCommunity(ctx, id, name, description, creator)
 	assert.Nil(t, err)
 
 	assert.Equal(t, community.Name, name)
@@ -24,8 +25,9 @@ func TestNewCommunity_InvalidName(t *testing.T) {
 
 	id, _, description := getFakeCommunityParams()
 	invalidName := "Some really really really long name for a community"
+	creator := keeper.GetParams(ctx).CommunityAdmins[0]
 
-	_, err := keeper.NewCommunity(ctx, id, invalidName, description)
+	_, err := keeper.NewCommunity(ctx, id, invalidName, description, creator)
 	assert.NotNil(t, err)
 	assert.Equal(t, ErrInvalidCommunityMsg("").Code(), err.Code())
 }
@@ -35,8 +37,9 @@ func TestNewCommunity_InvalidID(t *testing.T) {
 
 	_, name, description := getFakeCommunityParams()
 	invalidID := "some-really-really-really-long-name-for-a-community"
+	creator := keeper.GetParams(ctx).CommunityAdmins[0]
 
-	_, err := keeper.NewCommunity(ctx, invalidID, name, description)
+	_, err := keeper.NewCommunity(ctx, invalidID, name, description, creator)
 	assert.NotNil(t, err)
 	assert.Equal(t, ErrInvalidCommunityMsg("").Code(), err.Code())
 }
@@ -46,8 +49,9 @@ func TestNewCommunity_InvalidDescription(t *testing.T) {
 
 	id, name, _ := getFakeCommunityParams()
 	invalidDescription := "If I could ever think of a really silly day of my life, I would choose the day when I tried fitting in more than 140 chars in a tweet. How silly it was!"
+	creator := keeper.GetParams(ctx).CommunityAdmins[0]
 
-	_, err := keeper.NewCommunity(ctx, id, name, invalidDescription)
+	_, err := keeper.NewCommunity(ctx, id, name, invalidDescription, creator)
 	assert.NotNil(t, err)
 	assert.Equal(t, ErrInvalidCommunityMsg("").Code(), err.Code())
 }
@@ -56,8 +60,9 @@ func TestCommunity_Success(t *testing.T) {
 	ctx, keeper := mockDB()
 
 	id, name, description := getFakeCommunityParams()
+	creator := keeper.GetParams(ctx).CommunityAdmins[0]
 
-	createdCommunity, err := keeper.NewCommunity(ctx, id, name, description)
+	createdCommunity, err := keeper.NewCommunity(ctx, id, name, description, creator)
 	assert.Nil(t, err)
 
 	returnedCommunity, err := keeper.Community(ctx, id)
@@ -80,11 +85,12 @@ func TestCommunities_Success(t *testing.T) {
 	ctx, keeper := mockDB()
 
 	id, name, description := getFakeCommunityParams()
-	first, err := keeper.NewCommunity(ctx, id, name, description)
+	creator := keeper.GetParams(ctx).CommunityAdmins[0]
+	first, err := keeper.NewCommunity(ctx, id, name, description, creator)
 	assert.Nil(t, err)
 
 	id2, name2, description2 := getAnotherFakeCommunityParams()
-	another, err := keeper.NewCommunity(ctx, id2, name2, description2)
+	another, err := keeper.NewCommunity(ctx, id2, name2, description2, creator)
 	assert.Nil(t, err)
 
 	all := keeper.Communities(ctx)

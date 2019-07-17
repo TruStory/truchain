@@ -11,6 +11,7 @@ import (
 	abci "github.com/tendermint/tendermint/abci/types"
 	"github.com/tendermint/tendermint/crypto/ed25519"
 	cryptoAmino "github.com/tendermint/tendermint/crypto/encoding/amino"
+	"github.com/tendermint/tendermint/crypto/secp256k1"
 	dbm "github.com/tendermint/tendermint/libs/db"
 	"github.com/tendermint/tendermint/libs/log"
 )
@@ -54,9 +55,13 @@ func mockDB() (sdk.Context, Keeper) {
 		communityKey,
 		pk.Subspace(community.ModuleName),
 		codec)
-	community.InitGenesis(ctx, communityKeeper, community.DefaultGenesisState())
+	admin1 := getFakeCommunityAdmin()
+	admin2 := getFakeCommunityAdmin()
+	genesis := community.DefaultGenesisState()
+	genesis.Params.CommunityAdmins = append(genesis.Params.CommunityAdmins, admin1, admin2)
+	community.InitGenesis(ctx, communityKeeper, genesis)
 
-	_, err := communityKeeper.NewCommunity(ctx, "Furries", "furry", "")
+	_, err := communityKeeper.NewCommunity(ctx, "Furries", "furry", "", admin1)
 	if err != nil {
 		panic(err)
 	}
@@ -75,6 +80,13 @@ func mockDB() (sdk.Context, Keeper) {
 	InitGenesis(ctx, keeper, DefaultGenesisState())
 
 	return ctx, keeper
+}
+
+func getFakeCommunityAdmin() (address sdk.AccAddress) {
+	key := secp256k1.GenPrivKey()
+	pub := key.PubKey()
+	addr := sdk.AccAddress(pub.Address())
+	return addr
 }
 
 func fakeClaim(ctx sdk.Context, keeper Keeper) Claim {
