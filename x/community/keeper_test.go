@@ -3,6 +3,7 @@ package community
 import (
 	"testing"
 
+	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -54,6 +55,16 @@ func TestNewCommunity_InvalidDescription(t *testing.T) {
 	_, err := keeper.NewCommunity(ctx, id, name, invalidDescription, creator)
 	assert.NotNil(t, err)
 	assert.Equal(t, ErrInvalidCommunityMsg("").Code(), err.Code())
+}
+
+func TestNewCommunity_CreatorNotAuthorised(t *testing.T) {
+	ctx, keeper := mockDB()
+
+	id, name, description := getFakeCommunityParams()
+	unauthorisedCreator := sdk.AccAddress([]byte{1, 2})
+	_, err := keeper.NewCommunity(ctx, id, name, description, unauthorisedCreator)
+	assert.NotNil(t, err)
+	assert.Equal(t, ErrCreatorNotAuthorised().Code(), err.Code())
 }
 
 func TestCommunity_Success(t *testing.T) {
