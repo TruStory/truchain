@@ -1,11 +1,9 @@
 package params
 
 import (
+	"github.com/TruStory/truchain/x/community"
 	"strings"
 	"testing"
-
-	"github.com/TruStory/truchain/x/account"
-	"github.com/TruStory/truchain/x/slashing"
 
 	"github.com/stretchr/testify/assert"
 	abci "github.com/tendermint/tendermint/abci/types"
@@ -27,6 +25,5 @@ func TestQueryPath_Success(t *testing.T) {
 	var returnedParams Params
 	jsonErr := ModuleCodec.UnmarshalJSON(resBytes, &returnedParams)
 	assert.Nil(t, jsonErr)
-	assert.Equal(t, returnedParams.AccountParams.MaxSlashCount, account.DefaultParams().MaxSlashCount)
-	assert.Equal(t, returnedParams.SlashingParams.MinSlashCount, slashing.DefaultParams().MinSlashCount)
+	assert.Equal(t, returnedParams.CommunityParams.MinNameLength, community.DefaultParams().MinNameLength)
 }
