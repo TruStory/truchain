@@ -13,11 +13,11 @@ const (
 
 // MsgSlashArgument defines the message to slash an argument
 type MsgSlashArgument struct {
-	ArgumentID          uint64
-	SlashType           SlashType
-	SlashReason         SlashReason
-	SlashDetailedReason string
-	Creator             sdk.AccAddress
+	ArgumentID          uint64         `json:"argument_id"`
+	SlashType           SlashType      `json:"slash_type"`
+	SlashReason         SlashReason    `json:"slash_reason"`
+	SlashDetailedReason string         `json:"slash_detailed_reason,omitempty"`
+	Creator             sdk.AccAddress `json:"creator"`
 }
 
 // NewMsgSlashArgument returns the messages to slash an argument
