@@ -14,15 +14,17 @@ var (
 	KeyMinNameLength        = []byte("minNameLength")
 	KeyMaxNameLength        = []byte("maxNameLength")
 	KeyMaxDescriptionLength = []byte("maxDescriptionLength")
+	KeyCommunityAdmins      = []byte("communityAdmins")
 )
 
 // Params holds parameters for a Community
 type Params struct {
-	MinIDLength          int `json:"min_id_length"`
-	MaxIDLength          int `json:"max_id_length"`
-	MinNameLength        int `json:"min_name_length"`
-	MaxNameLength        int `json:"max_name_length"`
-	MaxDescriptionLength int `json:"max_description_length"`
+	MinIDLength          int              `json:"min_id_length"`
+	MaxIDLength          int              `json:"max_id_length"`
+	MinNameLength        int              `json:"min_name_length"`
+	MaxNameLength        int              `json:"max_name_length"`
+	MaxDescriptionLength int              `json:"max_description_length"`
+	CommunityAdmins      []sdk.AccAddress `json:"community_admins"`
 }
 
 // DefaultParams is the Community params for testing
@@ -33,6 +35,7 @@ func DefaultParams() Params {
 		MinIDLength:          3,
 		MaxIDLength:          15,
 		MaxDescriptionLength: 140,
+		CommunityAdmins:      []sdk.AccAddress{},
 	}
 }
 
@@ -44,6 +47,7 @@ func (p *Params) ParamSetPairs() params.ParamSetPairs {
 		{Key: KeyMinIDLength, Value: &p.MinIDLength},
 		{Key: KeyMaxIDLength, Value: &p.MaxIDLength},
 		{Key: KeyMaxDescriptionLength, Value: &p.MaxDescriptionLength},
+		{Key: KeyCommunityAdmins, Value: &p.CommunityAdmins},
 	}
 }
 

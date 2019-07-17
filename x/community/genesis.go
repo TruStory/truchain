@@ -67,5 +67,9 @@ func ValidateGenesis(data GenesisState) error {
 		return fmt.Errorf("Param: MaxDescriptionLength, must have a positive value")
 	}
 
+	if len(data.Params.CommunityAdmins) < 1 {
+		return fmt.Errorf("Param: CommunityAdmins, must have atleast one admin")
+	}
+
 	return nil
 }
