@@ -31,7 +31,7 @@ type Slashes []Slash
 
 func (s Slash) String() string {
 	return fmt.Sprintf(`Slash %d:
-  StakeID: %d
+  ArgumentID: %d
   Creator: %s
   CreatedTime: %s`,
 		s.ID, s.ArgumentID, s.Creator.String(), s.CreatedTime.String())
