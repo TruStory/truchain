@@ -22,7 +22,7 @@ func TestInitGenesis(t *testing.T) {
 
 	regTx := Transaction{
 		ID:                1,
-		Type:              TransactionRegistration,
+		Type:              TransactionGift,
 		AppAccountAddress: appAccountAddr,
 		ReferenceID:       0,
 		Amount:            sdk.NewInt64Coin("mydenom", 300),

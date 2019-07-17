@@ -15,6 +15,7 @@ def process_genesis(genesis, parsed_args):
             },
             'slash_admins': ['cosmos1xqc5gwzpg3fyv5en2fzyx36z2se5ks33tt57e7', 'cosmos1xqc5gwz923znjvzyg3pnxdfsgcu4jv34mep8hp'],
             'curator_share': '0.250000000000000000',
+            'max_detail_reason_length': '140'
         }
     }
 

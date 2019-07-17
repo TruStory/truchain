@@ -18,7 +18,7 @@ const (
 // Slash stores data about a slashing
 type Slash struct {
 	ID             uint64
-	StakeID        uint64
+	ArgumentID     uint64
 	Type           SlashType
 	Reason         SlashReason
 	DetailedReason string
@@ -34,7 +34,7 @@ func (s Slash) String() string {
   StakeID: %d
   Creator: %s
   CreatedTime: %s`,
-		s.ID, s.StakeID, s.Creator.String(), s.CreatedTime.String())
+		s.ID, s.ArgumentID, s.Creator.String(), s.CreatedTime.String())
 }
 
 // SlashType enum

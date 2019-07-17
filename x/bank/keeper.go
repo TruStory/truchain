@@ -144,7 +144,7 @@ func (k Keeper) sendGift(ctx sdk.Context,
 	if amount.Denom != app.StakeDenom {
 		return sdk.ErrInvalidCoins("Invalid denomination coin")
 	}
-	_, err := k.AddCoin(ctx, recipient, amount, 0, TransactionGiftPayout)
+	_, err := k.AddCoin(ctx, recipient, amount, 0, TransactionGift)
 	if err != nil {
 		return err
 	}

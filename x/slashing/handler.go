@@ -1,7 +1,6 @@
 package slashing
 
 import (
-	"encoding/json"
 	"fmt"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -25,12 +24,12 @@ func handleMsgSlashArgument(ctx sdk.Context, k Keeper, msg MsgSlashArgument) sdk
 		return err.Result()
 	}
 
-	slash, err := k.CreateSlash(ctx, msg.StakeID, msg.SlashType, msg.SlashReason, msg.SlashDetailedReason, msg.Creator)
+	slash, err := k.CreateSlash(ctx, msg.ArgumentID, msg.SlashType, msg.SlashReason, msg.SlashDetailedReason, msg.Creator)
 	if err != nil {
 		return err.Result()
 	}
 
-	res, jsonErr := json.Marshal(slash)
+	res, jsonErr := ModuleCodec.MarshalJSON(slash)
 	if jsonErr != nil {
 		return sdk.ErrInternal(fmt.Sprintf("Marshal result error: %s", jsonErr)).Result()
 	}

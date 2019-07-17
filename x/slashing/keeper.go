@@ -45,10 +45,10 @@ func NewKeeper(
 }
 
 // CreateSlash creates a new slash on an argument (mark as "Unhelpful" in app)
-func (k Keeper) CreateSlash(ctx sdk.Context, stakeID uint64, slashType SlashType, slashReason SlashReason, slashDetailedReason string, creator sdk.AccAddress) (slash Slash, err sdk.Error) {
+func (k Keeper) CreateSlash(ctx sdk.Context, argumentID uint64, slashType SlashType, slashReason SlashReason, slashDetailedReason string, creator sdk.AccAddress) (slash Slash, err sdk.Error) {
 	logger := getLogger(ctx)
 
-	err = k.validateParams(ctx, stakeID, slashDetailedReason, creator)
+	err = k.validateParams(ctx, argumentID, slashDetailedReason, creator)
 	if err != nil {
 		return
 	}
@@ -60,7 +60,7 @@ func (k Keeper) CreateSlash(ctx sdk.Context, stakeID uint64, slashType SlashType
 
 	slash = Slash{
 		ID:             slashID,
-		StakeID:        stakeID,
+		ArgumentID:     argumentID,
 		Type:           slashType,
 		Reason:         slashReason,
 		DetailedReason: slashDetailedReason,
@@ -74,27 +74,22 @@ func (k Keeper) CreateSlash(ctx sdk.Context, stakeID uint64, slashType SlashType
 	k.setSlashID(ctx, slashID+1)
 	// persist associations
 	k.setCreatorSlash(ctx, creator, slashID)
-	k.setStakeSlash(ctx, stakeID, slashID)
-	k.incrementSlashCount(ctx, stakeID)
+	k.incrementSlashCount(ctx, argumentID)
+	k.setArgumentSlash(ctx, argumentID, slashID)
+	k.setArgumentSlasherSlash(ctx, argumentID, slashID, creator)
 
-	stake, ok := k.stakingKeeper.Stake(ctx, stakeID)
-	if !ok {
-		return slash, ErrInvalidStake(stakeID)
-	}
-	k.setArgumentSlasherSlash(ctx, stake.ArgumentID, slashID, creator)
-
-	err = k.stakingKeeper.DownvoteArgument(ctx, stake.ArgumentID)
+	err = k.stakingKeeper.DownvoteArgument(ctx, argumentID)
 	if err != nil {
 		return slash, err
 	}
 
-	slashCount := k.getSlashCount(ctx, stakeID)
+	slashCount := k.getSlashCount(ctx, argumentID)
 	if slashCount >= k.GetParams(ctx).MinSlashCount || k.isAdmin(ctx, creator) {
-		err = k.stakingKeeper.MarkUnhelpfulArgument(ctx, stake.ArgumentID)
+		err = k.stakingKeeper.MarkUnhelpfulArgument(ctx, argumentID)
 		if err != nil {
 			return slash, err
 		}
-		err = k.punish(ctx, stake)
+		err = k.punish(ctx, argumentID)
 		if err != nil {
 			return slash, err
 		}
@@ -105,37 +100,39 @@ func (k Keeper) CreateSlash(ctx sdk.Context, stakeID uint64, slashType SlashType
 	return
 }
 
-func (k Keeper) punish(ctx sdk.Context, stake staking.Stake) sdk.Error {
-	stakingPool := sdk.NewCoin(stake.Amount.Denom, sdk.ZeroInt())
-	for _, s := range k.stakingKeeper.ArgumentStakes(ctx, stake.ArgumentID) {
-		stakingPool = stakingPool.Add(s.Amount)
-		if k.stakingKeeper.IsStakeActive(ctx, s.ID, s.EndTime) {
-			k.stakingKeeper.RemoveFromActiveStakeQueue(ctx, s.ID, s.EndTime)
+func (k Keeper) punish(ctx sdk.Context, argumentID uint64) sdk.Error {
+	stakingPool := sdk.NewCoin(app.StakeDenom, sdk.ZeroInt())
+	var communityID string
+	for _, stake := range k.stakingKeeper.ArgumentStakes(ctx, argumentID) {
+		communityID = stake.CommunityID
+		stakingPool = stakingPool.Add(stake.Amount)
+		if k.stakingKeeper.IsStakeActive(ctx, stake.ID, stake.EndTime) {
+			k.stakingKeeper.RemoveFromActiveStakeQueue(ctx, stake.ID, stake.EndTime)
 		} else {
-			if s.Result != nil {
-				stakeInterest := s.Result.ArgumentCreatorReward.Add(s.Result.StakeCreatorReward)
+			if stake.Result != nil {
+				stakeInterest := stake.Result.ArgumentCreatorReward.Add(stake.Result.StakeCreatorReward)
 				_, err := k.bankKeeper.SafeSubtractCoin(
 					ctx,
-					s.Creator,
+					stake.Creator,
 					stakeInterest,
-					s.ID,
+					stake.ID,
 					bank.TransactionInterestSlashed,
-					WithCommunityID(s.CommunityID))
+					WithCommunityID(communityID))
 				if err != nil {
 					return err
 				}
 			}
 		}
 		slashMagnitude := int64(k.GetParams(ctx).SlashMagnitude)
-		slashCoin := sdk.NewCoin(stake.Amount.Denom, stake.Amount.Amount.MulRaw(slashMagnitude))
+		slashCoin := sdk.NewCoin(app.StakeDenom, stake.Amount.Amount.MulRaw(slashMagnitude))
 
 		_, err := k.bankKeeper.SafeSubtractCoin(
 			ctx,
-			s.Creator,
+			stake.Creator,
 			slashCoin,
-			s.ID,
+			stake.ID,
 			bank.TransactionStakeSlashed,
-			WithCommunityID(s.CommunityID))
+			WithCommunityID(communityID))
 		if err != nil {
 			return err
 		}
@@ -154,7 +151,7 @@ func (k Keeper) punish(ctx sdk.Context, stake staking.Stake) sdk.Error {
 		}
 
 		// increment slash count for user (and jail if needed)
-		_, err = k.accountKeeper.IncrementSlashCount(ctx, s.Creator)
+		_, err = k.accountKeeper.IncrementSlashCount(ctx, stake.Creator)
 		if err != nil {
 			return err
 		}
@@ -165,9 +162,10 @@ func (k Keeper) punish(ctx sdk.Context, stake staking.Stake) sdk.Error {
 	}
 
 	// reward curators who marked "unhelpful"
-	slashes := k.StakeSlashes(ctx, stake.ID)
 	curatorShareDec := k.GetParams(ctx).CuratorShare
 	totalCuratorAmountDec := stakingPool.Amount.ToDec().Mul(curatorShareDec)
+
+	slashes := k.ArgumentSlashes(ctx, argumentID)
 	curatorAmount := totalCuratorAmountDec.QuoInt64(int64(len(slashes))).TruncateInt()
 	curatorCoin := sdk.NewCoin(app.StakeDenom, curatorAmount)
 	for _, slash := range slashes {
@@ -177,7 +175,7 @@ func (k Keeper) punish(ctx sdk.Context, stake staking.Stake) sdk.Error {
 			curatorCoin,
 			slash.ID,
 			bank.TransactionCuratorReward,
-			WithCommunityID(stake.CommunityID))
+			WithCommunityID(communityID))
 		if err != nil {
 			return err
 		}
@@ -206,11 +204,6 @@ func (k Keeper) Slashes(ctx sdk.Context) (slashes []Slash) {
 	return k.iterate(iterator)
 }
 
-// StakeSlashes gets all the slashes for a given stake
-func (k Keeper) StakeSlashes(ctx sdk.Context, stakeID uint64) (slashes Slashes) {
-	return k.associatedSlashes(ctx, stakeSlashesKey(stakeID))
-}
-
 // slashID gets the highest slash ID
 func (k Keeper) slashID(ctx sdk.Context) (slashID uint64, err sdk.Error) {
 	store := ctx.KVStore(k.storeKey)
@@ -234,13 +227,6 @@ func (k Keeper) setSlashID(ctx sdk.Context, slashID uint64) {
 	store := ctx.KVStore(k.storeKey)
 	bz := k.codec.MustMarshalBinaryLengthPrefixed(slashID)
 	store.Set(SlashIDKey, bz)
-}
-
-// setStakeSlash sets a stake <-> slash association in store
-func (k Keeper) setStakeSlash(ctx sdk.Context, stakeID, slashID uint64) {
-	store := ctx.KVStore(k.storeKey)
-	bz := k.codec.MustMarshalBinaryLengthPrefixed(slashID)
-	store.Set(stakeSlashKey(stakeID, slashID), bz)
 }
 
 // sets the association between the creator and the slash
@@ -285,16 +271,16 @@ func (k Keeper) iterate(iterator sdk.Iterator) (slashes Slashes) {
 	return
 }
 
-func (k Keeper) validateParams(ctx sdk.Context, stakeID uint64, detailedReason string, creator sdk.AccAddress) (err sdk.Error) {
+func (k Keeper) validateParams(ctx sdk.Context, argumentID uint64, detailedReason string, creator sdk.AccAddress) (err sdk.Error) {
 	params := k.GetParams(ctx)
 
-	// validating stake
-	stake, ok := k.stakingKeeper.Stake(ctx, stakeID)
+	_, ok := k.stakingKeeper.Argument(ctx, argumentID)
 	if !ok {
-		return ErrInvalidStake(stakeID)
+		return ErrInvalidArgument(argumentID)
 	}
-	if k.getSlashCount(ctx, stake.ID) > params.MinSlashCount {
-		return ErrMaxSlashCountReached(stakeID)
+
+	if k.getSlashCount(ctx, argumentID) > params.MinSlashCount {
+		return ErrMaxSlashCountReached(argumentID)
 	}
 
 	if len(detailedReason) > params.MaxDetailedReasonLength {
@@ -309,7 +295,7 @@ func (k Keeper) validateParams(ctx sdk.Context, stakeID uint64, detailedReason s
 		return ErrNotEnoughEarnedStake(creator)
 	}
 
-	if !isAdmin && k.hasPreviouslySlashed(ctx, stake.ID, creator) {
+	if !isAdmin && k.hasPreviouslySlashed(ctx, argumentID, creator) {
 		return ErrAlreadySlashed()
 	}
 
@@ -322,8 +308,8 @@ func (k Keeper) hasEnoughEarnedStake(ctx sdk.Context, address sdk.AccAddress, re
 	return balance.AmountOf(app.StakeDenom).GTE(requirement.Amount)
 }
 
-func (k Keeper) hasPreviouslySlashed(ctx sdk.Context, stakeID uint64, creator sdk.AccAddress) bool {
-	slashes := k.StakeSlashes(ctx, stakeID)
+func (k Keeper) hasPreviouslySlashed(ctx sdk.Context, argumentID uint64, creator sdk.AccAddress) bool {
+	slashes := k.ArgumentSlashes(ctx, argumentID)
 	for _, slash := range slashes {
 		if slash.Creator.Equals(creator) {
 			return true
@@ -342,21 +328,35 @@ func (k Keeper) isAdmin(ctx sdk.Context, address sdk.AccAddress) bool {
 	return false
 }
 
-func (k Keeper) associatedSlashes(ctx sdk.Context, prefix []byte) (slashes Slashes) {
-	store := ctx.KVStore(k.storeKey)
-	iterator := sdk.KVStorePrefixIterator(store, prefix)
+// setArgumentSlash sets a argument <-> slash association in store
+func (k Keeper) setArgumentSlash(ctx sdk.Context, argumentID, slashID uint64) {
+	bz := k.codec.MustMarshalBinaryLengthPrefixed(slashID)
+	k.store(ctx).Set(argumentSlashKey(argumentID, slashID), bz)
+}
 
+func (k Keeper) ArgumentSlashes(ctx sdk.Context, argumentID uint64) []Slash {
+	slashes := make([]Slash, 0)
+	k.IterateArgumentSlashes(ctx, argumentID, func(slash Slash) bool {
+		slashes = append(slashes, slash)
+		return false
+	})
+	return slashes
+}
+
+func (k Keeper) IterateArgumentSlashes(ctx sdk.Context, argumentID uint64, cb slashCallback) {
+	iterator := k.store(ctx).Iterator(ArgumentSlashesPrefix, sdk.PrefixEndBytes(argumentSlashPrefix(argumentID)))
 	defer iterator.Close()
 	for ; iterator.Valid(); iterator.Next() {
 		var slashID uint64
 		k.codec.MustUnmarshalBinaryLengthPrefixed(iterator.Value(), &slashID)
 		slash, err := k.Slash(ctx, slashID)
-		if err == nil {
-			slashes = append(slashes, slash)
+		if err != nil {
+			panic(err)
+		}
+		if cb(slash) {
+			break
 		}
 	}
-
-	return
 }
 
 func (k Keeper) setArgumentSlasherSlash(ctx sdk.Context, argumentID, slashID uint64, slasher sdk.AccAddress) {
@@ -364,9 +364,9 @@ func (k Keeper) setArgumentSlasherSlash(ctx sdk.Context, argumentID, slashID uin
 	k.store(ctx).Set(argumentSlasherSlashKey(argumentID, slasher, slashID), bz)
 }
 
-func (k Keeper) ArgumentSlashes(ctx sdk.Context, slasher sdk.AccAddress, argumentID uint64) []Slash {
+func (k Keeper) ArgumentSlasherSlashes(ctx sdk.Context, slasher sdk.AccAddress, argumentID uint64) []Slash {
 	slashes := make([]Slash, 0)
-	k.IterateArgumentSlashes(ctx, argumentID, slasher, func(slash Slash) bool {
+	k.IterateArgumentSlasherSlashes(ctx, argumentID, slasher, func(slash Slash) bool {
 		slashes = append(slashes, slash)
 		return false
 	})
@@ -375,7 +375,7 @@ func (k Keeper) ArgumentSlashes(ctx sdk.Context, slasher sdk.AccAddress, argumen
 
 type slashCallback func(slash Slash) (stop bool)
 
-func (k Keeper) IterateArgumentSlashes(ctx sdk.Context, argumentID uint64, address sdk.AccAddress, cb slashCallback) {
+func (k Keeper) IterateArgumentSlasherSlashes(ctx sdk.Context, argumentID uint64, address sdk.AccAddress, cb slashCallback) {
 	iterator := k.store(ctx).Iterator(ArgumentCreatorPrefix, sdk.PrefixEndBytes(argumentSlasherPrefix(argumentID, address)))
 	defer iterator.Close()
 	for ; iterator.Valid(); iterator.Next() {

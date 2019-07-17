@@ -10,12 +10,11 @@ The slashing module applies punishments to users who act badly on TruStory. Afte
 
 ```go
 type Slash struct {
-    ID              int64
-    StakeID         int64
+    ID              uint64
+    ArgumentID      uint64
     Creator         sdk.AccAddress
     CreatedTime     time.Time
 }
-
 
 // Params can be changed by governance vote
 type Param struct {
@@ -42,6 +41,8 @@ Furthermore, the same user cannot slash the same argument more than once.
 Punishment
 * Slash total interest of each staker
 * Slash 3x the total stake amount of each staker
+
+A staker is someone who has backed, challenged, or upvoted (agreed).
 
 Curator reward
 * Each user who marked "Unhelpful" will get a reward of 25% of the staking pool, distributed evenly
