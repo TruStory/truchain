@@ -185,6 +185,7 @@ func GetFilters(filterSetters ...Filter) Filters {
 // Defines bank module constants
 const (
 	QueryTransactionsByAddress = "transactions_by_address"
+	QueryParams                = "params"
 	ModuleName                 = types.ModuleName
 	StoreKey                   = ModuleName
 	RouterKey                  = ModuleName

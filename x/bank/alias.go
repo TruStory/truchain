@@ -29,6 +29,7 @@ const (
 	SortAsc                    = exported.SortAsc
 	SortDesc                   = exported.SortDesc
 	QueryTransactionsByAddress = exported.QueryTransactionsByAddress
+	QueryParams                = exported.QueryParams
 	RouterKey                  = exported.RouterKey
 )
 

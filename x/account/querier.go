@@ -2,6 +2,7 @@ package account
 
 import (
 	"fmt"
+
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	abci "github.com/tendermint/tendermint/abci/types"
@@ -11,6 +12,7 @@ import (
 const (
 	QueryAppAccount  = "account"
 	QueryAppAccounts = "accounts"
+	QueryParams      = "params"
 )
 
 // QueryAppAccountParams are params for querying app accounts by address queries
@@ -31,6 +33,8 @@ func NewQuerier(keeper Keeper) sdk.Querier {
 			return queryAppAccount(ctx, request, keeper)
 		case QueryAppAccounts:
 			return queryAppAccounts(ctx, request, keeper)
+		case QueryParams:
+			return queryParams(ctx, keeper)
 		default:
 			return nil, sdk.ErrUnknownRequest(fmt.Sprintf("Unknown truchain query endpoint: auth/%s", path[0]))
 		}
@@ -76,6 +80,17 @@ func queryAppAccounts(ctx sdk.Context, request abci.RequestQuery, k Keeper) (res
 	if jsonErr != nil {
 		return nil, sdk.ErrInternal(sdk.AppendMsgToErr("could not marshal result to JSON", jsonErr.Error()))
 	}
+	return result, nil
+}
+
+func queryParams(ctx sdk.Context, keeper Keeper) (result []byte, err sdk.Error) {
+	params := keeper.GetParams(ctx)
+
+	result, jsonErr := ModuleCodec.MarshalJSON(params)
+	if jsonErr != nil {
+		return nil, sdk.ErrInternal(sdk.AppendMsgToErr("could not marsal result to JSON", jsonErr.Error()))
+	}
+
 	return result, nil
 }
 

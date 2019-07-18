@@ -1,6 +1,7 @@
 package slashing
 
 import (
+	"fmt"
 	"strings"
 	"testing"
 
@@ -77,4 +78,23 @@ func TestQuerySlashes_Success(t *testing.T) {
 	assert.Len(t, all, 2)
 	assert.Equal(t, all[0], first)
 	assert.Equal(t, all[1], another)
+}
+
+func TestQueryParams_Success(t *testing.T) {
+	ctx, keeper := mockDB()
+
+	onChainParams := keeper.GetParams(ctx)
+
+	query := abci.RequestQuery{
+		Path: fmt.Sprintf("/custom/%s/%s", ModuleName, QueryParams),
+	}
+
+	querier := NewQuerier(keeper)
+	resBytes, err := querier(ctx, []string{QueryParams}, query)
+	assert.Nil(t, err)
+
+	var returnedParams Params
+	sdkErr := ModuleCodec.UnmarshalJSON(resBytes, &returnedParams)
+	assert.Nil(t, sdkErr)
+	assert.Equal(t, returnedParams, onChainParams)
 }

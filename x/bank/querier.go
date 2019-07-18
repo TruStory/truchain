@@ -11,6 +11,8 @@ func NewQuerier(keeper Keeper) sdk.Querier {
 		switch path[0] {
 		case QueryTransactionsByAddress:
 			return queryTransactionsByAddress(ctx, req, keeper)
+		case QueryParams:
+			return queryParams(ctx, keeper)
 		default:
 			return nil, sdk.ErrUnknownRequest("Unknown bank query endpoint")
 		}
@@ -35,4 +37,15 @@ func queryTransactionsByAddress(ctx sdk.Context, req abci.RequestQuery, keeper K
 		Offset(params.Offset),
 	)
 	return keeper.codec.MustMarshalJSON(transactions), nil
+}
+
+func queryParams(ctx sdk.Context, keeper Keeper) (result []byte, err sdk.Error) {
+	params := keeper.GetParams(ctx)
+
+	result, jsonErr := ModuleCodec.MarshalJSON(params)
+	if jsonErr != nil {
+		return nil, sdk.ErrInternal(sdk.AppendMsgToErr("could not marsal result to JSON", jsonErr.Error()))
+	}
+
+	return result, nil
 }

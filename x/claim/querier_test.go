@@ -1,9 +1,11 @@
 package claim
 
 import (
+	"fmt"
 	"strings"
 	"testing"
 
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	abci "github.com/tendermint/tendermint/abci/types"
 )
@@ -58,7 +60,7 @@ func TestQueryClaimsByIDs(t *testing.T) {
 	fakeClaim(ctx, keeper)
 
 	queryParams := QueryClaimsParams{
-		IDs: []uint64{1,3,4},
+		IDs: []uint64{1, 3, 4},
 	}
 	queryParamsBytes, jsonErr := ModuleCodec.MarshalJSON(queryParams)
 	require.Nil(t, jsonErr)
@@ -128,4 +130,23 @@ func TestQueryCreatorClaims(t *testing.T) {
 	cdcErr := ModuleCodec.UnmarshalJSON(resBytes, &claims)
 	require.NoError(t, cdcErr)
 	require.Equal(t, 1, len(claims))
+}
+
+func TestQueryParams_Success(t *testing.T) {
+	ctx, keeper := mockDB()
+
+	onChainParams := keeper.GetParams(ctx)
+
+	query := abci.RequestQuery{
+		Path: fmt.Sprintf("/custom/%s/%s", ModuleName, QueryParams),
+	}
+
+	querier := NewQuerier(keeper)
+	resBytes, err := querier(ctx, []string{QueryParams}, query)
+	assert.Nil(t, err)
+
+	var returnedParams Params
+	sdkErr := ModuleCodec.UnmarshalJSON(resBytes, &returnedParams)
+	assert.Nil(t, sdkErr)
+	assert.Equal(t, returnedParams, onChainParams)
 }

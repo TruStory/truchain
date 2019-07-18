@@ -3,9 +3,10 @@ package account
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/stretchr/testify/require"
 	"strings"
 	"testing"
+
+	"github.com/stretchr/testify/require"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/stretchr/testify/assert"
@@ -92,6 +93,24 @@ func TestQueryAppAccount_ErrNotFound(t *testing.T) {
 
 	_, sdkErr := queryAppAccount(ctx, query, keeper)
 	assert.NotNil(t, sdkErr)
-	t.Log(sdkErr)
 	assert.Equal(t, ErrAppAccountNotFound(address).Code(), sdkErr.Code())
+}
+
+func TestQueryParams_Success(t *testing.T) {
+	ctx, keeper := mockDB()
+
+	onChainParams := keeper.GetParams(ctx)
+
+	query := abci.RequestQuery{
+		Path: fmt.Sprintf("/custom/%s/%s", ModuleName, QueryParams),
+	}
+
+	querier := NewQuerier(keeper)
+	resBytes, err := querier(ctx, []string{QueryParams}, query)
+	assert.Nil(t, err)
+
+	var returnedParams Params
+	sdkErr := ModuleCodec.UnmarshalJSON(resBytes, &returnedParams)
+	assert.Nil(t, sdkErr)
+	assert.Equal(t, returnedParams, onChainParams)
 }

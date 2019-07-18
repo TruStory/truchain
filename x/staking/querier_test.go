@@ -1,6 +1,7 @@
 package staking
 
 import (
+	"fmt"
 	"strings"
 	"testing"
 	"time"
@@ -164,7 +165,7 @@ func TestQuerier_UserCommunityStakes(t *testing.T) {
 
 	querier := NewQuerier(k)
 	queryParams := QueryUserCommunityStakesParams{
-		Address: argument1.Creator,
+		Address:     argument1.Creator,
 		CommunityID: claim1.CommunityID,
 	}
 
@@ -180,4 +181,23 @@ func TestQuerier_UserCommunityStakes(t *testing.T) {
 	var stakes []Stake
 	k.codec.UnmarshalJSON(bz, &stakes)
 	assert.Len(t, stakes, 2)
+}
+
+func TestQueryParams_Success(t *testing.T) {
+	ctx, keeper, _ := mockDB()
+
+	onChainParams := keeper.GetParams(ctx)
+
+	query := abci.RequestQuery{
+		Path: fmt.Sprintf("/custom/%s/%s", ModuleName, QueryParams),
+	}
+
+	querier := NewQuerier(keeper)
+	resBytes, err := querier(ctx, []string{QueryParams}, query)
+	assert.Nil(t, err)
+
+	var returnedParams Params
+	sdkErr := ModuleCodec.UnmarshalJSON(resBytes, &returnedParams)
+	assert.Nil(t, sdkErr)
+	assert.Equal(t, returnedParams, onChainParams)
 }
