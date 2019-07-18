@@ -13,6 +13,7 @@ const (
 	QuerySlashes                = "slashes"
 	QueryArgumentSlashes        = "argument_slashes"
 	QueryArgumentSlasherSlashes = "argument_slasher_slashes"
+	QueryParams                 = "params"
 )
 
 // QuerySlashParams are params for querying slashes by id queries
@@ -43,6 +44,8 @@ func NewQuerier(keeper Keeper) sdk.Querier {
 			return queryArgumentSlashes(ctx, request, keeper)
 		case QueryArgumentSlasherSlashes:
 			return queryArgumentSlasherSlashes(ctx, request, keeper)
+		case QueryParams:
+			return queryParams(ctx, keeper)
 		default:
 			return nil, sdk.ErrUnknownRequest(fmt.Sprintf("Unknown truchain query endpoint: slashing/%s", path[0]))
 		}
@@ -101,6 +104,17 @@ func queryArgumentSlasherSlashes(ctx sdk.Context, request abci.RequestQuery, k K
 		return nil, sdk.ErrInternal(sdk.AppendMsgToErr("could not marshal result to JSON", jsonErr.Error()))
 	}
 	return bz, nil
+}
+
+func queryParams(ctx sdk.Context, keeper Keeper) (result []byte, err sdk.Error) {
+	params := keeper.GetParams(ctx)
+
+	result, jsonErr := ModuleCodec.MarshalJSON(params)
+	if jsonErr != nil {
+		return nil, sdk.ErrInternal(sdk.AppendMsgToErr("could not marsal result to JSON", jsonErr.Error()))
+	}
+
+	return result, nil
 }
 
 func unmarshalQueryParams(request abci.RequestQuery, params interface{}) (sdkErr sdk.Error) {
