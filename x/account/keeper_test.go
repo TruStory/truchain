@@ -70,5 +70,5 @@ func TestIncrementSlashCount_Success(t *testing.T) {
 	keeper.IncrementSlashCount(ctx, createdAppAccount.Address)
 	returnedAppAccount, err = keeper.getAccount(ctx, address)
 	assert.Nil(t, err)
-	assert.Equal(t, returnedAppAccount.SlashCount,2)
+	assert.Equal(t, returnedAppAccount.SlashCount, 2)
 }

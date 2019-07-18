@@ -17,11 +17,11 @@ func EndBlocker(ctx sdk.Context, keeper Keeper) sdk.Tags {
 	}
 	unjailed := make([]string, 0)
 	for _, acct := range toUnjail {
-		err = keeper.UnJail(ctx, acct.GetAddress())
+		err = keeper.UnJail(ctx, acct.PrimaryAddress())
 		if err != nil {
 			panic(err)
 		}
-		unjailed = append(unjailed, acct.GetAddress().String())
+		unjailed = append(unjailed, acct.PrimaryAddress().String())
 		logger(ctx).Info(fmt.Sprintf("Unjailed %s", acct.String()))
 	}
 	if len(unjailed) == 0 {
