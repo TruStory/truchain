@@ -23,7 +23,7 @@ import (
 
 	"github.com/TruStory/truchain/types"
 	"github.com/TruStory/truchain/x/account"
-	trubank2 "github.com/TruStory/truchain/x/bank"
+	trubank "github.com/TruStory/truchain/x/bank"
 	"github.com/TruStory/truchain/x/claim"
 	"github.com/TruStory/truchain/x/community"
 	truslashing "github.com/TruStory/truchain/x/slashing"
@@ -58,7 +58,7 @@ func init() {
 		claim.AppModuleBasic{},
 		mint.AppModuleBasic{},
 		account.AppModuleBasic{},
-		trubank2.AppModuleBasic{},
+		trubank.AppModuleBasic{},
 		trustaking.AppModuleBasic{},
 		truslashing.AppModuleBasic{},
 	)
@@ -85,7 +85,7 @@ type TruChain struct {
 	tkeyParams       *sdk.TransientStoreKey
 
 	// keys to access trustory state
-	keyTruBank2    *sdk.KVStoreKey
+	keyTruBank     *sdk.KVStoreKey
 	keyMint        *sdk.KVStoreKey
 	keyAppAccount  *sdk.KVStoreKey
 	keyCommunity   *sdk.KVStoreKey
@@ -107,7 +107,7 @@ type TruChain struct {
 	appAccountKeeper  account.Keeper
 	communityKeeper   community.Keeper
 	claimKeeper       claim.Keeper
-	truBankKeeper2    trubank2.Keeper
+	truBankKeeper     trubank.Keeper
 	truStakingKeeper  trustaking.Keeper
 	truSlashingKeeper truslashing.Keeper
 
@@ -148,7 +148,7 @@ func NewTruChain(logger log.Logger, db dbm.DB, loadLatest bool, options ...func(
 		keyMint:          sdk.NewKVStoreKey(mint.StoreKey),
 		keyAppAccount:    sdk.NewKVStoreKey(account.StoreKey),
 		keyTruStaking:    sdk.NewKVStoreKey(trustaking.StoreKey),
-		keyTruBank2:      sdk.NewKVStoreKey(trubank2.StoreKey),
+		keyTruBank:       sdk.NewKVStoreKey(trubank.StoreKey),
 		keyTruSlashing:   sdk.NewKVStoreKey(truslashing.StoreKey),
 	}
 
@@ -160,7 +160,7 @@ func NewTruChain(logger log.Logger, db dbm.DB, loadLatest bool, options ...func(
 	distrSubspace := app.paramsKeeper.Subspace(distr.DefaultParamspace)
 	mintSubspace := app.paramsKeeper.Subspace(mint.DefaultParamspace)
 	appAccountSubspace := app.paramsKeeper.Subspace(account.DefaultParamspace)
-	trubank2Subspace := app.paramsKeeper.Subspace(trubank2.DefaultParamspace)
+	trubank2Subspace := app.paramsKeeper.Subspace(trubank.DefaultParamspace)
 	truStakingSubspace := app.paramsKeeper.Subspace(trustaking.DefaultParamspace)
 	truSlashingSubspace := app.paramsKeeper.Subspace(truslashing.DefaultParamspace)
 
@@ -191,14 +191,14 @@ func NewTruChain(logger log.Logger, db dbm.DB, loadLatest bool, options ...func(
 		codec,
 	)
 
-	app.truBankKeeper2 = trubank2.NewKeeper(codec, app.keyTruBank2, app.bankKeeper,
-		trubank2Subspace, trubank2.DefaultCodespace)
+	app.truBankKeeper = trubank.NewKeeper(codec, app.keyTruBank, app.bankKeeper,
+		trubank2Subspace, trubank.DefaultCodespace)
 
 	app.appAccountKeeper = account.NewKeeper(
 		app.keyAppAccount,
 		appAccountSubspace,
 		codec,
-		app.truBankKeeper2,
+		app.truBankKeeper,
 		app.accountKeeper,
 	)
 
@@ -211,13 +211,13 @@ func NewTruChain(logger log.Logger, db dbm.DB, loadLatest bool, options ...func(
 	)
 
 	app.truStakingKeeper = trustaking.NewKeeper(codec, app.keyTruStaking, app.appAccountKeeper,
-		app.truBankKeeper2, app.claimKeeper, truStakingSubspace, trustaking.DefaultCodespace)
+		app.truBankKeeper, app.claimKeeper, truStakingSubspace, trustaking.DefaultCodespace)
 
 	app.truSlashingKeeper = truslashing.NewKeeper(
 		app.keyTruSlashing,
 		truSlashingSubspace,
 		codec,
-		app.truBankKeeper2,
+		app.truBankKeeper,
 		app.truStakingKeeper,
 		app.appAccountKeeper,
 		app.claimKeeper,
@@ -237,7 +237,7 @@ func NewTruChain(logger log.Logger, db dbm.DB, loadLatest bool, options ...func(
 		AddRoute(account.RouterKey, account.NewHandler(app.appAccountKeeper)).
 		AddRoute(trustaking.RouterKey, trustaking.NewHandler(app.truStakingKeeper)).
 		AddRoute(truslashing.RouterKey, truslashing.NewHandler(app.truSlashingKeeper)).
-		AddRoute(trubank2.RouterKey, trubank2.NewHandler(app.truBankKeeper2)).
+		AddRoute(trubank.RouterKey, trubank.NewHandler(app.truBankKeeper)).
 		AddRoute(community.RouterKey, community.NewHandler(app.communityKeeper))
 
 	// The app.QueryRouter is the main query router where each module registers its routes
@@ -245,7 +245,7 @@ func NewTruChain(logger log.Logger, db dbm.DB, loadLatest bool, options ...func(
 		AddRoute(auth.QuerierRoute, auth.NewQuerier(app.accountKeeper)).
 		AddRoute(community.QuerierRoute, community.NewQuerier(app.communityKeeper)).
 		AddRoute(claim.QuerierRoute, claim.NewQuerier(app.claimKeeper)).
-		AddRoute(trubank2.QuerierRoute, trubank2.NewQuerier(app.truBankKeeper2)).
+		AddRoute(trubank.QuerierRoute, trubank.NewQuerier(app.truBankKeeper)).
 		AddRoute(account.QuerierRoute, account.NewQuerier(app.appAccountKeeper)).
 		AddRoute(trustaking.QuerierRoute, trustaking.NewQuerier(app.truStakingKeeper)).
 		AddRoute(truslashing.QuerierRoute, truslashing.NewQuerier(app.truSlashingKeeper))
@@ -260,7 +260,7 @@ func NewTruChain(logger log.Logger, db dbm.DB, loadLatest bool, options ...func(
 		community.NewAppModule(app.communityKeeper),
 		claim.NewAppModule(app.claimKeeper),
 		mint.NewAppModule(app.mintKeeper),
-		trubank2.NewAppModule(app.truBankKeeper2),
+		trubank.NewAppModule(app.truBankKeeper),
 		account.NewAppModule(app.appAccountKeeper),
 		trustaking.NewAppModule(app.truStakingKeeper),
 		truslashing.NewAppModule(app.truSlashingKeeper),
@@ -277,7 +277,7 @@ func NewTruChain(logger log.Logger, db dbm.DB, loadLatest bool, options ...func(
 	app.mm.SetOrderInitGenesis(genaccounts.ModuleName, account.ModuleName, distr.ModuleName,
 		staking.ModuleName, auth.ModuleName, bank.ModuleName,
 		genutil.ModuleName, community.ModuleName, claim.ModuleName,
-		trubank2.ModuleName, trustaking.ModuleName, truslashing.ModuleName,
+		trubank.ModuleName, trustaking.ModuleName, truslashing.ModuleName,
 		mint.ModuleName)
 
 	app.SetInitChainer(app.InitChainer)
@@ -301,7 +301,7 @@ func NewTruChain(logger log.Logger, db dbm.DB, loadLatest bool, options ...func(
 		app.keyClaim,
 		app.keyMint,
 		app.keyAppAccount,
-		app.keyTruBank2,
+		app.keyTruBank,
 		app.keyTruStaking,
 		app.keyTruSlashing,
 	)
