@@ -86,7 +86,7 @@ func queryAppAccounts(ctx sdk.Context, request abci.RequestQuery, k Keeper) (res
 func queryParams(ctx sdk.Context, keeper Keeper) (result []byte, err sdk.Error) {
 	params := keeper.GetParams(ctx)
 
-	result, jsonErr := codec.MarshalJSONIndent(keeper.codec, params)
+	result, jsonErr := ModuleCodec.MarshalJSON(params)
 	if jsonErr != nil {
 		return nil, sdk.ErrInternal(sdk.AppendMsgToErr("could not marsal result to JSON", jsonErr.Error()))
 	}
