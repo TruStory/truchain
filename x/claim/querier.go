@@ -18,6 +18,7 @@ const (
 	QueryClaimsIDRange    = "claims_id_range"
 	QueryClaimsBeforeTime = "claims_before_time"
 	QueryClaimsAfterTime  = "claims_after_time"
+	QueryParams           = "params"
 )
 
 // QueryClaimParams for a single claim
@@ -71,6 +72,8 @@ func NewQuerier(keeper Keeper) sdk.Querier {
 			return queryClaimsBeforeTime(ctx, req, keeper)
 		case QueryClaimsAfterTime:
 			return queryClaimsAfterTime(ctx, req, keeper)
+		case QueryParams:
+			return queryParams(ctx, keeper)
 		}
 
 		return nil, sdk.ErrUnknownRequest("Unknown claim query endpoint")
@@ -106,7 +109,7 @@ func queryClaimsByIDs(ctx sdk.Context, req abci.RequestQuery, keeper Keeper) ([]
 	}
 
 	var claims Claims
-	for _,id := range params.IDs  {
+	for _, id := range params.IDs {
 		claim, ok := keeper.Claim(ctx, id)
 		if !ok {
 			return nil, ErrUnknownClaim(id)
@@ -170,6 +173,17 @@ func queryClaimsAfterTime(ctx sdk.Context, req abci.RequestQuery, keeper Keeper)
 	claims := keeper.ClaimsAfterTime(ctx, params.CreatedTime)
 
 	return mustMarshal(claims)
+}
+
+func queryParams(ctx sdk.Context, keeper Keeper) (result []byte, err sdk.Error) {
+	params := keeper.GetParams(ctx)
+
+	result, jsonErr := ModuleCodec.MarshalJSON(params)
+	if jsonErr != nil {
+		return nil, sdk.ErrInternal(sdk.AppendMsgToErr("could not marsal result to JSON", jsonErr.Error()))
+	}
+
+	return result, nil
 }
 
 func mustMarshal(v interface{}) (result []byte, err sdk.Error) {
