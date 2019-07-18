@@ -20,6 +20,7 @@ var (
 	ParamKeyUpvoteStake              = []byte("upvoteStake")
 	ParamKeyCreatorShare             = []byte("creatorShare")
 	ParamKeyInterestRate             = []byte("interestRate")
+	ParamKeyStakingAdmins            = []byte("stakingAdmins")
 	ParamKeyStakeLimitPercent        = []byte("stakeLimitPercent")
 	ParamKeyStakeLimitDays           = []byte("stakeLimitDays")
 	ParamKeyUnjailUpvotes            = []byte("unjailUpvotes")
@@ -27,15 +28,16 @@ var (
 )
 
 type Params struct {
-	Period                   time.Duration `json:"period"`
-	ArgumentCreationStake    sdk.Coin      `json:"argument_creation_stake"`
-	ArgumentBodyMaxLength    int           `json:"argument_body_max_length"`
-	ArgumentBodyMinLength    int           `json:"argument_body_min_length"`
-	ArgumentSummaryMaxLength int           `json:"argument_summary_max_length"`
-	ArgumentSummaryMinLength int           `json:"argument_summary_min_length"`
-	UpvoteStake              sdk.Coin      `json:"upvote_stake"`
-	CreatorShare             sdk.Dec       `json:"creator_share"`
-	InterestRate             sdk.Dec       `json:"interest_rate"`
+	Period                   time.Duration    `json:"period"`
+	ArgumentCreationStake    sdk.Coin         `json:"argument_creation_stake"`
+	ArgumentBodyMaxLength    int              `json:"argument_body_max_length"`
+	ArgumentBodyMinLength    int              `json:"argument_body_min_length"`
+	ArgumentSummaryMaxLength int              `json:"argument_summary_max_length"`
+	ArgumentSummaryMinLength int              `json:"argument_summary_min_length"`
+	UpvoteStake              sdk.Coin         `json:"upvote_stake"`
+	CreatorShare             sdk.Dec          `json:"creator_share"`
+	InterestRate             sdk.Dec          `json:"interest_rate"`
+	StakingAdmins            []sdk.AccAddress `json:"staking_admins"`
 	// deprecated
 	StakeLimitPercent sdk.Dec `json:"stake_limit_percent"`
 	// deprecated
@@ -55,6 +57,7 @@ func DefaultParams() Params {
 		UpvoteStake:              sdk.NewInt64Coin(app.StakeDenom, app.Shanev*10),
 		CreatorShare:             sdk.NewDecWithPrec(50, 2),
 		InterestRate:             sdk.NewDecWithPrec(105, 2),
+		StakingAdmins:            []sdk.AccAddress{},
 		StakeLimitPercent:        sdk.NewDecWithPrec(667, 3),
 		StakeLimitDays:           time.Hour * 24 * 7,
 		UnjailUpvotes:            1,
@@ -73,6 +76,7 @@ func (p *Params) ParamSetPairs() params.ParamSetPairs {
 		{Key: ParamKeyUpvoteStake, Value: &p.UpvoteStake},
 		{Key: ParamKeyCreatorShare, Value: &p.CreatorShare},
 		{Key: ParamKeyInterestRate, Value: &p.InterestRate},
+		{Key: ParamKeyStakingAdmins, Value: &p.StakingAdmins},
 		{Key: ParamKeyStakeLimitPercent, Value: &p.StakeLimitPercent},
 		{Key: ParamKeyStakeLimitDays, Value: &p.StakeLimitDays},
 		{Key: ParamKeyUnjailUpvotes, Value: &p.UnjailUpvotes},
