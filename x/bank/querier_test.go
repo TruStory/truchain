@@ -1,6 +1,7 @@
 package bank
 
 import (
+	"fmt"
 	"strings"
 	"testing"
 
@@ -66,4 +67,23 @@ func TestQueryTransactionsByAddress(t *testing.T) {
 	bz, err = querier(ctx, []string{"aquerypath"}, query)
 	assert.Error(t, err)
 	assert.Equal(t, err.Code(), sdk.CodeUnknownRequest)
+}
+
+func TestQueryParams_Success(t *testing.T) {
+	ctx, keeper, _ := mockDB()
+
+	onChainParams := keeper.GetParams(ctx)
+
+	query := abci.RequestQuery{
+		Path: fmt.Sprintf("/custom/%s/%s", ModuleName, QueryParams),
+	}
+
+	querier := NewQuerier(keeper)
+	resBytes, err := querier(ctx, []string{QueryParams}, query)
+	assert.Nil(t, err)
+
+	var returnedParams Params
+	sdkErr := ModuleCodec.UnmarshalJSON(resBytes, &returnedParams)
+	assert.Nil(t, sdkErr)
+	assert.Equal(t, returnedParams, onChainParams)
 }
