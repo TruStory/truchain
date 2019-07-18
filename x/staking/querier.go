@@ -19,6 +19,7 @@ const (
 	QueryClaimTopArgument    = "claim_top_argument"
 	QueryEarnedCoins         = "earned_coins"
 	QueryTotalEarnedCoins    = "total_earned_coins"
+	QueryParams              = "params"
 )
 
 type QueryClaimArgumentParams struct {
@@ -98,6 +99,8 @@ func NewQuerier(keeper Keeper) sdk.Querier {
 			return queryEarnedCoins(ctx, req, keeper)
 		case QueryTotalEarnedCoins:
 			return queryTotalEarnedCoins(ctx, req, keeper)
+		case QueryParams:
+			return queryParams(ctx, keeper)
 		default:
 			return nil, sdk.ErrUnknownRequest("Unknown staking query endpoint")
 		}
@@ -302,4 +305,15 @@ func queryTotalEarnedCoins(ctx sdk.Context, req abci.RequestQuery, keeper Keeper
 		return nil, ErrJSONParse(err)
 	}
 	return bz, nil
+}
+
+func queryParams(ctx sdk.Context, keeper Keeper) (result []byte, err sdk.Error) {
+	params := keeper.GetParams(ctx)
+
+	result, jsonErr := ModuleCodec.MarshalJSON(params)
+	if jsonErr != nil {
+		return nil, sdk.ErrInternal(sdk.AppendMsgToErr("could not marsal result to JSON", jsonErr.Error()))
+	}
+
+	return result, nil
 }
