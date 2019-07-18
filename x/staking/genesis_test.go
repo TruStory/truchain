@@ -64,7 +64,10 @@ func TestInitGenesis(t *testing.T) {
 	arguments[0].Summary = expectedSummary
 
 	usersEarnings := make([]UserEarnedCoins, 0)
-	genesisState := NewGenesisState(arguments, stakes, usersEarnings, DefaultParams())
+	params := DefaultParams()
+	_, _, admin := keyPubAddr()
+	params.StakingAdmins = append(params.StakingAdmins, admin)
+	genesisState := NewGenesisState(arguments, stakes, usersEarnings, params)
 	InitGenesis(ctx, k, genesisState)
 	actualGenesis := ExportGenesis(ctx, k)
 	assert.Equal(t, genesisState, actualGenesis)

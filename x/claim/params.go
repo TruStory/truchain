@@ -11,12 +11,14 @@ import (
 var (
 	KeyMinClaimLength = []byte("minClaimLength")
 	KeyMaxClaimLength = []byte("maxClaimLength")
+	KeyClaimAdmins    = []byte("claimAdmins")
 )
 
 // Params holds parameters for a Claim
 type Params struct {
-	MinClaimLength int `json:"min_claim_length"`
-	MaxClaimLength int `json:"max_claim_length"`
+	MinClaimLength int              `json:"min_claim_length"`
+	MaxClaimLength int              `json:"max_claim_length"`
+	ClaimAdmins    []sdk.AccAddress `json:"claim_admins"`
 }
 
 // DefaultParams is the Claim params for testing
@@ -24,6 +26,7 @@ func DefaultParams() Params {
 	return Params{
 		MinClaimLength: 25,
 		MaxClaimLength: 140,
+		ClaimAdmins:    []sdk.AccAddress{},
 	}
 }
 
@@ -32,6 +35,7 @@ func (p *Params) ParamSetPairs() params.ParamSetPairs {
 	return params.ParamSetPairs{
 		{Key: KeyMinClaimLength, Value: &p.MinClaimLength},
 		{Key: KeyMaxClaimLength, Value: &p.MaxClaimLength},
+		{Key: KeyClaimAdmins, Value: &p.ClaimAdmins},
 	}
 }
 
