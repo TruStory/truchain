@@ -1,6 +1,7 @@
 package community
 
 import (
+	"fmt"
 	"strings"
 	"testing"
 
@@ -78,4 +79,23 @@ func TestQueryCommunities_Success(t *testing.T) {
 	assert.Nil(t, jsonErr)
 	assert.Equal(t, communities[0].ID, "crypto")
 	assert.Equal(t, communities[1].ID, "meme")
+}
+
+func TestQueryParams_Success(t *testing.T) {
+	ctx, keeper := mockDB()
+
+	onChainParams := keeper.GetParams(ctx)
+
+	query := abci.RequestQuery{
+		Path: fmt.Sprintf("/custom/%s/%s", ModuleName, QueryParams),
+	}
+
+	querier := NewQuerier(keeper)
+	resBytes, err := querier(ctx, []string{QueryParams}, query)
+	assert.Nil(t, err)
+
+	var returnedParams Params
+	sdkErr := ModuleCodec.UnmarshalJSON(resBytes, &returnedParams)
+	assert.Nil(t, sdkErr)
+	assert.Equal(t, returnedParams, onChainParams)
 }
