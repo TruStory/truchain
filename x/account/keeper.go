@@ -38,6 +38,7 @@ func NewKeeper(storeKey sdk.StoreKey, paramStore params.Subspace, codec *codec.C
 func (k Keeper) CreateAppAccount(ctx sdk.Context, address sdk.AccAddress,
 	coins sdk.Coins, pubKey crypto.PubKey) (appAccnt AppAccount, sdkErr sdk.Error) {
 
+	// first create a base account
 	baseAccount := auth.NewBaseAccountWithAddress(address)
 	err := baseAccount.SetPubKey(pubKey)
 	if err != nil {
@@ -45,8 +46,11 @@ func (k Keeper) CreateAppAccount(ctx sdk.Context, address sdk.AccAddress,
 	}
 	k.accountKeeper.SetAccount(ctx, &baseAccount)
 
+	//  then create an app account
 	appAccnt = NewAppAccount(address, ctx.BlockHeader().Time)
+	k.setAppAccount(ctx, appAccnt)
 
+	// set initial coins
 	initialCoinAmount := coins.AmountOf(app.StakeDenom)
 	if initialCoinAmount.IsPositive() {
 		coin := sdk.NewCoin(app.StakeDenom, initialCoinAmount)
@@ -61,6 +65,17 @@ func (k Keeper) CreateAppAccount(ctx sdk.Context, address sdk.AccAddress,
 	logger(ctx).Info(fmt.Sprintf("Created %s", appAccnt.String()))
 
 	return appAccnt, nil
+}
+
+// PrimaryAccount gets the primary base account
+func (k Keeper) PrimaryAccount(ctx sdk.Context, addr sdk.AccAddress) (auth.Account, sdk.Error) {
+	_, ok := k.getAppAccount(ctx, addr)
+	if !ok {
+		return nil, ErrAppAccountNotFound(addr)
+	}
+	acc := k.accountKeeper.GetAccount(ctx, addr)
+
+	return acc, nil
 }
 
 // JailedAccountsAfter returns all jailed accounts after jailEndTime
@@ -106,6 +121,7 @@ func (k Keeper) UnJail(ctx sdk.Context, address sdk.AccAddress) sdk.Error {
 	user.IsJailed = false
 	k.deleteJailEndTimeAccount(ctx, user.JailEndTime, user.Addresses[0])
 	k.setAppAccount(ctx, user)
+
 	return nil
 }
 
@@ -152,28 +168,12 @@ func (k Keeper) getAppAccount(ctx sdk.Context, addr sdk.AccAddress) (acc AppAcco
 
 func (k Keeper) setAppAccount(ctx sdk.Context, acc AppAccount) {
 	accBytes := k.codec.MustMarshalBinaryBare(acc)
-	k.store(ctx).Set(key(acc.Addresses[0]), accBytes)
+	k.store(ctx).Set(key(acc.PrimaryAddress()), accBytes)
 }
 
 func (k Keeper) store(ctx sdk.Context) sdk.KVStore {
 	return ctx.KVStore(k.storeKey)
 }
-
-// func ToAppAccount(acc auth.Account) AppAccount {
-// 	return AppAccount{
-// 		BaseAccount: &auth.BaseAccount{
-// 			Address:       acc.GetAddress(),
-// 			Coins:         acc.GetCoins(),
-// 			PubKey:        acc.GetPubKey(),
-// 			AccountNumber: acc.GetAccountNumber(),
-// 			Sequence:      acc.GetSequence(),
-// 		},
-// 		SlashCount:  0,
-// 		IsJailed:    false,
-// 		JailEndTime: time.Time{},
-// 		CreatedTime: time.Time{},
-// 	}
-// }
 
 func logger(ctx sdk.Context) log.Logger {
 	return ctx.Logger().With("module", ModuleName)

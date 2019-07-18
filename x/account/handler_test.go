@@ -1,6 +1,5 @@
 package account
 
-
 import (
 	"testing"
 
@@ -24,8 +23,10 @@ func TestHandleMsgRegisterKey(t *testing.T) {
 	var appAccount AppAccount
 	err := keeper.codec.UnmarshalJSON(result.Data, &appAccount)
 	assert.NoError(t, err)
-	t.Log(appAccount)
-	assert.Equal(t, appAccount.PubKey, publicKey)
+
+	acc, err := keeper.PrimaryAccount(ctx, address)
+	assert.NoError(t, err)
+	assert.Equal(t, acc.GetPubKey(), publicKey)
 }
 
 func TestByzantineMsg(t *testing.T) {

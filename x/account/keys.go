@@ -9,7 +9,7 @@ import (
 // Keys for account store
 // Items are stored with the following key: values
 //
-// - 0x00<addr>: AppAccount
+// - 0x00<AccAddress>: AppAccount
 //
 // - 0x10<jailEndTime_Bytes><AccAddress>: AccAddress
 var (

@@ -46,7 +46,7 @@ func (acc AppAccount) String() string {
   IsJailed:          %t
   JailEndTime:       %s
   CreatedTime:       %s`,
-		acc.Addresses[0].String(), acc.SlashCount, acc.IsJailed, acc.JailEndTime.String(), acc.CreatedTime.String())
+		acc.PrimaryAddress().String(), acc.SlashCount, acc.IsJailed, acc.JailEndTime.String(), acc.CreatedTime.String())
 }
 
 // AppAccounts is a slice of AppAccounts

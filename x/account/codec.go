@@ -2,6 +2,7 @@ package account
 
 import (
 	"github.com/cosmos/cosmos-sdk/codec"
+	// "github.com/cosmos/cosmos-sdk/x/auth"
 )
 
 // RegisterCodec registers all the necessary types and interfaces for the module
