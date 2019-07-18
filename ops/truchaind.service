@@ -15,7 +15,7 @@ After=network-online.target
 
 [Service]
 User=ubuntu
-ExecStart=/home/ubuntu/go/bin/truchaind --log_level "main:info,state:info,*:error,app:info,argument:info,backing:info,category:info,challenge:info,expiration:info,stake:info,stories:info" start
+ExecStart=/home/ubuntu/go/bin/truchaind --log_level "main:info,state:info,*:error,app:info,account:info,trubank2:info,claim:info,community:info,truslashing:info,trustaking:info" start
 Restart=always
 RestartSec=3
 LimitNOFILE=4096
