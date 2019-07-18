@@ -137,14 +137,19 @@ func (k Keeper) punish(ctx sdk.Context, argumentID uint64) sdk.Error {
 			return err
 		}
 
+		argument, ok := k.stakingKeeper.Argument(ctx, argumentID)
+		if !ok {
+			return ErrInvalidArgument(stake.ArgumentID)
+		}
+
 		if stake.Type == staking.StakeBacking {
-			err = k.claimKeeper.SubtractBackingStake(ctx, stake.ID, stake.Amount)
+			err = k.claimKeeper.SubtractBackingStake(ctx, argument.ClaimID, stake.Amount)
 			if err != nil {
 				return err
 			}
 		}
 		if stake.Type == staking.StakeChallenge {
-			err = k.claimKeeper.SubtractChallengeStake(ctx, stake.ID, stake.Amount)
+			err = k.claimKeeper.SubtractChallengeStake(ctx, argument.ClaimID, stake.Amount)
 			if err != nil {
 				return err
 			}
