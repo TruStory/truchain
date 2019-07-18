@@ -23,21 +23,11 @@ import (
 
 	"github.com/TruStory/truchain/types"
 	"github.com/TruStory/truchain/x/account"
-	"github.com/TruStory/truchain/x/argument"
-	"github.com/TruStory/truchain/x/backing"
-	trubank2 "github.com/TruStory/truchain/x/bank"
-	"github.com/TruStory/truchain/x/category"
-	"github.com/TruStory/truchain/x/challenge"
+	trubank "github.com/TruStory/truchain/x/bank"
 	"github.com/TruStory/truchain/x/claim"
 	"github.com/TruStory/truchain/x/community"
-	"github.com/TruStory/truchain/x/expiration"
-	clientParams "github.com/TruStory/truchain/x/params"
 	truslashing "github.com/TruStory/truchain/x/slashing"
-	"github.com/TruStory/truchain/x/stake"
 	trustaking "github.com/TruStory/truchain/x/staking"
-	"github.com/TruStory/truchain/x/story"
-	"github.com/TruStory/truchain/x/trubank"
-	"github.com/TruStory/truchain/x/users"
 )
 
 const (
@@ -64,19 +54,11 @@ func init() {
 		staking.AppModuleBasic{},
 		distr.AppModuleBasic{},
 		params.AppModuleBasic{},
-		argument.AppModuleBasic{},
-		category.AppModuleBasic{},
-		backing.AppModuleBasic{},
-		challenge.AppModuleBasic{},
-		expiration.AppModuleBasic{},
-		stake.AppModuleBasic{},
-		story.AppModuleBasic{},
-		trubank.AppModuleBasic{},
 		community.AppModuleBasic{},
 		claim.AppModuleBasic{},
 		mint.AppModuleBasic{},
 		account.AppModuleBasic{},
-		trubank2.AppModuleBasic{},
+		trubank.AppModuleBasic{},
 		trustaking.AppModuleBasic{},
 		truslashing.AppModuleBasic{},
 	)
@@ -103,20 +85,9 @@ type TruChain struct {
 	tkeyParams       *sdk.TransientStoreKey
 
 	// keys to access trustory state
-	keyArgument   *sdk.KVStoreKey
-	keyBacking    *sdk.KVStoreKey
-	keyCategory   *sdk.KVStoreKey
-	keyChallenge  *sdk.KVStoreKey
-	keyExpiration *sdk.KVStoreKey
-	keyStake      *sdk.KVStoreKey
-	keyStory      *sdk.KVStoreKey
-	keyStoryQueue *sdk.KVStoreKey
-	keyTruBank    *sdk.KVStoreKey
-	keyTruBank2   *sdk.KVStoreKey
-	keyMint       *sdk.KVStoreKey
-	keyAppAccount *sdk.KVStoreKey
-
-	// keys to access trustory V2 state
+	keyTruBank     *sdk.KVStoreKey
+	keyMint        *sdk.KVStoreKey
+	keyAppAccount  *sdk.KVStoreKey
 	keyCommunity   *sdk.KVStoreKey
 	keyClaim       *sdk.KVStoreKey
 	keyTruStaking  *sdk.KVStoreKey
@@ -132,22 +103,11 @@ type TruChain struct {
 	paramsKeeper        params.Keeper
 
 	// access truchain multistore
-	argumentKeeper     argument.Keeper
-	backingKeeper      backing.Keeper
-	categoryKeeper     category.Keeper
-	challengeKeeper    challenge.Keeper
-	clientParamsKeeper clientParams.Keeper
-	expirationKeeper   expiration.Keeper
-	storyKeeper        story.Keeper
-	stakeKeeper        stake.Keeper
-	truBankKeeper      trubank.Keeper
-	mintKeeper         mint.Keeper
-	appAccountKeeper   account.Keeper
-
-	// access truchain V2 multistore
+	mintKeeper        mint.Keeper
+	appAccountKeeper  account.Keeper
 	communityKeeper   community.Keeper
 	claimKeeper       claim.Keeper
-	truBankKeeper2    trubank2.Keeper
+	truBankKeeper     trubank.Keeper
 	truStakingKeeper  trustaking.Keeper
 	truSlashingKeeper truslashing.Keeper
 
@@ -182,22 +142,13 @@ func NewTruChain(logger log.Logger, db dbm.DB, loadLatest bool, options ...func(
 		tkeyStaking:      sdk.NewTransientStoreKey(staking.TStoreKey),
 		keyDistr:         sdk.NewKVStoreKey(distr.StoreKey),
 		tkeyDistr:        sdk.NewTransientStoreKey(distr.TStoreKey),
-		keyArgument:      sdk.NewKVStoreKey(argument.StoreKey),
-		keyStory:         sdk.NewKVStoreKey(story.StoreKey),
-		keyStoryQueue:    sdk.NewKVStoreKey(story.QueueStoreKey),
-		keyCategory:      sdk.NewKVStoreKey(category.StoreKey),
-		keyBacking:       sdk.NewKVStoreKey(backing.StoreKey),
-		keyChallenge:     sdk.NewKVStoreKey(challenge.StoreKey),
-		keyExpiration:    sdk.NewKVStoreKey(expiration.StoreKey),
 		keyFeeCollection: sdk.NewKVStoreKey(auth.FeeStoreKey),
-		keyStake:         sdk.NewKVStoreKey(stake.StoreKey),
-		keyTruBank:       sdk.NewKVStoreKey(trubank.StoreKey),
 		keyCommunity:     sdk.NewKVStoreKey(community.StoreKey),
 		keyClaim:         sdk.NewKVStoreKey(claim.StoreKey),
 		keyMint:          sdk.NewKVStoreKey(mint.StoreKey),
 		keyAppAccount:    sdk.NewKVStoreKey(account.StoreKey),
 		keyTruStaking:    sdk.NewKVStoreKey(trustaking.StoreKey),
-		keyTruBank2:      sdk.NewKVStoreKey(trubank2.StoreKey),
+		keyTruBank:       sdk.NewKVStoreKey(trubank.StoreKey),
 		keyTruSlashing:   sdk.NewKVStoreKey(truslashing.StoreKey),
 	}
 
@@ -207,11 +158,9 @@ func NewTruChain(logger log.Logger, db dbm.DB, loadLatest bool, options ...func(
 	bankSubspace := app.paramsKeeper.Subspace(bank.DefaultParamspace)
 	stakingSubspace := app.paramsKeeper.Subspace(staking.DefaultParamspace)
 	distrSubspace := app.paramsKeeper.Subspace(distr.DefaultParamspace)
-	storySubspace := app.paramsKeeper.Subspace(story.StoreKey)
-	argumentSubspace := app.paramsKeeper.Subspace(argument.StoreKey)
 	mintSubspace := app.paramsKeeper.Subspace(mint.DefaultParamspace)
 	appAccountSubspace := app.paramsKeeper.Subspace(account.DefaultParamspace)
-	trubank2Subspace := app.paramsKeeper.Subspace(trubank2.DefaultParamspace)
+	trubank2Subspace := app.paramsKeeper.Subspace(trubank.DefaultParamspace)
 	truStakingSubspace := app.paramsKeeper.Subspace(trustaking.DefaultParamspace)
 	truSlashingSubspace := app.paramsKeeper.Subspace(truslashing.DefaultParamspace)
 
@@ -236,89 +185,20 @@ func NewTruChain(logger log.Logger, db dbm.DB, loadLatest bool, options ...func(
 
 	app.stakingKeeper = stakingKeeper
 
-	// wire up keepers
-	app.categoryKeeper = category.NewKeeper(app.keyCategory, codec)
-	app.storyKeeper = story.NewKeeper(app.keyStory, app.keyStoryQueue,
-		app.categoryKeeper, storySubspace, app.codec)
-	app.argumentKeeper = argument.NewKeeper(app.keyArgument, app.storyKeeper,
-		argumentSubspace, app.codec)
-
-	app.truBankKeeper = trubank.NewKeeper(
-		app.keyTruBank,
-		app.bankKeeper,
-		app.categoryKeeper,
-		app.codec)
-
-	app.stakeKeeper = stake.NewKeeper(
-		app.storyKeeper,
-		app.truBankKeeper,
-		app.paramsKeeper.Subspace(stake.StoreKey),
-	)
-
-	app.backingKeeper = backing.NewKeeper(
-		app.keyBacking,
-		app.argumentKeeper,
-		app.stakeKeeper,
-		app.storyKeeper,
-		app.bankKeeper,
-		app.truBankKeeper,
-		app.categoryKeeper,
-		codec,
-	)
-
-	app.challengeKeeper = challenge.NewKeeper(
-		app.keyChallenge,
-		app.argumentKeeper,
-		app.stakeKeeper,
-		app.backingKeeper,
-		app.truBankKeeper,
-		app.bankKeeper,
-		app.storyKeeper,
-		app.categoryKeeper,
-		app.paramsKeeper.Subspace(challenge.StoreKey),
-		codec,
-	)
-
-	app.expirationKeeper = expiration.NewKeeper(
-		app.keyExpiration,
-		app.keyStoryQueue,
-		app.stakeKeeper,
-		app.storyKeeper,
-		app.backingKeeper,
-		app.challengeKeeper,
-		app.paramsKeeper.Subspace(expiration.StoreKey),
-		codec,
-	)
-
-	app.clientParamsKeeper = clientParams.NewKeeper(
-		app.argumentKeeper,
-		app.backingKeeper,
-		app.challengeKeeper,
-		app.expirationKeeper,
-		app.stakeKeeper,
-		app.storyKeeper,
-		app.appAccountKeeper,
-		app.communityKeeper,
-		app.claimKeeper,
-		app.truBankKeeper2,
-		app.truStakingKeeper,
-		app.truSlashingKeeper,
-	)
-
 	app.communityKeeper = community.NewKeeper(
 		app.keyCommunity,
 		app.paramsKeeper.Subspace(community.StoreKey),
 		codec,
 	)
 
-	app.truBankKeeper2 = trubank2.NewKeeper(codec, app.keyTruBank2, app.bankKeeper,
-		trubank2Subspace, trubank2.DefaultCodespace)
+	app.truBankKeeper = trubank.NewKeeper(codec, app.keyTruBank, app.bankKeeper,
+		trubank2Subspace, trubank.DefaultCodespace)
 
 	app.appAccountKeeper = account.NewKeeper(
 		app.keyAppAccount,
 		appAccountSubspace,
 		codec,
-		app.truBankKeeper2,
+		app.truBankKeeper,
 		app.accountKeeper,
 	)
 
@@ -331,13 +211,13 @@ func NewTruChain(logger log.Logger, db dbm.DB, loadLatest bool, options ...func(
 	)
 
 	app.truStakingKeeper = trustaking.NewKeeper(codec, app.keyTruStaking, app.appAccountKeeper,
-		app.truBankKeeper2, app.claimKeeper, truStakingSubspace, trustaking.DefaultCodespace)
+		app.truBankKeeper, app.claimKeeper, truStakingSubspace, trustaking.DefaultCodespace)
 
 	app.truSlashingKeeper = truslashing.NewKeeper(
 		app.keyTruSlashing,
 		truSlashingSubspace,
 		codec,
-		app.truBankKeeper2,
+		app.truBankKeeper,
 		app.truStakingKeeper,
 		app.appAccountKeeper,
 		app.claimKeeper,
@@ -353,33 +233,19 @@ func NewTruChain(logger log.Logger, db dbm.DB, loadLatest bool, options ...func(
 		AddRoute(bank.RouterKey, bank.NewHandler(app.bankKeeper)).
 		AddRoute(staking.RouterKey, staking.NewHandler(app.stakingKeeper)).
 		AddRoute("ibc", ibc.NewHandler(app.ibcMapper, app.bankKeeper)).
-		AddRoute("story", story.NewHandler(app.storyKeeper)).
-		AddRoute("category", category.NewHandler(app.categoryKeeper)).
-		AddRoute("backing", backing.NewHandler(app.backingKeeper)).
-		AddRoute("challenge", challenge.NewHandler(app.challengeKeeper)).
-		AddRoute("users", users.NewHandler(app.accountKeeper, app.categoryKeeper)).
-		AddRoute("trubank", trubank.NewHandler(app.truBankKeeper)).
 		AddRoute(claim.RouterKey, claim.NewHandler(app.claimKeeper)).
 		AddRoute(account.RouterKey, account.NewHandler(app.appAccountKeeper)).
 		AddRoute(trustaking.RouterKey, trustaking.NewHandler(app.truStakingKeeper)).
 		AddRoute(truslashing.RouterKey, truslashing.NewHandler(app.truSlashingKeeper)).
-		AddRoute(trubank2.RouterKey, trubank2.NewHandler(app.truBankKeeper2)).
+		AddRoute(trubank.RouterKey, trubank.NewHandler(app.truBankKeeper)).
 		AddRoute(community.RouterKey, community.NewHandler(app.communityKeeper))
 
 	// The app.QueryRouter is the main query router where each module registers its routes
 	app.QueryRouter().
 		AddRoute(auth.QuerierRoute, auth.NewQuerier(app.accountKeeper)).
-		AddRoute(argument.QueryPath, argument.NewQuerier(app.argumentKeeper)).
-		AddRoute(story.QueryPath, story.NewQuerier(app.storyKeeper)).
-		AddRoute(category.QueryPath, category.NewQuerier(app.categoryKeeper)).
-		AddRoute(users.QueryPath, users.NewQuerier(codec, app.accountKeeper)).
-		AddRoute(backing.QueryPath, backing.NewQuerier(app.backingKeeper)).
-		AddRoute(challenge.QueryPath, challenge.NewQuerier(app.challengeKeeper)).
-		AddRoute(clientParams.QueryPath, clientParams.NewQuerier(app.clientParamsKeeper)).
-		AddRoute(trubank.QueryPath, trubank.NewQuerier(app.truBankKeeper)).
 		AddRoute(community.QuerierRoute, community.NewQuerier(app.communityKeeper)).
 		AddRoute(claim.QuerierRoute, claim.NewQuerier(app.claimKeeper)).
-		AddRoute(trubank2.QuerierRoute, trubank2.NewQuerier(app.truBankKeeper2)).
+		AddRoute(trubank.QuerierRoute, trubank.NewQuerier(app.truBankKeeper)).
 		AddRoute(account.QuerierRoute, account.NewQuerier(app.appAccountKeeper)).
 		AddRoute(trustaking.QuerierRoute, trustaking.NewQuerier(app.truStakingKeeper)).
 		AddRoute(truslashing.QuerierRoute, truslashing.NewQuerier(app.truSlashingKeeper))
@@ -391,18 +257,10 @@ func NewTruChain(logger log.Logger, db dbm.DB, loadLatest bool, options ...func(
 		bank.NewAppModule(app.bankKeeper, app.accountKeeper),
 		distr.NewAppModule(app.distrKeeper),
 		staking.NewAppModule(app.stakingKeeper, app.feeCollectionKeeper, app.distrKeeper, app.accountKeeper),
-		story.NewAppModule(app.storyKeeper),
-		category.NewAppModule(app.categoryKeeper),
-		argument.NewAppModule(app.argumentKeeper),
-		stake.NewAppModule(app.stakeKeeper),
-		backing.NewAppModule(app.backingKeeper),
-		challenge.NewAppModule(app.challengeKeeper),
-		expiration.NewAppModule(app.expirationKeeper),
-		trubank.NewAppModule(app.truBankKeeper),
 		community.NewAppModule(app.communityKeeper),
 		claim.NewAppModule(app.claimKeeper),
 		mint.NewAppModule(app.mintKeeper),
-		trubank2.NewAppModule(app.truBankKeeper2),
+		trubank.NewAppModule(app.truBankKeeper),
 		account.NewAppModule(app.appAccountKeeper),
 		trustaking.NewAppModule(app.truStakingKeeper),
 		truslashing.NewAppModule(app.truSlashingKeeper),
@@ -412,16 +270,14 @@ func NewTruChain(logger log.Logger, db dbm.DB, loadLatest bool, options ...func(
 	// there is nothing left over in the validator fee pool, so as to keep the
 	// CanWithdrawInvariant invariant.
 	app.mm.SetOrderBeginBlockers(mint.ModuleName, distr.ModuleName)
-	app.mm.SetOrderEndBlockers(staking.ModuleName, expiration.ModuleName, trustaking.ModuleName, truslashing.ModuleName)
+	app.mm.SetOrderEndBlockers(staking.ModuleName, trustaking.ModuleName, truslashing.ModuleName)
 
 	// genutils must occur after staking so that pools are properly
 	// initialized with tokens from genesis accounts.
 	app.mm.SetOrderInitGenesis(genaccounts.ModuleName, account.ModuleName, distr.ModuleName,
 		staking.ModuleName, auth.ModuleName, bank.ModuleName,
-		genutil.ModuleName, category.ModuleName, story.ModuleName,
-		argument.ModuleName, stake.ModuleName, backing.ModuleName, challenge.ModuleName,
-		expiration.ModuleName, trubank.ModuleName, community.ModuleName, claim.ModuleName,
-		trubank2.ModuleName, trustaking.ModuleName, truslashing.ModuleName,
+		genutil.ModuleName, community.ModuleName, claim.ModuleName,
+		trubank.ModuleName, trustaking.ModuleName, truslashing.ModuleName,
 		mint.ModuleName)
 
 	app.SetInitChainer(app.InitChainer)
@@ -435,17 +291,9 @@ func NewTruChain(logger log.Logger, db dbm.DB, loadLatest bool, options ...func(
 		app.keyParams,
 		app.keyStaking,
 		app.keyDistr,
-		app.keyBacking,
-		app.keyCategory,
-		app.keyChallenge,
-		app.keyExpiration,
 		app.keyFeeCollection,
 		app.keyIBC,
 		app.keyMain,
-		app.keyStory,
-		app.keyStoryQueue,
-		app.keyTruBank,
-		app.keyArgument,
 		app.tkeyParams,
 		app.tkeyStaking,
 		app.tkeyDistr,
@@ -453,7 +301,7 @@ func NewTruChain(logger log.Logger, db dbm.DB, loadLatest bool, options ...func(
 		app.keyClaim,
 		app.keyMint,
 		app.keyAppAccount,
-		app.keyTruBank2,
+		app.keyTruBank,
 		app.keyTruStaking,
 		app.keyTruSlashing,
 	)
@@ -476,7 +324,6 @@ func MakeCodec() *codec.Codec {
 	ModuleBasics.RegisterCodec(cdc)
 	sdk.RegisterCodec(cdc)
 
-	users.RegisterCodec(cdc)
 	// register other types
 	cdc.RegisterConcrete(&types.AppAccount{}, "types/AppAccount", nil)
 
