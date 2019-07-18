@@ -278,6 +278,16 @@ func (k Keeper) DownvoteArgument(ctx sdk.Context, argumentID uint64) sdk.Error {
 	return nil
 }
 
+func (k Keeper) SetStakeExpired(ctx sdk.Context, stakeID uint64) sdk.Error {
+	stake, ok := k.Stake(ctx, stakeID)
+	if !ok {
+		return ErrCodeUnknownStake(stakeID)
+	}
+	stake.Expired = true
+	k.setStake(ctx, stake)
+	return nil
+}
+
 func (k Keeper) setArgument(ctx sdk.Context, argument Argument) {
 	bz := k.codec.MustMarshalBinaryLengthPrefixed(argument)
 	k.store(ctx).Set(argumentKey(argument.ID), bz)
