@@ -106,7 +106,7 @@ func (k Keeper) punish(ctx sdk.Context, argumentID uint64) sdk.Error {
 	for _, stake := range k.stakingKeeper.ArgumentStakes(ctx, argumentID) {
 		communityID = stake.CommunityID
 		stakingPool = stakingPool.Add(stake.Amount)
-		if k.stakingKeeper.IsStakeActive(ctx, stake.ID, stake.EndTime) {
+		if !stake.Expired {
 			k.stakingKeeper.RemoveFromActiveStakeQueue(ctx, stake.ID, stake.EndTime)
 		} else {
 			if stake.Result != nil {
@@ -124,6 +124,10 @@ func (k Keeper) punish(ctx sdk.Context, argumentID uint64) sdk.Error {
 			}
 		}
 		slashMagnitude := int64(k.GetParams(ctx).SlashMagnitude)
+		// user won't be refunded their original stake. adjust the punishment to reflect that
+		if !stake.Expired {
+			slashMagnitude = slashMagnitude - 1
+		}
 		slashCoin := sdk.NewCoin(app.StakeDenom, stake.Amount.Amount.MulRaw(slashMagnitude))
 
 		_, err := k.bankKeeper.SafeSubtractCoin(

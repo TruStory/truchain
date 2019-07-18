@@ -503,12 +503,6 @@ func (k Keeper) RemoveFromActiveStakeQueue(ctx sdk.Context, stakeID uint64, endT
 	k.store(ctx).Delete(activeStakeQueueKey(stakeID, endTime))
 }
 
-// IsStakeActive returns true if a stake is active
-func (k Keeper) IsStakeActive(ctx sdk.Context, stakeID uint64, endTime time.Time) bool {
-	bz := k.store(ctx).Get(activeStakeQueueKey(stakeID, endTime))
-	return bz == nil
-}
-
 // Logger returns a module-specific logger.
 func (k Keeper) Logger(ctx sdk.Context) log.Logger {
 	return ctx.Logger().With("module", "x/"+ModuleName)
