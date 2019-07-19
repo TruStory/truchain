@@ -59,7 +59,9 @@ func handleMsgSlashArgument(ctx sdk.Context, k Keeper, msg MsgSlashArgument) sdk
 
 	if len(results) > 0 {
 		json, jsonErr := json.Marshal(results)
-		return sdk.ErrInternal(fmt.Sprintf("Marshal result error: %s", jsonErr)).Result()
+		if jsonErr != nil {
+			return sdk.ErrInternal(fmt.Sprintf("Marshal result error: %s", jsonErr)).Result()
+		}
 		resultTags = append(resultTags, sdk.NewTags(tags.SlashResults, json)...)
 	}
 	return sdk.Result{
