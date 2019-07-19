@@ -530,6 +530,15 @@ func (k Keeper) UsersEarnings(ctx sdk.Context) []UserEarnedCoins {
 	return userEarnedCoins
 }
 
+func (k Keeper) isAdmin(ctx sdk.Context, address sdk.AccAddress) bool {
+	for _, admin := range k.GetParams(ctx).StakingAdmins {
+		if address.Equals(admin) {
+			return true
+		}
+	}
+	return false
+}
+
 // EditArgument lets a creator edit an argument as long it hasn't been staked on
 func (k Keeper) EditArgument(ctx sdk.Context, body, summary string,
 	creator sdk.AccAddress, argumentID uint64) (Argument, sdk.Error) {
@@ -544,12 +553,14 @@ func (k Keeper) EditArgument(ctx sdk.Context, body, summary string,
 		return Argument{}, ErrCodeUnknownArgument(argumentID)
 	}
 
-	if !argument.Creator.Equals(creator) {
+	isAdmin := k.isAdmin(ctx, creator)
+
+	if !argument.Creator.Equals(creator) && !isAdmin {
 		return Argument{}, ErrCodeCannotEditArgumentWrongCreator(argumentID)
 	}
 
 	stakes := k.ArgumentStakes(ctx, argumentID)
-	if len(stakes) > 1 {
+	if len(stakes) > 1 && !isAdmin {
 		return Argument{}, ErrCodeCannotEditArgumentAlreadyStaked(argumentID)
 	}
 
