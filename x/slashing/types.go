@@ -76,3 +76,19 @@ const (
 	// SlashReasonOther represents the reason that is any other than the above
 	SlashReasonOther
 )
+
+func (r SlashReason) String() string {
+	if int(r) >= len(SlashReasonName) {
+		return "Unknown"
+	}
+	return SlashReasonName[r]
+}
+
+var SlashReasonName = []string{
+	SlashReasonLogicOrEvidenceAbsent: "No clear logic or evidence",
+	SlashReasonIssueNotAddressed:     "Doesn't address the issue",
+	SlashReasonFocusedOnPerson:       "Focuses on the person",
+	SlashNoOriginalThought:           "No original thought",
+	SlashReasonPlagiarism:            "Plagiarism",
+	SlashReasonOther:                 "Other",
+}
