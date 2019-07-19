@@ -1,6 +1,7 @@
 package staking
 
 import (
+	"encoding/json"
 	"testing"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -47,6 +48,41 @@ func TestHandle_SubmitUpvote(t *testing.T) {
 	assert.Equal(t, sdk.NewInt(app.Shanev*290), k.bankKeeper.GetCoins(ctx, addr2).AmountOf(app.StakeDenom))
 
 }
+
+func TestHandleMsgAddAdmin(t *testing.T) {
+	ctx, keeper, _ := mockDB()
+	handler := NewHandler(keeper)
+	assert.NotNil(t, handler) // assert handler is present
+
+	_, _, admin := keyPubAddr()
+	creator := keeper.GetParams(ctx).StakingAdmins[0]
+	msg := NewMsgAddAdmin(admin, creator)
+	assert.NotNil(t, msg) // assert msgs can be created
+
+	result := handler(ctx, msg)
+	var success bool
+	err := json.Unmarshal(result.Data, &success)
+	assert.NoError(t, err)
+	assert.Equal(t, success, true)
+}
+
+func TestHandleMsgRemoveAdmin(t *testing.T) {
+	ctx, keeper, _ := mockDB()
+	handler := NewHandler(keeper)
+	assert.NotNil(t, handler) // assert handler is present
+
+	_, _, admin := keyPubAddr()
+	creator := keeper.GetParams(ctx).StakingAdmins[0]
+	msg := NewMsgRemoveAdmin(admin, creator)
+	assert.NotNil(t, msg) // assert msgs can be created
+
+	result := handler(ctx, msg)
+	var success bool
+	err := json.Unmarshal(result.Data, &success)
+	assert.NoError(t, err)
+	assert.Equal(t, success, true)
+}
+
 func TestByzantineMsg(t *testing.T) {
 	ctx, k, _ := mockDB()
 

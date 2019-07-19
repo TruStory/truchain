@@ -30,6 +30,7 @@ const (
 	ErrorCodeCannotEditArgumentAlreadyStaked sdk.CodeType = 514
 	ErrorCodeCannotEditArgumentWrongCreator  sdk.CodeType = 515
 	ErrorCodeMinBalance                      sdk.CodeType = 516
+	ErrorCodeAddressNotAuthorised            sdk.CodeType = 517
 )
 
 // GenesisErrors
@@ -164,4 +165,12 @@ func ErrJSONParse(err error) sdk.Error {
 		DefaultCodespace,
 		ErrorCodeJSONParsing,
 		"JSON parsing error: "+err.Error())
+}
+
+// ErrAddressNotAuthorised throws an error when the address is not admin
+func ErrAddressNotAuthorised() sdk.Error {
+	return sdk.NewError(
+		DefaultCodespace,
+		ErrorCodeAddressNotAuthorised,
+		"This creator is not authorised to perform this action.")
 }
