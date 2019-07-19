@@ -112,3 +112,51 @@ func TestCommunities_Success(t *testing.T) {
 	assert.Equal(t, all[2].ID, first.ID)
 	assert.Equal(t, all[3].ID, another.ID)
 }
+
+func TestAddAdmin_Success(t *testing.T) {
+	ctx, keeper := mockDB()
+
+	creator := keeper.GetParams(ctx).CommunityAdmins[0]
+	newAdmin := getFakeAdmin()
+
+	err := keeper.AddAdmin(ctx, newAdmin, creator)
+	assert.Nil(t, err)
+
+	newAdmins := keeper.GetParams(ctx).CommunityAdmins
+	assert.Subset(t, newAdmins, []sdk.AccAddress{newAdmin})
+}
+
+func TestAddAdmin_CreatorNotAuthorised(t *testing.T) {
+	ctx, keeper := mockDB()
+
+	invalidCreator := sdk.AccAddress([]byte{1, 2})
+	newAdmin := getFakeAdmin()
+
+	err := keeper.AddAdmin(ctx, newAdmin, invalidCreator)
+	assert.NotNil(t, err)
+	assert.Equal(t, ErrCreatorNotAuthorised().Code(), err.Code())
+}
+
+func TestRemoveAdmin_Success(t *testing.T) {
+	ctx, keeper := mockDB()
+
+	currentAdmins := keeper.GetParams(ctx).CommunityAdmins
+	adminToRemove := currentAdmins[0]
+
+	err := keeper.RemoveAdmin(ctx, adminToRemove, adminToRemove) // removing self
+	assert.Nil(t, err)
+	newAdmins := keeper.GetParams(ctx).CommunityAdmins
+	assert.Equal(t, len(currentAdmins)-1, len(newAdmins))
+}
+
+func TestRemoveAdmin_CreatorNotAuthorised(t *testing.T) {
+	ctx, keeper := mockDB()
+
+	invalidRemover := sdk.AccAddress([]byte{1, 2})
+	currentAdmins := keeper.GetParams(ctx).CommunityAdmins
+	adminToRemove := currentAdmins[0]
+
+	err := keeper.AddAdmin(ctx, adminToRemove, invalidRemover)
+	assert.NotNil(t, err)
+	assert.Equal(t, ErrCreatorNotAuthorised().Code(), err.Code())
+}
