@@ -144,7 +144,7 @@ func (k Keeper) punish(ctx sdk.Context, argumentID uint64) sdk.Error {
 			case staking.RewardResultArgumentCreation:
 				_, err := k.bankKeeper.SafeSubtractCoin(
 					ctx,
-					stake.Creator,
+					stake.Result.ArgumentCreator,
 					stake.Result.ArgumentCreatorReward,
 					stake.ID,
 					bank.TransactionInterestArgumentCreationSlashed,
@@ -155,7 +155,7 @@ func (k Keeper) punish(ctx sdk.Context, argumentID uint64) sdk.Error {
 			case staking.RewardResultUpvoteSplit:
 				_, err := k.bankKeeper.SafeSubtractCoin(
 					ctx,
-					stake.Creator,
+					stake.Result.ArgumentCreator,
 					stake.Result.ArgumentCreatorReward,
 					stake.ID,
 					bank.TransactionInterestUpvoteReceivedSlashed,
@@ -165,7 +165,7 @@ func (k Keeper) punish(ctx sdk.Context, argumentID uint64) sdk.Error {
 				}
 				_, err = k.bankKeeper.SafeSubtractCoin(
 					ctx,
-					stake.Creator,
+					stake.Result.StakeCreator,
 					stake.Result.StakeCreatorReward,
 					stake.ID,
 					bank.TransactionInterestUpvoteGivenSlashed,
