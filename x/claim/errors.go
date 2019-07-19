@@ -78,7 +78,7 @@ func ErrAddressNotAuthorised() sdk.Error {
 	return sdk.NewError(
 		DefaultCodespace,
 		ErrorCodeAddressNotAuthorised,
-		"This creator is not authorised to perform this action.")
+		"This address is not authorised to perform this action.")
 }
 
 // ErrJSONParse throws an error on failed JSON parsing
