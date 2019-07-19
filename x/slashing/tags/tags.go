@@ -4,7 +4,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
-// staking tags
+// slashing tags
 var (
 	ArgumentCreator       = "argument-creator"
 	ArgumentCreatorJailed = "argument-creator-jailed"

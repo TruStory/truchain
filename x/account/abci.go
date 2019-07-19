@@ -6,7 +6,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	app "github.com/TruStory/truchain/types"
-	"github.com/TruStory/truchain/x/staking/tags"
+	"github.com/TruStory/truchain/x/account/tags"
 )
 
 // EndBlocker called every block, process expiring stakes
@@ -34,8 +34,8 @@ func EndBlocker(ctx sdk.Context, keeper Keeper) sdk.Tags {
 	return append(app.PushTag,
 		sdk.NewTags(
 			tags.Category, tags.TxCategory,
-			tags.Action, tags.ActionInterestRewardPaid,
-			tags.ExpiredStakes, b,
+			tags.Action, tags.ActionUnjailAccounts,
+			tags.UnjailedAccounts, b,
 		)...,
 	)
 }
