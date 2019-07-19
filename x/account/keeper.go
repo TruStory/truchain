@@ -82,14 +82,28 @@ func (k Keeper) AppAccounts(ctx sdk.Context) (appAccounts []AppAccount) {
 }
 
 // PrimaryAccount gets the primary base account
-func (k Keeper) PrimaryAccount(ctx sdk.Context, addr sdk.AccAddress) (auth.Account, sdk.Error) {
-	_, ok := k.getAppAccount(ctx, addr)
+func (k Keeper) PrimaryAccount(ctx sdk.Context, addr sdk.AccAddress) (pAcc PrimaryAccount, err sdk.Error) {
+	appAcc, ok := k.getAppAccount(ctx, addr)
 	if !ok {
-		return nil, ErrAppAccountNotFound(addr)
+		return pAcc, ErrAppAccountNotFound(addr)
 	}
 	acc := k.accountKeeper.GetAccount(ctx, addr)
 
-	return acc, nil
+	pAcc = PrimaryAccount{
+		BaseAccount: auth.BaseAccount{
+			Address:       acc.GetAddress(),
+			Coins:         acc.GetCoins(),
+			PubKey:        acc.GetPubKey(),
+			AccountNumber: acc.GetAccountNumber(),
+			Sequence:      acc.GetSequence(),
+		},
+		SlashCount:  appAcc.SlashCount,
+		IsJailed:    appAcc.IsJailed,
+		JailEndTime: appAcc.JailEndTime,
+		CreatedTime: appAcc.CreatedTime,
+	}
+
+	return pAcc, nil
 }
 
 // JailedAccountsAfter returns all jailed accounts after jailEndTime
