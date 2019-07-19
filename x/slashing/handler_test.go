@@ -1,6 +1,7 @@
 package slashing
 
 import (
+	"encoding/json"
 	"net/url"
 	"testing"
 
@@ -25,4 +26,38 @@ func TestHandle_SlashArgument(t *testing.T) {
 	res := handler(ctx, msg)
 
 	assert.True(t, res.IsOK())
+}
+
+func TestHandleMsgAddAdmin(t *testing.T) {
+	ctx, keeper := mockDB()
+	handler := NewHandler(keeper)
+	assert.NotNil(t, handler) // assert handler is present
+
+	_, _, admin, _ := getFakeAppAccountParams()
+	creator := keeper.GetParams(ctx).SlashAdmins[0]
+	msg := NewMsgAddAdmin(admin, creator)
+	assert.NotNil(t, msg) // assert msgs can be created
+
+	result := handler(ctx, msg)
+	var success bool
+	err := json.Unmarshal(result.Data, &success)
+	assert.NoError(t, err)
+	assert.Equal(t, success, true)
+}
+
+func TestHandleMsgRemoveAdmin(t *testing.T) {
+	ctx, keeper := mockDB()
+	handler := NewHandler(keeper)
+	assert.NotNil(t, handler) // assert handler is present
+
+	_, _, admin, _ := getFakeAppAccountParams()
+	creator := keeper.GetParams(ctx).SlashAdmins[0]
+	msg := NewMsgRemoveAdmin(admin, creator)
+	assert.NotNil(t, msg) // assert msgs can be created
+
+	result := handler(ctx, msg)
+	var success bool
+	err := json.Unmarshal(result.Data, &success)
+	assert.NoError(t, err)
+	assert.Equal(t, success, true)
 }

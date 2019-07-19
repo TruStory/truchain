@@ -18,6 +18,7 @@ const (
 	ErrorCodeNotEnoughEarnedStake sdk.CodeType = 506
 	ErrorCodeAlreadySlashed       sdk.CodeType = 507
 	ErrorCodeInvalidSlashReason   sdk.CodeType = 508
+	ErrorCodeAddressNotAuthorised sdk.CodeType = 509
 )
 
 // ErrSlashNotFound throws an error when the searched slash is not found
@@ -58,4 +59,9 @@ func ErrAlreadySlashed() sdk.Error {
 // ErrInvalidSlashReason throws an error when the slash reason is not valid
 func ErrInvalidSlashReason(because string) sdk.Error {
 	return sdk.NewError(DefaultCodespace, ErrorCodeAlreadySlashed, fmt.Sprintf("Slash reason is not valid: %s", because))
+}
+
+// ErrAddressNotAuthorised throws an error when the address is not admin
+func ErrAddressNotAuthorised() sdk.Error {
+	return sdk.NewError(DefaultCodespace, ErrorCodeAddressNotAuthorised, "This address is not authorised to perform this action.")
 }

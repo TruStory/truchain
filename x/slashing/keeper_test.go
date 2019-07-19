@@ -158,3 +158,51 @@ func Test_punishment(t *testing.T) {
 	claim, _ = keeper.claimKeeper.Claim(ctx, 1)
 	assert.Equal(t, "0trusteak", claim.TotalChallenged.String())
 }
+
+func TestAddAdmin_Success(t *testing.T) {
+	ctx, keeper := mockDB()
+
+	creator := keeper.GetParams(ctx).SlashAdmins[0]
+	_, _, newAdmin, _ := getFakeAppAccountParams()
+
+	err := keeper.AddAdmin(ctx, newAdmin, creator)
+	assert.Nil(t, err)
+
+	newAdmins := keeper.GetParams(ctx).SlashAdmins
+	assert.Subset(t, newAdmins, []sdk.AccAddress{newAdmin})
+}
+
+func TestAddAdmin_CreatorNotAuthorised(t *testing.T) {
+	ctx, keeper := mockDB()
+
+	invalidCreator := sdk.AccAddress([]byte{1, 2})
+	_, _, newAdmin, _ := getFakeAppAccountParams()
+
+	err := keeper.AddAdmin(ctx, newAdmin, invalidCreator)
+	assert.NotNil(t, err)
+	assert.Equal(t, ErrAddressNotAuthorised().Code(), err.Code())
+}
+
+func TestRemoveAdmin_Success(t *testing.T) {
+	ctx, keeper := mockDB()
+
+	currentAdmins := keeper.GetParams(ctx).SlashAdmins
+	adminToRemove := currentAdmins[0]
+
+	err := keeper.RemoveAdmin(ctx, adminToRemove, adminToRemove) // removing self
+	assert.Nil(t, err)
+	newAdmins := keeper.GetParams(ctx).SlashAdmins
+	assert.Equal(t, len(currentAdmins)-1, len(newAdmins))
+}
+
+func TestRemoveAdmin_RemoverNotAuthorised(t *testing.T) {
+	ctx, keeper := mockDB()
+
+	invalidRemover := sdk.AccAddress([]byte{1, 2})
+	currentAdmins := keeper.GetParams(ctx).SlashAdmins
+	adminToRemove := currentAdmins[0]
+
+	err := keeper.AddAdmin(ctx, adminToRemove, invalidRemover)
+	assert.NotNil(t, err)
+	assert.Equal(t, ErrAddressNotAuthorised().Code(), err.Code())
+}
