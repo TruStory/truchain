@@ -100,48 +100,97 @@ func (k Keeper) CreateSlash(ctx sdk.Context, argumentID uint64, slashType SlashT
 	return
 }
 
+func (k Keeper) refundStake(ctx sdk.Context, stake staking.Stake, communityID string) sdk.Error {
+	var refundType bank.TransactionType
+
+	switch stake.Type {
+	case staking.StakeBacking:
+		refundType = staking.TransactionBackingReturned
+	case staking.StakeChallenge:
+		refundType = staking.TransactionChallengeReturned
+	case staking.StakeUpvote:
+		refundType = staking.TransactionUpvoteReturned
+	default:
+		return staking.ErrCodeInvalidStakeType(stake.Type)
+	}
+	_, err := k.bankKeeper.AddCoin(ctx, stake.Creator, stake.Amount, stake.ArgumentID,
+		refundType, WithCommunityID(communityID),
+	)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 func (k Keeper) punish(ctx sdk.Context, argumentID uint64) sdk.Error {
 	stakingPool := sdk.NewCoin(app.StakeDenom, sdk.ZeroInt())
 	var communityID string
 	for _, stake := range k.stakingKeeper.ArgumentStakes(ctx, argumentID) {
 		communityID = stake.CommunityID
 		stakingPool = stakingPool.Add(stake.Amount)
-		slashMagnitude := int64(k.GetParams(ctx).SlashMagnitude)
-		// user won't be refunded their original stake. adjust the punishment to reflect that
-		if !stake.Expired {
-			slashMagnitude = slashMagnitude - 1
+		err := k.refundStake(ctx, stake, communityID)
+		if err != nil {
+			return err
 		}
-
 		if !stake.Expired {
 			k.stakingKeeper.RemoveFromActiveStakeQueue(ctx, stake.ID, stake.EndTime)
 			err := k.stakingKeeper.SetStakeExpired(ctx, stake.ID)
 			if err != nil {
 				return err
 			}
-		} else {
-			if stake.Result != nil {
-				stakeInterest := stake.Result.ArgumentCreatorReward.Add(stake.Result.StakeCreatorReward)
+		}
+		if stake.Expired && stake.Result != nil {
+			switch stake.Result.Type {
+			case staking.RewardResultArgumentCreation:
 				_, err := k.bankKeeper.SafeSubtractCoin(
 					ctx,
 					stake.Creator,
-					stakeInterest,
+					stake.Result.ArgumentCreatorReward,
 					stake.ID,
-					bank.TransactionInterestSlashed,
+					bank.TransactionInterestArgumentCreationSlashed,
+					WithCommunityID(communityID))
+				if err != nil {
+					return err
+				}
+			case staking.RewardResultUpvoteSplit:
+				_, err := k.bankKeeper.SafeSubtractCoin(
+					ctx,
+					stake.Creator,
+					stake.Result.ArgumentCreatorReward,
+					stake.ID,
+					bank.TransactionInterestUpvoteReceivedSlashed,
+					WithCommunityID(communityID))
+				if err != nil {
+					return err
+				}
+				_, err = k.bankKeeper.SafeSubtractCoin(
+					ctx,
+					stake.Creator,
+					stake.Result.StakeCreatorReward,
+					stake.ID,
+					bank.TransactionInterestUpvoteGivenSlashed,
 					WithCommunityID(communityID))
 				if err != nil {
 					return err
 				}
 			}
 		}
-
+		slashMagnitude := int64(k.GetParams(ctx).SlashMagnitude)
 		slashCoin := sdk.NewCoin(app.StakeDenom, stake.Amount.Amount.MulRaw(slashMagnitude))
+		var slashTxType bank.TransactionType
+		switch stake.Type {
+		case staking.StakeUpvote:
+			slashTxType = bank.TransactionStakeCuratorSlashed
+		default:
+			slashTxType = bank.TransactionStakeCreatorSlashed
 
-		_, err := k.bankKeeper.SafeSubtractCoin(
+		}
+		_, err = k.bankKeeper.SafeSubtractCoin(
 			ctx,
 			stake.Creator,
 			slashCoin,
 			stake.ID,
-			bank.TransactionStakeSlashed,
+			slashTxType,
 			WithCommunityID(communityID))
 		if err != nil {
 			return err
