@@ -11,20 +11,24 @@ const (
 	QuerierRoute      = types.QuerierRoute
 	DefaultParamspace = types.DefaultParamspace
 
-	TransactionGift                     = exported.TransactionGift
-	TransactionBacking                  = exported.TransactionBacking
-	TransactionBackingReturned          = exported.TransactionBackingReturned
-	TransactionChallenge                = exported.TransactionChallenge
-	TransactionChallengeReturned        = exported.TransactionChallengeReturned
-	TransactionUpvote                   = exported.TransactionUpvote
-	TransactionUpvoteReturned           = exported.TransactionUpvoteReturned
-	TransactionInterestArgumentCreation = exported.TransactionInterestArgumentCreation
-	TransactionInterestUpvoteReceived   = exported.TransactionInterestUpvoteReceived
-	TransactionInterestUpvoteGiven      = exported.TransactionInterestUpvoteGiven
-	TransactionRewardPayout             = exported.TransactionRewardPayout
-	TransactionInterestSlashed          = exported.TransactionInterestSlashed
-	TransactionStakeSlashed             = exported.TransactionStakeSlashed
-	TransactionCuratorReward            = exported.TransactionCuratorReward
+	TransactionGift                            = exported.TransactionGift
+	TransactionBacking                         = exported.TransactionBacking
+	TransactionBackingReturned                 = exported.TransactionBackingReturned
+	TransactionChallenge                       = exported.TransactionChallenge
+	TransactionChallengeReturned               = exported.TransactionChallengeReturned
+	TransactionUpvote                          = exported.TransactionUpvote
+	TransactionUpvoteReturned                  = exported.TransactionUpvoteReturned
+	TransactionInterestArgumentCreation        = exported.TransactionInterestArgumentCreation
+	TransactionInterestUpvoteReceived          = exported.TransactionInterestUpvoteReceived
+	TransactionInterestUpvoteGiven             = exported.TransactionInterestUpvoteGiven
+	TransactionRewardPayout                    = exported.TransactionRewardPayout
+	TransactionInterestArgumentCreationSlashed = exported.TransactionInterestArgumentCreationSlashed
+	TransactionInterestUpvoteReceivedSlashed   = exported.TransactionInterestUpvoteReceivedSlashed
+	TransactionInterestUpvoteGivenSlashed      = exported.TransactionInterestUpvoteGivenSlashed
+	TransactionStakeCreatorSlashed             = exported.TransactionStakeCreatorSlashed
+	TransactionStakeCuratorSlashed             = exported.TransactionStakeCuratorSlashed
+
+	TransactionCuratorReward = exported.TransactionCuratorReward
 
 	SortAsc                    = exported.SortAsc
 	SortDesc                   = exported.SortDesc

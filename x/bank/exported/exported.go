@@ -35,26 +35,31 @@ const (
 	TransactionInterestUpvoteReceived
 	TransactionInterestUpvoteGiven
 	TransactionRewardPayout
-	TransactionInterestSlashed
-	TransactionStakeSlashed
+	TransactionInterestArgumentCreationSlashed
+	TransactionInterestUpvoteReceivedSlashed
+	TransactionInterestUpvoteGivenSlashed
+	TransactionStakeCreatorSlashed
+	TransactionStakeCuratorSlashed
 	TransactionCuratorReward
 )
 
 var TransactionTypeName = []string{
-	TransactionGift:                     "TransactionGift",
-	TransactionBacking:                  "TransactionBacking",
-	TransactionBackingReturned:          "TransactionBackingReturned",
-	TransactionChallenge:                "TransactionChallenge",
-	TransactionChallengeReturned:        "TransactionChallengeReturned",
-	TransactionUpvote:                   "TransactionUpvote",
-	TransactionUpvoteReturned:           "TransactionUpvoteReturned",
-	TransactionInterestArgumentCreation: "TransactionInterestArgumentCreation",
-	TransactionInterestUpvoteReceived:   "TransactionInterestUpvoteReceived",
-	TransactionInterestUpvoteGiven:      "TransactionInterestUpvoteGiven",
-	TransactionRewardPayout:             "TransactionRewardPayout",
-	TransactionInterestSlashed:          "TransactionInterestSlashed",
-	TransactionStakeSlashed:             "TransactionStakeSlashed",
-	TransactionCuratorReward:            "TransactionCuratorReward",
+	TransactionGift:                            "TransactionGift",
+	TransactionBacking:                         "TransactionBacking",
+	TransactionBackingReturned:                 "TransactionBackingReturned",
+	TransactionChallenge:                       "TransactionChallenge",
+	TransactionChallengeReturned:               "TransactionChallengeReturned",
+	TransactionUpvote:                          "TransactionUpvote",
+	TransactionUpvoteReturned:                  "TransactionUpvoteReturned",
+	TransactionInterestArgumentCreation:        "TransactionInterestArgumentCreation",
+	TransactionInterestUpvoteReceived:          "TransactionInterestUpvoteReceived",
+	TransactionInterestUpvoteGiven:             "TransactionInterestUpvoteGiven",
+	TransactionRewardPayout:                    "TransactionRewardPayout",
+	TransactionInterestArgumentCreationSlashed: "TransactionInterestArgumentCreationSlashed",
+	TransactionInterestUpvoteReceivedSlashed:   "TransactionInterestUpvoteReceivedSlashed",
+	TransactionInterestUpvoteGivenSlashed:      "TransactionInterestUpvoteGivenSlashed",
+	TransactionStakeCreatorSlashed:             "TransactionStakeCreatorSlashed",
+	TransactionStakeCuratorSlashed:             "TransactionStakeCuratorSlashed",
 }
 
 func (t TransactionType) String() string {
@@ -87,8 +92,11 @@ var AllowedTransactionsForDeduction = []TransactionType{
 	TransactionBacking,
 	TransactionChallenge,
 	TransactionUpvote,
-	TransactionInterestSlashed,
-	TransactionStakeSlashed,
+	TransactionInterestArgumentCreationSlashed,
+	TransactionInterestUpvoteReceivedSlashed,
+	TransactionInterestUpvoteGivenSlashed,
+	TransactionStakeCreatorSlashed,
+	TransactionStakeCuratorSlashed,
 }
 
 func (t TransactionType) AllowedForAddition() bool {

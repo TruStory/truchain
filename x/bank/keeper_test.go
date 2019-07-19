@@ -130,7 +130,7 @@ func TestKeeper_SafeSubtractCoin(t *testing.T) {
 	addr := createFakeFundedAccount(ctx, auth, sdk.NewCoins(balance))
 
 	amount := sdk.NewCoin(app.StakeDenom, sdk.NewInt(app.Shanev*200))
-	coins, err := k.SafeSubtractCoin(ctx,
+	coins, safeAmount, err := k.SafeSubtractCoin(ctx,
 		addr,
 		amount,
 		200,
@@ -138,6 +138,7 @@ func TestKeeper_SafeSubtractCoin(t *testing.T) {
 	)
 	assert.NoError(t, err)
 	assert.Equal(t, "0", coins.AmountOf(app.StakeDenom).String())
+	assert.Equal(t, sdk.NewInt(app.Shanev*30).String(), safeAmount.Amount.String())
 
 	k.IterateUserTransactions(ctx, addr, false, func(tx Transaction) bool {
 		assert.Equal(t, uint64(1), tx.ID)
