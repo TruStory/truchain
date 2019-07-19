@@ -106,8 +106,18 @@ func (k Keeper) punish(ctx sdk.Context, argumentID uint64) sdk.Error {
 	for _, stake := range k.stakingKeeper.ArgumentStakes(ctx, argumentID) {
 		communityID = stake.CommunityID
 		stakingPool = stakingPool.Add(stake.Amount)
-		if k.stakingKeeper.IsStakeActive(ctx, stake.ID, stake.EndTime) {
+		slashMagnitude := int64(k.GetParams(ctx).SlashMagnitude)
+		// user won't be refunded their original stake. adjust the punishment to reflect that
+		if !stake.Expired {
+			slashMagnitude = slashMagnitude - 1
+		}
+
+		if !stake.Expired {
 			k.stakingKeeper.RemoveFromActiveStakeQueue(ctx, stake.ID, stake.EndTime)
+			err := k.stakingKeeper.SetStakeExpired(ctx, stake.ID)
+			if err != nil {
+				return err
+			}
 		} else {
 			if stake.Result != nil {
 				stakeInterest := stake.Result.ArgumentCreatorReward.Add(stake.Result.StakeCreatorReward)
@@ -123,7 +133,7 @@ func (k Keeper) punish(ctx sdk.Context, argumentID uint64) sdk.Error {
 				}
 			}
 		}
-		slashMagnitude := int64(k.GetParams(ctx).SlashMagnitude)
+
 		slashCoin := sdk.NewCoin(app.StakeDenom, stake.Amount.Amount.MulRaw(slashMagnitude))
 
 		_, err := k.bankKeeper.SafeSubtractCoin(
@@ -137,14 +147,19 @@ func (k Keeper) punish(ctx sdk.Context, argumentID uint64) sdk.Error {
 			return err
 		}
 
+		argument, ok := k.stakingKeeper.Argument(ctx, argumentID)
+		if !ok {
+			return ErrInvalidArgument(stake.ArgumentID)
+		}
+
 		if stake.Type == staking.StakeBacking {
-			err = k.claimKeeper.SubtractBackingStake(ctx, stake.ID, stake.Amount)
+			err = k.claimKeeper.SubtractBackingStake(ctx, argument.ClaimID, stake.Amount)
 			if err != nil {
 				return err
 			}
 		}
 		if stake.Type == staking.StakeChallenge {
-			err = k.claimKeeper.SubtractChallengeStake(ctx, stake.ID, stake.Amount)
+			err = k.claimKeeper.SubtractChallengeStake(ctx, argument.ClaimID, stake.Amount)
 			if err != nil {
 				return err
 			}

@@ -162,7 +162,7 @@ func getFakeAppAccountParams() (privateKey crypto.PrivKey, publicKey crypto.PubK
 
 func getFakeCoins() sdk.Coins {
 	return sdk.Coins{
-		sdk.NewInt64Coin(app.StakeDenom, 100000000000),
+		sdk.NewInt64Coin(app.StakeDenom, 300000000000),
 	}
 }
 

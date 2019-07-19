@@ -278,6 +278,16 @@ func (k Keeper) DownvoteArgument(ctx sdk.Context, argumentID uint64) sdk.Error {
 	return nil
 }
 
+func (k Keeper) SetStakeExpired(ctx sdk.Context, stakeID uint64) sdk.Error {
+	stake, ok := k.Stake(ctx, stakeID)
+	if !ok {
+		return ErrCodeUnknownStake(stakeID)
+	}
+	stake.Expired = true
+	k.setStake(ctx, stake)
+	return nil
+}
+
 func (k Keeper) setArgument(ctx sdk.Context, argument Argument) {
 	bz := k.codec.MustMarshalBinaryLengthPrefixed(argument)
 	k.store(ctx).Set(argumentKey(argument.ID), bz)
@@ -501,12 +511,6 @@ func (k Keeper) InsertActiveStakeQueue(ctx sdk.Context, stakeID uint64, endTime 
 // RemoveFromActiveStakeQueue removes a stakeID from the Active Stake Queue
 func (k Keeper) RemoveFromActiveStakeQueue(ctx sdk.Context, stakeID uint64, endTime time.Time) {
 	k.store(ctx).Delete(activeStakeQueueKey(stakeID, endTime))
-}
-
-// IsStakeActive returns true if a stake is active
-func (k Keeper) IsStakeActive(ctx sdk.Context, stakeID uint64, endTime time.Time) bool {
-	bz := k.store(ctx).Get(activeStakeQueueKey(stakeID, endTime))
-	return bz == nil
 }
 
 // Logger returns a module-specific logger.

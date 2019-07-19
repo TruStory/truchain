@@ -268,7 +268,7 @@ func queryClaimTopArgument(ctx sdk.Context, req abci.RequestQuery, keeper Keeper
 		if topArgument.ID == 0 {
 			topArgument = a
 		}
-		if topArgument.UpvotedStake.IsLT(a.UpvotedStake) {
+		if topArgument.UpvotedStake.IsLT(a.UpvotedStake) && !a.IsUnhelpful {
 			topArgument = a
 		}
 	}

@@ -114,24 +114,38 @@ func Test_punishment(t *testing.T) {
 
 	staker := keeper.GetParams(ctx).SlashAdmins[0]
 	slasher := keeper.GetParams(ctx).SlashAdmins[1]
+	slashMagnitude := keeper.GetParams(ctx).SlashMagnitude
 	stakerStartingBalance := keeper.bankKeeper.GetCoins(ctx, staker)
 	slasherStartingBalance := keeper.bankKeeper.GetCoins(ctx, slasher)
-	assert.Equal(t, "100000000000trusteak", stakerStartingBalance.String())
-	assert.Equal(t, "100000000000trusteak", slasherStartingBalance.String())
+	assert.Equal(t, "300000000000trusteak", stakerStartingBalance.String())
+	assert.Equal(t, "300000000000trusteak", slasherStartingBalance.String())
 
-	_, err := keeper.stakingKeeper.SubmitArgument(ctx, "arg1", "summary1", staker, 1, staking.StakeChallenge)
+	claim, _ := keeper.claimKeeper.Claim(ctx, 1)
+	assert.Equal(t, "0trusteak", claim.TotalChallenged.String())
+
+	argument, err := keeper.stakingKeeper.SubmitArgument(ctx, "arg2", "summary2", staker, claim.ID, staking.StakeChallenge)
 	assert.NoError(t, err)
 
-	stake, _ := keeper.stakingKeeper.Stake(ctx, 1)
+	stake, _ := keeper.stakingKeeper.Stake(ctx, 2)
+	assert.Equal(t, argument.ID, stake.ArgumentID)
 	assert.Equal(t, "50000000000trusteak", stake.Amount.String())
 
-	// this also does a punish because slasher is an admin
-	_, err = keeper.CreateSlash(ctx, stake.ID, SlashTypeUnhelpful, SlashReasonPlagiarism, "", slasher)
-	assert.NoError(t, err)
+	claim, _ = keeper.claimKeeper.Claim(ctx, 1)
+	assert.Equal(t, stake.Amount.String(), claim.TotalChallenged.String())
 
 	//staker should have = starting balance - stake amount
 	stakerEndingBalance := keeper.bankKeeper.GetCoins(ctx, staker)
 	expectedBalance := stakerStartingBalance.Sub(sdk.Coins{stake.Amount})
+	assert.Equal(t, expectedBalance.String(), stakerEndingBalance.String())
+
+	// this also does a punish because slasher is an admin
+	_, err = keeper.CreateSlash(ctx, argument.ID, SlashTypeUnhelpful, SlashReasonPlagiarism, "", slasher)
+	assert.NoError(t, err)
+
+	//staker should have = starting balance - (stake amount * slashMagnitude)
+	slashPenalty := sdk.NewCoin(stake.Amount.Denom, stake.Amount.Amount.MulRaw(int64(slashMagnitude)))
+	stakerEndingBalance = keeper.bankKeeper.GetCoins(ctx, staker)
+	expectedBalance = stakerStartingBalance.Sub(sdk.Coins{slashPenalty})
 	assert.Equal(t, expectedBalance.String(), stakerEndingBalance.String())
 
 	// slasher should have = starting balance + reward (25% stake)
@@ -140,4 +154,7 @@ func Test_punishment(t *testing.T) {
 	rewardCoin := sdk.NewCoin(stake.Amount.Denom, reward)
 	expectedBalance = slasherStartingBalance.Add(sdk.Coins{rewardCoin})
 	assert.Equal(t, expectedBalance.String(), slasherEndingBalance.String())
+
+	claim, _ = keeper.claimKeeper.Claim(ctx, 1)
+	assert.Equal(t, "0trusteak", claim.TotalChallenged.String())
 }
