@@ -38,5 +38,4 @@ func EndBlocker(ctx sdk.Context, keeper Keeper) sdk.Tags {
 			tags.ExpiredStakes, b,
 		)...,
 	)
-	return sdk.EmptyTags()
 }
