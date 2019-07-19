@@ -101,10 +101,10 @@ func (k Keeper) SubtractCoin(ctx sdk.Context, addr sdk.AccAddress, amt sdk.Coin,
 
 // SafeSubtractCoin subtracts a coin without going below zero
 func (k Keeper) SafeSubtractCoin(ctx sdk.Context, addr sdk.AccAddress, amt sdk.Coin,
-	referenceID uint64, txType TransactionType, txSetters ...TransactionSetter) (sdk.Coins, sdk.Error) {
+	referenceID uint64, txType TransactionType, txSetters ...TransactionSetter) (sdk.Coins, sdk.Coin, sdk.Error) {
 
 	if amt.IsNegative() {
-		return sdk.Coins{}, sdk.ErrInvalidCoins("amount can't be negative")
+		return sdk.Coins{}, sdk.Coin{}, sdk.ErrInvalidCoins("amount can't be negative")
 	}
 
 	adjustedCoin := amt
@@ -117,11 +117,11 @@ func (k Keeper) SafeSubtractCoin(ctx sdk.Context, addr sdk.AccAddress, amt sdk.C
 	if adjustedCoin.IsPositive() {
 		coins, err := k.SubtractCoin(ctx, addr, adjustedCoin, referenceID, txType, txSetters...)
 		if err != nil {
-			return coins, err
+			return coins, adjustedCoin, err
 		}
-		return coins, nil
+		return coins, adjustedCoin, nil
 	} else {
-		return balanceCoins, nil
+		return balanceCoins, adjustedCoin, nil
 	}
 }
 

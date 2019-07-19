@@ -26,6 +26,20 @@ type Slash struct {
 	CreatedTime    time.Time
 }
 
+type PunishmentResultType int
+
+const (
+	PunishmentInterestSlashed PunishmentResultType = iota
+	PunishmentStakeSlashed
+	PunishmentCuratorRewarded
+)
+
+type PunishmentResult struct {
+	Type          PunishmentResultType `json:"type"`
+	AppAccAddress sdk.Address          `json:"address"`
+	Coin          sdk.Coin             `json:"coin"`
+}
+
 // Slashes is an array of slashes
 type Slashes []Slash
 
