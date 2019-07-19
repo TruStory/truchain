@@ -5,6 +5,7 @@ import (
 	"time"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/cosmos/cosmos-sdk/x/auth"
 )
 
 // Defines auth module constants
@@ -14,6 +15,15 @@ const (
 	QuerierRoute      = ModuleName
 	DefaultParamspace = ModuleName
 )
+
+type PrimaryAccount struct {
+	auth.BaseAccount
+
+	SlashCount  int       `json:"slash_count"`
+	IsJailed    bool      `json:"is_jailed"`
+	JailEndTime time.Time `json:"jail_end_time"`
+	CreatedTime time.Time `json:"created_time"`
+}
 
 // AppAccount is the main account for a TruStory user.
 type AppAccount struct {

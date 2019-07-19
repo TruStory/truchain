@@ -38,6 +38,31 @@ func TestQueryAppAccount_Success(t *testing.T) {
 	assert.Equal(t, returnedAppAccount.PrimaryAddress(), createdAppAccount.PrimaryAddress())
 }
 
+func TestQueryPrimaryAccount_Success(t *testing.T) {
+	ctx, keeper := mockDB()
+
+	_, publicKey, address, coins := getFakeAppAccountParams()
+	keeper.CreateAppAccount(ctx, address, coins, publicKey)
+
+	params, jsonErr := json.Marshal(QueryAppAccountParams{
+		Address: address,
+	})
+	assert.Nil(t, jsonErr)
+
+	query := abci.RequestQuery{
+		Path: fmt.Sprintf("/custom/%s/%s", ModuleName, QueryPrimaryAccount),
+		Data: params,
+	}
+
+	result, sdkErr := queryPrimaryAccount(ctx, query, keeper)
+	assert.NoError(t, sdkErr)
+
+	var returnedPrimaryAccount PrimaryAccount
+	jsonErr = keeper.codec.UnmarshalJSON(result, &returnedPrimaryAccount)
+	assert.NoError(t, jsonErr)
+	assert.Equal(t, publicKey, returnedPrimaryAccount.GetPubKey())
+}
+
 func TestQueryAppAccounts_Success(t *testing.T) {
 	ctx, keeper := mockDB()
 
