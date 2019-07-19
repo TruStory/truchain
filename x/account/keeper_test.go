@@ -11,10 +11,8 @@ func TestNewAppAccount_Success(t *testing.T) {
 	ctx, keeper := mockDB()
 
 	_, publicKey, address, coins := getFakeAppAccountParams()
-
 	appAccount, err := keeper.CreateAppAccount(ctx, address, coins, publicKey)
 	assert.NoError(t, err)
-	t.Log(appAccount)
 
 	assert.Equal(t, appAccount.PrimaryAddress(), address)
 	acc, err := keeper.PrimaryAccount(ctx, address)
@@ -22,6 +20,18 @@ func TestNewAppAccount_Success(t *testing.T) {
 	assert.Equal(t, acc.GetPubKey(), publicKey)
 
 	assert.Equal(t, false, appAccount.IsJailed)
+}
+
+func TesAppAccounts(t *testing.T) {
+	ctx, keeper := mockDB()
+
+	_, publicKey, address, coins := getFakeAppAccountParams()
+	_, err := keeper.CreateAppAccount(ctx, address, coins, publicKey)
+	assert.NoError(t, err)
+
+	_, publicKey, address, coins = getFakeAppAccountParams()
+	keeper.CreateAppAccount(ctx, address, coins, publicKey)
+	assert.Equal(t, len(keeper.AppAccounts(ctx)), 2)
 }
 
 func TestJailUntil_Success(t *testing.T) {

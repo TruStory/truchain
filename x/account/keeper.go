@@ -67,6 +67,20 @@ func (k Keeper) CreateAppAccount(ctx sdk.Context, address sdk.AccAddress,
 	return appAccnt, nil
 }
 
+// AppAccounts returns all app accounts
+func (k Keeper) AppAccounts(ctx sdk.Context) (appAccounts []AppAccount) {
+	iterator := sdk.KVStorePrefixIterator(k.store(ctx), AppAccountKeyPrefix)
+
+	defer iterator.Close()
+	for ; iterator.Valid(); iterator.Next() {
+		var appAccount AppAccount
+		k.codec.MustUnmarshalBinaryBare(iterator.Value(), &appAccount)
+		appAccounts = append(appAccounts, appAccount)
+	}
+
+	return appAccounts
+}
+
 // PrimaryAccount gets the primary base account
 func (k Keeper) PrimaryAccount(ctx sdk.Context, addr sdk.AccAddress) (auth.Account, sdk.Error) {
 	_, ok := k.getAppAccount(ctx, addr)
@@ -171,14 +185,6 @@ func (k Keeper) setAppAccount(ctx sdk.Context, acc AppAccount) {
 	k.store(ctx).Set(key(acc.PrimaryAddress()), accBytes)
 }
 
-func (k Keeper) store(ctx sdk.Context) sdk.KVStore {
-	return ctx.KVStore(k.storeKey)
-}
-
-func logger(ctx sdk.Context) log.Logger {
-	return ctx.Logger().With("module", ModuleName)
-}
-
 func (k Keeper) setJailEndTimeAccount(ctx sdk.Context, jailEndTime time.Time, addr sdk.AccAddress) {
 	store := ctx.KVStore(k.storeKey)
 	store.Set(jailEndTimeAccountKey(jailEndTime, addr), addr)
@@ -187,4 +193,12 @@ func (k Keeper) setJailEndTimeAccount(ctx sdk.Context, jailEndTime time.Time, ad
 func (k Keeper) deleteJailEndTimeAccount(ctx sdk.Context, jailEndTime time.Time, addr sdk.AccAddress) {
 	store := ctx.KVStore(k.storeKey)
 	store.Delete(jailEndTimeAccountKey(jailEndTime, addr))
+}
+
+func (k Keeper) store(ctx sdk.Context) sdk.KVStore {
+	return ctx.KVStore(k.storeKey)
+}
+
+func logger(ctx sdk.Context) log.Logger {
+	return ctx.Logger().With("module", ModuleName)
 }
