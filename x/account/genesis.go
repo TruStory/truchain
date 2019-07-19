@@ -1,6 +1,5 @@
 package account
 
-
 import (
 	"fmt"
 
@@ -9,13 +8,15 @@ import (
 
 // GenesisState defines genesis data for the module
 type GenesisState struct {
-	Params Params `json:"params"`
+	AppAccounts []AppAccount `json:"app_accounts"`
+	Params      Params       `json:"params"`
 }
 
 // NewGenesisState creates a new genesis state.
 func NewGenesisState() GenesisState {
 	return GenesisState{
-		Params: DefaultParams(),
+		AppAccounts: nil,
+		Params:      DefaultParams(),
 	}
 }
 
@@ -24,13 +25,17 @@ func DefaultGenesisState() GenesisState { return NewGenesisState() }
 
 // InitGenesis initializes account state from genesis file
 func InitGenesis(ctx sdk.Context, keeper Keeper, data GenesisState) {
+	for _, acc := range data.AppAccounts {
+		keeper.setAppAccount(ctx, acc)
+	}
 	keeper.SetParams(ctx, data.Params)
 }
 
 // ExportGenesis exports the genesis state
 func ExportGenesis(ctx sdk.Context, keeper Keeper) GenesisState {
 	return GenesisState{
-		Params: keeper.GetParams(ctx),
+		AppAccounts: keeper.AppAccounts(ctx),
+		Params:      keeper.GetParams(ctx),
 	}
 }
 

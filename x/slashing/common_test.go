@@ -57,6 +57,7 @@ func mockDB() (sdk.Context, Keeper) {
 	cryptoAmino.RegisterAmino(codec)
 	account.RegisterCodec(codec)
 	codec.RegisterInterface((*auth.Account)(nil), nil)
+	codec.RegisterConcrete(&auth.BaseAccount{}, "auth/Account", nil)
 	RegisterCodec(codec)
 
 	paramsKeeper := params.NewKeeper(codec, paramsKey, transientParamsKey, params.DefaultCodespace)

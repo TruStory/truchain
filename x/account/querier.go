@@ -47,9 +47,9 @@ func queryAppAccount(ctx sdk.Context, request abci.RequestQuery, k Keeper) (resu
 		return
 	}
 
-	appAccount, err := k.getAccount(ctx, params.Address)
-	if err != nil {
-		return
+	appAccount, ok := k.getAppAccount(ctx, params.Address)
+	if !ok {
+		return nil, ErrAppAccountNotFound(params.Address)
 	}
 
 	result, jsonErr := codec.MarshalJSONIndent(k.codec, appAccount)
@@ -69,9 +69,9 @@ func queryAppAccounts(ctx sdk.Context, request abci.RequestQuery, k Keeper) (res
 	accounts := make([]AppAccount, 0, len(params.Addresses))
 
 	for _, addr := range params.Addresses {
-		appAccount, err := k.getAccount(ctx, addr)
-		if err != nil {
-			return result, err
+		appAccount, ok := k.getAppAccount(ctx, addr)
+		if !ok {
+			return nil, ErrAppAccountNotFound(addr)
 		}
 		accounts = append(accounts, appAccount)
 	}
