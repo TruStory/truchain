@@ -133,19 +133,19 @@ func (k Keeper) refundStake(ctx sdk.Context, stake staking.Stake, communityID st
 func (k Keeper) punish(ctx sdk.Context, argumentID uint64) ([]PunishmentResult, sdk.Error) {
 	stakingPool := sdk.NewCoin(app.StakeDenom, sdk.ZeroInt())
 	var communityID string
-	results := make([]PunishmentResult, 0)
+	punishmentResults := make([]PunishmentResult, 0)
 	for _, stake := range k.stakingKeeper.ArgumentStakes(ctx, argumentID) {
 		communityID = stake.CommunityID
 		stakingPool = stakingPool.Add(stake.Amount)
 		err := k.refundStake(ctx, stake, communityID)
 		if err != nil {
-			return results, err
+			return punishmentResults, err
 		}
 		if !stake.Expired {
 			k.stakingKeeper.RemoveFromActiveStakeQueue(ctx, stake.ID, stake.EndTime)
 			err := k.stakingKeeper.SetStakeExpired(ctx, stake.ID)
 			if err != nil {
-				return results, err
+				return punishmentResults, err
 			}
 		}
 		if stake.Expired && stake.Result != nil {
@@ -158,13 +158,13 @@ func (k Keeper) punish(ctx sdk.Context, argumentID uint64) ([]PunishmentResult, 
 					stake.ID,
 					bank.TransactionInterestArgumentCreationSlashed,
 					WithCommunityID(communityID))
-				results = append(results,
+				punishmentResults = append(punishmentResults,
 					PunishmentResult{Type: PunishmentInterestSlashed,
 						AppAccAddress: stake.Result.ArgumentCreator,
 						Coin:          amount,
 					})
 				if err != nil {
-					return results, err
+					return punishmentResults, err
 				}
 			case staking.RewardResultUpvoteSplit:
 				_, amount, err := k.bankKeeper.SafeSubtractCoin(
@@ -175,9 +175,9 @@ func (k Keeper) punish(ctx sdk.Context, argumentID uint64) ([]PunishmentResult, 
 					bank.TransactionInterestUpvoteReceivedSlashed,
 					WithCommunityID(communityID))
 				if err != nil {
-					return results, err
+					return punishmentResults, err
 				}
-				results = append(results,
+				punishmentResults = append(punishmentResults,
 					PunishmentResult{Type: PunishmentInterestSlashed,
 						AppAccAddress: stake.Result.ArgumentCreator,
 						Coin:          amount,
@@ -190,9 +190,9 @@ func (k Keeper) punish(ctx sdk.Context, argumentID uint64) ([]PunishmentResult, 
 					bank.TransactionInterestUpvoteGivenSlashed,
 					WithCommunityID(communityID))
 				if err != nil {
-					return results, err
+					return punishmentResults, err
 				}
-				results = append(results,
+				punishmentResults = append(punishmentResults,
 					PunishmentResult{Type: PunishmentInterestSlashed,
 						AppAccAddress: stake.Result.StakeCreator,
 						Coin:          amount,
@@ -216,42 +216,42 @@ func (k Keeper) punish(ctx sdk.Context, argumentID uint64) ([]PunishmentResult, 
 			stake.ID,
 			slashTxType,
 			WithCommunityID(communityID))
-		results = append(results,
+		punishmentResults = append(punishmentResults,
 			PunishmentResult{Type: PunishmentStakeSlashed,
 				AppAccAddress: stake.Creator,
 				Coin:          amount,
 			})
 		if err != nil {
-			return results, err
+			return punishmentResults, err
 		}
 
 		argument, ok := k.stakingKeeper.Argument(ctx, argumentID)
 		if !ok {
-			return results, ErrInvalidArgument(stake.ArgumentID)
+			return punishmentResults, ErrInvalidArgument(stake.ArgumentID)
 		}
 
 		if stake.Type == staking.StakeBacking {
 			err = k.claimKeeper.SubtractBackingStake(ctx, argument.ClaimID, stake.Amount)
 			if err != nil {
-				return results, err
+				return punishmentResults, err
 			}
 		}
 		if stake.Type == staking.StakeChallenge {
 			err = k.claimKeeper.SubtractChallengeStake(ctx, argument.ClaimID, stake.Amount)
 			if err != nil {
-				return results, err
+				return punishmentResults, err
 			}
 		}
 
 		// increment slash count for user (and jail if needed)
 		_, err = k.accountKeeper.IncrementSlashCount(ctx, stake.Creator)
 		if err != nil {
-			return results, err
+			return punishmentResults, err
 		}
 	}
 
 	if !stakingPool.IsPositive() {
-		return results, sdk.ErrInsufficientCoins("staking pool cannot be empty")
+		return punishmentResults, sdk.ErrInsufficientCoins("staking pool cannot be empty")
 	}
 
 	// reward curators who marked "unhelpful"
@@ -270,16 +270,16 @@ func (k Keeper) punish(ctx sdk.Context, argumentID uint64) ([]PunishmentResult, 
 			bank.TransactionCuratorReward,
 			WithCommunityID(communityID))
 		if err != nil {
-			return results, err
+			return punishmentResults, err
 		}
-		results = append(results,
+		punishmentResults = append(punishmentResults,
 			PunishmentResult{Type: PunishmentCuratorRewarded,
 				AppAccAddress: slash.Creator,
 				Coin:          curatorCoin,
 			})
 	}
 
-	return results, nil
+	return punishmentResults, nil
 }
 
 // Slash returns a slash by its ID

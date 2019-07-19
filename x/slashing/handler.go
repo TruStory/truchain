@@ -28,7 +28,7 @@ func handleMsgSlashArgument(ctx sdk.Context, k Keeper, msg MsgSlashArgument) sdk
 		return err.Result()
 	}
 
-	slash, results, err := k.CreateSlash(ctx, msg.ArgumentID, msg.SlashType, msg.SlashReason, msg.SlashDetailedReason, msg.Creator)
+	slash, punishmentResults, err := k.CreateSlash(ctx, msg.ArgumentID, msg.SlashType, msg.SlashReason, msg.SlashDetailedReason, msg.Creator)
 	if err != nil {
 		return err.Result()
 	}
@@ -57,8 +57,8 @@ func handleMsgSlashArgument(ctx sdk.Context, k Keeper, msg MsgSlashArgument) sdk
 		resultTags = append(resultTags, sdk.NewTags(tags.ArgumentCreatorJailed, "jailed")...)
 	}
 
-	if len(results) > 0 {
-		json, jsonErr := json.Marshal(results)
+	if len(punishmentResults) > 0 {
+		json, jsonErr := json.Marshal(punishmentResults)
 		if jsonErr != nil {
 			return sdk.ErrInternal(fmt.Sprintf("Marshal result error: %s", jsonErr)).Result()
 		}
