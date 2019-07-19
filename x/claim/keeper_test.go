@@ -183,7 +183,7 @@ func TestRemoveAdmin_Success(t *testing.T) {
 	assert.Equal(t, len(currentAdmins)-1, len(newAdmins))
 }
 
-func TestRemoveAdmin_CreatorNotAuthorised(t *testing.T) {
+func TestRemoveAdmin_RemoverNotAuthorised(t *testing.T) {
 	ctx, keeper := mockDB()
 
 	invalidRemover := sdk.AccAddress([]byte{1, 2})
