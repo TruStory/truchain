@@ -101,6 +101,9 @@ func (k Keeper) CreateSlash(ctx sdk.Context, argumentID uint64, slashType SlashT
 }
 
 func (k Keeper) refundStake(ctx sdk.Context, stake staking.Stake, communityID string) sdk.Error {
+	if stake.Expired {
+		return nil
+	}
 	var refundType bank.TransactionType
 
 	switch stake.Type {
