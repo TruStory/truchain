@@ -75,7 +75,7 @@ func (k Keeper) Communities(ctx sdk.Context) (communities []Community) {
 // AddAdmin adds a new admin
 func (k Keeper) AddAdmin(ctx sdk.Context, admin, creator sdk.AccAddress) (err sdk.Error) {
 	if !k.isAdmin(ctx, creator) {
-		err = ErrCreatorNotAuthorised()
+		err = ErrAddressNotAuthorised()
 	}
 
 	params := k.GetParams(ctx)
@@ -96,7 +96,7 @@ func (k Keeper) AddAdmin(ctx sdk.Context, admin, creator sdk.AccAddress) (err sd
 // RemoveAdmin removes an admin
 func (k Keeper) RemoveAdmin(ctx sdk.Context, admin, remover sdk.AccAddress) (err sdk.Error) {
 	if !k.isAdmin(ctx, remover) {
-		err = ErrCreatorNotAuthorised()
+		err = ErrAddressNotAuthorised()
 	}
 
 	params := k.GetParams(ctx)
@@ -130,7 +130,7 @@ func (k Keeper) validateParams(ctx sdk.Context, id, name, description string, cr
 	}
 
 	if !k.isAdmin(ctx, creator) {
-		err = ErrCreatorNotAuthorised()
+		err = ErrAddressNotAuthorised()
 	}
 
 	return

@@ -64,7 +64,7 @@ func TestNewCommunity_CreatorNotAuthorised(t *testing.T) {
 	unauthorisedCreator := sdk.AccAddress([]byte{1, 2})
 	_, err := keeper.NewCommunity(ctx, id, name, description, unauthorisedCreator)
 	assert.NotNil(t, err)
-	assert.Equal(t, ErrCreatorNotAuthorised().Code(), err.Code())
+	assert.Equal(t, ErrAddressNotAuthorised().Code(), err.Code())
 }
 
 func TestCommunity_Success(t *testing.T) {
@@ -134,7 +134,7 @@ func TestAddAdmin_CreatorNotAuthorised(t *testing.T) {
 
 	err := keeper.AddAdmin(ctx, newAdmin, invalidCreator)
 	assert.NotNil(t, err)
-	assert.Equal(t, ErrCreatorNotAuthorised().Code(), err.Code())
+	assert.Equal(t, ErrAddressNotAuthorised().Code(), err.Code())
 }
 
 func TestRemoveAdmin_Success(t *testing.T) {
@@ -158,5 +158,5 @@ func TestRemoveAdmin_CreatorNotAuthorised(t *testing.T) {
 
 	err := keeper.AddAdmin(ctx, adminToRemove, invalidRemover)
 	assert.NotNil(t, err)
-	assert.Equal(t, ErrCreatorNotAuthorised().Code(), err.Code())
+	assert.Equal(t, ErrAddressNotAuthorised().Code(), err.Code())
 }
