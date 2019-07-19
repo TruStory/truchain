@@ -35,7 +35,7 @@ func TestQueryAppAccount_Success(t *testing.T) {
 	var returnedAppAccount AppAccount
 	jsonErr = keeper.codec.UnmarshalJSON(result, &returnedAppAccount)
 	assert.Nil(t, jsonErr)
-	assert.Equal(t, returnedAppAccount.GetAddress(), createdAppAccount.GetAddress())
+	assert.Equal(t, returnedAppAccount.PrimaryAddress(), createdAppAccount.PrimaryAddress())
 }
 
 func TestQueryAppAccounts_Success(t *testing.T) {
@@ -72,7 +72,7 @@ func TestQueryAppAccounts_Success(t *testing.T) {
 
 	jsonErr = ModuleCodec.UnmarshalJSON(resBytes, &returnedAppAccounts)
 	assert.NoError(t, jsonErr)
-	assert.Equal(t, returnedAppAccounts[0].GetAddress(), createdAppAccount.GetAddress())
+	assert.Equal(t, returnedAppAccounts[0].PrimaryAddress(), createdAppAccount.PrimaryAddress())
 	assert.Len(t, returnedAppAccounts, 3)
 }
 

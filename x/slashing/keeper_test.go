@@ -68,8 +68,7 @@ func TestSlash_Success(t *testing.T) {
 	assert.Nil(t, err)
 
 	returnedSlash, err := keeper.Slash(ctx, createdSlash.ID)
-
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 	assert.Equal(t, createdSlash, returnedSlash)
 }
 
