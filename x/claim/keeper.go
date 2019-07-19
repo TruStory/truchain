@@ -183,6 +183,54 @@ func (k Keeper) SubtractChallengeStake(ctx sdk.Context, id uint64, stake sdk.Coi
 	return nil
 }
 
+// AddAdmin adds a new admin
+func (k Keeper) AddAdmin(ctx sdk.Context, admin, creator sdk.AccAddress) (err sdk.Error) {
+	if !k.isAdmin(ctx, creator) {
+		err = ErrAddressNotAuthorised()
+	}
+
+	params := k.GetParams(ctx)
+	// if already present, don't add again
+	for _, currentAdmin := range params.ClaimAdmins {
+		if currentAdmin.Equals(admin) {
+			return
+		}
+	}
+
+	params.ClaimAdmins = append(params.ClaimAdmins, admin)
+
+	k.SetParams(ctx, params)
+
+	return
+}
+
+// RemoveAdmin removes an admin
+func (k Keeper) RemoveAdmin(ctx sdk.Context, admin, remover sdk.AccAddress) (err sdk.Error) {
+	if !k.isAdmin(ctx, remover) {
+		err = ErrAddressNotAuthorised()
+	}
+
+	params := k.GetParams(ctx)
+	for i, currentAdmin := range params.ClaimAdmins {
+		if currentAdmin.Equals(admin) {
+			params.ClaimAdmins = append(params.ClaimAdmins[:i], params.ClaimAdmins[i+1:]...)
+		}
+	}
+
+	k.SetParams(ctx, params)
+
+	return
+}
+
+func (k Keeper) isAdmin(ctx sdk.Context, address sdk.AccAddress) bool {
+	for _, admin := range k.GetParams(ctx).ClaimAdmins {
+		if address.Equals(admin) {
+			return true
+		}
+	}
+	return false
+}
+
 func (k Keeper) validateLength(ctx sdk.Context, body string) sdk.Error {
 	var minClaimLength int
 	var maxClaimLength int
