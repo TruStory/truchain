@@ -36,7 +36,7 @@ const (
 
 type PunishmentResult struct {
 	Type          PunishmentResultType `json:"type"`
-	AppAccAddress sdk.Address          `json:"address"`
+	AppAccAddress sdk.AccAddress       `json:"address"`
 	Coin          sdk.Coin             `json:"coin"`
 }
 
