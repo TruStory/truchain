@@ -323,10 +323,6 @@ func MakeCodec() *codec.Codec {
 
 	ModuleBasics.RegisterCodec(cdc)
 	sdk.RegisterCodec(cdc)
-
-	// register other types
-	cdc.RegisterConcrete(&types.AppAccount{}, "types/AppAccount", nil)
-
 	codec.RegisterCrypto(cdc)
 
 	return cdc
