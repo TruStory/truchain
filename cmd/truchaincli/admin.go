@@ -31,8 +31,14 @@ func GetAdminCmd(cdc *codec.Codec) *cobra.Command {
 
 	adminCmd.PersistentFlags().String("action", "", "Choose either 'add' or 'remove'.")
 	adminCmd.PersistentFlags().String("auth", "", "The cosmos address that is authorised to perform this action.")
-	adminCmd.MarkPersistentFlagRequired("action")
-	adminCmd.MarkPersistentFlagRequired("auth")
+	err := adminCmd.MarkPersistentFlagRequired("action")
+	if err != nil {
+		panic(err)
+	}
+	err = adminCmd.MarkPersistentFlagRequired("auth")
+	if err != nil {
+		panic(err)
+	}
 
 	adminCmd.AddCommand(CommunityAdminCmd(cdc))
 	adminCmd.AddCommand(ClaimAdminCmd(cdc))
