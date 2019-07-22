@@ -25,7 +25,6 @@ func GetAdminCmd(cdc *codec.Codec) *cobra.Command {
 	adminCmd := &cobra.Command{
 		Use:                        "admin",
 		Short:                      "Add or remove an admin to a module",
-		DisableFlagParsing:         true,
 		SuggestionsMinimumDistance: 2,
 	}
 
