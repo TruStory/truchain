@@ -290,11 +290,13 @@ func (k Keeper) SetStakeExpired(ctx sdk.Context, stakeID uint64) sdk.Error {
 
 // AddAdmin adds a new admin
 func (k Keeper) AddAdmin(ctx sdk.Context, admin, creator sdk.AccAddress) (err sdk.Error) {
-	if !k.isAdmin(ctx, creator) {
+	params := k.GetParams(ctx)
+
+	// first admin can be added without any authorisation
+	if len(params.StakingAdmins) > 0 && !k.isAdmin(ctx, creator) {
 		err = ErrAddressNotAuthorised()
 	}
 
-	params := k.GetParams(ctx)
 	// if already present, don't add again
 	for _, currentAdmin := range params.StakingAdmins {
 		if currentAdmin.Equals(admin) {

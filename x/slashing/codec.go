@@ -5,6 +5,8 @@ import "github.com/cosmos/cosmos-sdk/codec"
 // RegisterCodec registers all the necessary types and interfaces for the module
 func RegisterCodec(cdc *codec.Codec) {
 	cdc.RegisterConcrete(MsgSlashArgument{}, "truchain/MsgSlashArgument", nil)
+	cdc.RegisterConcrete(MsgAddAdmin{}, "slashing/MsgAddAdmin", nil)
+	cdc.RegisterConcrete(MsgRemoveAdmin{}, "slashing/MsgRemoveAdmin", nil)
 
 	cdc.RegisterConcrete(Slash{}, "truchain/Slash", nil)
 }
