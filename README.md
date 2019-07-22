@@ -40,7 +40,7 @@ This creates:
 
 `truchaincli`: TruStory blockchain client. Used for creating keys and lightweight interaction with the chain and underlying Tendermint node.
 
-### Run a single node
+## Run a single node
 
 TruChain currently needs a _registrar_ account to sign new user registration messages.
 
