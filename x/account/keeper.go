@@ -34,38 +34,76 @@ func NewKeeper(storeKey sdk.StoreKey, paramStore params.Subspace, codec *codec.C
 	}
 }
 
-// NewAppAccount creates a new AppAccount
-func NewAppAccount(baseAcct auth.BaseAccount) *AppAccount {
-	return &AppAccount{BaseAccount: &baseAcct}
-}
-
 // CreateAppAccount creates a new account on chain for a user
 func (k Keeper) CreateAppAccount(ctx sdk.Context, address sdk.AccAddress,
-	coins sdk.Coins, pubKey crypto.PubKey) (acc *AppAccount, sdkErr sdk.Error) {
+	coins sdk.Coins, pubKey crypto.PubKey) (appAccnt AppAccount, sdkErr sdk.Error) {
 
+	// first create a base account
 	baseAccount := auth.NewBaseAccountWithAddress(address)
 	err := baseAccount.SetPubKey(pubKey)
 	if err != nil {
-		return acc, ErrAppAccountCreateFailed(address)
+		return appAccnt, ErrAppAccountCreateFailed(address)
 	}
-	acc = NewAppAccount(baseAccount)
-	acc.CreatedTime = ctx.BlockHeader().Time
-	k.accountKeeper.SetAccount(ctx, acc)
+	k.accountKeeper.SetAccount(ctx, &baseAccount)
 
-	logger(ctx).Info(fmt.Sprintf("Created %s", acc.String()))
+	//  then create an app account
+	appAccnt = NewAppAccount(address, ctx.BlockHeader().Time)
+	k.setAppAccount(ctx, appAccnt)
 
+	// set initial coins
 	initialCoinAmount := coins.AmountOf(app.StakeDenom)
 	if initialCoinAmount.IsPositive() {
 		coin := sdk.NewCoin(app.StakeDenom, initialCoinAmount)
-		_, sdkErr = k.bankKeeper.AddCoin(ctx, address, coin, 0, TransactionGift)
+		_, sdkErr := k.bankKeeper.AddCoin(ctx, address, coin, 0, TransactionGift)
 		if sdkErr != nil {
-			return
+			return appAccnt, sdkErr
 		}
 	} else {
-		return acc, sdk.ErrInvalidCoins("Invalid initial coins")
+		return appAccnt, sdk.ErrInvalidCoins("Invalid initial coins")
 	}
 
-	return acc, nil
+	logger(ctx).Info(fmt.Sprintf("Created %s", appAccnt.String()))
+
+	return appAccnt, nil
+}
+
+// AppAccounts returns all app accounts
+func (k Keeper) AppAccounts(ctx sdk.Context) (appAccounts []AppAccount) {
+	iterator := sdk.KVStorePrefixIterator(k.store(ctx), AppAccountKeyPrefix)
+
+	defer iterator.Close()
+	for ; iterator.Valid(); iterator.Next() {
+		var appAccount AppAccount
+		k.codec.MustUnmarshalBinaryBare(iterator.Value(), &appAccount)
+		appAccounts = append(appAccounts, appAccount)
+	}
+
+	return appAccounts
+}
+
+// PrimaryAccount gets the primary base account
+func (k Keeper) PrimaryAccount(ctx sdk.Context, addr sdk.AccAddress) (pAcc PrimaryAccount, err sdk.Error) {
+	appAcc, ok := k.getAppAccount(ctx, addr)
+	if !ok {
+		return pAcc, ErrAppAccountNotFound(addr)
+	}
+	acc := k.accountKeeper.GetAccount(ctx, addr)
+
+	pAcc = PrimaryAccount{
+		BaseAccount: auth.BaseAccount{
+			Address:       acc.GetAddress(),
+			Coins:         acc.GetCoins(),
+			PubKey:        acc.GetPubKey(),
+			AccountNumber: acc.GetAccountNumber(),
+			Sequence:      acc.GetSequence(),
+		},
+		SlashCount:  appAcc.SlashCount,
+		IsJailed:    appAcc.IsJailed,
+		JailEndTime: appAcc.JailEndTime,
+		CreatedTime: appAcc.CreatedTime,
+	}
+
+	return pAcc, nil
 }
 
 // JailedAccountsAfter returns all jailed accounts after jailEndTime
@@ -76,11 +114,10 @@ func (k Keeper) JailedAccountsAfter(ctx sdk.Context, jailEndTime time.Time) (acc
 	defer iterator.Close()
 	for ; iterator.Valid(); iterator.Next() {
 		addr := iterator.Value()
-		user, err := k.getAccount(ctx, addr)
-		if err != nil {
-			panic(err)
+		user, ok := k.getAppAccount(ctx, addr)
+		if ok {
+			accounts = append(accounts, user)
 		}
-		accounts = append(accounts, user)
 	}
 
 	return accounts, nil
@@ -88,15 +125,14 @@ func (k Keeper) JailedAccountsAfter(ctx sdk.Context, jailEndTime time.Time) (acc
 
 // JailUntil puts an AppAccount in jail until a time
 func (k Keeper) JailUntil(ctx sdk.Context, address sdk.AccAddress, until time.Time) sdk.Error {
-	user, err := k.getAccount(ctx, address)
-	if err != nil {
-		return err
+	user, ok := k.getAppAccount(ctx, address)
+	if !ok {
+		return ErrAppAccountNotFound(address)
 	}
-
 	user.IsJailed = true
 	user.JailEndTime = until
 
-	k.accountKeeper.SetAccount(ctx, user)
+	k.setAppAccount(ctx, user)
 
 	// persist in jail list (sorted by jail end time)
 	k.setJailEndTimeAccount(ctx, until, address)
@@ -106,21 +142,22 @@ func (k Keeper) JailUntil(ctx sdk.Context, address sdk.AccAddress, until time.Ti
 
 // UnJail unjails an AppAccount.
 func (k Keeper) UnJail(ctx sdk.Context, address sdk.AccAddress) sdk.Error {
-	user, err := k.getAccount(ctx, address)
-	if err != nil {
-		return err
+	user, ok := k.getAppAccount(ctx, address)
+	if !ok {
+		return ErrAppAccountNotFound(address)
 	}
 	user.IsJailed = false
-	k.deleteJailEndTimeAccount(ctx, user.JailEndTime, user.Address)
-	k.accountKeeper.SetAccount(ctx, user)
+	k.deleteJailEndTimeAccount(ctx, user.JailEndTime, user.Addresses[0])
+	k.setAppAccount(ctx, user)
+
 	return nil
 }
 
 // IsJailed tells whether an AppAccount is jailed by its address
 func (k Keeper) IsJailed(ctx sdk.Context, address sdk.AccAddress) (bool, sdk.Error) {
-	user, err := k.getAccount(ctx, address)
-	if err != nil {
-		return false, err
+	user, ok := k.getAppAccount(ctx, address)
+	if !ok {
+		return false, ErrAppAccountNotFound(address)
 	}
 
 	return user.IsJailed, nil
@@ -128,17 +165,17 @@ func (k Keeper) IsJailed(ctx sdk.Context, address sdk.AccAddress) (bool, sdk.Err
 
 // IncrementSlashCount increments the slash count of the user
 func (k Keeper) IncrementSlashCount(ctx sdk.Context, address sdk.AccAddress) (int, sdk.Error) {
-	user, err := k.getAccount(ctx, address)
-	if err != nil {
-		return 0, err
+	user, ok := k.getAppAccount(ctx, address)
+	if !ok {
+		return 0, ErrAppAccountNotFound(address)
 	}
 
 	user.SlashCount++
-	k.accountKeeper.SetAccount(ctx, user)
+	k.setAppAccount(ctx, user)
 
 	if user.SlashCount >= k.GetParams(ctx).MaxSlashCount {
 		jailEndTime := ctx.BlockHeader().Time.Add(k.GetParams(ctx).JailDuration)
-		err = k.JailUntil(ctx, user.GetAddress(), jailEndTime)
+		err := k.JailUntil(ctx, user.Addresses[0], jailEndTime)
 		if err != nil {
 			return 0, err
 		}
@@ -147,36 +184,19 @@ func (k Keeper) IncrementSlashCount(ctx sdk.Context, address sdk.AccAddress) (in
 	return user.SlashCount, nil
 }
 
-func (k Keeper) getAccount(ctx sdk.Context, addr sdk.AccAddress) (AppAccount, sdk.Error) {
-	acc := k.accountKeeper.GetAccount(ctx, addr)
-	switch appAcc := acc.(type) {
-	case AppAccount:
-		return appAcc, nil
-	case *auth.BaseAccount:
-		return ToAppAccount(acc), nil
-	default:
-		return AppAccount{}, ErrAppAccountNotFound(addr)
+func (k Keeper) getAppAccount(ctx sdk.Context, addr sdk.AccAddress) (acc AppAccount, ok bool) {
+	accBytes := k.store(ctx).Get(key(addr))
+	if accBytes == nil {
+		return
 	}
+	k.codec.MustUnmarshalBinaryBare(accBytes, &acc)
+
+	return acc, true
 }
 
-func ToAppAccount(acc auth.Account) AppAccount {
-	return AppAccount{
-		BaseAccount: &auth.BaseAccount{
-			Address:       acc.GetAddress(),
-			Coins:         acc.GetCoins(),
-			PubKey:        acc.GetPubKey(),
-			AccountNumber: acc.GetAccountNumber(),
-			Sequence:      acc.GetSequence(),
-		},
-		SlashCount:  0,
-		IsJailed:    false,
-		JailEndTime: time.Time{},
-		CreatedTime: time.Time{},
-	}
-}
-
-func logger(ctx sdk.Context) log.Logger {
-	return ctx.Logger().With("module", ModuleName)
+func (k Keeper) setAppAccount(ctx sdk.Context, acc AppAccount) {
+	accBytes := k.codec.MustMarshalBinaryBare(acc)
+	k.store(ctx).Set(key(acc.PrimaryAddress()), accBytes)
 }
 
 func (k Keeper) setJailEndTimeAccount(ctx sdk.Context, jailEndTime time.Time, addr sdk.AccAddress) {
@@ -187,4 +207,12 @@ func (k Keeper) setJailEndTimeAccount(ctx sdk.Context, jailEndTime time.Time, ad
 func (k Keeper) deleteJailEndTimeAccount(ctx sdk.Context, jailEndTime time.Time, addr sdk.AccAddress) {
 	store := ctx.KVStore(k.storeKey)
 	store.Delete(jailEndTimeAccountKey(jailEndTime, addr))
+}
+
+func (k Keeper) store(ctx sdk.Context) sdk.KVStore {
+	return ctx.KVStore(k.storeKey)
+}
+
+func logger(ctx sdk.Context) log.Logger {
+	return ctx.Logger().With("module", ModuleName)
 }

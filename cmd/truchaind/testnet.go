@@ -85,7 +85,7 @@ Example:
 	cmd.Flags().String(
 		client.FlagChainID, "", "genesis file chain-id, if left blank will be randomly created")
 	cmd.Flags().String(
-		server.FlagMinGasPrices, fmt.Sprintf("0.000006%s", sdk.DefaultBondDenom),
+		server.FlagMinGasPrices, fmt.Sprintf("0.000006%s", app.StakeDenom),
 		"Minimum gas prices to accept for transactions; All fees in a tx must meet this minimum (e.g. 0.01photino,0.001stake)")
 	return cmd
 }
@@ -194,8 +194,8 @@ func InitTestnet(config *tmconfig.Config, cdc *codec.Codec, mbm sdk.ModuleBasicM
 		accs = append(accs, genaccounts.GenesisAccount{
 			Address: addr,
 			Coins: sdk.Coins{
-				sdk.NewCoin(fmt.Sprintf("%stoken", nodeDirName), accTokens),
-				sdk.NewCoin(app.StakeDenom, accStakingTokens),
+				sdk.NewCoin(app.StakeDenom, accTokens),
+				sdk.NewCoin(sdk.DefaultBondDenom, accStakingTokens),
 			},
 		})
 

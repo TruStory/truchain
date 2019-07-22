@@ -16,7 +16,7 @@ func TestQuerySlash_Success(t *testing.T) {
 
 	stakeID := uint64(1)
 	creator := keeper.GetParams(ctx).SlashAdmins[0]
-	createdSlash, err := keeper.CreateSlash(ctx, stakeID, SlashTypeUnhelpful, SlashReasonPlagiarism, "", creator)
+	createdSlash, _, err := keeper.CreateSlash(ctx, stakeID, SlashTypeUnhelpful, SlashReasonPlagiarism, "", creator)
 	assert.NoError(t, err)
 
 	params := keeper.codec.MustMarshalJSON(QuerySlashParams{
@@ -62,11 +62,11 @@ func TestQuerySlashes_Success(t *testing.T) {
 
 	stakeID := uint64(1)
 	creator := keeper.GetParams(ctx).SlashAdmins[0]
-	first, err := keeper.CreateSlash(ctx, stakeID, SlashTypeUnhelpful, SlashReasonPlagiarism, "", creator)
+	first, _, err := keeper.CreateSlash(ctx, stakeID, SlashTypeUnhelpful, SlashReasonPlagiarism, "", creator)
 	assert.Nil(t, err)
 
 	creator2 := keeper.GetParams(ctx).SlashAdmins[1]
-	another, err := keeper.CreateSlash(ctx, stakeID, SlashTypeUnhelpful, SlashReasonPlagiarism, "", creator2)
+	another, _, err := keeper.CreateSlash(ctx, stakeID, SlashTypeUnhelpful, SlashReasonPlagiarism, "", creator2)
 	assert.Nil(t, err)
 
 	result, sdkErr := querySlashes(ctx, keeper)

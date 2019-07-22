@@ -5,6 +5,9 @@ import (
 	"fmt"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
+
+	app "github.com/TruStory/truchain/types"
+	"github.com/TruStory/truchain/x/slashing/tags"
 )
 
 // NewHandler creates a new handler for slashing module
@@ -29,7 +32,7 @@ func handleMsgSlashArgument(ctx sdk.Context, k Keeper, msg MsgSlashArgument) sdk
 		return err.Result()
 	}
 
-	slash, err := k.CreateSlash(ctx, msg.ArgumentID, msg.SlashType, msg.SlashReason, msg.SlashDetailedReason, msg.Creator)
+	slash, punishmentResults, err := k.CreateSlash(ctx, msg.ArgumentID, msg.SlashType, msg.SlashReason, msg.SlashDetailedReason, msg.Creator)
 	if err != nil {
 		return err.Result()
 	}
@@ -39,8 +42,35 @@ func handleMsgSlashArgument(ctx sdk.Context, k Keeper, msg MsgSlashArgument) sdk
 		return sdk.ErrInternal(fmt.Sprintf("Marshal result error: %s", jsonErr)).Result()
 	}
 
+	argument, ok := k.stakingKeeper.Argument(ctx, slash.ArgumentID)
+	if !ok {
+		return sdk.ErrInternal("couldn't find argument").Result()
+	}
+	isJailed, err := k.accountKeeper.IsJailed(ctx, argument.Creator)
+	if err != nil {
+		return err.Result()
+	}
+	resultTags := append(app.PushTag,
+		sdk.NewTags(
+			tags.Category, tags.TxCategory,
+			tags.Action, tags.ActionCreateSlash,
+			tags.ArgumentCreator, argument.Creator.String(),
+		)...,
+	)
+	if isJailed {
+		resultTags = append(resultTags, sdk.NewTags(tags.ArgumentCreatorJailed, "jailed")...)
+	}
+
+	if len(punishmentResults) > 0 {
+		json, jsonErr := json.Marshal(punishmentResults)
+		if jsonErr != nil {
+			return sdk.ErrInternal(fmt.Sprintf("Marshal result error: %s", jsonErr)).Result()
+		}
+		resultTags = append(resultTags, sdk.NewTags(tags.SlashResults, json)...)
+	}
 	return sdk.Result{
 		Data: res,
+		Tags: resultTags,
 	}
 }
 

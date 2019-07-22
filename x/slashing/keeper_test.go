@@ -17,7 +17,7 @@ func TestNewSlash_Success(t *testing.T) {
 
 	stakeID := uint64(1)
 	creator := keeper.GetParams(ctx).SlashAdmins[0]
-	slash, err := keeper.CreateSlash(ctx, stakeID, SlashTypeUnhelpful, SlashReasonPlagiarism, "", creator)
+	slash, _, err := keeper.CreateSlash(ctx, stakeID, SlashTypeUnhelpful, SlashReasonPlagiarism, "", creator)
 	assert.NoError(t, err)
 
 	assert.NotZero(t, slash.ID)
@@ -30,7 +30,7 @@ func TestNewSlash_InvalidArgument(t *testing.T) {
 
 	invalidArgumentID := uint64(404)
 	creator := keeper.GetParams(ctx).SlashAdmins[0]
-	_, err := keeper.CreateSlash(ctx, invalidArgumentID, SlashTypeUnhelpful, SlashReasonPlagiarism, "", creator)
+	_, _, err := keeper.CreateSlash(ctx, invalidArgumentID, SlashTypeUnhelpful, SlashReasonPlagiarism, "", creator)
 
 	assert.NotNil(t, err)
 	assert.Equal(t, ErrInvalidArgument(invalidArgumentID).Code(), err.Code())
@@ -42,7 +42,7 @@ func TestNewSlash_InvalidDetailedReason(t *testing.T) {
 	stakeID := uint64(1)
 	creator := keeper.GetParams(ctx).SlashAdmins[0]
 	longDetailedReason := "This is a very very very descriptive reason to slash an argument. I am writing it in this detail to make the validation fail. I hope it works!"
-	_, err := keeper.CreateSlash(ctx, stakeID, SlashTypeUnhelpful, SlashReasonOther, longDetailedReason, creator)
+	_, _, err := keeper.CreateSlash(ctx, stakeID, SlashTypeUnhelpful, SlashReasonOther, longDetailedReason, creator)
 
 	assert.NotNil(t, err)
 	assert.Equal(t, ErrInvalidSlashReason("").Code(), err.Code())
@@ -53,7 +53,7 @@ func TestNewSlash_ErrNotEnoughEarnedStake(t *testing.T) {
 
 	stakeID := uint64(1)
 	invalidCreator := sdk.AccAddress([]byte{1, 2})
-	_, err := keeper.CreateSlash(ctx, stakeID, SlashTypeUnhelpful, SlashReasonPlagiarism, "", invalidCreator)
+	_, _, err := keeper.CreateSlash(ctx, stakeID, SlashTypeUnhelpful, SlashReasonPlagiarism, "", invalidCreator)
 
 	assert.NotNil(t, err)
 	assert.Equal(t, ErrNotEnoughEarnedStake(invalidCreator).Code(), err.Code())
@@ -64,12 +64,11 @@ func TestSlash_Success(t *testing.T) {
 
 	stakeID := uint64(1)
 	creator := keeper.GetParams(ctx).SlashAdmins[0]
-	createdSlash, err := keeper.CreateSlash(ctx, stakeID, SlashTypeUnhelpful, SlashReasonPlagiarism, "", creator)
+	createdSlash, _, err := keeper.CreateSlash(ctx, stakeID, SlashTypeUnhelpful, SlashReasonPlagiarism, "", creator)
 	assert.Nil(t, err)
 
 	returnedSlash, err := keeper.Slash(ctx, createdSlash.ID)
-
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 	assert.Equal(t, createdSlash, returnedSlash)
 }
 
@@ -78,7 +77,7 @@ func TestSlash_ErrNotFound(t *testing.T) {
 
 	stakeID := uint64(1)
 	creator := keeper.GetParams(ctx).SlashAdmins[0]
-	_, err := keeper.CreateSlash(ctx, stakeID, SlashTypeUnhelpful, SlashReasonPlagiarism, "", creator)
+	_, _, err := keeper.CreateSlash(ctx, stakeID, SlashTypeUnhelpful, SlashReasonPlagiarism, "", creator)
 	assert.Nil(t, err)
 
 	_, err = keeper.Slash(ctx, uint64(404))
@@ -96,11 +95,11 @@ func TestSlashes_Success(t *testing.T) {
 
 	stakeID := uint64(1)
 	creator := keeper.GetParams(ctx).SlashAdmins[0]
-	first, err := keeper.CreateSlash(ctx, stakeID, SlashTypeUnhelpful, SlashReasonPlagiarism, "", creator)
+	first, _, err := keeper.CreateSlash(ctx, stakeID, SlashTypeUnhelpful, SlashReasonPlagiarism, "", creator)
 	assert.NoError(t, err)
 
 	creator2 := keeper.GetParams(ctx).SlashAdmins[1]
-	another, err := keeper.CreateSlash(ctx, stakeID, SlashTypeUnhelpful, SlashReasonPlagiarism, "", creator2)
+	another, _, err := keeper.CreateSlash(ctx, stakeID, SlashTypeUnhelpful, SlashReasonPlagiarism, "", creator2)
 	assert.NoError(t, err)
 
 	all := keeper.Slashes(ctx)
@@ -133,16 +132,16 @@ func Test_punishment(t *testing.T) {
 	claim, _ = keeper.claimKeeper.Claim(ctx, 1)
 	assert.Equal(t, stake.Amount.String(), claim.TotalChallenged.String())
 
-	//staker should have = starting balance - stake amount
+	// staker should have = starting balance - stake amount
 	stakerEndingBalance := keeper.bankKeeper.GetCoins(ctx, staker)
 	expectedBalance := stakerStartingBalance.Sub(sdk.Coins{stake.Amount})
 	assert.Equal(t, expectedBalance.String(), stakerEndingBalance.String())
 
 	// this also does a punish because slasher is an admin
-	_, err = keeper.CreateSlash(ctx, argument.ID, SlashTypeUnhelpful, SlashReasonPlagiarism, "", slasher)
+	_, _, err = keeper.CreateSlash(ctx, argument.ID, SlashTypeUnhelpful, SlashReasonPlagiarism, "", slasher)
 	assert.NoError(t, err)
 
-	//staker should have = starting balance - (stake amount * slashMagnitude)
+	// staker should have = starting balance - (stake amount * slashMagnitude)
 	slashPenalty := sdk.NewCoin(stake.Amount.Denom, stake.Amount.Amount.MulRaw(int64(slashMagnitude)))
 	stakerEndingBalance = keeper.bankKeeper.GetCoins(ctx, staker)
 	expectedBalance = stakerStartingBalance.Sub(sdk.Coins{slashPenalty})

@@ -35,7 +35,32 @@ func TestQueryAppAccount_Success(t *testing.T) {
 	var returnedAppAccount AppAccount
 	jsonErr = keeper.codec.UnmarshalJSON(result, &returnedAppAccount)
 	assert.Nil(t, jsonErr)
-	assert.Equal(t, returnedAppAccount.GetAddress(), createdAppAccount.GetAddress())
+	assert.Equal(t, returnedAppAccount.PrimaryAddress(), createdAppAccount.PrimaryAddress())
+}
+
+func TestQueryPrimaryAccount_Success(t *testing.T) {
+	ctx, keeper := mockDB()
+
+	_, publicKey, address, coins := getFakeAppAccountParams()
+	keeper.CreateAppAccount(ctx, address, coins, publicKey)
+
+	params, jsonErr := json.Marshal(QueryAppAccountParams{
+		Address: address,
+	})
+	assert.Nil(t, jsonErr)
+
+	query := abci.RequestQuery{
+		Path: fmt.Sprintf("/custom/%s/%s", ModuleName, QueryPrimaryAccount),
+		Data: params,
+	}
+
+	result, sdkErr := queryPrimaryAccount(ctx, query, keeper)
+	assert.NoError(t, sdkErr)
+
+	var returnedPrimaryAccount PrimaryAccount
+	jsonErr = keeper.codec.UnmarshalJSON(result, &returnedPrimaryAccount)
+	assert.NoError(t, jsonErr)
+	assert.Equal(t, publicKey, returnedPrimaryAccount.GetPubKey())
 }
 
 func TestQueryAppAccounts_Success(t *testing.T) {
@@ -72,7 +97,7 @@ func TestQueryAppAccounts_Success(t *testing.T) {
 
 	jsonErr = ModuleCodec.UnmarshalJSON(resBytes, &returnedAppAccounts)
 	assert.NoError(t, jsonErr)
-	assert.Equal(t, returnedAppAccounts[0].GetAddress(), createdAppAccount.GetAddress())
+	assert.Equal(t, returnedAppAccounts[0].PrimaryAddress(), createdAppAccount.PrimaryAddress())
 	assert.Len(t, returnedAppAccounts, 3)
 }
 

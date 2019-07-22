@@ -10,9 +10,10 @@ import (
 
 // query endpoints supported by the truchain Querier
 const (
-	QueryAppAccount  = "account"
-	QueryAppAccounts = "accounts"
-	QueryParams      = "params"
+	QueryAppAccount     = "account"
+	QueryPrimaryAccount = "primary_account"
+	QueryAppAccounts    = "accounts"
+	QueryParams         = "params"
 )
 
 // QueryAppAccountParams are params for querying app accounts by address queries
@@ -25,6 +26,11 @@ type QueryAppAccountsParams struct {
 	Addresses []sdk.AccAddress `json:"addresses"`
 }
 
+// QueryPrimaryAccountParams are params for querying app accounts by address queries
+type QueryPrimaryAccountParams struct {
+	Address sdk.AccAddress `json:"address"`
+}
+
 // NewQuerier creates a new querier
 func NewQuerier(keeper Keeper) sdk.Querier {
 	return func(ctx sdk.Context, path []string, request abci.RequestQuery) ([]byte, sdk.Error) {
@@ -33,6 +39,8 @@ func NewQuerier(keeper Keeper) sdk.Querier {
 			return queryAppAccount(ctx, request, keeper)
 		case QueryAppAccounts:
 			return queryAppAccounts(ctx, request, keeper)
+		case QueryPrimaryAccount:
+			return queryPrimaryAccount(ctx, request, keeper)
 		case QueryParams:
 			return queryParams(ctx, keeper)
 		default:
@@ -47,12 +55,31 @@ func queryAppAccount(ctx sdk.Context, request abci.RequestQuery, k Keeper) (resu
 		return
 	}
 
-	appAccount, err := k.getAccount(ctx, params.Address)
-	if err != nil {
-		return
+	appAccount, ok := k.getAppAccount(ctx, params.Address)
+	if !ok {
+		return nil, ErrAppAccountNotFound(params.Address)
 	}
 
 	result, jsonErr := codec.MarshalJSONIndent(k.codec, appAccount)
+	if jsonErr != nil {
+		return nil, sdk.ErrInternal(sdk.AppendMsgToErr("could not marshal result to JSON", jsonErr.Error()))
+	}
+
+	return result, nil
+}
+
+func queryPrimaryAccount(ctx sdk.Context, request abci.RequestQuery, k Keeper) (result []byte, err sdk.Error) {
+	params := QueryPrimaryAccountParams{}
+	if err = unmarshalQueryParams(request, &params); err != nil {
+		return
+	}
+
+	primaryAccount, err := k.PrimaryAccount(ctx, params.Address)
+	if err != nil {
+		return nil, ErrAppAccountNotFound(params.Address)
+	}
+
+	result, jsonErr := codec.MarshalJSONIndent(k.codec, primaryAccount)
 	if jsonErr != nil {
 		return nil, sdk.ErrInternal(sdk.AppendMsgToErr("could not marshal result to JSON", jsonErr.Error()))
 	}
@@ -69,9 +96,9 @@ func queryAppAccounts(ctx sdk.Context, request abci.RequestQuery, k Keeper) (res
 	accounts := make([]AppAccount, 0, len(params.Addresses))
 
 	for _, addr := range params.Addresses {
-		appAccount, err := k.getAccount(ctx, addr)
-		if err != nil {
-			return result, err
+		appAccount, ok := k.getAppAccount(ctx, addr)
+		if !ok {
+			return nil, ErrAppAccountNotFound(addr)
 		}
 		accounts = append(accounts, appAccount)
 	}
