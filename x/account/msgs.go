@@ -1,6 +1,5 @@
 package account
 
-
 import (
 	"fmt"
 
@@ -11,6 +10,8 @@ import (
 const (
 	// TypeMsgRegisterKey represents the type of the message for registering the key
 	TypeMsgRegisterKey = "register_key"
+	// TypeMsgUpdateParams represents the type of
+	TypeMsgUpdateParams = "update_params"
 )
 
 // MsgRegisterKey defines the message to register a new key
@@ -61,4 +62,39 @@ func (msg MsgRegisterKey) GetSignBytes() []byte {
 // GetSigners implements Msg. Returns the registrar as the signer.
 func (msg MsgRegisterKey) GetSigners() []sdk.AccAddress {
 	return []sdk.AccAddress{msg.Registrar}
+}
+
+// MsgUpdateParams defines the message to remove an admin
+type MsgUpdateParams struct {
+	Updates map[string]interface{} `json:"updates"`
+	Updater sdk.AccAddress         `json:"updater"`
+}
+
+// NewMsgUpdateParams returns the message to update the params
+func NewMsgUpdateParams(updates map[string]interface{}) MsgUpdateParams {
+	return MsgUpdateParams{
+		Updates: updates,
+	}
+}
+
+// ValidateBasic implements Msg
+func (msg MsgUpdateParams) ValidateBasic() sdk.Error {
+	return nil
+}
+
+// Route implements Msg
+func (msg MsgUpdateParams) Route() string { return RouterKey }
+
+// Type implements Msg
+func (msg MsgUpdateParams) Type() string { return TypeMsgUpdateParams }
+
+// GetSignBytes implements Msg
+func (msg MsgUpdateParams) GetSignBytes() []byte {
+	msgBytes := ModuleCodec.MustMarshalJSON(msg)
+	return sdk.MustSortJSON(msgBytes)
+}
+
+// GetSigners implements Msg. Returns the remover as the signer.
+func (msg MsgUpdateParams) GetSigners() []sdk.AccAddress {
+	return []sdk.AccAddress{sdk.AccAddress(msg.Updater)}
 }

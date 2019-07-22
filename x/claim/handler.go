@@ -1,6 +1,7 @@
 package claim
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/url"
 
@@ -13,6 +14,8 @@ func NewHandler(keeper Keeper) sdk.Handler {
 		switch msg := msg.(type) {
 		case MsgCreateClaim:
 			return handleMsgCreateClaim(ctx, keeper, msg)
+		case MsgUpdateParams:
+			return handleMsgUpdateParams(ctx, keeper, msg)
 		default:
 			errMsg := fmt.Sprintf("Unrecognized claim message type: %T", msg)
 			return sdk.ErrUnknownRequest(errMsg).Result()
@@ -45,3 +48,24 @@ func handleMsgCreateClaim(ctx sdk.Context, keeper Keeper, msg MsgCreateClaim) sd
 		Data: res,
 	}
 }
+
+func handleMsgUpdateParams(ctx sdk.Context, k Keeper, msg MsgUpdateParams) sdk.Result {
+	if err := msg.ValidateBasic(); err != nil {
+		return err.Result()
+	}
+
+	err := k.UpdateParams(ctx, msg.Updates)
+	if err != nil {
+		return err.Result()
+	}
+
+	res, jsonErr := json.Marshal(true)
+	if jsonErr != nil {
+		return sdk.ErrInternal(fmt.Sprintf("Marshal result error: %s", jsonErr)).Result()
+	}
+
+	return sdk.Result{
+		Data: res,
+	}
+}
+

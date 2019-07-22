@@ -39,3 +39,17 @@ func (k Keeper) GetParams(ctx sdk.Context) Params {
 func (k Keeper) SetParams(ctx sdk.Context, params Params) {
 	k.paramStore.SetParamSet(ctx, &params)
 }
+
+// UpdateParams updates the required params
+func (k Keeper) UpdateParams(ctx sdk.Context, updatesMap map[string]interface{}) sdk.Error {
+	current := k.GetParams(ctx)
+	updated := k.getUpdatedParams(current, updatesMap)
+	k.SetParams(ctx, updated)
+
+	return nil
+}
+
+func (k Keeper) getUpdatedParams(current Params, updatesMap map[string]interface{}) Params {
+	// TODO: to be implemented
+	return current
+}

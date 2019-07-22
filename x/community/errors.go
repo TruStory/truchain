@@ -33,8 +33,5 @@ func ErrCreatorNotAuthorised() sdk.Error {
 
 // ErrJSONParse throws an error on failed JSON parsing
 func ErrJSONParse(err error) sdk.Error {
-	return sdk.NewError(
-		DefaultCodespace,
-		ErrorCodeJSONParsing,
-		"JSON parsing error: "+err.Error())
+	return sdk.NewError(DefaultCodespace, ErrorCodeJSONParsing, "JSON parsing error: "+err.Error())
 }

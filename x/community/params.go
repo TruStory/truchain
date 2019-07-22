@@ -69,3 +69,52 @@ func (k Keeper) SetParams(ctx sdk.Context, params Params) {
 	k.paramStore.SetParamSet(ctx, &params)
 	logger.Info(fmt.Sprintf("Loaded community params: %+v", params))
 }
+
+// UpdateParams updates the required params
+func (k Keeper) UpdateParams(ctx sdk.Context, updatesMap map[string]interface{}) sdk.Error {
+	current := k.GetParams(ctx)
+	updated := k.getUpdatedParams(current, updatesMap)
+
+	k.SetParams(ctx, updated)
+
+	return nil
+	// var paramUpdates Params
+	// msConfig := &mapstructure.DecoderConfig{
+	// 	TagName:          "json",
+	// 	WeaklyTypedInput: true,
+	// 	Result:           &paramUpdates,
+	// }
+	// decoder, err := mapstructure.NewDecoder(msConfig)
+	// if err != nil {
+	// 	return ErrJSONParse(err)
+	// }
+	// err = decoder.Decode(updatesMap)
+	// if err != nil {
+	// 	return ErrJSONParse(err)
+	// }
+
+	// rParams := reflect.TypeOf(current)
+	// for field, _ := range updatesMap {
+	// 	updateParam(&current, paramUpdates, field)
+	// }
+}
+
+func (k Keeper) getUpdatedParams(current Params, updatesMap map[string]interface{}) Params {
+	return current
+}
+
+func updateParam(current *Params, changes Params, field string) {
+	// tCurrent := reflect.TypeOf(current)
+	// vCurrent := reflect.ValueOf(current)
+	// tChanges := reflect.TypeOf(changes)
+	// vChanges := reflect.ValueOf(changes)
+	// for i := 0; i < tCurrent.NumField(); i++ {
+	// 	rField := tCurrent.Field(i)
+	// 	param := rField.Tag.Get("json")
+	// 	if param == field {
+	// 		vCurrent.Elem().FieldByName(rField.Name).Set(
+	// 			vChanges.FieldByIndex(i).Interface()
+	// 		)
+	// 	}
+	// }
+}
