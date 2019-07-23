@@ -22,6 +22,7 @@ const (
 	ErrorCodeInvalidSourceURL            CodeType = 107
 	ErrorCodeCreatorJailed               CodeType = 108
 	ErrorCodeJSONParsing                 CodeType = 109
+	ErrorCodeUnauthorisedAddress         CodeType = 110
 )
 
 // ErrInvalidBodyTooShort throws an error on invalid claim body
@@ -78,4 +79,12 @@ func ErrJSONParse(err error) sdk.Error {
 		DefaultCodespace,
 		ErrorCodeJSONParsing,
 		"JSON parsing error: "+err.Error())
+}
+
+// ErrUnauthorisedAddress throws an error on failed JSON parsing
+func ErrUnauthorisedAddress() sdk.Error {
+	return sdk.NewError(
+		DefaultCodespace,
+		ErrorCodeUnauthorisedAddress,
+		"This address cannot perform this action.")
 }

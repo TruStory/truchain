@@ -76,7 +76,12 @@ func (k Keeper) SubmitClaim(ctx sdk.Context, body, communityID string,
 }
 
 // EditClaim allows admins to edit the body of a claim
-func (k Keeper) EditClaim(ctx sdk.Context, id uint64, body string) (claim Claim, err sdk.Error) {
+func (k Keeper) EditClaim(ctx sdk.Context, id uint64, body string, editor sdk.AccAddress) (claim Claim, err sdk.Error) {
+	if !k.isAdmin(ctx, editor) {
+		err = ErrUnauthorisedAddress()
+		return
+	}
+
 	err = k.validateLength(ctx, body)
 	if err != nil {
 		return
@@ -200,6 +205,15 @@ func (k Keeper) SubtractChallengeStake(ctx sdk.Context, id uint64, stake sdk.Coi
 	k.setClaim(ctx, claim)
 
 	return nil
+}
+
+func (k Keeper) isAdmin(ctx sdk.Context, address sdk.AccAddress) bool {
+	for _, admin := range k.GetParams(ctx).ClaimAdmins {
+		if address.Equals(admin) {
+			return true
+		}
+	}
+	return false
 }
 
 func (k Keeper) validateLength(ctx sdk.Context, body string) sdk.Error {
