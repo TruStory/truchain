@@ -75,6 +75,25 @@ func (k Keeper) SubmitClaim(ctx sdk.Context, body, communityID string,
 	return claim, nil
 }
 
+// EditClaim allows admins to edit the body of a claim
+func (k Keeper) EditClaim(ctx sdk.Context, id uint64, body string) (claim Claim, err sdk.Error) {
+	err = k.validateLength(ctx, body)
+	if err != nil {
+		return
+	}
+
+	claim, ok := k.Claim(ctx, id)
+	if !ok {
+		err = ErrUnknownClaim(id)
+		return
+	}
+
+	claim.Body = body
+	k.setClaim(ctx, claim)
+
+	return
+}
+
 // Claim gets a single claim by its ID
 func (k Keeper) Claim(ctx sdk.Context, id uint64) (claim Claim, ok bool) {
 	store := ctx.KVStore(k.storeKey)

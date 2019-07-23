@@ -146,3 +146,20 @@ func TestKeeper_AddBackingChallengeStake(t *testing.T) {
 	assert.Equal(t, sdk.NewInt64Coin(app.StakeDenom, 85*app.Shanev).String(), c.TotalBacked.String())
 	assert.Equal(t, sdk.NewInt64Coin(app.StakeDenom, 75*app.Shanev).String(), c.TotalChallenged.String())
 }
+
+func TestEditClaim_Success(t *testing.T) {
+	ctx, keeper := mockDB()
+
+	claim := createFakeClaim(ctx, keeper)
+	updatedBody := "This is the new claim body. Old wasn't gold anymore."
+
+	updated, err := keeper.EditClaim(ctx, claim.ID, updatedBody)
+	assert.NoError(t, err)
+
+	refetched, ok := keeper.Claim(ctx, claim.ID)
+	assert.Equal(t, ok, true)
+
+	assert.NotEqual(t, claim.Body, updatedBody)
+	assert.Equal(t, updated.Body, updatedBody)
+	assert.Equal(t, updated, refetched)
+}
