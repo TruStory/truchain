@@ -128,6 +128,11 @@ func (k Keeper) JailUntil(ctx sdk.Context, address sdk.AccAddress, until time.Ti
 	if !ok {
 		return ErrAppAccountNotFound(address)
 	}
+
+	// delete previous jail time
+	if user.IsJailed {
+		k.deleteJailEndTimeAccount(ctx, user.JailEndTime, user.Addresses[0])
+	}
 	user.IsJailed = true
 	user.JailEndTime = until
 
