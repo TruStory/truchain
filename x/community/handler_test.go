@@ -31,6 +31,24 @@ func TestHandleMsgNewCommunity(t *testing.T) {
 	assert.NoError(t, err)
 }
 
+func TestHandleMsgUpdateParams(t *testing.T) {
+	ctx, keeper := mockDB()
+	handler := NewHandler(keeper)
+	assert.NotNil(t, handler) // assert handler is present
+
+	updates := map[string]interface{}{
+		"min_id_length": "20",
+	}
+	updater := sdk.AccAddress([]byte{1, 2})
+	msg := NewMsgUpdateParams(updates, updater)
+	assert.NotNil(t, msg) // assert msgs can be created
+
+	result := handler(ctx, msg)
+	var success bool
+	err := json.Unmarshal(result.Data, &success)
+	assert.NoError(t, err)
+}
+
 func TestByzantineMsg(t *testing.T) {
 	ctx, keeper := mockDB()
 

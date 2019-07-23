@@ -27,3 +27,17 @@ func TestMsgNewCommunity_InvalidCreator(t *testing.T) {
 	assert.NotNil(t, err)
 	assert.Equal(t, sdk.ErrInvalidAddress("").Code(), err.Code())
 }
+
+func TestMsgUpdateParams_Success(t *testing.T) {
+	updates := map[string]interface{}{
+		"min_id_length": "20",
+	}
+	updater := sdk.AccAddress([]byte{1, 2})
+	msg := NewMsgUpdateParams(updates, updater)
+	err := msg.ValidateBasic()
+	assert.Nil(t, err)
+	assert.Equal(t, msg.Updates, updates)
+	assert.Equal(t, msg.Updater, updater)
+	assert.Equal(t, ModuleName, msg.Route())
+	assert.Equal(t, TypeMsgUpdateParams, msg.Type())
+}

@@ -1,6 +1,7 @@
 package community
 
 import (
+	"fmt"
 	"testing"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -111,4 +112,17 @@ func TestCommunities_Success(t *testing.T) {
 	assert.Equal(t, all[1].ID, "meme")
 	assert.Equal(t, all[2].ID, first.ID)
 	assert.Equal(t, all[3].ID, another.ID)
+}
+
+func TestUpdateParams_Success(t *testing.T) {
+	ctx, keeper := mockDB()
+
+	current := keeper.GetParams(ctx)
+	updates := map[string]interface{}{
+		"min_id_length": fmt.Sprintf("%v", current.MinIDLength+20),
+	}
+	keeper.UpdateParams(ctx, updates)
+
+	updated := keeper.GetParams(ctx)
+	assert.Equal(t, current.MinIDLength+20, updated.MinIDLength)
 }

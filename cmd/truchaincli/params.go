@@ -4,8 +4,6 @@ import (
 	"reflect"
 	"strings"
 
-	"github.com/mitchellh/mapstructure"
-
 	"github.com/TruStory/truchain/x/community"
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/codec"
@@ -42,19 +40,6 @@ func CommunityParamsCmd(cdc *codec.Codec) *cobra.Command {
 					mapInput[param] = input
 				}
 			})
-			msConfig := &mapstructure.DecoderConfig{
-				TagName:          "json",
-				WeaklyTypedInput: true,
-				Result:           &params,
-			}
-			decoder, err := mapstructure.NewDecoder(msConfig)
-			if err != nil {
-				panic(err)
-			}
-			err = decoder.Decode(mapInput)
-			if err != nil {
-				panic(err)
-			}
 
 			return nil
 		},

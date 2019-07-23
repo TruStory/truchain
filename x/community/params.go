@@ -2,6 +2,9 @@ package community
 
 import (
 	"fmt"
+	"reflect"
+
+	"github.com/mitchellh/mapstructure"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/params"
@@ -74,47 +77,44 @@ func (k Keeper) SetParams(ctx sdk.Context, params Params) {
 func (k Keeper) UpdateParams(ctx sdk.Context, updatesMap map[string]interface{}) sdk.Error {
 	current := k.GetParams(ctx)
 	updated := k.getUpdatedParams(current, updatesMap)
-
 	k.SetParams(ctx, updated)
 
 	return nil
-	// var paramUpdates Params
-	// msConfig := &mapstructure.DecoderConfig{
-	// 	TagName:          "json",
-	// 	WeaklyTypedInput: true,
-	// 	Result:           &paramUpdates,
-	// }
-	// decoder, err := mapstructure.NewDecoder(msConfig)
-	// if err != nil {
-	// 	return ErrJSONParse(err)
-	// }
-	// err = decoder.Decode(updatesMap)
-	// if err != nil {
-	// 	return ErrJSONParse(err)
-	// }
-
-	// rParams := reflect.TypeOf(current)
-	// for field, _ := range updatesMap {
-	// 	updateParam(&current, paramUpdates, field)
-	// }
 }
 
 func (k Keeper) getUpdatedParams(current Params, updatesMap map[string]interface{}) Params {
-	return current
+	updated := current
+	var updatesStruct Params
+	msConfig := &mapstructure.DecoderConfig{
+		TagName:          "json",
+		WeaklyTypedInput: true,
+		Result:           &updatesStruct,
+	}
+	decoder, err := mapstructure.NewDecoder(msConfig)
+	if err != nil {
+		panic(err)
+	}
+	err = decoder.Decode(updatesMap)
+	if err != nil {
+		panic(err)
+	}
+
+	mapParams(updatesStruct, func(param string, index int) {
+		reflect.ValueOf(&updated).Elem().FieldByName(param).Set(
+			reflect.ValueOf(
+				reflect.ValueOf(updatesStruct).FieldByName(param).Interface(),
+			),
+		)
+	})
+
+	return updated
 }
 
-func updateParam(current *Params, changes Params, field string) {
-	// tCurrent := reflect.TypeOf(current)
-	// vCurrent := reflect.ValueOf(current)
-	// tChanges := reflect.TypeOf(changes)
-	// vChanges := reflect.ValueOf(changes)
-	// for i := 0; i < tCurrent.NumField(); i++ {
-	// 	rField := tCurrent.Field(i)
-	// 	param := rField.Tag.Get("json")
-	// 	if param == field {
-	// 		vCurrent.Elem().FieldByName(rField.Name).Set(
-	// 			vChanges.FieldByIndex(i).Interface()
-	// 		)
-	// 	}
-	// }
+// mapParams walks over each param
+func mapParams(params interface{}, fn func(param string, index int)) {
+	rParams := reflect.TypeOf(params)
+	for i := 0; i < rParams.NumField(); i++ {
+		param := rParams.Field(i).Name
+		fn(param, i)
+	}
 }

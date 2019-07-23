@@ -156,9 +156,10 @@ type MsgUpdateParams struct {
 }
 
 // NewMsgUpdateParams returns the message to update the params
-func NewMsgUpdateParams(updates map[string]interface{}) MsgUpdateParams {
+func NewMsgUpdateParams(updates map[string]interface{}, updater sdk.AccAddress) MsgUpdateParams {
 	return MsgUpdateParams{
 		Updates: updates,
+		Updater: updater,
 	}
 }
 
