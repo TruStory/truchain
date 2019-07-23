@@ -37,7 +37,7 @@ const (
 
 // default home directories for expected binaries
 var (
-	DefaultCLIHome  = os.ExpandEnv("$HOME/.trucli")
+	DefaultCLIHome  = os.ExpandEnv("$HOME/.truchaincli")
 	DefaultNodeHome = os.ExpandEnv("$HOME/.truchaind")
 	// The ModuleBasicManager is in charge of setting up basic,
 	// non-dependant module elements, such as codec registration
@@ -323,10 +323,6 @@ func MakeCodec() *codec.Codec {
 
 	ModuleBasics.RegisterCodec(cdc)
 	sdk.RegisterCodec(cdc)
-
-	// register other types
-	cdc.RegisterConcrete(&types.AppAccount{}, "types/AppAccount", nil)
-
 	codec.RegisterCrypto(cdc)
 
 	return cdc
