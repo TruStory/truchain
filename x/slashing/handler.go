@@ -77,7 +77,7 @@ func handleMsgUpdateParams(ctx sdk.Context, k Keeper, msg MsgUpdateParams) sdk.R
 		return err.Result()
 	}
 
-	err := k.UpdateParams(ctx, msg.Updates)
+	err := k.UpdateParams(ctx, msg.Updates, msg.UpdatedFields)
 	if err != nil {
 		return err.Result()
 	}

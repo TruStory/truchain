@@ -206,14 +206,17 @@ func (msg MsgRemoveAdmin) GetSigners() []sdk.AccAddress {
 
 // MsgUpdateParams defines the message to remove an admin
 type MsgUpdateParams struct {
-	Updates map[string]interface{} `json:"updates"`
-	Updater sdk.AccAddress         `json:"updater"`
+	Updates       Params         `json:"updates"`
+	UpdatedFields []string       `json:"updated_fields"`
+	Updater       sdk.AccAddress `json:"updater"`
 }
 
 // NewMsgUpdateParams returns the message to update the params
-func NewMsgUpdateParams(updates map[string]interface{}) MsgUpdateParams {
+func NewMsgUpdateParams(updates Params, updatedFields []string, updater sdk.AccAddress) MsgUpdateParams {
 	return MsgUpdateParams{
-		Updates: updates,
+		Updates:       updates,
+		UpdatedFields: updatedFields,
+		Updater:       updater,
 	}
 }
 

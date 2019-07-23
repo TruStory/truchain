@@ -9,6 +9,7 @@ func RegisterCodec(cdc *codec.Codec) {
 	cdc.RegisterConcrete(MsgRegisterKey{}, "truchain/MsgRegisterKey", nil)
 	cdc.RegisterConcrete(AppAccount{}, "truchain/AppAccount", nil)
 	cdc.RegisterConcrete(PrimaryAccount{}, "truchain/PrimaryAccount", nil)
+	cdc.RegisterConcrete(MsgUpdateParams{}, "account/MsgUpdateParams", nil)
 }
 
 // ModuleCodec encodes module codec

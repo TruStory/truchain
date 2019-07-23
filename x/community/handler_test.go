@@ -36,11 +36,12 @@ func TestHandleMsgUpdateParams(t *testing.T) {
 	handler := NewHandler(keeper)
 	assert.NotNil(t, handler) // assert handler is present
 
-	updates := map[string]interface{}{
-		"min_id_length": "20",
+	updates := Params{
+		MinIDLength: 20,
 	}
+	updatedFields := []string{"min_id_length"}
 	updater := sdk.AccAddress([]byte{1, 2})
-	msg := NewMsgUpdateParams(updates, updater)
+	msg := NewMsgUpdateParams(updates, updatedFields, updater)
 	assert.NotNil(t, msg) // assert msgs can be created
 
 	result := handler(ctx, msg)

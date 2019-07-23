@@ -29,11 +29,12 @@ func TestMsgNewCommunity_InvalidCreator(t *testing.T) {
 }
 
 func TestMsgUpdateParams_Success(t *testing.T) {
-	updates := map[string]interface{}{
-		"min_id_length": "20",
+	updates := Params{
+		MinIDLength: 20,
 	}
+	updatedFields := []string{"min_id_length"}
 	updater := sdk.AccAddress([]byte{1, 2})
-	msg := NewMsgUpdateParams(updates, updater)
+	msg := NewMsgUpdateParams(updates, updatedFields, updater)
 	err := msg.ValidateBasic()
 	assert.Nil(t, err)
 	assert.Equal(t, msg.Updates, updates)

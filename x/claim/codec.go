@@ -6,6 +6,7 @@ import "github.com/cosmos/cosmos-sdk/codec"
 func RegisterCodec(c *codec.Codec) {
 	c.RegisterConcrete(MsgCreateClaim{}, "truchain/MsgCreateClaim", nil)
 	c.RegisterConcrete(MsgDeleteClaim{}, "truchain/MsgDeleteClaim", nil)
+	c.RegisterConcrete(MsgUpdateParams{}, "claim/MsgUpdateParams", nil)
 
 	c.RegisterConcrete(Claim{}, "truchain/Claim", nil)
 }

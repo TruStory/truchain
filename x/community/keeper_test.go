@@ -1,7 +1,6 @@
 package community
 
 import (
-	"fmt"
 	"testing"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -118,10 +117,11 @@ func TestUpdateParams_Success(t *testing.T) {
 	ctx, keeper := mockDB()
 
 	current := keeper.GetParams(ctx)
-	updates := map[string]interface{}{
-		"min_id_length": fmt.Sprintf("%v", current.MinIDLength+20),
+	updates := Params{
+		MinIDLength: current.MinIDLength + 20,
 	}
-	keeper.UpdateParams(ctx, updates)
+	updatedFields := []string{"min_id_length"}
+	keeper.UpdateParams(ctx, updates, updatedFields)
 
 	updated := keeper.GetParams(ctx)
 	assert.Equal(t, current.MinIDLength+20, updated.MinIDLength)
