@@ -158,6 +158,11 @@ func (k Keeper) punish(ctx sdk.Context, argumentID uint64) ([]PunishmentResult, 
 					stake.ID,
 					bank.TransactionInterestArgumentCreationSlashed,
 					WithCommunityID(communityID))
+				// remove argument created interest from earned coins
+				k.stakingKeeper.SubtractEarnedCoin(ctx,
+					stake.Result.ArgumentCreator,
+					communityID,
+					stake.Result.ArgumentCreatorReward.Amount)
 				punishmentResults = append(punishmentResults,
 					PunishmentResult{Type: PunishmentInterestSlashed,
 						AppAccAddress: stake.Result.ArgumentCreator,
@@ -167,6 +172,11 @@ func (k Keeper) punish(ctx sdk.Context, argumentID uint64) ([]PunishmentResult, 
 					return punishmentResults, err
 				}
 			case staking.RewardResultUpvoteSplit:
+				// remove agree received interest from earned coins
+				k.stakingKeeper.SubtractEarnedCoin(ctx,
+					stake.Result.ArgumentCreator,
+					communityID,
+					stake.Result.ArgumentCreatorReward.Amount)
 				_, amount, err := k.bankKeeper.SafeSubtractCoin(
 					ctx,
 					stake.Result.ArgumentCreator,
@@ -182,6 +192,11 @@ func (k Keeper) punish(ctx sdk.Context, argumentID uint64) ([]PunishmentResult, 
 						AppAccAddress: stake.Result.ArgumentCreator,
 						Coin:          amount,
 					})
+				// remove agree given interest from earned coins
+				k.stakingKeeper.SubtractEarnedCoin(ctx,
+					stake.Result.StakeCreator,
+					communityID,
+					stake.Result.StakeCreatorReward.Amount)
 				_, amount, err = k.bankKeeper.SafeSubtractCoin(
 					ctx,
 					stake.Result.StakeCreator,
@@ -189,6 +204,7 @@ func (k Keeper) punish(ctx sdk.Context, argumentID uint64) ([]PunishmentResult, 
 					stake.ID,
 					bank.TransactionInterestUpvoteGivenSlashed,
 					WithCommunityID(communityID))
+
 				if err != nil {
 					return punishmentResults, err
 				}

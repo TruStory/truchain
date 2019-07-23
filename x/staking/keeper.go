@@ -476,6 +476,12 @@ func (k Keeper) addEarnedCoin(ctx sdk.Context, user sdk.AccAddress, communityID 
 	k.setEarnedCoins(ctx, user, earnedCoins)
 }
 
+func (k Keeper) SubtractEarnedCoin(ctx sdk.Context, user sdk.AccAddress, communityID string, amount sdk.Int) {
+	earnedCoins := k.getEarnedCoins(ctx, user)
+	earnedCoins = earnedCoins.Sub(sdk.NewCoins(sdk.NewCoin(communityID, amount)))
+	k.setEarnedCoins(ctx, user, earnedCoins)
+}
+
 func (k Keeper) stakeID(ctx sdk.Context) (uint64, sdk.Error) {
 	id, err := k.getID(ctx, StakeIDKey)
 	if err != nil {
