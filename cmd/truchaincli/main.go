@@ -74,7 +74,7 @@ func main() {
 	)
 
 	// prepare and add flags
-	executor := cli.PrepareMainCmd(rootCmd, "BC", os.ExpandEnv("$HOME/.trucli"))
+	executor := cli.PrepareMainCmd(rootCmd, "BC", os.ExpandEnv("$HOME/.truchaincli"))
 	err := executor.Execute()
 	if err != nil {
 		panic(err)
