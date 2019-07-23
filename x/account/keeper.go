@@ -106,23 +106,6 @@ func (k Keeper) PrimaryAccount(ctx sdk.Context, addr sdk.AccAddress) (pAcc Prima
 	return pAcc, nil
 }
 
-// JailedAccountsAfter returns all jailed accounts after jailEndTime
-func (k Keeper) JailedAccountsAfter(ctx sdk.Context, jailEndTime time.Time) (accounts AppAccounts, err sdk.Error) {
-	store := ctx.KVStore(k.storeKey)
-	iterator := store.Iterator(jailEndTimeAccountsKey(jailEndTime), sdk.PrefixEndBytes(JailEndTimeAccountPrefix))
-
-	defer iterator.Close()
-	for ; iterator.Valid(); iterator.Next() {
-		addr := iterator.Value()
-		user, ok := k.getAppAccount(ctx, addr)
-		if ok {
-			accounts = append(accounts, user)
-		}
-	}
-
-	return accounts, nil
-}
-
 // JailedAccountsBefore returns all jailed accounts before jailEndTime
 func (k Keeper) JailedAccountsBefore(ctx sdk.Context, jailEndTime time.Time) (accounts AppAccounts, err sdk.Error) {
 	store := ctx.KVStore(k.storeKey)
