@@ -41,6 +41,7 @@ func handleMsgSlashArgument(ctx sdk.Context, k Keeper, msg MsgSlashArgument) sdk
 		sdk.NewTags(
 			tags.Category, tags.TxCategory,
 			tags.Action, tags.ActionCreateSlash,
+			tags.MinSlashCount, fmt.Sprintf("%d", k.GetParams(ctx).MinSlashCount),
 		)...,
 	)
 	if len(punishmentResults) > 0 {
