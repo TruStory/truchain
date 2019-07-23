@@ -106,11 +106,10 @@ func (k Keeper) PrimaryAccount(ctx sdk.Context, addr sdk.AccAddress) (pAcc Prima
 	return pAcc, nil
 }
 
-// JailedAccountsAfter returns all jailed accounts after jailEndTime
-func (k Keeper) JailedAccountsAfter(ctx sdk.Context, jailEndTime time.Time) (accounts AppAccounts, err sdk.Error) {
+// JailedAccountsBefore returns all jailed accounts before jailEndTime
+func (k Keeper) JailedAccountsBefore(ctx sdk.Context, jailEndTime time.Time) (accounts AppAccounts, err sdk.Error) {
 	store := ctx.KVStore(k.storeKey)
-	iterator := store.Iterator(jailEndTimeAccountsKey(jailEndTime), sdk.PrefixEndBytes(JailEndTimeAccountPrefix))
-
+	iterator := store.Iterator(JailEndTimeAccountPrefix, jailEndTimeAccountsKey(jailEndTime))
 	defer iterator.Close()
 	for ; iterator.Valid(); iterator.Next() {
 		addr := iterator.Value()
@@ -128,6 +127,11 @@ func (k Keeper) JailUntil(ctx sdk.Context, address sdk.AccAddress, until time.Ti
 	user, ok := k.getAppAccount(ctx, address)
 	if !ok {
 		return ErrAppAccountNotFound(address)
+	}
+
+	// delete previous jail time
+	if user.IsJailed {
+		k.deleteJailEndTimeAccount(ctx, user.JailEndTime, user.Addresses[0])
 	}
 	user.IsJailed = true
 	user.JailEndTime = until
@@ -164,10 +168,10 @@ func (k Keeper) IsJailed(ctx sdk.Context, address sdk.AccAddress) (bool, sdk.Err
 }
 
 // IncrementSlashCount increments the slash count of the user
-func (k Keeper) IncrementSlashCount(ctx sdk.Context, address sdk.AccAddress) (int, sdk.Error) {
+func (k Keeper) IncrementSlashCount(ctx sdk.Context, address sdk.AccAddress) (jailed bool, err sdk.Error) {
 	user, ok := k.getAppAccount(ctx, address)
 	if !ok {
-		return 0, ErrAppAccountNotFound(address)
+		return false, ErrAppAccountNotFound(address)
 	}
 
 	user.SlashCount++
@@ -177,11 +181,12 @@ func (k Keeper) IncrementSlashCount(ctx sdk.Context, address sdk.AccAddress) (in
 		jailEndTime := ctx.BlockHeader().Time.Add(k.GetParams(ctx).JailDuration)
 		err := k.JailUntil(ctx, user.Addresses[0], jailEndTime)
 		if err != nil {
-			return 0, err
+			return false, err
 		}
+		return true, nil
 	}
 
-	return user.SlashCount, nil
+	return false, nil
 }
 
 func (k Keeper) getAppAccount(ctx sdk.Context, addr sdk.AccAddress) (acc AppAccount, ok bool) {
