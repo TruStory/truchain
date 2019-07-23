@@ -244,9 +244,17 @@ func (k Keeper) punish(ctx sdk.Context, argumentID uint64) ([]PunishmentResult, 
 		}
 
 		// increment slash count for user (and jail if needed)
-		_, err = k.accountKeeper.IncrementSlashCount(ctx, stake.Creator)
+		jailed, err := k.accountKeeper.IncrementSlashCount(ctx, stake.Creator)
 		if err != nil {
 			return punishmentResults, err
+		}
+		if jailed {
+			punishmentResults = append(punishmentResults,
+				PunishmentResult{
+					Type:          PunishmentJailed,
+					AppAccAddress: stake.Creator,
+				},
+			)
 		}
 	}
 
