@@ -151,6 +151,11 @@ func (k Keeper) punish(ctx sdk.Context, argumentID uint64) ([]PunishmentResult, 
 		if stake.Expired && stake.Result != nil {
 			switch stake.Result.Type {
 			case staking.RewardResultArgumentCreation:
+				// remove argument created interest from earned coins
+				k.stakingKeeper.SubtractEarnedCoin(ctx,
+					stake.Result.ArgumentCreator,
+					communityID,
+					stake.Result.ArgumentCreatorReward.Amount)
 				_, amount, err := k.bankKeeper.SafeSubtractCoin(
 					ctx,
 					stake.Result.ArgumentCreator,
@@ -158,11 +163,6 @@ func (k Keeper) punish(ctx sdk.Context, argumentID uint64) ([]PunishmentResult, 
 					stake.ID,
 					bank.TransactionInterestArgumentCreationSlashed,
 					WithCommunityID(communityID))
-				// remove argument created interest from earned coins
-				k.stakingKeeper.SubtractEarnedCoin(ctx,
-					stake.Result.ArgumentCreator,
-					communityID,
-					stake.Result.ArgumentCreatorReward.Amount)
 				punishmentResults = append(punishmentResults,
 					PunishmentResult{Type: PunishmentInterestSlashed,
 						AppAccAddress: stake.Result.ArgumentCreator,
