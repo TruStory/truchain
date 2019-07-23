@@ -37,12 +37,14 @@ var RegistrationFee = auth.StdFee{
 
 // Tags keys
 const (
-	KeyPushTag             = "tru.event"
+	KeyPushTxTag           = "tru.event.tx"
+	KeyPushBlockTag        = "tru.event.block"
 	KeyCompletedStoriesTag = "tru.event.completedStories"
 )
 
 // PushTag signifies a push notification event for Tendermint
-var PushTag = sdk.NewTags(KeyPushTag, []byte("Push"))
+var PushTxTag = sdk.NewTags(KeyPushTxTag, []byte("Push"))
+var PushBlockTag = sdk.NewTags(KeyPushBlockTag, []byte("Push"))
 
 // MsgResult is the default success response for a chain request
 type MsgResult struct {
