@@ -13,7 +13,7 @@ TruChain is an application-specific blockchain built with [Cosmos SDK](https://c
 
 2. Now let's install truchain.
 
-```bash
+```sh
 mkdir -p github.com/TruStory
 cd TruStory
 git clone https://github.com/TruStory/truchain.git
@@ -44,7 +44,7 @@ This creates:
 
 TruChain currently needs a _registrar_ account to sign new user registration messages.
 
-```
+```sh
 # Add a new key named registrar
 make registrar
 
@@ -68,7 +68,7 @@ A 4-node local testnet can be created with Docker Compose.
 
 NOTE: You will not be able to register accounts because each node won't have a registrar key setup. This restriction will go away after client-side signing.
 
-```
+```sh
 # Build daemon for linux so it can run inside a Docker container
 make build-linux
 
@@ -83,7 +83,7 @@ docker logs -f truchaindnodeN
 
 TruChain can be run as a full node, syncing it's state with another node. First follow the instructions above to install and setup a single node.
 
-```
+```sh
 # Initialize another chain with a new moniker but same chain-id
 truchaind init <moniker-2> --chain-id betanet-1 --home ~/.devnet
 
@@ -107,7 +107,7 @@ If the first node has many blocks, it could take several minutes for the first s
 
 ## Testing
 
-```
+```sh
 # Run linter
 make check
 
@@ -117,7 +117,7 @@ make test
 
 ## API Documentation
 
-```
+```sh
 # Generate a website with documentation
 make doc
 ```
