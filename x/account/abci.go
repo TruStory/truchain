@@ -11,7 +11,7 @@ import (
 
 // EndBlocker called every block, process expiring stakes
 func EndBlocker(ctx sdk.Context, keeper Keeper) sdk.Tags {
-	toUnjail, err := keeper.JailedAccountsAfter(ctx, ctx.BlockHeader().Time)
+	toUnjail, err := keeper.JailedAccountsBefore(ctx, ctx.BlockHeader().Time)
 	if err != nil {
 		panic(err)
 	}
@@ -31,7 +31,7 @@ func EndBlocker(ctx sdk.Context, keeper Keeper) sdk.Tags {
 	if jsonErr != nil {
 		panic(jsonErr)
 	}
-	return append(app.PushTag,
+	return append(app.PushBlockTag,
 		sdk.NewTags(
 			tags.Category, tags.TxCategory,
 			tags.Action, tags.ActionUnjailAccounts,

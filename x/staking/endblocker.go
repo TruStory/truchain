@@ -34,7 +34,7 @@ func EndBlocker(ctx sdk.Context, keeper Keeper) sdk.Tags {
 	if err != nil {
 		panic(err)
 	}
-	return append(app.PushTag,
+	return append(app.PushBlockTag,
 		sdk.NewTags(
 			tags.Category, tags.TxCategory,
 			tags.Action, tags.ActionInterestRewardPaid,
