@@ -41,7 +41,7 @@ func handleMsgSubmitArgument(ctx sdk.Context, keeper Keeper, msg MsgSubmitArgume
 	if codecErr != nil {
 		return sdk.ErrInternal(fmt.Sprintf("Marshal result error: %s", codecErr)).Result()
 	}
-	resultTags := append(app.PushTag,
+	resultTags := append(app.PushTxTag,
 		sdk.NewTags(
 			tags.Category, tags.TxCategory,
 			tags.Action, tags.ActionCreateArgument,
@@ -66,7 +66,7 @@ func handleMsgSubmitUpvote(ctx sdk.Context, keeper Keeper, msg MsgSubmitUpvote) 
 	if codecErr != nil {
 		return sdk.ErrInternal(fmt.Sprintf("Marshal result error: %s", codecErr)).Result()
 	}
-	resultTags := append(app.PushTag,
+	resultTags := append(app.PushTxTag,
 		sdk.NewTags(
 			tags.Category, tags.TxCategory,
 			tags.Action, tags.ActionCreateUpvote,

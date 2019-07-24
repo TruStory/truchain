@@ -32,6 +32,7 @@ const (
 	PunishmentInterestSlashed PunishmentResultType = iota
 	PunishmentStakeSlashed
 	PunishmentCuratorRewarded
+	PunishmentJailed
 )
 
 type PunishmentResult struct {
