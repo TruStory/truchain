@@ -1,7 +1,6 @@
 package community
 
 import (
-	"encoding/json"
 	"fmt"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -34,7 +33,7 @@ func handleMsgNewCommunity(ctx sdk.Context, k Keeper, msg MsgNewCommunity) sdk.R
 		return err.Result()
 	}
 
-	res, jsonErr := json.Marshal(community)
+	res, jsonErr := ModuleCodec.MarshalJSON(community)
 	if jsonErr != nil {
 		return sdk.ErrInternal(fmt.Sprintf("Marshal result error: %s", jsonErr)).Result()
 	}
@@ -54,7 +53,7 @@ func handleMsgAddAdmin(ctx sdk.Context, k Keeper, msg MsgAddAdmin) sdk.Result {
 		return err.Result()
 	}
 
-	res, jsonErr := json.Marshal(true)
+	res, jsonErr := ModuleCodec.MarshalJSON(true)
 	if jsonErr != nil {
 		return sdk.ErrInternal(fmt.Sprintf("Marshal result error: %s", jsonErr)).Result()
 	}
@@ -74,7 +73,7 @@ func handleMsgRemoveAdmin(ctx sdk.Context, k Keeper, msg MsgRemoveAdmin) sdk.Res
 		return err.Result()
 	}
 
-	res, jsonErr := json.Marshal(true)
+	res, jsonErr := ModuleCodec.MarshalJSON(true)
 	if jsonErr != nil {
 		return sdk.ErrInternal(fmt.Sprintf("Marshal result error: %s", jsonErr)).Result()
 	}

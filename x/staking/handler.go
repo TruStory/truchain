@@ -2,7 +2,6 @@ package staking
 
 import (
 	"fmt"
-	"encoding/json"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
@@ -108,7 +107,7 @@ func handleMsgAddAdmin(ctx sdk.Context, k Keeper, msg MsgAddAdmin) sdk.Result {
 		return err.Result()
 	}
 
-	res, jsonErr := json.Marshal(true)
+	res, jsonErr := ModuleCodec.MarshalJSON(true)
 	if jsonErr != nil {
 		return sdk.ErrInternal(fmt.Sprintf("Marshal result error: %s", jsonErr)).Result()
 	}
@@ -128,7 +127,7 @@ func handleMsgRemoveAdmin(ctx sdk.Context, k Keeper, msg MsgRemoveAdmin) sdk.Res
 		return err.Result()
 	}
 
-	res, jsonErr := json.Marshal(true)
+	res, jsonErr := ModuleCodec.MarshalJSON(true)
 	if jsonErr != nil {
 		return sdk.ErrInternal(fmt.Sprintf("Marshal result error: %s", jsonErr)).Result()
 	}
