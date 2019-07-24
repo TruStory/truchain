@@ -85,18 +85,22 @@ TruChain can be run as a full node, syncing it's state with another node. First 
 
 ```
 # Initialize another chain with a new moniker but same chain-id
-truchaincli init <moniker-2> --chain-id betanet-1
+truchaind init <moniker-2> --chain-id betanet-1 --home ~/.devnet
 
 # Copy the genesis file from the first node
-scp ubuntu@devnet:/home/ubuntu/.truchaind/config/genesis.json ~/.truchaind/config/
+scp ubuntu@devnet:/home/ubuntu/.truchaind/config/genesis.json ~/.devnet/config/
+
+# Get the node id of the first node
+truchaincli status
 
 # Add first node to `persistent_peers` in config.toml
-vi ~/.truchaind/config/config.toml
-# persistent_peers = "first_node_id@first_node_ip:26656"
-persistent_peers = "3ebaf6ae8000af5e233ce2d3158776f7245e5ae0@ec2-54-183-49-244.us-west-1.compute.amazonaws.com:26656"
+sed -i -e 's/private_peer_ids.*/private_peer_ids="3ebaf6ae8000af5e233ce2d3158776f7245e5ae0@ec2-54-183-49-244.us-west-1.compute.amazonaws.com:26656"/' ~/.devnet/config/config.toml
+
+# Optional: Add verbose logging
+sed -i -e 's/log_level.*/log_level = "main:info,state:info,*:error,app:info,account:info,trubank2:info,claim:info,community:info,truslashing:info,trustaking:info"/' ~/.devnet/config/config.toml
 
 # Start the second node
-truchaind start
+truchaind start --home ~/.devnet
 ```
 
 If the first node has many blocks, it could take several minutes for the first sync to complete. Now you will have two nodes running in lockstep!
