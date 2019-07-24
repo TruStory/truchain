@@ -3,11 +3,10 @@ package main
 import (
 	"fmt"
 
-	"github.com/TruStory/truchain/x/staking"
-
 	"github.com/TruStory/truchain/x/claim"
-
 	"github.com/TruStory/truchain/x/community"
+	"github.com/TruStory/truchain/x/staking"
+	"github.com/TruStory/truchain/x/slashing"
 
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/context"
@@ -170,9 +169,9 @@ func SlashingAdminCmd(cdc *codec.Codec) *cobra.Command {
 			}
 			var msg sdk.Msg
 			if action == "add" {
-				msg = claim.NewMsgAddAdmin(newAdmin, authAdmin)
+				msg = slashing.NewMsgAddAdmin(newAdmin, authAdmin)
 			} else if action == "remove" {
-				msg = claim.NewMsgRemoveAdmin(newAdmin, authAdmin)
+				msg = slashing.NewMsgRemoveAdmin(newAdmin, authAdmin)
 			}
 
 			return executeMsg(cmd, args, cdc, msg)
