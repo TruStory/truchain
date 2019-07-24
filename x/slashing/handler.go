@@ -41,26 +41,13 @@ func handleMsgSlashArgument(ctx sdk.Context, k Keeper, msg MsgSlashArgument) sdk
 	if jsonErr != nil {
 		return sdk.ErrInternal(fmt.Sprintf("Marshal result error: %s", jsonErr)).Result()
 	}
-
-	argument, ok := k.stakingKeeper.Argument(ctx, slash.ArgumentID)
-	if !ok {
-		return sdk.ErrInternal("couldn't find argument").Result()
-	}
-	isJailed, err := k.accountKeeper.IsJailed(ctx, argument.Creator)
-	if err != nil {
-		return err.Result()
-	}
-	resultTags := append(app.PushTag,
+	resultTags := append(app.PushTxTag,
 		sdk.NewTags(
 			tags.Category, tags.TxCategory,
 			tags.Action, tags.ActionCreateSlash,
-			tags.ArgumentCreator, argument.Creator.String(),
+			tags.MinSlashCount, fmt.Sprintf("%d", k.GetParams(ctx).MinSlashCount),
 		)...,
 	)
-	if isJailed {
-		resultTags = append(resultTags, sdk.NewTags(tags.ArgumentCreatorJailed, "jailed")...)
-	}
-
 	if len(punishmentResults) > 0 {
 		json, jsonErr := json.Marshal(punishmentResults)
 		if jsonErr != nil {
