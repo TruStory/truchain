@@ -64,3 +64,26 @@ func TestHandleMsgRemoveAdmin(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, success, true)
 }
+
+func TestMsgEditClaim(t *testing.T) {
+	ctx, keeper := mockDB()
+
+	handler := NewHandler(keeper)
+	assert.NotNil(t, handler)
+
+	claim := createFakeClaim(ctx, keeper)
+	updatedBody := "If change is the only constant, why immutability is the future of technology?"
+	editor := keeper.GetParams(ctx).ClaimAdmins[0]
+
+	msg := NewMsgEditClaim(claim.ID, updatedBody, editor)
+	assert.NotNil(t, msg)
+
+	res := handler(ctx, msg)
+	assert.NotNil(t, res)
+	assert.True(t, res.IsOK())
+
+	var updated Claim
+	ModuleCodec.UnmarshalJSON(res.Data, &updated)
+	assert.Equal(t, updated.ID, claim.ID)
+	assert.Equal(t, updated.Body, updatedBody)
+}

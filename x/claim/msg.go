@@ -17,6 +17,7 @@ const (
 
 // verify interface at compile time
 var _ sdk.Msg = &MsgCreateClaim{}
+var _ sdk.Msg = &MsgEditClaim{}
 var _ sdk.Msg = &MsgAddAdmin{}
 var _ sdk.Msg = &MsgRemoveAdmin{}
 
@@ -111,6 +112,55 @@ func (msg MsgDeleteClaim) GetSignBytes() []byte {
 // GetSigners gets the signs of the Msg
 func (msg MsgDeleteClaim) GetSigners() []sdk.AccAddress {
 	return []sdk.AccAddress{sdk.AccAddress(msg.Creator)}
+}
+
+// MsgEditClaim defines a message to submit a story
+type MsgEditClaim struct {
+	ID     uint64         `json:"id"`
+	Body   string         `json:"body"`
+	Editor sdk.AccAddress `json:"editor"`
+}
+
+// NewMsgEditClaim creates a new message to edit a claim
+func NewMsgEditClaim(id uint64, body string, editor sdk.AccAddress) MsgEditClaim {
+	return MsgEditClaim{
+		ID:     id,
+		Body:   body,
+		Editor: editor,
+	}
+}
+
+// Route is the name of the route for claim
+func (msg MsgEditClaim) Route() string {
+	return RouterKey
+}
+
+// Type is the name for the Msg
+func (msg MsgEditClaim) Type() string {
+	return ModuleName
+}
+
+// ValidateBasic validates basic fields of the Msg
+func (msg MsgEditClaim) ValidateBasic() sdk.Error {
+	if msg.ID == 0 {
+		return ErrUnknownClaim(msg.ID)
+	}
+	if len(msg.Editor) == 0 {
+		return sdk.ErrInvalidAddress("Invalid address: " + msg.Editor.String())
+	}
+
+	return nil
+}
+
+// GetSignBytes gets the bytes for Msg signer to sign on
+func (msg MsgEditClaim) GetSignBytes() []byte {
+	msgBytes := ModuleCodec.MustMarshalJSON(msg)
+	return sdk.MustSortJSON(msgBytes)
+}
+
+// GetSigners gets the signs of the Msg
+func (msg MsgEditClaim) GetSigners() []sdk.AccAddress {
+	return []sdk.AccAddress{sdk.AccAddress(msg.Editor)}
 }
 
 // MsgAddAdmin defines the message to add a new admin

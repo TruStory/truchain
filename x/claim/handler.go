@@ -1,9 +1,9 @@
 package claim
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/url"
-	"encoding/json"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
@@ -18,6 +18,8 @@ func NewHandler(keeper Keeper) sdk.Handler {
 			return handleMsgAddAdmin(ctx, keeper, msg)
 		case MsgRemoveAdmin:
 			return handleMsgRemoveAdmin(ctx, keeper, msg)
+		case MsgEditClaim:
+			return handleMsgEditClaim(ctx, keeper, msg)
 		default:
 			errMsg := fmt.Sprintf("Unrecognized claim message type: %T", msg)
 			return sdk.ErrUnknownRequest(errMsg).Result()
@@ -64,6 +66,26 @@ func handleMsgAddAdmin(ctx sdk.Context, k Keeper, msg MsgAddAdmin) sdk.Result {
 	res, jsonErr := json.Marshal(true)
 	if jsonErr != nil {
 		return sdk.ErrInternal(fmt.Sprintf("Marshal result error: %s", jsonErr)).Result()
+	}
+
+	return sdk.Result{
+		Data: res,
+	}
+}
+
+func handleMsgEditClaim(ctx sdk.Context, keeper Keeper, msg MsgEditClaim) sdk.Result {
+	if err := msg.ValidateBasic(); err != nil {
+		return err.Result()
+	}
+
+	claim, err := keeper.EditClaim(ctx, msg.ID, msg.Body, msg.Editor)
+	if err != nil {
+		return err.Result()
+	}
+
+	res, codecErr := ModuleCodec.MarshalJSON(claim)
+	if codecErr != nil {
+		return sdk.ErrInternal(fmt.Sprintf("Marshal result error: %s", codecErr)).Result()
 	}
 
 	return sdk.Result{

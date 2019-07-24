@@ -50,8 +50,13 @@ init:
 	rm -rf ~/.truchaind
 	bin/truchaind init trunode
 	bin/truchaind add-genesis-account $(shell bin/truchaincli keys show registrar -a --home ~/.octopus) 1000000000trusteak
-
-gentx:
+	sed -i -e 's/bond_denom.*/bond_denom": "trusteak"/' ~/.truchaind/config/genesis.json
+	sed -i -e 's/registrar.*/registrar": "$(shell bin/truchaincli keys show registrar -a --home ~/.octopus)",/' ~/.truchaind/config/genesis.json
+	sed -i -e 's/community_admins.*/community_admins": ["$(shell bin/truchaincli keys show registrar -a --home ~/.octopus)"]/' ~/.truchaind/config/genesis.json
+	sed -i -e 's/claim_admins.*/community_admins": ["$(shell bin/truchaincli keys show registrar -a --home ~/.octopus)"]/' ~/.truchaind/config/genesis.json
+	sed -i -e 's/staking_admins.*/staking_admins": ["$(shell bin/truchaincli keys show registrar -a --home ~/.octopus)"],/' ~/.truchaind/config/genesis.json
+	sed -i -e 's/slash_admins.*/slash_admins": ["$(shell bin/truchaincli keys show registrar -a --home ~/.octopus)"],/' ~/.truchaind/config/genesis.json
+	sed -i -e 's/reward_broker_address.*/reward_broker_address": "$(shell bin/truchaincli keys show registrar -a --home ~/.octopus)"/' ~/.truchaind/config/genesis.json
 	bin/truchaind gentx --name=registrar --amount 100000000trusteak --home-client ~/.octopus
 	bin/truchaind collect-gentxs
 

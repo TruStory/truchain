@@ -194,3 +194,34 @@ func TestRemoveAdmin_RemoverNotAuthorised(t *testing.T) {
 	assert.NotNil(t, err)
 	assert.Equal(t, ErrAddressNotAuthorised().Code(), err.Code())
 }
+
+func TestEditClaim_Success(t *testing.T) {
+	ctx, keeper := mockDB()
+
+	claim := createFakeClaim(ctx, keeper)
+	updatedBody := "This is the new claim body. Old wasn't gold anymore."
+	editor := keeper.GetParams(ctx).ClaimAdmins[0]
+
+	updated, err := keeper.EditClaim(ctx, claim.ID, updatedBody, editor)
+	assert.NoError(t, err)
+
+	refetched, ok := keeper.Claim(ctx, claim.ID)
+	assert.Equal(t, ok, true)
+
+	assert.NotEqual(t, claim.Body, updatedBody)
+	assert.Equal(t, updated.Body, updatedBody)
+	assert.Equal(t, updated, refetched)
+}
+
+func TestEditClaim_ErrAddressNotAuthorised(t *testing.T) {
+	ctx, keeper := mockDB()
+
+	claim := createFakeClaim(ctx, keeper)
+	updatedBody := "This is the new claim body. Old wasn't gold anymore."
+	editor := sdk.AccAddress([]byte{1, 2})
+
+	_, err := keeper.EditClaim(ctx, claim.ID, updatedBody, editor)
+	assert.NotNil(t, err)
+
+	assert.Equal(t, ErrAddressNotAuthorised().Code(), err.Code())
+}
