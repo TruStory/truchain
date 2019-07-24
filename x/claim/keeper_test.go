@@ -147,6 +147,54 @@ func TestKeeper_AddBackingChallengeStake(t *testing.T) {
 	assert.Equal(t, sdk.NewInt64Coin(app.StakeDenom, 75*app.Shanev).String(), c.TotalChallenged.String())
 }
 
+func TestAddAdmin_Success(t *testing.T) {
+	ctx, keeper := mockDB()
+
+	creator := keeper.GetParams(ctx).ClaimAdmins[0]
+	newAdmin := getFakeAdmin()
+
+	err := keeper.AddAdmin(ctx, newAdmin, creator)
+	assert.Nil(t, err)
+
+	newAdmins := keeper.GetParams(ctx).ClaimAdmins
+	assert.Subset(t, newAdmins, []sdk.AccAddress{newAdmin})
+}
+
+func TestAddAdmin_CreatorNotAuthorised(t *testing.T) {
+	ctx, keeper := mockDB()
+
+	invalidCreator := sdk.AccAddress([]byte{1, 2})
+	newAdmin := getFakeAdmin()
+
+	err := keeper.AddAdmin(ctx, newAdmin, invalidCreator)
+	assert.NotNil(t, err)
+	assert.Equal(t, ErrAddressNotAuthorised().Code(), err.Code())
+}
+
+func TestRemoveAdmin_Success(t *testing.T) {
+	ctx, keeper := mockDB()
+
+	currentAdmins := keeper.GetParams(ctx).ClaimAdmins
+	adminToRemove := currentAdmins[0]
+
+	err := keeper.RemoveAdmin(ctx, adminToRemove, adminToRemove) // removing self
+	assert.Nil(t, err)
+	newAdmins := keeper.GetParams(ctx).ClaimAdmins
+	assert.Equal(t, len(currentAdmins)-1, len(newAdmins))
+}
+
+func TestRemoveAdmin_RemoverNotAuthorised(t *testing.T) {
+	ctx, keeper := mockDB()
+
+	invalidRemover := sdk.AccAddress([]byte{1, 2})
+	currentAdmins := keeper.GetParams(ctx).ClaimAdmins
+	adminToRemove := currentAdmins[0]
+
+	err := keeper.AddAdmin(ctx, adminToRemove, invalidRemover)
+	assert.NotNil(t, err)
+	assert.Equal(t, ErrAddressNotAuthorised().Code(), err.Code())
+}
+
 func TestEditClaim_Success(t *testing.T) {
 	ctx, keeper := mockDB()
 
@@ -165,7 +213,7 @@ func TestEditClaim_Success(t *testing.T) {
 	assert.Equal(t, updated, refetched)
 }
 
-func TestEditClaim_ErrUnauthorisedAddress(t *testing.T) {
+func TestEditClaim_ErrAddressNotAuthorised(t *testing.T) {
 	ctx, keeper := mockDB()
 
 	claim := createFakeClaim(ctx, keeper)
@@ -175,5 +223,5 @@ func TestEditClaim_ErrUnauthorisedAddress(t *testing.T) {
 	_, err := keeper.EditClaim(ctx, claim.ID, updatedBody, editor)
 	assert.NotNil(t, err)
 
-	assert.Equal(t, ErrUnauthorisedAddress().Code(), err.Code())
+	assert.Equal(t, ErrAddressNotAuthorised().Code(), err.Code())
 }

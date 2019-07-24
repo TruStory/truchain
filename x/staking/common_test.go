@@ -183,7 +183,11 @@ func mockDB() (sdk.Context, Keeper, *mockedDB) {
 	mockedClaimKeeper := newMockedClaimKeeper()
 	mockedClaimKeeper.claims = make(map[uint64]claim.Claim)
 	keeper := NewKeeper(cdc, storeKey, mockedAccountKeeper, trubankKeeper, mockedClaimKeeper, pk.Subspace(DefaultParamspace), DefaultCodespace)
-	InitGenesis(ctx, keeper, DefaultGenesisState())
+	_, _, admin1 := keyPubAddr()
+	_, _, admin2 := keyPubAddr()
+	genesis := DefaultGenesisState()
+	genesis.Params.StakingAdmins = append(genesis.Params.StakingAdmins, admin1, admin2)
+	InitGenesis(ctx, keeper, genesis)
 	trubank.InitGenesis(ctx, trubankKeeper, trubank.DefaultGenesisState())
 
 	mockedDB := &mockedDB{

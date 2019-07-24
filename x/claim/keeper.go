@@ -78,7 +78,7 @@ func (k Keeper) SubmitClaim(ctx sdk.Context, body, communityID string,
 // EditClaim allows admins to edit the body of a claim
 func (k Keeper) EditClaim(ctx sdk.Context, id uint64, body string, editor sdk.AccAddress) (claim Claim, err sdk.Error) {
 	if !k.isAdmin(ctx, editor) {
-		err = ErrUnauthorisedAddress()
+		err = ErrAddressNotAuthorised()
 		return
 	}
 
@@ -205,6 +205,47 @@ func (k Keeper) SubtractChallengeStake(ctx sdk.Context, id uint64, stake sdk.Coi
 	k.setClaim(ctx, claim)
 
 	return nil
+}
+
+// AddAdmin adds a new admin
+func (k Keeper) AddAdmin(ctx sdk.Context, admin, creator sdk.AccAddress) (err sdk.Error) {
+	params := k.GetParams(ctx)
+
+	// first admin can be added without any authorisation
+	if len(params.ClaimAdmins) > 0 && !k.isAdmin(ctx, creator) {
+		err = ErrAddressNotAuthorised()
+	}
+
+	// if already present, don't add again
+	for _, currentAdmin := range params.ClaimAdmins {
+		if currentAdmin.Equals(admin) {
+			return
+		}
+	}
+
+	params.ClaimAdmins = append(params.ClaimAdmins, admin)
+
+	k.SetParams(ctx, params)
+
+	return
+}
+
+// RemoveAdmin removes an admin
+func (k Keeper) RemoveAdmin(ctx sdk.Context, admin, remover sdk.AccAddress) (err sdk.Error) {
+	if !k.isAdmin(ctx, remover) {
+		err = ErrAddressNotAuthorised()
+	}
+
+	params := k.GetParams(ctx)
+	for i, currentAdmin := range params.ClaimAdmins {
+		if currentAdmin.Equals(admin) {
+			params.ClaimAdmins = append(params.ClaimAdmins[:i], params.ClaimAdmins[i+1:]...)
+		}
+	}
+
+	k.SetParams(ctx, params)
+
+	return
 }
 
 func (k Keeper) isAdmin(ctx sdk.Context, address sdk.AccAddress) bool {

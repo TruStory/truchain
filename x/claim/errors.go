@@ -21,8 +21,8 @@ const (
 	ErrorCodeClaimsWithCommunityNotFound CodeType = 106
 	ErrorCodeInvalidSourceURL            CodeType = 107
 	ErrorCodeCreatorJailed               CodeType = 108
-	ErrorCodeJSONParsing                 CodeType = 109
-	ErrorCodeUnauthorisedAddress         CodeType = 110
+	ErrorCodeAddressNotAuthorised        CodeType = 109
+	ErrorCodeJSONParsing                 CodeType = 110
 )
 
 // ErrInvalidBodyTooShort throws an error on invalid claim body
@@ -73,18 +73,18 @@ func ErrCreatorJailed(addr sdk.AccAddress) sdk.Error {
 		"Creator cannot be jailed: "+addr.String())
 }
 
+// ErrAddressNotAuthorised throws an error when the address is not admin
+func ErrAddressNotAuthorised() sdk.Error {
+	return sdk.NewError(
+		DefaultCodespace,
+		ErrorCodeAddressNotAuthorised,
+		"This address is not authorised to perform this action.")
+}
+
 // ErrJSONParse throws an error on failed JSON parsing
 func ErrJSONParse(err error) sdk.Error {
 	return sdk.NewError(
 		DefaultCodespace,
 		ErrorCodeJSONParsing,
 		"JSON parsing error: "+err.Error())
-}
-
-// ErrUnauthorisedAddress throws an error on failed JSON parsing
-func ErrUnauthorisedAddress() sdk.Error {
-	return sdk.NewError(
-		DefaultCodespace,
-		ErrorCodeUnauthorisedAddress,
-		"This address cannot perform this action.")
 }

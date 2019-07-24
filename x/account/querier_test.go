@@ -1,7 +1,6 @@
 package account
 
 import (
-	"encoding/json"
 	"fmt"
 	"strings"
 	"testing"
@@ -19,7 +18,7 @@ func TestQueryAppAccount_Success(t *testing.T) {
 	_, publicKey, address, coins := getFakeAppAccountParams()
 	createdAppAccount, _ := keeper.CreateAppAccount(ctx, address, coins, publicKey)
 
-	params, jsonErr := json.Marshal(QueryAppAccountParams{
+	params, jsonErr := ModuleCodec.MarshalJSON(QueryAppAccountParams{
 		Address: address,
 	})
 	assert.Nil(t, jsonErr)
@@ -44,7 +43,7 @@ func TestQueryPrimaryAccount_Success(t *testing.T) {
 	_, publicKey, address, coins := getFakeAppAccountParams()
 	keeper.CreateAppAccount(ctx, address, coins, publicKey)
 
-	params, jsonErr := json.Marshal(QueryAppAccountParams{
+	params, jsonErr := ModuleCodec.MarshalJSON(QueryAppAccountParams{
 		Address: address,
 	})
 	assert.Nil(t, jsonErr)
@@ -106,7 +105,7 @@ func TestQueryAppAccount_ErrNotFound(t *testing.T) {
 
 	_, _, address, _ := getFakeAppAccountParams()
 
-	params, jsonErr := json.Marshal(QueryAppAccountParams{
+	params, jsonErr := ModuleCodec.MarshalJSON(QueryAppAccountParams{
 		Address: address,
 	})
 	assert.NoError(t, jsonErr)
