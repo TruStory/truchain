@@ -94,7 +94,7 @@ scp ubuntu@devnet:/home/ubuntu/.truchaind/config/genesis.json ~/.devnet/config/
 truchaincli status
 
 # Add first node to `persistent_peers` in config.toml
-sed -i -e 's/private_peer_ids.*/private_peer_ids="3ebaf6ae8000af5e233ce2d3158776f7245e5ae0@ec2-54-183-49-244.us-west-1.compute.amazonaws.com:26656"/' ~/.devnet/config/config.toml
+sed -i -e 's/persistent_peers.*/persistent_peers = "3ebaf6ae8000af5e233ce2d3158776f7245e5ae0@ec2-54-183-49-244.us-west-1.compute.amazonaws.com:26656"/' ~/.devnet/config/config.toml
 
 # Optional: Add verbose logging
 sed -i -e 's/log_level.*/log_level = "main:info,state:info,*:error,app:info,account:info,trubank2:info,claim:info,community:info,truslashing:info,trustaking:info"/' ~/.devnet/config/config.toml
