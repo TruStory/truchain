@@ -466,9 +466,9 @@ func (k Keeper) validateParams(ctx sdk.Context, argumentID uint64, detailedReaso
 }
 
 func (k Keeper) hasEnoughEarnedStake(ctx sdk.Context, address sdk.AccAddress, requirement sdk.Coin) bool {
-	balance := k.bankKeeper.GetCoins(ctx, address)
+	totalStakeEarned := k.stakingKeeper.TotalEarnedCoins(ctx, address)
 
-	return balance.AmountOf(app.StakeDenom).GTE(requirement.Amount)
+	return totalStakeEarned.GTE(requirement.Amount)
 }
 
 func (k Keeper) hasPreviouslySlashed(ctx sdk.Context, argumentID uint64, creator sdk.AccAddress) bool {

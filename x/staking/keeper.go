@@ -386,7 +386,7 @@ func (k Keeper) checkStakeThreshold(ctx sdk.Context, address sdk.AccAddress, amo
 		return ErrCodeMinBalance()
 	}
 
-	switch totalEarned := k.totalEarnedCoins(ctx, address); {
+	switch totalEarned := k.TotalEarnedCoins(ctx, address); {
 	// if total earned >= 50
 	case totalEarned.GTE(tierLimitsEarnedCoins[4]):
 		if staked.Add(amount).GT(tierLimitsStakeAmounts[4]) {
@@ -425,7 +425,7 @@ func (k Keeper) checkStakeThreshold(ctx sdk.Context, address sdk.AccAddress, amo
 	}
 }
 
-func (k Keeper) totalEarnedCoins(ctx sdk.Context, creator sdk.AccAddress) sdk.Int {
+func (k Keeper) TotalEarnedCoins(ctx sdk.Context, creator sdk.AccAddress) sdk.Int {
 	earnedCoins := k.getEarnedCoins(ctx, creator)
 	total := sdk.NewInt(0)
 	for _, e := range earnedCoins {
