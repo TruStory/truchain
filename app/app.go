@@ -270,7 +270,7 @@ func NewTruChain(logger log.Logger, db dbm.DB, loadLatest bool, options ...func(
 	// there is nothing left over in the validator fee pool, so as to keep the
 	// CanWithdrawInvariant invariant.
 	app.mm.SetOrderBeginBlockers(mint.ModuleName, distr.ModuleName)
-	app.mm.SetOrderEndBlockers(staking.ModuleName, trustaking.ModuleName, truslashing.ModuleName)
+	app.mm.SetOrderEndBlockers(staking.ModuleName, trustaking.ModuleName, truslashing.ModuleName, account.ModuleName)
 
 	// genutils must occur after staking so that pools are properly
 	// initialized with tokens from genesis accounts.

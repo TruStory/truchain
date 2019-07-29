@@ -6,11 +6,9 @@ import (
 
 // slashing tags
 var (
-	ArgumentCreator       = "argument-creator"
-	ArgumentCreatorJailed = "argument-creator-jailed"
-	SlashResults          = "slash-results"
-
+	SlashResults      = "slash-results"
 	ActionCreateSlash = "create-slash"
+	MinSlashCount     = "min-slash-count"
 
 	TxCategory = "truchain-slashing"
 	Action     = sdk.TagAction

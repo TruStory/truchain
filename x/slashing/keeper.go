@@ -151,6 +151,11 @@ func (k Keeper) punish(ctx sdk.Context, argumentID uint64) ([]PunishmentResult, 
 		if stake.Expired && stake.Result != nil {
 			switch stake.Result.Type {
 			case staking.RewardResultArgumentCreation:
+				// remove argument created interest from earned coins
+				k.stakingKeeper.SubtractEarnedCoin(ctx,
+					stake.Result.ArgumentCreator,
+					communityID,
+					stake.Result.ArgumentCreatorReward.Amount)
 				_, amount, err := k.bankKeeper.SafeSubtractCoin(
 					ctx,
 					stake.Result.ArgumentCreator,
@@ -167,6 +172,11 @@ func (k Keeper) punish(ctx sdk.Context, argumentID uint64) ([]PunishmentResult, 
 					return punishmentResults, err
 				}
 			case staking.RewardResultUpvoteSplit:
+				// remove agree received interest from earned coins
+				k.stakingKeeper.SubtractEarnedCoin(ctx,
+					stake.Result.ArgumentCreator,
+					communityID,
+					stake.Result.ArgumentCreatorReward.Amount)
 				_, amount, err := k.bankKeeper.SafeSubtractCoin(
 					ctx,
 					stake.Result.ArgumentCreator,
@@ -182,6 +192,11 @@ func (k Keeper) punish(ctx sdk.Context, argumentID uint64) ([]PunishmentResult, 
 						AppAccAddress: stake.Result.ArgumentCreator,
 						Coin:          amount,
 					})
+				// remove agree given interest from earned coins
+				k.stakingKeeper.SubtractEarnedCoin(ctx,
+					stake.Result.StakeCreator,
+					communityID,
+					stake.Result.StakeCreatorReward.Amount)
 				_, amount, err = k.bankKeeper.SafeSubtractCoin(
 					ctx,
 					stake.Result.StakeCreator,
@@ -189,6 +204,7 @@ func (k Keeper) punish(ctx sdk.Context, argumentID uint64) ([]PunishmentResult, 
 					stake.ID,
 					bank.TransactionInterestUpvoteGivenSlashed,
 					WithCommunityID(communityID))
+
 				if err != nil {
 					return punishmentResults, err
 				}
@@ -244,9 +260,17 @@ func (k Keeper) punish(ctx sdk.Context, argumentID uint64) ([]PunishmentResult, 
 		}
 
 		// increment slash count for user (and jail if needed)
-		_, err = k.accountKeeper.IncrementSlashCount(ctx, stake.Creator)
+		jailed, err := k.accountKeeper.IncrementSlashCount(ctx, stake.Creator)
 		if err != nil {
 			return punishmentResults, err
+		}
+		if jailed {
+			punishmentResults = append(punishmentResults,
+				PunishmentResult{
+					Type:          PunishmentJailed,
+					AppAccAddress: stake.Creator,
+				},
+			)
 		}
 	}
 
@@ -300,6 +324,47 @@ func (k Keeper) Slashes(ctx sdk.Context) (slashes []Slash) {
 	iterator := sdk.KVStorePrefixIterator(store, SlashesKeyPrefix)
 
 	return k.iterate(iterator)
+}
+
+// AddAdmin adds a new admin
+func (k Keeper) AddAdmin(ctx sdk.Context, admin, creator sdk.AccAddress) (err sdk.Error) {
+	params := k.GetParams(ctx)
+
+	// first admin can be added without any authorisation
+	if len(params.SlashAdmins) > 0 && !k.isAdmin(ctx, creator) {
+		err = ErrAddressNotAuthorised()
+	}
+
+	// if already present, don't add again
+	for _, currentAdmin := range params.SlashAdmins {
+		if currentAdmin.Equals(admin) {
+			return
+		}
+	}
+
+	params.SlashAdmins = append(params.SlashAdmins, admin)
+
+	k.SetParams(ctx, params)
+
+	return
+}
+
+// RemoveAdmin removes an admin
+func (k Keeper) RemoveAdmin(ctx sdk.Context, admin, remover sdk.AccAddress) (err sdk.Error) {
+	if !k.isAdmin(ctx, remover) {
+		err = ErrAddressNotAuthorised()
+	}
+
+	params := k.GetParams(ctx)
+	for i, currentAdmin := range params.SlashAdmins {
+		if currentAdmin.Equals(admin) {
+			params.SlashAdmins = append(params.SlashAdmins[:i], params.SlashAdmins[i+1:]...)
+		}
+	}
+
+	k.SetParams(ctx, params)
+
+	return
 }
 
 // slashID gets the highest slash ID
@@ -401,9 +466,9 @@ func (k Keeper) validateParams(ctx sdk.Context, argumentID uint64, detailedReaso
 }
 
 func (k Keeper) hasEnoughEarnedStake(ctx sdk.Context, address sdk.AccAddress, requirement sdk.Coin) bool {
-	balance := k.bankKeeper.GetCoins(ctx, address)
+	totalStakeEarned := k.stakingKeeper.TotalEarnedCoins(ctx, address)
 
-	return balance.AmountOf(app.StakeDenom).GTE(requirement.Amount)
+	return totalStakeEarned.GTE(requirement.Amount)
 }
 
 func (k Keeper) hasPreviouslySlashed(ctx sdk.Context, argumentID uint64, creator sdk.AccAddress) bool {

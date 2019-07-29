@@ -12,7 +12,7 @@ const (
 
 	ErrorCodeCommunityNotFound    sdk.CodeType = 801
 	ErrorCodeInvalidCommunityMsg  sdk.CodeType = 802
-	ErrorCodeCreatorNotAuthorised sdk.CodeType = 803
+	ErrorCodeAddressNotAuthorised sdk.CodeType = 803
 	ErrorCodeJSONParsing          sdk.CodeType = 804
 )
 
@@ -26,9 +26,9 @@ func ErrInvalidCommunityMsg(message string) sdk.Error {
 	return sdk.NewError(DefaultCodespace, ErrorCodeInvalidCommunityMsg, fmt.Sprintf("Invalid community msg. Reason: %s", message))
 }
 
-// ErrCreatorNotAuthorised throws an error when the creator is not admin
-func ErrCreatorNotAuthorised() sdk.Error {
-	return sdk.NewError(DefaultCodespace, ErrorCodeInvalidCommunityMsg, "This creator is not authorised to perform this action.")
+// ErrAddressNotAuthorised throws an error when the address is not admin
+func ErrAddressNotAuthorised() sdk.Error {
+	return sdk.NewError(DefaultCodespace, ErrorCodeAddressNotAuthorised, "This address is not authorised to perform this action.")
 }
 
 // ErrJSONParse throws an error on failed JSON parsing

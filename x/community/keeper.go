@@ -72,6 +72,47 @@ func (k Keeper) Communities(ctx sdk.Context) (communities []Community) {
 	return
 }
 
+// AddAdmin adds a new admin
+func (k Keeper) AddAdmin(ctx sdk.Context, admin, creator sdk.AccAddress) (err sdk.Error) {
+	params := k.GetParams(ctx)
+
+	// first admin can be added without any authorisation
+	if len(params.CommunityAdmins) > 0 && !k.isAdmin(ctx, creator) {
+		err = ErrAddressNotAuthorised()
+	}
+
+	// if already present, don't add again
+	for _, currentAdmin := range params.CommunityAdmins {
+		if currentAdmin.Equals(admin) {
+			return
+		}
+	}
+
+	params.CommunityAdmins = append(params.CommunityAdmins, admin)
+
+	k.SetParams(ctx, params)
+
+	return
+}
+
+// RemoveAdmin removes an admin
+func (k Keeper) RemoveAdmin(ctx sdk.Context, admin, remover sdk.AccAddress) (err sdk.Error) {
+	if !k.isAdmin(ctx, remover) {
+		err = ErrAddressNotAuthorised()
+	}
+
+	params := k.GetParams(ctx)
+	for i, currentAdmin := range params.CommunityAdmins {
+		if currentAdmin.Equals(admin) {
+			params.CommunityAdmins = append(params.CommunityAdmins[:i], params.CommunityAdmins[i+1:]...)
+		}
+	}
+
+	k.SetParams(ctx, params)
+
+	return
+}
+
 func (k Keeper) validateParams(ctx sdk.Context, id, name, description string, creator sdk.AccAddress) (err sdk.Error) {
 	params := k.GetParams(ctx)
 	if len(id) < params.MinIDLength || len(id) > params.MaxIDLength {
@@ -91,7 +132,7 @@ func (k Keeper) validateParams(ctx sdk.Context, id, name, description string, cr
 	}
 
 	if !k.isAdmin(ctx, creator) {
-		err = ErrCreatorNotAuthorised()
+		err = ErrAddressNotAuthorised()
 	}
 
 	return

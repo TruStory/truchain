@@ -14,6 +14,12 @@ func NewHandler(keeper Keeper) sdk.Handler {
 		switch msg := msg.(type) {
 		case MsgCreateClaim:
 			return handleMsgCreateClaim(ctx, keeper, msg)
+		case MsgEditClaim:
+			return handleMsgEditClaim(ctx, keeper, msg)
+		case MsgAddAdmin:
+			return handleMsgAddAdmin(ctx, keeper, msg)
+		case MsgRemoveAdmin:
+			return handleMsgRemoveAdmin(ctx, keeper, msg)
 		case MsgUpdateParams:
 			return handleMsgUpdateParams(ctx, keeper, msg)
 		default:
@@ -42,6 +48,66 @@ func handleMsgCreateClaim(ctx sdk.Context, keeper Keeper, msg MsgCreateClaim) sd
 	res, codecErr := ModuleCodec.MarshalJSON(claim)
 	if codecErr != nil {
 		return sdk.ErrInternal(fmt.Sprintf("Marshal result error: %s", codecErr)).Result()
+	}
+
+	return sdk.Result{
+		Data: res,
+	}
+}
+
+func handleMsgEditClaim(ctx sdk.Context, keeper Keeper, msg MsgEditClaim) sdk.Result {
+	if err := msg.ValidateBasic(); err != nil {
+		return err.Result()
+	}
+
+	claim, err := keeper.EditClaim(ctx, msg.ID, msg.Body, msg.Editor)
+	if err != nil {
+		return err.Result()
+	}
+
+	res, codecErr := ModuleCodec.MarshalJSON(claim)
+	if codecErr != nil {
+		return sdk.ErrInternal(fmt.Sprintf("Marshal result error: %s", codecErr)).Result()
+	}
+
+	return sdk.Result{
+		Data: res,
+	}
+}
+
+func handleMsgAddAdmin(ctx sdk.Context, k Keeper, msg MsgAddAdmin) sdk.Result {
+	if err := msg.ValidateBasic(); err != nil {
+		return err.Result()
+	}
+
+	err := k.AddAdmin(ctx, msg.Admin, msg.Creator)
+	if err != nil {
+		return err.Result()
+	}
+
+	res, jsonErr := ModuleCodec.MarshalJSON(true)
+	if jsonErr != nil {
+		return sdk.ErrInternal(fmt.Sprintf("Marshal result error: %s", jsonErr)).Result()
+	}
+
+	return sdk.Result{
+		Data: res,
+	}
+}
+
+func handleMsgRemoveAdmin(ctx sdk.Context, k Keeper, msg MsgRemoveAdmin) sdk.Result {
+	if err := msg.ValidateBasic(); err != nil {
+		return err.Result()
+	}
+
+	err := k.RemoveAdmin(ctx, msg.Admin, msg.Remover)
+	if err != nil {
+		return err.Result()
+	}
+
+	res, jsonErr := ModuleCodec.MarshalJSON(true)
+	if jsonErr != nil {
+		return sdk.ErrInternal(fmt.Sprintf("Marshal result error: %s", jsonErr)).Result()
 	}
 
 	return sdk.Result{

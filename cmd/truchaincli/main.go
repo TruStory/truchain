@@ -69,6 +69,7 @@ func main() {
 		NewCommunityCmd(cdc),
 		client.LineBreak,
 		GetParamsCmd(cdc),
+		GetAdminCmd(cdc),
 		client.LineBreak,
 		version.Cmd,
 	)
