@@ -1,8 +1,6 @@
 #!/usr/bin/env python3
 
-import copy
 import argparse
-import sys
 import re
 
 
