@@ -1,7 +1,6 @@
 package claim
 
 import (
-	"encoding/json"
 	"fmt"
 	"net/url"
 
@@ -120,12 +119,12 @@ func handleMsgUpdateParams(ctx sdk.Context, k Keeper, msg MsgUpdateParams) sdk.R
 		return err.Result()
 	}
 
-	err := k.UpdateParams(ctx, msg.Updates, msg.UpdatedFields)
+	err := k.UpdateParams(ctx, msg.Updater, msg.Updates, msg.UpdatedFields)
 	if err != nil {
 		return err.Result()
 	}
 
-	res, jsonErr := json.Marshal(true)
+	res, jsonErr := ModuleCodec.MarshalJSON(true)
 	if jsonErr != nil {
 		return sdk.ErrInternal(fmt.Sprintf("Marshal result error: %s", jsonErr)).Result()
 	}
