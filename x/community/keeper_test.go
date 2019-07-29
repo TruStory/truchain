@@ -117,11 +117,12 @@ func TestUpdateParams_Success(t *testing.T) {
 	ctx, keeper := mockDB()
 
 	current := keeper.GetParams(ctx)
+	updater := keeper.GetParams(ctx).CommunityAdmins[0]
 	updates := Params{
 		MinIDLength: current.MinIDLength + 20,
 	}
 	updatedFields := []string{"min_id_length"}
-	keeper.UpdateParams(ctx, updates, updatedFields)
+	keeper.UpdateParams(ctx, updater, updates, updatedFields)
 
 	updated := keeper.GetParams(ctx)
 	assert.Equal(t, current.MinIDLength+20, updated.MinIDLength)

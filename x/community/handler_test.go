@@ -78,7 +78,7 @@ func TestHandleMsgUpdateParams(t *testing.T) {
 		MinIDLength: 20,
 	}
 	updatedFields := []string{"min_id_length"}
-	updater := sdk.AccAddress([]byte{1, 2})
+	updater := keeper.GetParams(ctx).CommunityAdmins[0]
 	msg := NewMsgUpdateParams(updates, updatedFields, updater)
 	assert.NotNil(t, msg) // assert msgs can be created
 
