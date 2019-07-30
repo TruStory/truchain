@@ -3,10 +3,12 @@ package main
 import (
 	"fmt"
 	"reflect"
+	"strconv"
 	"strings"
 
 	"github.com/mitchellh/mapstructure"
 
+	app "github.com/TruStory/truchain/types"
 	"github.com/TruStory/truchain/x/account"
 	"github.com/TruStory/truchain/x/bank"
 	"github.com/TruStory/truchain/x/claim"
@@ -53,10 +55,18 @@ func AccountParamsCmd(cdc *codec.Codec) *cobra.Command {
 			mapInput := make(map[string]string)
 			updates := account.Params{}
 			updatedFields := make([]string, 0)
-			mapParams(updates, func(param string, _ int, _ reflect.StructField) {
+			mapParams(updates, func(param string, _ int, field reflect.StructField) {
 				input := cmd.Flag(param).Value.String()
 				if input != "" {
-					mapInput[param] = input
+					if field.Type.PkgPath() == "github.com/cosmos/cosmos-sdk/types" {
+						// if cosmos type, we'll make the cosmos object
+						reflect.ValueOf(&updates).Elem().FieldByName(field.Name).Set(
+							makeCosmosObject(field.Type.String(), cmd.Flag(param).Value.String()),
+						)
+					} else {
+						mapInput[param] = input
+					}
+
 					updatedFields = append(updatedFields, param)
 				}
 			})
@@ -74,16 +84,6 @@ func AccountParamsCmd(cdc *codec.Codec) *cobra.Command {
 			if err != nil {
 				panic(err)
 			}
-
-			mapParams(updates, func(param string, _ int, field reflect.StructField) {
-				if field.Type.PkgPath() == "github.com/cosmos/cosmos-sdk/types" && field.Type.String() == "types.AccAddress" {
-					address, err := sdk.AccAddressFromBech32(cmd.Flag(param).Value.String())
-					if err != nil {
-						panic(err)
-					}
-					reflect.ValueOf(&updates).Elem().FieldByName(field.Name).Set(reflect.ValueOf(address))
-				}
-			})
 
 			cliCtx := context.NewCLIContextWithFrom(args[0]).WithCodec(cdc).WithAccountDecoder(cdc)
 			seq, _ := cliCtx.GetAccountSequence(cliCtx.FromAddress)
@@ -132,10 +132,18 @@ func BankParamsCmd(cdc *codec.Codec) *cobra.Command {
 			mapInput := make(map[string]string)
 			updates := bank.Params{}
 			updatedFields := make([]string, 0)
-			mapParams(updates, func(param string, _ int, _ reflect.StructField) {
+			mapParams(updates, func(param string, _ int, field reflect.StructField) {
 				input := cmd.Flag(param).Value.String()
 				if input != "" {
-					mapInput[param] = input
+					if field.Type.PkgPath() == "github.com/cosmos/cosmos-sdk/types" {
+						// if cosmos type, we'll make the cosmos object
+						reflect.ValueOf(&updates).Elem().FieldByName(field.Name).Set(
+							makeCosmosObject(field.Type.String(), cmd.Flag(param).Value.String()),
+						)
+					} else {
+						mapInput[param] = input
+					}
+
 					updatedFields = append(updatedFields, param)
 				}
 			})
@@ -153,16 +161,6 @@ func BankParamsCmd(cdc *codec.Codec) *cobra.Command {
 			if err != nil {
 				panic(err)
 			}
-
-			mapParams(updates, func(param string, _ int, field reflect.StructField) {
-				if field.Type.PkgPath() == "github.com/cosmos/cosmos-sdk/types" && field.Type.String() == "types.AccAddress" {
-					address, err := sdk.AccAddressFromBech32(cmd.Flag(param).Value.String())
-					if err != nil {
-						panic(err)
-					}
-					reflect.ValueOf(&updates).Elem().FieldByName(field.Name).Set(reflect.ValueOf(address))
-				}
-			})
 
 			cliCtx := context.NewCLIContextWithFrom(args[0]).WithCodec(cdc).WithAccountDecoder(cdc)
 			seq, _ := cliCtx.GetAccountSequence(cliCtx.FromAddress)
@@ -211,10 +209,18 @@ func ClaimParamsCmd(cdc *codec.Codec) *cobra.Command {
 			mapInput := make(map[string]string)
 			updates := claim.Params{}
 			updatedFields := make([]string, 0)
-			mapParams(updates, func(param string, _ int, _ reflect.StructField) {
+			mapParams(updates, func(param string, _ int, field reflect.StructField) {
 				input := cmd.Flag(param).Value.String()
 				if input != "" {
-					mapInput[param] = input
+					if field.Type.PkgPath() == "github.com/cosmos/cosmos-sdk/types" {
+						// if cosmos type, we'll make the cosmos object
+						reflect.ValueOf(&updates).Elem().FieldByName(field.Name).Set(
+							makeCosmosObject(field.Type.String(), cmd.Flag(param).Value.String()),
+						)
+					} else {
+						mapInput[param] = input
+					}
+
 					updatedFields = append(updatedFields, param)
 				}
 			})
@@ -232,16 +238,6 @@ func ClaimParamsCmd(cdc *codec.Codec) *cobra.Command {
 			if err != nil {
 				panic(err)
 			}
-
-			mapParams(updates, func(param string, _ int, field reflect.StructField) {
-				if field.Type.PkgPath() == "github.com/cosmos/cosmos-sdk/types" && field.Type.String() == "types.AccAddress" {
-					address, err := sdk.AccAddressFromBech32(cmd.Flag(param).Value.String())
-					if err != nil {
-						panic(err)
-					}
-					reflect.ValueOf(&updates).Elem().FieldByName(field.Name).Set(reflect.ValueOf(address))
-				}
-			})
 
 			cliCtx := context.NewCLIContextWithFrom(args[0]).WithCodec(cdc).WithAccountDecoder(cdc)
 			seq, _ := cliCtx.GetAccountSequence(cliCtx.FromAddress)
@@ -290,10 +286,18 @@ func CommunityParamsCmd(cdc *codec.Codec) *cobra.Command {
 			mapInput := make(map[string]string)
 			updates := community.Params{}
 			updatedFields := make([]string, 0)
-			mapParams(updates, func(param string, _ int, _ reflect.StructField) {
+			mapParams(updates, func(param string, _ int, field reflect.StructField) {
 				input := cmd.Flag(param).Value.String()
 				if input != "" {
-					mapInput[param] = input
+					if field.Type.PkgPath() == "github.com/cosmos/cosmos-sdk/types" {
+						// if cosmos type, we'll make the cosmos object
+						reflect.ValueOf(&updates).Elem().FieldByName(field.Name).Set(
+							makeCosmosObject(field.Type.String(), cmd.Flag(param).Value.String()),
+						)
+					} else {
+						mapInput[param] = input
+					}
+
 					updatedFields = append(updatedFields, param)
 				}
 			})
@@ -311,16 +315,6 @@ func CommunityParamsCmd(cdc *codec.Codec) *cobra.Command {
 			if err != nil {
 				panic(err)
 			}
-
-			mapParams(updates, func(param string, _ int, field reflect.StructField) {
-				if field.Type.PkgPath() == "github.com/cosmos/cosmos-sdk/types" && field.Type.String() == "types.AccAddress" {
-					address, err := sdk.AccAddressFromBech32(cmd.Flag(param).Value.String())
-					if err != nil {
-						panic(err)
-					}
-					reflect.ValueOf(&updates).Elem().FieldByName(field.Name).Set(reflect.ValueOf(address))
-				}
-			})
 
 			cliCtx := context.NewCLIContextWithFrom(args[0]).WithCodec(cdc).WithAccountDecoder(cdc)
 			seq, _ := cliCtx.GetAccountSequence(cliCtx.FromAddress)
@@ -369,10 +363,18 @@ func SlashingParamsCmd(cdc *codec.Codec) *cobra.Command {
 			mapInput := make(map[string]string)
 			updates := slashing.Params{}
 			updatedFields := make([]string, 0)
-			mapParams(updates, func(param string, _ int, _ reflect.StructField) {
+			mapParams(updates, func(param string, _ int, field reflect.StructField) {
 				input := cmd.Flag(param).Value.String()
 				if input != "" {
-					mapInput[param] = input
+					if field.Type.PkgPath() == "github.com/cosmos/cosmos-sdk/types" {
+						// if cosmos type, we'll make the cosmos object
+						reflect.ValueOf(&updates).Elem().FieldByName(field.Name).Set(
+							makeCosmosObject(field.Type.String(), cmd.Flag(param).Value.String()),
+						)
+					} else {
+						mapInput[param] = input
+					}
+
 					updatedFields = append(updatedFields, param)
 				}
 			})
@@ -390,16 +392,6 @@ func SlashingParamsCmd(cdc *codec.Codec) *cobra.Command {
 			if err != nil {
 				panic(err)
 			}
-
-			mapParams(updates, func(param string, _ int, field reflect.StructField) {
-				if field.Type.PkgPath() == "github.com/cosmos/cosmos-sdk/types" && field.Type.String() == "types.AccAddress" {
-					address, err := sdk.AccAddressFromBech32(cmd.Flag(param).Value.String())
-					if err != nil {
-						panic(err)
-					}
-					reflect.ValueOf(&updates).Elem().FieldByName(field.Name).Set(reflect.ValueOf(address))
-				}
-			})
 
 			cliCtx := context.NewCLIContextWithFrom(args[0]).WithCodec(cdc).WithAccountDecoder(cdc)
 			seq, _ := cliCtx.GetAccountSequence(cliCtx.FromAddress)
@@ -448,10 +440,18 @@ func StakingParamsCmd(cdc *codec.Codec) *cobra.Command {
 			mapInput := make(map[string]string)
 			updates := staking.Params{}
 			updatedFields := make([]string, 0)
-			mapParams(updates, func(param string, _ int, _ reflect.StructField) {
+			mapParams(updates, func(param string, _ int, field reflect.StructField) {
 				input := cmd.Flag(param).Value.String()
 				if input != "" {
-					mapInput[param] = input
+					if field.Type.PkgPath() == "github.com/cosmos/cosmos-sdk/types" {
+						// if cosmos type, we'll make the cosmos object
+						reflect.ValueOf(&updates).Elem().FieldByName(field.Name).Set(
+							makeCosmosObject(field.Type.String(), cmd.Flag(param).Value.String()),
+						)
+					} else {
+						mapInput[param] = input
+					}
+
 					updatedFields = append(updatedFields, param)
 				}
 			})
@@ -469,16 +469,6 @@ func StakingParamsCmd(cdc *codec.Codec) *cobra.Command {
 			if err != nil {
 				panic(err)
 			}
-
-			mapParams(updates, func(param string, _ int, field reflect.StructField) {
-				if field.Type.PkgPath() == "github.com/cosmos/cosmos-sdk/types" && field.Type.String() == "types.AccAddress" {
-					address, err := sdk.AccAddressFromBech32(cmd.Flag(param).Value.String())
-					if err != nil {
-						panic(err)
-					}
-					reflect.ValueOf(&updates).Elem().FieldByName(field.Name).Set(reflect.ValueOf(address))
-				}
-			})
 
 			cliCtx := context.NewCLIContextWithFrom(args[0]).WithCodec(cdc).WithAccountDecoder(cdc)
 			seq, _ := cliCtx.GetAccountSequence(cliCtx.FromAddress)
@@ -526,4 +516,31 @@ func mapParams(params interface{}, fn func(param string, index int, field reflec
 			fn(param, i, field)
 		}
 	}
+}
+
+// makeCosmosObject converts the input string into correct cosmos object
+func makeCosmosObject(cosmosType string, value string) reflect.Value {
+	if cosmosType == "types.Dec" {
+		dec := sdk.MustNewDecFromStr(value)
+		return reflect.ValueOf(dec)
+	}
+
+	if cosmosType == "types.Coin" {
+		value, err := strconv.ParseInt(value, 10, 64)
+		if err != nil {
+			panic(err)
+		}
+		coin := sdk.NewCoin(app.StakeDenom, sdk.NewInt(value*app.Shanev))
+		return reflect.ValueOf(coin)
+	}
+
+	if cosmosType == "types.AccAddress" {
+		address, err := sdk.AccAddressFromBech32(value)
+		if err != nil {
+			panic(err)
+		}
+		return reflect.ValueOf(address)
+	}
+
+	return reflect.ValueOf(value)
 }
