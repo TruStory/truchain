@@ -6,6 +6,7 @@ import "github.com/cosmos/cosmos-sdk/codec"
 func RegisterCodec(c *codec.Codec) {
 	c.RegisterConcrete(MsgPayReward{}, "truchain/MsgPayReward", nil)
 	c.RegisterConcrete(MsgSendGift{}, "truchain/MsgSendGift", nil)
+	c.RegisterConcrete(MsgUpdateParams{}, "bank/MsgUpdateParams", nil)
 
 	c.RegisterConcrete(Transaction{}, "truchain/Transaction", nil)
 }

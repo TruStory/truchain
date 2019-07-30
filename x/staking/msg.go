@@ -13,6 +13,7 @@ var _ sdk.Msg = &MsgDeleteArgument{}
 var _ sdk.Msg = &MsgEditArgument{}
 var _ sdk.Msg = &MsgAddAdmin{}
 var _ sdk.Msg = &MsgRemoveAdmin{}
+var _ sdk.Msg = &MsgUpdateParams{}
 
 const (
 	TypeMsgSubmitArgument = "submit_argument"
@@ -21,6 +22,7 @@ const (
 	TypeMsgEditArgument   = "edit_argument"
 	TypeMsgAddAdmin       = "add_admin"
 	TypeMsgRemoveAdmin    = "remove_admin"
+	TypeMsgUpdateParams   = "update_params"
 )
 
 // MsgSubmitArgument msg for creating an argument.
@@ -291,4 +293,42 @@ func (msg MsgRemoveAdmin) GetSignBytes() []byte {
 // GetSigners implements Msg. Returns the remover as the signer.
 func (msg MsgRemoveAdmin) GetSigners() []sdk.AccAddress {
 	return []sdk.AccAddress{sdk.AccAddress(msg.Remover)}
+}
+
+// MsgUpdateParams defines the message to remove an admin
+type MsgUpdateParams struct {
+	Updates       Params         `json:"updates"`
+	UpdatedFields []string       `json:"updated_fields"`
+	Updater       sdk.AccAddress `json:"updater"`
+}
+
+// NewMsgUpdateParams returns the message to update the params
+func NewMsgUpdateParams(updates Params, updatedFields []string, updater sdk.AccAddress) MsgUpdateParams {
+	return MsgUpdateParams{
+		Updates:       updates,
+		UpdatedFields: updatedFields,
+		Updater:       updater,
+	}
+}
+
+// ValidateBasic implements Msg
+func (msg MsgUpdateParams) ValidateBasic() sdk.Error {
+	return nil
+}
+
+// Route implements Msg
+func (msg MsgUpdateParams) Route() string { return RouterKey }
+
+// Type implements Msg
+func (msg MsgUpdateParams) Type() string { return TypeMsgUpdateParams }
+
+// GetSignBytes implements Msg
+func (msg MsgUpdateParams) GetSignBytes() []byte {
+	msgBytes := ModuleCodec.MustMarshalJSON(msg)
+	return sdk.MustSortJSON(msgBytes)
+}
+
+// GetSigners implements Msg. Returns the remover as the signer.
+func (msg MsgUpdateParams) GetSigners() []sdk.AccAddress {
+	return []sdk.AccAddress{sdk.AccAddress(msg.Updater)}
 }

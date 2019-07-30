@@ -69,6 +69,25 @@ func TestHandleMsgRemoveAdmin(t *testing.T) {
 	assert.Equal(t, success, true)
 }
 
+func TestHandleMsgUpdateParams(t *testing.T) {
+	ctx, keeper := mockDB()
+	handler := NewHandler(keeper)
+	assert.NotNil(t, handler) // assert handler is present
+
+	updates := Params{
+		MinIDLength: 20,
+	}
+	updatedFields := []string{"min_id_length"}
+	updater := keeper.GetParams(ctx).CommunityAdmins[0]
+	msg := NewMsgUpdateParams(updates, updatedFields, updater)
+	assert.NotNil(t, msg) // assert msgs can be created
+
+	result := handler(ctx, msg)
+	var success bool
+	err := json.Unmarshal(result.Data, &success)
+	assert.NoError(t, err)
+}
+
 func TestByzantineMsg(t *testing.T) {
 	ctx, keeper := mockDB()
 

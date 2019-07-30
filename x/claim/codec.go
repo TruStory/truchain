@@ -9,6 +9,7 @@ func RegisterCodec(c *codec.Codec) {
 	c.RegisterConcrete(MsgDeleteClaim{}, "truchain/MsgDeleteClaim", nil)
 	c.RegisterConcrete(MsgAddAdmin{}, "claim/MsgAddAdmin", nil)
 	c.RegisterConcrete(MsgRemoveAdmin{}, "claim/MsgRemoveAdmin", nil)
+	c.RegisterConcrete(MsgUpdateParams{}, "claim/MsgUpdateParams", nil)
 
 	c.RegisterConcrete(Claim{}, "truchain/Claim", nil)
 }

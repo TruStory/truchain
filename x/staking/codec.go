@@ -9,6 +9,7 @@ func RegisterCodec(c *codec.Codec) {
 	c.RegisterConcrete(MsgEditArgument{}, "truchain/MsgEditArgument", nil)
 	c.RegisterConcrete(MsgAddAdmin{}, "staking/MsgAddAdmin", nil)
 	c.RegisterConcrete(MsgRemoveAdmin{}, "staking/MsgRemoveAdmin", nil)
+	c.RegisterConcrete(MsgUpdateParams{}, "staking/MsgUpdateParams", nil)
 
 	c.RegisterConcrete(Stake{}, "truchain/Stake", nil)
 	c.RegisterConcrete(Argument{}, "truchain/Argument", nil)

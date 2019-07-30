@@ -7,6 +7,7 @@ func RegisterCodec(cdc *codec.Codec) {
 	cdc.RegisterConcrete(MsgSlashArgument{}, "truchain/MsgSlashArgument", nil)
 	cdc.RegisterConcrete(MsgAddAdmin{}, "slashing/MsgAddAdmin", nil)
 	cdc.RegisterConcrete(MsgRemoveAdmin{}, "slashing/MsgRemoveAdmin", nil)
+	cdc.RegisterConcrete(MsgUpdateParams{}, "slashing/MsgUpdateParams", nil)
 
 	cdc.RegisterConcrete(Slash{}, "truchain/Slash", nil)
 }

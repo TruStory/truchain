@@ -23,6 +23,8 @@ func NewHandler(keeper Keeper) sdk.Handler {
 			return handleMsgAddAdmin(ctx, keeper, msg)
 		case MsgRemoveAdmin:
 			return handleMsgRemoveAdmin(ctx, keeper, msg)
+		case MsgUpdateParams:
+			return handleMsgUpdateParams(ctx, keeper, msg)
 		default:
 			errMsg := fmt.Sprintf("Unrecognized staking message type: %T", msg)
 			return sdk.ErrUnknownRequest(errMsg).Result()
@@ -128,6 +130,28 @@ func handleMsgRemoveAdmin(ctx sdk.Context, k Keeper, msg MsgRemoveAdmin) sdk.Res
 	}
 
 	res, jsonErr := ModuleCodec.MarshalJSON(true)
+	if jsonErr != nil {
+		return sdk.ErrInternal(fmt.Sprintf("Marshal result error: %s", jsonErr)).Result()
+	}
+
+	return sdk.Result{
+		Data: res,
+	}
+}
+
+func handleMsgUpdateParams(ctx sdk.Context, k Keeper, msg MsgUpdateParams) sdk.Result {
+	if err := msg.ValidateBasic(); err != nil {
+		return err.Result()
+	}
+
+	err := k.UpdateParams(ctx, msg.Updater, msg.Updates, msg.UpdatedFields)
+
+	if err != nil {
+		return err.Result()
+	}
+
+	res, jsonErr := ModuleCodec.MarshalJSON(true)
+
 	if jsonErr != nil {
 		return sdk.ErrInternal(fmt.Sprintf("Marshal result error: %s", jsonErr)).Result()
 	}
