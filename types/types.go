@@ -8,8 +8,8 @@ import (
 const (
 	// AppName is the name of the Cosmos app
 	AppName = "TruChain"
-	// StakeDenom is the name of the main staking currency (will be "trustake" on mainnet launch)
-	StakeDenom = "trusteak"
+	// StakeDenom is the name of the main staking currency
+	StakeDenom = "tru"
 	// Hostname is the address the app's HTTP server will bind to
 	Hostname = "0.0.0.0"
 	// Portname is the port the app's HTTP server will bind to
@@ -25,8 +25,8 @@ const (
 // InitialCredAmount is the initial amount of cred for categories
 var InitialCredAmount = sdk.NewInt(1000000000)
 
-// InitialTruStake is an `sdk.Coins` representing the balance a new user is granted upon registration
-var InitialTruStake = sdk.Coin{Amount: sdk.NewInt(300 * Shanev), Denom: StakeDenom}
+// InitialStake is an `sdk.Coins` representing the balance a new user is granted upon registration
+var InitialStake = sdk.Coin{Amount: sdk.NewInt(300 * Shanev), Denom: StakeDenom}
 
 // RegistrationFee is an `auth.StdFee` representing the coin and gas cost of registering a new account
 // TODO: Use more accurate gas estimate [notduncansmith]
