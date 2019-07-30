@@ -3,12 +3,10 @@ package main
 import (
 	"fmt"
 	"reflect"
-	"strconv"
 	"strings"
 
 	"github.com/mitchellh/mapstructure"
 
-	app "github.com/TruStory/truchain/types"
 	"github.com/TruStory/truchain/x/account"
 	"github.com/TruStory/truchain/x/bank"
 	"github.com/TruStory/truchain/x/claim"
@@ -526,11 +524,10 @@ func makeCosmosObject(cosmosType string, value string) reflect.Value {
 	}
 
 	if cosmosType == "types.Coin" {
-		value, err := strconv.ParseInt(value, 10, 64)
+		coin, err := sdk.ParseCoin(value)
 		if err != nil {
 			panic(err)
 		}
-		coin := sdk.NewCoin(app.StakeDenom, sdk.NewInt(value*app.Shanev))
 		return reflect.ValueOf(coin)
 	}
 
