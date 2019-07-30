@@ -35,6 +35,40 @@ func TestHandleMsgNewCommunity(t *testing.T) {
 	assert.NoError(t, err)
 }
 
+func TestHandleMsgAddAdmin(t *testing.T) {
+	ctx, keeper := mockDB()
+	handler := NewHandler(keeper)
+	assert.NotNil(t, handler) // assert handler is present
+
+	admin := getFakeAdmin()
+	creator := keeper.GetParams(ctx).CommunityAdmins[0]
+	msg := NewMsgAddAdmin(admin, creator)
+	assert.NotNil(t, msg) // assert msgs can be created
+
+	result := handler(ctx, msg)
+	var success bool
+	err := json.Unmarshal(result.Data, &success)
+	assert.NoError(t, err)
+	assert.Equal(t, success, true)
+}
+
+func TestHandleMsgRemoveAdmin(t *testing.T) {
+	ctx, keeper := mockDB()
+	handler := NewHandler(keeper)
+	assert.NotNil(t, handler) // assert handler is present
+
+	admin := getFakeAdmin()
+	creator := keeper.GetParams(ctx).CommunityAdmins[0]
+	msg := NewMsgRemoveAdmin(admin, creator)
+	assert.NotNil(t, msg) // assert msgs can be created
+
+	result := handler(ctx, msg)
+	var success bool
+	err := json.Unmarshal(result.Data, &success)
+	assert.NoError(t, err)
+	assert.Equal(t, success, true)
+}
+
 func TestHandleMsgUpdateParams(t *testing.T) {
 	ctx, keeper := mockDB()
 	handler := NewHandler(keeper)
@@ -44,7 +78,7 @@ func TestHandleMsgUpdateParams(t *testing.T) {
 		MinIDLength: 20,
 	}
 	updatedFields := []string{"min_id_length"}
-	updater := sdk.AccAddress([]byte{1, 2})
+	updater := keeper.GetParams(ctx).CommunityAdmins[0]
 	msg := NewMsgUpdateParams(updates, updatedFields, updater)
 	assert.NotNil(t, msg) // assert msgs can be created
 

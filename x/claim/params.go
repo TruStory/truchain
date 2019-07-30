@@ -59,7 +59,12 @@ func (k Keeper) SetParams(ctx sdk.Context, params Params) {
 }
 
 // UpdateParams updates the required params
-func (k Keeper) UpdateParams(ctx sdk.Context, updates Params, updatedFields []string) sdk.Error {
+func (k Keeper) UpdateParams(ctx sdk.Context, updater sdk.AccAddress, updates Params, updatedFields []string) sdk.Error {
+	if !k.isAdmin(ctx, updater) {
+		err := ErrAddressNotAuthorised()
+		return err
+	}
+
 	current := k.GetParams(ctx)
 	updated := k.getUpdatedParams(current, updates, updatedFields)
 	k.SetParams(ctx, updated)

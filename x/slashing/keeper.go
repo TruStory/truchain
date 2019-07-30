@@ -326,6 +326,47 @@ func (k Keeper) Slashes(ctx sdk.Context) (slashes []Slash) {
 	return k.iterate(iterator)
 }
 
+// AddAdmin adds a new admin
+func (k Keeper) AddAdmin(ctx sdk.Context, admin, creator sdk.AccAddress) (err sdk.Error) {
+	params := k.GetParams(ctx)
+
+	// first admin can be added without any authorisation
+	if len(params.SlashAdmins) > 0 && !k.isAdmin(ctx, creator) {
+		err = ErrAddressNotAuthorised()
+	}
+
+	// if already present, don't add again
+	for _, currentAdmin := range params.SlashAdmins {
+		if currentAdmin.Equals(admin) {
+			return
+		}
+	}
+
+	params.SlashAdmins = append(params.SlashAdmins, admin)
+
+	k.SetParams(ctx, params)
+
+	return
+}
+
+// RemoveAdmin removes an admin
+func (k Keeper) RemoveAdmin(ctx sdk.Context, admin, remover sdk.AccAddress) (err sdk.Error) {
+	if !k.isAdmin(ctx, remover) {
+		err = ErrAddressNotAuthorised()
+	}
+
+	params := k.GetParams(ctx)
+	for i, currentAdmin := range params.SlashAdmins {
+		if currentAdmin.Equals(admin) {
+			params.SlashAdmins = append(params.SlashAdmins[:i], params.SlashAdmins[i+1:]...)
+		}
+	}
+
+	k.SetParams(ctx, params)
+
+	return
+}
+
 // slashID gets the highest slash ID
 func (k Keeper) slashID(ctx sdk.Context) (slashID uint64, err sdk.Error) {
 	store := ctx.KVStore(k.storeKey)
@@ -425,9 +466,9 @@ func (k Keeper) validateParams(ctx sdk.Context, argumentID uint64, detailedReaso
 }
 
 func (k Keeper) hasEnoughEarnedStake(ctx sdk.Context, address sdk.AccAddress, requirement sdk.Coin) bool {
-	balance := k.bankKeeper.GetCoins(ctx, address)
+	totalStakeEarned := k.stakingKeeper.TotalEarnedCoins(ctx, address)
 
-	return balance.AmountOf(app.StakeDenom).GTE(requirement.Amount)
+	return totalStakeEarned.GTE(requirement.Amount)
 }
 
 func (k Keeper) hasPreviouslySlashed(ctx sdk.Context, argumentID uint64, creator sdk.AccAddress) bool {

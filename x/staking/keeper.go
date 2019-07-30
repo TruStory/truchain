@@ -288,6 +288,56 @@ func (k Keeper) SetStakeExpired(ctx sdk.Context, stakeID uint64) sdk.Error {
 	return nil
 }
 
+// AddAdmin adds a new admin
+func (k Keeper) AddAdmin(ctx sdk.Context, admin, creator sdk.AccAddress) (err sdk.Error) {
+	params := k.GetParams(ctx)
+
+	// first admin can be added without any authorisation
+	if len(params.StakingAdmins) > 0 && !k.isAdmin(ctx, creator) {
+		err = ErrAddressNotAuthorised()
+	}
+
+	// if already present, don't add again
+	for _, currentAdmin := range params.StakingAdmins {
+		if currentAdmin.Equals(admin) {
+			return
+		}
+	}
+
+	params.StakingAdmins = append(params.StakingAdmins, admin)
+
+	k.SetParams(ctx, params)
+
+	return
+}
+
+// RemoveAdmin removes an admin
+func (k Keeper) RemoveAdmin(ctx sdk.Context, admin, remover sdk.AccAddress) (err sdk.Error) {
+	if !k.isAdmin(ctx, remover) {
+		err = ErrAddressNotAuthorised()
+	}
+
+	params := k.GetParams(ctx)
+	for i, currentAdmin := range params.StakingAdmins {
+		if currentAdmin.Equals(admin) {
+			params.StakingAdmins = append(params.StakingAdmins[:i], params.StakingAdmins[i+1:]...)
+		}
+	}
+
+	k.SetParams(ctx, params)
+
+	return
+}
+
+func (k Keeper) isAdmin(ctx sdk.Context, address sdk.AccAddress) bool {
+	for _, admin := range k.GetParams(ctx).StakingAdmins {
+		if address.Equals(admin) {
+			return true
+		}
+	}
+	return false
+}
+
 func (k Keeper) setArgument(ctx sdk.Context, argument Argument) {
 	bz := k.codec.MustMarshalBinaryLengthPrefixed(argument)
 	k.store(ctx).Set(argumentKey(argument.ID), bz)
@@ -336,7 +386,7 @@ func (k Keeper) checkStakeThreshold(ctx sdk.Context, address sdk.AccAddress, amo
 		return ErrCodeMinBalance()
 	}
 
-	switch totalEarned := k.totalEarnedCoins(ctx, address); {
+	switch totalEarned := k.TotalEarnedCoins(ctx, address); {
 	// if total earned >= 50
 	case totalEarned.GTE(tierLimitsEarnedCoins[4]):
 		if staked.Add(amount).GT(tierLimitsStakeAmounts[4]) {
@@ -375,7 +425,7 @@ func (k Keeper) checkStakeThreshold(ctx sdk.Context, address sdk.AccAddress, amo
 	}
 }
 
-func (k Keeper) totalEarnedCoins(ctx sdk.Context, creator sdk.AccAddress) sdk.Int {
+func (k Keeper) TotalEarnedCoins(ctx sdk.Context, creator sdk.AccAddress) sdk.Int {
 	earnedCoins := k.getEarnedCoins(ctx, creator)
 	total := sdk.NewInt(0)
 	for _, e := range earnedCoins {
@@ -534,15 +584,6 @@ func (k Keeper) UsersEarnings(ctx sdk.Context) []UserEarnedCoins {
 		return false
 	})
 	return userEarnedCoins
-}
-
-func (k Keeper) isAdmin(ctx sdk.Context, address sdk.AccAddress) bool {
-	for _, admin := range k.GetParams(ctx).StakingAdmins {
-		if address.Equals(admin) {
-			return true
-		}
-	}
-	return false
 }
 
 // EditArgument lets a creator edit an argument as long it hasn't been staked on

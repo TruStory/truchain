@@ -64,7 +64,7 @@ func TestNewCommunity_CreatorNotAuthorised(t *testing.T) {
 	unauthorisedCreator := sdk.AccAddress([]byte{1, 2})
 	_, err := keeper.NewCommunity(ctx, id, name, description, unauthorisedCreator)
 	assert.NotNil(t, err)
-	assert.Equal(t, ErrCreatorNotAuthorised().Code(), err.Code())
+	assert.Equal(t, ErrAddressNotAuthorised().Code(), err.Code())
 }
 
 func TestCommunity_Success(t *testing.T) {
@@ -117,12 +117,61 @@ func TestUpdateParams_Success(t *testing.T) {
 	ctx, keeper := mockDB()
 
 	current := keeper.GetParams(ctx)
+	updater := keeper.GetParams(ctx).CommunityAdmins[0]
 	updates := Params{
 		MinIDLength: current.MinIDLength + 20,
 	}
 	updatedFields := []string{"min_id_length"}
-	keeper.UpdateParams(ctx, updates, updatedFields)
+	keeper.UpdateParams(ctx, updater, updates, updatedFields)
 
 	updated := keeper.GetParams(ctx)
 	assert.Equal(t, current.MinIDLength+20, updated.MinIDLength)
+}
+
+func TestAddAdmin_Success(t *testing.T) {
+	ctx, keeper := mockDB()
+
+	creator := keeper.GetParams(ctx).CommunityAdmins[0]
+	newAdmin := getFakeAdmin()
+
+	err := keeper.AddAdmin(ctx, newAdmin, creator)
+	assert.Nil(t, err)
+
+	newAdmins := keeper.GetParams(ctx).CommunityAdmins
+	assert.Subset(t, newAdmins, []sdk.AccAddress{newAdmin})
+}
+
+func TestAddAdmin_CreatorNotAuthorised(t *testing.T) {
+	ctx, keeper := mockDB()
+
+	invalidCreator := sdk.AccAddress([]byte{1, 2})
+	newAdmin := getFakeAdmin()
+
+	err := keeper.AddAdmin(ctx, newAdmin, invalidCreator)
+	assert.NotNil(t, err)
+	assert.Equal(t, ErrAddressNotAuthorised().Code(), err.Code())
+}
+
+func TestRemoveAdmin_Success(t *testing.T) {
+	ctx, keeper := mockDB()
+
+	currentAdmins := keeper.GetParams(ctx).CommunityAdmins
+	adminToRemove := currentAdmins[0]
+
+	err := keeper.RemoveAdmin(ctx, adminToRemove, adminToRemove) // removing self
+	assert.Nil(t, err)
+	newAdmins := keeper.GetParams(ctx).CommunityAdmins
+	assert.Equal(t, len(currentAdmins)-1, len(newAdmins))
+}
+
+func TestRemoveAdmin_RemoverNotAuthorised(t *testing.T) {
+	ctx, keeper := mockDB()
+
+	invalidRemover := sdk.AccAddress([]byte{1, 2})
+	currentAdmins := keeper.GetParams(ctx).CommunityAdmins
+	adminToRemove := currentAdmins[0]
+
+	err := keeper.AddAdmin(ctx, adminToRemove, invalidRemover)
+	assert.NotNil(t, err)
+	assert.Equal(t, ErrAddressNotAuthorised().Code(), err.Code())
 }

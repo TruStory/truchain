@@ -497,3 +497,51 @@ func TestKeeper_ClaimTotalsAdded(t *testing.T) {
 	assert.True(t, ok)
 	assert.NoError(t, err)
 }
+
+func TestAddAdmin_Success(t *testing.T) {
+	ctx, keeper, _ := mockDB()
+
+	creator := keeper.GetParams(ctx).StakingAdmins[0]
+	_, _, newAdmin := keyPubAddr()
+
+	err := keeper.AddAdmin(ctx, newAdmin, creator)
+	assert.Nil(t, err)
+
+	newAdmins := keeper.GetParams(ctx).StakingAdmins
+	assert.Subset(t, newAdmins, []sdk.AccAddress{newAdmin})
+}
+
+func TestAddAdmin_CreatorNotAuthorised(t *testing.T) {
+	ctx, keeper, _ := mockDB()
+
+	invalidCreator := sdk.AccAddress([]byte{1, 2})
+	_, _, newAdmin := keyPubAddr()
+
+	err := keeper.AddAdmin(ctx, newAdmin, invalidCreator)
+	assert.NotNil(t, err)
+	assert.Equal(t, ErrAddressNotAuthorised().Code(), err.Code())
+}
+
+func TestRemoveAdmin_Success(t *testing.T) {
+	ctx, keeper, _ := mockDB()
+
+	currentAdmins := keeper.GetParams(ctx).StakingAdmins
+	adminToRemove := currentAdmins[0]
+
+	err := keeper.RemoveAdmin(ctx, adminToRemove, adminToRemove) // removing self
+	assert.Nil(t, err)
+	newAdmins := keeper.GetParams(ctx).StakingAdmins
+	assert.Equal(t, len(currentAdmins)-1, len(newAdmins))
+}
+
+func TestRemoveAdmin_RemoverNotAuthorised(t *testing.T) {
+	ctx, keeper, _ := mockDB()
+
+	invalidRemover := sdk.AccAddress([]byte{1, 2})
+	currentAdmins := keeper.GetParams(ctx).StakingAdmins
+	adminToRemove := currentAdmins[0]
+
+	err := keeper.AddAdmin(ctx, adminToRemove, invalidRemover)
+	assert.NotNil(t, err)
+	assert.Equal(t, ErrAddressNotAuthorised().Code(), err.Code())
+}

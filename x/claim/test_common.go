@@ -55,8 +55,8 @@ func mockDB() (sdk.Context, Keeper) {
 		communityKey,
 		pk.Subspace(community.ModuleName),
 		codec)
-	admin1 := getFakeCommunityAdmin()
-	admin2 := getFakeCommunityAdmin()
+	admin1 := getFakeAdmin()
+	admin2 := getFakeAdmin()
 	genesis := community.DefaultGenesisState()
 	genesis.Params.CommunityAdmins = append(genesis.Params.CommunityAdmins, admin1, admin2)
 	community.InitGenesis(ctx, communityKeeper, genesis)
@@ -77,12 +77,14 @@ func mockDB() (sdk.Context, Keeper) {
 		accountKeeper,
 		communityKeeper,
 	)
-	InitGenesis(ctx, keeper, DefaultGenesisState())
+	claimGenesis := DefaultGenesisState()
+	claimGenesis.Params.ClaimAdmins = append(claimGenesis.Params.ClaimAdmins, admin1, admin2)
+	InitGenesis(ctx, keeper, claimGenesis)
 
 	return ctx, keeper
 }
 
-func getFakeCommunityAdmin() (address sdk.AccAddress) {
+func getFakeAdmin() (address sdk.AccAddress) {
 	key := secp256k1.GenPrivKey()
 	pub := key.PubKey()
 	addr := sdk.AccAddress(pub.Address())

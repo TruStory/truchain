@@ -17,7 +17,7 @@ const (
 	TypeMsgUpdateParams = "update_params"
 )
 
-// MsgNewCommunity defines the message to create new community
+// MsgNewCommunity defines the message to add a new admin
 type MsgNewCommunity struct {
 	Name        string         `json:"name"`
 	ID          string         `json:"id"`
