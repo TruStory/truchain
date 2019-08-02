@@ -117,6 +117,11 @@ func (k Keeper) interest(ctx sdk.Context, amount sdk.Coin, period time.Duration)
 	// TODO: https://github.com/TruStory/truchain/issues/677
 	// use interest from distribution module
 	interestRate := k.GetParams(ctx).InterestRate
+	return Interest(interestRate, amount, period)
+}
+
+// Interest takes an annual inflation/interest rate and calculates the return on an amount staked for a given period
+func Interest(interestRate sdk.Dec, amount sdk.Coin, period time.Duration) sdk.Dec {
 	periodDec := sdk.NewDec(period.Nanoseconds())
 	amountDec := sdk.NewDecFromInt(amount.Amount)
 	oneYear := time.Hour * 24 * 365
