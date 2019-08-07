@@ -76,6 +76,12 @@ const (
 	SlashReasonPlagiarism
 	// SlashReasonOther represents the reason that is any other than the above
 	SlashReasonOther
+	// SlashReasonHarassment ...
+	SlashReasonHarassment
+	// SlashReasonSpam ...
+	SlashReasonSpam
+	// SlashReasonOffensiveContent ...
+	SlashReasonOffensiveContent
 )
 
 func (r SlashReason) String() string {
@@ -85,6 +91,7 @@ func (r SlashReason) String() string {
 	return SlashReasonName[r]
 }
 
+// SlashReasonName is the reason for the slash
 var SlashReasonName = []string{
 	SlashReasonLogicOrEvidenceAbsent: "No clear logic or evidence",
 	SlashReasonIssueNotAddressed:     "Doesn't address the issue",
@@ -92,4 +99,7 @@ var SlashReasonName = []string{
 	SlashNoOriginalThought:           "No original thought",
 	SlashReasonPlagiarism:            "Plagiarism",
 	SlashReasonOther:                 "Other",
+	SlashReasonHarassment:            "Harassment",
+	SlashReasonSpam:                  "Spam",
+	SlashReasonOffensiveContent:      "Offensive Content",
 }
