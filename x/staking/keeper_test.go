@@ -350,14 +350,11 @@ func TestKeeper_StakeLimitTiers(t *testing.T) {
 	}
 
 	var tierTests = []tierTest{
-		{"500 limit", 700, 11, 12},
-		{"1000 limit", 1200, 21, 20},
-
-		{"1500 limit", 1800, 31, 35},
-
-		{"2000 limit", 2100, 41, 49},
-
-		{"2500 limit", 5000, 51, 51},
+		{"1000 limit", 1200, 21, 12},
+		{"1500 limit", 1700, 31, 20},
+		{"2000 limit", 2300, 41, 35},
+		{"2500 limit", 2700, 51, 49},
+		{"3000 limit", 5000, 61, 51},
 	}
 	assert.Len(t, tierTests, len(tierLimitsEarnedCoins))
 	for _, tt := range tierTests {
@@ -383,7 +380,7 @@ func TestKeeper_StakeLimitTiers(t *testing.T) {
 }
 func TestKeeper_StakeLimitDefaultTier(t *testing.T) {
 	ctx, k, mdb := mockDB()
-	addr := createFakeFundedAccount(ctx, mdb.authAccKeeper, sdk.Coins{sdk.NewInt64Coin(app.StakeDenom, app.Shanev*500)})
+	addr := createFakeFundedAccount(ctx, mdb.authAccKeeper, sdk.Coins{sdk.NewInt64Coin(app.StakeDenom, app.Shanev*700)})
 
 	_, err := k.SubmitArgument(ctx, "arg1", "summary1", addr, 1, StakeChallenge)
 	assert.NoError(t, err)
@@ -404,6 +401,16 @@ func TestKeeper_StakeLimitDefaultTier(t *testing.T) {
 	assert.NoError(t, err)
 
 	_, err = k.SubmitArgument(ctx, "arg1", "summary1", addr, 7, StakeChallenge)
+	assert.NoError(t, err)
+
+	_, err = k.SubmitArgument(ctx, "arg1", "summary1", addr, 8, StakeChallenge)
+	assert.NoError(t, err)
+	_, err = k.SubmitArgument(ctx, "arg1", "summary1", addr, 9, StakeChallenge)
+	assert.NoError(t, err)
+	_, err = k.SubmitArgument(ctx, "arg1", "summary1", addr, 10, StakeChallenge)
+	assert.NoError(t, err)
+
+	_, err = k.SubmitArgument(ctx, "arg1", "summary1", addr, 11, StakeChallenge)
 	assert.Error(t, err)
 	assert.Equal(t, ErrorCodeMaxAmountStakingReached, err.Code())
 }

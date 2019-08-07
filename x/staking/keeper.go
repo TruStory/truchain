@@ -352,14 +352,14 @@ var tierLimitsEarnedCoins = []sdk.Int{
 }
 
 var tierLimitsStakeAmounts = []sdk.Int{
-	sdk.NewInt(app.Shanev * 500),
 	sdk.NewInt(app.Shanev * 1000),
 	sdk.NewInt(app.Shanev * 1500),
 	sdk.NewInt(app.Shanev * 2000),
 	sdk.NewInt(app.Shanev * 2500),
+	sdk.NewInt(app.Shanev * 3000),
 }
 
-var defaultStakeLimit = sdk.NewInt(app.Shanev * 300)
+var defaultStakeLimit = sdk.NewInt(app.Shanev * 500)
 var defaultMinimumBalance = sdk.NewInt(app.Shanev * 50)
 
 func (k Keeper) checkStakeThreshold(ctx sdk.Context, address sdk.AccAddress, amount sdk.Int) sdk.Error {
