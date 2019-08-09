@@ -91,11 +91,11 @@ func getFakeAdmin() (address sdk.AccAddress) {
 	return addr
 }
 
-func fakeClaim(ctx sdk.Context, keeper Keeper) Claim {
+func fakeClaim(ctx sdk.Context, keeper Keeper, communityID string) Claim {
 	body := "body string ajsdkhfakjsdfhd"
 	creator := sdk.AccAddress(ed25519.GenPrivKey().PubKey().Address())
 	source := url.URL{}
-	claim, err := keeper.SubmitClaim(ctx, body, "crypto", creator, source)
+	claim, err := keeper.SubmitClaim(ctx, body, communityID, creator, source)
 	if err != nil {
 		panic(err)
 	}

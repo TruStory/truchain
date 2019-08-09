@@ -10,15 +10,16 @@ import (
 
 // query endpoints
 const (
-	QueryClaim            = "claim"
-	QueryClaims           = "claims"
-	QueryClaimsByIDs      = "claims_ids"
-	QueryCommunityClaims  = "community_claims"
-	QueryCreatorClaims    = "creator_claims"
-	QueryClaimsIDRange    = "claims_id_range"
-	QueryClaimsBeforeTime = "claims_before_time"
-	QueryClaimsAfterTime  = "claims_after_time"
-	QueryParams           = "params"
+	QueryClaim             = "claim"
+	QueryClaims            = "claims"
+	QueryClaimsByIDs       = "claims_ids"
+	QueryCommunityClaims   = "community_claims"
+	QueryCommunitiesClaims = "communities_claims"
+	QueryCreatorClaims     = "creator_claims"
+	QueryClaimsIDRange     = "claims_id_range"
+	QueryClaimsBeforeTime  = "claims_before_time"
+	QueryClaimsAfterTime   = "claims_after_time"
+	QueryParams            = "params"
 )
 
 // QueryClaimParams for a single claim
@@ -34,6 +35,11 @@ type QueryClaimsParams struct {
 // QueryCommunityClaimsParams for community claims
 type QueryCommunityClaimsParams struct {
 	CommunityID string `json:"community_id"`
+}
+
+// QueryCommunitiesClaimsParams for communities claims
+type QueryCommunitiesClaimsParams struct {
+	CommunityIDs []string `json:"community_ids"`
 }
 
 // QueryCreatorClaimsParams for community claims
@@ -64,6 +70,8 @@ func NewQuerier(keeper Keeper) sdk.Querier {
 			return queryClaimsByIDs(ctx, req, keeper)
 		case QueryCommunityClaims:
 			return queryCommunityClaims(ctx, req, keeper)
+		case QueryCommunitiesClaims:
+			return queryCommunitiesClaims(ctx, req, keeper)
 		case QueryCreatorClaims:
 			return queryCreatorClaims(ctx, req, keeper)
 		case QueryClaimsIDRange:
@@ -127,6 +135,21 @@ func queryCommunityClaims(ctx sdk.Context, req abci.RequestQuery, keeper Keeper)
 		return nil, ErrJSONParse(codecErr)
 	}
 	claims := keeper.CommunityClaims(ctx, params.CommunityID)
+
+	return mustMarshal(claims)
+}
+
+func queryCommunitiesClaims(ctx sdk.Context, req abci.RequestQuery, keeper Keeper) ([]byte, sdk.Error) {
+	var params QueryCommunitiesClaimsParams
+	codecErr := ModuleCodec.UnmarshalJSON(req.Data, &params)
+	if codecErr != nil {
+		return nil, ErrJSONParse(codecErr)
+	}
+	claims := make([]Claim, 0)
+	for _, community := range params.CommunityIDs {
+		communityClaims := keeper.CommunityClaims(ctx, community)
+		claims = append(claims, communityClaims...)
+	}
 
 	return mustMarshal(claims)
 }
