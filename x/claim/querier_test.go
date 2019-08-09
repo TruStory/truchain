@@ -33,7 +33,7 @@ func TestQueryClaims_NoneFound(t *testing.T) {
 func TestQueryClaims(t *testing.T) {
 	ctx, keeper := mockDB()
 
-	fakeClaim(ctx, keeper)
+	fakeClaim(ctx, keeper, "crypto")
 
 	query := abci.RequestQuery{
 		Path: strings.Join([]string{custom, QueryClaims}, "/"),
@@ -53,11 +53,11 @@ func TestQueryClaims(t *testing.T) {
 func TestQueryClaimsByIDs(t *testing.T) {
 	ctx, keeper := mockDB()
 
-	fakeClaim(ctx, keeper)
-	fakeClaim(ctx, keeper)
-	fakeClaim(ctx, keeper)
-	fakeClaim(ctx, keeper)
-	fakeClaim(ctx, keeper)
+	fakeClaim(ctx, keeper, "crypto")
+	fakeClaim(ctx, keeper, "crypto")
+	fakeClaim(ctx, keeper, "crypto")
+	fakeClaim(ctx, keeper, "crypto")
+	fakeClaim(ctx, keeper, "crypto")
 
 	queryParams := QueryClaimsParams{
 		IDs: []uint64{1, 3, 4},
@@ -83,7 +83,7 @@ func TestQueryClaimsByIDs(t *testing.T) {
 func TestQueryCommunityClaims(t *testing.T) {
 	ctx, keeper := mockDB()
 
-	fakeClaim(ctx, keeper)
+	fakeClaim(ctx, keeper, "crypto")
 
 	queryParams := QueryCommunityClaimsParams{
 		CommunityID: "crypto",
@@ -106,10 +106,37 @@ func TestQueryCommunityClaims(t *testing.T) {
 	require.Equal(t, 1, len(claims))
 }
 
+func TestQueryCommunitiesClaims(t *testing.T) {
+	ctx, keeper := mockDB()
+
+	fakeClaim(ctx, keeper, "crypto")
+	fakeClaim(ctx, keeper, "meme")
+
+	queryParams := QueryCommunitiesClaimsParams{
+		CommunityIDs: []string{"crypto", "meme"},
+	}
+	queryParamsBytes, jsonErr := ModuleCodec.MarshalJSON(queryParams)
+	require.Nil(t, jsonErr)
+
+	query := abci.RequestQuery{
+		Path: strings.Join([]string{custom, QueryCommunitiesClaims}, "/"),
+		Data: queryParamsBytes,
+	}
+
+	querier := NewQuerier(keeper)
+	resBytes, err := querier(ctx, []string{QueryCommunitiesClaims}, query)
+	require.NoError(t, err)
+
+	var claims []Claim
+	cdcErr := ModuleCodec.UnmarshalJSON(resBytes, &claims)
+	require.NoError(t, cdcErr)
+	require.Equal(t, 2, len(claims))
+}
+
 func TestQueryCreatorClaims(t *testing.T) {
 	ctx, keeper := mockDB()
 
-	claim := fakeClaim(ctx, keeper)
+	claim := fakeClaim(ctx, keeper, "crypto")
 
 	queryParams := QueryCreatorClaimsParams{
 		Creator: claim.Creator,
