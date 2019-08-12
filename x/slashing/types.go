@@ -48,8 +48,9 @@ func (s Slash) String() string {
 	return fmt.Sprintf(`Slash %d:
   ArgumentID: %d
   Creator: %s
+  Reason: %d
   CreatedTime: %s`,
-		s.ID, s.ArgumentID, s.Creator.String(), s.CreatedTime.String())
+		s.ID, s.ArgumentID, s.Creator.String(), s.Reason, s.CreatedTime.String())
 }
 
 // SlashType enum
