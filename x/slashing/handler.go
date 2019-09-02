@@ -5,9 +5,6 @@ import (
 	"fmt"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
-
-	app "github.com/TruStory/truchain/types"
-	"github.com/TruStory/truchain/x/slashing/tags"
 )
 
 // NewHandler creates a new handler for slashing module
@@ -43,23 +40,24 @@ func handleMsgSlashArgument(ctx sdk.Context, k Keeper, msg MsgSlashArgument) sdk
 	if jsonErr != nil {
 		return sdk.ErrInternal(fmt.Sprintf("Marshal result error: %s", jsonErr)).Result()
 	}
-	resultTags := append(app.PushTxTag,
-		sdk.NewTags(
-			tags.Category, tags.TxCategory,
-			tags.Action, tags.ActionCreateSlash,
-			tags.MinSlashCount, fmt.Sprintf("%d", k.GetParams(ctx).MinSlashCount),
-		)...,
-	)
+	//resultTags := append(app.PushTxTag,
+	//	sdk.NewTags(
+	//		tags.Category, tags.TxCategory,
+	//		tags.Action, tags.ActionCreateSlash,
+	//		tags.MinSlashCount, fmt.Sprintf("%d", k.GetParams(ctx).MinSlashCount),
+	//	)...,
+	//)
 	if len(punishmentResults) > 0 {
-		json, jsonErr := json.Marshal(punishmentResults)
+		//json, jsonErr := json.Marshal(punishmentResults)
+		_, jsonErr := json.Marshal(punishmentResults)
 		if jsonErr != nil {
 			return sdk.ErrInternal(fmt.Sprintf("Marshal result error: %s", jsonErr)).Result()
 		}
-		resultTags = append(resultTags, sdk.NewTags(tags.SlashResults, json)...)
+		//resultTags = append(resultTags, sdk.NewTags(tags.SlashResults, json)...)
 	}
 	return sdk.Result{
 		Data: res,
-		Tags: resultTags,
+		//Tags: resultTags,
 	}
 }
 

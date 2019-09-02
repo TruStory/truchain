@@ -5,8 +5,6 @@ import (
 	"fmt"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
-
-	"github.com/TruStory/truchain/x/bank/tags"
 )
 
 // NewHandler creates a new handler for bank module
@@ -34,14 +32,14 @@ func handleMsgSendGift(ctx sdk.Context, keeper Keeper, msg MsgSendGift) sdk.Resu
 		fmt.Println("error", err)
 		return err.Result()
 	}
-	tags := sdk.NewTags(
-		tags.Category, tags.TxCategory,
-		tags.Action, tags.ActionPayGift,
-		tags.Sender, msg.Sender.String(),
-		tags.Recipient, msg.Recipient.String(),
-	)
+	//tags := sdk.NewTags(
+	//	tags.Category, tags.TxCategory,
+	//	tags.Action, tags.ActionPayGift,
+	//	tags.Sender, msg.Sender.String(),
+	//	tags.Recipient, msg.Recipient.String(),
+	//)
 	return sdk.Result{
-		Tags: tags,
+		//Tags: tags,
 	}
 }
 
@@ -53,14 +51,14 @@ func handleMsgPayReward(ctx sdk.Context, keeper Keeper, msg MsgPayReward) sdk.Re
 	if err != nil {
 		return err.Result()
 	}
-	tags := sdk.NewTags(
-		tags.Category, tags.TxCategory,
-		tags.Action, tags.ActionPayReward,
-		tags.Sender, msg.Sender.String(),
-		tags.Recipient, msg.Recipient.String(),
-	)
+	//tags := sdk.NewTags(
+	//	tags.Category, tags.TxCategory,
+	//	tags.Action, tags.ActionPayReward,
+	//	tags.Sender, msg.Sender.String(),
+	//	tags.Recipient, msg.Recipient.String(),
+	//)
 	return sdk.Result{
-		Tags: tags,
+		//Tags: tags,
 	}
 }
 

@@ -1,9 +1,5 @@
 package tags
 
-import (
-	sdk "github.com/cosmos/cosmos-sdk/types"
-)
-
 // slashing tags
 var (
 	SlashResults      = "slash-results"
@@ -11,6 +7,6 @@ var (
 	MinSlashCount     = "min-slash-count"
 
 	TxCategory = "truchain-slashing"
-	Action     = sdk.TagAction
-	Category   = sdk.TagCategory
+	//Action     = sdk.TagAction
+	//Category   = sdk.TagCategory
 )
