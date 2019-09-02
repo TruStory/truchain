@@ -51,6 +51,7 @@ func (k Keeper) CreateSlash(ctx sdk.Context,
 	slashReason SlashReason,
 	slashDetailedReason string,
 	creator sdk.AccAddress) (slash Slash, results []PunishmentResult, err sdk.Error) {
+
 	logger := getLogger(ctx)
 	results = make([]PunishmentResult, 0)
 	err = k.validateParams(ctx, argumentID, slashDetailedReason, creator)

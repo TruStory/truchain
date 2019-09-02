@@ -41,6 +41,15 @@ func handleMsgSubmitArgument(ctx sdk.Context, keeper Keeper, msg MsgSubmitArgume
 	if codecErr != nil {
 		return sdk.ErrInternal(fmt.Sprintf("Marshal result error: %s", codecErr)).Result()
 	}
+
+	ctx.EventManager().EmitEvent(
+		sdk.NewEvent(
+			EventTypeCreateArgument,
+			sdk.NewAttribute(sdk.AttributeKeyModule, ModuleName),
+			sdk.NewAttribute(AttributeKeyCreator, msg.Creator.String()),
+		),
+	)
+
 	//resultTags := append(app.PushTxTag,
 	//	sdk.NewTags(
 	//		tags.Category, tags.TxCategory,
@@ -50,7 +59,6 @@ func handleMsgSubmitArgument(ctx sdk.Context, keeper Keeper, msg MsgSubmitArgume
 	//)
 	return sdk.Result{
 		Data: res,
-		//Tags: resultTags,
 	}
 }
 
@@ -66,6 +74,25 @@ func handleMsgSubmitUpvote(ctx sdk.Context, keeper Keeper, msg MsgSubmitUpvote) 
 	if codecErr != nil {
 		return sdk.ErrInternal(fmt.Sprintf("Marshal result error: %s", codecErr)).Result()
 	}
+
+	//ctx.EventManager().EmitEvent(
+	//	sdk.NewEvent(
+	//		EventTypeCreateUpvote,
+	//		sdk.NewAttribute(sdk.AttributeKeyModule, ModuleName),
+	//		sdk.NewAttribute(sdk.AttributeKeyAction, "create-upvote"),
+	//		sdk.NewAttribute(AttributeKeyCreator, msg.Creator.String()),
+	//	),
+	//)
+
+	ctx.EventManager().EmitEvent(
+		sdk.NewEvent(
+			"tru-event",
+			sdk.NewAttribute(sdk.AttributeKeyModule, ModuleName),
+			sdk.NewAttribute(sdk.AttributeKeyAction, "create-upvote"),
+			sdk.NewAttribute(AttributeKeyCreator, msg.Creator.String()),
+		),
+	)
+
 	//resultTags := append(app.PushTxTag,
 	//	sdk.NewTags(
 	//		tags.Category, tags.TxCategory,
@@ -75,7 +102,6 @@ func handleMsgSubmitUpvote(ctx sdk.Context, keeper Keeper, msg MsgSubmitUpvote) 
 	//)
 	return sdk.Result{
 		Data: res,
-		//Tags: resultTags,
 	}
 }
 

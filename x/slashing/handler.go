@@ -40,6 +40,16 @@ func handleMsgSlashArgument(ctx sdk.Context, k Keeper, msg MsgSlashArgument) sdk
 	if jsonErr != nil {
 		return sdk.ErrInternal(fmt.Sprintf("Marshal result error: %s", jsonErr)).Result()
 	}
+
+	ctx.EventManager().EmitEvent(
+		sdk.NewEvent(
+			EventTypeCreateSlash,
+			sdk.NewAttribute(sdk.AttributeKeyModule, ModuleName),
+			sdk.NewAttribute(AttributeMinSlashCountKey, fmt.Sprintf("%d", k.GetParams(ctx).MinSlashCount)),
+			//sdk.NewAttribute(AttributeMinSlashCountKey, fmt.Sprintf("%d", k.GetParams(ctx).MinSlashCount)),
+		),
+	)
+
 	//resultTags := append(app.PushTxTag,
 	//	sdk.NewTags(
 	//		tags.Category, tags.TxCategory,

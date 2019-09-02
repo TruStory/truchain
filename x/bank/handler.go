@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"github.com/TruStory/truchain/x/bank/types"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
@@ -32,15 +34,17 @@ func handleMsgSendGift(ctx sdk.Context, keeper Keeper, msg MsgSendGift) sdk.Resu
 		fmt.Println("error", err)
 		return err.Result()
 	}
-	//tags := sdk.NewTags(
-	//	tags.Category, tags.TxCategory,
-	//	tags.Action, tags.ActionPayGift,
-	//	tags.Sender, msg.Sender.String(),
-	//	tags.Recipient, msg.Recipient.String(),
-	//)
-	return sdk.Result{
-		//Tags: tags,
-	}
+
+	ctx.EventManager().EmitEvent(
+		sdk.NewEvent(
+			types.EventTypePayGift,
+			sdk.NewAttribute(sdk.AttributeKeyModule, ModuleName),
+			sdk.NewAttribute(sdk.AttributeKeySender, msg.Sender.String()),
+			sdk.NewAttribute(types.AttributeRecipient, msg.Recipient.String()),
+		),
+	)
+
+	return sdk.Result{}
 }
 
 func handleMsgPayReward(ctx sdk.Context, keeper Keeper, msg MsgPayReward) sdk.Result {
@@ -51,15 +55,17 @@ func handleMsgPayReward(ctx sdk.Context, keeper Keeper, msg MsgPayReward) sdk.Re
 	if err != nil {
 		return err.Result()
 	}
-	//tags := sdk.NewTags(
-	//	tags.Category, tags.TxCategory,
-	//	tags.Action, tags.ActionPayReward,
-	//	tags.Sender, msg.Sender.String(),
-	//	tags.Recipient, msg.Recipient.String(),
-	//)
-	return sdk.Result{
-		//Tags: tags,
-	}
+
+	ctx.EventManager().EmitEvent(
+		sdk.NewEvent(
+			types.EventTypePayReward,
+			sdk.NewAttribute(sdk.AttributeKeyModule, ModuleName),
+			sdk.NewAttribute(sdk.AttributeKeySender, msg.Sender.String()),
+			sdk.NewAttribute(types.AttributeRecipient, msg.Recipient.String()),
+		),
+	)
+
+	return sdk.Result{}
 }
 
 func handleMsgUpdateParams(ctx sdk.Context, k Keeper, msg MsgUpdateParams) sdk.Result {
