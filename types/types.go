@@ -43,8 +43,8 @@ const (
 )
 
 // PushTag signifies a push notification event for Tendermint
-var PushTxTag = sdk.NewTags(KeyPushTxTag, []byte("Push"))
-var PushBlockTag = sdk.NewTags(KeyPushBlockTag, []byte("Push"))
+//var PushTxTag = sdk.NewTags(KeyPushTxTag, []byte("Push"))
+//var PushBlockTag = sdk.NewTags(KeyPushBlockTag, []byte("Push"))
 
 // MsgResult is the default success response for a chain request
 type MsgResult struct {
