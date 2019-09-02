@@ -3,13 +3,13 @@ package main
 import (
 	"fmt"
 
+	"github.com/cosmos/cosmos-sdk/x/auth"
+
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/context"
 	"github.com/cosmos/cosmos-sdk/client/keys"
-	"github.com/cosmos/cosmos-sdk/client/utils"
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	authtxb "github.com/cosmos/cosmos-sdk/x/auth/client/txbuilder"
 
 	"github.com/spf13/cobra"
 
@@ -23,11 +23,8 @@ func SendGiftCmd(cdc *codec.Codec) *cobra.Command {
 		Short: "Create and sign a send gift tx",
 		Args:  cobra.ExactArgs(3),
 		RunE: func(cmd *cobra.Command, args []string) error {
-
-			cliCtx := context.NewCLIContextWithFrom(args[0]).
-				WithCodec(cdc).
-				WithAccountDecoder(cdc)
-			seq, _ := cliCtx.GetAccountSequence(cliCtx.FromAddress)
+			txBldr := auth.NewTxBuilderFromCLI().WithTxEncoder(auth.DefaultTxEncoder(cdc))
+			cliCtx := context.NewCLIContext().WithCodec(cdc)
 			to, err := sdk.AccAddressFromBech32(args[1])
 			if err != nil {
 				return err
@@ -46,7 +43,6 @@ func SendGiftCmd(cdc *codec.Codec) *cobra.Command {
 				return err
 			}
 
-			txBldr := authtxb.NewTxBuilderFromCLI().WithSequence(seq).WithTxEncoder(utils.GetTxEncoder(cliCtx.Codec))
 			txBytes, err := txBldr.BuildAndSign(fromName, passphrase, []sdk.Msg{msg})
 			if err != nil {
 				return err
