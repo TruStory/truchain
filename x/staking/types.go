@@ -15,6 +15,11 @@ const (
 	RouterKey         = ModuleName
 	QuerierRoute      = ModuleName
 	DefaultParamspace = ModuleName
+
+	EventTypeCreateArgument = "create-argument"
+	EventTypeCreateUpvote   = "create-upvote"
+
+	AttributeKeyCreator = "creator"
 )
 
 type StakeType byte

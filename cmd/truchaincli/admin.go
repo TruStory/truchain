@@ -12,9 +12,8 @@ import (
 	"github.com/cosmos/cosmos-sdk/client/keys"
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/spf13/cobra"
-
 	"github.com/cosmos/cosmos-sdk/x/auth"
+	"github.com/spf13/cobra"
 )
 
 // GetAdminCmd will create a new community

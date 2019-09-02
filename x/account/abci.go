@@ -12,27 +12,21 @@ func EndBlocker(ctx sdk.Context, keeper Keeper) {
 	if err != nil {
 		panic(err)
 	}
-	unjailed := make([]string, 0)
+
 	for _, acct := range toUnjail {
 		err = keeper.UnJail(ctx, acct.PrimaryAddress())
 		if err != nil {
 			panic(err)
 		}
-		unjailed = append(unjailed, acct.PrimaryAddress().String())
+
+		ctx.EventManager().EmitEvent(
+			sdk.NewEvent(
+				EventTypeUnjailedAccount,
+				sdk.NewAttribute(sdk.AttributeKeyModule, ModuleName),
+				sdk.NewAttribute(AttributeKeyUser, acct.PrimaryAddress().String()),
+			),
+		)
+
 		logger(ctx).Info(fmt.Sprintf("Unjailed %s", acct.String()))
 	}
-	//if len(unjailed) == 0 {
-	//	return sdk.EmptyTags()
-	//}
-	//b, jsonErr := keeper.codec.MarshalJSON(unjailed)
-	//if jsonErr != nil {
-	//	panic(jsonErr)
-	//}
-	//return append(app.PushBlockTag,
-	//	sdk.NewTags(
-	//		tags.Category, tags.TxCategory,
-	//		tags.Action, tags.ActionUnjailAccounts,
-	//		tags.UnjailedAccounts, b,
-	//	)...,
-	//)
 }

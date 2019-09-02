@@ -13,4 +13,9 @@ const (
 	RouterKey         = ModuleName
 	QuerierRoute      = ModuleName
 	DefaultParamspace = ModuleName
+
+	EventTypePayReward = "pay-reward"
+	EventTypePayGift   = "pay-gift"
+
+	AttributeRecipient = "recipient"
 )
