@@ -4,15 +4,12 @@ import (
 	"fmt"
 
 	"github.com/TruStory/truchain/x/community"
-
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/context"
 	"github.com/cosmos/cosmos-sdk/client/keys"
-	"github.com/cosmos/cosmos-sdk/client/utils"
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	authtxb "github.com/cosmos/cosmos-sdk/x/auth/client/txbuilder"
-
+	"github.com/cosmos/cosmos-sdk/x/auth"
 	"github.com/spf13/cobra"
 )
 
@@ -23,12 +20,8 @@ func NewCommunityCmd(cdc *codec.Codec) *cobra.Command {
 		Short: "Create a new community with the given details",
 		Args:  cobra.ExactArgs(4),
 		RunE: func(cmd *cobra.Command, args []string) error {
-
-			cliCtx := context.NewCLIContextWithFrom(args[3]).
-				WithCodec(cdc).
-				WithAccountDecoder(cdc)
-			seq, _ := cliCtx.GetAccountSequence(cliCtx.FromAddress)
-			txBldr := authtxb.NewTxBuilderFromCLI().WithSequence(seq).WithTxEncoder(utils.GetTxEncoder(cliCtx.Codec))
+			txBldr := auth.NewTxBuilderFromCLI().WithTxEncoder(auth.DefaultTxEncoder(cdc))
+			cliCtx := context.NewCLIContext().WithCodec(cdc)
 
 			// build and sign the transaction, then broadcast to Tendermint
 			msg := community.NewMsgNewCommunity(args[0], args[1], args[2], cliCtx.GetFromAddress())
