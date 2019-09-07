@@ -62,7 +62,7 @@ func (k Keeper) CreateAppAccount(ctx sdk.Context, address sdk.AccAddress,
 		return appAccnt, sdk.ErrInvalidCoins("Invalid initial coins")
 	}
 
-	logger(ctx).Info(fmt.Sprintf("Created %s", appAccnt.String()))
+	k.Logger(ctx).Info(fmt.Sprintf("Created %s", appAccnt.String()))
 
 	return appAccnt, nil
 }
@@ -218,6 +218,6 @@ func (k Keeper) store(ctx sdk.Context) sdk.KVStore {
 	return ctx.KVStore(k.storeKey)
 }
 
-func logger(ctx sdk.Context) log.Logger {
+func (k Keeper) Logger(ctx sdk.Context) log.Logger {
 	return ctx.Logger().With("module", ModuleName)
 }

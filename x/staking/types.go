@@ -16,10 +16,8 @@ const (
 	QuerierRoute      = ModuleName
 	DefaultParamspace = ModuleName
 
-	EventTypeCreateArgument = "create-argument"
-	EventTypeCreateUpvote   = "create-upvote"
-
-	AttributeKeyCreator = "creator"
+	AttributeKeyExpiredStakes        = "expired-stakes"
+	AttributeValueInterestRewardPaid = "interest-reward-paid"
 )
 
 type StakeType byte

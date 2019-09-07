@@ -24,18 +24,20 @@ func EndBlocker(ctx sdk.Context, keeper Keeper) {
 		return false
 	})
 
-	//if len(expiredStakes) == 0 {
-	//	return sdk.EmptyTags()
-	//}
-	//b, err := keeper.codec.MarshalJSON(expiredStakes)
-	//if err != nil {
-	//	panic(err)
-	//}
-	//return append(app.PushBlockTag,
-	//	sdk.NewTags(
-	//		tags.Category, tags.TxCategory,
-	//		tags.Action, tags.ActionInterestRewardPaid,
-	//		tags.ExpiredStakes, b,
-	//	)...,
-	//)
+	if len(expiredStakes) == 0 {
+		return
+	}
+
+	b, err := keeper.codec.MarshalJSON(expiredStakes)
+	if err != nil {
+		panic(err)
+	}
+
+	ctx.EventManager().EmitEvent(
+		sdk.NewEvent(
+			ModuleName,
+			sdk.NewAttribute(sdk.AttributeKeyAction, AttributeValueInterestRewardPaid),
+			sdk.NewAttribute(AttributeKeyExpiredStakes, string(b)),
+		),
+	)
 }
