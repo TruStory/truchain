@@ -571,7 +571,8 @@ func (k Keeper) RemoveFromActiveStakeQueue(ctx sdk.Context, stakeID uint64, endT
 
 // Logger returns a module-specific logger.
 func (k Keeper) Logger(ctx sdk.Context) log.Logger {
-	return ctx.Logger().With("module", "x/"+ModuleName)
+	//return ctx.Logger().With("module", "x/"+ModuleName)
+	return ctx.Logger().With("module", ModuleName)
 }
 
 func (k Keeper) UsersEarnings(ctx sdk.Context) []UserEarnedCoins {
