@@ -175,6 +175,7 @@ func mockDB() (sdk.Context, Keeper, *mockedDB) {
 	bankKeeper := bank.NewBaseKeeper(accKeeper,
 		pk.Subspace(bank.DefaultParamspace),
 		bank.DefaultCodespace,
+		nil,
 	)
 
 	trubankKeeper := trubank.NewKeeper(cdc, bankKey, bankKeeper, pk.Subspace(trubank.DefaultParamspace), trubank.DefaultCodespace)

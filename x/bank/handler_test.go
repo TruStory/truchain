@@ -3,11 +3,9 @@ package bank
 import (
 	"testing"
 
+	app "github.com/TruStory/truchain/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/stretchr/testify/assert"
-
-	app "github.com/TruStory/truchain/types"
-	"github.com/TruStory/truchain/x/bank/tags"
 )
 
 func TestHandle_MsgPayReward(t *testing.T) {
@@ -35,15 +33,6 @@ func TestHandle_MsgPayReward(t *testing.T) {
 
 	recipientCoins := keeper.bankKeeper.GetCoins(ctx, recipientAddr)
 	assert.True(t, recipientCoins.AmountOf(app.StakeDenom).Equal(sdk.NewInt(app.Shanev*15)))
-
-	expectedTags := sdk.NewTags(
-		tags.Category, tags.TxCategory,
-		tags.Action, tags.ActionPayReward,
-		tags.Sender, brokerAddress.String(),
-		tags.Recipient, recipientAddr.String(),
-	)
-	assert.Equal(t, expectedTags, res.Tags)
-
 }
 
 func TestMsgPayReward_Invalid(t *testing.T) {
