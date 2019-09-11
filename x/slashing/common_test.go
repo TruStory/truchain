@@ -71,7 +71,7 @@ func mockDB() (sdk.Context, Keeper) {
 	bankKeeper := bank.NewBaseKeeper(
 		authKeeper,
 		paramsKeeper.Subspace(bank.DefaultParamspace),
-		bank.DefaultCodespace)
+		bank.DefaultCodespace, nil)
 
 	trubankKeeper := trubank.NewKeeper(
 		codec,

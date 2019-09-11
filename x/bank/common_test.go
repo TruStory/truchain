@@ -42,6 +42,7 @@ func mockDB() (sdk.Context, Keeper, auth.AccountKeeper) {
 	bankKeeper := bank.NewBaseKeeper(accKeeper,
 		pk.Subspace(bank.DefaultParamspace),
 		bank.DefaultCodespace,
+		nil,
 	)
 
 	// module keeper
