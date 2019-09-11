@@ -3,6 +3,10 @@ package slashing
 import (
 	"net/url"
 
+	"github.com/cosmos/cosmos-sdk/x/gov"
+	"github.com/cosmos/cosmos-sdk/x/mint"
+	"github.com/cosmos/cosmos-sdk/x/supply"
+
 	"github.com/tendermint/tendermint/crypto/secp256k1"
 
 	"github.com/TruStory/truchain/x/account"
@@ -38,6 +42,7 @@ func mockDB() (sdk.Context, Keeper) {
 	stakingKey := sdk.NewKVStoreKey(staking.ModuleName)
 	paramsKey := sdk.NewKVStoreKey(params.StoreKey)
 	transientParamsKey := sdk.NewTransientStoreKey(params.TStoreKey)
+	supplyKey := sdk.NewKVStoreKey(supply.StoreKey)
 
 	ms := store.NewCommitMultiStore(db)
 	ms.MountStoreWithDB(slashKey, sdk.StoreTypeIAVL, db)
@@ -49,6 +54,7 @@ func mockDB() (sdk.Context, Keeper) {
 	ms.MountStoreWithDB(bankKey, sdk.StoreTypeIAVL, db)
 	ms.MountStoreWithDB(communityKey, sdk.StoreTypeIAVL, db)
 	ms.MountStoreWithDB(claimKey, sdk.StoreTypeIAVL, db)
+	ms.MountStoreWithDB(supplyKey, sdk.StoreTypeIAVL, db)
 	ms.LoadLatestVersion()
 
 	ctx := sdk.NewContext(ms, abci.Header{}, false, log.NewNopLogger())
@@ -59,6 +65,17 @@ func mockDB() (sdk.Context, Keeper) {
 	codec.RegisterInterface((*auth.Account)(nil), nil)
 	codec.RegisterConcrete(&auth.BaseAccount{}, "auth/Account", nil)
 	RegisterCodec(codec)
+
+	maccPerms := map[string][]string{
+		auth.FeeCollectorName: nil,
+		//distr.ModuleName:            nil,
+		mint.ModuleName: {supply.Minter},
+		//staking.BondedPoolName:    {supply.Burner, supply.Staking},
+		//staking.NotBondedPoolName: {supply.Burner, supply.Staking},
+		gov.ModuleName: {supply.Burner},
+		//account.UserGrowthPoolName:  {supply.Staking},
+		//account.StakeholderPoolName: {supply.Staking},
+	}
 
 	paramsKeeper := params.NewKeeper(codec, paramsKey, transientParamsKey, params.DefaultCodespace)
 
@@ -96,12 +113,15 @@ func mockDB() (sdk.Context, Keeper) {
 		panic(err)
 	}
 
+	supplyKeeper := supply.NewKeeper(codec, supplyKey, authKeeper, bankKeeper, maccPerms)
+
 	accountKeeper := account.NewKeeper(
 		accountKey,
 		paramsKeeper.Subspace(account.DefaultParamspace),
 		codec,
 		trubankKeeper,
 		authKeeper,
+		supplyKeeper,
 	)
 	account.InitGenesis(ctx, accountKeeper, account.DefaultGenesisState())
 

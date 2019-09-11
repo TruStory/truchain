@@ -185,6 +185,7 @@ func NewTruChain(logger log.Logger, db dbm.DB, loadLatest bool, options ...func(
 		codec,
 		app.truBankKeeper,
 		app.accountKeeper,
+		app.supplyKeeper,
 	)
 
 	app.claimKeeper = claim.NewKeeper(

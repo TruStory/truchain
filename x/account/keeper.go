@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/cosmos/cosmos-sdk/x/supply"
+
 	app "github.com/TruStory/truchain/types"
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -21,16 +23,18 @@ type Keeper struct {
 
 	bankKeeper    BankKeeper
 	accountKeeper auth.AccountKeeper
+	supplyKeeper  supply.Keeper
 }
 
 // NewKeeper creates a new keeper of the auth Keeper
-func NewKeeper(storeKey sdk.StoreKey, paramStore params.Subspace, codec *codec.Codec, bankKeeper BankKeeper, accountKeeper auth.AccountKeeper) Keeper {
+func NewKeeper(storeKey sdk.StoreKey, paramStore params.Subspace, codec *codec.Codec, bankKeeper BankKeeper, accountKeeper auth.AccountKeeper, supplyKeeper supply.Keeper) Keeper {
 	return Keeper{
 		storeKey,
 		codec,
 		paramStore.WithKeyTable(ParamKeyTable()),
 		bankKeeper,
 		accountKeeper,
+		supplyKeeper,
 	}
 }
 

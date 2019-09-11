@@ -29,3 +29,7 @@ func EndBlocker(ctx sdk.Context, keeper Keeper) {
 		keeper.Logger(ctx).Info(fmt.Sprintf("Unjailed %s", acct.String()))
 	}
 }
+
+func distributeInflation(ctx sdk.Context, keeper Keeper) {
+	//	get
+}
