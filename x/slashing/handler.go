@@ -44,7 +44,7 @@ func handleMsgSlashArgument(ctx sdk.Context, keeper Keeper, msg MsgSlashArgument
 	ctx.EventManager().EmitEvent(
 		sdk.NewEvent(
 			sdk.EventTypeMessage,
-			sdk.NewAttribute(AttributeMinSlashCountKey, fmt.Sprintf("%d", keeper.GetParams(ctx).MinSlashCount)),
+			sdk.NewAttribute(AttributeKeyMinSlashCountKey, fmt.Sprintf("%d", keeper.GetParams(ctx).MinSlashCount)),
 		),
 	)
 
@@ -57,13 +57,10 @@ func handleMsgSlashArgument(ctx sdk.Context, keeper Keeper, msg MsgSlashArgument
 		ctx.EventManager().EmitEvent(
 			sdk.NewEvent(
 				sdk.EventTypeMessage,
-				sdk.NewAttribute("slash-results", string(_json)),
+				sdk.NewAttribute(AttributeKeySlashResults, string(_json)),
 			),
 		)
 	}
-
-	keeper.Logger(ctx).Info("Fired tru-event....")
-	keeper.Logger(ctx).Info(sdk.StringifyEvents(ctx.EventManager().ABCIEvents()).String())
 
 	return sdk.Result{
 		Data:   res,
