@@ -2,6 +2,7 @@ package staking
 
 import (
 	"encoding/json"
+
 	"github.com/cosmos/cosmos-sdk/client/context"
 	"github.com/cosmos/cosmos-sdk/types/module"
 	"github.com/gorilla/mux"
@@ -49,19 +50,17 @@ func (AppModuleBasic) ValidateGenesis(bz json.RawMessage) error {
 	return ValidateGenesis(data)
 }
 
-// RegisterRESTRoutes registers the REST routes for the supply module.
+// RegisterRESTRoutes registers the REST routes for the staking module.
 func (AppModuleBasic) RegisterRESTRoutes(ctx context.CLIContext, rtr *mux.Router) {
 	// no REST routes, use GraphQL API endpoint
 	// i.e: rest.RegisterRoutes(ctx, rtr)
 }
 
-// GetTxCmd returns the root tx command for the supply module.
+// GetTxCmd returns the root tx command for the staking module.
 func (AppModuleBasic) GetTxCmd(_ *codec.Codec) *cobra.Command { return nil }
 
-// GetQueryCmd returns no root query command for the supply module.
+// GetQueryCmd returns no root query command for the staking module.
 func (AppModuleBasic) GetQueryCmd(cdc *codec.Codec) *cobra.Command {
-	// TODO: ??
-	// return cli.GetQueryCmd(cdc)
 	return nil
 }
 

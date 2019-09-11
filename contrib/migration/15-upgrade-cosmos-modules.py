@@ -11,10 +11,6 @@ def process_genesis(genesis, parsed_args):
 
     del genesis['app_state']['staking']['pool']
 
-    # Set new chain ID and genesis start time
-    # genesis['chain_id'] = parsed_args.chain_id.strip()
-    # genesis['genesis_time'] = parsed_args.start_time
-
     return genesis
 
 if __name__ == '__main__':
