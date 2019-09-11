@@ -2,6 +2,7 @@ package claim
 
 import (
 	"encoding/json"
+
 	"github.com/cosmos/cosmos-sdk/client/context"
 	"github.com/cosmos/cosmos-sdk/types/module"
 	"github.com/gorilla/mux"
@@ -60,8 +61,6 @@ func (AppModuleBasic) GetTxCmd(_ *codec.Codec) *cobra.Command { return nil }
 
 // GetQueryCmd returns no root query command for the supply module.
 func (AppModuleBasic) GetQueryCmd(cdc *codec.Codec) *cobra.Command {
-	// TODO: ??
-	// return cli.GetQueryCmd(cdc)
 	return nil
 }
 
@@ -70,7 +69,6 @@ func (AppModuleBasic) GetQueryCmd(cdc *codec.Codec) *cobra.Command {
 type AppModule struct {
 	AppModuleBasic
 	keeper Keeper
-	// accountKeeper auth.AccountKeeper
 }
 
 // NewAppModule creates a NewAppModule object
