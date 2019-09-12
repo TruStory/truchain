@@ -35,8 +35,7 @@ func EndBlocker(ctx sdk.Context, keeper Keeper) {
 
 	ctx.EventManager().EmitEvent(
 		sdk.NewEvent(
-			ModuleName,
-			sdk.NewAttribute(sdk.AttributeKeyAction, AttributeValueInterestRewardPaid),
+			EventTypeInterestRewardPaid,
 			sdk.NewAttribute(AttributeKeyExpiredStakes, string(b)),
 		),
 	)
