@@ -30,6 +30,14 @@ func EndBlocker(ctx sdk.Context, keeper Keeper) {
 	}
 }
 
-func distributeInflation(ctx sdk.Context, keeper Keeper) {
-	//	get
+func distributeInflation(ctx sdk.Context, keeper Keeper) sdk.Error {
+	//userGrowthAllocation := sdk.NewDecWithPrec(800, 3)
+	//
+	//amount := sdk.NewCoins(sdk.NewInt64Coin("tru", 23423))
+	//err := keeper.supplyKeeper.SendCoinsFromModuleToModule(ctx, auth.FeeCollectorName, UserGrowthPoolName, amount)
+	//if err != nil {
+	//	return err
+	//}
+
+	return nil
 }
