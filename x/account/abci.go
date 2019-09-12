@@ -21,7 +21,7 @@ func EndBlocker(ctx sdk.Context, keeper Keeper) {
 
 		ctx.EventManager().EmitEvent(
 			sdk.NewEvent(
-				ModuleName,
+				EventTypeUnjailedAccount,
 				sdk.NewAttribute(AttributeKeyUser, acct.PrimaryAddress().String()),
 			),
 		)
