@@ -1,7 +1,10 @@
 package staking
 
 import (
+	"fmt"
 	"time"
+
+	"github.com/cosmos/cosmos-sdk/x/supply"
 
 	app "github.com/TruStory/truchain/types"
 	trubank "github.com/TruStory/truchain/x/bank"
@@ -163,6 +166,7 @@ func mockDB() (sdk.Context, Keeper, *mockedDB) {
 	transientParamsKey := sdk.NewTransientStoreKey(params.TStoreKey)
 	bankKey := sdk.NewKVStoreKey("bank")
 	claimKey := sdk.NewKVStoreKey(claim.StoreKey)
+	supplyKey := sdk.NewKVStoreKey(supply.StoreKey)
 
 	ms := store.NewCommitMultiStore(db)
 	ms.MountStoreWithDB(accKey, sdk.StoreTypeIAVL, db)
@@ -171,6 +175,7 @@ func mockDB() (sdk.Context, Keeper, *mockedDB) {
 	ms.MountStoreWithDB(bankKey, sdk.StoreTypeIAVL, db)
 	ms.MountStoreWithDB(claimKey, sdk.StoreTypeIAVL, db)
 	ms.MountStoreWithDB(transientParamsKey, sdk.StoreTypeTransient, db)
+	ms.MountStoreWithDB(supplyKey, sdk.StoreTypeIAVL, db)
 	ms.LoadLatestVersion()
 
 	ctx := sdk.NewContext(ms, abci.Header{}, false, log.NewNopLogger())
@@ -185,18 +190,59 @@ func mockDB() (sdk.Context, Keeper, *mockedDB) {
 	pk := params.NewKeeper(cdc, paramsKey, transientParamsKey, params.DefaultCodespace)
 	accKeeper := auth.NewAccountKeeper(cdc, accKey, pk.Subspace(auth.DefaultParamspace), auth.ProtoBaseAccount)
 
+	//feeCollectorAcc := supply.NewEmptyModuleAccount(auth.FeeCollectorName)
+	userRewardAcc := supply.NewEmptyModuleAccount(UserRewardPoolName)
+
+	blacklistedAddrs := make(map[string]bool)
+	//blacklistedAddrs[feeCollectorAcc.String()] = true
+	blacklistedAddrs[userRewardAcc.String()] = true
+
 	bankKeeper := bank.NewBaseKeeper(accKeeper,
 		pk.Subspace(bank.DefaultParamspace),
 		bank.DefaultCodespace,
-		nil,
+		blacklistedAddrs,
 	)
+
+	maccPerms := map[string][]string{
+		auth.FeeCollectorName: nil,
+		UserRewardPoolName:    nil,
+	}
+
+	supplyKeeper := supply.NewKeeper(cdc, supplyKey, accKeeper, bankKeeper, maccPerms)
+
+	//supplyKeeper.SetModuleAccount(ctx, feeCollectorAcc)
+	supplyKeeper.SetModuleAccount(ctx, userRewardAcc)
+
+	acc := supplyKeeper.GetModuleAccount(ctx, auth.FeeCollectorName)
+	fmt.Println(acc)
+
+	acc2 := supplyKeeper.GetModuleAccount(ctx, UserRewardPoolName)
+	fmt.Println(acc2)
+
+	//totalSupply := sdk.NewCoins(sdk.NewInt64Coin("tru", 2342343243432423))
+	//supplyKeeper.SetSupply(ctx, supply.NewSupply(totalSupply))
+
+	//baseAcc := accKeeper.NewAccountWithAddress(ctx, supply.NewModuleAddress("baseAcc"))
+
+	//initCoins := sdk.NewCoins(sdk.NewInt64Coin("tru", 5000000000))
+	//err := userRewardAcc.SetCoins(initCoins)
+	//if err != nil {
+	//	panic(err)
+	//}
+	//accKeeper.SetAccount(ctx, userRewardAcc)
+	////accKeeper.SetAccount(ctx, baseAcc)
+	//supplyKeeper.SetModuleAccount(ctx, userRewardAcc)
+	//fmt.Println(userRewardAcc)
+
+	//acc2 := supplyKeeper.GetModuleAccount(ctx, UserRewardPoolName)
+	//fmt.Println(acc2)
 
 	trubankKeeper := trubank.NewKeeper(cdc, bankKey, bankKeeper, pk.Subspace(trubank.DefaultParamspace), trubank.DefaultCodespace)
 
 	mockedAccountKeeper := newAccountKeeper()
 	mockedClaimKeeper := newMockedClaimKeeper()
 	mockedClaimKeeper.claims = make(map[uint64]claim.Claim)
-	keeper := NewKeeper(cdc, storeKey, mockedAccountKeeper, trubankKeeper, mockedClaimKeeper, pk.Subspace(DefaultParamspace), DefaultCodespace)
+	keeper := NewKeeper(cdc, storeKey, mockedAccountKeeper, trubankKeeper, mockedClaimKeeper, supplyKeeper, pk.Subspace(DefaultParamspace), DefaultCodespace)
 	_, _, admin1 := keyPubAddr()
 	_, _, admin2 := keyPubAddr()
 	genesis := DefaultGenesisState()

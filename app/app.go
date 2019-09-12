@@ -3,10 +3,6 @@ package app
 import (
 	"os"
 
-	"github.com/cosmos/cosmos-sdk/x/gov"
-	"github.com/cosmos/cosmos-sdk/x/slashing"
-	"github.com/cosmos/cosmos-sdk/x/supply"
-
 	"github.com/TruStory/truchain/types"
 	"github.com/TruStory/truchain/x/account"
 	trubank "github.com/TruStory/truchain/x/bank"
@@ -24,9 +20,12 @@ import (
 	distr "github.com/cosmos/cosmos-sdk/x/distribution"
 	"github.com/cosmos/cosmos-sdk/x/genaccounts"
 	"github.com/cosmos/cosmos-sdk/x/genutil"
+	"github.com/cosmos/cosmos-sdk/x/gov"
 	"github.com/cosmos/cosmos-sdk/x/mint"
 	"github.com/cosmos/cosmos-sdk/x/params"
+	"github.com/cosmos/cosmos-sdk/x/slashing"
 	"github.com/cosmos/cosmos-sdk/x/staking"
+	"github.com/cosmos/cosmos-sdk/x/supply"
 	abci "github.com/tendermint/tendermint/abci/types"
 	cmn "github.com/tendermint/tendermint/libs/common"
 	"github.com/tendermint/tendermint/libs/log"
@@ -65,14 +64,15 @@ var (
 
 	// module account permissions
 	maccPerms = map[string][]string{
-		auth.FeeCollectorName:       nil,
-		distr.ModuleName:            nil,
-		mint.ModuleName:             {supply.Minter},
-		staking.BondedPoolName:      {supply.Burner, supply.Staking},
-		staking.NotBondedPoolName:   {supply.Burner, supply.Staking},
-		gov.ModuleName:              {supply.Burner},
-		account.UserGrowthPoolName:  {supply.Staking},
-		account.StakeholderPoolName: {supply.Staking},
+		auth.FeeCollectorName:         nil,
+		distr.ModuleName:              nil,
+		mint.ModuleName:               {supply.Minter},
+		staking.BondedPoolName:        {supply.Burner, supply.Staking},
+		staking.NotBondedPoolName:     {supply.Burner, supply.Staking},
+		gov.ModuleName:                {supply.Burner},
+		account.UserGrowthPoolName:    nil,
+		account.StakeholderPoolName:   nil,
+		trustaking.UserRewardPoolName: nil,
 	}
 )
 
@@ -202,6 +202,7 @@ func NewTruChain(logger log.Logger, db dbm.DB, loadLatest bool, options ...func(
 		app.appAccountKeeper,
 		app.truBankKeeper,
 		app.claimKeeper,
+		app.supplyKeeper,
 		truStakingSubspace,
 		trustaking.DefaultCodespace,
 	)

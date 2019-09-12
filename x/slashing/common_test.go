@@ -75,6 +75,7 @@ func mockDB() (sdk.Context, Keeper) {
 		gov.ModuleName: {supply.Burner},
 		//account.UserGrowthPoolName:  {supply.Staking},
 		//account.StakeholderPoolName: {supply.Staking},
+		staking.UserRewardPoolName: nil,
 	}
 
 	paramsKeeper := params.NewKeeper(codec, paramsKey, transientParamsKey, params.DefaultCodespace)
@@ -151,6 +152,7 @@ func mockDB() (sdk.Context, Keeper) {
 		accountKeeper,
 		trubankKeeper,
 		claimKeeper,
+		supplyKeeper,
 		paramsKeeper.Subspace(staking.DefaultParamspace),
 		staking.DefaultCodespace,
 	)

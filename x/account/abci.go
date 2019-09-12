@@ -39,7 +39,7 @@ func (k Keeper) unjailAccounts(ctx sdk.Context) {
 
 func (k Keeper) distributeInflation(ctx sdk.Context) {
 	// TODO: take this from params
-	userGrowthAllocation := sdk.NewDecWithPrec(800, 3)
+	userGrowthAllocation := sdk.NewDecWithPrec(200, 3)
 
 	acc := k.supplyKeeper.GetModuleAccount(ctx, auth.FeeCollectorName)
 	userInflation := acc.GetCoins().AmountOf(app.StakeDenom)
