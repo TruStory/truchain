@@ -27,6 +27,9 @@ func DefaultGenesisState() GenesisState { return NewGenesisState() }
 func InitGenesis(ctx sdk.Context, keeper Keeper, data GenesisState) {
 	for _, acc := range data.AppAccounts {
 		keeper.setAppAccount(ctx, acc)
+		if acc.IsJailed {
+			keeper.setJailEndTimeAccount(ctx, acc.JailEndTime, acc.PrimaryAddress())
+		}
 	}
 	keeper.SetParams(ctx, data.Params)
 }
