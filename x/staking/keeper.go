@@ -623,6 +623,7 @@ func (k Keeper) EditArgument(ctx sdk.Context, body, summary string,
 		UpdatedTime:  argument.UpdatedTime,
 		UpvotedStake: argument.UpvotedStake,
 		TotalStake:   argument.TotalStake,
+		UpvotedCount: argument.UpvotedCount,
 		EditedTime:   ctx.BlockHeader().Time,
 		Edited:       true,
 	}
