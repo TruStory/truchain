@@ -193,6 +193,7 @@ func mockDB() (sdk.Context, Keeper, *mockedDB) {
 	//feeCollectorAcc := supply.NewEmptyModuleAccount(auth.FeeCollectorName)
 	userRewardAcc := supply.NewEmptyModuleAccount(UserRewardPoolName)
 
+	// so bank cannot use module accounts, only supply keeper
 	blacklistedAddrs := make(map[string]bool)
 	//blacklistedAddrs[feeCollectorAcc.String()] = true
 	blacklistedAddrs[userRewardAcc.String()] = true
