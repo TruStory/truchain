@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/TruStory/truchain/x/bank/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
@@ -35,14 +34,6 @@ func handleMsgSendGift(ctx sdk.Context, keeper Keeper, msg MsgSendGift) sdk.Resu
 		return err.Result()
 	}
 
-	ctx.EventManager().EmitEvent(
-		sdk.NewEvent(
-			sdk.EventTypeMessage,
-			sdk.NewAttribute(sdk.AttributeKeySender, msg.Sender.String()),
-			sdk.NewAttribute(types.AttributeRecipient, msg.Recipient.String()),
-		),
-	)
-
 	return sdk.Result{}
 }
 
@@ -54,14 +45,6 @@ func handleMsgPayReward(ctx sdk.Context, keeper Keeper, msg MsgPayReward) sdk.Re
 	if err != nil {
 		return err.Result()
 	}
-
-	ctx.EventManager().EmitEvent(
-		sdk.NewEvent(
-			sdk.EventTypeMessage,
-			sdk.NewAttribute(sdk.AttributeKeySender, msg.Sender.String()),
-			sdk.NewAttribute(types.AttributeRecipient, msg.Recipient.String()),
-		),
-	)
 
 	return sdk.Result{}
 }

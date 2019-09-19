@@ -42,13 +42,6 @@ func handleMsgSubmitArgument(ctx sdk.Context, keeper Keeper, msg MsgSubmitArgume
 		return sdk.ErrInternal(fmt.Sprintf("Marshal result error: %s", codecErr)).Result()
 	}
 
-	ctx.EventManager().EmitEvent(
-		sdk.NewEvent(
-			sdk.EventTypeMessage,
-			sdk.NewAttribute(sdk.AttributeKeySender, msg.Creator.String()),
-		),
-	)
-
 	return sdk.Result{
 		Data: res,
 	}
@@ -66,13 +59,6 @@ func handleMsgSubmitUpvote(ctx sdk.Context, keeper Keeper, msg MsgSubmitUpvote) 
 	if codecErr != nil {
 		return sdk.ErrInternal(fmt.Sprintf("Marshal result error: %s", codecErr)).Result()
 	}
-
-	ctx.EventManager().EmitEvent(
-		sdk.NewEvent(
-			sdk.EventTypeMessage,
-			sdk.NewAttribute(sdk.AttributeKeySender, msg.Creator.String()),
-		),
-	)
 
 	return sdk.Result{
 		Data: res,
