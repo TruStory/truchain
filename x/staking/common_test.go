@@ -197,13 +197,16 @@ func mockDB() (sdk.Context, Keeper, *mockedDB) {
 	if err != nil {
 		panic(err)
 	}
-	fmt.Println(feeCollectorAcc)
 
 	userRewardAcc := supply.NewEmptyModuleAccount(UserRewardPoolName)
+	err = userRewardAcc.SetCoins(coins)
+	if err != nil {
+		panic(err)
+	}
 
 	// so bank cannot use module accounts, only supply keeper
 	blacklistedAddrs := make(map[string]bool)
-	//blacklistedAddrs[feeCollectorAcc.String()] = true
+	blacklistedAddrs[feeCollectorAcc.String()] = true
 	blacklistedAddrs[userRewardAcc.String()] = true
 
 	bankKeeper := bank.NewBaseKeeper(accKeeper,
@@ -223,7 +226,7 @@ func mockDB() (sdk.Context, Keeper, *mockedDB) {
 	acc := supplyKeeper.GetModuleAccount(ctx, auth.FeeCollectorName)
 	fmt.Println(acc)
 
-	//supplyKeeper.SetModuleAccount(ctx, userRewardAcc)
+	supplyKeeper.SetModuleAccount(ctx, userRewardAcc)
 	acc2 := supplyKeeper.GetModuleAccount(ctx, UserRewardPoolName)
 	fmt.Println(acc2)
 

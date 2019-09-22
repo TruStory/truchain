@@ -13,6 +13,12 @@ import (
 func EndBlocker(ctx sdk.Context, keeper Keeper) {
 	keeper.processExpiringStakes(ctx)
 	keeper.distributeInflation(ctx)
+
+	inflationAcc := keeper.supplyKeeper.GetModuleAccount(ctx, auth.FeeCollectorName)
+	fmt.Println(inflationAcc)
+
+	userRewardAcc := keeper.supplyKeeper.GetModuleAccount(ctx, UserRewardPoolName)
+	fmt.Println(userRewardAcc)
 }
 
 func (k Keeper) processExpiringStakes(ctx sdk.Context) {
