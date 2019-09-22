@@ -42,6 +42,7 @@ func (k Keeper) distributeInflation(ctx sdk.Context) {
 	userGrowthAllocation := sdk.NewDecWithPrec(200, 3)
 
 	acc := k.supplyKeeper.GetModuleAccount(ctx, auth.FeeCollectorName)
+
 	userInflation := acc.GetCoins().AmountOf(app.StakeDenom)
 	userInflationDec := sdk.NewDecFromIntWithPrec(userInflation, 3)
 	userGrowthAmount := userInflationDec.Mul(userGrowthAllocation).RoundInt()

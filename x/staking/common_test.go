@@ -185,12 +185,20 @@ func mockDB() (sdk.Context, Keeper, *mockedDB) {
 	auth.RegisterCodec(cdc)
 	RegisterCodec(cdc)
 	codec.RegisterCrypto(cdc)
+	supply.RegisterCodec(cdc)
 
 	// Keepers
 	pk := params.NewKeeper(cdc, paramsKey, transientParamsKey, params.DefaultCodespace)
 	accKeeper := auth.NewAccountKeeper(cdc, accKey, pk.Subspace(auth.DefaultParamspace), auth.ProtoBaseAccount)
 
-	//feeCollectorAcc := supply.NewEmptyModuleAccount(auth.FeeCollectorName)
+	feeCollectorAcc := supply.NewEmptyModuleAccount(auth.FeeCollectorName)
+	coins, _ := sdk.ParseCoins("1000000000000tru")
+	err := feeCollectorAcc.SetCoins(coins)
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println(feeCollectorAcc)
+
 	userRewardAcc := supply.NewEmptyModuleAccount(UserRewardPoolName)
 
 	// so bank cannot use module accounts, only supply keeper
@@ -211,12 +219,11 @@ func mockDB() (sdk.Context, Keeper, *mockedDB) {
 
 	supplyKeeper := supply.NewKeeper(cdc, supplyKey, accKeeper, bankKeeper, maccPerms)
 
-	//supplyKeeper.SetModuleAccount(ctx, feeCollectorAcc)
-	supplyKeeper.SetModuleAccount(ctx, userRewardAcc)
-
+	supplyKeeper.SetModuleAccount(ctx, feeCollectorAcc)
 	acc := supplyKeeper.GetModuleAccount(ctx, auth.FeeCollectorName)
 	fmt.Println(acc)
 
+	//supplyKeeper.SetModuleAccount(ctx, userRewardAcc)
 	acc2 := supplyKeeper.GetModuleAccount(ctx, UserRewardPoolName)
 	fmt.Println(acc2)
 

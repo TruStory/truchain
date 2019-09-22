@@ -55,11 +55,6 @@ func (k Keeper) distributeInflation(ctx sdk.Context) {
 	userRewardAllocation := sdk.NewDecWithPrec(200, 3)
 
 	acc := k.supplyKeeper.GetModuleAccount(ctx, auth.FeeCollectorName)
-	fmt.Println(acc)
-
-	acc2 := k.supplyKeeper.GetModuleAccount(ctx, UserRewardPoolName)
-	fmt.Println(acc2)
-
 	userInflation := acc.GetCoins().AmountOf(app.StakeDenom)
 	userInflationDec := sdk.NewDecFromIntWithPrec(userInflation, 3)
 	userRewardAmount := userInflationDec.Mul(userRewardAllocation).RoundInt()
