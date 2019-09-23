@@ -10,8 +10,8 @@ import (
 	abci "github.com/tendermint/tendermint/abci/types"
 	"github.com/tendermint/tendermint/crypto"
 	"github.com/tendermint/tendermint/crypto/ed25519"
-	dbm "github.com/tendermint/tendermint/libs/db"
 	"github.com/tendermint/tendermint/libs/log"
+	dbm "github.com/tendermint/tm-db"
 )
 
 func mockDB() (sdk.Context, Keeper, auth.AccountKeeper) {
@@ -42,6 +42,7 @@ func mockDB() (sdk.Context, Keeper, auth.AccountKeeper) {
 	bankKeeper := bank.NewBaseKeeper(accKeeper,
 		pk.Subspace(bank.DefaultParamspace),
 		bank.DefaultCodespace,
+		nil,
 	)
 
 	// module keeper

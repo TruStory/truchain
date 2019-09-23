@@ -5,17 +5,14 @@ import (
 
 	"github.com/TruStory/truchain/x/claim"
 	"github.com/TruStory/truchain/x/community"
-	"github.com/TruStory/truchain/x/staking"
 	"github.com/TruStory/truchain/x/slashing"
-
+	"github.com/TruStory/truchain/x/staking"
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/context"
 	"github.com/cosmos/cosmos-sdk/client/keys"
-	"github.com/cosmos/cosmos-sdk/client/utils"
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	authtxb "github.com/cosmos/cosmos-sdk/x/auth/client/txbuilder"
-
+	"github.com/cosmos/cosmos-sdk/x/auth"
 	"github.com/spf13/cobra"
 )
 
@@ -184,12 +181,8 @@ func SlashingAdminCmd(cdc *codec.Codec) *cobra.Command {
 }
 
 func executeMsg(cmd *cobra.Command, args []string, cdc *codec.Codec, msg sdk.Msg) error {
-	auth := cmd.Flag("auth").Value.String()
-	cliCtx := context.NewCLIContextWithFrom(auth).
-		WithCodec(cdc).
-		WithAccountDecoder(cdc)
-	seq, _ := cliCtx.GetAccountSequence(cliCtx.FromAddress)
-	txBldr := authtxb.NewTxBuilderFromCLI().WithSequence(seq).WithTxEncoder(utils.GetTxEncoder(cliCtx.Codec))
+	txBldr := auth.NewTxBuilderFromCLI().WithTxEncoder(auth.DefaultTxEncoder(cdc))
+	cliCtx := context.NewCLIContext().WithCodec(cdc)
 
 	// build and sign the transaction, then broadcast to Tendermint
 	fromName := cliCtx.GetFromName()
@@ -211,3 +204,5 @@ func executeMsg(cmd *cobra.Command, args []string, cdc *codec.Codec, msg sdk.Msg
 	fmt.Println(res)
 	return nil
 }
+
+//

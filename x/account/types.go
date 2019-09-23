@@ -14,6 +14,9 @@ const (
 	RouterKey         = ModuleName
 	QuerierRoute      = ModuleName
 	DefaultParamspace = ModuleName
+
+	EventTypeUnjailedAccount = "unjailed_account"
+	AttributeKeyUser         = "user"
 )
 
 type PrimaryAccount struct {

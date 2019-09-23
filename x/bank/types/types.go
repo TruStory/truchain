@@ -13,4 +13,6 @@ const (
 	RouterKey         = ModuleName
 	QuerierRoute      = ModuleName
 	DefaultParamspace = ModuleName
+
+	AttributeRecipient = "recipient"
 )

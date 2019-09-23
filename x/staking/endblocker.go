@@ -4,13 +4,10 @@ import (
 	"fmt"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
-
-	app "github.com/TruStory/truchain/types"
-	"github.com/TruStory/truchain/x/staking/tags"
 )
 
 // EndBlocker called every block, process expiring stakes
-func EndBlocker(ctx sdk.Context, keeper Keeper) sdk.Tags {
+func EndBlocker(ctx sdk.Context, keeper Keeper) {
 	logger := keeper.Logger(ctx)
 	expiredStakes := make([]Stake, 0)
 	keeper.IterateActiveStakeQueue(ctx, ctx.BlockHeader().Time, func(stake Stake) bool {
@@ -28,17 +25,18 @@ func EndBlocker(ctx sdk.Context, keeper Keeper) sdk.Tags {
 	})
 
 	if len(expiredStakes) == 0 {
-		return sdk.EmptyTags()
+		return
 	}
+
 	b, err := keeper.codec.MarshalJSON(expiredStakes)
 	if err != nil {
 		panic(err)
 	}
-	return append(app.PushBlockTag,
-		sdk.NewTags(
-			tags.Category, tags.TxCategory,
-			tags.Action, tags.ActionInterestRewardPaid,
-			tags.ExpiredStakes, b,
-		)...,
+
+	ctx.EventManager().EmitEvent(
+		sdk.NewEvent(
+			EventTypeInterestRewardPaid,
+			sdk.NewAttribute(AttributeKeyExpiredStakes, string(b)),
+		),
 	)
 }

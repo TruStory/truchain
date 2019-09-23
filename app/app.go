@@ -3,23 +3,9 @@ package app
 import (
 	"os"
 
-	bam "github.com/cosmos/cosmos-sdk/baseapp"
-	"github.com/cosmos/cosmos-sdk/codec"
-	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/cosmos/cosmos-sdk/version"
-	"github.com/cosmos/cosmos-sdk/x/auth"
-	"github.com/cosmos/cosmos-sdk/x/auth/genaccounts"
-	"github.com/cosmos/cosmos-sdk/x/bank"
-	distr "github.com/cosmos/cosmos-sdk/x/distribution"
-	"github.com/cosmos/cosmos-sdk/x/genutil"
-	"github.com/cosmos/cosmos-sdk/x/ibc"
-	"github.com/cosmos/cosmos-sdk/x/mint"
-	"github.com/cosmos/cosmos-sdk/x/params"
-	"github.com/cosmos/cosmos-sdk/x/staking"
-	abci "github.com/tendermint/tendermint/abci/types"
-	cmn "github.com/tendermint/tendermint/libs/common"
-	dbm "github.com/tendermint/tendermint/libs/db"
-	"github.com/tendermint/tendermint/libs/log"
+	"github.com/cosmos/cosmos-sdk/x/gov"
+	"github.com/cosmos/cosmos-sdk/x/slashing"
+	"github.com/cosmos/cosmos-sdk/x/supply"
 
 	"github.com/TruStory/truchain/types"
 	"github.com/TruStory/truchain/x/account"
@@ -28,6 +14,23 @@ import (
 	"github.com/TruStory/truchain/x/community"
 	truslashing "github.com/TruStory/truchain/x/slashing"
 	trustaking "github.com/TruStory/truchain/x/staking"
+	bam "github.com/cosmos/cosmos-sdk/baseapp"
+	"github.com/cosmos/cosmos-sdk/codec"
+	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/cosmos/cosmos-sdk/types/module"
+	"github.com/cosmos/cosmos-sdk/version"
+	"github.com/cosmos/cosmos-sdk/x/auth"
+	"github.com/cosmos/cosmos-sdk/x/bank"
+	distr "github.com/cosmos/cosmos-sdk/x/distribution"
+	"github.com/cosmos/cosmos-sdk/x/genaccounts"
+	"github.com/cosmos/cosmos-sdk/x/genutil"
+	"github.com/cosmos/cosmos-sdk/x/mint"
+	"github.com/cosmos/cosmos-sdk/x/params"
+	"github.com/cosmos/cosmos-sdk/x/staking"
+	abci "github.com/tendermint/tendermint/abci/types"
+	cmn "github.com/tendermint/tendermint/libs/common"
+	"github.com/tendermint/tendermint/libs/log"
+	dbm "github.com/tendermint/tm-db"
 )
 
 const (
@@ -42,11 +45,7 @@ var (
 	// The ModuleBasicManager is in charge of setting up basic,
 	// non-dependant module elements, such as codec registration
 	// and genesis verification.
-	ModuleBasics sdk.ModuleBasicManager
-)
-
-func init() {
-	ModuleBasics = sdk.NewModuleBasicManager(
+	ModuleBasics = module.NewBasicManager(
 		genaccounts.AppModuleBasic{},
 		genutil.AppModuleBasic{},
 		auth.AppModuleBasic{},
@@ -61,8 +60,19 @@ func init() {
 		trubank.AppModuleBasic{},
 		trustaking.AppModuleBasic{},
 		truslashing.AppModuleBasic{},
+		supply.AppModuleBasic{},
 	)
-}
+
+	// module account permissions
+	maccPerms = map[string][]string{
+		auth.FeeCollectorName:     nil,
+		distr.ModuleName:          nil,
+		mint.ModuleName:           {supply.Minter},
+		staking.BondedPoolName:    {supply.Burner, supply.Staking},
+		staking.NotBondedPoolName: {supply.Burner, supply.Staking},
+		gov.ModuleName:            {supply.Burner},
+	}
+)
 
 // TruChain implements an extended ABCI application. It contains a BaseApp,
 // a codec for serialization, KVStore keys for multistore state management, and
@@ -72,35 +82,17 @@ type TruChain struct {
 	*bam.BaseApp
 	codec *codec.Codec
 
-	// keys to access the multistore
-	keyMain          *sdk.KVStoreKey
-	keyAccount       *sdk.KVStoreKey
-	keyStaking       *sdk.KVStoreKey
-	tkeyStaking      *sdk.TransientStoreKey
-	keyDistr         *sdk.KVStoreKey
-	tkeyDistr        *sdk.TransientStoreKey
-	keyFeeCollection *sdk.KVStoreKey
-	keyIBC           *sdk.KVStoreKey
-	keyParams        *sdk.KVStoreKey
-	tkeyParams       *sdk.TransientStoreKey
-
-	// keys to access trustory state
-	keyTruBank     *sdk.KVStoreKey
-	keyMint        *sdk.KVStoreKey
-	keyAppAccount  *sdk.KVStoreKey
-	keyCommunity   *sdk.KVStoreKey
-	keyClaim       *sdk.KVStoreKey
-	keyTruStaking  *sdk.KVStoreKey
-	keyTruSlashing *sdk.KVStoreKey
+	// keys to access the substores
+	keys  map[string]*sdk.KVStoreKey
+	tkeys map[string]*sdk.TransientStoreKey
 
 	// manage getting and setting accounts
-	accountKeeper       auth.AccountKeeper
-	feeCollectionKeeper auth.FeeCollectionKeeper
-	bankKeeper          bank.Keeper
-	stakingKeeper       staking.Keeper
-	ibcMapper           ibc.Mapper
-	distrKeeper         distr.Keeper
-	paramsKeeper        params.Keeper
+	accountKeeper auth.AccountKeeper
+	bankKeeper    bank.Keeper
+	stakingKeeper staking.Keeper
+	distrKeeper   distr.Keeper
+	paramsKeeper  params.Keeper
+	supplyKeeper  supply.Keeper
 
 	// access truchain multistore
 	mintKeeper        mint.Keeper
@@ -112,7 +104,7 @@ type TruChain struct {
 	truSlashingKeeper truslashing.Keeper
 
 	// the module manager
-	mm *sdk.ModuleManager
+	mm *module.Manager
 }
 
 // NewTruChain returns a reference to a new TruChain. Internally,
@@ -127,33 +119,25 @@ func NewTruChain(logger log.Logger, db dbm.DB, loadLatest bool, options ...func(
 	bApp := bam.NewBaseApp(types.AppName, logger, db, auth.DefaultTxDecoder(codec), options...)
 	bApp.SetAppVersion(version.Version)
 
+	keys := sdk.NewKVStoreKeys(
+		bam.MainStoreKey, auth.StoreKey, staking.StoreKey,
+		supply.StoreKey, mint.StoreKey, distr.StoreKey, slashing.StoreKey,
+		gov.StoreKey, params.StoreKey,
+		community.StoreKey, claim.StoreKey, account.StoreKey, trustaking.StoreKey,
+		trubank.StoreKey, truslashing.StoreKey,
+	)
+	tkeys := sdk.NewTransientStoreKeys(staking.TStoreKey, params.TStoreKey)
+
 	// create your application type
 	var app = &TruChain{
 		BaseApp: bApp,
 		codec:   codec,
-
-		keyParams:  sdk.NewKVStoreKey(params.StoreKey),
-		tkeyParams: sdk.NewTransientStoreKey(params.TStoreKey),
-
-		keyMain:          sdk.NewKVStoreKey(bam.MainStoreKey),
-		keyAccount:       sdk.NewKVStoreKey(auth.StoreKey),
-		keyIBC:           sdk.NewKVStoreKey("ibc"),
-		keyStaking:       sdk.NewKVStoreKey(staking.StoreKey),
-		tkeyStaking:      sdk.NewTransientStoreKey(staking.TStoreKey),
-		keyDistr:         sdk.NewKVStoreKey(distr.StoreKey),
-		tkeyDistr:        sdk.NewTransientStoreKey(distr.TStoreKey),
-		keyFeeCollection: sdk.NewKVStoreKey(auth.FeeStoreKey),
-		keyCommunity:     sdk.NewKVStoreKey(community.StoreKey),
-		keyClaim:         sdk.NewKVStoreKey(claim.StoreKey),
-		keyMint:          sdk.NewKVStoreKey(mint.StoreKey),
-		keyAppAccount:    sdk.NewKVStoreKey(account.StoreKey),
-		keyTruStaking:    sdk.NewKVStoreKey(trustaking.StoreKey),
-		keyTruBank:       sdk.NewKVStoreKey(trubank.StoreKey),
-		keyTruSlashing:   sdk.NewKVStoreKey(truslashing.StoreKey),
+		keys:    keys,
+		tkeys:   tkeys,
 	}
 
 	// init params keeper and subspaces
-	app.paramsKeeper = params.NewKeeper(app.codec, app.keyParams, app.tkeyParams, params.DefaultCodespace)
+	app.paramsKeeper = params.NewKeeper(app.codec, keys[params.StoreKey], tkeys[params.TStoreKey], params.DefaultCodespace)
 	authSubspace := app.paramsKeeper.Subspace(auth.DefaultParamspace)
 	bankSubspace := app.paramsKeeper.Subspace(bank.DefaultParamspace)
 	stakingSubspace := app.paramsKeeper.Subspace(staking.DefaultParamspace)
@@ -164,38 +148,37 @@ func NewTruChain(logger log.Logger, db dbm.DB, loadLatest bool, options ...func(
 	truStakingSubspace := app.paramsKeeper.Subspace(trustaking.DefaultParamspace)
 	truSlashingSubspace := app.paramsKeeper.Subspace(truslashing.DefaultParamspace)
 
-	// add keepers
-	app.accountKeeper = auth.NewAccountKeeper(app.codec, app.keyAccount, authSubspace, auth.ProtoBaseAccount)
-	app.bankKeeper = bank.NewBaseKeeper(app.accountKeeper, bankSubspace, bank.DefaultCodespace)
-	app.ibcMapper = ibc.NewMapper(app.codec, app.keyIBC, ibc.DefaultCodespace)
-	app.feeCollectionKeeper = auth.NewFeeCollectionKeeper(app.codec, app.keyFeeCollection)
-
-	stakingKeeper := staking.NewKeeper(app.codec, app.keyStaking, app.tkeyStaking, app.bankKeeper,
-		stakingSubspace, staking.DefaultCodespace)
-
-	app.mintKeeper = mint.NewKeeper(app.codec, app.keyMint, mintSubspace, &stakingKeeper, app.feeCollectionKeeper)
-
-	app.distrKeeper = distr.NewKeeper(
-		app.codec,
-		app.keyDistr,
-		distrSubspace,
-		app.bankKeeper, &stakingKeeper, app.feeCollectionKeeper,
-		distr.DefaultCodespace,
+	// add cosmos keepers
+	app.accountKeeper = auth.NewAccountKeeper(app.codec, keys[auth.StoreKey], authSubspace, auth.ProtoBaseAccount)
+	app.bankKeeper = bank.NewBaseKeeper(app.accountKeeper, bankSubspace, bank.DefaultCodespace, app.ModuleAccountAddrs())
+	app.supplyKeeper = supply.NewKeeper(app.codec, keys[supply.StoreKey], app.accountKeeper, app.bankKeeper, maccPerms)
+	stakingKeeper := staking.NewKeeper(
+		app.codec, keys[staking.StoreKey], tkeys[staking.TStoreKey],
+		app.supplyKeeper, stakingSubspace, staking.DefaultCodespace,
 	)
+	app.mintKeeper = mint.NewKeeper(app.codec, keys[mint.StoreKey], mintSubspace, &stakingKeeper, app.supplyKeeper, auth.FeeCollectorName)
+	app.distrKeeper = distr.NewKeeper(app.codec, keys[distr.StoreKey], distrSubspace, &stakingKeeper,
+		app.supplyKeeper, distr.DefaultCodespace, auth.FeeCollectorName, app.ModuleAccountAddrs())
 
 	app.stakingKeeper = stakingKeeper
 
+	// add truchain keepers
 	app.communityKeeper = community.NewKeeper(
-		app.keyCommunity,
+		keys[community.StoreKey],
 		app.paramsKeeper.Subspace(community.StoreKey),
 		codec,
 	)
 
-	app.truBankKeeper = trubank.NewKeeper(codec, app.keyTruBank, app.bankKeeper,
-		trubank2Subspace, trubank.DefaultCodespace)
+	app.truBankKeeper = trubank.NewKeeper(
+		codec,
+		keys[trubank.StoreKey],
+		app.bankKeeper,
+		trubank2Subspace,
+		trubank.DefaultCodespace,
+	)
 
 	app.appAccountKeeper = account.NewKeeper(
-		app.keyAppAccount,
+		keys[account.StoreKey],
 		appAccountSubspace,
 		codec,
 		app.truBankKeeper,
@@ -203,18 +186,25 @@ func NewTruChain(logger log.Logger, db dbm.DB, loadLatest bool, options ...func(
 	)
 
 	app.claimKeeper = claim.NewKeeper(
-		app.keyClaim,
+		keys[claim.StoreKey],
 		app.paramsKeeper.Subspace(claim.StoreKey),
 		codec,
 		app.appAccountKeeper,
 		app.communityKeeper,
 	)
 
-	app.truStakingKeeper = trustaking.NewKeeper(codec, app.keyTruStaking, app.appAccountKeeper,
-		app.truBankKeeper, app.claimKeeper, truStakingSubspace, trustaking.DefaultCodespace)
+	app.truStakingKeeper = trustaking.NewKeeper(
+		codec,
+		keys[trustaking.StoreKey],
+		app.appAccountKeeper,
+		app.truBankKeeper,
+		app.claimKeeper,
+		truStakingSubspace,
+		trustaking.DefaultCodespace,
+	)
 
 	app.truSlashingKeeper = truslashing.NewKeeper(
-		app.keyTruSlashing,
+		keys[truslashing.StoreKey],
 		truSlashingSubspace,
 		codec,
 		app.truBankKeeper,
@@ -232,7 +222,6 @@ func NewTruChain(logger log.Logger, db dbm.DB, loadLatest bool, options ...func(
 	app.Router().
 		AddRoute(bank.RouterKey, bank.NewHandler(app.bankKeeper)).
 		AddRoute(staking.RouterKey, staking.NewHandler(app.stakingKeeper)).
-		AddRoute("ibc", ibc.NewHandler(app.ibcMapper, app.bankKeeper)).
 		AddRoute(claim.RouterKey, claim.NewHandler(app.claimKeeper)).
 		AddRoute(account.RouterKey, account.NewHandler(app.appAccountKeeper)).
 		AddRoute(trustaking.RouterKey, trustaking.NewHandler(app.truStakingKeeper)).
@@ -250,13 +239,13 @@ func NewTruChain(logger log.Logger, db dbm.DB, loadLatest bool, options ...func(
 		AddRoute(trustaking.QuerierRoute, trustaking.NewQuerier(app.truStakingKeeper)).
 		AddRoute(truslashing.QuerierRoute, truslashing.NewQuerier(app.truSlashingKeeper))
 
-	app.mm = sdk.NewModuleManager(
+	app.mm = module.NewManager(
 		genaccounts.NewAppModule(app.accountKeeper),
 		genutil.NewAppModule(app.accountKeeper, app.stakingKeeper, app.BaseApp.DeliverTx),
-		auth.NewAppModule(app.accountKeeper, app.feeCollectionKeeper),
+		auth.NewAppModule(app.accountKeeper),
 		bank.NewAppModule(app.bankKeeper, app.accountKeeper),
-		distr.NewAppModule(app.distrKeeper),
-		staking.NewAppModule(app.stakingKeeper, app.feeCollectionKeeper, app.distrKeeper, app.accountKeeper),
+		distr.NewAppModule(app.distrKeeper, app.supplyKeeper),
+		staking.NewAppModule(app.stakingKeeper, app.distrKeeper, app.accountKeeper, app.supplyKeeper),
 		community.NewAppModule(app.communityKeeper),
 		claim.NewAppModule(app.claimKeeper),
 		mint.NewAppModule(app.mintKeeper),
@@ -285,29 +274,12 @@ func NewTruChain(logger log.Logger, db dbm.DB, loadLatest bool, options ...func(
 	app.SetBeginBlocker(app.BeginBlocker)
 	app.SetEndBlocker(app.EndBlocker)
 
-	// mount the multistore and load the latest state
-	app.MountStores(
-		app.keyAccount,
-		app.keyParams,
-		app.keyStaking,
-		app.keyDistr,
-		app.keyFeeCollection,
-		app.keyIBC,
-		app.keyMain,
-		app.tkeyParams,
-		app.tkeyStaking,
-		app.tkeyDistr,
-		app.keyCommunity,
-		app.keyClaim,
-		app.keyMint,
-		app.keyAppAccount,
-		app.keyTruBank,
-		app.keyTruStaking,
-		app.keyTruSlashing,
-	)
+	// initialize stores
+	app.MountKVStores(keys)
+	app.MountTransientStores(tkeys)
 
 	if loadLatest {
-		err := app.LoadLatestVersion(app.keyMain)
+		err := app.LoadLatestVersion(app.keys[bam.MainStoreKey])
 		if err != nil {
 			cmn.Exit(err.Error())
 		}
@@ -349,5 +321,15 @@ func (app *TruChain) InitChainer(ctx sdk.Context, req abci.RequestInitChain) abc
 
 // LoadHeight loads the app at a particular height
 func (app *TruChain) LoadHeight(height int64) error {
-	return app.LoadVersion(height, app.keyMain)
+	return app.LoadVersion(height, app.keys[bam.MainStoreKey])
+}
+
+// ModuleAccountAddrs returns all the app's module account addresses.
+func (app *TruChain) ModuleAccountAddrs() map[string]bool {
+	modAccAddrs := make(map[string]bool)
+	for acc := range maccPerms {
+		modAccAddrs[supply.NewModuleAddress(acc).String()] = true
+	}
+
+	return modAccAddrs
 }

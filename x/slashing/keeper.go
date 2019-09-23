@@ -51,7 +51,8 @@ func (k Keeper) CreateSlash(ctx sdk.Context,
 	slashReason SlashReason,
 	slashDetailedReason string,
 	creator sdk.AccAddress) (slash Slash, results []PunishmentResult, err sdk.Error) {
-	logger := getLogger(ctx)
+
+	logger := k.Logger(ctx)
 	results = make([]PunishmentResult, 0)
 	err = k.validateParams(ctx, argumentID, slashDetailedReason, creator)
 	if err != nil {
@@ -554,6 +555,6 @@ func (k Keeper) store(ctx sdk.Context) sdk.KVStore {
 	return ctx.KVStore(k.storeKey)
 }
 
-func getLogger(ctx sdk.Context) log.Logger {
+func (k Keeper) Logger(ctx sdk.Context) log.Logger {
 	return ctx.Logger().With("module", ModuleName)
 }

@@ -2,6 +2,10 @@ package account
 
 import (
 	"encoding/json"
+	"github.com/cosmos/cosmos-sdk/client/context"
+	"github.com/cosmos/cosmos-sdk/types/module"
+	"github.com/gorilla/mux"
+	"github.com/spf13/cobra"
 
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -9,8 +13,8 @@ import (
 )
 
 var (
-	_ sdk.AppModule      = AppModule{}
-	_ sdk.AppModuleBasic = AppModuleBasic{}
+	_ module.AppModule      = AppModule{}
+	_ module.AppModuleBasic = AppModuleBasic{}
 )
 
 // ModuleName is the name of this module
@@ -19,8 +23,6 @@ const ModuleName = "account"
 // AppModuleBasic defines the internal data for the module
 // ----------------------------------------------------------------------------
 type AppModuleBasic struct{}
-
-var _ sdk.AppModuleBasic = AppModuleBasic{}
 
 // Name define the name of the module
 func (AppModuleBasic) Name() string {
@@ -47,6 +49,22 @@ func (AppModuleBasic) ValidateGenesis(bz json.RawMessage) error {
 	return ValidateGenesis(data)
 }
 
+// RegisterRESTRoutes registers the REST routes for the supply module.
+func (AppModuleBasic) RegisterRESTRoutes(ctx context.CLIContext, rtr *mux.Router) {
+	// no REST routes, use GraphQL API endpoint
+	// i.e: rest.RegisterRoutes(ctx, rtr)
+}
+
+// GetTxCmd returns the root tx command for the supply module.
+func (AppModuleBasic) GetTxCmd(_ *codec.Codec) *cobra.Command { return nil }
+
+// GetQueryCmd returns no root query command for the supply module.
+func (AppModuleBasic) GetQueryCmd(cdc *codec.Codec) *cobra.Command {
+	// TODO: ??
+	// return cli.GetQueryCmd(cdc)
+	return nil
+}
+
 // AppModule defines external data for the module
 // ----------------------------------------------------------------------------
 type AppModule struct {
@@ -63,7 +81,8 @@ func NewAppModule(keeper Keeper) AppModule {
 }
 
 // RegisterInvariants enforces registering of invariants
-func (AppModule) RegisterInvariants(_ sdk.InvariantRouter) {}
+func (am AppModule) RegisterInvariants(ir sdk.InvariantRegistry) {
+}
 
 // Route defines the key for the route
 func (AppModule) Route() string {
@@ -99,13 +118,12 @@ func (am AppModule) ExportGenesis(ctx sdk.Context) json.RawMessage {
 	return ModuleCodec.MustMarshalJSON(gs)
 }
 
-// BeginBlock runs before a block is processed
-func (AppModule) BeginBlock(_ sdk.Context, _ abci.RequestBeginBlock) sdk.Tags {
-	return sdk.EmptyTags()
-}
+// BeginBlock returns the begin blocker for the supply module.
+func (am AppModule) BeginBlock(_ sdk.Context, _ abci.RequestBeginBlock) {}
 
-// EndBlock runs at the end of each block
-func (am AppModule) EndBlock(ctx sdk.Context, _ abci.RequestEndBlock) ([]abci.ValidatorUpdate, sdk.Tags) {
-	tags := EndBlocker(ctx, am.keeper)
-	return []abci.ValidatorUpdate{}, tags
+// EndBlock returns the end blocker for the supply module. It returns no validator
+// updates.
+func (am AppModule) EndBlock(ctx sdk.Context, _ abci.RequestEndBlock) []abci.ValidatorUpdate {
+	EndBlocker(ctx, am.keeper)
+	return []abci.ValidatorUpdate{}
 }

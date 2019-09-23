@@ -13,6 +13,9 @@ const (
 	RouterKey         = ModuleName
 	QuerierRoute      = ModuleName
 	DefaultParamspace = ModuleName
+
+	AttributeKeyMinSlashCountKey = "min-slash-count"
+	AttributeKeySlashResults     = "slash-results"
 )
 
 // Slash stores data about a slashing

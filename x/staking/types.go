@@ -15,6 +15,9 @@ const (
 	RouterKey         = ModuleName
 	QuerierRoute      = ModuleName
 	DefaultParamspace = ModuleName
+
+	EventTypeInterestRewardPaid = "interest-reward-paid"
+	AttributeKeyExpiredStakes   = "expired-stakes"
 )
 
 type StakeType byte

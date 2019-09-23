@@ -22,8 +22,8 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/params"
 	abci "github.com/tendermint/tendermint/abci/types"
 	cryptoAmino "github.com/tendermint/tendermint/crypto/encoding/amino"
-	dbm "github.com/tendermint/tendermint/libs/db"
 	"github.com/tendermint/tendermint/libs/log"
+	dbm "github.com/tendermint/tm-db"
 )
 
 func mockDB() (sdk.Context, Keeper) {
@@ -71,7 +71,7 @@ func mockDB() (sdk.Context, Keeper) {
 	bankKeeper := bank.NewBaseKeeper(
 		authKeeper,
 		paramsKeeper.Subspace(bank.DefaultParamspace),
-		bank.DefaultCodespace)
+		bank.DefaultCodespace, nil)
 
 	trubankKeeper := trubank.NewKeeper(
 		codec,
