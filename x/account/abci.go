@@ -12,6 +12,12 @@ import (
 func EndBlocker(ctx sdk.Context, keeper Keeper) {
 	keeper.distributeInflation(ctx)
 	keeper.unjailAccounts(ctx)
+
+	acc := keeper.supplyKeeper.GetModuleAccount(ctx, UserGrowthPoolName)
+	fmt.Println(acc)
+
+	acc1 := keeper.supplyKeeper.GetModuleAccount(ctx, StakeholderPoolName)
+	fmt.Println(acc1)
 }
 
 func (k Keeper) unjailAccounts(ctx sdk.Context) {
