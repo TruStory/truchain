@@ -43,8 +43,7 @@ func (k Keeper) distributeInflation(ctx sdk.Context) {
 }
 
 func (k Keeper) distributeInflationToUserGrowthPool(ctx sdk.Context) {
-	// TODO: take this from params
-	userGrowthAllocation := sdk.NewDecWithPrec(200, 3)
+	userGrowthAllocation := k.GetParams(ctx).UserGrowthAllocation
 	inflationAcc := k.supplyKeeper.GetModuleAccount(ctx, auth.FeeCollectorName)
 	userInflation := inflationAcc.GetCoins().AmountOf(app.StakeDenom)
 	userInflationDec := sdk.NewDecFromIntWithPrec(userInflation, 3)
@@ -57,8 +56,7 @@ func (k Keeper) distributeInflationToUserGrowthPool(ctx sdk.Context) {
 }
 
 func (k Keeper) distributeInflationToStakeholderPool(ctx sdk.Context) {
-	// TODO: take this from params
-	stakeholderAllocation := sdk.NewDecWithPrec(200, 3)
+	stakeholderAllocation := k.GetParams(ctx).StakeholderAllocation
 	inflationAcc := k.supplyKeeper.GetModuleAccount(ctx, StakeholderPoolName)
 	stakeholderInflation := inflationAcc.GetCoins().AmountOf(app.StakeDenom)
 	stakeholderInflationDec := sdk.NewDecFromIntWithPrec(stakeholderInflation, 3)

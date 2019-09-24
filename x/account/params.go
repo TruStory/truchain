@@ -11,24 +11,30 @@ import (
 
 // Keys for params
 var (
-	KeyRegistrar     = []byte("registrar")
-	KeyMaxSlashCount = []byte("maxSlashCount")
-	KeyJailDuration  = []byte("jailTime")
+	KeyRegistrar             = []byte("registrar")
+	KeyMaxSlashCount         = []byte("maxSlashCount")
+	KeyJailDuration          = []byte("jailTime")
+	KeyUserGrowthAllocation  = []byte("userGrowthAllocation")
+	KeyStakeholderAllocation = []byte("stakeholderAllocation")
 )
 
 // Params holds parameters for Auth
 type Params struct {
-	Registrar     sdk.AccAddress `json:"registrar"`
-	MaxSlashCount int            `json:"max_slash_count"`
-	JailDuration  time.Duration  `json:"jail_duration"`
+	Registrar             sdk.AccAddress `json:"registrar"`
+	MaxSlashCount         int            `json:"max_slash_count"`
+	JailDuration          time.Duration  `json:"jail_duration"`
+	UserGrowthAllocation  sdk.Dec        `json:"user_growth_allocation"`
+	StakeholderAllocation sdk.Dec        `json:"stakeholder_allocation"`
 }
 
 // DefaultParams is the auth params for testing
 func DefaultParams() Params {
 	return Params{
-		Registrar:     nil,
-		MaxSlashCount: 3,
-		JailDuration:  24 * time.Hour * 7,
+		Registrar:             nil,
+		MaxSlashCount:         3,
+		JailDuration:          24 * time.Hour * 7,
+		UserGrowthAllocation:  sdk.NewDecWithPrec(20, 2),
+		StakeholderAllocation: sdk.NewDecWithPrec(20, 2),
 	}
 }
 
@@ -38,6 +44,8 @@ func (p *Params) ParamSetPairs() params.ParamSetPairs {
 		{Key: KeyRegistrar, Value: &p.Registrar},
 		{Key: KeyMaxSlashCount, Value: &p.MaxSlashCount},
 		{Key: KeyJailDuration, Value: &p.JailDuration},
+		{Key: KeyUserGrowthAllocation, Value: &p.UserGrowthAllocation},
+		{Key: KeyStakeholderAllocation, Value: &p.StakeholderAllocation},
 	}
 }
 

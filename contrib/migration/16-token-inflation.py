@@ -5,6 +5,9 @@ import lib
 def process_genesis(genesis, parsed_args):
     genesis['app_state']['distribution']['community_tax'] = '0.800000000000000000'
 
+    genesis['app_state']['account']['params']['user_growth_allocation'] = '0.200000000000000000'
+    genesis['app_state']['account']['params']['stakeholder_allocation'] = '0.200000000000000000'
+
     # Add modules accounts that hold inflation fund pools
 
     # This is the account that holds the total inflation from each block.
