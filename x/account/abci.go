@@ -38,17 +38,33 @@ func (k Keeper) unjailAccounts(ctx sdk.Context) {
 }
 
 func (k Keeper) distributeInflation(ctx sdk.Context) {
+	k.distributeInflationToUserGrowthPool(ctx)
+	k.distributeInflationToStakeholderPool(ctx)
+}
+
+func (k Keeper) distributeInflationToUserGrowthPool(ctx sdk.Context) {
 	// TODO: take this from params
 	userGrowthAllocation := sdk.NewDecWithPrec(200, 3)
-
-	acc := k.supplyKeeper.GetModuleAccount(ctx, auth.FeeCollectorName)
-
-	userInflation := acc.GetCoins().AmountOf(app.StakeDenom)
+	inflationAcc := k.supplyKeeper.GetModuleAccount(ctx, auth.FeeCollectorName)
+	userInflation := inflationAcc.GetCoins().AmountOf(app.StakeDenom)
 	userInflationDec := sdk.NewDecFromIntWithPrec(userInflation, 3)
 	userGrowthAmount := userInflationDec.Mul(userGrowthAllocation).RoundInt()
 	userGrowthCoins := sdk.NewCoins(sdk.NewCoin(app.StakeDenom, userGrowthAmount))
-
 	err := k.supplyKeeper.SendCoinsFromModuleToModule(ctx, auth.FeeCollectorName, UserGrowthPoolName, userGrowthCoins)
+	if err != nil {
+		panic(err)
+	}
+}
+
+func (k Keeper) distributeInflationToStakeholderPool(ctx sdk.Context) {
+	// TODO: take this from params
+	stakeholderAllocation := sdk.NewDecWithPrec(200, 3)
+	inflationAcc := k.supplyKeeper.GetModuleAccount(ctx, StakeholderPoolName)
+	stakeholderInflation := inflationAcc.GetCoins().AmountOf(app.StakeDenom)
+	stakeholderInflationDec := sdk.NewDecFromIntWithPrec(stakeholderInflation, 3)
+	stakeholderAmount := stakeholderInflationDec.Mul(stakeholderAllocation).RoundInt()
+	stakeholderCoins := sdk.NewCoins(sdk.NewCoin(app.StakeDenom, stakeholderAmount))
+	err := k.supplyKeeper.SendCoinsFromModuleToModule(ctx, auth.FeeCollectorName, StakeholderPoolName, stakeholderCoins)
 	if err != nil {
 		panic(err)
 	}
