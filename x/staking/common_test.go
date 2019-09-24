@@ -1,7 +1,6 @@
 package staking
 
 import (
-	"fmt"
 	"time"
 
 	"github.com/cosmos/cosmos-sdk/x/supply"
@@ -221,32 +220,8 @@ func mockDB() (sdk.Context, Keeper, *mockedDB) {
 	}
 
 	supplyKeeper := supply.NewKeeper(cdc, supplyKey, accKeeper, bankKeeper, maccPerms)
-
 	supplyKeeper.SetModuleAccount(ctx, feeCollectorAcc)
-	acc := supplyKeeper.GetModuleAccount(ctx, auth.FeeCollectorName)
-	fmt.Println(acc)
-
 	supplyKeeper.SetModuleAccount(ctx, userRewardAcc)
-	acc2 := supplyKeeper.GetModuleAccount(ctx, UserRewardPoolName)
-	fmt.Println(acc2)
-
-	//totalSupply := sdk.NewCoins(sdk.NewInt64Coin("tru", 2342343243432423))
-	//supplyKeeper.SetSupply(ctx, supply.NewSupply(totalSupply))
-
-	//baseAcc := accKeeper.NewAccountWithAddress(ctx, supply.NewModuleAddress("baseAcc"))
-
-	//initCoins := sdk.NewCoins(sdk.NewInt64Coin("tru", 5000000000))
-	//err := userRewardAcc.SetCoins(initCoins)
-	//if err != nil {
-	//	panic(err)
-	//}
-	//accKeeper.SetAccount(ctx, userRewardAcc)
-	////accKeeper.SetAccount(ctx, baseAcc)
-	//supplyKeeper.SetModuleAccount(ctx, userRewardAcc)
-	//fmt.Println(userRewardAcc)
-
-	//acc2 := supplyKeeper.GetModuleAccount(ctx, UserRewardPoolName)
-	//fmt.Println(acc2)
 
 	trubankKeeper := trubank.NewKeeper(cdc, bankKey, bankKeeper, pk.Subspace(trubank.DefaultParamspace), trubank.DefaultCodespace)
 

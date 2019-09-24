@@ -13,12 +13,6 @@ import (
 func EndBlocker(ctx sdk.Context, keeper Keeper) {
 	keeper.processExpiringStakes(ctx)
 	keeper.distributeInflation(ctx)
-
-	inflationAcc := keeper.supplyKeeper.GetModuleAccount(ctx, auth.FeeCollectorName)
-	fmt.Println(inflationAcc)
-
-	userRewardAcc := keeper.supplyKeeper.GetModuleAccount(ctx, UserRewardPoolName)
-	fmt.Println(userRewardAcc)
 }
 
 func (k Keeper) processExpiringStakes(ctx sdk.Context) {
@@ -56,9 +50,7 @@ func (k Keeper) processExpiringStakes(ctx sdk.Context) {
 }
 
 func (k Keeper) distributeInflation(ctx sdk.Context) {
-	// TODO: take this from params
-	// 20%
-	userRewardAllocation := sdk.NewDecWithPrec(200, 3)
+	userRewardAllocation := k.GetParams(ctx).UserRewardAllocation
 
 	acc := k.supplyKeeper.GetModuleAccount(ctx, auth.FeeCollectorName)
 	userInflation := acc.GetCoins().AmountOf(app.StakeDenom)
