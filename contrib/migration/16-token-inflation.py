@@ -5,6 +5,8 @@ import lib
 def process_genesis(genesis, parsed_args):
     genesis['app_state']['distribution']['community_tax'] = '0.800000000000000000'
 
+
+
     return genesis
 
 if __name__ == '__main__':
