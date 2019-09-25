@@ -10,6 +10,9 @@ def process_genesis(genesis, parsed_args):
 
     genesis['app_state']['trustaking']['params']['user_reward_allocation'] = '0.200000000000000000'
 
+    # genesis['app_state']['supply']['supply'] = ['253644628704484tru']
+    genesis['app_state']['supply']['supply'] = [{'denom': 'tru', 'amount': '253644628704484'}]
+
     # Add modules accounts that hold inflation fund pools
 
     # This is the account that holds the total inflation from each block.
