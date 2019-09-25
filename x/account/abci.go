@@ -18,6 +18,8 @@ func EndBlocker(ctx sdk.Context, keeper Keeper) {
 
 	acc1 := keeper.supplyKeeper.GetModuleAccount(ctx, StakeholderPoolName)
 	fmt.Println(acc1)
+
+	//fmt.Println(keeper.supplyKeeper.GetSupply(ctx).String())
 }
 
 func (k Keeper) unjailAccounts(ctx sdk.Context) {
