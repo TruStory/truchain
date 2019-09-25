@@ -2,11 +2,12 @@ package account
 
 import (
 	"fmt"
-	"github.com/cosmos/cosmos-sdk/x/supply"
 
 	app "github.com/TruStory/truchain/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth"
+	"github.com/cosmos/cosmos-sdk/x/distribution"
+	"github.com/cosmos/cosmos-sdk/x/supply"
 )
 
 // EndBlocker called every block, process expiring stakes
@@ -19,13 +20,17 @@ func EndBlocker(ctx sdk.Context, keeper Keeper) {
 		fmt.Println("supply is empty..")
 		keeper.supplyKeeper.SetSupply(ctx, supply.NewSupply(totalSupply))
 	}
-	fmt.Println(keeper.supplyKeeper.GetSupply(ctx).GetTotal().String())
+	//fmt.Println("supply...")
+	//fmt.Println(keeper.supplyKeeper.GetSupply(ctx).GetTotal().String())
 
 	acc := keeper.supplyKeeper.GetModuleAccount(ctx, UserGrowthPoolName)
-	fmt.Println(acc)
+	fmt.Println(acc.GetName() + acc.GetCoins().String())
 
 	acc1 := keeper.supplyKeeper.GetModuleAccount(ctx, StakeholderPoolName)
-	fmt.Println(acc1)
+	fmt.Println(acc1.GetName() + acc1.GetCoins().String())
+
+	acc2 := keeper.supplyKeeper.GetModuleAccount(ctx, distribution.ModuleName)
+	fmt.Println(acc2.GetName() + acc2.GetCoins().String())
 }
 
 func (k Keeper) calculateTotalSupply(ctx sdk.Context) sdk.Coins {
@@ -69,12 +74,22 @@ func (k Keeper) distributeInflation(ctx sdk.Context) {
 
 func (k Keeper) distributeInflationToUserGrowthPool(ctx sdk.Context) {
 	userGrowthAllocation := k.GetParams(ctx).UserGrowthAllocation
-	inflationAcc := k.supplyKeeper.GetModuleAccount(ctx, auth.FeeCollectorName)
-	userInflation := inflationAcc.GetCoins().AmountOf(app.StakeDenom)
-	userInflationDec := sdk.NewDecFromIntWithPrec(userInflation, 3)
-	userGrowthAmount := userInflationDec.Mul(userGrowthAllocation).RoundInt()
+	//fmt.Println("user growth allocation " + userGrowthAllocation.String())
+
+	inflationAcc := k.supplyKeeper.GetModuleAccount(ctx, distribution.ModuleName)
+	inflation := inflationAcc.GetCoins()
+	//fmt.Println("inflation " + inflation.String())
+
+	inflationDec := sdk.NewDecFromInt(inflation.AmountOf("tru"))
+	//fmt.Println("inflation dec " + inflationDec.String())
+
+	userGrowthAmount := inflationDec.Mul(userGrowthAllocation).RoundInt()
+	//fmt.Println("user growth amount rounded int " + userGrowthAmount.String())
+
 	userGrowthCoins := sdk.NewCoins(sdk.NewCoin(app.StakeDenom, userGrowthAmount))
-	err := k.supplyKeeper.SendCoinsFromModuleToModule(ctx, auth.FeeCollectorName, UserGrowthPoolName, userGrowthCoins)
+	//fmt.Println("user growth coins " + userGrowthCoins.String())
+
+	err := k.supplyKeeper.SendCoinsFromModuleToModule(ctx, distribution.ModuleName, UserGrowthPoolName, userGrowthCoins)
 	if err != nil {
 		panic(err)
 	}
@@ -82,12 +97,13 @@ func (k Keeper) distributeInflationToUserGrowthPool(ctx sdk.Context) {
 
 func (k Keeper) distributeInflationToStakeholderPool(ctx sdk.Context) {
 	stakeholderAllocation := k.GetParams(ctx).StakeholderAllocation
-	inflationAcc := k.supplyKeeper.GetModuleAccount(ctx, auth.FeeCollectorName)
+	inflationAcc := k.supplyKeeper.GetModuleAccount(ctx, distribution.ModuleName)
 	stakeholderInflation := inflationAcc.GetCoins().AmountOf(app.StakeDenom)
-	stakeholderInflationDec := sdk.NewDecFromIntWithPrec(stakeholderInflation, 3)
+	stakeholderInflationDec := sdk.NewDecFromInt(stakeholderInflation)
 	stakeholderAmount := stakeholderInflationDec.Mul(stakeholderAllocation).RoundInt()
 	stakeholderCoins := sdk.NewCoins(sdk.NewCoin(app.StakeDenom, stakeholderAmount))
-	err := k.supplyKeeper.SendCoinsFromModuleToModule(ctx, auth.FeeCollectorName, StakeholderPoolName, stakeholderCoins)
+	fmt.Println("stakeholder coins " + stakeholderCoins.String())
+	err := k.supplyKeeper.SendCoinsFromModuleToModule(ctx, distribution.ModuleName, StakeholderPoolName, stakeholderCoins)
 	if err != nil {
 		panic(err)
 	}

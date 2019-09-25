@@ -1,8 +1,9 @@
 package app
 
 import (
-	"github.com/cosmos/cosmos-sdk/x/crisis"
 	"os"
+
+	"github.com/cosmos/cosmos-sdk/x/crisis"
 
 	"github.com/TruStory/truchain/types"
 	"github.com/TruStory/truchain/x/account"
@@ -338,14 +339,15 @@ func MakeCodec() *codec.Codec {
 	ModuleBasics.RegisterCodec(cdc)
 	sdk.RegisterCodec(cdc)
 	codec.RegisterCrypto(cdc)
+	codec.RegisterEvidences(cdc)
 
-	return cdc
+	return cdc.Seal()
 }
 
 // BeginBlocker reflects logic to run before any TXs application are processed
 // by the application.
 func (app *TruChain) BeginBlocker(ctx sdk.Context, req abci.RequestBeginBlock) abci.ResponseBeginBlock {
-	return abci.ResponseBeginBlock{}
+	return app.mm.BeginBlock(ctx, req)
 }
 
 // EndBlocker reflects logic to run after all TXs are processed by the
