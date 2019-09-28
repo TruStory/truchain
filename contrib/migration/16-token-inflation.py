@@ -10,8 +10,29 @@ def process_genesis(genesis, parsed_args):
 
     genesis['app_state']['trustaking']['params']['user_reward_allocation'] = '0.200000000000000000'
 
-    # genesis['app_state']['supply']['supply'] = ['253644628704484tru']
     genesis['app_state']['supply']['supply'] = [{'denom': 'tru', 'amount': '253644628704484'}]
+
+    genesis['app_state']['gov'] = {
+        'starting_proposal_id': '1',
+        'deposits': None,
+        'votes': None,
+        'proposals': None,
+        'deposit_params': {
+            'min_deposit': [{
+                'denom': 'tru',
+                'amount': '1000'
+            }],
+            'max_deposit_period': '172800000000000'
+        },
+        'voting_params': {
+            'voting_period': '172800000000000'
+        },
+        'tally_params': {
+            'quorum': '0.334000000000000000',
+            'threshold': '0.500000000000000000',
+            'veto': '0.334000000000000000'
+        }
+    }
 
     # Add modules accounts that hold inflation fund pools
 
