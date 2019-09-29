@@ -10,7 +10,11 @@ def process_genesis(genesis, parsed_args):
 
     genesis['app_state']['trustaking']['params']['user_reward_allocation'] = '0.200000000000000000'
 
-    genesis['app_state']['supply']['supply'] = [{'denom': 'tru', 'amount': '253644628704484'}]
+    genesis['app_state']['supply'] = {
+        'supply': [
+            {'denom': 'tru', 'amount': '253644628704484'},
+        ],
+    }
 
     genesis['app_state']['gov'] = {
         'starting_proposal_id': '1',
@@ -20,27 +24,27 @@ def process_genesis(genesis, parsed_args):
         'deposit_params': {
             'min_deposit': [{
                 'denom': 'tru',
-                'amount': '1000'
+                'amount': '1000',
             }],
-            'max_deposit_period': '172800000000000'
+            'max_deposit_period': '172800000000000',
         },
         'voting_params': {
-            'voting_period': '172800000000000'
+            'voting_period': '172800000000000',
         },
         'tally_params': {
             'quorum': '0.334000000000000000',
             'threshold': '0.500000000000000000',
-            'veto': '0.334000000000000000'
-        }
+            'veto': '0.334000000000000000',
+        },
     }
 
     genesis['app_state']['crisis'] = {
         'crisis': {
             'constant_fee': {
                 'denom': 'tru',
-                'amount': '1000'
-            }
-        }
+                'amount': '1000',
+            },
+        },
     }
 
     genesis['app_state']['slashing'] = {
@@ -50,10 +54,10 @@ def process_genesis(genesis, parsed_args):
             'min_signed_per_window': '0.500000000000000000',
             'downtime_jail_duration': '600000000000',
             'slash_fraction_double_sign': '0.050000000000000000',
-            'slash_fraction_downtime': '0.010000000000000000'
+            'slash_fraction_downtime': '0.010000000000000000',
         },
         'signing_infos': {},
-        'missed_blocks': {}
+        'missed_blocks': {},
     }
 
     # Add modules accounts that hold inflation fund pools
