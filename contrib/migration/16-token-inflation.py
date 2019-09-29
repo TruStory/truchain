@@ -58,6 +58,10 @@ def process_genesis(genesis, parsed_args):
         'missed_blocks': {},
     }
 
+    genesis['app_state']['genutil'] = {
+        'gentx': None,
+    }
+
     # Add modules accounts that hold inflation fund pools
 
     # This is the account that holds the total inflation from each block.
