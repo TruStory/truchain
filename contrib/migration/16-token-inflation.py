@@ -39,11 +39,9 @@ def process_genesis(genesis, parsed_args):
     }
 
     genesis['app_state']['crisis'] = {
-        'crisis': {
-            'constant_fee': {
-                'denom': 'tru',
-                'amount': '1000',
-            },
+        'constant_fee': {
+            'denom': 'tru',
+            'amount': '1000',
         },
     }
 
