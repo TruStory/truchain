@@ -34,6 +34,15 @@ def process_genesis(genesis, parsed_args):
         }
     }
 
+    genesis['app_state']['crisis'] = {
+        'crisis': {
+            'constant_fee': {
+                'denom': 'tru',
+                'amount': '1000'
+            }
+        }
+    }
+
     # Add modules accounts that hold inflation fund pools
 
     # This is the account that holds the total inflation from each block.
