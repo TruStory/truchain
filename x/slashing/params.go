@@ -31,11 +31,16 @@ type Params struct {
 
 // DefaultParams is the Slashing params for testing
 func DefaultParams() Params {
+	rewardBroker, err := sdk.AccAddressFromBech32("cosmos1tfpcnjzkthft3ynewqvn7mtdk7guf3knjdqg4d")
+	if err != nil {
+		panic(err)
+	}
+
 	return Params{
 		MinSlashCount:           5,
 		SlashMagnitude:          3,
 		SlashMinStake:           sdk.NewCoin(app.StakeDenom, sdk.NewInt(10*app.Shanev)),
-		SlashAdmins:             []sdk.AccAddress{},
+		SlashAdmins:             []sdk.AccAddress{rewardBroker},
 		CuratorShare:            sdk.NewDecWithPrec(25, 2),
 		MaxDetailedReasonLength: 140,
 	}

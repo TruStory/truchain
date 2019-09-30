@@ -16,7 +16,12 @@ type Params struct {
 }
 
 func DefaultParams() Params {
-	return Params{RewardBrokerAddress: nil}
+	rewardBroker, err := sdk.AccAddressFromBech32("cosmos1tfpcnjzkthft3ynewqvn7mtdk7guf3knjdqg4d")
+	if err != nil {
+		panic(err)
+	}
+
+	return Params{RewardBrokerAddress: rewardBroker}
 }
 
 func (p *Params) ParamSetPairs() params.ParamSetPairs {

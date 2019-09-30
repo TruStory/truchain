@@ -30,13 +30,18 @@ type Params struct {
 
 // DefaultParams is the Community params for testing
 func DefaultParams() Params {
+	rewardBroker, err := sdk.AccAddressFromBech32("cosmos1tfpcnjzkthft3ynewqvn7mtdk7guf3knjdqg4d")
+	if err != nil {
+		panic(err)
+	}
+
 	return Params{
 		MinNameLength:        5,
 		MaxNameLength:        25,
 		MinIDLength:          3,
 		MaxIDLength:          15,
 		MaxDescriptionLength: 140,
-		CommunityAdmins:      []sdk.AccAddress{},
+		CommunityAdmins:      []sdk.AccAddress{rewardBroker},
 	}
 }
 
