@@ -3,6 +3,8 @@ package staking
 import (
 	"time"
 
+	"github.com/cosmos/cosmos-sdk/x/distribution"
+
 	"github.com/cosmos/cosmos-sdk/x/supply"
 
 	app "github.com/TruStory/truchain/types"
@@ -190,9 +192,9 @@ func mockDB() (sdk.Context, Keeper, *mockedDB) {
 	pk := params.NewKeeper(cdc, paramsKey, transientParamsKey, params.DefaultCodespace)
 	accKeeper := auth.NewAccountKeeper(cdc, accKey, pk.Subspace(auth.DefaultParamspace), auth.ProtoBaseAccount)
 
-	feeCollectorAcc := supply.NewEmptyModuleAccount(auth.FeeCollectorName)
+	distAcc := supply.NewEmptyModuleAccount(distribution.ModuleName)
 	coins, _ := sdk.ParseCoins("1000000000000tru")
-	err := feeCollectorAcc.SetCoins(coins)
+	err := distAcc.SetCoins(coins)
 	if err != nil {
 		panic(err)
 	}
@@ -205,7 +207,7 @@ func mockDB() (sdk.Context, Keeper, *mockedDB) {
 
 	// so bank cannot use module accounts, only supply keeper
 	blacklistedAddrs := make(map[string]bool)
-	blacklistedAddrs[feeCollectorAcc.String()] = true
+	blacklistedAddrs[distAcc.String()] = true
 	blacklistedAddrs[userRewardAcc.String()] = true
 
 	bankKeeper := bank.NewBaseKeeper(accKeeper,
@@ -215,12 +217,12 @@ func mockDB() (sdk.Context, Keeper, *mockedDB) {
 	)
 
 	maccPerms := map[string][]string{
-		auth.FeeCollectorName: nil,
-		UserRewardPoolName:    nil,
+		distribution.ModuleName: nil,
+		UserRewardPoolName:      nil,
 	}
 
 	supplyKeeper := supply.NewKeeper(cdc, supplyKey, accKeeper, bankKeeper, maccPerms)
-	supplyKeeper.SetModuleAccount(ctx, feeCollectorAcc)
+	supplyKeeper.SetModuleAccount(ctx, distAcc)
 	supplyKeeper.SetModuleAccount(ctx, userRewardAcc)
 
 	trubankKeeper := trubank.NewKeeper(cdc, bankKey, bankKeeper, pk.Subspace(trubank.DefaultParamspace), trubank.DefaultCodespace)

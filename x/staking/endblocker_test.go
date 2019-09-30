@@ -59,7 +59,6 @@ func TestKeeper_TestEarnedCoins(t *testing.T) {
 	assert.Equal(t, sdk.NewInt(0), earnings[addr2.String()].Coins.AmountOf("crypto"))
 	argumentAndUpvoteReceived := argumentInterest.Add(upvoteAfterSplitInterest)
 	assert.Equal(t, argumentAndUpvoteReceived.String(), earnings[addr2.String()].Coins.AmountOf("random").String())
-
 }
 
 func TestKeeper_TestRefundStake(t *testing.T) {
