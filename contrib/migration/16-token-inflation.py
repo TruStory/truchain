@@ -4,11 +4,43 @@ import lib
 
 def process_genesis(genesis, parsed_args):
     genesis['app_state']['distribution']['community_tax'] = '0.800000000000000000'
+    # this doesn't have to change, already in genesis
+    # "distribution": {
+    #                     "fee_pool": {
+    #                         "community_pool": []
+    #                     },
+    #                     "community_tax": "0.020000000000000000",
+    #                     "base_proposer_reward": "0.010000000000000000",
+    #                     "bonus_proposer_reward": "0.040000000000000000",
+    #                     "withdraw_addr_enabled": true,
+    #                     "delegator_withdraw_infos": [],
+    #                     "previous_proposer": "",
+    #                     "outstanding_rewards": [],
+    #                     "validator_accumulated_commissions": [],
+    #                     "validator_historical_rewards": [],
+    #                     "validator_current_rewards": [],
+    #                     "delegator_starting_infos": [],
+    #                     "validator_slash_events": []
+    #                 },
 
-    genesis['app_state']['account']['params']['user_growth_allocation'] = '0.200000000000000000'
-    genesis['app_state']['account']['params']['stakeholder_allocation'] = '0.200000000000000000'
+    # staking from init genesis
+    # "staking": {
+    #                "params": {
+    #                    "unbonding_time": "1814400000000000",
+    #                    "max_validators": 100,
+    #                    "max_entries": 7,
+    #                    "bond_denom": "stake"
+    #                },
+    #                "last_total_power": "0",
+    #                "last_validator_powers": null,
+    #                "validators": null,
+    #                "delegations": null,
+    #                "unbonding_delegations": null,
+    #                "redelegations": null,
+    #                "exported": false
+    #            },
 
-    genesis['app_state']['trustaking']['params']['user_reward_allocation'] = '0.200000000000000000'
+
 
     genesis['app_state']['supply'] = {
         'supply': [
@@ -64,10 +96,17 @@ def process_genesis(genesis, parsed_args):
 
     # Add modules accounts that hold inflation fund pools
 
+    # module account allocations
+    genesis['app_state']['account']['params']['user_growth_allocation'] = '0.200000000000000000'
+    genesis['app_state']['account']['params']['stakeholder_allocation'] = '0.200000000000000000'
+    genesis['app_state']['trustaking']['params']['user_reward_allocation'] = '0.200000000000000000'
+
     # This is the account that holds the total inflation from each block.
     # The naming is bit of a misnomer due to historical reasons with Cosmos.
     # The address of the account is derived from the name "fee_collector", which
     # the mint modules uses. Thus it cannot be changed.
+
+    # TODO: replace this with distribution?
     feeCollectorAccnt = {
         'address': 'cosmos17xpfvakm2amg962yls6f84z3kell8c5lserqta',
         'coins': [{'denom': 'tru', 'amount': '0'}],
