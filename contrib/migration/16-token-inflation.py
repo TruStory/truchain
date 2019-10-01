@@ -7,22 +7,23 @@ def process_genesis(genesis, parsed_args):
     # NOTE: the rest of distribution should already be in the db by this point
 
     # staking from init genesis
-    # "staking": {
-    #                "params": {
-    #                    "unbonding_time": "1814400000000000",
-    #                    "max_validators": 100,
-    #                    "max_entries": 7,
-    #                    "bond_denom": "stake"
-    #                },
-    #                "last_total_power": "0",
-    #                "last_validator_powers": null,
-    #                "validators": null,
-    #                "delegations": null,
-    #                "unbonding_delegations": null,
-    #                "redelegations": null,
-    #                "exported": false
-    #            },
+    genesis['app_state']['staking'] = {
+        'params': {
+            'unbonding_time': '1814400000000000',
+            'max_validators': '100',
+            'max_entries': '7',
+            'bond_denom': 'tru',
+        },
+        'last_total_power': '0',
+        'last_validator_power': None,
+        'validators': None,
+        'delegations': None,
+        'unbonding_delegations': None,
+        'redelegations': None,
+        'exported': False,
+    }
 
+    # TODO: iterate all accounts to add up and calculate total supply
     genesis['app_state']['supply'] = {
         'supply': [
             {'denom': 'tru', 'amount': '253644628704484'},
@@ -80,7 +81,7 @@ def process_genesis(genesis, parsed_args):
     genesis['app_state']['account']['params']['stakeholder_allocation'] = '0.200000000000000000'
     genesis['app_state']['trustaking']['params']['user_reward_allocation'] = '0.200000000000000000'
 
-    # module accounts are automatically created...
+    # module accounts themselves are automatically created...
 
     return genesis
 
