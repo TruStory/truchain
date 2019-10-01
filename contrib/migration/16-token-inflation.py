@@ -9,6 +9,9 @@ def process_genesis(genesis, parsed_args):
     # remove validators
     del genesis['validators']
 
+    # TODO: change bonded_tokens_pool coins to []
+    # for some reason it is 100000000
+
     # staking from init genesis
     genesis['app_state']['staking'] = {
         'params': {
@@ -29,7 +32,7 @@ def process_genesis(genesis, parsed_args):
     # TODO: iterate all accounts to add up and calculate total supply
     genesis['app_state']['supply'] = {
         'supply': [
-            {'denom': 'tru', 'amount': '1314197611375650'},
+            {'denom': 'tru', 'amount': '1332881859320829'},
         ],
     }
 
