@@ -249,11 +249,6 @@ func NewTruChain(logger log.Logger, db dbm.DB, loadLatest bool,
 		app.claimKeeper,
 	)
 
-	// The AnteHandler handles signature verification and transaction pre-processing
-	// TODO [shanev]: see https://github.com/TruStory/truchain/issues/364
-	// Add this back after fixing issues with signature verification
-	// app.SetAnteHandler(auth.NewAnteHandler(app.accountKeeper, app.feeCollectionKeeper))
-
 	// The app.Router is the main transaction router where each module registers its routes
 	app.Router().
 		AddRoute(bank.RouterKey, bank.NewHandler(app.bankKeeper)).
@@ -319,6 +314,10 @@ func NewTruChain(logger log.Logger, db dbm.DB, loadLatest bool,
 
 	app.SetInitChainer(app.InitChainer)
 	app.SetBeginBlocker(app.BeginBlocker)
+	// The AnteHandler handles signature verification and transaction pre-processing
+	// TODO [shanev]: see https://github.com/TruStory/truchain/issues/364
+	// Add this back after fixing issues with signature verification
+	//app.SetAnteHandler(auth.NewAnteHandler(app.accountKeeper, app.supplyKeeper, auth.DefaultSigVerificationGasConsumer))
 	app.SetEndBlocker(app.EndBlocker)
 
 	if loadLatest {

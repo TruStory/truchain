@@ -2,9 +2,10 @@ package main
 
 import (
 	"encoding/json"
-	"github.com/cosmos/cosmos-sdk/x/auth"
 	"io"
 	"os"
+
+	"github.com/cosmos/cosmos-sdk/x/auth"
 
 	"github.com/TruStory/truchain/app"
 	"github.com/cosmos/cosmos-sdk/baseapp"
@@ -40,8 +41,13 @@ func main() {
 
 	rootCmd.AddCommand(genutilcli.InitCmd(ctx, cdc, app.ModuleBasics, app.DefaultNodeHome))
 	rootCmd.AddCommand(genutilcli.CollectGenTxsCmd(ctx, cdc, auth.GenesisAccountIterator{}, app.DefaultNodeHome))
-	rootCmd.AddCommand(genutilcli.GenTxCmd(ctx, cdc, app.ModuleBasics, staking.AppModuleBasic{},
-		auth.GenesisAccountIterator{}, app.DefaultNodeHome, app.DefaultCLIHome))
+	rootCmd.AddCommand(genutilcli.MigrateGenesisCmd(ctx, cdc))
+	rootCmd.AddCommand(
+		genutilcli.GenTxCmd(
+			ctx, cdc, app.ModuleBasics, staking.AppModuleBasic{},
+			auth.GenesisAccountIterator{}, app.DefaultNodeHome, app.DefaultCLIHome,
+		),
+	)
 	rootCmd.AddCommand(genutilcli.ValidateGenesisCmd(ctx, cdc, app.ModuleBasics))
 	rootCmd.AddCommand(AddGenesisAccountCmd(ctx, cdc, app.DefaultNodeHome, app.DefaultCLIHome))
 	rootCmd.AddCommand(client.NewCompletionCmd(rootCmd, true))
