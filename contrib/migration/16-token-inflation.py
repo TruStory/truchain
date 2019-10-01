@@ -10,8 +10,8 @@ def process_genesis(genesis, parsed_args):
     genesis['app_state']['staking'] = {
         'params': {
             'unbonding_time': '1814400000000000',
-            'max_validators': '100',
-            'max_entries': '7',
+            'max_validators': 100,
+            'max_entries': 7,
             'bond_denom': 'tru',
         },
         'last_total_power': '0',
