@@ -6,6 +6,9 @@ def process_genesis(genesis, parsed_args):
     genesis['app_state']['distribution']['community_tax'] = '0.800000000000000000'
     # NOTE: the rest of distribution should already be in the db by this point
 
+    # remove validators
+    del genesis['validators']
+
     # staking from init genesis
     genesis['app_state']['staking'] = {
         'params': {
@@ -26,7 +29,7 @@ def process_genesis(genesis, parsed_args):
     # TODO: iterate all accounts to add up and calculate total supply
     genesis['app_state']['supply'] = {
         'supply': [
-            {'denom': 'tru', 'amount': '253644628704484'},
+            {'denom': 'tru', 'amount': '1314197611375650'},
         ],
     }
 
@@ -87,7 +90,7 @@ def process_genesis(genesis, parsed_args):
 
 if __name__ == '__main__':
     parser = lib.init_default_argument_parser(
-        prog_desc='Migrate genesis.json to adjust community tax',
+        prog_desc='Migrate genesis.json to add inflation',
         default_chain_id='betanet-1',
         default_start_time='2019-02-11T12:00:00Z',
     )
