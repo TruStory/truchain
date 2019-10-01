@@ -29,11 +29,14 @@ def process_genesis(genesis, parsed_args):
         'exported': False,
     }
 
-    # TODO: iterate all accounts to add up and calculate total supply
+    # genesis['app_state']['supply'] = {
+    #     'supply': [
+    #         {'denom': 'tru', 'amount': '1332881859320829'},
+    #     ],
+    # }
+
     genesis['app_state']['supply'] = {
-        'supply': [
-            {'denom': 'tru', 'amount': '1332881859320829'},
-        ],
+        'supply': [],
     }
 
     genesis['app_state']['gov'] = {
