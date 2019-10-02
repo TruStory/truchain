@@ -13,7 +13,7 @@ import (
 )
 
 func TestQueryAppAccount_Success(t *testing.T) {
-	ctx, keeper := mockDB()
+	ctx, keeper := mockDB(t)
 
 	_, publicKey, address, coins := getFakeAppAccountParams()
 	createdAppAccount, _ := keeper.CreateAppAccount(ctx, address, coins, publicKey)
@@ -38,7 +38,7 @@ func TestQueryAppAccount_Success(t *testing.T) {
 }
 
 func TestQueryPrimaryAccount_Success(t *testing.T) {
-	ctx, keeper := mockDB()
+	ctx, keeper := mockDB(t)
 
 	_, publicKey, address, coins := getFakeAppAccountParams()
 	keeper.CreateAppAccount(ctx, address, coins, publicKey)
@@ -63,7 +63,7 @@ func TestQueryPrimaryAccount_Success(t *testing.T) {
 }
 
 func TestQueryAppAccounts_Success(t *testing.T) {
-	ctx, keeper := mockDB()
+	ctx, keeper := mockDB(t)
 
 	_, publicKey, address, coins := getFakeAppAccountParams()
 	createdAppAccount, err := keeper.CreateAppAccount(ctx, address, coins, publicKey)
@@ -101,7 +101,7 @@ func TestQueryAppAccounts_Success(t *testing.T) {
 }
 
 func TestQueryAppAccount_ErrNotFound(t *testing.T) {
-	ctx, keeper := mockDB()
+	ctx, keeper := mockDB(t)
 
 	_, _, address, _ := getFakeAppAccountParams()
 
@@ -121,7 +121,7 @@ func TestQueryAppAccount_ErrNotFound(t *testing.T) {
 }
 
 func TestQueryParams_Success(t *testing.T) {
-	ctx, keeper := mockDB()
+	ctx, keeper := mockDB(t)
 
 	onChainParams := keeper.GetParams(ctx)
 

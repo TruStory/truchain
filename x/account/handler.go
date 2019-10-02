@@ -31,6 +31,11 @@ func handleMsgRegisterKey(ctx sdk.Context, k Keeper, msg MsgRegisterKey) sdk.Res
 		return err.Result()
 	}
 
+	err = k.supplyKeeper.BurnCoins(ctx, UserGrowthPoolName, msg.Coins)
+	if err != nil {
+		return err.Result()
+	}
+
 	res, jsonErr := k.codec.MarshalJSON(appAccount)
 	if jsonErr != nil {
 		return sdk.ErrInternal(fmt.Sprintf("Marshal result error: %s", jsonErr)).Result()

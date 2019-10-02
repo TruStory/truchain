@@ -1,6 +1,8 @@
 package account
 
 import (
+	"testing"
+
 	app "github.com/TruStory/truchain/types"
 	trubank "github.com/TruStory/truchain/x/bank"
 	"github.com/cosmos/cosmos-sdk/codec"
@@ -13,6 +15,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/params"
 	"github.com/cosmos/cosmos-sdk/x/staking"
 	"github.com/cosmos/cosmos-sdk/x/supply"
+	"github.com/stretchr/testify/require"
 	abci "github.com/tendermint/tendermint/abci/types"
 	"github.com/tendermint/tendermint/crypto"
 	cryptoAmino "github.com/tendermint/tendermint/crypto/encoding/amino"
@@ -41,7 +44,7 @@ func (bk bankKeeper) AddCoin(ctx sdk.Context, to sdk.AccAddress, coin sdk.Coin,
 	return sdk.Coins{coin}, nil
 }
 
-func mockDB() (sdk.Context, Keeper) {
+func mockDB(t *testing.T) (sdk.Context, Keeper) {
 	db := dbm.NewMemDB()
 
 	authKey := sdk.NewKVStoreKey(ModuleName)
@@ -65,6 +68,7 @@ func mockDB() (sdk.Context, Keeper) {
 	RegisterCodec(codec)
 	codec.RegisterInterface((*auth.Account)(nil), nil)
 	codec.RegisterConcrete(&auth.BaseAccount{}, "auth/Account", nil)
+	supply.RegisterCodec(codec)
 
 	maccPerms := map[string][]string{
 		auth.FeeCollectorName: nil,
@@ -73,7 +77,7 @@ func mockDB() (sdk.Context, Keeper) {
 		staking.BondedPoolName:    {supply.Burner, supply.Staking},
 		staking.NotBondedPoolName: {supply.Burner, supply.Staking},
 		gov.ModuleName:            {supply.Burner},
-		//account.UserGrowthPoolName:  {supply.Staking},
+		UserGrowthPoolName:        {supply.Burner, supply.Staking},
 		//account.StakeholderPoolName: {supply.Staking},
 	}
 
@@ -81,6 +85,15 @@ func mockDB() (sdk.Context, Keeper) {
 	accountKeeper := auth.NewAccountKeeper(codec, accountKey, paramsKeeper.Subspace(auth.DefaultParamspace), auth.ProtoBaseAccount)
 	cosmosBankKeeper := bank.NewBaseKeeper(accountKeeper, paramsKeeper.Subspace(bank.DefaultParamspace), bank.DefaultCodespace, nil)
 	supplyKeeper := supply.NewKeeper(codec, supplyKey, accountKeeper, cosmosBankKeeper, maccPerms)
+
+	userGrowthAcc := supply.NewEmptyModuleAccount(UserGrowthPoolName, supply.Burner, supply.Staking)
+	initCoins := sdk.NewCoins(sdk.NewCoin(app.StakeDenom, sdk.NewInt(10000000000)))
+	err := userGrowthAcc.SetCoins(initCoins)
+	require.NoError(t, err)
+	supplyKeeper.SetModuleAccount(ctx, userGrowthAcc)
+
+	totalSupply := initCoins
+	supplyKeeper.SetSupply(ctx, supply.NewSupply(totalSupply))
 
 	bankKeeper := bankKeeper{
 		Transactions: []transaction{},
