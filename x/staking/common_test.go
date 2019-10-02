@@ -225,7 +225,7 @@ func mockDB() (sdk.Context, Keeper, *mockedDB) {
 	supplyKeeper.SetModuleAccount(ctx, distAcc)
 	supplyKeeper.SetModuleAccount(ctx, userRewardAcc)
 
-	trubankKeeper := trubank.NewKeeper(cdc, bankKey, bankKeeper, pk.Subspace(trubank.DefaultParamspace), trubank.DefaultCodespace)
+	trubankKeeper := trubank.NewKeeper(cdc, bankKey, bankKeeper, pk.Subspace(trubank.DefaultParamspace), trubank.DefaultCodespace, supplyKeeper)
 
 	mockedAccountKeeper := newAccountKeeper()
 	mockedClaimKeeper := newMockedClaimKeeper()

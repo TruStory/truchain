@@ -5,28 +5,31 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/bank"
 	"github.com/cosmos/cosmos-sdk/x/params"
+	"github.com/cosmos/cosmos-sdk/x/supply"
 
 	app "github.com/TruStory/truchain/types"
 )
 
 // Keeper is the model object for the package bank module
 type Keeper struct {
-	storeKey   sdk.StoreKey
-	codec      *codec.Codec
-	paramStore params.Subspace
-	bankKeeper bank.Keeper
-	codespace  sdk.CodespaceType
+	storeKey     sdk.StoreKey
+	codec        *codec.Codec
+	paramStore   params.Subspace
+	bankKeeper   bank.Keeper
+	codespace    sdk.CodespaceType
+	supplyKeeper supply.Keeper
 }
 
 // NewKeeper creates a bank keeper.
 func NewKeeper(codec *codec.Codec, storeKey sdk.StoreKey, bankKeeper bank.Keeper,
-	paramStore params.Subspace, codespace sdk.CodespaceType) Keeper {
+	paramStore params.Subspace, codespace sdk.CodespaceType, supplyKeeper supply.Keeper) Keeper {
 	return Keeper{
-		storeKey:   storeKey,
-		codec:      codec,
-		bankKeeper: bankKeeper,
-		paramStore: paramStore.WithKeyTable(ParamKeyTable()),
-		codespace:  codespace,
+		storeKey:     storeKey,
+		codec:        codec,
+		bankKeeper:   bankKeeper,
+		paramStore:   paramStore.WithKeyTable(ParamKeyTable()),
+		codespace:    codespace,
+		supplyKeeper: supplyKeeper,
 	}
 }
 
@@ -134,6 +137,7 @@ func (k Keeper) rewardBrokerAddress(ctx sdk.Context) sdk.AccAddress {
 	k.paramStore.GetIfExists(ctx, ParamKeyRewardBrokerAddress, &address)
 	return address
 }
+
 func (k Keeper) sendGift(ctx sdk.Context,
 	sender sdk.AccAddress, recipient sdk.AccAddress,
 	amount sdk.Coin) sdk.Error {

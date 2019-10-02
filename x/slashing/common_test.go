@@ -91,12 +91,16 @@ func mockDB() (sdk.Context, Keeper) {
 		paramsKeeper.Subspace(bank.DefaultParamspace),
 		bank.DefaultCodespace, nil)
 
+	supplyKeeper := supply.NewKeeper(codec, supplyKey, authKeeper, bankKeeper, maccPerms)
+
 	trubankKeeper := trubank.NewKeeper(
 		codec,
 		bankKey,
 		bankKeeper,
 		paramsKeeper.Subspace(trubank.DefaultParamspace),
-		trubank.DefaultCodespace)
+		trubank.DefaultCodespace,
+		supplyKeeper)
+
 	trubank.InitGenesis(ctx, trubankKeeper, trubank.DefaultGenesisState())
 
 	communityKeeper := community.NewKeeper(
@@ -113,8 +117,6 @@ func mockDB() (sdk.Context, Keeper) {
 	if err != nil {
 		panic(err)
 	}
-
-	supplyKeeper := supply.NewKeeper(codec, supplyKey, authKeeper, bankKeeper, maccPerms)
 
 	accountKeeper := account.NewKeeper(
 		accountKey,

@@ -209,6 +209,7 @@ func NewTruChain(logger log.Logger, db dbm.DB, loadLatest bool,
 		app.bankKeeper,
 		trubank2Subspace,
 		trubank.DefaultCodespace,
+		app.supplyKeeper,
 	)
 
 	app.appAccountKeeper = account.NewKeeper(
