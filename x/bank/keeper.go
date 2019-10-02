@@ -1,6 +1,7 @@
 package bank
 
 import (
+	"github.com/TruStory/truchain/x/account"
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/bank"
@@ -152,6 +153,12 @@ func (k Keeper) sendGift(ctx sdk.Context,
 	if err != nil {
 		return err
 	}
+
+	err = k.supplyKeeper.BurnCoins(ctx, account.UserGrowthPoolName, sdk.Coins{amount})
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -165,6 +172,12 @@ func (k Keeper) payReward(ctx sdk.Context,
 	if err != nil {
 		return err
 	}
+
+	err = k.supplyKeeper.BurnCoins(ctx, account.UserGrowthPoolName, sdk.Coins{amount})
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 

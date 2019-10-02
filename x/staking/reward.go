@@ -1,9 +1,9 @@
 package staking
 
 import (
-	app "github.com/TruStory/truchain/types"
-
 	"time"
+
+	app "github.com/TruStory/truchain/types"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
@@ -73,6 +73,10 @@ func (k Keeper) distributeReward(ctx sdk.Context, stake Stake) (RewardResult, sd
 		if err != nil {
 			return RewardResult{}, err
 		}
+		err = k.supplyKeeper.BurnCoins(ctx, UserRewardPoolName, sdk.NewCoins(reward))
+		if err != nil {
+			return RewardResult{}, err
+		}
 		k.addEarnedCoin(ctx, argument.Creator, claim.CommunityID, reward.Amount)
 		return RewardResult{Type: RewardResultArgumentCreation,
 			ArgumentCreator:       argument.Creator,
@@ -91,6 +95,11 @@ func (k Keeper) distributeReward(ctx sdk.Context, stake Stake) (RewardResult, sd
 	if err != nil {
 		return RewardResult{}, err
 	}
+	err = k.supplyKeeper.BurnCoins(ctx, UserRewardPoolName, sdk.NewCoins(creatorRewardCoin))
+	if err != nil {
+		return RewardResult{}, err
+	}
+
 	_, err = k.bankKeeper.AddCoin(ctx,
 		stake.Creator,
 		stakerRewardCoin,
@@ -101,6 +110,11 @@ func (k Keeper) distributeReward(ctx sdk.Context, stake Stake) (RewardResult, sd
 	if err != nil {
 		return RewardResult{}, err
 	}
+	err = k.supplyKeeper.BurnCoins(ctx, UserRewardPoolName, sdk.NewCoins(stakerRewardCoin))
+	if err != nil {
+		return RewardResult{}, err
+	}
+
 	k.addEarnedCoin(ctx, argument.Creator, claim.CommunityID, creatorRewardCoin.Amount)
 	k.addEarnedCoin(ctx, stake.Creator, claim.CommunityID, stakerRewardCoin.Amount)
 	rewardResult := RewardResult{
