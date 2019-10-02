@@ -9,8 +9,11 @@ def process_genesis(genesis, parsed_args):
     # remove validators
     del genesis['validators']
 
-    # TODO: change bonded_tokens_pool coins to []
-    # for some reason it is 100000000
+    # change bonded_tokens_pool coins to []
+    # because the old staking module had delegated shares which added to the bond pool
+    for acc in genesis['app_state']['accounts']:
+        if acc['module_name'] == 'bonded_tokens_pool':
+            acc['coins'] = []
 
     # staking from init genesis
     genesis['app_state']['staking'] = {
@@ -29,12 +32,13 @@ def process_genesis(genesis, parsed_args):
         'exported': False,
     }
 
+    # supply is set automatically on chain init, so leave empty
+    # i.e:
     # genesis['app_state']['supply'] = {
     #     'supply': [
     #         {'denom': 'tru', 'amount': '1332881859320829'},
     #     ],
     # }
-
     genesis['app_state']['supply'] = {
         'supply': [],
     }
