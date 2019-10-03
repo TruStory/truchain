@@ -1,6 +1,7 @@
 package bank
 
 import (
+	app "github.com/TruStory/truchain/types"
 	"github.com/TruStory/truchain/x/account"
 	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/cosmos/cosmos-sdk/store"
@@ -39,6 +40,7 @@ func mockDB() (sdk.Context, Keeper, auth.AccountKeeper) {
 	auth.RegisterCodec(cdc)
 	RegisterCodec(cdc)
 	codec.RegisterCrypto(cdc)
+	supply.RegisterCodec(cdc)
 
 	// Keepers
 	pk := params.NewKeeper(cdc, paramsKey, transientParamsKey, params.DefaultCodespace)
@@ -53,6 +55,12 @@ func mockDB() (sdk.Context, Keeper, auth.AccountKeeper) {
 		account.UserGrowthPoolName: {supply.Burner, supply.Staking},
 	}
 	supplyKeeper := supply.NewKeeper(cdc, supplyKey, accKeeper, bankKeeper, maccPerms)
+	userGrowthAcc := supply.NewEmptyModuleAccount(account.UserGrowthPoolName, supply.Burner, supply.Staking)
+	initCoins := sdk.NewCoins(sdk.NewCoin(app.StakeDenom, sdk.NewInt(100000000000)))
+	userGrowthAcc.SetCoins(initCoins)
+	supplyKeeper.SetModuleAccount(ctx, userGrowthAcc)
+	totalSupply := initCoins
+	supplyKeeper.SetSupply(ctx, supply.NewSupply(totalSupply))
 
 	// module keeper
 	keeper := NewKeeper(

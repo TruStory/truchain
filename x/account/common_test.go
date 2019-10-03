@@ -71,14 +71,12 @@ func mockDB(t *testing.T) (sdk.Context, Keeper) {
 	supply.RegisterCodec(codec)
 
 	maccPerms := map[string][]string{
-		auth.FeeCollectorName: nil,
-		//distr.ModuleName:            nil,
+		auth.FeeCollectorName:     nil,
 		mint.ModuleName:           {supply.Minter},
 		staking.BondedPoolName:    {supply.Burner, supply.Staking},
 		staking.NotBondedPoolName: {supply.Burner, supply.Staking},
 		gov.ModuleName:            {supply.Burner},
 		UserGrowthPoolName:        {supply.Burner, supply.Staking},
-		//account.StakeholderPoolName: {supply.Staking},
 	}
 
 	paramsKeeper := params.NewKeeper(codec, paramsKey, transientParamsKey, params.DefaultCodespace)

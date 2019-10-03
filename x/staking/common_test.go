@@ -218,7 +218,7 @@ func mockDB() (sdk.Context, Keeper, *mockedDB) {
 
 	maccPerms := map[string][]string{
 		distribution.ModuleName: nil,
-		UserRewardPoolName:      nil,
+		UserRewardPoolName:      {supply.Burner},
 	}
 
 	supplyKeeper := supply.NewKeeper(cdc, supplyKey, accKeeper, bankKeeper, maccPerms)
