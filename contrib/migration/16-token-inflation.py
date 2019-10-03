@@ -11,8 +11,15 @@ def process_genesis(genesis, parsed_args):
 
     # change bonded_tokens_pool coins to []
     # because the old staking module had delegated shares which added to the bond pool
+    # remove coins from registrar and reward broker, which fucks up supply
     for acc in genesis['app_state']['accounts']:
         if acc['module_name'] == 'bonded_tokens_pool':
+            acc['coins'] = []
+        if acc['address'] == 'cosmos1tfpcnjzkthft3ynewqvn7mtdk7guf3knjdqg4d':
+            acc['coins'] = []
+        if acc['address'] == 'cosmos1pmp80ys5kplk0gnvmhtxq086xlerkwvcdhk8gx':
+            acc['coins'] = []
+        if acc['address'] == 'cosmos1em44grl9ylmmnwawwp5fjn079kesatwp67rxjx':
             acc['coins'] = []
 
     # staking from init genesis
