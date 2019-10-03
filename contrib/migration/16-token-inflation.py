@@ -103,6 +103,8 @@ def process_genesis(genesis, parsed_args):
 
     # module accounts themselves are automatically created...
 
+    genesis['chain_id'] = 'betanet-1'
+
     return genesis
 
 if __name__ == '__main__':
