@@ -12,6 +12,7 @@ require (
 	github.com/tendermint/tendermint v0.32.2
 	github.com/tendermint/tm-db v0.1.1
 	github.com/tendermint/tmlibs v0.9.0
+	github.com/writeas/go-strip-markdown v2.0.1+incompatible
 	golang.org/x/crypto v0.0.0-20190530122614-20be4c3c3ed5 // indirect
 	golang.org/x/sys v0.0.0-20190530182044-ad28b68e88f1 // indirect
 	golang.org/x/text v0.3.2 // indirect

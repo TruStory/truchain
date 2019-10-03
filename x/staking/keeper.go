@@ -3,6 +3,8 @@ package staking
 import (
 	"time"
 
+	stripmd "github.com/writeas/go-strip-markdown"
+
 	app "github.com/TruStory/truchain/types"
 
 	"github.com/cosmos/cosmos-sdk/codec"
@@ -199,6 +201,9 @@ func (k Keeper) SubmitArgument(ctx sdk.Context, body, summary string,
 	p := k.GetParams(ctx)
 	if count >= p.MaxArgumentsPerClaim {
 		return Argument{}, ErrCodeMaxNumOfArgumentsReached(p.MaxArgumentsPerClaim)
+	}
+	if len(stripmd.Strip(body)) > p.ArgumentBodyMaxLength {
+		return Argument{}, ErrCodeInvalidBodyLength()
 	}
 
 	creationAmount := p.ArgumentCreationStake
