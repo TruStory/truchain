@@ -65,11 +65,13 @@ func mockDB() (sdk.Context, Keeper) {
 	codec.RegisterInterface((*auth.Account)(nil), nil)
 	codec.RegisterConcrete(&auth.BaseAccount{}, "auth/Account", nil)
 	RegisterCodec(codec)
+	supply.RegisterCodec(codec)
 
 	maccPerms := map[string][]string{
 		auth.FeeCollectorName:      nil,
 		mint.ModuleName:            {supply.Minter},
 		gov.ModuleName:             {supply.Burner},
+		account.UserGrowthPoolName: {supply.Burner, supply.Staking},
 		staking.UserRewardPoolName: {supply.Burner},
 	}
 
@@ -86,7 +88,15 @@ func mockDB() (sdk.Context, Keeper) {
 		paramsKeeper.Subspace(bank.DefaultParamspace),
 		bank.DefaultCodespace, nil)
 
+	userRewardAcc := supply.NewEmptyModuleAccount(staking.UserRewardPoolName, supply.Burner, supply.Staking)
+	userGrowthAcc := supply.NewEmptyModuleAccount(account.UserGrowthPoolName, supply.Minter, supply.Burner, supply.Staking)
+	initCoins := sdk.NewCoins(sdk.NewCoin(app.StakeDenom, sdk.NewInt(10000000000)))
+	err := userRewardAcc.SetCoins(initCoins)
 	supplyKeeper := supply.NewKeeper(codec, supplyKey, authKeeper, bankKeeper, maccPerms)
+	supplyKeeper.SetModuleAccount(ctx, userGrowthAcc)
+	supplyKeeper.SetModuleAccount(ctx, userRewardAcc)
+	totalSupply := initCoins
+	supplyKeeper.SetSupply(ctx, supply.NewSupply(totalSupply))
 
 	trubankKeeper := trubank.NewKeeper(
 		codec,
@@ -108,7 +118,7 @@ func mockDB() (sdk.Context, Keeper) {
 	cGenesis.Params.CommunityAdmins = append(cGenesis.Params.CommunityAdmins, cAdmin1, cAdmin2)
 	community.InitGenesis(ctx, communityKeeper, cGenesis)
 	communityID := "furry"
-	_, err := communityKeeper.NewCommunity(ctx, communityID, "Furries", "", cAdmin1)
+	_, err = communityKeeper.NewCommunity(ctx, communityID, "Furries", "", cAdmin1)
 	if err != nil {
 		panic(err)
 	}

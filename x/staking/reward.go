@@ -1,6 +1,7 @@
 package staking
 
 import (
+	"fmt"
 	"time"
 
 	app "github.com/TruStory/truchain/types"
@@ -73,6 +74,9 @@ func (k Keeper) distributeReward(ctx sdk.Context, stake Stake) (RewardResult, sd
 		if err != nil {
 			return RewardResult{}, err
 		}
+		acc := k.supplyKeeper.GetModuleAccount(ctx, UserRewardPoolName)
+		fmt.Println(acc)
+
 		err = k.supplyKeeper.BurnCoins(ctx, UserRewardPoolName, sdk.NewCoins(reward))
 		if err != nil {
 			return RewardResult{}, err

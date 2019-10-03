@@ -299,11 +299,11 @@ func NewTruChain(logger log.Logger, db dbm.DB, loadLatest bool,
 
 	// genutils must occur after staking so that pools are properly
 	// initialized with tokens from genesis accounts.
-	app.mm.SetOrderInitGenesis(account.ModuleName, distr.ModuleName,
+	app.mm.SetOrderInitGenesis(distr.ModuleName,
 		staking.ModuleName, auth.ModuleName, bank.ModuleName,
 		slashing.ModuleName, gov.ModuleName, mint.ModuleName, supply.ModuleName,
 		crisis.ModuleName, genutil.ModuleName,
-		community.ModuleName, claim.ModuleName,
+		account.ModuleName, community.ModuleName, claim.ModuleName,
 		trubank.ModuleName, trustaking.ModuleName, truslashing.ModuleName)
 
 	app.mm.RegisterInvariants(&app.crisisKeeper)

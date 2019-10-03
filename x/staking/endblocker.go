@@ -16,9 +16,6 @@ func EndBlocker(ctx sdk.Context, keeper Keeper) {
 
 	acc := keeper.supplyKeeper.GetModuleAccount(ctx, UserRewardPoolName)
 	fmt.Println(acc.GetName() + acc.GetCoins().String())
-
-	//acc1 := keeper.supplyKeeper.GetModuleAccount(ctx, auth.FeeCollectorName)
-	//fmt.Println(acc1)
 }
 
 func (k Keeper) processExpiringStakes(ctx sdk.Context) {

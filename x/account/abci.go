@@ -102,7 +102,6 @@ func (k Keeper) distributeInflationToStakeholderPool(ctx sdk.Context) {
 	stakeholderInflationDec := sdk.NewDecFromInt(stakeholderInflation)
 	stakeholderAmount := stakeholderInflationDec.Mul(stakeholderAllocation).RoundInt()
 	stakeholderCoins := sdk.NewCoins(sdk.NewCoin(app.StakeDenom, stakeholderAmount))
-	fmt.Println("stakeholder coins " + stakeholderCoins.String())
 	err := k.supplyKeeper.SendCoinsFromModuleToModule(ctx, distribution.ModuleName, StakeholderPoolName, stakeholderCoins)
 	if err != nil {
 		panic(err)

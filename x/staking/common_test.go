@@ -199,7 +199,7 @@ func mockDB() (sdk.Context, Keeper, *mockedDB) {
 		panic(err)
 	}
 
-	userRewardAcc := supply.NewEmptyModuleAccount(UserRewardPoolName)
+	userRewardAcc := supply.NewEmptyModuleAccount(UserRewardPoolName, supply.Burner)
 	err = userRewardAcc.SetCoins(coins)
 	if err != nil {
 		panic(err)
@@ -224,6 +224,8 @@ func mockDB() (sdk.Context, Keeper, *mockedDB) {
 	supplyKeeper := supply.NewKeeper(cdc, supplyKey, accKeeper, bankKeeper, maccPerms)
 	supplyKeeper.SetModuleAccount(ctx, distAcc)
 	supplyKeeper.SetModuleAccount(ctx, userRewardAcc)
+	totalSupply := coins
+	supplyKeeper.SetSupply(ctx, supply.NewSupply(totalSupply))
 
 	trubankKeeper := trubank.NewKeeper(cdc, bankKey, bankKeeper, pk.Subspace(trubank.DefaultParamspace), trubank.DefaultCodespace, supplyKeeper)
 
