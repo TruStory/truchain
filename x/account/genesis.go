@@ -3,6 +3,7 @@ package account
 import (
 	"fmt"
 
+	app "github.com/TruStory/truchain/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
@@ -32,6 +33,12 @@ func InitGenesis(ctx sdk.Context, keeper Keeper, data GenesisState) {
 		}
 	}
 	keeper.SetParams(ctx, data.Params)
+
+	userGrowthAcc := keeper.supplyKeeper.GetModuleAccount(ctx, UserGrowthPoolName)
+	if userGrowthAcc.GetCoins().Empty() {
+		amount := app.NewShanevCoin(2500000)
+		keeper.supplyKeeper.MintCoins(ctx, UserGrowthPoolName, sdk.NewCoins(amount))
+	}
 }
 
 // ExportGenesis exports the genesis state

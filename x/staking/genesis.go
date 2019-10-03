@@ -79,6 +79,13 @@ func InitGenesis(ctx sdk.Context, k Keeper, data GenesisState) {
 		k.setEarnedCoins(ctx, e.Address, e.Coins.Sort())
 	}
 	k.SetParams(ctx, data.Params)
+
+	userRewardAcc := k.supplyKeeper.GetModuleAccount(ctx, UserRewardPoolName)
+	if userRewardAcc.GetCoins().Empty() {
+		amount := app.NewShanevCoin(2500000)
+		k.supplyKeeper.MintCoins(ctx, UserRewardPoolName, sdk.NewCoins(amount))
+	}
+
 }
 
 // ExportGenesis exports the genesis state
