@@ -77,9 +77,9 @@ var (
 		staking.NotBondedPoolName: {supply.Burner, supply.Staking},
 		gov.ModuleName:            {supply.Burner},
 		// trustory module accounts
-		account.UserGrowthPoolName:    nil,
+		account.UserGrowthPoolName:    {supply.Burner},
 		account.StakeholderPoolName:   nil,
-		trustaking.UserRewardPoolName: nil,
+		trustaking.UserRewardPoolName: {supply.Burner},
 	}
 )
 
