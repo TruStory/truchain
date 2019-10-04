@@ -3,8 +3,27 @@
 import lib
 
 def process_genesis(genesis, parsed_args):
+    # reset community pool
     genesis['app_state']['distribution']['community_tax'] = '0.800000000000000000'
-    # NOTE: the rest of distribution should already be in the db by this point
+    genesis['app_state']['distribution']['fee_pool']['community_pool'] = []
+
+    # "mint": {
+    #             "minter": {
+    #                 "annual_provisions": "0.000000000000000000",
+    #                 "inflation": "0.200000000000000000"
+    #             },
+    #             "params": {
+    #                 "blocks_per_year": "6311520",
+    #                 "goal_bonded": "0.670000000000000000",
+    #                 "inflation_max": "0.250000000000000000",
+    #                 "inflation_min": "0.100000000000000000",
+    #                 "inflation_rate_change": "0.150000000000000000",
+    #                 "mint_denom": "tru"
+    #             }
+    #         },
+    genesis['app_state']['mint']['minter']['inflation'] = '0.700000000000000000'
+    genesis['app_state']['mint']['params']['inflation_min'] = '0.700000000000000000'
+    genesis['app_state']['mint']['params']['inflation_max'] = '0.700000000000000000'
 
     # remove validators
     del genesis['validators']

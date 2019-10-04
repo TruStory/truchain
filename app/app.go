@@ -303,8 +303,8 @@ func NewTruChain(logger log.Logger, db dbm.DB, loadLatest bool,
 		staking.ModuleName, auth.ModuleName, bank.ModuleName,
 		slashing.ModuleName, gov.ModuleName, mint.ModuleName, supply.ModuleName,
 		crisis.ModuleName, genutil.ModuleName,
-		account.ModuleName, community.ModuleName, claim.ModuleName,
-		trubank.ModuleName, trustaking.ModuleName, truslashing.ModuleName)
+		community.ModuleName, claim.ModuleName, trubank.ModuleName,
+		account.ModuleName, trustaking.ModuleName, truslashing.ModuleName)
 
 	app.mm.RegisterInvariants(&app.crisisKeeper)
 	//app.mm.RegisterRoutes(app.Router(), app.QueryRouter())

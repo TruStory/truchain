@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	app "github.com/TruStory/truchain/types"
-	trubank "github.com/TruStory/truchain/x/bank"
+	bankexported "github.com/TruStory/truchain/x/bank/exported"
 	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/cosmos/cosmos-sdk/store"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -37,11 +37,15 @@ type bankKeeper struct {
 
 // AddCoin mock for bank keeper
 func (bk bankKeeper) AddCoin(ctx sdk.Context, to sdk.AccAddress, coin sdk.Coin,
-	referenceID uint64, txType trubank.TransactionType, setters ...trubank.TransactionSetter) (sdk.Coins, sdk.Error) {
+	referenceID uint64, txType bankexported.TransactionType, setters ...bankexported.TransactionSetter) (sdk.Coins, sdk.Error) {
 
 	txn := transaction{to, coin}
 	bk.Transactions = append(bk.Transactions, txn)
 	return sdk.Coins{coin}, nil
+}
+
+func (bk bankKeeper) IterateUserTransactions(ctx sdk.Context, creator sdk.AccAddress, reverse bool, cb func(transaction bankexported.Transaction) (stop bool)) {
+
 }
 
 func mockDB(t *testing.T) (sdk.Context, Keeper) {

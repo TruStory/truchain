@@ -3,10 +3,9 @@ package staking
 import (
 	"fmt"
 
-	"github.com/cosmos/cosmos-sdk/x/distribution"
-
 	app "github.com/TruStory/truchain/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/cosmos/cosmos-sdk/x/distribution"
 )
 
 // EndBlocker called every block, process expiring stakes
@@ -14,8 +13,14 @@ func EndBlocker(ctx sdk.Context, keeper Keeper) {
 	keeper.processExpiringStakes(ctx)
 	keeper.distributeInflation(ctx)
 
-	acc := keeper.supplyKeeper.GetModuleAccount(ctx, UserRewardPoolName)
-	fmt.Println(acc.GetName() + acc.GetCoins().String())
+	supplyTotal := keeper.supplyKeeper.GetSupply(ctx)
+	fmt.Println("supply " + supplyTotal.String())
+
+	distAcc := keeper.supplyKeeper.GetModuleAccount(ctx, distribution.ModuleName)
+	fmt.Println(distAcc.GetName() + "            " + distAcc.GetCoins().String())
+
+	rewardAcc := keeper.supplyKeeper.GetModuleAccount(ctx, UserRewardPoolName)
+	fmt.Println(rewardAcc.GetName() + " " + rewardAcc.GetCoins().String())
 }
 
 func (k Keeper) processExpiringStakes(ctx sdk.Context) {

@@ -9,4 +9,6 @@ import (
 type BankKeeper interface {
 	AddCoin(ctx sdk.Context, addr sdk.AccAddress, amt sdk.Coin,
 		referenceID uint64, txType bankexported.TransactionType, setters ...bankexported.TransactionSetter) (sdk.Coins, sdk.Error)
+
+	IterateUserTransactions(ctx sdk.Context, creator sdk.AccAddress, reverse bool, cb func(transaction bankexported.Transaction) (stop bool))
 }

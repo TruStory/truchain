@@ -5,9 +5,7 @@ import (
 
 	app "github.com/TruStory/truchain/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/cosmos/cosmos-sdk/x/auth"
 	"github.com/cosmos/cosmos-sdk/x/distribution"
-	"github.com/cosmos/cosmos-sdk/x/supply"
 )
 
 // EndBlocker called every block, process expiring stakes
@@ -15,33 +13,11 @@ func EndBlocker(ctx sdk.Context, keeper Keeper) {
 	keeper.distributeInflation(ctx)
 	keeper.unjailAccounts(ctx)
 
-	totalSupply := keeper.calculateTotalSupply(ctx)
-	if keeper.supplyKeeper.GetSupply(ctx).GetTotal().Empty() {
-		fmt.Println("supply is empty..")
-		keeper.supplyKeeper.SetSupply(ctx, supply.NewSupply(totalSupply))
-	}
-	//fmt.Println("supply...")
-	//fmt.Println(keeper.supplyKeeper.GetSupply(ctx).GetTotal().String())
-
 	acc := keeper.supplyKeeper.GetModuleAccount(ctx, UserGrowthPoolName)
-	fmt.Println(acc.GetName() + acc.GetCoins().String())
+	fmt.Println(acc.GetName() + " " + acc.GetCoins().String())
 
 	acc1 := keeper.supplyKeeper.GetModuleAccount(ctx, StakeholderPoolName)
-	fmt.Println(acc1.GetName() + acc1.GetCoins().String())
-
-	acc2 := keeper.supplyKeeper.GetModuleAccount(ctx, distribution.ModuleName)
-	fmt.Println(acc2.GetName() + acc2.GetCoins().String())
-}
-
-func (k Keeper) calculateTotalSupply(ctx sdk.Context) sdk.Coins {
-	var totalSupply sdk.Coins
-	k.accountKeeper.IterateAccounts(ctx,
-		func(acc auth.Account) (stop bool) {
-			totalSupply = totalSupply.Add(acc.GetCoins())
-			return false
-		},
-	)
-	return totalSupply
+	fmt.Println(acc1.GetName() + " " + acc1.GetCoins().String())
 }
 
 func (k Keeper) unjailAccounts(ctx sdk.Context) {
