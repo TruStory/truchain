@@ -3,6 +3,9 @@ package staking
 import (
 	"fmt"
 
+	"github.com/TruStory/truchain/x/account"
+	bankexported "github.com/TruStory/truchain/x/bank/exported"
+
 	app "github.com/TruStory/truchain/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
@@ -80,12 +83,40 @@ func InitGenesis(ctx sdk.Context, k Keeper, data GenesisState) {
 	}
 	k.SetParams(ctx, data.Params)
 
-	userRewardAcc := k.supplyKeeper.GetModuleAccount(ctx, UserRewardPoolName)
-	if userRewardAcc.GetCoins().Empty() {
-		amount := app.NewShanevCoin(2500000)
-		k.supplyKeeper.MintCoins(ctx, UserRewardPoolName, sdk.NewCoins(amount))
+	err := initUserRewardsPool(ctx, k)
+	if err != nil {
+		panic(err)
 	}
+}
 
+func initUserRewardsPool(ctx sdk.Context, keeper Keeper) sdk.Error {
+	userGrowthAcc := keeper.supplyKeeper.GetModuleAccount(ctx, UserRewardPoolName)
+	if userGrowthAcc.GetCoins().Empty() {
+		amount := app.NewShanevCoin(2500000)
+		err := keeper.supplyKeeper.MintCoins(ctx, UserRewardPoolName, sdk.NewCoins(amount))
+		if err != nil {
+			return err
+		}
+
+		keeper.accountKeeper.IterateAppAccounts(ctx, func(acc account.AppAccount) (stop bool) {
+			addr := acc.PrimaryAddress()
+			fmt.Println(addr.String())
+			keeper.bankKeeper.IterateUserTransactions(ctx, addr, false, func(tx bankexported.Transaction) bool {
+				switch tx.Type {
+				case TransactionInterestArgumentCreation, TransactionInterestUpvoteGiven,
+					TransactionInterestUpvoteReceived:
+					fmt.Println("processing " + tx.Type.String() + " " + tx.Amount.String())
+					err := keeper.supplyKeeper.BurnCoins(ctx, UserRewardPoolName, sdk.NewCoins(tx.Amount))
+					if err != nil {
+						panic(err)
+					}
+				}
+				return false
+			})
+			return false
+		})
+	}
+	return nil
 }
 
 // ExportGenesis exports the genesis state

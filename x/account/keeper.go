@@ -193,6 +193,21 @@ func (k Keeper) IncrementSlashCount(ctx sdk.Context, address sdk.AccAddress) (ja
 	return false, nil
 }
 
+// IterateAppAccounts iterates over all the stored app accounts and performs a callback function
+func (k Keeper) IterateAppAccounts(ctx sdk.Context, cb func(acc AppAccount) (stop bool)) {
+	iterator := sdk.KVStorePrefixIterator(k.store(ctx), AppAccountKeyPrefix)
+
+	defer iterator.Close()
+	for ; iterator.Valid(); iterator.Next() {
+		var account AppAccount
+		k.codec.MustUnmarshalBinaryBare(iterator.Value(), &account)
+
+		if cb(account) {
+			break
+		}
+	}
+}
+
 func (k Keeper) getAppAccount(ctx sdk.Context, addr sdk.AccAddress) (acc AppAccount, ok bool) {
 	accBytes := k.store(ctx).Get(key(addr))
 	if accBytes == nil {

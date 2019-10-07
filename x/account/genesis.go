@@ -51,8 +51,11 @@ func initUserGrowthPool(ctx sdk.Context, keeper Keeper) sdk.Error {
 			return err
 		}
 
+		userBalanceTotal := sdk.NewCoin("tru", sdk.ZeroInt())
 		keeper.accountKeeper.IterateAccounts(ctx, func(acc auth.Account) (stop bool) {
 			addr := acc.GetAddress()
+			amt := acc.GetCoins().AmountOf("tru")
+			userBalanceTotal = userBalanceTotal.Add(sdk.NewCoin("tru", amt))
 			fmt.Println(addr.String())
 			keeper.bankKeeper.IterateUserTransactions(ctx, addr, false, func(tx bankexported.Transaction) bool {
 				if tx.Type == bankexported.TransactionGift {
@@ -66,6 +69,8 @@ func initUserGrowthPool(ctx sdk.Context, keeper Keeper) sdk.Error {
 			})
 			return false
 		})
+		fmt.Println("TOTAL USER BALANCE " + userBalanceTotal.String())
+		//panic("asdfds")
 	}
 	return nil
 }

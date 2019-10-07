@@ -15,4 +15,5 @@ require (
 )
 
 go 1.13
+
 replace github.com/cosmos/cosmos-sdk => ../cosmos-sdk

@@ -16,8 +16,8 @@ func EndBlocker(ctx sdk.Context, keeper Keeper) {
 	supplyTotal := keeper.supplyKeeper.GetSupply(ctx)
 	fmt.Println("supply " + supplyTotal.String())
 
-	distAcc := keeper.supplyKeeper.GetModuleAccount(ctx, distribution.ModuleName)
-	fmt.Println(distAcc.GetName() + "            " + distAcc.GetCoins().String())
+	//distAcc := keeper.supplyKeeper.GetModuleAccount(ctx, distribution.ModuleName)
+	//fmt.Println(distAcc.GetName() + "            " + distAcc.GetCoins().String())
 
 	rewardAcc := keeper.supplyKeeper.GetModuleAccount(ctx, UserRewardPoolName)
 	fmt.Println(rewardAcc.GetName() + " " + rewardAcc.GetCoins().String())

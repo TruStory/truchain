@@ -50,20 +50,12 @@ func (k Keeper) distributeInflation(ctx sdk.Context) {
 
 func (k Keeper) distributeInflationToUserGrowthPool(ctx sdk.Context) {
 	userGrowthAllocation := k.GetParams(ctx).UserGrowthAllocation
-	//fmt.Println("user growth allocation " + userGrowthAllocation.String())
 
 	inflationAcc := k.supplyKeeper.GetModuleAccount(ctx, distribution.ModuleName)
 	inflation := inflationAcc.GetCoins()
-	//fmt.Println("inflation " + inflation.String())
-
 	inflationDec := sdk.NewDecFromInt(inflation.AmountOf("tru"))
-	//fmt.Println("inflation dec " + inflationDec.String())
-
 	userGrowthAmount := inflationDec.Mul(userGrowthAllocation).RoundInt()
-	//fmt.Println("user growth amount rounded int " + userGrowthAmount.String())
-
 	userGrowthCoins := sdk.NewCoins(sdk.NewCoin(app.StakeDenom, userGrowthAmount))
-	//fmt.Println("user growth coins " + userGrowthCoins.String())
 
 	err := k.supplyKeeper.SendCoinsFromModuleToModule(ctx, distribution.ModuleName, UserGrowthPoolName, userGrowthCoins)
 	if err != nil {
