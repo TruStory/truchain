@@ -7,6 +7,14 @@ def process_genesis(genesis, parsed_args):
     genesis['app_state']['distribution']['community_tax'] = '0.800000000000000000'
     genesis['app_state']['distribution']['fee_pool']['community_pool'] = []
 
+    genesis['app_state']['trudistribution'] = {
+        'params': {
+            'user_growth_allocation': '0.250000000000000000',
+            'user_reward_allocation': '0.250000000000000000',
+            'stakeholder_allocation': '0.250000000000000000',
+        }
+    }
+
     # "mint": {
     #             "minter": {
     #                 "annual_provisions": "0.000000000000000000",

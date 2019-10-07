@@ -26,7 +26,6 @@ var (
 	ParamKeyStakeLimitDays           = []byte("stakeLimitDays")
 	ParamKeyUnjailUpvotes            = []byte("unjailUpvotes")
 	ParamKeyMaxArgumentsPerClaim     = []byte("maxArgumentsPerClaim")
-	KeyUserRewardAllocation          = []byte("userRewardAllocation")
 )
 
 type Params struct {
@@ -46,7 +45,6 @@ type Params struct {
 	StakeLimitDays       time.Duration `json:"stake_limit_days"`
 	UnjailUpvotes        int           `json:"unjail_upvotes"`
 	MaxArgumentsPerClaim int           `json:"max_arguments_per_claim"`
-	UserRewardAllocation sdk.Dec       `json:"user_reward_allocation"`
 }
 
 func DefaultParams() Params {
@@ -65,7 +63,6 @@ func DefaultParams() Params {
 		StakeLimitDays:           time.Hour * 24 * 7,
 		UnjailUpvotes:            1,
 		MaxArgumentsPerClaim:     5,
-		UserRewardAllocation:     sdk.NewDecWithPrec(20, 2),
 	}
 }
 
@@ -85,7 +82,6 @@ func (p *Params) ParamSetPairs() params.ParamSetPairs {
 		{Key: ParamKeyStakeLimitDays, Value: &p.StakeLimitDays},
 		{Key: ParamKeyUnjailUpvotes, Value: &p.UnjailUpvotes},
 		{Key: ParamKeyMaxArgumentsPerClaim, Value: &p.MaxArgumentsPerClaim},
-		{Key: KeyUserRewardAllocation, Value: &p.UserRewardAllocation},
 	}
 }
 

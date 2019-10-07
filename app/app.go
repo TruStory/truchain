@@ -10,6 +10,7 @@ import (
 	trubank "github.com/TruStory/truchain/x/bank"
 	"github.com/TruStory/truchain/x/claim"
 	"github.com/TruStory/truchain/x/community"
+	trudist "github.com/TruStory/truchain/x/distribution"
 	truslashing "github.com/TruStory/truchain/x/slashing"
 	trustaking "github.com/TruStory/truchain/x/staking"
 	bam "github.com/cosmos/cosmos-sdk/baseapp"
@@ -66,6 +67,7 @@ var (
 		trubank.AppModuleBasic{},
 		trustaking.AppModuleBasic{},
 		truslashing.AppModuleBasic{},
+		trudist.AppModuleBasic{},
 	)
 
 	// module account permissions
@@ -77,9 +79,10 @@ var (
 		staking.NotBondedPoolName: {supply.Burner, supply.Staking},
 		gov.ModuleName:            {supply.Burner},
 		// trustory module accounts
-		account.UserGrowthPoolName:    {supply.Minter, supply.Burner},
-		account.StakeholderPoolName:   nil,
-		trustaking.UserRewardPoolName: {supply.Minter, supply.Burner},
+		trudist.UserGrowthPoolName:    {supply.Minter, supply.Burner},
+		trudist.StakeholderPoolName:   nil,
+		trudist.UserRewardPoolName:    {supply.Minter, supply.Burner},
+		trustaking.UserStakesPoolName: {supply.Minter, supply.Burner},
 	}
 )
 
@@ -108,12 +111,13 @@ type TruChain struct {
 	paramsKeeper   params.Keeper
 
 	// trustory keepers
-	appAccountKeeper  account.Keeper
-	communityKeeper   community.Keeper
-	claimKeeper       claim.Keeper
-	truBankKeeper     trubank.Keeper
-	truStakingKeeper  trustaking.Keeper
-	truSlashingKeeper truslashing.Keeper
+	appAccountKeeper      account.Keeper
+	communityKeeper       community.Keeper
+	claimKeeper           claim.Keeper
+	truBankKeeper         trubank.Keeper
+	truStakingKeeper      trustaking.Keeper
+	truSlashingKeeper     truslashing.Keeper
+	truDistributionKeeper trudist.Keeper
 
 	// the module manager
 	mm *module.Manager
@@ -137,7 +141,7 @@ func NewTruChain(logger log.Logger, db dbm.DB, loadLatest bool,
 		supply.StoreKey, mint.StoreKey, distr.StoreKey, slashing.StoreKey,
 		gov.StoreKey, params.StoreKey,
 		community.StoreKey, claim.StoreKey, account.StoreKey, trustaking.StoreKey,
-		trubank.StoreKey, truslashing.StoreKey,
+		trubank.StoreKey, truslashing.StoreKey, trudist.StoreKey,
 	)
 	tkeys := sdk.NewTransientStoreKeys(staking.TStoreKey, params.TStoreKey)
 
@@ -165,6 +169,7 @@ func NewTruChain(logger log.Logger, db dbm.DB, loadLatest bool,
 	trubank2Subspace := app.paramsKeeper.Subspace(trubank.DefaultParamspace)
 	truStakingSubspace := app.paramsKeeper.Subspace(trustaking.DefaultParamspace)
 	truSlashingSubspace := app.paramsKeeper.Subspace(truslashing.DefaultParamspace)
+	truDistSubspace := app.paramsKeeper.Subspace(trudist.DefaultParamspace)
 
 	// add cosmos keepers
 	app.accountKeeper = auth.NewAccountKeeper(app.codec, keys[auth.StoreKey], authSubspace, auth.ProtoBaseAccount)
@@ -250,6 +255,16 @@ func NewTruChain(logger log.Logger, db dbm.DB, loadLatest bool,
 		app.claimKeeper,
 	)
 
+	app.truDistributionKeeper = trudist.NewKeeper(
+		keys[trudist.StoreKey],
+		truDistSubspace,
+		codec,
+		app.truBankKeeper,
+		app.accountKeeper,
+		app.supplyKeeper,
+		app.distrKeeper,
+	)
+
 	// The app.Router is the main transaction router where each module registers its routes
 	app.Router().
 		AddRoute(bank.RouterKey, bank.NewHandler(app.bankKeeper)).
@@ -289,12 +304,13 @@ func NewTruChain(logger log.Logger, db dbm.DB, loadLatest bool,
 		account.NewAppModule(app.appAccountKeeper),
 		trustaking.NewAppModule(app.truStakingKeeper),
 		truslashing.NewAppModule(app.truSlashingKeeper),
+		trudist.NewAppModule(app.truDistributionKeeper),
 	)
 
 	// During begin block slashing happens after distr.BeginBlocker so that
 	// there is nothing left over in the validator fee pool, so as to keep the
 	// CanWithdrawInvariant invariant.
-	app.mm.SetOrderBeginBlockers(mint.ModuleName, distr.ModuleName, slashing.ModuleName)
+	app.mm.SetOrderBeginBlockers(mint.ModuleName, distr.ModuleName, slashing.ModuleName, trudist.ModuleName)
 	app.mm.SetOrderEndBlockers(crisis.ModuleName, gov.ModuleName, staking.ModuleName, trustaking.ModuleName, truslashing.ModuleName, account.ModuleName)
 
 	// genutils must occur after staking so that pools are properly
@@ -304,7 +320,7 @@ func NewTruChain(logger log.Logger, db dbm.DB, loadLatest bool,
 		slashing.ModuleName, gov.ModuleName, mint.ModuleName, supply.ModuleName,
 		crisis.ModuleName, genutil.ModuleName,
 		community.ModuleName, claim.ModuleName, trubank.ModuleName,
-		account.ModuleName, trustaking.ModuleName, truslashing.ModuleName)
+		account.ModuleName, trustaking.ModuleName, truslashing.ModuleName, trudist.ModuleName)
 
 	app.mm.RegisterInvariants(&app.crisisKeeper)
 	//app.mm.RegisterRoutes(app.Router(), app.QueryRouter())

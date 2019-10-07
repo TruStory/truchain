@@ -54,6 +54,10 @@ func InitGenesis(ctx sdk.Context, k Keeper, data GenesisState) {
 		k.setStake(ctx, s)
 		if !s.Expired {
 			k.InsertActiveStakeQueue(ctx, s.ID, s.EndTime)
+			err := k.supplyKeeper.MintCoins(ctx, UserStakesPoolName, sdk.NewCoins(s.Amount))
+			if err != nil {
+				panic(err)
+			}
 		}
 		k.setArgumentStake(ctx, s.ArgumentID, s.ID)
 		k.setUserStake(ctx, s.Creator, s.CreatedTime, s.ID)
@@ -87,12 +91,16 @@ func InitGenesis(ctx sdk.Context, k Keeper, data GenesisState) {
 	if err != nil {
 		panic(err)
 	}
+
+	userStakesPool := k.supplyKeeper.GetModuleAccount(ctx, UserStakesPoolName)
+	fmt.Println(userStakesPool.String())
 }
 
 func initUserRewardsPool(ctx sdk.Context, keeper Keeper) sdk.Error {
 	userGrowthAcc := keeper.supplyKeeper.GetModuleAccount(ctx, UserRewardPoolName)
 	if userGrowthAcc.GetCoins().Empty() {
-		amount := app.NewShanevCoin(2500000)
+		//amount := app.NewShanevCoin(2500000)
+		amount := app.NewShanevCoin(1000000)
 		err := keeper.supplyKeeper.MintCoins(ctx, UserRewardPoolName, sdk.NewCoins(amount))
 		if err != nil {
 			return err

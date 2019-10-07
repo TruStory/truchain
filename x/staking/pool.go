@@ -9,6 +9,7 @@ import (
 // names used as root for pool module accounts:
 const (
 	UserRewardPoolName = "user_reward_tokens_pool"
+	UserStakesPoolName = "user_stakes_tokens_pool"
 )
 
 // Pool - tracking user reward funds

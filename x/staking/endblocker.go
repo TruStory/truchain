@@ -3,24 +3,12 @@ package staking
 import (
 	"fmt"
 
-	app "github.com/TruStory/truchain/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/cosmos/cosmos-sdk/x/distribution"
 )
 
 // EndBlocker called every block, process expiring stakes
 func EndBlocker(ctx sdk.Context, keeper Keeper) {
 	keeper.processExpiringStakes(ctx)
-	keeper.distributeInflation(ctx)
-
-	supplyTotal := keeper.supplyKeeper.GetSupply(ctx)
-	fmt.Println("supply " + supplyTotal.String())
-
-	//distAcc := keeper.supplyKeeper.GetModuleAccount(ctx, distribution.ModuleName)
-	//fmt.Println(distAcc.GetName() + "            " + distAcc.GetCoins().String())
-
-	rewardAcc := keeper.supplyKeeper.GetModuleAccount(ctx, UserRewardPoolName)
-	fmt.Println(rewardAcc.GetName() + " " + rewardAcc.GetCoins().String())
 }
 
 func (k Keeper) processExpiringStakes(ctx sdk.Context) {
@@ -55,21 +43,4 @@ func (k Keeper) processExpiringStakes(ctx sdk.Context) {
 			sdk.NewAttribute(AttributeKeyExpiredStakes, string(b)),
 		),
 	)
-}
-
-func (k Keeper) distributeInflation(ctx sdk.Context) {
-	userRewardAllocation := k.GetParams(ctx).UserRewardAllocation
-
-	acc := k.supplyKeeper.GetModuleAccount(ctx, distribution.ModuleName)
-
-	userInflation := acc.GetCoins().AmountOf(app.StakeDenom)
-	userInflationDec := sdk.NewDecFromInt(userInflation)
-	userRewardAmount := userInflationDec.Mul(userRewardAllocation).RoundInt()
-	userRewardCoins := sdk.NewCoins(sdk.NewCoin(app.StakeDenom, userRewardAmount))
-	//fmt.Println("user reward coins " + userRewardCoins.String())
-
-	err := k.supplyKeeper.SendCoinsFromModuleToModule(ctx, distribution.ModuleName, UserRewardPoolName, userRewardCoins)
-	if err != nil {
-		panic(err)
-	}
 }
