@@ -100,6 +100,10 @@ func getStakeLimitUpgradeMultiple(earned sdk.Int) int {
 		for n = 30, limit = 1000 + (500 * 2) = 2000
 	**/
 
+	if earned.IsNegative() {
+		return 0
+	}
+
 	divisor := int64(math.Pow10(10)) // 10^10 (10^9 for removing the decimal part; 10^1 for finding the multiple)
 	return int(earned.QuoRaw(divisor).Int64())
 }
