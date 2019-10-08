@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"math"
 
-	chain "github.com/TruStory/truchain/types"
+	app "github.com/TruStory/truchain/types"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
@@ -67,7 +67,7 @@ func EndBlocker(ctx sdk.Context, keeper Keeper) {
 		upgradeBz, err := keeper.codec.MarshalJSON(StakeLimitUpgrade{
 			Address:     creator,
 			NewLimit:    limit,
-			EarnedStake: sdk.NewCoin(chain.StakeDenom, earned),
+			EarnedStake: sdk.NewCoin(app.StakeDenom, earned),
 		})
 		if err != nil {
 			panic(err)
