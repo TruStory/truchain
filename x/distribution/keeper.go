@@ -37,10 +37,6 @@ func NewKeeper(storeKey sdk.StoreKey, paramStore params.Subspace, codec *codec.C
 	}
 }
 
-func (k Keeper) store(ctx sdk.Context) sdk.KVStore {
-	return ctx.KVStore(k.storeKey)
-}
-
 func (k Keeper) Logger(ctx sdk.Context) log.Logger {
 	return ctx.Logger().With("module", ModuleName)
 }
