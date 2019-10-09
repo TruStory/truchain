@@ -3,20 +3,19 @@ package staking
 import (
 	"time"
 
-	"github.com/cosmos/cosmos-sdk/x/distribution"
-
-	"github.com/cosmos/cosmos-sdk/x/supply"
+	"github.com/TruStory/truchain/x/account"
 
 	app "github.com/TruStory/truchain/types"
 	trubank "github.com/TruStory/truchain/x/bank"
 	"github.com/TruStory/truchain/x/claim"
-
 	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/cosmos/cosmos-sdk/store"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth"
 	"github.com/cosmos/cosmos-sdk/x/bank"
+	"github.com/cosmos/cosmos-sdk/x/distribution"
 	"github.com/cosmos/cosmos-sdk/x/params"
+	"github.com/cosmos/cosmos-sdk/x/supply"
 	abci "github.com/tendermint/tendermint/abci/types"
 	"github.com/tendermint/tendermint/crypto"
 	"github.com/tendermint/tendermint/crypto/ed25519"
@@ -61,6 +60,10 @@ func (m *mockedAccountKeeper) UnJail(ctx sdk.Context, address sdk.AccAddress) sd
 	}
 	m.jailStatus[address.String()] = false
 	return nil
+}
+
+func (m *mockedAccountKeeper) IterateAppAccounts(ctx sdk.Context, cb func(acc account.AppAccount) (stop bool)) {
+
 }
 
 type mockClaimKeeper struct {
@@ -219,6 +222,7 @@ func mockDB() (sdk.Context, Keeper, *mockedDB) {
 	maccPerms := map[string][]string{
 		distribution.ModuleName: nil,
 		UserRewardPoolName:      {supply.Burner},
+		UserStakesPoolName:      {supply.Minter, supply.Burner},
 	}
 
 	supplyKeeper := supply.NewKeeper(cdc, supplyKey, accKeeper, bankKeeper, maccPerms)

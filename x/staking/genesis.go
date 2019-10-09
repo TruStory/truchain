@@ -91,15 +91,11 @@ func InitGenesis(ctx sdk.Context, k Keeper, data GenesisState) {
 	if err != nil {
 		panic(err)
 	}
-
-	userStakesPool := k.supplyKeeper.GetModuleAccount(ctx, UserStakesPoolName)
-	fmt.Println(userStakesPool.String())
 }
 
 func initUserRewardsPool(ctx sdk.Context, keeper Keeper) sdk.Error {
 	userGrowthAcc := keeper.supplyKeeper.GetModuleAccount(ctx, UserRewardPoolName)
 	if userGrowthAcc.GetCoins().Empty() {
-		//amount := app.NewShanevCoin(2500000)
 		amount := app.NewShanevCoin(1000000)
 		err := keeper.supplyKeeper.MintCoins(ctx, UserRewardPoolName, sdk.NewCoins(amount))
 		if err != nil {

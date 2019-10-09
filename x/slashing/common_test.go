@@ -3,6 +3,8 @@ package slashing
 import (
 	"net/url"
 
+	"github.com/TruStory/truchain/x/distribution"
+
 	"github.com/cosmos/cosmos-sdk/x/gov"
 	"github.com/cosmos/cosmos-sdk/x/mint"
 	"github.com/cosmos/cosmos-sdk/x/supply"
@@ -68,11 +70,12 @@ func mockDB() (sdk.Context, Keeper) {
 	supply.RegisterCodec(codec)
 
 	maccPerms := map[string][]string{
-		auth.FeeCollectorName:      nil,
-		mint.ModuleName:            {supply.Minter},
-		gov.ModuleName:             {supply.Burner},
-		account.UserGrowthPoolName: {supply.Burner, supply.Staking},
-		staking.UserRewardPoolName: {supply.Burner},
+		auth.FeeCollectorName:           nil,
+		mint.ModuleName:                 {supply.Minter},
+		gov.ModuleName:                  {supply.Burner},
+		distribution.UserGrowthPoolName: {supply.Burner, supply.Staking},
+		distribution.UserRewardPoolName: {supply.Burner},
+		staking.UserStakesPoolName:      {supply.Minter, supply.Burner},
 	}
 
 	paramsKeeper := params.NewKeeper(codec, paramsKey, transientParamsKey, params.DefaultCodespace)

@@ -53,7 +53,7 @@ contain valid denominations. Accounts may optionally be supplied with vesting pa
 
 				info, err := kb.Get(args[0])
 				if err != nil {
-					return fmt.Errorf("failed to get address from Keybase: %w", err)
+					return fmt.Errorf("failed to get address from Keybase: %v", err)
 				}
 
 				addr = info.GetAddress()
@@ -61,14 +61,14 @@ contain valid denominations. Accounts may optionally be supplied with vesting pa
 
 			coins, err := sdk.ParseCoins(args[1])
 			if err != nil {
-				return fmt.Errorf("failed to parse coins: %w", err)
+				return fmt.Errorf("failed to parse coins: %v", err)
 			}
 
 			vestingStart := viper.GetInt64(flagVestingStart)
 			vestingEnd := viper.GetInt64(flagVestingEnd)
 			vestingAmt, err := sdk.ParseCoins(viper.GetString(flagVestingAmt))
 			if err != nil {
-				return fmt.Errorf("failed to parse vesting amount: %w", err)
+				return fmt.Errorf("failed to parse vesting amount: %v", err)
 			}
 
 			// create concrete account type based on input parameters
@@ -95,13 +95,13 @@ contain valid denominations. Accounts may optionally be supplied with vesting pa
 			}
 
 			if err := genAccount.Validate(); err != nil {
-				return fmt.Errorf("failed to validate new genesis account: %w", err)
+				return fmt.Errorf("failed to validate new genesis account: %v", err)
 			}
 
 			genFile := config.GenesisFile()
 			appState, genDoc, err := genutil.GenesisStateFromGenFile(cdc, genFile)
 			if err != nil {
-				return fmt.Errorf("failed to unmarshal genesis state: %w", err)
+				return fmt.Errorf("failed to unmarshal genesis state: %v", err)
 			}
 
 			authGenState := auth.GetGenesisStateFromAppState(cdc, appState)
@@ -117,14 +117,14 @@ contain valid denominations. Accounts may optionally be supplied with vesting pa
 
 			authGenStateBz, err := cdc.MarshalJSON(authGenState)
 			if err != nil {
-				return fmt.Errorf("failed to marshal auth genesis state: %w", err)
+				return fmt.Errorf("failed to marshal auth genesis state: %v", err)
 			}
 
 			appState[auth.ModuleName] = authGenStateBz
 
 			appStateJSON, err := cdc.MarshalJSON(appState)
 			if err != nil {
-				return fmt.Errorf("failed to marshal application genesis state: %w", err)
+				return fmt.Errorf("failed to marshal application genesis state: %v", err)
 			}
 
 			genDoc.AppState = appStateJSON
