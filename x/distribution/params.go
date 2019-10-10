@@ -25,9 +25,9 @@ type Params struct {
 // DefaultParams is the auth params for testing
 func DefaultParams() Params {
 	return Params{
-		UserGrowthAllocation:  sdk.NewDecWithPrec(33, 2),
-		UserRewardAllocation:  sdk.NewDecWithPrec(33, 2),
-		StakeholderAllocation: sdk.NewDecWithPrec(33, 2),
+		UserGrowthAllocation:  sdk.NewDecWithPrec(25, 2),
+		UserRewardAllocation:  sdk.NewDecWithPrec(25, 2),
+		StakeholderAllocation: sdk.NewDecWithPrec(25, 2),
 	}
 }
 

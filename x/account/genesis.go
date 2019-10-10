@@ -56,10 +56,10 @@ func initUserGrowthPool(ctx sdk.Context, keeper Keeper) sdk.Error {
 			addr := acc.GetAddress()
 			amt := acc.GetCoins().AmountOf("tru")
 			userBalanceTotal = userBalanceTotal.Add(sdk.NewCoin("tru", amt))
-			fmt.Println(addr.String())
+			//fmt.Println(addr.String())
 			keeper.bankKeeper.IterateUserTransactions(ctx, addr, false, func(tx bankexported.Transaction) bool {
 				if tx.Type == bankexported.TransactionGift {
-					fmt.Println("found gift transaction for " + tx.Amount.String())
+					//fmt.Println("found gift transaction for " + tx.Amount.String())
 					err := keeper.supplyKeeper.BurnCoins(ctx, UserGrowthPoolName, sdk.NewCoins(tx.Amount))
 					if err != nil {
 						panic(err)

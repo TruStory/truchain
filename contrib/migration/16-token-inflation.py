@@ -4,14 +4,14 @@ import lib
 
 def process_genesis(genesis, parsed_args):
     # reset community pool
-    genesis['app_state']['distribution']['community_tax'] = '0.800000000000000000'
+    genesis['app_state']['distribution']['community_tax'] = '0.500000000000000000'
     genesis['app_state']['distribution']['fee_pool']['community_pool'] = []
 
     genesis['app_state']['trudistribution'] = {
         'params': {
-            'user_growth_allocation': '0.250000000000000000',
-            'user_reward_allocation': '0.250000000000000000',
-            'stakeholder_allocation': '0.250000000000000000',
+            'user_growth_allocation': '0.333333333333333333',
+            'user_reward_allocation': '0.333333333333333333',
+            'stakeholder_allocation': '0.333333333333333333',
         }
     }
 
@@ -38,12 +38,12 @@ def process_genesis(genesis, parsed_args):
 
     # change bonded_tokens_pool coins to []
     # because the old staking module had delegated shares which added to the bond pool
-    # remove coins from registrar and reward broker, which fucks up supply
+    # remove coins from registrar which fucks up supply
     for acc in genesis['app_state']['accounts']:
         if acc['module_name'] == 'bonded_tokens_pool':
             acc['coins'] = []
         if acc['address'] == 'cosmos1tfpcnjzkthft3ynewqvn7mtdk7guf3knjdqg4d':
-            acc['coins'] = [{'denom': 'tru', 'amount': '100000000'}]
+            acc['coins'] = [{'denom': 'tru', 'amount': '1000000000000'}]
         if acc['address'] == 'cosmos1pmp80ys5kplk0gnvmhtxq086xlerkwvcdhk8gx':
             acc['coins'] = []
         if acc['address'] == 'cosmos1em44grl9ylmmnwawwp5fjn079kesatwp67rxjx':
@@ -124,9 +124,9 @@ def process_genesis(genesis, parsed_args):
     }
 
     # module account allocations
-    genesis['app_state']['account']['params']['user_growth_allocation'] = '0.200000000000000000'
-    genesis['app_state']['account']['params']['stakeholder_allocation'] = '0.200000000000000000'
-    genesis['app_state']['trustaking']['params']['user_reward_allocation'] = '0.200000000000000000'
+    # genesis['app_state']['account']['params']['user_growth_allocation'] = '0.200000000000000000'
+    # genesis['app_state']['account']['params']['stakeholder_allocation'] = '0.200000000000000000'
+    # genesis['app_state']['trustaking']['params']['user_reward_allocation'] = '0.200000000000000000'
 
     # module accounts themselves are automatically created...
 
