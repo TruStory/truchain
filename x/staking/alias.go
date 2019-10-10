@@ -1,6 +1,9 @@
 package staking
 
-import "github.com/TruStory/truchain/x/bank/exported"
+import (
+	"github.com/TruStory/truchain/x/bank/exported"
+	"github.com/TruStory/truchain/x/distribution"
+)
 
 const (
 	TransactionInterestArgumentCreation = exported.TransactionInterestArgumentCreation
@@ -12,6 +15,8 @@ const (
 	TransactionBackingReturned          = exported.TransactionBackingReturned
 	TransactionChallengeReturned        = exported.TransactionChallengeReturned
 	TransactionUpvoteReturned           = exported.TransactionUpvoteReturned
+
+	UserRewardPoolName = distribution.UserRewardPoolName
 )
 
 type (

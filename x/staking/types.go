@@ -21,6 +21,8 @@ const (
 
 	EventTypeStakeLimitIncreased  = "stake-limit-increased"
 	AttributeKeyStakeLimitUpgrade = "stake-limit-upgrade"
+
+	UserStakesPoolName = "user_stakes_tokens_pool"
 )
 
 type StakeType byte

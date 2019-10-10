@@ -193,18 +193,9 @@ func InitTestnet(cmd *cobra.Command, config *tmconfig.Config, cdc *codec.Codec, 
 
 		accTokens := sdk.TokensFromConsensusPower(1000)
 		accStakingTokens := sdk.TokensFromConsensusPower(500)
-		//accs = append(accs, genaccounts.GenesisAccount{
-		//	Address: addr,
-		//	Coins: sdk.Coins{
-		//		sdk.NewCoin(app.StakeDenom, accTokens),
-		//		sdk.NewCoin(sdk.DefaultBondDenom, accStakingTokens),
-		//	},
-		//})
 		coins := sdk.Coins{
 			sdk.NewCoin(fmt.Sprintf("%stoken", nodeDirName), accTokens),
-			//sdk.NewCoin(sdk.DefaultBondDenom, accStakingTokens),
 			sdk.NewCoin(app.StakeDenom, accStakingTokens),
-			//sdk.NewCoin(app.StakeDenom, accTokens),
 		}
 		genAccounts = append(genAccounts, auth.NewBaseAccount(addr, coins.Sort(), nil, 0, 0))
 
@@ -213,7 +204,6 @@ func InitTestnet(cmd *cobra.Command, config *tmconfig.Config, cdc *codec.Codec, 
 			sdk.ValAddress(addr),
 			valPubKeys[i],
 			sdk.NewCoin(app.StakeDenom, valTokens),
-			//sdk.NewCoin(sdk.DefaultBondDenom, valTokens),
 			staking.NewDescription(nodeDirName, "", "", "", ""),
 			staking.NewCommissionRates(sdk.ZeroDec(), sdk.ZeroDec(), sdk.ZeroDec()),
 			sdk.OneInt(),
