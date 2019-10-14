@@ -45,7 +45,7 @@ func InitGenesis(ctx sdk.Context, keeper Keeper, data GenesisState) {
 func initUserGrowthPool(ctx sdk.Context, keeper Keeper) sdk.Error {
 	userGrowthAcc := keeper.supplyKeeper.GetModuleAccount(ctx, UserGrowthPoolName)
 	if userGrowthAcc.GetCoins().Empty() {
-		amount := app.NewShanevCoin(2000000)
+		amount := app.NewShanevCoin(5000000)
 		err := keeper.supplyKeeper.MintCoins(ctx, UserGrowthPoolName, sdk.NewCoins(amount))
 		if err != nil {
 			return err
