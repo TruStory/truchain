@@ -80,7 +80,6 @@ var (
 		gov.ModuleName:            {supply.Burner},
 		// trustory module accounts
 		trudist.UserGrowthPoolName:    {supply.Minter, supply.Burner},
-		trudist.StakeholderPoolName:   nil,
 		trudist.UserRewardPoolName:    {supply.Minter, supply.Burner},
 		trustaking.UserStakesPoolName: {supply.Minter, supply.Burner},
 	}

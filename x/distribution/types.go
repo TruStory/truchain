@@ -7,7 +7,6 @@ const (
 	QuerierRoute      = ModuleName
 	DefaultParamspace = ModuleName
 
-	UserGrowthPoolName  = "user_growth_tokens_pool"
-	UserRewardPoolName  = "user_reward_tokens_pool"
-	StakeholderPoolName = "stakeholder_tokens_pool"
+	UserGrowthPoolName = "user_growth_tokens_pool"
+	UserRewardPoolName = "user_reward_tokens_pool"
 )

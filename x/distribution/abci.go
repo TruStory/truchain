@@ -28,10 +28,6 @@ func BeginBlocker(ctx sdk.Context, keeper Keeper) {
 	fmt.Println(acc.GetName() + " " + acc.GetCoins().String())
 	acc1 := keeper.supplyKeeper.GetModuleAccount(ctx, UserRewardPoolName)
 	fmt.Println(acc1.GetName() + " " + acc1.GetCoins().String())
-	acc2 := keeper.supplyKeeper.GetModuleAccount(ctx, StakeholderPoolName)
-	fmt.Println(acc2.GetName() + " " + acc2.GetCoins().String())
-	//acc3 := keeper.supplyKeeper.GetModuleAccount(ctx, "user_stakes_tokens_pool")
-	//fmt.Println(acc3.GetName() + " " + acc3.GetCoins().String())
 }
 
 func (k Keeper) distributeInflation(ctx sdk.Context) {
@@ -42,7 +38,6 @@ func (k Keeper) distributeInflation(ctx sdk.Context) {
 	userInflationDec := sdk.NewDecFromInt(totalInflation).QuoInt(sdk.NewInt(2))
 	k.distributeInflationToUserGrowthPool(ctx, userInflationDec)
 	k.distributeInflationToUserRewardPool(ctx, userInflationDec)
-	k.distributeInflationToStakeholderPool(ctx, userInflationDec)
 }
 
 func (k Keeper) distributeInflationToUserGrowthPool(ctx sdk.Context, inflation sdk.Dec) {
@@ -60,16 +55,6 @@ func (k Keeper) distributeInflationToUserRewardPool(ctx sdk.Context, inflation s
 	userRewardAmount := inflation.Mul(userRewardAllocation)
 	userRewardCoins := sdk.NewCoins(sdk.NewCoin(app.StakeDenom, userRewardAmount.TruncateInt()))
 	err := k.supplyKeeper.SendCoinsFromModuleToModule(ctx, auth.FeeCollectorName, UserRewardPoolName, userRewardCoins)
-	if err != nil {
-		panic(err)
-	}
-}
-
-func (k Keeper) distributeInflationToStakeholderPool(ctx sdk.Context, inflation sdk.Dec) {
-	stakeholderAllocation := k.GetParams(ctx).StakeholderAllocation
-	stakeholderAmount := inflation.Mul(stakeholderAllocation)
-	stakeholderCoins := sdk.NewCoins(sdk.NewCoin(app.StakeDenom, stakeholderAmount.TruncateInt()))
-	err := k.supplyKeeper.SendCoinsFromModuleToModule(ctx, auth.FeeCollectorName, StakeholderPoolName, stakeholderCoins)
 	if err != nil {
 		panic(err)
 	}

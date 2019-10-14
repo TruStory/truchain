@@ -47,9 +47,5 @@ func ValidateGenesis(data GenesisState) error {
 		return fmt.Errorf("Param: UserRewardAllocation must be positive")
 	}
 
-	if !data.Params.StakeholderAllocation.IsPositive() {
-		return fmt.Errorf("Param: StakeholderAllocation must be positive")
-	}
-
 	return nil
 }
