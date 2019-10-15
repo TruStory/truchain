@@ -9,9 +9,8 @@ def process_genesis(genesis, parsed_args):
 
     genesis['app_state']['trudistribution'] = {
         'params': {
-            'user_growth_allocation': '0.333333333333333333',
-            'user_reward_allocation': '0.333333333333333333',
-            'stakeholder_allocation': '0.333333333333333333',
+            'user_growth_allocation': '0.500000000000000000',
+            'user_reward_allocation': '0.500000000000000000',
         }
     }
 
@@ -122,11 +121,6 @@ def process_genesis(genesis, parsed_args):
     genesis['app_state']['genutil'] = {
         'gentx': None,
     }
-
-    # module account allocations
-    # genesis['app_state']['account']['params']['user_growth_allocation'] = '0.200000000000000000'
-    # genesis['app_state']['account']['params']['stakeholder_allocation'] = '0.200000000000000000'
-    # genesis['app_state']['trustaking']['params']['user_reward_allocation'] = '0.200000000000000000'
 
     # module accounts themselves are automatically created...
 
