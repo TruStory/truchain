@@ -5,10 +5,6 @@ import (
 	"reflect"
 	"strings"
 
-	"github.com/cosmos/cosmos-sdk/x/auth"
-
-	"github.com/mitchellh/mapstructure"
-
 	"github.com/TruStory/truchain/x/account"
 	"github.com/TruStory/truchain/x/bank"
 	"github.com/TruStory/truchain/x/claim"
@@ -20,7 +16,8 @@ import (
 	"github.com/cosmos/cosmos-sdk/client/keys"
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-
+	"github.com/cosmos/cosmos-sdk/x/auth"
+	"github.com/mitchellh/mapstructure"
 	"github.com/spf13/cobra"
 )
 
@@ -83,8 +80,8 @@ func AccountParamsCmd(cdc *codec.Codec) *cobra.Command {
 				panic(err)
 			}
 
+			cliCtx := context.NewCLIContextWithFrom(args[0]).WithCodec(cdc)
 			txBldr := auth.NewTxBuilderFromCLI().WithTxEncoder(auth.DefaultTxEncoder(cdc))
-			cliCtx := context.NewCLIContext().WithCodec(cdc)
 
 			msg := account.NewMsgUpdateParams(updates, updatedFields, cliCtx.GetFromAddress())
 			fromName := cliCtx.GetFromName()
@@ -159,8 +156,8 @@ func BankParamsCmd(cdc *codec.Codec) *cobra.Command {
 				panic(err)
 			}
 
+			cliCtx := context.NewCLIContextWithFrom(args[0]).WithCodec(cdc)
 			txBldr := auth.NewTxBuilderFromCLI().WithTxEncoder(auth.DefaultTxEncoder(cdc))
-			cliCtx := context.NewCLIContext().WithCodec(cdc)
 
 			msg := bank.NewMsgUpdateParams(updates, updatedFields, cliCtx.GetFromAddress())
 			fromName := cliCtx.GetFromName()
@@ -235,8 +232,8 @@ func ClaimParamsCmd(cdc *codec.Codec) *cobra.Command {
 				panic(err)
 			}
 
+			cliCtx := context.NewCLIContextWithFrom(args[0]).WithCodec(cdc)
 			txBldr := auth.NewTxBuilderFromCLI().WithTxEncoder(auth.DefaultTxEncoder(cdc))
-			cliCtx := context.NewCLIContext().WithCodec(cdc)
 
 			msg := claim.NewMsgUpdateParams(updates, updatedFields, cliCtx.GetFromAddress())
 			fromName := cliCtx.GetFromName()
@@ -311,8 +308,8 @@ func CommunityParamsCmd(cdc *codec.Codec) *cobra.Command {
 				panic(err)
 			}
 
+			cliCtx := context.NewCLIContextWithFrom(args[0]).WithCodec(cdc)
 			txBldr := auth.NewTxBuilderFromCLI().WithTxEncoder(auth.DefaultTxEncoder(cdc))
-			cliCtx := context.NewCLIContext().WithCodec(cdc)
 
 			msg := community.NewMsgUpdateParams(updates, updatedFields, cliCtx.GetFromAddress())
 			fromName := cliCtx.GetFromName()
@@ -387,8 +384,8 @@ func SlashingParamsCmd(cdc *codec.Codec) *cobra.Command {
 				panic(err)
 			}
 
+			cliCtx := context.NewCLIContextWithFrom(args[0]).WithCodec(cdc)
 			txBldr := auth.NewTxBuilderFromCLI().WithTxEncoder(auth.DefaultTxEncoder(cdc))
-			cliCtx := context.NewCLIContext().WithCodec(cdc)
 
 			msg := slashing.NewMsgUpdateParams(updates, updatedFields, cliCtx.GetFromAddress())
 			fromName := cliCtx.GetFromName()
@@ -463,8 +460,8 @@ func StakingParamsCmd(cdc *codec.Codec) *cobra.Command {
 				panic(err)
 			}
 
+			cliCtx := context.NewCLIContextWithFrom(args[0]).WithCodec(cdc)
 			txBldr := auth.NewTxBuilderFromCLI().WithTxEncoder(auth.DefaultTxEncoder(cdc))
-			cliCtx := context.NewCLIContext().WithCodec(cdc)
 
 			msg := staking.NewMsgUpdateParams(updates, updatedFields, cliCtx.GetFromAddress())
 			fromName := cliCtx.GetFromName()
