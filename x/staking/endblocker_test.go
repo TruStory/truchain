@@ -185,23 +185,23 @@ func TestKeeper_TestStakeRewardResult(t *testing.T) {
 }
 
 func TestStakeLimitUpgradeMultiple(t *testing.T) {
-	earned := sdk.NewInt(10000000000)
+	earned := sdk.NewInt(10 * app.Shanev)
 	multiple := getStakeLimitUpgradeMultiple(earned)
 	assert.Equal(t, multiple, 1)
 
-	earned = sdk.NewInt(18000000000)
+	earned = sdk.NewInt(18 * app.Shanev)
 	multiple = getStakeLimitUpgradeMultiple(earned)
 	assert.Equal(t, multiple, 1)
 
-	earned = sdk.NewInt(28000000000)
+	earned = sdk.NewInt(28 * app.Shanev)
 	multiple = getStakeLimitUpgradeMultiple(earned)
 	assert.Equal(t, multiple, 2)
 
-	earned = sdk.NewInt(00000000000)
+	earned = sdk.NewInt(0 * app.Shanev)
 	multiple = getStakeLimitUpgradeMultiple(earned)
 	assert.Equal(t, multiple, 0)
 
-	earned = sdk.NewInt(-10000000000)
+	earned = sdk.NewInt(-10 * app.Shanev)
 	multiple = getStakeLimitUpgradeMultiple(earned)
 	assert.Equal(t, multiple, 0)
 }

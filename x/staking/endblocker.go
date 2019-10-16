@@ -2,7 +2,6 @@ package staking
 
 import (
 	"fmt"
-	"math"
 
 	app "github.com/TruStory/truchain/types"
 
@@ -104,7 +103,7 @@ func getStakeLimitUpgradeMultiple(earned sdk.Int) int {
 		return 0
 	}
 
-	divisor := int64(math.Pow10(10)) // 10^10 (10^9 for removing the decimal part; 10^1 for finding the multiple)
+	divisor := int64(10 * app.Shanev)
 	return int(earned.QuoRaw(divisor).Int64())
 }
 
