@@ -90,7 +90,7 @@ func TestQuerier_EarnedCoins(t *testing.T) {
 
 func TestQuerier_ArgumentsByIDs(t *testing.T) {
 	ctx, k, mdb := mockDB()
-	ctx.WithBlockTime(time.Now())
+	ctx = ctx.WithBlockTime(time.Now())
 	addr := createFakeFundedAccount(ctx, mdb.authAccKeeper, sdk.Coins{sdk.NewInt64Coin(app.StakeDenom, app.Shanev*300)})
 
 	argument1, err := k.SubmitArgument(ctx, "body", "summary", addr, 1, StakeBacking)
@@ -120,7 +120,7 @@ func TestQuerier_ArgumentsByIDs(t *testing.T) {
 
 func TestQuerier_CommunityStakes(t *testing.T) {
 	ctx, k, mdb := mockDB()
-	ctx.WithBlockTime(time.Now())
+	ctx = ctx.WithBlockTime(time.Now())
 	addr := createFakeFundedAccount(ctx, mdb.authAccKeeper, sdk.Coins{sdk.NewInt64Coin(app.StakeDenom, app.Shanev*300)})
 
 	argument1, err := k.SubmitArgument(ctx, "body", "summary", addr, 1, StakeBacking)
@@ -152,7 +152,7 @@ func TestQuerier_CommunityStakes(t *testing.T) {
 
 func TestQuerier_UserCommunityStakes(t *testing.T) {
 	ctx, k, mdb := mockDB()
-	ctx.WithBlockTime(time.Now())
+	ctx = ctx.WithBlockTime(time.Now())
 	addr := createFakeFundedAccount(ctx, mdb.authAccKeeper, sdk.Coins{sdk.NewInt64Coin(app.StakeDenom, app.Shanev*300)})
 
 	argument1, err := k.SubmitArgument(ctx, "body", "summary", addr, 1, StakeBacking)
