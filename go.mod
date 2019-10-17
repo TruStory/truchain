@@ -3,6 +3,7 @@ module github.com/TruStory/truchain
 require (
 	github.com/cosmos/cosmos-sdk v0.37.0
 	github.com/go-logfmt/logfmt v0.4.0 // indirect
+	github.com/golangci/golangci-lint v1.18.0 // indirect
 	github.com/gorilla/mux v1.7.0
 	github.com/magiconair/properties v1.8.0
 	github.com/mitchellh/mapstructure v1.1.2
