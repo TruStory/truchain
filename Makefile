@@ -27,10 +27,10 @@ download:
 	go mod download
 
 build_cli:
-	@go build -mod=readonly $(BUILD_FLAGS) -o bin/truchaincli cmd/truchaincli/*.go
+	@go build $(BUILD_FLAGS) -o bin/truchaincli cmd/truchaincli/*.go
 
 build_daemon:
-	@go build -mod=readonly $(BUILD_FLAGS) -o bin/truchaind cmd/truchaind/*.go
+	@go build $(BUILD_FLAGS) -o bin/truchaind cmd/truchaind/*.go
 
 build-linux:
 	GOOS=linux GOARCH=amd64 go build -mod=readonly $(BUILD_FLAGS) -o build/truchaind cmd/truchaind/*.go
