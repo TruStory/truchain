@@ -98,6 +98,19 @@ func (m *mockClaimKeeper) AddBackingStake(ctx sdk.Context, id uint64, stake sdk.
 	return nil
 }
 
+func (m *mockClaimKeeper) SetFirstArgumentTime(ctx sdk.Context, id uint64, firstArgumentTime time.Time) sdk.Error {
+	if !m.enableTrackStake {
+		return nil
+	}
+	c, ok := m.Claim(ctx, id)
+	if !ok {
+		return sdk.ErrInternal("unknown claim")
+	}
+	c.FirstArgumentTime = firstArgumentTime
+	m.claims[id] = c
+	return nil
+}
+
 func (m *mockClaimKeeper) AddChallengeStake(ctx sdk.Context, id uint64, stake sdk.Coin) sdk.Error {
 	if !m.enableTrackStake {
 		return nil

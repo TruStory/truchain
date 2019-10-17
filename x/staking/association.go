@@ -73,8 +73,8 @@ func (k Keeper) IterateCommunityStakes(ctx sdk.Context, communityID string, cb f
 	}
 }
 
-// serUserArgument sets a user <-> argument association in the store
-func (k Keeper) serUserArgument(ctx sdk.Context, creator sdk.AccAddress, argumentID uint64) {
+// setUserArgument sets a user <-> argument association in the store
+func (k Keeper) setUserArgument(ctx sdk.Context, creator sdk.AccAddress, argumentID uint64) {
 	bz := k.codec.MustMarshalBinaryLengthPrefixed(argumentID)
 	k.store(ctx).Set(userArgumentKey(creator, argumentID), bz)
 }
