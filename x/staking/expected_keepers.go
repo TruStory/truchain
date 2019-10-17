@@ -1,6 +1,8 @@
 package staking
 
 import (
+	"time"
+
 	bankexported "github.com/TruStory/truchain/x/bank/exported"
 	"github.com/TruStory/truchain/x/claim"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -17,6 +19,7 @@ type ClaimKeeper interface {
 	AddChallengeStake(ctx sdk.Context, id uint64, stake sdk.Coin) sdk.Error
 	SubtractBackingStake(ctx sdk.Context, id uint64, stake sdk.Coin) sdk.Error
 	SubtractChallengeStake(ctx sdk.Context, id uint64, stake sdk.Coin) sdk.Error
+	SetFirstArgumentTime(ctx sdk.Context, id uint64, firstArgumentTime time.Time) sdk.Error
 }
 
 // BankKeeper is the expected bank keeper interface for this module

@@ -45,7 +45,7 @@ func InitGenesis(ctx sdk.Context, k Keeper, data GenesisState) {
 	for _, a := range data.Arguments {
 		k.setArgument(ctx, a)
 		k.setClaimArgument(ctx, a.ClaimID, a.ID)
-		k.serUserArgument(ctx, a.Creator, a.ID)
+		k.setUserArgument(ctx, a.Creator, a.ID)
 	}
 	for _, s := range data.Stakes {
 		k.setStake(ctx, s)
