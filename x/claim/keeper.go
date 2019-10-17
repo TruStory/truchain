@@ -207,6 +207,18 @@ func (k Keeper) SubtractChallengeStake(ctx sdk.Context, id uint64, stake sdk.Coi
 	return nil
 }
 
+// SetFirstArgumentTime sets time when first argument was created on a claim
+func (k Keeper) SetFirstArgumentTime(ctx sdk.Context, id uint64, firstArgumentTime time.Time) sdk.Error {
+	claim, ok := k.Claim(ctx, id)
+	if !ok {
+		return ErrUnknownClaim(id)
+	}
+	claim.FirstArgumentTime = firstArgumentTime
+	k.setClaim(ctx, claim)
+
+	return nil
+}
+
 // AddAdmin adds a new admin
 func (k Keeper) AddAdmin(ctx sdk.Context, admin, creator sdk.AccAddress) (err sdk.Error) {
 	params := k.GetParams(ctx)

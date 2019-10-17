@@ -229,7 +229,14 @@ func (k Keeper) SubmitArgument(ctx sdk.Context, body, summary string,
 	k.setArgument(ctx, argument)
 	k.setArgumentID(ctx, argumentID+1)
 	k.setClaimArgument(ctx, claimID, argument.ID)
-	k.serUserArgument(ctx, creator, argument.ID)
+	k.setUserArgument(ctx, creator, argument.ID)
+
+	if claim.FirstArgumentTime.Equal(time.Time{}) {
+		err = k.claimKeeper.SetFirstArgumentTime(ctx, claimID, ctx.BlockHeader().Time)
+		if err != nil {
+			return Argument{}, err
+		}
+	}
 
 	switch {
 	case stakeType == StakeBacking:

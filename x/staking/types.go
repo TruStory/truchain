@@ -18,6 +18,9 @@ const (
 
 	EventTypeInterestRewardPaid = "interest-reward-paid"
 	AttributeKeyExpiredStakes   = "expired-stakes"
+
+	EventTypeStakeLimitIncreased  = "stake-limit-increased"
+	AttributeKeyStakeLimitUpgrade = "stake-limit-upgrade"
 )
 
 type StakeType byte
@@ -113,4 +116,10 @@ type Argument struct {
 	UpdatedTime    time.Time      `json:"updated_time"`
 	EditedTime     time.Time      `json:"edited_time"`
 	Edited         bool           `json:"edited"`
+}
+
+type StakeLimitUpgrade struct {
+	Address     sdk.AccAddress `json:"address"`
+	NewLimit    int            `json:"new_limit"`
+	EarnedStake sdk.Coin       `json:"earned_stake"`
 }

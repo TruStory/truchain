@@ -3,7 +3,7 @@ version: 2.1
 executors:
   go:
     docker:
-      - image: circleci/golang:1.12
+      - image: circleci/golang:1.13.1
     working_directory: /tmp/truchain
 
 jobs:
@@ -18,7 +18,7 @@ jobs:
       - run:
           name: Install linter
           command: |
-            GO111MODULE=on go get github.com/golangci/golangci-lint/cmd/golangci-lint@v1.17.0
+            GO111MODULE=on go get github.com/golangci/golangci-lint/cmd/golangci-lint@v1.18.0
       - run: make download
       - run: make check
       - run: make build-linux
