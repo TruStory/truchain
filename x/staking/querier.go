@@ -265,10 +265,13 @@ func queryClaimTopArgument(ctx sdk.Context, req abci.RequestQuery, keeper Keeper
 		return bz, nil
 	}
 	for _, a := range arguments {
+		if a.IsUnhelpful {
+			continue
+		}
 		if topArgument.ID == 0 {
 			topArgument = a
 		}
-		if topArgument.UpvotedStake.IsLT(a.UpvotedStake) && !a.IsUnhelpful {
+		if topArgument.UpvotedStake.IsLT(a.UpvotedStake) {
 			topArgument = a
 		}
 	}
