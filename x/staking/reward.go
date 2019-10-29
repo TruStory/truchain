@@ -62,10 +62,6 @@ func (k Keeper) distributeReward(ctx sdk.Context, stake Stake) (RewardResult, sd
 		return RewardResult{}, err
 	}
 
-	if err != nil {
-		return RewardResult{}, err
-	}
-
 	interest := k.interest(ctx, stake.Amount, stake.EndTime.Sub(stake.CreatedTime))
 	// creator receives 100% interest of his own stake
 	if argument.Creator.Equals(stake.Creator) {
