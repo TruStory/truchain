@@ -1,6 +1,7 @@
 package bank
 
 import (
+	"fmt"
 	"testing"
 
 	app "github.com/TruStory/truchain/types"
@@ -8,7 +9,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestHandle_MsgPayReward(t *testing.T) {
+func TestHandle_MsgSendGift(t *testing.T) {
 	ctx, keeper, ak := mockDB()
 	handler := NewHandler(keeper)
 
@@ -18,10 +19,10 @@ func TestHandle_MsgPayReward(t *testing.T) {
 	assert.NotNil(t, handler)
 	recipientAddr := createFakeFundedAccount(ctx, ak, sdk.Coins{})
 	reward := sdk.NewCoin(app.StakeDenom, sdk.NewInt(app.Shanev*15))
-	msg := NewMsgPayReward(brokerAddress, recipientAddr, reward, 1)
+	msg := NewMsgSendGift(brokerAddress, recipientAddr, reward)
 
 	assert.Equal(t, msg.Route(), RouterKey)
-	assert.Equal(t, msg.Type(), TypeMsgPayReward)
+	assert.Equal(t, msg.Type(), TypeMsgSendGift)
 	res := handler(ctx, msg)
 
 	assert.Equal(t, ErrorCodeInvalidRewardBrokerAddress, res.Code)
@@ -29,17 +30,18 @@ func TestHandle_MsgPayReward(t *testing.T) {
 	p := Params{RewardBrokerAddress: brokerAddress}
 	keeper.SetParams(ctx, p)
 	res = handler(ctx, msg)
+	fmt.Println(res)
 	assert.True(t, res.IsOK())
 
 	recipientCoins := keeper.bankKeeper.GetCoins(ctx, recipientAddr)
 	assert.True(t, recipientCoins.AmountOf(app.StakeDenom).Equal(sdk.NewInt(app.Shanev*15)))
 }
 
-func TestMsgPayReward_Invalid(t *testing.T) {
+func TestMsgSendGift_Invalid(t *testing.T) {
 	ctx, keeper, _ := mockDB()
 	_, _, validAddr := keyPubAddr()
 
-	msg := NewMsgPayReward(sdk.AccAddress{}, sdk.AccAddress{}, sdk.Coin{}, 1)
+	msg := NewMsgSendGift(sdk.AccAddress{}, sdk.AccAddress{}, sdk.Coin{})
 	handler := NewHandler(keeper)
 
 	res := handler(ctx, msg)
@@ -47,7 +49,7 @@ func TestMsgPayReward_Invalid(t *testing.T) {
 	assert.Equal(t, sdk.CodeInvalidAddress, res.Code)
 	assert.Equal(t, sdk.CodespaceRoot, res.Codespace)
 
-	msg = NewMsgPayReward(validAddr, sdk.AccAddress{}, sdk.Coin{}, 1)
+	msg = NewMsgSendGift(validAddr, sdk.AccAddress{}, sdk.Coin{})
 	handler = NewHandler(keeper)
 
 	res = handler(ctx, msg)
