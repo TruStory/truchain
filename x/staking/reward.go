@@ -56,12 +56,12 @@ func (k Keeper) distributeReward(ctx sdk.Context, stake Stake) (RewardResult, sd
 
 	_, err := k.bankKeeper.AddCoin(ctx, stake.Creator, stake.Amount, stake.ArgumentID,
 		refundType, WithCommunityID(argument.CommunityID),
+		FromModuleAccount(UserStakesPoolName),
 	)
 	if err != nil {
 		return RewardResult{}, err
 	}
 
-	err = k.supplyKeeper.BurnCoins(ctx, UserStakesPoolName, sdk.NewCoins(stake.Amount))
 	if err != nil {
 		return RewardResult{}, err
 	}
@@ -76,11 +76,8 @@ func (k Keeper) distributeReward(ctx sdk.Context, stake Stake) (RewardResult, sd
 			argument.ID,
 			TransactionInterestArgumentCreation,
 			WithCommunityID(argument.CommunityID),
+			FromModuleAccount(UserRewardPoolName),
 		)
-		if err != nil {
-			return RewardResult{}, err
-		}
-		err = k.supplyKeeper.BurnCoins(ctx, UserRewardPoolName, sdk.NewCoins(reward))
 		if err != nil {
 			return RewardResult{}, err
 		}
@@ -98,11 +95,8 @@ func (k Keeper) distributeReward(ctx sdk.Context, stake Stake) (RewardResult, sd
 		stake.ID,
 		TransactionInterestUpvoteReceived,
 		WithCommunityID(argument.CommunityID),
+		FromModuleAccount(UserRewardPoolName),
 	)
-	if err != nil {
-		return RewardResult{}, err
-	}
-	err = k.supplyKeeper.BurnCoins(ctx, UserRewardPoolName, sdk.NewCoins(creatorRewardCoin))
 	if err != nil {
 		return RewardResult{}, err
 	}
@@ -113,11 +107,8 @@ func (k Keeper) distributeReward(ctx sdk.Context, stake Stake) (RewardResult, sd
 		argument.ID,
 		TransactionInterestUpvoteGiven,
 		WithCommunityID(argument.CommunityID),
+		FromModuleAccount(UserRewardPoolName),
 	)
-	if err != nil {
-		return RewardResult{}, err
-	}
-	err = k.supplyKeeper.BurnCoins(ctx, UserRewardPoolName, sdk.NewCoins(stakerRewardCoin))
 	if err != nil {
 		return RewardResult{}, err
 	}

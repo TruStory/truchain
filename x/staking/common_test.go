@@ -160,6 +160,7 @@ type mockedDB struct {
 	accountKeeper AccountKeeper
 	claimKeeper   ClaimKeeper
 	bankKeeper    BankKeeper
+	supplyKeeper  supply.Keeper
 }
 
 func mockDB() (sdk.Context, Keeper, *mockedDB) {
@@ -249,6 +250,7 @@ func mockDB() (sdk.Context, Keeper, *mockedDB) {
 		accountKeeper: mockedAccountKeeper,
 		authAccKeeper: accKeeper,
 		bankKeeper:    trubankKeeper,
+		supplyKeeper:  supplyKeeper,
 	}
 	return ctx, keeper, mockedDB
 }

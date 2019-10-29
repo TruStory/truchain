@@ -5,6 +5,7 @@ import (
 	"github.com/TruStory/truchain/x/distribution"
 )
 
+// Aliased constants
 const (
 	TransactionInterestArgumentCreation = exported.TransactionInterestArgumentCreation
 	TransactionInterestUpvoteReceived   = exported.TransactionInterestUpvoteReceived
@@ -23,6 +24,9 @@ type (
 	TransactionType = exported.TransactionType
 )
 
+// Transaction setters
 var (
-	WithCommunityID = exported.WithCommunityID
+	WithCommunityID   = exported.WithCommunityID
+	FromModuleAccount = exported.FromModuleAccount
+	ToModuleAccount   = exported.ToModuleAccount
 )

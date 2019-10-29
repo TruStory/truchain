@@ -7,6 +7,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/supply"
 
 	app "github.com/TruStory/truchain/types"
+	"github.com/TruStory/truchain/x/distribution"
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth"
@@ -58,7 +59,7 @@ func (k Keeper) CreateAppAccount(ctx sdk.Context, address sdk.AccAddress,
 	initialCoinAmount := coins.AmountOf(app.StakeDenom)
 	if initialCoinAmount.IsPositive() {
 		coin := sdk.NewCoin(app.StakeDenom, initialCoinAmount)
-		_, sdkErr := k.bankKeeper.AddCoin(ctx, address, coin, 0, TransactionGift)
+		_, sdkErr := k.bankKeeper.AddCoin(ctx, address, coin, 0, TransactionGift, FromModuleAccount(distribution.UserGrowthPoolName))
 		if sdkErr != nil {
 			return appAccnt, sdkErr
 		}

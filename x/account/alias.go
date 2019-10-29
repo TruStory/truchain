@@ -11,3 +11,7 @@ const (
 
 	UserGrowthPoolName = distribution.UserGrowthPoolName
 )
+
+var (
+	FromModuleAccount = exported.FromModuleAccount
+)

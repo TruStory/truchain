@@ -1,7 +1,7 @@
 package bank
 
 import (
-	"github.com/TruStory/truchain/x/account"
+	"github.com/TruStory/truchain/x/distribution"
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/bank"
@@ -49,7 +49,15 @@ func (k Keeper) AddCoin(ctx sdk.Context, addr sdk.AccAddress, amt sdk.Coin,
 	if !txType.AllowedForAddition() {
 		return sdk.Coins{}, ErrInvalidTransactionType(txType)
 	}
-	coins, err := k.bankKeeper.AddCoins(ctx, addr, sdk.Coins{amt})
+	var err sdk.Error
+	coins := sdk.Coins{amt}
+	if tx.FromModuleAccount != "" {
+		err = k.supplyKeeper.SendCoinsFromModuleToAccount(ctx, tx.FromModuleAccount, addr, sdk.Coins{amt})
+	}
+	if tx.FromModuleAccount == "" {
+		coins, err = k.bankKeeper.AddCoins(ctx, addr, sdk.Coins{amt})
+	}
+
 	if err != nil {
 		return coins, err
 	}
@@ -80,7 +88,14 @@ func (k Keeper) SubtractCoin(ctx sdk.Context, addr sdk.AccAddress, amt sdk.Coin,
 	if !txType.AllowedForDeduction() {
 		return sdk.Coins{}, ErrInvalidTransactionType(txType)
 	}
-	coins, err := k.bankKeeper.SubtractCoins(ctx, addr, sdk.Coins{amt})
+	var err sdk.Error
+	coins := sdk.Coins{amt}
+	if tx.ToModuleAccount != "" {
+		err = k.supplyKeeper.SendCoinsFromAccountToModule(ctx, addr, tx.ToModuleAccount, sdk.Coins{amt})
+	}
+	if tx.ToModuleAccount == "" {
+		coins, err = k.bankKeeper.SubtractCoins(ctx, addr, sdk.Coins{amt})
+	}
 	if err != nil {
 		return coins, err
 	}
@@ -149,12 +164,7 @@ func (k Keeper) sendGift(ctx sdk.Context,
 	if amount.Denom != app.StakeDenom {
 		return sdk.ErrInvalidCoins("Invalid denomination coin")
 	}
-	_, err := k.AddCoin(ctx, recipient, amount, 0, TransactionGift)
-	if err != nil {
-		return err
-	}
-
-	err = k.supplyKeeper.BurnCoins(ctx, account.UserGrowthPoolName, sdk.Coins{amount})
+	_, err := k.AddCoin(ctx, recipient, amount, 0, TransactionGift, FromModuleAccount(distribution.UserGrowthPoolName))
 	if err != nil {
 		return err
 	}
@@ -168,12 +178,8 @@ func (k Keeper) payReward(ctx sdk.Context,
 	if !k.rewardBrokerAddress(ctx).Equals(sender) {
 		return ErrInvalidRewardBrokerAddress(sender)
 	}
-	_, err := k.AddCoin(ctx, recipient, amount, inviteID, TransactionRewardPayout)
-	if err != nil {
-		return err
-	}
-
-	err = k.supplyKeeper.BurnCoins(ctx, account.UserGrowthPoolName, sdk.Coins{amount})
+	_, err := k.AddCoin(ctx, recipient, amount, inviteID, TransactionRewardPayout,
+		FromModuleAccount(distribution.UserRewardPoolName))
 	if err != nil {
 		return err
 	}

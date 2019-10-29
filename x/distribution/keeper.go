@@ -1,6 +1,8 @@
 package distribution
 
 import (
+	"fmt"
+
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth"
@@ -26,6 +28,13 @@ type Keeper struct {
 func NewKeeper(storeKey sdk.StoreKey, paramStore params.Subspace, codec *codec.Codec, bankKeeper BankKeeper,
 	accountKeeper auth.AccountKeeper, supplyKeeper supply.Keeper, cosmosDistKeeper cosmosDist.Keeper) Keeper {
 
+	// ensure distribution module accounts are set
+	if addr := supplyKeeper.GetModuleAddress(UserGrowthPoolName); addr == nil {
+		panic(fmt.Sprintf("%s module account has not been set", UserGrowthPoolName))
+	}
+	if addr := supplyKeeper.GetModuleAddress(UserRewardPoolName); addr == nil {
+		panic(fmt.Sprintf("%s module account has not been set", UserRewardPoolName))
+	}
 	return Keeper{
 		storeKey,
 		codec,

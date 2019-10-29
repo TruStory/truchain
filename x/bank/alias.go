@@ -43,6 +43,8 @@ var (
 	SortOrder               = exported.SortOrder
 	Limit                   = exported.Limit
 	Offset                  = exported.Offset
+	FromModuleAccount       = exported.FromModuleAccount
+	ToModuleAccount         = exported.ToModuleAccount
 	ModuleCodec             = types.ModuleCodec
 )
 

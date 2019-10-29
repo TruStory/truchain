@@ -69,8 +69,6 @@ func initUserGrowthPool(ctx sdk.Context, keeper Keeper) sdk.Error {
 			})
 			return false
 		})
-		fmt.Println("TOTAL USER BALANCE " + userBalanceTotal.String())
-		//panic("asdfds")
 	}
 	return nil
 }
