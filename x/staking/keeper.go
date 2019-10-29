@@ -200,6 +200,9 @@ func (k Keeper) SubmitArgument(ctx sdk.Context, body, summary string,
 	if count >= p.MaxArgumentsPerClaim {
 		return Argument{}, ErrCodeMaxNumOfArgumentsReached(p.MaxArgumentsPerClaim)
 	}
+	if len(body) > p.ArgumentBodyMaxLength {
+		return Argument{}, ErrCodeInvalidBodyLength()
+	}
 
 	creationAmount := p.ArgumentCreationStake
 	argumentID, err := k.argumentID(ctx)
