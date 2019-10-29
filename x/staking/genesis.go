@@ -104,12 +104,10 @@ func initUserRewardsPool(ctx sdk.Context, keeper Keeper) sdk.Error {
 
 		keeper.accountKeeper.IterateAppAccounts(ctx, func(acc account.AppAccount) (stop bool) {
 			addr := acc.PrimaryAddress()
-			//fmt.Println(addr.String())
 			keeper.bankKeeper.IterateUserTransactions(ctx, addr, false, func(tx bankexported.Transaction) bool {
 				switch tx.Type {
 				case TransactionInterestArgumentCreation, TransactionInterestUpvoteGiven,
 					TransactionInterestUpvoteReceived:
-					//fmt.Println("processing " + tx.Type.String() + " " + tx.Amount.String())
 					err := keeper.supplyKeeper.BurnCoins(ctx, UserRewardPoolName, sdk.NewCoins(tx.Amount))
 					if err != nil {
 						panic(err)

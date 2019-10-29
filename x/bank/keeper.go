@@ -172,21 +172,6 @@ func (k Keeper) sendGift(ctx sdk.Context,
 	return nil
 }
 
-func (k Keeper) payReward(ctx sdk.Context,
-	sender sdk.AccAddress, recipient sdk.AccAddress,
-	amount sdk.Coin, inviteID uint64) sdk.Error {
-	if !k.rewardBrokerAddress(ctx).Equals(sender) {
-		return ErrInvalidRewardBrokerAddress(sender)
-	}
-	_, err := k.AddCoin(ctx, recipient, amount, inviteID, TransactionRewardPayout,
-		FromModuleAccount(distribution.UserRewardPoolName))
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
 // Transactions gets all the transactions
 func (k Keeper) Transactions(ctx sdk.Context) []Transaction {
 	transactions := make([]Transaction, 0)

@@ -1,7 +1,6 @@
 package bank
 
 import (
-	"fmt"
 	"testing"
 
 	app "github.com/TruStory/truchain/types"
@@ -30,7 +29,6 @@ func TestHandle_MsgSendGift(t *testing.T) {
 	p := Params{RewardBrokerAddress: brokerAddress}
 	keeper.SetParams(ctx, p)
 	res = handler(ctx, msg)
-	fmt.Println(res)
 	assert.True(t, res.IsOK())
 
 	recipientCoins := keeper.bankKeeper.GetCoins(ctx, recipientAddr)
