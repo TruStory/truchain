@@ -24,6 +24,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/store"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth"
+	authexported "github.com/cosmos/cosmos-sdk/x/auth/exported"
 	"github.com/cosmos/cosmos-sdk/x/bank"
 	"github.com/cosmos/cosmos-sdk/x/params"
 	abci "github.com/tendermint/tendermint/abci/types"
@@ -64,7 +65,7 @@ func mockDB() (sdk.Context, Keeper) {
 	codec := codec.New()
 	cryptoAmino.RegisterAmino(codec)
 	account.RegisterCodec(codec)
-	codec.RegisterInterface((*auth.Account)(nil), nil)
+	codec.RegisterInterface((*authexported.Account)(nil), nil)
 	codec.RegisterConcrete(&auth.BaseAccount{}, "auth/Account", nil)
 	RegisterCodec(codec)
 	supply.RegisterCodec(codec)
