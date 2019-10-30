@@ -183,3 +183,42 @@ func TestKeeper_TestStakeRewardResult(t *testing.T) {
 	assert.Equal(t, addr, stakes[1].Result.StakeCreator)
 	assert.Equal(t, addr2, stakes[1].Result.ArgumentCreator)
 }
+
+func TestStakeLimitUpgradeMultiple(t *testing.T) {
+	earned := sdk.NewInt(10 * app.Shanev)
+	multiple := getStakeLimitUpgradeMultiple(earned)
+	assert.Equal(t, multiple, 1)
+
+	earned = sdk.NewInt(18 * app.Shanev)
+	multiple = getStakeLimitUpgradeMultiple(earned)
+	assert.Equal(t, multiple, 1)
+
+	earned = sdk.NewInt(28 * app.Shanev)
+	multiple = getStakeLimitUpgradeMultiple(earned)
+	assert.Equal(t, multiple, 2)
+
+	earned = sdk.NewInt(0 * app.Shanev)
+	multiple = getStakeLimitUpgradeMultiple(earned)
+	assert.Equal(t, multiple, 0)
+
+	earned = sdk.NewInt(-10 * app.Shanev)
+	multiple = getStakeLimitUpgradeMultiple(earned)
+	assert.Equal(t, multiple, 0)
+}
+
+func TestGetUpgradedStakeLimit(t *testing.T) {
+	/**
+		10 TRU earned: 1,000 TRU limit
+		20 TRU earned: 1,500 TRU limit
+		30 TRU earned: 2,000 TRU limit
+		40 TRU earned: 2,500 TRU limit
+		50 TRU earned: 3,000 TRU limit
+		...and so on.
+	**/
+	assert.Equal(t, getUpgradedStakeLimit(1), 1000)
+	assert.Equal(t, getUpgradedStakeLimit(2), 1500)
+	assert.Equal(t, getUpgradedStakeLimit(3), 2000)
+	assert.Equal(t, getUpgradedStakeLimit(4), 2500)
+	assert.Equal(t, getUpgradedStakeLimit(5), 3000)
+	assert.Equal(t, getUpgradedStakeLimit(6), 3500)
+}
