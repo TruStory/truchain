@@ -13,7 +13,7 @@ require (
 	github.com/coreos/etcd v3.3.17+incompatible // indirect
 	github.com/coreos/go-semver v0.3.0 // indirect
 	github.com/coreos/go-systemd v0.0.0-20190719114852-fd7a80b32e1f // indirect
-	github.com/cosmos/cosmos-sdk v0.37.0
+	github.com/cosmos/cosmos-sdk v0.34.4-0.20191029195223-3099b42aa1a9
 	github.com/creack/pty v1.1.9 // indirect
 	github.com/golang/groupcache v0.0.0-20191002201903-404acd9df4cc // indirect
 	github.com/google/go-cmp v0.3.1 // indirect
@@ -32,7 +32,7 @@ require (
 	github.com/mwitkow/go-conntrack v0.0.0-20190716064945-2f068394615f // indirect
 	github.com/onsi/ginkgo v1.10.2 // indirect
 	github.com/onsi/gomega v1.7.0 // indirect
-	github.com/pelletier/go-toml v1.5.0 // indirect
+	github.com/pkg/errors v0.8.1
 	github.com/prometheus/client_golang v1.1.0 // indirect
 	github.com/prometheus/client_model v0.0.0-20190812154241-14fe0d1b01d4 // indirect
 	github.com/prometheus/common v0.7.0 // indirect
@@ -45,8 +45,7 @@ require (
 	github.com/spf13/cobra v0.0.5
 	github.com/spf13/viper v1.4.0
 	github.com/stretchr/testify v1.4.0
-	github.com/tendermint/go-amino v0.15.1 // indirect
-	github.com/tendermint/tendermint v0.32.5
+	github.com/tendermint/tendermint v0.32.7
 	github.com/tendermint/tm-db v0.2.0
 	github.com/tendermint/tmlibs v0.9.0
 	github.com/ugorji/go v1.1.7 // indirect
@@ -65,7 +64,3 @@ require (
 	google.golang.org/grpc v1.24.0 // indirect
 	gopkg.in/check.v1 v1.0.0-20190902080502-41f04d3bba15 // indirect
 )
-
-// replace github.com/cosmos/cosmos-sdk => ../cosmos-sdk
-
-replace github.com/cosmos/cosmos-sdk => github.com/trustory/cosmos-sdk v0.28.2-0.20191001193947-1bb0a82e99d5

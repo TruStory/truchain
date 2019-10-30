@@ -6,7 +6,7 @@ import (
 	app "github.com/TruStory/truchain/types"
 	bankexported "github.com/TruStory/truchain/x/bank/exported"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/cosmos/cosmos-sdk/x/auth"
+	authexported "github.com/cosmos/cosmos-sdk/x/auth/exported"
 )
 
 // GenesisState defines genesis data for the module
@@ -52,7 +52,7 @@ func initUserGrowthPool(ctx sdk.Context, keeper Keeper) sdk.Error {
 		}
 
 		userBalanceTotal := sdk.NewCoin("tru", sdk.ZeroInt())
-		keeper.accountKeeper.IterateAccounts(ctx, func(acc auth.Account) (stop bool) {
+		keeper.accountKeeper.IterateAccounts(ctx, func(acc authexported.Account) (stop bool) {
 			addr := acc.GetAddress()
 			amt := acc.GetCoins().AmountOf("tru")
 			userBalanceTotal = userBalanceTotal.Add(sdk.NewCoin("tru", amt))
