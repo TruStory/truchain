@@ -297,6 +297,7 @@ func (k Keeper) punish(ctx sdk.Context, argumentID uint64) ([]PunishmentResult, 
 		if err != nil {
 			return punishmentResults, err
 		}
+
 		punishmentResults = append(punishmentResults,
 			PunishmentResult{Type: PunishmentCuratorRewarded,
 				AppAccAddress: slash.Creator,

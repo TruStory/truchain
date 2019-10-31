@@ -11,12 +11,12 @@ import (
 func TestNewSlash_Success(t *testing.T) {
 	ctx, keeper := mockDB()
 
-	staker := keeper.GetParams(ctx).SlashAdmins[0]
+	staker := keeper.GetParams(ctx).SlashAdmins[1]
 	arg, err := keeper.stakingKeeper.SubmitArgument(ctx, "arg1", "summary1", staker, 1, staking.StakeChallenge)
 	assert.NoError(t, err)
 
 	stakeID := uint64(1)
-	creator := keeper.GetParams(ctx).SlashAdmins[0]
+	creator := keeper.GetParams(ctx).SlashAdmins[1]
 	slash, _, err := keeper.CreateSlash(ctx, stakeID, SlashTypeUnhelpful, SlashReasonPlagiarism, "", creator)
 	assert.NoError(t, err)
 
@@ -89,7 +89,7 @@ func TestSlash_ErrNotFound(t *testing.T) {
 func TestSlashes_Success(t *testing.T) {
 	ctx, keeper := mockDB()
 
-	staker := keeper.GetParams(ctx).SlashAdmins[0]
+	staker := keeper.GetParams(ctx).SlashAdmins[1]
 	_, err := keeper.stakingKeeper.SubmitArgument(ctx, "arg1", "summary1", staker, 1, staking.StakeBacking)
 	assert.NoError(t, err)
 
@@ -111,8 +111,8 @@ func TestSlashes_Success(t *testing.T) {
 func Test_punishment(t *testing.T) {
 	ctx, keeper := mockDB()
 
-	staker := keeper.GetParams(ctx).SlashAdmins[0]
-	slasher := keeper.GetParams(ctx).SlashAdmins[1]
+	staker := keeper.GetParams(ctx).SlashAdmins[1]
+	slasher := keeper.GetParams(ctx).SlashAdmins[2]
 	slashMagnitude := keeper.GetParams(ctx).SlashMagnitude
 	stakerStartingBalance := keeper.bankKeeper.GetCoins(ctx, staker)
 	slasherStartingBalance := keeper.bankKeeper.GetCoins(ctx, slasher)

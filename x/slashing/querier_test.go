@@ -56,7 +56,7 @@ func TestQuerySlash_ErrNotFound(t *testing.T) {
 func TestQuerySlashes_Success(t *testing.T) {
 	ctx, keeper := mockDB()
 
-	staker := keeper.GetParams(ctx).SlashAdmins[0]
+	staker := keeper.GetParams(ctx).SlashAdmins[1]
 	_, err := keeper.stakingKeeper.SubmitArgument(ctx, "arg1", "summary1", staker, 1, staking.StakeBacking)
 	assert.NoError(t, err)
 

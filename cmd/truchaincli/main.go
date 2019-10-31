@@ -1,25 +1,26 @@
 package main
 
 import (
-	"github.com/cosmos/cosmos-sdk/x/auth"
-	"github.com/spf13/viper"
 	"os"
 	"path"
 
-	"github.com/cosmos/cosmos-sdk/codec"
-	authrest "github.com/cosmos/cosmos-sdk/x/auth/client/rest"
+	"github.com/cosmos/cosmos-sdk/x/auth"
+	"github.com/spf13/viper"
+
 	"github.com/TruStory/truchain/app"
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/keys"
 	"github.com/cosmos/cosmos-sdk/client/lcd"
 	"github.com/cosmos/cosmos-sdk/client/rpc"
+	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/version"
 	authcmd "github.com/cosmos/cosmos-sdk/x/auth/client/cli"
+	authrest "github.com/cosmos/cosmos-sdk/x/auth/client/rest"
+	"github.com/cosmos/cosmos-sdk/x/bank"
 	bankcmd "github.com/cosmos/cosmos-sdk/x/bank/client/cli"
 	"github.com/spf13/cobra"
 	"github.com/tendermint/tmlibs/cli"
-	"github.com/cosmos/cosmos-sdk/x/bank"
 )
 
 func main() {

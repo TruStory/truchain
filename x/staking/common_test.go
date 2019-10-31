@@ -3,16 +3,19 @@ package staking
 import (
 	"time"
 
+	"github.com/TruStory/truchain/x/account"
+
 	app "github.com/TruStory/truchain/types"
 	trubank "github.com/TruStory/truchain/x/bank"
 	"github.com/TruStory/truchain/x/claim"
-
 	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/cosmos/cosmos-sdk/store"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth"
 	"github.com/cosmos/cosmos-sdk/x/bank"
+	"github.com/cosmos/cosmos-sdk/x/distribution"
 	"github.com/cosmos/cosmos-sdk/x/params"
+	"github.com/cosmos/cosmos-sdk/x/supply"
 	abci "github.com/tendermint/tendermint/abci/types"
 	"github.com/tendermint/tendermint/crypto"
 	"github.com/tendermint/tendermint/crypto/ed25519"
@@ -57,6 +60,10 @@ func (m *mockedAccountKeeper) UnJail(ctx sdk.Context, address sdk.AccAddress) sd
 	}
 	m.jailStatus[address.String()] = false
 	return nil
+}
+
+func (m *mockedAccountKeeper) IterateAppAccounts(ctx sdk.Context, cb func(acc account.AppAccount) (stop bool)) {
+
 }
 
 type mockClaimKeeper struct {
@@ -153,6 +160,7 @@ type mockedDB struct {
 	accountKeeper AccountKeeper
 	claimKeeper   ClaimKeeper
 	bankKeeper    BankKeeper
+	supplyKeeper  supply.Keeper
 }
 
 func mockDB() (sdk.Context, Keeper, *mockedDB) {
@@ -163,6 +171,7 @@ func mockDB() (sdk.Context, Keeper, *mockedDB) {
 	transientParamsKey := sdk.NewTransientStoreKey(params.TStoreKey)
 	bankKey := sdk.NewKVStoreKey("bank")
 	claimKey := sdk.NewKVStoreKey(claim.StoreKey)
+	supplyKey := sdk.NewKVStoreKey(supply.StoreKey)
 
 	ms := store.NewCommitMultiStore(db)
 	ms.MountStoreWithDB(accKey, sdk.StoreTypeIAVL, db)
@@ -171,6 +180,7 @@ func mockDB() (sdk.Context, Keeper, *mockedDB) {
 	ms.MountStoreWithDB(bankKey, sdk.StoreTypeIAVL, db)
 	ms.MountStoreWithDB(claimKey, sdk.StoreTypeIAVL, db)
 	ms.MountStoreWithDB(transientParamsKey, sdk.StoreTypeTransient, db)
+	ms.MountStoreWithDB(supplyKey, sdk.StoreTypeIAVL, db)
 	ms.LoadLatestVersion()
 
 	ctx := sdk.NewContext(ms, abci.Header{}, false, log.NewNopLogger())
@@ -180,23 +190,54 @@ func mockDB() (sdk.Context, Keeper, *mockedDB) {
 	auth.RegisterCodec(cdc)
 	RegisterCodec(cdc)
 	codec.RegisterCrypto(cdc)
+	supply.RegisterCodec(cdc)
 
 	// Keepers
 	pk := params.NewKeeper(cdc, paramsKey, transientParamsKey, params.DefaultCodespace)
 	accKeeper := auth.NewAccountKeeper(cdc, accKey, pk.Subspace(auth.DefaultParamspace), auth.ProtoBaseAccount)
 
+	distAcc := supply.NewEmptyModuleAccount(distribution.ModuleName)
+	coins, _ := sdk.ParseCoins("1000000000000tru")
+	err := distAcc.SetCoins(coins)
+	if err != nil {
+		panic(err)
+	}
+
+	userRewardAcc := supply.NewEmptyModuleAccount(UserRewardPoolName, supply.Burner)
+	err = userRewardAcc.SetCoins(coins)
+	if err != nil {
+		panic(err)
+	}
+
+	// so bank cannot use module accounts, only supply keeper
+	blacklistedAddrs := make(map[string]bool)
+	blacklistedAddrs[distAcc.String()] = true
+	blacklistedAddrs[userRewardAcc.String()] = true
+
 	bankKeeper := bank.NewBaseKeeper(accKeeper,
 		pk.Subspace(bank.DefaultParamspace),
 		bank.DefaultCodespace,
-		nil,
+		blacklistedAddrs,
 	)
 
-	trubankKeeper := trubank.NewKeeper(cdc, bankKey, bankKeeper, pk.Subspace(trubank.DefaultParamspace), trubank.DefaultCodespace)
+	maccPerms := map[string][]string{
+		distribution.ModuleName: nil,
+		UserRewardPoolName:      {supply.Burner},
+		UserStakesPoolName:      {supply.Minter, supply.Burner},
+	}
+
+	supplyKeeper := supply.NewKeeper(cdc, supplyKey, accKeeper, bankKeeper, maccPerms)
+	supplyKeeper.SetModuleAccount(ctx, distAcc)
+	supplyKeeper.SetModuleAccount(ctx, userRewardAcc)
+	totalSupply := coins
+	supplyKeeper.SetSupply(ctx, supply.NewSupply(totalSupply))
+
+	trubankKeeper := trubank.NewKeeper(cdc, bankKey, bankKeeper, pk.Subspace(trubank.DefaultParamspace), trubank.DefaultCodespace, supplyKeeper)
 
 	mockedAccountKeeper := newAccountKeeper()
 	mockedClaimKeeper := newMockedClaimKeeper()
 	mockedClaimKeeper.claims = make(map[uint64]claim.Claim)
-	keeper := NewKeeper(cdc, storeKey, mockedAccountKeeper, trubankKeeper, mockedClaimKeeper, pk.Subspace(DefaultParamspace), DefaultCodespace)
+	keeper := NewKeeper(cdc, storeKey, mockedAccountKeeper, trubankKeeper, mockedClaimKeeper, supplyKeeper, pk.Subspace(DefaultParamspace), DefaultCodespace)
 	_, _, admin1 := keyPubAddr()
 	_, _, admin2 := keyPubAddr()
 	genesis := DefaultGenesisState()
@@ -209,6 +250,7 @@ func mockDB() (sdk.Context, Keeper, *mockedDB) {
 		accountKeeper: mockedAccountKeeper,
 		authAccKeeper: accKeeper,
 		bankKeeper:    trubankKeeper,
+		supplyKeeper:  supplyKeeper,
 	}
 	return ctx, keeper, mockedDB
 }

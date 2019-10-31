@@ -8,7 +8,7 @@ import (
 )
 
 func TestNewAppAccount_Success(t *testing.T) {
-	ctx, keeper := mockDB()
+	ctx, keeper := mockDB(t)
 
 	_, publicKey, address, coins := getFakeAppAccountParams()
 	appAccount, err := keeper.CreateAppAccount(ctx, address, coins, publicKey)
@@ -23,7 +23,7 @@ func TestNewAppAccount_Success(t *testing.T) {
 }
 
 func TesAppAccounts(t *testing.T) {
-	ctx, keeper := mockDB()
+	ctx, keeper := mockDB(t)
 
 	_, publicKey, address, coins := getFakeAppAccountParams()
 	_, err := keeper.CreateAppAccount(ctx, address, coins, publicKey)
@@ -35,7 +35,7 @@ func TesAppAccounts(t *testing.T) {
 }
 
 func TestJailUntil_Success(t *testing.T) {
-	ctx, keeper := mockDB()
+	ctx, keeper := mockDB(t)
 
 	_, publicKey, address, coins := getFakeAppAccountParams()
 
@@ -65,7 +65,7 @@ func TestJailUntil_Success(t *testing.T) {
 }
 
 func TestIncrementSlashCount_Success(t *testing.T) {
-	ctx, keeper := mockDB()
+	ctx, keeper := mockDB(t)
 
 	_, publicKey, address, coins := getFakeAppAccountParams()
 
