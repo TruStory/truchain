@@ -29,13 +29,8 @@ type Params struct {
 
 // DefaultParams is the auth params for testing
 func DefaultParams() Params {
-	rewardBroker, err := sdk.AccAddressFromBech32("cosmos1tfpcnjzkthft3ynewqvn7mtdk7guf3knjdqg4d")
-	if err != nil {
-		panic(err)
-	}
-
 	return Params{
-		Registrar:             rewardBroker,
+		Registrar:             nil,
 		MaxSlashCount:         3,
 		JailDuration:          24 * time.Hour * 7,
 		UserGrowthAllocation:  sdk.NewDecWithPrec(20, 2),
