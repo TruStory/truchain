@@ -9,7 +9,7 @@ TruChain is an application-specific blockchain built with [Cosmos SDK](https://c
 
 1. Install Go by following the [official docs](https://golang.org/doc/install). 
 
-**Go version must be 1.12+**.
+**Go version must be 1.13**.
 
 2. Now let's install truchain.
 
@@ -134,5 +134,5 @@ To migrate between different genesis schemas, use the python script in `contrib/
 ```sh
 python 2-stories-to-claims.py \
     --exported-genesis exported-genesis.json \
-    --chain-id devnet-1 > genesis.json 
+    --chain-id betanet-1 > genesis.json 
 ```
