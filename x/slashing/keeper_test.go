@@ -110,9 +110,8 @@ func TestSlashes_Success(t *testing.T) {
 
 func Test_punishment(t *testing.T) {
 	ctx, keeper := mockDB()
-
-	staker := keeper.GetParams(ctx).SlashAdmins[1]
-	slasher := keeper.GetParams(ctx).SlashAdmins[2]
+	staker := keeper.GetParams(ctx).SlashAdmins[0]
+	slasher := keeper.GetParams(ctx).SlashAdmins[1]
 	slashMagnitude := keeper.GetParams(ctx).SlashMagnitude
 	stakerStartingBalance := keeper.bankKeeper.GetCoins(ctx, staker)
 	slasherStartingBalance := keeper.bankKeeper.GetCoins(ctx, slasher)
