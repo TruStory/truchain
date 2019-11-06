@@ -136,9 +136,6 @@ func (k Keeper) punish(ctx sdk.Context, argumentID uint64) ([]*PunishmentResult,
 	var communityID string
 	punishmentResults := make([]*PunishmentResult, 0)
 	for _, stake := range k.stakingKeeper.ArgumentStakes(ctx, argumentID) {
-
-		k.Logger(ctx).Info(fmt.Sprintf("processing stake: %+s", stake.String()))
-
 		communityID = stake.CommunityID
 		stakingPool = stakingPool.Add(stake.Amount)
 		err := k.refundStake(ctx, stake, communityID)
