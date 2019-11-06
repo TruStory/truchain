@@ -1,6 +1,5 @@
 package account
 
-
 import (
 	"testing"
 
@@ -9,7 +8,7 @@ import (
 )
 
 func TestMsgRegisterKey_Success(t *testing.T) {
-	ctx, keeper := mockDB()
+	ctx, keeper := mockDB(t)
 
 	_, publicKey, address, coins := getFakeAppAccountParams()
 
@@ -23,7 +22,7 @@ func TestMsgRegisterKey_Success(t *testing.T) {
 }
 
 func TestMsgNewCommunity_InvalidAddress(t *testing.T) {
-	ctx, keeper := mockDB()
+	ctx, keeper := mockDB(t)
 
 	_, publicKey, _, coins := getFakeAppAccountParams()
 	invalidAddress := sdk.AccAddress(nil)

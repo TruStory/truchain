@@ -11,8 +11,6 @@ import (
 func NewHandler(keeper Keeper) sdk.Handler {
 	return func(ctx sdk.Context, msg sdk.Msg) sdk.Result {
 		switch msg := msg.(type) {
-		case MsgPayReward:
-			return handleMsgPayReward(ctx, keeper, msg)
 		case MsgSendGift:
 			return handleMsgSendGift(ctx, keeper, msg)
 		case MsgUpdateParams:
@@ -31,18 +29,6 @@ func handleMsgSendGift(ctx sdk.Context, keeper Keeper, msg MsgSendGift) sdk.Resu
 	err := keeper.sendGift(ctx, msg.Sender, msg.Recipient, msg.Reward)
 	if err != nil {
 		fmt.Println("error", err)
-		return err.Result()
-	}
-
-	return sdk.Result{}
-}
-
-func handleMsgPayReward(ctx sdk.Context, keeper Keeper, msg MsgPayReward) sdk.Result {
-	if err := msg.ValidateBasic(); err != nil {
-		return err.Result()
-	}
-	err := keeper.payReward(ctx, msg.Sender, msg.Recipient, msg.Reward, msg.InviteID)
-	if err != nil {
 		return err.Result()
 	}
 

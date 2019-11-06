@@ -1,4 +1,4 @@
-package account
+package distribution
 
 import (
 	bankexported "github.com/TruStory/truchain/x/bank/exported"

@@ -59,7 +59,6 @@ func TestKeeper_TestEarnedCoins(t *testing.T) {
 	assert.Equal(t, sdk.NewInt(0), earnings[addr2.String()].Coins.AmountOf("crypto"))
 	argumentAndUpvoteReceived := argumentInterest.Add(upvoteAfterSplitInterest)
 	assert.Equal(t, argumentAndUpvoteReceived.String(), earnings[addr2.String()].Coins.AmountOf("random").String())
-
 }
 
 func TestKeeper_TestRefundStake(t *testing.T) {
@@ -156,22 +155,42 @@ func TestKeeper_TestStakeRewardResult(t *testing.T) {
 	_, err := k.SubmitArgument(ctx.WithBlockTime(mustParseTime("2019-01-01")),
 		"arg1", "summary1", addr, 1, StakeChallenge)
 	assert.NoError(t, err)
+	// check  the stake is added to the stake pool
+	c := mdb.supplyKeeper.GetModuleAccount(ctx, UserStakesPoolName).GetCoins()
+	assert.Equal(t, c, sdk.Coins{k.GetParams(ctx).ArgumentCreationStake})
+
 	EndBlocker(ctx.WithBlockTime(mustParseTime("2019-01-08")), k)
+	// check  the stake is removed from the pool
+	c = mdb.supplyKeeper.GetModuleAccount(ctx, UserStakesPoolName).GetCoins()
+	assert.Equal(t, c.AmountOf(app.StakeDenom).String(), "0")
+
 	arg2, err := k.SubmitArgument(ctx.WithBlockTime(mustParseTime("2019-01-03")),
 		"arg2", "summary2", addr2, 2, StakeBacking)
 	assert.NoError(t, err)
 	EndBlocker(ctx.WithBlockTime(mustParseTime("2019-01-11")), k)
+
 	_, err = k.SubmitUpvote(ctx.WithBlockTime(mustParseTime("2019-01-05")), arg2.ID, addr)
 	assert.NoError(t, err)
+	// check  the stake is added to the stake pool
+	c = mdb.supplyKeeper.GetModuleAccount(ctx, UserStakesPoolName).GetCoins()
+	assert.Equal(t, c, sdk.Coins{k.GetParams(ctx).UpvoteStake})
 	EndBlocker(ctx.WithBlockTime(mustParseTime("2019-01-13")), k)
+	// check  the stake is removed from the pool
+	c = mdb.supplyKeeper.GetModuleAccount(ctx, UserStakesPoolName).GetCoins()
+	assert.Equal(t, c.AmountOf(app.StakeDenom).String(), "0")
 
 	stakes := k.UserStakes(ctx, addr)
+
 	assert.Len(t, stakes, 2)
 	assert.NotNil(t, stakes[0].Result)
 	assert.NotNil(t, stakes[1].Result)
+	stakesUser2 := k.UserStakes(ctx, addr2)
+	assert.Len(t, stakesUser2, 1)
+	assert.NotNil(t, stakesUser2[0].Result)
 
 	assert.Equal(t, RewardResultArgumentCreation, stakes[0].Result.Type)
 	assert.Equal(t, RewardResultUpvoteSplit, stakes[1].Result.Type)
+	assert.Equal(t, RewardResultArgumentCreation, stakesUser2[0].Result.Type)
 
 	argumentInterest := k.interest(ctx, sdk.NewInt64Coin(app.StakeDenom, app.Shanev*50), time.Hour*24*7).RoundInt()
 	upvoteInterest := k.interest(ctx, sdk.NewInt64Coin(app.StakeDenom, app.Shanev*10), time.Hour*24*7)
@@ -182,4 +201,13 @@ func TestKeeper_TestStakeRewardResult(t *testing.T) {
 	assert.Equal(t, upvoteAfterSplitInterest.String(), stakes[1].Result.StakeCreatorReward.Amount.String())
 	assert.Equal(t, addr, stakes[1].Result.StakeCreator)
 	assert.Equal(t, addr2, stakes[1].Result.ArgumentCreator)
+	totalRewards := stakes[0].Result.ArgumentCreatorReward
+	totalRewards = totalRewards.Add(stakes[1].Result.ArgumentCreatorReward)
+	totalRewards = totalRewards.Add(stakes[1].Result.StakeCreatorReward)
+	totalRewards = totalRewards.Add(stakesUser2[0].Result.ArgumentCreatorReward)
+	coins, _ := sdk.ParseCoins("1000000000000tru")
+	result := coins.Sub(sdk.Coins{totalRewards})
+	c = mdb.supplyKeeper.GetModuleAccount(ctx, UserRewardPoolName).GetCoins()
+	assert.Equal(t, c.AmountOf(app.StakeDenom).String(), result.AmountOf(app.StakeDenom).String())
+
 }

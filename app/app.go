@@ -3,15 +3,14 @@ package app
 import (
 	"os"
 
-	"github.com/cosmos/cosmos-sdk/x/gov"
-	"github.com/cosmos/cosmos-sdk/x/slashing"
-	"github.com/cosmos/cosmos-sdk/x/supply"
+	"github.com/cosmos/cosmos-sdk/x/crisis"
 
 	"github.com/TruStory/truchain/types"
 	"github.com/TruStory/truchain/x/account"
 	trubank "github.com/TruStory/truchain/x/bank"
 	"github.com/TruStory/truchain/x/claim"
 	"github.com/TruStory/truchain/x/community"
+	trudist "github.com/TruStory/truchain/x/distribution"
 	truslashing "github.com/TruStory/truchain/x/slashing"
 	trustaking "github.com/TruStory/truchain/x/staking"
 	bam "github.com/cosmos/cosmos-sdk/baseapp"
@@ -22,11 +21,14 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/auth"
 	"github.com/cosmos/cosmos-sdk/x/bank"
 	distr "github.com/cosmos/cosmos-sdk/x/distribution"
-	"github.com/cosmos/cosmos-sdk/x/genaccounts"
 	"github.com/cosmos/cosmos-sdk/x/genutil"
+	"github.com/cosmos/cosmos-sdk/x/gov"
 	"github.com/cosmos/cosmos-sdk/x/mint"
 	"github.com/cosmos/cosmos-sdk/x/params"
+	paramsclient "github.com/cosmos/cosmos-sdk/x/params/client"
+	"github.com/cosmos/cosmos-sdk/x/slashing"
 	"github.com/cosmos/cosmos-sdk/x/staking"
+	"github.com/cosmos/cosmos-sdk/x/supply"
 	abci "github.com/tendermint/tendermint/abci/types"
 	cmn "github.com/tendermint/tendermint/libs/common"
 	"github.com/tendermint/tendermint/libs/log"
@@ -42,25 +44,30 @@ const (
 var (
 	DefaultCLIHome  = os.ExpandEnv("$HOME/.truchaincli")
 	DefaultNodeHome = os.ExpandEnv("$HOME/.truchaind")
+
 	// The ModuleBasicManager is in charge of setting up basic,
 	// non-dependant module elements, such as codec registration
 	// and genesis verification.
 	ModuleBasics = module.NewBasicManager(
-		genaccounts.AppModuleBasic{},
 		genutil.AppModuleBasic{},
 		auth.AppModuleBasic{},
 		bank.AppModuleBasic{},
 		staking.AppModuleBasic{},
+		mint.AppModuleBasic{},
 		distr.AppModuleBasic{},
+		gov.NewAppModuleBasic(paramsclient.ProposalHandler, distr.ProposalHandler),
 		params.AppModuleBasic{},
+		crisis.AppModuleBasic{},
+		slashing.AppModuleBasic{},
+		supply.AppModuleBasic{},
+		// trustory modules
 		community.AppModuleBasic{},
 		claim.AppModuleBasic{},
-		mint.AppModuleBasic{},
 		account.AppModuleBasic{},
 		trubank.AppModuleBasic{},
 		trustaking.AppModuleBasic{},
 		truslashing.AppModuleBasic{},
-		supply.AppModuleBasic{},
+		trudist.AppModuleBasic{},
 	)
 
 	// module account permissions
@@ -71,6 +78,10 @@ var (
 		staking.BondedPoolName:    {supply.Burner, supply.Staking},
 		staking.NotBondedPoolName: {supply.Burner, supply.Staking},
 		gov.ModuleName:            {supply.Burner},
+		// trustory module accounts
+		trudist.UserGrowthPoolName:    {supply.Minter, supply.Burner},
+		trudist.UserRewardPoolName:    {supply.Minter, supply.Burner},
+		trustaking.UserStakesPoolName: {supply.Minter, supply.Burner},
 	}
 )
 
@@ -86,22 +97,26 @@ type TruChain struct {
 	keys  map[string]*sdk.KVStoreKey
 	tkeys map[string]*sdk.TransientStoreKey
 
-	// manage getting and setting accounts
-	accountKeeper auth.AccountKeeper
-	bankKeeper    bank.Keeper
-	stakingKeeper staking.Keeper
-	distrKeeper   distr.Keeper
-	paramsKeeper  params.Keeper
-	supplyKeeper  supply.Keeper
+	// cosmos keepers
+	accountKeeper  auth.AccountKeeper
+	bankKeeper     bank.Keeper
+	supplyKeeper   supply.Keeper
+	stakingKeeper  staking.Keeper
+	slashingKeeper slashing.Keeper
+	mintKeeper     mint.Keeper
+	distrKeeper    distr.Keeper
+	govKeeper      gov.Keeper
+	crisisKeeper   crisis.Keeper
+	paramsKeeper   params.Keeper
 
-	// access truchain multistore
-	mintKeeper        mint.Keeper
-	appAccountKeeper  account.Keeper
-	communityKeeper   community.Keeper
-	claimKeeper       claim.Keeper
-	truBankKeeper     trubank.Keeper
-	truStakingKeeper  trustaking.Keeper
-	truSlashingKeeper truslashing.Keeper
+	// trustory keepers
+	appAccountKeeper      account.Keeper
+	communityKeeper       community.Keeper
+	claimKeeper           claim.Keeper
+	truBankKeeper         trubank.Keeper
+	truStakingKeeper      trustaking.Keeper
+	truSlashingKeeper     truslashing.Keeper
+	truDistributionKeeper trudist.Keeper
 
 	// the module manager
 	mm *module.Manager
@@ -112,7 +127,8 @@ type TruChain struct {
 // In addition, all necessary mappers and keepers are created, routes
 // registered, and finally the stores being mounted along with any necessary
 // chain initialization.
-func NewTruChain(logger log.Logger, db dbm.DB, loadLatest bool, options ...func(*bam.BaseApp)) *TruChain {
+func NewTruChain(logger log.Logger, db dbm.DB, loadLatest bool,
+	invCheckPeriod uint, options ...func(*bam.BaseApp)) *TruChain {
 	// create and register app-level codec for TXs and accounts
 	codec := MakeCodec()
 
@@ -124,7 +140,7 @@ func NewTruChain(logger log.Logger, db dbm.DB, loadLatest bool, options ...func(
 		supply.StoreKey, mint.StoreKey, distr.StoreKey, slashing.StoreKey,
 		gov.StoreKey, params.StoreKey,
 		community.StoreKey, claim.StoreKey, account.StoreKey, trustaking.StoreKey,
-		trubank.StoreKey, truslashing.StoreKey,
+		trubank.StoreKey, truslashing.StoreKey, trudist.StoreKey,
 	)
 	tkeys := sdk.NewTransientStoreKeys(staking.TStoreKey, params.TStoreKey)
 
@@ -136,31 +152,53 @@ func NewTruChain(logger log.Logger, db dbm.DB, loadLatest bool, options ...func(
 		tkeys:   tkeys,
 	}
 
-	// init params keeper and subspaces
+	// init params keeper and cosmos subspaces
 	app.paramsKeeper = params.NewKeeper(app.codec, keys[params.StoreKey], tkeys[params.TStoreKey], params.DefaultCodespace)
 	authSubspace := app.paramsKeeper.Subspace(auth.DefaultParamspace)
 	bankSubspace := app.paramsKeeper.Subspace(bank.DefaultParamspace)
 	stakingSubspace := app.paramsKeeper.Subspace(staking.DefaultParamspace)
-	distrSubspace := app.paramsKeeper.Subspace(distr.DefaultParamspace)
 	mintSubspace := app.paramsKeeper.Subspace(mint.DefaultParamspace)
+	distrSubspace := app.paramsKeeper.Subspace(distr.DefaultParamspace)
+	slashingSubspace := app.paramsKeeper.Subspace(slashing.DefaultParamspace)
+	govSubspace := app.paramsKeeper.Subspace(gov.DefaultParamspace).WithKeyTable(gov.ParamKeyTable())
+	crisisSubspace := app.paramsKeeper.Subspace(crisis.DefaultParamspace)
+
+	// trustory subspaces
 	appAccountSubspace := app.paramsKeeper.Subspace(account.DefaultParamspace)
 	trubank2Subspace := app.paramsKeeper.Subspace(trubank.DefaultParamspace)
 	truStakingSubspace := app.paramsKeeper.Subspace(trustaking.DefaultParamspace)
 	truSlashingSubspace := app.paramsKeeper.Subspace(truslashing.DefaultParamspace)
+	truDistSubspace := app.paramsKeeper.Subspace(trudist.DefaultParamspace)
 
 	// add cosmos keepers
 	app.accountKeeper = auth.NewAccountKeeper(app.codec, keys[auth.StoreKey], authSubspace, auth.ProtoBaseAccount)
 	app.bankKeeper = bank.NewBaseKeeper(app.accountKeeper, bankSubspace, bank.DefaultCodespace, app.ModuleAccountAddrs())
 	app.supplyKeeper = supply.NewKeeper(app.codec, keys[supply.StoreKey], app.accountKeeper, app.bankKeeper, maccPerms)
 	stakingKeeper := staking.NewKeeper(
-		app.codec, keys[staking.StoreKey], tkeys[staking.TStoreKey],
-		app.supplyKeeper, stakingSubspace, staking.DefaultCodespace,
+		app.codec, keys[staking.StoreKey], app.supplyKeeper, stakingSubspace, staking.DefaultCodespace,
 	)
 	app.mintKeeper = mint.NewKeeper(app.codec, keys[mint.StoreKey], mintSubspace, &stakingKeeper, app.supplyKeeper, auth.FeeCollectorName)
 	app.distrKeeper = distr.NewKeeper(app.codec, keys[distr.StoreKey], distrSubspace, &stakingKeeper,
 		app.supplyKeeper, distr.DefaultCodespace, auth.FeeCollectorName, app.ModuleAccountAddrs())
+	app.slashingKeeper = slashing.NewKeeper(
+		app.codec, keys[slashing.StoreKey], &stakingKeeper, slashingSubspace, slashing.DefaultCodespace,
+	)
+	app.crisisKeeper = crisis.NewKeeper(crisisSubspace, invCheckPeriod, app.supplyKeeper, auth.FeeCollectorName)
 
-	app.stakingKeeper = stakingKeeper
+	// register the proposal types
+	govRouter := gov.NewRouter()
+	govRouter.AddRoute(gov.RouterKey, gov.ProposalHandler).
+		AddRoute(params.RouterKey, params.NewParamChangeProposalHandler(app.paramsKeeper))
+	app.govKeeper = gov.NewKeeper(
+		app.codec, keys[gov.StoreKey], govSubspace,
+		app.supplyKeeper, &stakingKeeper, gov.DefaultCodespace, govRouter,
+	)
+
+	// register the staking hooks
+	// NOTE: stakingKeeper above is passed by reference, so that it will contain these hooks
+	app.stakingKeeper = *stakingKeeper.SetHooks(
+		staking.NewMultiStakingHooks(app.distrKeeper.Hooks(), app.slashingKeeper.Hooks()),
+	)
 
 	// add truchain keepers
 	app.communityKeeper = community.NewKeeper(
@@ -175,6 +213,7 @@ func NewTruChain(logger log.Logger, db dbm.DB, loadLatest bool, options ...func(
 		app.bankKeeper,
 		trubank2Subspace,
 		trubank.DefaultCodespace,
+		app.supplyKeeper,
 	)
 
 	app.appAccountKeeper = account.NewKeeper(
@@ -183,6 +222,7 @@ func NewTruChain(logger log.Logger, db dbm.DB, loadLatest bool, options ...func(
 		codec,
 		app.truBankKeeper,
 		app.accountKeeper,
+		app.supplyKeeper,
 	)
 
 	app.claimKeeper = claim.NewKeeper(
@@ -199,6 +239,7 @@ func NewTruChain(logger log.Logger, db dbm.DB, loadLatest bool, options ...func(
 		app.appAccountKeeper,
 		app.truBankKeeper,
 		app.claimKeeper,
+		app.supplyKeeper,
 		truStakingSubspace,
 		trustaking.DefaultCodespace,
 	)
@@ -213,10 +254,15 @@ func NewTruChain(logger log.Logger, db dbm.DB, loadLatest bool, options ...func(
 		app.claimKeeper,
 	)
 
-	// The AnteHandler handles signature verification and transaction pre-processing
-	// TODO [shanev]: see https://github.com/TruStory/truchain/issues/364
-	// Add this back after fixing issues with signature verification
-	// app.SetAnteHandler(auth.NewAnteHandler(app.accountKeeper, app.feeCollectionKeeper))
+	app.truDistributionKeeper = trudist.NewKeeper(
+		keys[trudist.StoreKey],
+		truDistSubspace,
+		codec,
+		app.truBankKeeper,
+		app.accountKeeper,
+		app.supplyKeeper,
+		app.distrKeeper,
+	)
 
 	// The app.Router is the main transaction router where each module registers its routes
 	app.Router().
@@ -240,43 +286,55 @@ func NewTruChain(logger log.Logger, db dbm.DB, loadLatest bool, options ...func(
 		AddRoute(truslashing.QuerierRoute, truslashing.NewQuerier(app.truSlashingKeeper))
 
 	app.mm = module.NewManager(
-		genaccounts.NewAppModule(app.accountKeeper),
 		genutil.NewAppModule(app.accountKeeper, app.stakingKeeper, app.BaseApp.DeliverTx),
 		auth.NewAppModule(app.accountKeeper),
 		bank.NewAppModule(app.bankKeeper, app.accountKeeper),
+		crisis.NewAppModule(&app.crisisKeeper),
+		supply.NewAppModule(app.supplyKeeper, app.accountKeeper),
 		distr.NewAppModule(app.distrKeeper, app.supplyKeeper),
-		staking.NewAppModule(app.stakingKeeper, app.distrKeeper, app.accountKeeper, app.supplyKeeper),
+		gov.NewAppModule(app.govKeeper, app.supplyKeeper),
+		mint.NewAppModule(app.mintKeeper),
+		slashing.NewAppModule(app.slashingKeeper, app.stakingKeeper),
+		staking.NewAppModule(app.stakingKeeper, app.accountKeeper, app.supplyKeeper),
+		// trustory modules
 		community.NewAppModule(app.communityKeeper),
 		claim.NewAppModule(app.claimKeeper),
-		mint.NewAppModule(app.mintKeeper),
 		trubank.NewAppModule(app.truBankKeeper),
 		account.NewAppModule(app.appAccountKeeper),
 		trustaking.NewAppModule(app.truStakingKeeper),
 		truslashing.NewAppModule(app.truSlashingKeeper),
+		trudist.NewAppModule(app.truDistributionKeeper),
 	)
 
 	// During begin block slashing happens after distr.BeginBlocker so that
 	// there is nothing left over in the validator fee pool, so as to keep the
 	// CanWithdrawInvariant invariant.
-	app.mm.SetOrderBeginBlockers(mint.ModuleName, distr.ModuleName)
-	app.mm.SetOrderEndBlockers(staking.ModuleName, trustaking.ModuleName, truslashing.ModuleName, account.ModuleName)
+	app.mm.SetOrderBeginBlockers(mint.ModuleName, trudist.ModuleName, distr.ModuleName, slashing.ModuleName)
+	app.mm.SetOrderEndBlockers(crisis.ModuleName, gov.ModuleName, staking.ModuleName, trustaking.ModuleName, truslashing.ModuleName, account.ModuleName)
 
 	// genutils must occur after staking so that pools are properly
 	// initialized with tokens from genesis accounts.
-	app.mm.SetOrderInitGenesis(genaccounts.ModuleName, account.ModuleName, distr.ModuleName,
+	app.mm.SetOrderInitGenesis(distr.ModuleName,
 		staking.ModuleName, auth.ModuleName, bank.ModuleName,
-		genutil.ModuleName, community.ModuleName, claim.ModuleName,
-		trubank.ModuleName, trustaking.ModuleName, truslashing.ModuleName,
-		mint.ModuleName)
+		slashing.ModuleName, gov.ModuleName, mint.ModuleName, supply.ModuleName,
+		crisis.ModuleName, genutil.ModuleName,
+		community.ModuleName, claim.ModuleName, trubank.ModuleName,
+		account.ModuleName, trustaking.ModuleName, truslashing.ModuleName, trudist.ModuleName)
 
-	app.SetInitChainer(app.InitChainer)
-
-	app.SetBeginBlocker(app.BeginBlocker)
-	app.SetEndBlocker(app.EndBlocker)
+	app.mm.RegisterInvariants(&app.crisisKeeper)
+	//app.mm.RegisterRoutes(app.Router(), app.QueryRouter())
 
 	// initialize stores
 	app.MountKVStores(keys)
 	app.MountTransientStores(tkeys)
+
+	app.SetInitChainer(app.InitChainer)
+	app.SetBeginBlocker(app.BeginBlocker)
+	// The AnteHandler handles signature verification and transaction pre-processing
+	// TODO [shanev]: see https://github.com/TruStory/truchain/issues/364
+	// Add this back after fixing issues with signature verification
+	//app.SetAnteHandler(auth.NewAnteHandler(app.accountKeeper, app.supplyKeeper, auth.DefaultSigVerificationGasConsumer))
+	app.SetEndBlocker(app.EndBlocker)
 
 	if loadLatest {
 		err := app.LoadLatestVersion(app.keys[bam.MainStoreKey])
@@ -296,14 +354,15 @@ func MakeCodec() *codec.Codec {
 	ModuleBasics.RegisterCodec(cdc)
 	sdk.RegisterCodec(cdc)
 	codec.RegisterCrypto(cdc)
+	codec.RegisterEvidences(cdc)
 
-	return cdc
+	return cdc.Seal()
 }
 
 // BeginBlocker reflects logic to run before any TXs application are processed
 // by the application.
 func (app *TruChain) BeginBlocker(ctx sdk.Context, req abci.RequestBeginBlock) abci.ResponseBeginBlock {
-	return abci.ResponseBeginBlock{}
+	return app.mm.BeginBlock(ctx, req)
 }
 
 // EndBlocker reflects logic to run after all TXs are processed by the

@@ -3,6 +3,12 @@ package slashing
 import (
 	"net/url"
 
+	"github.com/TruStory/truchain/x/distribution"
+
+	"github.com/cosmos/cosmos-sdk/x/gov"
+	"github.com/cosmos/cosmos-sdk/x/mint"
+	"github.com/cosmos/cosmos-sdk/x/supply"
+
 	"github.com/tendermint/tendermint/crypto/secp256k1"
 
 	"github.com/TruStory/truchain/x/account"
@@ -18,6 +24,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/store"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth"
+	authexported "github.com/cosmos/cosmos-sdk/x/auth/exported"
 	"github.com/cosmos/cosmos-sdk/x/bank"
 	"github.com/cosmos/cosmos-sdk/x/params"
 	abci "github.com/tendermint/tendermint/abci/types"
@@ -38,6 +45,7 @@ func mockDB() (sdk.Context, Keeper) {
 	stakingKey := sdk.NewKVStoreKey(staking.ModuleName)
 	paramsKey := sdk.NewKVStoreKey(params.StoreKey)
 	transientParamsKey := sdk.NewTransientStoreKey(params.TStoreKey)
+	supplyKey := sdk.NewKVStoreKey(supply.StoreKey)
 
 	ms := store.NewCommitMultiStore(db)
 	ms.MountStoreWithDB(slashKey, sdk.StoreTypeIAVL, db)
@@ -49,6 +57,7 @@ func mockDB() (sdk.Context, Keeper) {
 	ms.MountStoreWithDB(bankKey, sdk.StoreTypeIAVL, db)
 	ms.MountStoreWithDB(communityKey, sdk.StoreTypeIAVL, db)
 	ms.MountStoreWithDB(claimKey, sdk.StoreTypeIAVL, db)
+	ms.MountStoreWithDB(supplyKey, sdk.StoreTypeIAVL, db)
 	ms.LoadLatestVersion()
 
 	ctx := sdk.NewContext(ms, abci.Header{}, false, log.NewNopLogger())
@@ -56,9 +65,19 @@ func mockDB() (sdk.Context, Keeper) {
 	codec := codec.New()
 	cryptoAmino.RegisterAmino(codec)
 	account.RegisterCodec(codec)
-	codec.RegisterInterface((*auth.Account)(nil), nil)
+	codec.RegisterInterface((*authexported.Account)(nil), nil)
 	codec.RegisterConcrete(&auth.BaseAccount{}, "auth/Account", nil)
 	RegisterCodec(codec)
+	supply.RegisterCodec(codec)
+
+	maccPerms := map[string][]string{
+		auth.FeeCollectorName:           nil,
+		mint.ModuleName:                 {supply.Minter},
+		gov.ModuleName:                  {supply.Burner},
+		distribution.UserGrowthPoolName: {supply.Burner, supply.Staking},
+		distribution.UserRewardPoolName: {supply.Burner},
+		staking.UserStakesPoolName:      {supply.Minter, supply.Burner},
+	}
 
 	paramsKeeper := params.NewKeeper(codec, paramsKey, transientParamsKey, params.DefaultCodespace)
 
@@ -73,12 +92,24 @@ func mockDB() (sdk.Context, Keeper) {
 		paramsKeeper.Subspace(bank.DefaultParamspace),
 		bank.DefaultCodespace, nil)
 
+	userRewardAcc := supply.NewEmptyModuleAccount(staking.UserRewardPoolName, supply.Burner, supply.Staking)
+	userGrowthAcc := supply.NewEmptyModuleAccount(account.UserGrowthPoolName, supply.Minter, supply.Burner, supply.Staking)
+	initCoins := sdk.NewCoins(sdk.NewCoin(app.StakeDenom, sdk.NewInt(10000000000)))
+	err := userRewardAcc.SetCoins(initCoins)
+	supplyKeeper := supply.NewKeeper(codec, supplyKey, authKeeper, bankKeeper, maccPerms)
+	supplyKeeper.SetModuleAccount(ctx, userGrowthAcc)
+	supplyKeeper.SetModuleAccount(ctx, userRewardAcc)
+	totalSupply := initCoins
+	supplyKeeper.SetSupply(ctx, supply.NewSupply(totalSupply))
+
 	trubankKeeper := trubank.NewKeeper(
 		codec,
 		bankKey,
 		bankKeeper,
 		paramsKeeper.Subspace(trubank.DefaultParamspace),
-		trubank.DefaultCodespace)
+		trubank.DefaultCodespace,
+		supplyKeeper)
+
 	trubank.InitGenesis(ctx, trubankKeeper, trubank.DefaultGenesisState())
 
 	communityKeeper := community.NewKeeper(
@@ -91,7 +122,7 @@ func mockDB() (sdk.Context, Keeper) {
 	cGenesis.Params.CommunityAdmins = append(cGenesis.Params.CommunityAdmins, cAdmin1, cAdmin2)
 	community.InitGenesis(ctx, communityKeeper, cGenesis)
 	communityID := "furry"
-	_, err := communityKeeper.NewCommunity(ctx, communityID, "Furries", "", cAdmin1)
+	_, err = communityKeeper.NewCommunity(ctx, communityID, "Furries", "", cAdmin1)
 	if err != nil {
 		panic(err)
 	}
@@ -102,6 +133,7 @@ func mockDB() (sdk.Context, Keeper) {
 		codec,
 		trubankKeeper,
 		authKeeper,
+		supplyKeeper,
 	)
 	account.InitGenesis(ctx, accountKeeper, account.DefaultGenesisState())
 
@@ -131,6 +163,7 @@ func mockDB() (sdk.Context, Keeper) {
 		accountKeeper,
 		trubankKeeper,
 		claimKeeper,
+		supplyKeeper,
 		paramsKeeper.Subspace(staking.DefaultParamspace),
 		staking.DefaultCodespace,
 	)

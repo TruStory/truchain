@@ -13,7 +13,7 @@ func TestHandle_SlashArgument(t *testing.T) {
 	ctx, k := mockDB()
 	handler := NewHandler(k)
 
-	staker := k.GetParams(ctx).SlashAdmins[0]
+	staker := k.GetParams(ctx).SlashAdmins[1]
 	body := "Blockchains have the power to fund grassroots communities to solve specific problems."
 	communityID := "crypto"
 	claim, err := k.claimKeeper.SubmitClaim(ctx, body, communityID, staker, url.URL{})

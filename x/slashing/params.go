@@ -31,6 +31,7 @@ type Params struct {
 
 // DefaultParams is the Slashing params for testing
 func DefaultParams() Params {
+
 	return Params{
 		MinSlashCount:           5,
 		SlashMagnitude:          3,

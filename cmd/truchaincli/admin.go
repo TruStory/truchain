@@ -204,5 +204,3 @@ func executeMsg(cmd *cobra.Command, args []string, cdc *codec.Codec, msg sdk.Msg
 	fmt.Println(res)
 	return nil
 }
-
-//

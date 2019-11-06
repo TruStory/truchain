@@ -1,9 +1,9 @@
 package staking
 
 import (
-	app "github.com/TruStory/truchain/types"
-
 	"time"
+
+	app "github.com/TruStory/truchain/types"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
@@ -53,12 +53,15 @@ func (k Keeper) distributeReward(ctx sdk.Context, stake Stake) (RewardResult, sd
 	default:
 		return RewardResult{}, ErrCodeUnknownStakeType()
 	}
+
 	_, err := k.bankKeeper.AddCoin(ctx, stake.Creator, stake.Amount, stake.ArgumentID,
 		refundType, WithCommunityID(argument.CommunityID),
+		FromModuleAccount(UserStakesPoolName),
 	)
 	if err != nil {
 		return RewardResult{}, err
 	}
+
 	interest := k.interest(ctx, stake.Amount, stake.EndTime.Sub(stake.CreatedTime))
 	// creator receives 100% interest of his own stake
 	if argument.Creator.Equals(stake.Creator) {
@@ -69,6 +72,7 @@ func (k Keeper) distributeReward(ctx sdk.Context, stake Stake) (RewardResult, sd
 			argument.ID,
 			TransactionInterestArgumentCreation,
 			WithCommunityID(argument.CommunityID),
+			FromModuleAccount(UserRewardPoolName),
 		)
 		if err != nil {
 			return RewardResult{}, err
@@ -87,20 +91,24 @@ func (k Keeper) distributeReward(ctx sdk.Context, stake Stake) (RewardResult, sd
 		stake.ID,
 		TransactionInterestUpvoteReceived,
 		WithCommunityID(argument.CommunityID),
+		FromModuleAccount(UserRewardPoolName),
 	)
 	if err != nil {
 		return RewardResult{}, err
 	}
+
 	_, err = k.bankKeeper.AddCoin(ctx,
 		stake.Creator,
 		stakerRewardCoin,
 		argument.ID,
 		TransactionInterestUpvoteGiven,
 		WithCommunityID(argument.CommunityID),
+		FromModuleAccount(UserRewardPoolName),
 	)
 	if err != nil {
 		return RewardResult{}, err
 	}
+
 	k.addEarnedCoin(ctx, argument.Creator, claim.CommunityID, creatorRewardCoin.Amount)
 	k.addEarnedCoin(ctx, stake.Creator, claim.CommunityID, stakerRewardCoin.Amount)
 	rewardResult := RewardResult{
@@ -114,8 +122,6 @@ func (k Keeper) distributeReward(ctx sdk.Context, stake Stake) (RewardResult, sd
 }
 
 func (k Keeper) interest(ctx sdk.Context, amount sdk.Coin, period time.Duration) sdk.Dec {
-	// TODO: https://github.com/TruStory/truchain/issues/677
-	// use interest from distribution module
 	interestRate := k.GetParams(ctx).InterestRate
 	return Interest(interestRate, amount, period)
 }

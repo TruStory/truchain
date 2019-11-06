@@ -8,13 +8,17 @@ import (
 
 // EndBlocker called every block, process expiring stakes
 func EndBlocker(ctx sdk.Context, keeper Keeper) {
-	toUnjail, err := keeper.JailedAccountsBefore(ctx, ctx.BlockHeader().Time)
+	keeper.unjailAccounts(ctx)
+}
+
+func (k Keeper) unjailAccounts(ctx sdk.Context) {
+	toUnjail, err := k.JailedAccountsBefore(ctx, ctx.BlockHeader().Time)
 	if err != nil {
 		panic(err)
 	}
 
 	for _, acct := range toUnjail {
-		err = keeper.UnJail(ctx, acct.PrimaryAddress())
+		err = k.UnJail(ctx, acct.PrimaryAddress())
 		if err != nil {
 			panic(err)
 		}
@@ -26,6 +30,6 @@ func EndBlocker(ctx sdk.Context, keeper Keeper) {
 			),
 		)
 
-		keeper.Logger(ctx).Info(fmt.Sprintf("Unjailed %s", acct.String()))
+		k.Logger(ctx).Info(fmt.Sprintf("Unjailed %s", acct.String()))
 	}
 }

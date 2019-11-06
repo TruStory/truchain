@@ -123,7 +123,7 @@ func (k Keeper) refundStake(ctx sdk.Context, stake staking.Stake, communityID st
 		return staking.ErrCodeInvalidStakeType(stake.Type)
 	}
 	_, err := k.bankKeeper.AddCoin(ctx, stake.Creator, stake.Amount, stake.ArgumentID,
-		refundType, WithCommunityID(communityID),
+		refundType, WithCommunityID(communityID), FromModuleAccount(staking.UserStakesPoolName),
 	)
 	if err != nil {
 		return err
@@ -150,70 +150,9 @@ func (k Keeper) punish(ctx sdk.Context, argumentID uint64) ([]PunishmentResult, 
 			}
 		}
 		if stake.Expired && stake.Result != nil {
-			switch stake.Result.Type {
-			case staking.RewardResultArgumentCreation:
-				// remove argument created interest from earned coins
-				k.stakingKeeper.SubtractEarnedCoin(ctx,
-					stake.Result.ArgumentCreator,
-					communityID,
-					stake.Result.ArgumentCreatorReward.Amount)
-				_, amount, err := k.bankKeeper.SafeSubtractCoin(
-					ctx,
-					stake.Result.ArgumentCreator,
-					stake.Result.ArgumentCreatorReward,
-					stake.ID,
-					bank.TransactionInterestArgumentCreationSlashed,
-					WithCommunityID(communityID))
-				punishmentResults = append(punishmentResults,
-					PunishmentResult{Type: PunishmentInterestSlashed,
-						AppAccAddress: stake.Result.ArgumentCreator,
-						Coin:          amount,
-					})
-				if err != nil {
-					return punishmentResults, err
-				}
-			case staking.RewardResultUpvoteSplit:
-				// remove agree received interest from earned coins
-				k.stakingKeeper.SubtractEarnedCoin(ctx,
-					stake.Result.ArgumentCreator,
-					communityID,
-					stake.Result.ArgumentCreatorReward.Amount)
-				_, amount, err := k.bankKeeper.SafeSubtractCoin(
-					ctx,
-					stake.Result.ArgumentCreator,
-					stake.Result.ArgumentCreatorReward,
-					stake.ID,
-					bank.TransactionInterestUpvoteReceivedSlashed,
-					WithCommunityID(communityID))
-				if err != nil {
-					return punishmentResults, err
-				}
-				punishmentResults = append(punishmentResults,
-					PunishmentResult{Type: PunishmentInterestSlashed,
-						AppAccAddress: stake.Result.ArgumentCreator,
-						Coin:          amount,
-					})
-				// remove agree given interest from earned coins
-				k.stakingKeeper.SubtractEarnedCoin(ctx,
-					stake.Result.StakeCreator,
-					communityID,
-					stake.Result.StakeCreatorReward.Amount)
-				_, amount, err = k.bankKeeper.SafeSubtractCoin(
-					ctx,
-					stake.Result.StakeCreator,
-					stake.Result.StakeCreatorReward,
-					stake.ID,
-					bank.TransactionInterestUpvoteGivenSlashed,
-					WithCommunityID(communityID))
-
-				if err != nil {
-					return punishmentResults, err
-				}
-				punishmentResults = append(punishmentResults,
-					PunishmentResult{Type: PunishmentInterestSlashed,
-						AppAccAddress: stake.Result.StakeCreator,
-						Coin:          amount,
-					})
+			punishmentResults, err := k.punishCreatorsWithExpiredStake(ctx, stake, communityID, punishmentResults)
+			if err != nil {
+				return punishmentResults, err
 			}
 		}
 		slashMagnitude := int64(k.GetParams(ctx).SlashMagnitude)
@@ -232,7 +171,8 @@ func (k Keeper) punish(ctx sdk.Context, argumentID uint64) ([]PunishmentResult, 
 			slashCoin,
 			stake.ID,
 			slashTxType,
-			WithCommunityID(communityID))
+			WithCommunityID(communityID),
+			ToModuleAccount(staking.UserRewardPoolName))
 		punishmentResults = append(punishmentResults,
 			PunishmentResult{Type: PunishmentStakeSlashed,
 				AppAccAddress: stake.Creator,
@@ -265,6 +205,8 @@ func (k Keeper) punish(ctx sdk.Context, argumentID uint64) ([]PunishmentResult, 
 		if err != nil {
 			return punishmentResults, err
 		}
+
+		k.Logger(ctx).Info(fmt.Sprintf("jailed: %+v", jailed))
 		if jailed {
 			punishmentResults = append(punishmentResults,
 				PunishmentResult{
@@ -279,7 +221,84 @@ func (k Keeper) punish(ctx sdk.Context, argumentID uint64) ([]PunishmentResult, 
 		return punishmentResults, sdk.ErrInsufficientCoins("staking pool cannot be empty")
 	}
 
-	// reward curators who marked "unhelpful"
+	return k.rewardCurators(ctx, stakingPool, argumentID, communityID, punishmentResults)
+}
+
+func (k Keeper) punishCreatorsWithExpiredStake(ctx sdk.Context, stake staking.Stake, communityID string, punishmentResults []PunishmentResult) ([]PunishmentResult, sdk.Error) {
+	switch stake.Result.Type {
+	case staking.RewardResultArgumentCreation:
+		// remove argument created interest from earned coins
+		k.stakingKeeper.SubtractEarnedCoin(ctx,
+			stake.Result.ArgumentCreator,
+			communityID,
+			stake.Result.ArgumentCreatorReward.Amount)
+		_, amount, err := k.bankKeeper.SafeSubtractCoin(
+			ctx,
+			stake.Result.ArgumentCreator,
+			stake.Result.ArgumentCreatorReward,
+			stake.ID,
+			bank.TransactionInterestArgumentCreationSlashed,
+			WithCommunityID(communityID),
+			ToModuleAccount(staking.UserRewardPoolName))
+		punishmentResults = append(punishmentResults,
+			PunishmentResult{Type: PunishmentInterestSlashed,
+				AppAccAddress: stake.Result.ArgumentCreator,
+				Coin:          amount,
+			})
+		if err != nil {
+			return punishmentResults, err
+		}
+	case staking.RewardResultUpvoteSplit:
+		// remove agree received interest from earned coins
+		k.stakingKeeper.SubtractEarnedCoin(ctx,
+			stake.Result.ArgumentCreator,
+			communityID,
+			stake.Result.ArgumentCreatorReward.Amount)
+		_, amount, err := k.bankKeeper.SafeSubtractCoin(
+			ctx,
+			stake.Result.ArgumentCreator,
+			stake.Result.ArgumentCreatorReward,
+			stake.ID,
+			bank.TransactionInterestUpvoteReceivedSlashed,
+			WithCommunityID(communityID),
+			ToModuleAccount(staking.UserRewardPoolName))
+		if err != nil {
+			return punishmentResults, err
+		}
+		punishmentResults = append(punishmentResults,
+			PunishmentResult{Type: PunishmentInterestSlashed,
+				AppAccAddress: stake.Result.ArgumentCreator,
+				Coin:          amount,
+			})
+		// remove agree given interest from earned coins
+		k.stakingKeeper.SubtractEarnedCoin(ctx,
+			stake.Result.StakeCreator,
+			communityID,
+			stake.Result.StakeCreatorReward.Amount)
+		_, amount, err = k.bankKeeper.SafeSubtractCoin(
+			ctx,
+			stake.Result.StakeCreator,
+			stake.Result.StakeCreatorReward,
+			stake.ID,
+			bank.TransactionInterestUpvoteGivenSlashed,
+			WithCommunityID(communityID),
+			ToModuleAccount(staking.UserRewardPoolName))
+
+		if err != nil {
+			return punishmentResults, err
+		}
+		punishmentResults = append(punishmentResults,
+			PunishmentResult{Type: PunishmentInterestSlashed,
+				AppAccAddress: stake.Result.StakeCreator,
+				Coin:          amount,
+			})
+	}
+
+	return punishmentResults, nil
+}
+
+// reward curators who marked "unhelpful"
+func (k Keeper) rewardCurators(ctx sdk.Context, stakingPool sdk.Coin, argumentID uint64, communityID string, punishmentResults []PunishmentResult) ([]PunishmentResult, sdk.Error) {
 	curatorShareDec := k.GetParams(ctx).CuratorShare
 	totalCuratorAmountDec := stakingPool.Amount.ToDec().Mul(curatorShareDec)
 
@@ -293,10 +312,12 @@ func (k Keeper) punish(ctx sdk.Context, argumentID uint64) ([]PunishmentResult, 
 			curatorCoin,
 			slash.ID,
 			bank.TransactionCuratorReward,
-			WithCommunityID(communityID))
+			WithCommunityID(communityID),
+			FromModuleAccount(staking.UserRewardPoolName))
 		if err != nil {
 			return punishmentResults, err
 		}
+
 		punishmentResults = append(punishmentResults,
 			PunishmentResult{Type: PunishmentCuratorRewarded,
 				AppAccAddress: slash.Creator,

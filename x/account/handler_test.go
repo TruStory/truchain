@@ -8,7 +8,7 @@ import (
 )
 
 func TestHandleMsgRegisterKey(t *testing.T) {
-	ctx, keeper := mockDB()
+	ctx, keeper := mockDB(t)
 	handler := NewHandler(keeper)
 	assert.NotNil(t, handler) // assert handler is present
 
@@ -30,7 +30,7 @@ func TestHandleMsgRegisterKey(t *testing.T) {
 }
 
 func TestByzantineMsg(t *testing.T) {
-	ctx, keeper := mockDB()
+	ctx, keeper := mockDB(t)
 
 	handler := NewHandler(keeper)
 	assert.NotNil(t, handler)

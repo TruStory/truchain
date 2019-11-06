@@ -4,7 +4,10 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/cosmos/cosmos-sdk/x/supply"
+
 	app "github.com/TruStory/truchain/types"
+	"github.com/TruStory/truchain/x/distribution"
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth"
@@ -21,16 +24,18 @@ type Keeper struct {
 
 	bankKeeper    BankKeeper
 	accountKeeper auth.AccountKeeper
+	supplyKeeper  supply.Keeper
 }
 
 // NewKeeper creates a new keeper of the auth Keeper
-func NewKeeper(storeKey sdk.StoreKey, paramStore params.Subspace, codec *codec.Codec, bankKeeper BankKeeper, accountKeeper auth.AccountKeeper) Keeper {
+func NewKeeper(storeKey sdk.StoreKey, paramStore params.Subspace, codec *codec.Codec, bankKeeper BankKeeper, accountKeeper auth.AccountKeeper, supplyKeeper supply.Keeper) Keeper {
 	return Keeper{
 		storeKey,
 		codec,
 		paramStore.WithKeyTable(ParamKeyTable()),
 		bankKeeper,
 		accountKeeper,
+		supplyKeeper,
 	}
 }
 
@@ -54,7 +59,7 @@ func (k Keeper) CreateAppAccount(ctx sdk.Context, address sdk.AccAddress,
 	initialCoinAmount := coins.AmountOf(app.StakeDenom)
 	if initialCoinAmount.IsPositive() {
 		coin := sdk.NewCoin(app.StakeDenom, initialCoinAmount)
-		_, sdkErr := k.bankKeeper.AddCoin(ctx, address, coin, 0, TransactionGift)
+		_, sdkErr := k.bankKeeper.AddCoin(ctx, address, coin, 0, TransactionGift, FromModuleAccount(distribution.UserGrowthPoolName))
 		if sdkErr != nil {
 			return appAccnt, sdkErr
 		}
@@ -187,6 +192,21 @@ func (k Keeper) IncrementSlashCount(ctx sdk.Context, address sdk.AccAddress) (ja
 	}
 
 	return false, nil
+}
+
+// IterateAppAccounts iterates over all the stored app accounts and performs a callback function
+func (k Keeper) IterateAppAccounts(ctx sdk.Context, cb func(acc AppAccount) (stop bool)) {
+	iterator := sdk.KVStorePrefixIterator(k.store(ctx), AppAccountKeyPrefix)
+
+	defer iterator.Close()
+	for ; iterator.Valid(); iterator.Next() {
+		var account AppAccount
+		k.codec.MustUnmarshalBinaryBare(iterator.Value(), &account)
+
+		if cb(account) {
+			break
+		}
+	}
 }
 
 func (k Keeper) getAppAccount(ctx sdk.Context, addr sdk.AccAddress) (acc AppAccount, ok bool) {

@@ -3,6 +3,7 @@ package staking
 import (
 	"time"
 
+	"github.com/TruStory/truchain/x/account"
 	bankexported "github.com/TruStory/truchain/x/bank/exported"
 	"github.com/TruStory/truchain/x/claim"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -11,6 +12,7 @@ import (
 type AccountKeeper interface {
 	IsJailed(ctx sdk.Context, address sdk.AccAddress) (bool, sdk.Error)
 	UnJail(ctx sdk.Context, address sdk.AccAddress) sdk.Error
+	IterateAppAccounts(ctx sdk.Context, cb func(acc account.AppAccount) (stop bool))
 }
 
 type ClaimKeeper interface {
@@ -30,4 +32,5 @@ type BankKeeper interface {
 	SubtractCoin(ctx sdk.Context, addr sdk.AccAddress, amt sdk.Coin,
 		referenceID uint64, txType TransactionType, setters ...bankexported.TransactionSetter) (sdk.Coins, sdk.Error)
 	TransactionsByAddress(ctx sdk.Context, address sdk.AccAddress, filterSetters ...bankexported.Filter) []bankexported.Transaction
+	IterateUserTransactions(sdk.Context, sdk.AccAddress, bool, func(tx bankexported.Transaction) bool)
 }
