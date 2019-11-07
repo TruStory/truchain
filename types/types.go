@@ -35,6 +35,10 @@ var RegistrationFee = auth.StdFee{
 	Gas:    20000,
 }
 
+func NewShanevCoin(amount int64) sdk.Coin {
+	return sdk.NewInt64Coin("tru", amount*Shanev)
+}
+
 // MsgResult is the default success response for a chain request
 type MsgResult struct {
 	ID int64 `json:"id"`

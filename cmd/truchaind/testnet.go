@@ -25,7 +25,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/module"
 	"github.com/cosmos/cosmos-sdk/x/auth"
-	"github.com/cosmos/cosmos-sdk/x/genaccounts"
+	authexported "github.com/cosmos/cosmos-sdk/x/auth/exported"
 	"github.com/cosmos/cosmos-sdk/x/genutil"
 	genutiltypes "github.com/cosmos/cosmos-sdk/x/genutil/types"
 	"github.com/cosmos/cosmos-sdk/x/staking"
@@ -112,8 +112,8 @@ func InitTestnet(cmd *cobra.Command, config *tmconfig.Config, cdc *codec.Codec, 
 	gaiaConfig.MinGasPrices = minGasPrices
 
 	var (
-		accs     []genaccounts.GenesisAccount
-		genFiles []string
+		genAccounts []authexported.GenesisAccount
+		genFiles    []string
 	)
 
 	// generate private keys, node IDs, and initial transactions
@@ -193,20 +193,18 @@ func InitTestnet(cmd *cobra.Command, config *tmconfig.Config, cdc *codec.Codec, 
 
 		accTokens := sdk.TokensFromConsensusPower(1000)
 		accStakingTokens := sdk.TokensFromConsensusPower(500)
-		accs = append(accs, genaccounts.GenesisAccount{
-			Address: addr,
-			Coins: sdk.Coins{
-				sdk.NewCoin(app.StakeDenom, accTokens),
-				sdk.NewCoin(sdk.DefaultBondDenom, accStakingTokens),
-			},
-		})
+		coins := sdk.Coins{
+			sdk.NewCoin(fmt.Sprintf("%stoken", nodeDirName), accTokens),
+			sdk.NewCoin(app.StakeDenom, accStakingTokens),
+		}
+		genAccounts = append(genAccounts, auth.NewBaseAccount(addr, coins.Sort(), nil, 0, 0))
 
 		valTokens := sdk.TokensFromConsensusPower(100)
 		msg := staking.NewMsgCreateValidator(
 			sdk.ValAddress(addr),
 			valPubKeys[i],
-			sdk.NewCoin(sdk.DefaultBondDenom, valTokens),
-			staking.NewDescription(nodeDirName, "", "", ""),
+			sdk.NewCoin(app.StakeDenom, valTokens),
+			staking.NewDescription(nodeDirName, "", "", "", ""),
 			staking.NewCommissionRates(sdk.ZeroDec(), sdk.ZeroDec(), sdk.ZeroDec()),
 			sdk.OneInt(),
 		)
@@ -242,7 +240,7 @@ func InitTestnet(cmd *cobra.Command, config *tmconfig.Config, cdc *codec.Codec, 
 		srvconfig.WriteConfigFile(gaiaConfigFilePath, gaiaConfig)
 	}
 
-	if err := initGenFiles(cdc, mbm, chainID, accs, genFiles, numValidators); err != nil {
+	if err := initGenFiles(cdc, mbm, chainID, genAccounts, genFiles, numValidators); err != nil {
 		return err
 	}
 
@@ -259,12 +257,16 @@ func InitTestnet(cmd *cobra.Command, config *tmconfig.Config, cdc *codec.Codec, 
 }
 
 func initGenFiles(cdc *codec.Codec, mbm module.BasicManager, chainID string,
-	accs []genaccounts.GenesisAccount, genFiles []string, numValidators int) error {
+	genAccounts []authexported.GenesisAccount, genFiles []string, numValidators int) error {
 
 	appGenState := mbm.DefaultGenesis()
 
 	// set the accounts in the genesis state
-	appGenState = genaccounts.SetGenesisStateInAppState(cdc, appGenState, accs)
+	authDataBz := appGenState[auth.ModuleName]
+	var authGenState auth.GenesisState
+	cdc.MustUnmarshalJSON(authDataBz, &authGenState)
+	authGenState.Accounts = genAccounts
+	appGenState[auth.ModuleName] = cdc.MustMarshalJSON(authGenState)
 
 	appGenStateJSON, err := codec.MarshalJSONIndent(cdc, appGenState)
 	if err != nil {

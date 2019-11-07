@@ -3,6 +3,9 @@ package staking
 import (
 	"fmt"
 
+	"github.com/TruStory/truchain/x/account"
+	bankexported "github.com/TruStory/truchain/x/bank/exported"
+
 	app "github.com/TruStory/truchain/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
@@ -51,6 +54,10 @@ func InitGenesis(ctx sdk.Context, k Keeper, data GenesisState) {
 		k.setStake(ctx, s)
 		if !s.Expired {
 			k.InsertActiveStakeQueue(ctx, s.ID, s.EndTime)
+			err := k.supplyKeeper.MintCoins(ctx, UserStakesPoolName, sdk.NewCoins(s.Amount))
+			if err != nil {
+				panic(err)
+			}
 		}
 		k.setArgumentStake(ctx, s.ArgumentID, s.ID)
 		k.setUserStake(ctx, s.Creator, s.CreatedTime, s.ID)
@@ -79,6 +86,39 @@ func InitGenesis(ctx sdk.Context, k Keeper, data GenesisState) {
 		k.setEarnedCoins(ctx, e.Address, e.Coins.Sort())
 	}
 	k.SetParams(ctx, data.Params)
+
+	err := initUserRewardsPool(ctx, k)
+	if err != nil {
+		panic(err)
+	}
+}
+
+func initUserRewardsPool(ctx sdk.Context, keeper Keeper) sdk.Error {
+	userGrowthAcc := keeper.supplyKeeper.GetModuleAccount(ctx, UserRewardPoolName)
+	if userGrowthAcc.GetCoins().Empty() {
+		amount := app.NewShanevCoin(5000000)
+		err := keeper.supplyKeeper.MintCoins(ctx, UserRewardPoolName, sdk.NewCoins(amount))
+		if err != nil {
+			return err
+		}
+
+		keeper.accountKeeper.IterateAppAccounts(ctx, func(acc account.AppAccount) (stop bool) {
+			addr := acc.PrimaryAddress()
+			keeper.bankKeeper.IterateUserTransactions(ctx, addr, false, func(tx bankexported.Transaction) bool {
+				switch tx.Type {
+				case TransactionInterestArgumentCreation, TransactionInterestUpvoteGiven,
+					TransactionInterestUpvoteReceived:
+					err := keeper.supplyKeeper.BurnCoins(ctx, UserRewardPoolName, sdk.NewCoins(tx.Amount))
+					if err != nil {
+						panic(err)
+					}
+				}
+				return false
+			})
+			return false
+		})
+	}
+	return nil
 }
 
 // ExportGenesis exports the genesis state

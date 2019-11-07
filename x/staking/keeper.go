@@ -3,6 +3,8 @@ package staking
 import (
 	"time"
 
+	"github.com/cosmos/cosmos-sdk/x/supply"
+
 	app "github.com/TruStory/truchain/types"
 
 	"github.com/cosmos/cosmos-sdk/codec"
@@ -20,11 +22,12 @@ type Keeper struct {
 	bankKeeper    BankKeeper
 	accountKeeper AccountKeeper
 	claimKeeper   ClaimKeeper
+	supplyKeeper  supply.Keeper
 }
 
 // NewKeeper creates a staking keeper.
 func NewKeeper(codec *codec.Codec, storeKey sdk.StoreKey,
-	accountKeeper AccountKeeper, bankKeeper BankKeeper, claimKeeper ClaimKeeper,
+	accountKeeper AccountKeeper, bankKeeper BankKeeper, claimKeeper ClaimKeeper, supplyKeeper supply.Keeper,
 	paramStore params.Subspace,
 	codespace sdk.CodespaceType) Keeper {
 	return Keeper{
@@ -35,6 +38,7 @@ func NewKeeper(codec *codec.Codec, storeKey sdk.StoreKey,
 		bankKeeper:    bankKeeper,
 		accountKeeper: accountKeeper,
 		claimKeeper:   claimKeeper,
+		supplyKeeper:  supplyKeeper,
 	}
 }
 
@@ -455,11 +459,15 @@ func (k Keeper) newStake(ctx sdk.Context, amount sdk.Coin, creator sdk.AccAddres
 	if err != nil {
 		return Stake{}, err
 	}
+
 	_, err = k.bankKeeper.SubtractCoin(ctx, creator, amount,
-		argumentID, stakeType.BankTransactionType(), WithCommunityID(communityID))
+		argumentID, stakeType.BankTransactionType(), WithCommunityID(communityID),
+		ToModuleAccount(UserStakesPoolName),
+	)
 	if err != nil {
 		return Stake{}, err
 	}
+
 	stake := Stake{
 		ID:          stakeID,
 		ArgumentID:  argumentID,

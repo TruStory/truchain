@@ -19,7 +19,7 @@ import (
 // SendGiftCmd will create a send tx and sign it with the given key.
 func SendGiftCmd(cdc *codec.Codec) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "send [from_key_or_address] [to_address] [amount]",
+		Use:   "send_gift [from_key_or_address] [to_address] [amount]",
 		Short: "Create and sign a send gift tx",
 		Args:  cobra.ExactArgs(3),
 		RunE: func(cmd *cobra.Command, args []string) error {

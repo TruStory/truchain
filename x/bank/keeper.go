@@ -1,32 +1,36 @@
 package bank
 
 import (
+	"github.com/TruStory/truchain/x/distribution"
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/bank"
 	"github.com/cosmos/cosmos-sdk/x/params"
+	"github.com/cosmos/cosmos-sdk/x/supply"
 
 	app "github.com/TruStory/truchain/types"
 )
 
 // Keeper is the model object for the package bank module
 type Keeper struct {
-	storeKey   sdk.StoreKey
-	codec      *codec.Codec
-	paramStore params.Subspace
-	bankKeeper bank.Keeper
-	codespace  sdk.CodespaceType
+	storeKey     sdk.StoreKey
+	codec        *codec.Codec
+	paramStore   params.Subspace
+	bankKeeper   bank.Keeper
+	codespace    sdk.CodespaceType
+	supplyKeeper supply.Keeper
 }
 
 // NewKeeper creates a bank keeper.
 func NewKeeper(codec *codec.Codec, storeKey sdk.StoreKey, bankKeeper bank.Keeper,
-	paramStore params.Subspace, codespace sdk.CodespaceType) Keeper {
+	paramStore params.Subspace, codespace sdk.CodespaceType, supplyKeeper supply.Keeper) Keeper {
 	return Keeper{
-		storeKey:   storeKey,
-		codec:      codec,
-		bankKeeper: bankKeeper,
-		paramStore: paramStore.WithKeyTable(ParamKeyTable()),
-		codespace:  codespace,
+		storeKey:     storeKey,
+		codec:        codec,
+		bankKeeper:   bankKeeper,
+		paramStore:   paramStore.WithKeyTable(ParamKeyTable()),
+		codespace:    codespace,
+		supplyKeeper: supplyKeeper,
 	}
 }
 
@@ -45,7 +49,15 @@ func (k Keeper) AddCoin(ctx sdk.Context, addr sdk.AccAddress, amt sdk.Coin,
 	if !txType.AllowedForAddition() {
 		return sdk.Coins{}, ErrInvalidTransactionType(txType)
 	}
-	coins, err := k.bankKeeper.AddCoins(ctx, addr, sdk.Coins{amt})
+	var err sdk.Error
+	coins := sdk.Coins{amt}
+	if tx.FromModuleAccount != "" {
+		err = k.supplyKeeper.SendCoinsFromModuleToAccount(ctx, tx.FromModuleAccount, addr, sdk.Coins{amt})
+	}
+	if tx.FromModuleAccount == "" {
+		coins, err = k.bankKeeper.AddCoins(ctx, addr, sdk.Coins{amt})
+	}
+
 	if err != nil {
 		return coins, err
 	}
@@ -76,7 +88,14 @@ func (k Keeper) SubtractCoin(ctx sdk.Context, addr sdk.AccAddress, amt sdk.Coin,
 	if !txType.AllowedForDeduction() {
 		return sdk.Coins{}, ErrInvalidTransactionType(txType)
 	}
-	coins, err := k.bankKeeper.SubtractCoins(ctx, addr, sdk.Coins{amt})
+	var err sdk.Error
+	coins := sdk.Coins{amt}
+	if tx.ToModuleAccount != "" {
+		err = k.supplyKeeper.SendCoinsFromAccountToModule(ctx, addr, tx.ToModuleAccount, sdk.Coins{amt})
+	}
+	if tx.ToModuleAccount == "" {
+		coins, err = k.bankKeeper.SubtractCoins(ctx, addr, sdk.Coins{amt})
+	}
 	if err != nil {
 		return coins, err
 	}
@@ -134,6 +153,7 @@ func (k Keeper) rewardBrokerAddress(ctx sdk.Context) sdk.AccAddress {
 	k.paramStore.GetIfExists(ctx, ParamKeyRewardBrokerAddress, &address)
 	return address
 }
+
 func (k Keeper) sendGift(ctx sdk.Context,
 	sender sdk.AccAddress, recipient sdk.AccAddress,
 	amount sdk.Coin) sdk.Error {
@@ -144,23 +164,11 @@ func (k Keeper) sendGift(ctx sdk.Context,
 	if amount.Denom != app.StakeDenom {
 		return sdk.ErrInvalidCoins("Invalid denomination coin")
 	}
-	_, err := k.AddCoin(ctx, recipient, amount, 0, TransactionGift)
+	_, err := k.AddCoin(ctx, recipient, amount, 0, TransactionGift, FromModuleAccount(distribution.UserGrowthPoolName))
 	if err != nil {
 		return err
 	}
-	return nil
-}
 
-func (k Keeper) payReward(ctx sdk.Context,
-	sender sdk.AccAddress, recipient sdk.AccAddress,
-	amount sdk.Coin, inviteID uint64) sdk.Error {
-	if !k.rewardBrokerAddress(ctx).Equals(sender) {
-		return ErrInvalidRewardBrokerAddress(sender)
-	}
-	_, err := k.AddCoin(ctx, recipient, amount, inviteID, TransactionRewardPayout)
-	if err != nil {
-		return err
-	}
 	return nil
 }
 

@@ -17,6 +17,8 @@ type Transaction struct {
 	CommunityID       string          `json:"community_id"`
 	Amount            sdk.Coin        `json:"amount"`
 	CreatedTime       time.Time       `json:"created_time"`
+	FromModuleAccount string          `json:"sender_module_account"`
+	ToModuleAccount   string          `json:"to_module_account"`
 }
 
 // TransactionType defines the type of transaction.
@@ -121,6 +123,18 @@ type TransactionSetter func(*Transaction)
 func WithCommunityID(communityID string) TransactionSetter {
 	return func(tx *Transaction) {
 		tx.CommunityID = communityID
+	}
+}
+
+func FromModuleAccount(moduleAccount string) TransactionSetter {
+	return func(tx *Transaction) {
+		tx.FromModuleAccount = moduleAccount
+	}
+}
+
+func ToModuleAccount(moduleAccount string) TransactionSetter {
+	return func(tx *Transaction) {
+		tx.ToModuleAccount = moduleAccount
 	}
 }
 

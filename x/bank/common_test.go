@@ -1,12 +1,15 @@
 package bank
 
 import (
+	app "github.com/TruStory/truchain/types"
+	"github.com/TruStory/truchain/x/account"
 	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/cosmos/cosmos-sdk/store"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth"
 	"github.com/cosmos/cosmos-sdk/x/bank"
 	"github.com/cosmos/cosmos-sdk/x/params"
+	"github.com/cosmos/cosmos-sdk/x/supply"
 	abci "github.com/tendermint/tendermint/abci/types"
 	"github.com/tendermint/tendermint/crypto"
 	"github.com/tendermint/tendermint/crypto/ed25519"
@@ -20,12 +23,14 @@ func mockDB() (sdk.Context, Keeper, auth.AccountKeeper) {
 	accKey := sdk.NewKVStoreKey(auth.StoreKey)
 	paramsKey := sdk.NewKVStoreKey(params.StoreKey)
 	transientParamsKey := sdk.NewTransientStoreKey(params.TStoreKey)
+	supplyKey := sdk.NewKVStoreKey(supply.StoreKey)
 
 	ms := store.NewCommitMultiStore(db)
 	ms.MountStoreWithDB(accKey, sdk.StoreTypeIAVL, db)
 	ms.MountStoreWithDB(storeKey, sdk.StoreTypeIAVL, db)
 	ms.MountStoreWithDB(paramsKey, sdk.StoreTypeIAVL, db)
 	ms.MountStoreWithDB(transientParamsKey, sdk.StoreTypeTransient, db)
+	ms.MountStoreWithDB(supplyKey, sdk.StoreTypeIAVL, db)
 	ms.LoadLatestVersion()
 
 	ctx := sdk.NewContext(ms, abci.Header{}, false, log.NewNopLogger())
@@ -35,6 +40,7 @@ func mockDB() (sdk.Context, Keeper, auth.AccountKeeper) {
 	auth.RegisterCodec(cdc)
 	RegisterCodec(cdc)
 	codec.RegisterCrypto(cdc)
+	supply.RegisterCodec(cdc)
 
 	// Keepers
 	pk := params.NewKeeper(cdc, paramsKey, transientParamsKey, params.DefaultCodespace)
@@ -45,6 +51,17 @@ func mockDB() (sdk.Context, Keeper, auth.AccountKeeper) {
 		nil,
 	)
 
+	maccPerms := map[string][]string{
+		account.UserGrowthPoolName: {supply.Burner, supply.Staking},
+	}
+	supplyKeeper := supply.NewKeeper(cdc, supplyKey, accKeeper, bankKeeper, maccPerms)
+	userGrowthAcc := supply.NewEmptyModuleAccount(account.UserGrowthPoolName, supply.Burner, supply.Staking)
+	initCoins := sdk.NewCoins(sdk.NewCoin(app.StakeDenom, sdk.NewInt(100000000000)))
+	userGrowthAcc.SetCoins(initCoins)
+	supplyKeeper.SetModuleAccount(ctx, userGrowthAcc)
+	totalSupply := initCoins
+	supplyKeeper.SetSupply(ctx, supply.NewSupply(totalSupply))
+
 	// module keeper
 	keeper := NewKeeper(
 		cdc,
@@ -52,6 +69,7 @@ func mockDB() (sdk.Context, Keeper, auth.AccountKeeper) {
 		bankKeeper,
 		pk.Subspace(DefaultParamspace),
 		DefaultCodespace,
+		supplyKeeper,
 	)
 
 	InitGenesis(ctx, keeper, DefaultGenesisState())

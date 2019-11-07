@@ -8,18 +8,22 @@ import (
 
 // EndBlocker called every block, process expiring stakes
 func EndBlocker(ctx sdk.Context, keeper Keeper) {
-	logger := keeper.Logger(ctx)
+	keeper.processExpiringStakes(ctx)
+}
+
+func (k Keeper) processExpiringStakes(ctx sdk.Context) {
+	logger := k.Logger(ctx)
 	expiredStakes := make([]Stake, 0)
-	keeper.IterateActiveStakeQueue(ctx, ctx.BlockHeader().Time, func(stake Stake) bool {
+	k.IterateActiveStakeQueue(ctx, ctx.BlockHeader().Time, func(stake Stake) bool {
 		logger.Info(fmt.Sprintf("Processing expired stakeID %d argumentID %d", stake.ID, stake.ArgumentID))
-		result, err := keeper.distributeReward(ctx, stake)
+		result, err := k.distributeReward(ctx, stake)
 		if err != nil {
 			panic(err)
 		}
 		stake.Expired = true
 		stake.Result = &result
-		keeper.setStake(ctx, stake)
-		keeper.RemoveFromActiveStakeQueue(ctx, stake.ID, stake.EndTime)
+		k.setStake(ctx, stake)
+		k.RemoveFromActiveStakeQueue(ctx, stake.ID, stake.EndTime)
 		expiredStakes = append(expiredStakes, stake)
 		return false
 	})
@@ -28,7 +32,7 @@ func EndBlocker(ctx sdk.Context, keeper Keeper) {
 		return
 	}
 
-	b, err := keeper.codec.MarshalJSON(expiredStakes)
+	b, err := k.codec.MarshalJSON(expiredStakes)
 	if err != nil {
 		panic(err)
 	}
