@@ -3,7 +3,9 @@ package community
 import (
 	"fmt"
 
+	app "github.com/TruStory/truchain/types"
 	"github.com/cosmos/cosmos-sdk/codec"
+	"github.com/cosmos/cosmos-sdk/store/gaskv"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/params"
 	log "github.com/tendermint/tendermint/libs/log"
@@ -47,7 +49,7 @@ func (k Keeper) NewCommunity(ctx sdk.Context, id string, name string, descriptio
 
 // Community returns a community by its ID
 func (k Keeper) Community(ctx sdk.Context, id string) (community Community, err sdk.Error) {
-	store := ctx.KVStore(k.storeKey)
+	store := k.store(ctx)
 	communityBytes := store.Get(key(id))
 	if communityBytes == nil {
 		return community, ErrCommunityNotFound(community.ID)
@@ -59,7 +61,7 @@ func (k Keeper) Community(ctx sdk.Context, id string) (community Community, err 
 
 // Communities gets all communities from the KVStore
 func (k Keeper) Communities(ctx sdk.Context) (communities []Community) {
-	store := ctx.KVStore(k.storeKey)
+	store := k.store(ctx)
 	iterator := sdk.KVStorePrefixIterator(store, CommunityKeyPrefix)
 
 	defer iterator.Close()
@@ -139,7 +141,7 @@ func (k Keeper) validateParams(ctx sdk.Context, id, name, description string, cr
 }
 
 func (k Keeper) setCommunity(ctx sdk.Context, community Community) {
-	store := ctx.KVStore(k.storeKey)
+	store := k.store(ctx)
 	bz := k.codec.MustMarshalBinaryLengthPrefixed(community)
 	store.Set(key(community.ID), bz)
 }
@@ -151,6 +153,10 @@ func (k Keeper) isAdmin(ctx sdk.Context, address sdk.AccAddress) bool {
 		}
 	}
 	return false
+}
+
+func (k Keeper) store(ctx sdk.Context) sdk.KVStore {
+	return gaskv.NewStore(ctx.MultiStore().GetKVStore(k.storeKey), ctx.GasMeter(), app.KVGasConfig())
 }
 
 func logger(ctx sdk.Context) log.Logger {

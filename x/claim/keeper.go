@@ -4,8 +4,10 @@ import (
 	"net/url"
 	"time"
 
+	app "github.com/TruStory/truchain/types"
 	"github.com/TruStory/truchain/x/community"
 	"github.com/cosmos/cosmos-sdk/codec"
+	"github.com/cosmos/cosmos-sdk/store/gaskv"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/params"
 	log "github.com/tendermint/tendermint/libs/log"
@@ -101,7 +103,7 @@ func (k Keeper) EditClaim(ctx sdk.Context, id uint64, body string, editor sdk.Ac
 
 // Claim gets a single claim by its ID
 func (k Keeper) Claim(ctx sdk.Context, id uint64) (claim Claim, ok bool) {
-	store := ctx.KVStore(k.storeKey)
+	store := k.store(ctx)
 	claimBytes := store.Get(key(id))
 	if claimBytes == nil {
 		return claim, false
@@ -113,7 +115,7 @@ func (k Keeper) Claim(ctx sdk.Context, id uint64) (claim Claim, ok bool) {
 
 // Claims gets all the claims in reverse order
 func (k Keeper) Claims(ctx sdk.Context) (claims Claims) {
-	store := ctx.KVStore(k.storeKey)
+	store := k.store(ctx)
 	iterator := sdk.KVStoreReversePrefixIterator(store, ClaimsKeyPrefix)
 
 	return k.iterate(iterator)
@@ -289,7 +291,7 @@ func (k Keeper) validateLength(ctx sdk.Context, body string) sdk.Error {
 
 // claimID gets the highest claim ID
 func (k Keeper) claimID(ctx sdk.Context) (claimID uint64, err sdk.Error) {
-	store := ctx.KVStore(k.storeKey)
+	store := k.store(ctx)
 	bz := store.Get(ClaimIDKey)
 	if bz == nil {
 		return 0, ErrUnknownClaim(claimID)
@@ -300,61 +302,61 @@ func (k Keeper) claimID(ctx sdk.Context) (claimID uint64, err sdk.Error) {
 
 // set the claim ID
 func (k Keeper) setClaimID(ctx sdk.Context, claimID uint64) {
-	store := ctx.KVStore(k.storeKey)
+	store := k.store(ctx)
 	bz := k.codec.MustMarshalBinaryLengthPrefixed(claimID)
 	store.Set(ClaimIDKey, bz)
 }
 
 // setClaim sets a claim in store
 func (k Keeper) setClaim(ctx sdk.Context, claim Claim) {
-	store := ctx.KVStore(k.storeKey)
+	store := k.store(ctx)
 	bz := k.codec.MustMarshalBinaryLengthPrefixed(claim)
 	store.Set(key(claim.ID), bz)
 }
 
 // setCommunityClaim sets a community <-> claim association in store
 func (k Keeper) setCommunityClaim(ctx sdk.Context, communityID string, claimID uint64) {
-	store := ctx.KVStore(k.storeKey)
+	store := k.store(ctx)
 	bz := k.codec.MustMarshalBinaryLengthPrefixed(claimID)
 	store.Set(communityClaimKey(communityID, claimID), bz)
 }
 
 func (k Keeper) setCreatorClaim(ctx sdk.Context, creator sdk.AccAddress, claimID uint64) {
-	store := ctx.KVStore(k.storeKey)
+	store := k.store(ctx)
 	bz := k.codec.MustMarshalBinaryLengthPrefixed(claimID)
 	store.Set(creatorClaimKey(creator, claimID), bz)
 }
 
 func (k Keeper) setCreatedTimeClaim(ctx sdk.Context, createdTime time.Time, claimID uint64) {
-	store := ctx.KVStore(k.storeKey)
+	store := k.store(ctx)
 	bz := k.codec.MustMarshalBinaryLengthPrefixed(claimID)
 	store.Set(createdTimeClaimKey(createdTime, claimID), bz)
 }
 
 // claimsIterator returns an sdk.Iterator for claims from startClaimID to endClaimID
 func (k Keeper) claimsIterator(ctx sdk.Context, startClaimID, endClaimID uint64) sdk.Iterator {
-	store := ctx.KVStore(k.storeKey)
+	store := k.store(ctx)
 	return store.Iterator(key(startClaimID), sdk.PrefixEndBytes(key(endClaimID)))
 }
 
 func (k Keeper) beforeCreatedTimeClaimsIterator(ctx sdk.Context, createdTime time.Time) sdk.Iterator {
-	store := ctx.KVStore(k.storeKey)
+	store := k.store(ctx)
 	return store.Iterator(CreatedTimeClaimsPrefix, sdk.PrefixEndBytes(createdTimeClaimsKey(createdTime)))
 }
 
 func (k Keeper) afterCreatedTimeClaimsIterator(ctx sdk.Context, createdTime time.Time) sdk.Iterator {
-	store := ctx.KVStore(k.storeKey)
+	store := k.store(ctx)
 	return store.Iterator(createdTimeClaimsKey(createdTime), sdk.PrefixEndBytes(CreatedTimeClaimsPrefix))
 }
 
 // createdTimeRangeClaimsIterator returns an sdk.Iterator for all claims between startCreatedTime and endCreatedTime
 func (k Keeper) createdTimeRangeClaimsIterator(ctx sdk.Context, startCreatedTime, endCreatedTime time.Time) sdk.Iterator {
-	store := ctx.KVStore(k.storeKey)
+	store := k.store(ctx)
 	return store.Iterator(createdTimeClaimsKey(startCreatedTime), sdk.PrefixEndBytes(createdTimeClaimsKey(endCreatedTime)))
 }
 
 func (k Keeper) associatedClaims(ctx sdk.Context, prefix []byte) (claims Claims) {
-	store := ctx.KVStore(k.storeKey)
+	store := k.store(ctx)
 	iterator := sdk.KVStoreReversePrefixIterator(store, prefix)
 
 	defer iterator.Close()
@@ -393,6 +395,10 @@ func (k Keeper) iterateAssociated(ctx sdk.Context, iterator sdk.Iterator) (claim
 	}
 
 	return
+}
+
+func (k Keeper) store(ctx sdk.Context) sdk.KVStore {
+	return gaskv.NewStore(ctx.MultiStore().GetKVStore(k.storeKey), ctx.GasMeter(), app.KVGasConfig())
 }
 
 func logger(ctx sdk.Context) log.Logger {

@@ -1,14 +1,14 @@
 package bank
 
 import (
+	app "github.com/TruStory/truchain/types"
 	"github.com/TruStory/truchain/x/distribution"
 	"github.com/cosmos/cosmos-sdk/codec"
+	"github.com/cosmos/cosmos-sdk/store/gaskv"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/bank"
 	"github.com/cosmos/cosmos-sdk/x/params"
 	"github.com/cosmos/cosmos-sdk/x/supply"
-
-	app "github.com/TruStory/truchain/types"
 )
 
 // Keeper is the model object for the package bank module
@@ -240,7 +240,7 @@ func (k Keeper) getID(ctx sdk.Context, key []byte) (uint64, sdk.Error) {
 }
 
 func (k Keeper) store(ctx sdk.Context) sdk.KVStore {
-	return ctx.KVStore(k.storeKey)
+	return gaskv.NewStore(ctx.MultiStore().GetKVStore(k.storeKey), ctx.GasMeter(), app.KVGasConfig())
 }
 
 func (k Keeper) getTransaction(ctx sdk.Context, transactionID uint64) (Transaction, bool) {
