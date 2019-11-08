@@ -4,14 +4,14 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/cosmos/cosmos-sdk/x/supply"
-
 	app "github.com/TruStory/truchain/types"
 	"github.com/TruStory/truchain/x/distribution"
 	"github.com/cosmos/cosmos-sdk/codec"
+	"github.com/cosmos/cosmos-sdk/store/gaskv"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth"
 	"github.com/cosmos/cosmos-sdk/x/params"
+	"github.com/cosmos/cosmos-sdk/x/supply"
 	"github.com/tendermint/tendermint/crypto"
 	"github.com/tendermint/tendermint/libs/log"
 )
@@ -113,7 +113,7 @@ func (k Keeper) PrimaryAccount(ctx sdk.Context, addr sdk.AccAddress) (pAcc Prima
 
 // JailedAccountsBefore returns all jailed accounts before jailEndTime
 func (k Keeper) JailedAccountsBefore(ctx sdk.Context, jailEndTime time.Time) (accounts AppAccounts, err sdk.Error) {
-	store := ctx.KVStore(k.storeKey)
+	store := k.store(ctx)
 	iterator := store.Iterator(JailEndTimeAccountPrefix, jailEndTimeAccountsKey(jailEndTime))
 	defer iterator.Close()
 	for ; iterator.Valid(); iterator.Next() {
@@ -225,17 +225,17 @@ func (k Keeper) setAppAccount(ctx sdk.Context, acc AppAccount) {
 }
 
 func (k Keeper) setJailEndTimeAccount(ctx sdk.Context, jailEndTime time.Time, addr sdk.AccAddress) {
-	store := ctx.KVStore(k.storeKey)
+	store := k.store(ctx)
 	store.Set(jailEndTimeAccountKey(jailEndTime, addr), addr)
 }
 
 func (k Keeper) deleteJailEndTimeAccount(ctx sdk.Context, jailEndTime time.Time, addr sdk.AccAddress) {
-	store := ctx.KVStore(k.storeKey)
+	store := k.store(ctx)
 	store.Delete(jailEndTimeAccountKey(jailEndTime, addr))
 }
 
 func (k Keeper) store(ctx sdk.Context) sdk.KVStore {
-	return ctx.KVStore(k.storeKey)
+	return gaskv.NewStore(ctx.MultiStore().GetKVStore(k.storeKey), ctx.GasMeter(), app.KVGasConfig())
 }
 
 func (k Keeper) Logger(ctx sdk.Context) log.Logger {

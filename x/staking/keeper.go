@@ -3,13 +3,12 @@ package staking
 import (
 	"time"
 
-	"github.com/cosmos/cosmos-sdk/x/supply"
-
 	app "github.com/TruStory/truchain/types"
-
 	"github.com/cosmos/cosmos-sdk/codec"
+	"github.com/cosmos/cosmos-sdk/store/gaskv"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/params"
+	"github.com/cosmos/cosmos-sdk/x/supply"
 	"github.com/tendermint/tendermint/libs/log"
 )
 
@@ -504,7 +503,7 @@ func (k Keeper) setStake(ctx sdk.Context, stake Stake) {
 }
 
 func (k Keeper) store(ctx sdk.Context) sdk.KVStore {
-	return ctx.KVStore(k.storeKey)
+	return gaskv.NewStore(ctx.MultiStore().GetKVStore(k.storeKey), ctx.GasMeter(), app.KVGasConfig())
 }
 
 func (k Keeper) setStakeID(ctx sdk.Context, stakeID uint64) {
