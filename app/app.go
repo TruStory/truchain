@@ -264,27 +264,6 @@ func NewTruChain(logger log.Logger, db dbm.DB, loadLatest bool,
 		app.distrKeeper,
 	)
 
-	// The app.Router is the main transaction router where each module registers its routes
-	app.Router().
-		AddRoute(bank.RouterKey, bank.NewHandler(app.bankKeeper)).
-		AddRoute(staking.RouterKey, staking.NewHandler(app.stakingKeeper)).
-		AddRoute(claim.RouterKey, claim.NewHandler(app.claimKeeper)).
-		AddRoute(account.RouterKey, account.NewHandler(app.appAccountKeeper)).
-		AddRoute(trustaking.RouterKey, trustaking.NewHandler(app.truStakingKeeper)).
-		AddRoute(truslashing.RouterKey, truslashing.NewHandler(app.truSlashingKeeper)).
-		AddRoute(trubank.RouterKey, trubank.NewHandler(app.truBankKeeper)).
-		AddRoute(community.RouterKey, community.NewHandler(app.communityKeeper))
-
-	// The app.QueryRouter is the main query router where each module registers its routes
-	app.QueryRouter().
-		AddRoute(auth.QuerierRoute, auth.NewQuerier(app.accountKeeper)).
-		AddRoute(community.QuerierRoute, community.NewQuerier(app.communityKeeper)).
-		AddRoute(claim.QuerierRoute, claim.NewQuerier(app.claimKeeper)).
-		AddRoute(trubank.QuerierRoute, trubank.NewQuerier(app.truBankKeeper)).
-		AddRoute(account.QuerierRoute, account.NewQuerier(app.appAccountKeeper)).
-		AddRoute(trustaking.QuerierRoute, trustaking.NewQuerier(app.truStakingKeeper)).
-		AddRoute(truslashing.QuerierRoute, truslashing.NewQuerier(app.truSlashingKeeper))
-
 	app.mm = module.NewManager(
 		genutil.NewAppModule(app.accountKeeper, app.stakingKeeper, app.BaseApp.DeliverTx),
 		auth.NewAppModule(app.accountKeeper),
@@ -322,7 +301,7 @@ func NewTruChain(logger log.Logger, db dbm.DB, loadLatest bool,
 		account.ModuleName, trustaking.ModuleName, truslashing.ModuleName, trudist.ModuleName)
 
 	app.mm.RegisterInvariants(&app.crisisKeeper)
-	//app.mm.RegisterRoutes(app.Router(), app.QueryRouter())
+	app.mm.RegisterRoutes(app.Router(), app.QueryRouter())
 
 	// initialize stores
 	app.MountKVStores(keys)
