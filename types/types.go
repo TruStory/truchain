@@ -115,12 +115,12 @@ type InterestDistributionResults struct {
 
 func KVGasConfig() stypes.GasConfig {
 	return stypes.GasConfig{
-		HasCost:          100,
-		DeleteCost:       100,
-		ReadCostFlat:     100,
-		ReadCostPerByte:  1,
-		WriteCostFlat:    200,
-		WriteCostPerByte: 3,
-		IterNextCostFlat: 3,
+		HasCost:          0,
+		DeleteCost:       0,
+		ReadCostFlat:     0,
+		ReadCostPerByte:  0,
+		WriteCostFlat:    0,
+		WriteCostPerByte: 0,
+		IterNextCostFlat: 0,
 	}
 }
