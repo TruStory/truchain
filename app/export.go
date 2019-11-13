@@ -9,6 +9,7 @@ import (
 
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/cosmos/cosmos-sdk/x/slashing"
 	"github.com/cosmos/cosmos-sdk/x/staking"
 )
 
@@ -52,6 +53,9 @@ func (app *TruChain) prepForZeroHeightGenesis(ctx sdk.Context, jailWhiteList []s
 		}
 		whiteListMap[addr] = true
 	}
+
+	/* Just to be safe, assert the invariants on current state. */
+	app.crisisKeeper.AssertInvariants(ctx)
 
 	/* Handle fee distribution state. */
 
@@ -125,6 +129,7 @@ func (app *TruChain) prepForZeroHeightGenesis(ctx sdk.Context, jailWhiteList []s
 	iter := sdk.KVStoreReversePrefixIterator(store, staking.ValidatorsKey)
 	counter := int16(0)
 
+	var valConsAddrs []sdk.ConsAddress
 	for ; iter.Valid(); iter.Next() {
 		addr := sdk.ValAddress(iter.Key()[1:])
 		validator, found := app.stakingKeeper.GetValidator(ctx, addr)
@@ -133,6 +138,7 @@ func (app *TruChain) prepForZeroHeightGenesis(ctx sdk.Context, jailWhiteList []s
 		}
 
 		validator.UnbondingHeight = 0
+		valConsAddrs = append(valConsAddrs, validator.ConsAddress())
 		if applyWhiteList && !whiteListMap[addr.String()] {
 			validator.Jailed = true
 		}
@@ -144,5 +150,17 @@ func (app *TruChain) prepForZeroHeightGenesis(ctx sdk.Context, jailWhiteList []s
 	iter.Close()
 
 	_ = app.stakingKeeper.ApplyAndReturnValidatorSetUpdates(ctx)
+
+	/* Handle slashing state. */
+
+	// reset start height on signing infos
+	app.slashingKeeper.IterateValidatorSigningInfos(
+		ctx,
+		func(addr sdk.ConsAddress, info slashing.ValidatorSigningInfo) (stop bool) {
+			info.StartHeight = 0
+			app.slashingKeeper.SetValidatorSigningInfo(ctx, addr, info)
+			return false
+		},
+	)
 
 }
