@@ -3,14 +3,13 @@ package slashing
 import (
 	"fmt"
 
-	"github.com/TruStory/truchain/x/claim"
-
-	"github.com/TruStory/truchain/x/account"
-	"github.com/TruStory/truchain/x/staking"
-
 	app "github.com/TruStory/truchain/types"
+	"github.com/TruStory/truchain/x/account"
 	"github.com/TruStory/truchain/x/bank"
+	"github.com/TruStory/truchain/x/claim"
+	"github.com/TruStory/truchain/x/staking"
 	"github.com/cosmos/cosmos-sdk/codec"
+	"github.com/cosmos/cosmos-sdk/store/gaskv"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/params"
 	log "github.com/tendermint/tendermint/libs/log"
@@ -330,7 +329,7 @@ func (k Keeper) rewardCurators(ctx sdk.Context, stakingPool sdk.Coin, argumentID
 
 // Slash returns a slash by its ID
 func (k Keeper) Slash(ctx sdk.Context, id uint64) (slash Slash, err sdk.Error) {
-	store := ctx.KVStore(k.storeKey)
+	store := k.store(ctx)
 	slashBytes := store.Get(key(id))
 	if slashBytes == nil {
 		return slash, ErrSlashNotFound(id)
@@ -342,7 +341,7 @@ func (k Keeper) Slash(ctx sdk.Context, id uint64) (slash Slash, err sdk.Error) {
 
 // Slashes gets all slashes from the KVStore
 func (k Keeper) Slashes(ctx sdk.Context) (slashes []Slash) {
-	store := ctx.KVStore(k.storeKey)
+	store := k.store(ctx)
 	iterator := sdk.KVStorePrefixIterator(store, SlashesKeyPrefix)
 
 	return k.iterate(iterator)
@@ -391,7 +390,7 @@ func (k Keeper) RemoveAdmin(ctx sdk.Context, admin, remover sdk.AccAddress) (err
 
 // slashID gets the highest slash ID
 func (k Keeper) slashID(ctx sdk.Context) (slashID uint64, err sdk.Error) {
-	store := ctx.KVStore(k.storeKey)
+	store := k.store(ctx)
 	bz := store.Get(SlashIDKey)
 	if bz == nil {
 		return 0, ErrSlashNotFound(slashID)
@@ -402,21 +401,21 @@ func (k Keeper) slashID(ctx sdk.Context) (slashID uint64, err sdk.Error) {
 
 // setSlash sets a slash in store
 func (k Keeper) setSlash(ctx sdk.Context, slash Slash) {
-	store := ctx.KVStore(k.storeKey)
+	store := k.store(ctx)
 	bz := k.codec.MustMarshalBinaryLengthPrefixed(slash)
 	store.Set(key(slash.ID), bz)
 }
 
 // set the slash ID
 func (k Keeper) setSlashID(ctx sdk.Context, slashID uint64) {
-	store := ctx.KVStore(k.storeKey)
+	store := k.store(ctx)
 	bz := k.codec.MustMarshalBinaryLengthPrefixed(slashID)
 	store.Set(SlashIDKey, bz)
 }
 
 // sets the association between the creator and the slash
 func (k Keeper) setCreatorSlash(ctx sdk.Context, creator sdk.AccAddress, slashID uint64) {
-	store := ctx.KVStore(k.storeKey)
+	store := k.store(ctx)
 	bz := k.codec.MustMarshalBinaryLengthPrefixed(slashID)
 	store.Set(creatorSlashKey(creator, slashID), bz)
 }
@@ -428,14 +427,14 @@ func (k Keeper) incrementSlashCount(ctx sdk.Context, stakeID uint64) {
 
 // sets the association between the stake and the slash count
 func (k Keeper) setSlashCount(ctx sdk.Context, stakeID uint64, count uint64) {
-	store := ctx.KVStore(k.storeKey)
+	store := k.store(ctx)
 	bz := k.codec.MustMarshalBinaryLengthPrefixed(count)
 	store.Set(slashCountKey(stakeID), bz)
 }
 
 // getSlashCount gets the number of slashes for a stake
 func (k Keeper) getSlashCount(ctx sdk.Context, stakeID uint64) (count int) {
-	store := ctx.KVStore(k.storeKey)
+	store := k.store(ctx)
 	bz := store.Get(slashCountKey(stakeID))
 	if bz == nil {
 		return 0
@@ -573,7 +572,7 @@ func (k Keeper) IterateArgumentSlasherSlashes(ctx sdk.Context, argumentID uint64
 }
 
 func (k Keeper) store(ctx sdk.Context) sdk.KVStore {
-	return ctx.KVStore(k.storeKey)
+	return gaskv.NewStore(ctx.MultiStore().GetKVStore(k.storeKey), ctx.GasMeter(), app.KVGasConfig())
 }
 
 func (k Keeper) Logger(ctx sdk.Context) log.Logger {
