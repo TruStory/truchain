@@ -95,6 +95,7 @@ func InitGenesis(ctx sdk.Context, k Keeper, data GenesisState) {
 
 func initUserRewardsPool(ctx sdk.Context, keeper Keeper) sdk.Error {
 	userGrowthAcc := keeper.supplyKeeper.GetModuleAccount(ctx, UserRewardPoolName)
+	fmt.Println("Setting user rewards pool")
 	if userGrowthAcc.GetCoins().Empty() {
 		amount := app.NewShanevCoin(5000000)
 		err := keeper.supplyKeeper.MintCoins(ctx, UserRewardPoolName, sdk.NewCoins(amount))
@@ -118,6 +119,8 @@ func initUserRewardsPool(ctx sdk.Context, keeper Keeper) sdk.Error {
 			return false
 		})
 	}
+
+	fmt.Println("Completed setting user rewards pool")
 	return nil
 }
 
@@ -134,9 +137,11 @@ func ExportGenesis(ctx sdk.Context, keeper Keeper) GenesisState {
 // ValidateGenesis validates the genesis state data
 func ValidateGenesis(data GenesisState) error {
 	if data.Params.ArgumentCreationStake.Denom != app.StakeDenom {
+		fmt.Println(data.Params.ArgumentCreationStake.Denom, app.StakeDenom)
 		return ErrInvalidArgumentStakeDenom
 	}
 	if data.Params.UpvoteStake.Denom != app.StakeDenom {
+		fmt.Println(data.Params.UpvoteStake.Denom, app.StakeDenom)
 		return ErrInvalidUpvoteStakeDenom
 	}
 	return nil

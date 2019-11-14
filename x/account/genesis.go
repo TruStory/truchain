@@ -45,17 +45,18 @@ func InitGenesis(ctx sdk.Context, keeper Keeper, data GenesisState) {
 func initUserGrowthPool(ctx sdk.Context, keeper Keeper) sdk.Error {
 	userGrowthAcc := keeper.supplyKeeper.GetModuleAccount(ctx, UserGrowthPoolName)
 	if userGrowthAcc.GetCoins().Empty() {
-		amount := app.NewShanevCoin(5000000)
+		fmt.Println("Setting user growth pool")
+		amount := app.NewShanevCoin(5_000_000)
 		err := keeper.supplyKeeper.MintCoins(ctx, UserGrowthPoolName, sdk.NewCoins(amount))
 		if err != nil {
 			return err
 		}
 
-		userBalanceTotal := sdk.NewCoin("tru", sdk.ZeroInt())
+		userBalanceTotal := sdk.NewCoin(app.StakeDenom, sdk.ZeroInt())
 		keeper.accountKeeper.IterateAccounts(ctx, func(acc authexported.Account) (stop bool) {
 			addr := acc.GetAddress()
-			amt := acc.GetCoins().AmountOf("tru")
-			userBalanceTotal = userBalanceTotal.Add(sdk.NewCoin("tru", amt))
+			amt := acc.GetCoins().AmountOf(app.StakeDenom)
+			userBalanceTotal = userBalanceTotal.Add(sdk.NewCoin(app.StakeDenom, amt))
 			keeper.bankKeeper.IterateUserTransactions(ctx, addr, false, func(tx bankexported.Transaction) bool {
 				if tx.Type == bankexported.TransactionGift {
 					err := keeper.supplyKeeper.BurnCoins(ctx, UserGrowthPoolName, sdk.NewCoins(tx.Amount))
@@ -67,6 +68,9 @@ func initUserGrowthPool(ctx sdk.Context, keeper Keeper) sdk.Error {
 			})
 			return false
 		})
+
+		fmt.Println("Completed: Setting user growth pool")
+
 	}
 	return nil
 }

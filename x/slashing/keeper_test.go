@@ -115,18 +115,18 @@ func Test_punishment(t *testing.T) {
 	slashMagnitude := keeper.GetParams(ctx).SlashMagnitude
 	stakerStartingBalance := keeper.bankKeeper.GetCoins(ctx, staker)
 	slasherStartingBalance := keeper.bankKeeper.GetCoins(ctx, slasher)
-	assert.Equal(t, "300000000000tru", stakerStartingBalance.String())
-	assert.Equal(t, "300000000000tru", slasherStartingBalance.String())
+	assert.Equal(t, "300000000utru", stakerStartingBalance.String())
+	assert.Equal(t, "300000000utru", slasherStartingBalance.String())
 
 	claim, _ := keeper.claimKeeper.Claim(ctx, 1)
-	assert.Equal(t, "0tru", claim.TotalChallenged.String())
+	assert.Equal(t, "0utru", claim.TotalChallenged.String())
 
 	argument, err := keeper.stakingKeeper.SubmitArgument(ctx, "arg2", "summary2", staker, claim.ID, staking.StakeChallenge)
 	assert.NoError(t, err)
 
 	stake, _ := keeper.stakingKeeper.Stake(ctx, 2)
 	assert.Equal(t, argument.ID, stake.ArgumentID)
-	assert.Equal(t, "50000000000tru", stake.Amount.String())
+	assert.Equal(t, "50000000utru", stake.Amount.String())
 
 	claim, _ = keeper.claimKeeper.Claim(ctx, 1)
 	assert.Equal(t, stake.Amount.String(), claim.TotalChallenged.String())
@@ -154,7 +154,7 @@ func Test_punishment(t *testing.T) {
 	assert.Equal(t, expectedBalance.String(), slasherEndingBalance.String())
 
 	claim, _ = keeper.claimKeeper.Claim(ctx, 1)
-	assert.Equal(t, "0tru", claim.TotalChallenged.String())
+	assert.Equal(t, "0utru", claim.TotalChallenged.String())
 }
 
 func TestAddAdmin_Success(t *testing.T) {

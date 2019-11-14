@@ -14,6 +14,7 @@ func EndBlocker(ctx sdk.Context, keeper Keeper) {
 func (k Keeper) processExpiringStakes(ctx sdk.Context) {
 	logger := k.Logger(ctx)
 	expiredStakes := make([]Stake, 0)
+	fmt.Println("processing expired stakes")
 	k.IterateActiveStakeQueue(ctx, ctx.BlockHeader().Time, func(stake Stake) bool {
 		logger.Info(fmt.Sprintf("Processing expired stakeID %d argumentID %d", stake.ID, stake.ArgumentID))
 		result, err := k.distributeReward(ctx, stake)
