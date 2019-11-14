@@ -72,7 +72,7 @@ reset:
 restart: build_daemon reset start
 
 start:
-	bin/truchaind start --log_level "main:info,state:info,*:error,app:info,account:info,trubank2:info,claim:info,community:info,truslashing:info,trustaking:info"
+	bin/truchaind start --inv-check-period 10 --log_level "main:info,state:info,*:error,app:info,account:info,trubank2:info,claim:info,community:info,truslashing:info,trustaking:info"
 
 check:
 	@echo "--> Running golangci"

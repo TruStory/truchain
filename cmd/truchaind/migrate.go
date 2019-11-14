@@ -9,6 +9,7 @@ import (
 	"github.com/TruStory/truchain/cmd/truchaind/migration/v0_3"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 	"github.com/tendermint/tendermint/types"
 
 	"github.com/cosmos/cosmos-sdk/codec"
@@ -25,7 +26,7 @@ const (
 )
 
 var migrationMap = extypes.MigrationMap{
-	"v0.3": v0_3.Migrate,
+	"v0.3.1": v0_3.Migrate,
 }
 
 // GetMigrationCallback returns a MigrationCallback for a given version.
@@ -51,18 +52,22 @@ func GetMigrationVersions() []string {
 // nolint: funlen
 func MigrateGenesisCmd(_ *server.Context, cdc *codec.Codec) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "tru_migrate [target-version] [genesis-file]",
+		Use:   "tru_migrate [target-version] [genesis-file] [output-file]",
 		Short: "Migrate genesis to a specified target version",
 		Long: fmt.Sprintf(`Migrate the source genesis into the target version and print to STDOUT.
 Example:
-$ %s migrate v0.36 /path/to/genesis.json --chain-id=cosmoshub-3 --genesis-time=2019-04-22T17:00:00Z
+$ %s tru_migrate v0.3.1 /path/to/genesis.json /path/to/output-genesis.json --chain-id=betanet-2 --genesis-time=2019-04-22T17:00:00Z
 `, version.ServerName),
-		Args: cobra.ExactArgs(2),
+		Args: cobra.ExactArgs(3),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			var err error
 
 			target := args[0]
 			importGenesis := args[1]
+			outputGenesis := args[2]
+			if outputGenesis == "" {
+				return errors.New("must provide a valid path for output file")
+			}
 
 			genDoc, err := types.GenesisDocFromFile(importGenesis)
 			if err != nil {
@@ -81,7 +86,10 @@ $ %s migrate v0.36 /path/to/genesis.json --chain-id=cosmoshub-3 --genesis-time=2
 
 			// TODO: handler error from migrationFunc call
 			newGenState := migrationFunc(initialState)
-			genDoc.Validators = nil
+			resetValidators := viper.GetBool(flagResetValidators)
+			if resetValidators {
+				genDoc.Validators = nil
+			}
 			genDoc.AppState, err = cdc.MarshalJSON(newGenState)
 			if err != nil {
 				return errors.Wrap(err, "failed to JSON marshal migrated genesis state")
@@ -113,16 +121,13 @@ $ %s migrate v0.36 /path/to/genesis.json --chain-id=cosmoshub-3 --genesis-time=2
 			if err != nil {
 				return errors.Wrap(err, "failed to sort JSON genesis doc")
 			}
-			// os.New
-			fmt.Println(len(sortedBz))
-			err = ioutil.WriteFile("migrated.json", sortedBz, 0644)
-			// fmt.Println(string(sortedBz))
+			err = ioutil.WriteFile(outputGenesis, sortedBz, 0644)
 			return err
 		},
 	}
 
 	cmd.Flags().String(flagGenesisTime, "", "override genesis_time with this flag")
 	cmd.Flags().String(flagChainID, "", "override chain_id with this flag")
-
+	cmd.Flags().Bool(flagResetValidators, false, "remove validators set with this flag")
 	return cmd
 }
