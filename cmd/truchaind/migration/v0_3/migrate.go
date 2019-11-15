@@ -1,9 +1,6 @@
 package v0_3
 
 import (
-	"fmt"
-	"strings"
-
 	"github.com/cosmos/cosmos-sdk/x/auth"
 	authexported "github.com/cosmos/cosmos-sdk/x/auth/exported"
 	"github.com/cosmos/cosmos-sdk/x/crisis"
@@ -294,38 +291,5 @@ func Migrate(appState genutil.AppMap) genutil.AppMap {
 		slashingGenState.Params.SlashMinStake = slashMinStake
 		appState[truslashing.ModuleName] = cdc.MustMarshalJSON(slashingGenState)
 	}
-	for _, v := range earned["cosmos1xqc5gwzpfp8ygkzdfdpnq4j3xd8y6djy5z8gfn"] {
-		fmt.Println("community", v.Denom, humanReadable(v, 6))
-	}
-	fmt.Println("earned", earned["cosmos1xqc5gwzpfp8ygkzdfdpnq4j3xd8y6djy5z8gfn"].String())
 	return appState
-}
-
-// Copied from truchain/truapi until truapi is moved into Octopus
-func humanReadable(coin sdk.Coin, prec int64) string {
-	// empty struct
-	if (sdk.Coin{}) == coin {
-		return "0"
-	}
-	shanevs := sdk.NewDecFromIntWithPrec(coin.Amount, prec).String()
-	parts := strings.Split(shanevs, ".")
-	number := parts[0]
-	decimal := parts[1]
-	// If greater than 1.0 => show two decimal digits, truncate trailing zeros
-	displayDecimalPlaces := 2
-	if number == "0" {
-		// If less than 1.0 => show four decimal digits, truncate trailing zeros
-		displayDecimalPlaces = 4
-	}
-	decimal = strings.TrimRight(decimal, "0")
-	numberOfDecimalPlaces := len(decimal)
-	if numberOfDecimalPlaces > displayDecimalPlaces {
-		numberOfDecimalPlaces = displayDecimalPlaces
-	}
-	decimal = decimal[0:numberOfDecimalPlaces]
-	decimal = strings.TrimRight(decimal, "0")
-	if decimal == "" {
-		return number
-	}
-	return fmt.Sprintf("%s%s%s", number, ".", decimal)
 }
