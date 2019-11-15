@@ -58,8 +58,15 @@ func trackEarnedCoins(tx trubank.Transaction, coins sdk.Coins) sdk.Coins {
 func Migrate(appState genutil.AppMap) genutil.AppMap {
 	cdc := codec.New()
 	codec.RegisterCrypto(cdc)
-	sdk.RegisterDenom(targetDenom, sdk.NewDecWithPrec(1, 6))
-	sdk.RegisterDenom(currentDenom, sdk.NewDecWithPrec(1, 9))
+	err := sdk.RegisterDenom(targetDenom, sdk.NewDecWithPrec(1, 6))
+	if err != nil {
+		panic(err)
+	}
+	err = sdk.RegisterDenom(currentDenom, sdk.NewDecWithPrec(1, 9))
+	if err != nil {
+		panic(err)
+	}
+
 	auth.RegisterCodec(cdc)
 	supply.RegisterCodec(cdc)
 	earned := make(map[string]sdk.Coins, 0)
@@ -113,18 +120,6 @@ func Migrate(appState genutil.AppMap) genutil.AppMap {
 		mintGenState.Params.MintDenom = targetDenom
 		appState[mint.ModuleName] = cdc.MustMarshalJSON(&mintGenState)
 	}
-	// "community_tax": "0.020000000000000000",
-	// "base_proposer_reward": "0.010000000000000000",
-	// "bonus_proposer_reward": "0.040000000000000000",
-	// "withdraw_addr_enabled": true,
-	// "delegator_withdraw_infos": [],
-	// "previous_proposer": "",
-	// "outstanding_rewards": [],
-	// "validator_accumulated_commissions": [],
-	// "validator_historical_rewards": [],
-	// "validator_current_rewards": [],
-	// "delegator_starting_infos": [],
-	// "validator_slash_events": []
 	if appState[distribution.ModuleName] != nil {
 		var distrGenState distribution.GenesisState
 		cdc.MustUnmarshalJSON(appState[distribution.ModuleName], &distrGenState)

@@ -118,11 +118,9 @@ func ExportGenesis(ctx sdk.Context, keeper Keeper) GenesisState {
 // ValidateGenesis validates the genesis state data
 func ValidateGenesis(data GenesisState) error {
 	if data.Params.ArgumentCreationStake.Denom != app.StakeDenom {
-		fmt.Println(data.Params.ArgumentCreationStake.Denom, app.StakeDenom)
 		return ErrInvalidArgumentStakeDenom
 	}
 	if data.Params.UpvoteStake.Denom != app.StakeDenom {
-		fmt.Println(data.Params.UpvoteStake.Denom, app.StakeDenom)
 		return ErrInvalidUpvoteStakeDenom
 	}
 	return nil
