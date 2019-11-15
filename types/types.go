@@ -10,7 +10,7 @@ const (
 	// AppName is the name of the Cosmos app
 	AppName = "TruChain"
 	// StakeDenom is the name of the main staking currency
-	StakeDenom = "tru"
+	StakeDenom = "utru"
 	// Hostname is the address the app's HTTP server will bind to
 	Hostname = "0.0.0.0"
 	// Portname is the port the app's HTTP server will bind to
@@ -20,11 +20,8 @@ const (
 // Coin units
 const (
 	Preethi = 1
-	Shanev  = 1000000000 * Preethi
+	Shanev  = 1000000 * Preethi
 )
-
-// InitialCredAmount is the initial amount of cred for categories
-var InitialCredAmount = sdk.NewInt(1000000000)
 
 // InitialStake is an `sdk.Coins` representing the balance a new user is granted upon registration
 var InitialStake = sdk.Coin{Amount: sdk.NewInt(300 * Shanev), Denom: StakeDenom}
@@ -36,8 +33,9 @@ var RegistrationFee = auth.StdFee{
 	Gas:    20000,
 }
 
+// NewShanevCoin returns the desired amount in shanevs
 func NewShanevCoin(amount int64) sdk.Coin {
-	return sdk.NewInt64Coin("tru", amount*Shanev)
+	return sdk.NewInt64Coin(StakeDenom, amount*Shanev)
 }
 
 // MsgResult is the default success response for a chain request

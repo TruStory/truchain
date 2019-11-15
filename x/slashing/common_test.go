@@ -94,7 +94,7 @@ func mockDB() (sdk.Context, Keeper) {
 
 	userRewardAcc := supply.NewEmptyModuleAccount(staking.UserRewardPoolName, supply.Burner, supply.Staking)
 	userGrowthAcc := supply.NewEmptyModuleAccount(account.UserGrowthPoolName, supply.Minter, supply.Burner, supply.Staking)
-	initCoins := sdk.NewCoins(sdk.NewCoin(app.StakeDenom, sdk.NewInt(10000000000)))
+	initCoins := sdk.NewCoins(sdk.NewCoin(app.StakeDenom, sdk.NewInt(10000000)))
 	err := userRewardAcc.SetCoins(initCoins)
 	supplyKeeper := supply.NewKeeper(codec, supplyKey, authKeeper, bankKeeper, maccPerms)
 	supplyKeeper.SetModuleAccount(ctx, userGrowthAcc)
@@ -196,7 +196,7 @@ func getFakeAppAccountParams() (privateKey crypto.PrivKey, publicKey crypto.PubK
 
 func getFakeCoins() sdk.Coins {
 	return sdk.Coins{
-		sdk.NewInt64Coin(app.StakeDenom, 300000000000),
+		sdk.NewInt64Coin(app.StakeDenom, 300000000),
 	}
 }
 

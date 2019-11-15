@@ -65,4 +65,4 @@ require (
 	gopkg.in/check.v1 v1.0.0-20190902080502-41f04d3bba15 // indirect
 )
 
-replace github.com/cosmos/cosmos-sdk => github.com/trustory/cosmos-sdk v0.34.4-0.20191108215248-e15e6b89e0e7
+replace github.com/cosmos/cosmos-sdk => github.com/TruStory/cosmos-sdk v0.34.4-0.20191114003118-2268a8498fdd

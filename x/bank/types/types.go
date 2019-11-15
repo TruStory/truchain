@@ -8,7 +8,7 @@ import (
 var ModuleCodec *codec.Codec
 
 const (
-	ModuleName        = "trubank2"
+	ModuleName        = "trubank"
 	StoreKey          = ModuleName
 	RouterKey         = ModuleName
 	QuerierRoute      = ModuleName

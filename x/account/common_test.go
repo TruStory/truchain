@@ -90,7 +90,7 @@ func mockDB(t *testing.T) (sdk.Context, Keeper) {
 	supplyKeeper := supply.NewKeeper(codec, supplyKey, accountKeeper, cosmosBankKeeper, maccPerms)
 
 	userGrowthAcc := supply.NewEmptyModuleAccount(UserGrowthPoolName, supply.Burner, supply.Staking)
-	initCoins := sdk.NewCoins(sdk.NewCoin(app.StakeDenom, sdk.NewInt(10000000000)))
+	initCoins := sdk.NewCoins(sdk.NewCoin(app.StakeDenom, sdk.NewInt(10000000)))
 	err := userGrowthAcc.SetCoins(initCoins)
 	require.NoError(t, err)
 	supplyKeeper.SetModuleAccount(ctx, userGrowthAcc)

@@ -205,7 +205,7 @@ func TestKeeper_TestStakeRewardResult(t *testing.T) {
 	totalRewards = totalRewards.Add(stakes[1].Result.ArgumentCreatorReward)
 	totalRewards = totalRewards.Add(stakes[1].Result.StakeCreatorReward)
 	totalRewards = totalRewards.Add(stakesUser2[0].Result.ArgumentCreatorReward)
-	coins, _ := sdk.ParseCoins("1000000000000tru")
+	coins, _ := sdk.ParseCoins("1000000000utru") // 100 TRU
 	result := coins.Sub(sdk.Coins{totalRewards})
 	c = mdb.supplyKeeper.GetModuleAccount(ctx, UserRewardPoolName).GetCoins()
 	assert.Equal(t, c.AmountOf(app.StakeDenom).String(), result.AmountOf(app.StakeDenom).String())

@@ -197,7 +197,7 @@ func mockDB() (sdk.Context, Keeper, *mockedDB) {
 	accKeeper := auth.NewAccountKeeper(cdc, accKey, pk.Subspace(auth.DefaultParamspace), auth.ProtoBaseAccount)
 
 	distAcc := supply.NewEmptyModuleAccount(distribution.ModuleName)
-	coins, _ := sdk.ParseCoins("1000000000000tru")
+	coins, _ := sdk.ParseCoins("1000000000utru") // 100TRU
 	err := distAcc.SetCoins(coins)
 	if err != nil {
 		panic(err)
