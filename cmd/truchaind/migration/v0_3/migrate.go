@@ -25,12 +25,10 @@ import (
 )
 
 const (
-	flagGenesisTime = "genesis-time"
-	flagChainID     = "chain-id"
+	targetDenom       = "utru"
+	currentDenom      = "tru"
+	oldBankModuleName = "trubank2"
 )
-
-var targetDenom = "utru"
-var currentDenom = "tru"
 
 func convert(coin sdk.Coin) (sdk.Coin, error) {
 	if coin.Amount.IsZero() {
@@ -69,7 +67,7 @@ func Migrate(appState genutil.AppMap) genutil.AppMap {
 
 	auth.RegisterCodec(cdc)
 	supply.RegisterCodec(cdc)
-	earned := make(map[string]sdk.Coins, 0)
+	earned := make(map[string]sdk.Coins)
 	getEarnedCoins := func(address string) sdk.Coins {
 		e, ok := earned[address]
 		if ok {
@@ -81,7 +79,7 @@ func Migrate(appState genutil.AppMap) genutil.AppMap {
 	// cosmos modules
 	if appState[crisis.ModuleName] != nil {
 		var crisisGenState crisis.GenesisState
-		cdc.MustUnmarshalJSON(appState[trubank.ModuleName], &crisisGenState)
+		cdc.MustUnmarshalJSON(appState[crisis.ModuleName], &crisisGenState)
 		crisisGenState.ConstantFee = sdk.NewInt64Coin(targetDenom, 1000)
 		appState[crisis.ModuleName] = cdc.MustMarshalJSON(&crisisGenState)
 	}
@@ -168,15 +166,18 @@ func Migrate(appState genutil.AppMap) genutil.AppMap {
 		authGenState.Accounts = accounts
 		appState[auth.ModuleName] = cdc.MustMarshalJSON(authGenState)
 	}
-	delete(appState, "validators")
 	if appState[genutil.ModuleName] == nil {
 		genState := genutil.NewGenesisState(nil)
 		appState[genutil.ModuleName] = cdc.MustMarshalJSON(&genState)
 	}
+	trubankModuleName := trubank.ModuleName
+	if appState[oldBankModuleName] != nil {
+		trubankModuleName = oldBankModuleName
+	}
 	// trustory modules
-	if appState[trubank.ModuleName] != nil && appState[account.ModuleName] != nil {
+	if appState[trubankModuleName] != nil && appState[account.ModuleName] != nil {
 		var bankGenState trubank.GenesisState
-		cdc.MustUnmarshalJSON(appState[trubank.ModuleName], &bankGenState)
+		cdc.MustUnmarshalJSON(appState[trubankModuleName], &bankGenState)
 		transactions := make([]trubankexported.Transaction, 0)
 		for _, tx := range bankGenState.Transactions {
 
@@ -190,6 +191,7 @@ func Migrate(appState genutil.AppMap) genutil.AppMap {
 			transactions = append(transactions, tx)
 		}
 		bankGenState.Transactions = transactions
+		delete(appState, trubankModuleName)
 		appState[trubank.ModuleName] = cdc.MustMarshalJSON(&bankGenState)
 	}
 

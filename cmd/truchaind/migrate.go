@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"io/ioutil"
-	"sort"
 	"time"
 
 	"github.com/TruStory/truchain/cmd/truchaind/migration/v0_3"
@@ -32,20 +31,6 @@ var migrationMap = extypes.MigrationMap{
 // GetMigrationCallback returns a MigrationCallback for a given version.
 func GetMigrationCallback(version string) extypes.MigrationCallback {
 	return migrationMap[version]
-}
-
-// GetMigrationVersions get all migration version in a sorted slice.
-func GetMigrationVersions() []string {
-	versions := make([]string, len(migrationMap))
-
-	var i int
-	for version := range migrationMap {
-		versions[i] = version
-		i++
-	}
-
-	sort.Strings(versions)
-	return versions
 }
 
 // MigrateGenesisCmd returns a command to execute genesis state migration.
