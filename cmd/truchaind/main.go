@@ -12,6 +12,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/server"
 	"github.com/cosmos/cosmos-sdk/store"
+	sdk "github.com/cosmos/cosmos-sdk/types"
 	genutilcli "github.com/cosmos/cosmos-sdk/x/genutil/client/cli"
 	"github.com/cosmos/cosmos-sdk/x/staking"
 	"github.com/spf13/cobra"
@@ -22,6 +23,10 @@ import (
 	tmtypes "github.com/tendermint/tendermint/types"
 	dbm "github.com/tendermint/tm-db"
 )
+
+const flagInvCheckPeriod = "inv-check-period"
+
+var invCheckPeriod uint
 
 const (
 	// Bech32PrefixAccAddr defines the Bech32 prefix of an account's address
