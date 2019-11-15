@@ -14,6 +14,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/TruStory/truchain/x/bank"
+	app "github.com/TruStory/truchain/types"
 )
 
 // SendGiftCmd will create a send tx and sign it with the given key.
@@ -34,6 +35,9 @@ func SendGiftCmd(cdc *codec.Codec) *cobra.Command {
 			coin, err := sdk.ParseCoin(args[2])
 			if err != nil {
 				return err
+			}
+			if coin.Denom != app.StakeDenom {
+				return fmt.Errorf("invalid denomination coin got %s wanted %s", coin.Denom, app.StakeDenom)
 			}
 			// build and sign the transaction, then broadcast to Tendermint
 			msg := bank.NewMsgSendGift(cliCtx.GetFromAddress(), to, coin)

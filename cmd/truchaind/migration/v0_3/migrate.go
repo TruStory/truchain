@@ -112,6 +112,7 @@ func Migrate(appState genutil.AppMap) genutil.AppMap {
 	if appState[mint.ModuleName] != nil {
 		var mintGenState mint.GenesisState
 		cdc.MustUnmarshalJSON(appState[mint.ModuleName], &mintGenState)
+		mintGenState.Minter.AnnualProvisions = sdk.NewDec(0)
 		mintGenState.Params.MintDenom = targetDenom
 		appState[mint.ModuleName] = cdc.MustMarshalJSON(&mintGenState)
 	}
