@@ -22,12 +22,6 @@ cd truchain && git checkout master
 
 ## Getting Started
 
-### Download dependencies
-
-```
-make download
-```
-
 ### Install
 
 ```
@@ -42,10 +36,9 @@ This creates:
 
 ## Run a single node
 
-TruChain currently needs a _registrar_ account to sign new user registration messages.
-
 ```sh
 # Add a new key named registrar
+# This will go away once client-side key management is implemented
 make registrar
 
 # Initialize configuration files and genesis file
@@ -99,10 +92,10 @@ scp ubuntu@devnet:/home/ubuntu/.truchaind/config/genesis.json ~/.devnet/config/
 truchaincli status
 
 # Add first node to `persistent_peers` in config.toml
-sed -i -e 's/persistent_peers.*/persistent_peers = "3ebaf6ae8000af5e233ce2d3158776f7245e5ae0@ec2-54-183-49-244.us-west-1.compute.amazonaws.com:26656"/' ~/.devnet/config/config.toml
+sed -i -e 's/persistent_peers.*/persistent_peers = "[ip_address]:26656"/' ~/.devnet/config/config.toml
 
 # Optional: Add verbose logging
-sed -i -e 's/log_level.*/log_level = "main:info,state:info,*:error,app:info,account:info,trubank2:info,claim:info,community:info,truslashing:info,trustaking:info"/' ~/.devnet/config/config.toml
+sed -i -e 's/log_level.*/log_level = "main:info,state:info,*:error,app:info,account:info,trubank:info,claim:info,community:info,truslashing:info,trustaking:info"/' ~/.devnet/config/config.toml
 
 # Start the second node
 truchaind start --home ~/.devnet
@@ -132,7 +125,7 @@ make doc
 To migrate between different genesis schemas, use the python script in `contrib/migration`.
 
 ```sh
-python 2-stories-to-claims.py \
+python X-migration.py \
     --exported-genesis exported-genesis.json \
     --chain-id betanet-1 > genesis.json 
 ```
