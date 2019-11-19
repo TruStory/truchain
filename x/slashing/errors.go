@@ -19,6 +19,7 @@ const (
 	ErrorCodeAlreadySlashed       sdk.CodeType = 507
 	ErrorCodeInvalidSlashReason   sdk.CodeType = 508
 	ErrorCodeAddressNotAuthorised sdk.CodeType = 509
+	ErrorCodeAlreadyUnhelpful     sdk.CodeType = 510
 )
 
 // ErrSlashNotFound throws an error when the searched slash is not found
@@ -64,4 +65,9 @@ func ErrInvalidSlashReason(because string) sdk.Error {
 // ErrAddressNotAuthorised throws an error when the address is not admin
 func ErrAddressNotAuthorised() sdk.Error {
 	return sdk.NewError(DefaultCodespace, ErrorCodeAddressNotAuthorised, "This address is not authorised to perform this action.")
+}
+
+// ErrAlreadyUnhelpful throws an error when the creator has already slashed the stake previously
+func ErrAlreadyUnhelpful() sdk.Error {
+	return sdk.NewError(DefaultCodespace, ErrorCodeAlreadyUnhelpful, "The argument is already slashed")
 }

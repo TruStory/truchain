@@ -458,17 +458,24 @@ func (k Keeper) iterate(iterator sdk.Iterator) (slashes Slashes) {
 func (k Keeper) validateParams(ctx sdk.Context, argumentID uint64, detailedReason string, creator sdk.AccAddress) (err sdk.Error) {
 	params := k.GetParams(ctx)
 
-	_, ok := k.stakingKeeper.Argument(ctx, argumentID)
+	a, ok := k.stakingKeeper.Argument(ctx, argumentID)
+	if a.IsUnhelpful {
+		return ErrAlreadyUnhelpful()
+	}
+
 	if !ok {
 		return ErrInvalidArgument(argumentID)
 	}
 
-	if k.getSlashCount(ctx, argumentID) > params.MinSlashCount {
+	if k.getSlashCount(ctx, argumentID) >= params.MinSlashCount {
 		return ErrMaxSlashCountReached(argumentID)
 	}
 
 	if len(detailedReason) > params.MaxDetailedReasonLength {
 		return ErrInvalidSlashReason(fmt.Sprintf("Detailed reason must be under %d chars.", params.MaxDetailedReasonLength))
+	}
+	if k.hasPreviouslySlashed(ctx, argumentID, creator) {
+		return ErrAlreadySlashed()
 	}
 
 	// validating creator
@@ -477,10 +484,6 @@ func (k Keeper) validateParams(ctx sdk.Context, argumentID uint64, detailedReaso
 
 	if !isAdmin && !hasEnoughCoins {
 		return ErrNotEnoughEarnedStake(creator)
-	}
-
-	if !isAdmin && k.hasPreviouslySlashed(ctx, argumentID, creator) {
-		return ErrAlreadySlashed()
 	}
 
 	return nil

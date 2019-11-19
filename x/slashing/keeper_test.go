@@ -4,6 +4,8 @@ import (
 	"testing"
 
 	"github.com/TruStory/truchain/x/staking"
+
+	app "github.com/TruStory/truchain/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/stretchr/testify/assert"
 )
@@ -59,6 +61,17 @@ func TestNewSlash_ErrNotEnoughEarnedStake(t *testing.T) {
 	assert.Equal(t, ErrNotEnoughEarnedStake(invalidCreator).Code(), err.Code())
 }
 
+func TestNewSlash_ErrAlreadyUnhelpful(t *testing.T) {
+	ctx, keeper := mockDB()
+	stakeID := uint64(1)
+	creator := keeper.GetParams(ctx).SlashAdmins[0]
+	_, _, err := keeper.CreateSlash(ctx, stakeID, SlashTypeUnhelpful, SlashReasonPlagiarism, "", creator)
+	assert.Nil(t, err)
+	_, _, err = keeper.CreateSlash(ctx, stakeID, SlashTypeUnhelpful, SlashReasonPlagiarism, "", creator)
+	assert.NotNil(t, err)
+	assert.Equal(t, ErrAlreadyUnhelpful().Code(), err.Code())
+}
+
 func TestSlash_Success(t *testing.T) {
 	ctx, keeper := mockDB()
 
@@ -88,24 +101,40 @@ func TestSlash_ErrNotFound(t *testing.T) {
 
 func TestSlashes_Success(t *testing.T) {
 	ctx, keeper := mockDB()
+	_, _, addr1, _ := getFakeAppAccountParams()
+	_, _, addr2, _ := getFakeAppAccountParams()
+	earned := sdk.NewCoins(sdk.NewInt64Coin("general", 70*app.Shanev))
+	usersEarnings := []staking.UserEarnedCoins{
+		staking.UserEarnedCoins{Address: addr1, Coins: earned},
+		staking.UserEarnedCoins{Address: addr2, Coins: earned},
+	}
+	genesis := staking.DefaultGenesisState()
+	genesis.UsersEarnings = usersEarnings
+	staking.InitGenesis(ctx, keeper.stakingKeeper, genesis)
 
+	p := keeper.GetParams(ctx)
+	p.MinSlashCount = 2
+	keeper.SetParams(ctx, p)
+
+	assert.Equal(t, keeper.GetParams(ctx).MinSlashCount, 2)
 	staker := keeper.GetParams(ctx).SlashAdmins[1]
 	_, err := keeper.stakingKeeper.SubmitArgument(ctx, "arg1", "summary1", staker, 1, staking.StakeBacking)
 	assert.NoError(t, err)
-
 	stakeID := uint64(1)
-	creator := keeper.GetParams(ctx).SlashAdmins[0]
-	first, _, err := keeper.CreateSlash(ctx, stakeID, SlashTypeUnhelpful, SlashReasonPlagiarism, "", creator)
+
+	first, _, err := keeper.CreateSlash(ctx, stakeID, SlashTypeUnhelpful, SlashReasonPlagiarism, "", addr1)
 	assert.NoError(t, err)
 
-	creator2 := keeper.GetParams(ctx).SlashAdmins[1]
-	another, _, err := keeper.CreateSlash(ctx, stakeID, SlashTypeUnhelpful, SlashReasonPlagiarism, "", creator2)
+	another, _, err := keeper.CreateSlash(ctx, stakeID, SlashTypeUnhelpful, SlashReasonPlagiarism, "", addr2)
 	assert.NoError(t, err)
 
 	all := keeper.Slashes(ctx)
 	assert.Len(t, all, 2)
 	assert.Equal(t, all[0], first)
 	assert.Equal(t, all[1], another)
+
+	a, _ := keeper.stakingKeeper.Argument(ctx, 1)
+	assert.True(t, a.IsUnhelpful)
 }
 
 func Test_punishment(t *testing.T) {

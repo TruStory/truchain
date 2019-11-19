@@ -34,7 +34,6 @@ func InitGenesis(ctx sdk.Context, keeper Keeper, data GenesisState) {
 	}
 	keeper.setSlashID(ctx, uint64(len(data.Slashes)+1))
 	keeper.SetParams(ctx, data.Params)
-	fmt.Println("Finished slashing")
 }
 
 // ExportGenesis exports the genesis state
