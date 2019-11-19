@@ -33,13 +33,11 @@ This creates:
 # Build the binaries
 make build
 
-# Add a new key named registrar
-# This key is used to register new accounts and will go away once client-side key management is implemented
-# Save the passphrase from this step
-make registrar
+# Create a wallet and save the mnemonic and passphrase
+make create-wallet
 
 # Initialize configuration files and genesis file
-# Enter the passphrase from above
+# Enter passphrase from above
 make init
 
 # Start the chain
