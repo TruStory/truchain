@@ -37,11 +37,16 @@ This creates:
 ## Run a single node
 
 ```sh
+# Build the binaries
+make build
+
 # Add a new key named registrar
-# This will go away once client-side key management is implemented
+# This key is used to register new accounts and will go away once client-side key management is implemented
+# Save the passphrase from this step
 make registrar
 
 # Initialize configuration files and genesis file
+# Enter the passphrase from above
 make init
 
 # Start the chain

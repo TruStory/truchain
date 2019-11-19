@@ -1,21 +1,24 @@
 package main
 
 import (
-	"os"
-
 	"github.com/TruStory/truchain/app"
 	truchain "github.com/TruStory/truchain/types"
 	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/cosmos/cosmos-sdk/server"
+	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/module"
+	"github.com/cosmos/cosmos-sdk/x/crisis"
 	"github.com/cosmos/cosmos-sdk/x/genutil"
 	genutilcli "github.com/cosmos/cosmos-sdk/x/genutil/client/cli"
+	"github.com/cosmos/cosmos-sdk/x/gov"
+	"github.com/cosmos/cosmos-sdk/x/mint"
 	"github.com/cosmos/cosmos-sdk/x/staking"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"github.com/tendermint/tendermint/libs/cli"
 	"github.com/tendermint/tendermint/types"
+	"os"
 )
 
 func InitCmd(ctx *server.Context, cdc *codec.Codec, mbm module.BasicManager, defaultNodeHome string) *cobra.Command {
@@ -53,6 +56,28 @@ func InitCmd(ctx *server.Context, cdc *codec.Codec, mbm module.BasicManager, def
 			cdc.MustUnmarshalJSON(appState[staking.ModuleName], &stakingGenState)
 			stakingGenState.Params.BondDenom = truchain.StakeDenom
 			appState[staking.ModuleName] = cdc.MustMarshalJSON(stakingGenState)
+		}
+		// migrate gov state
+		if appState[gov.ModuleName] != nil {
+			var govGenState gov.GenesisState
+			cdc.MustUnmarshalJSON(appState[gov.ModuleName], &govGenState)
+			minDeposit := sdk.NewInt64Coin(truchain.StakeDenom, 10_000_000)
+			govGenState.DepositParams.MinDeposit = sdk.NewCoins(minDeposit)
+			appState[gov.ModuleName] = cdc.MustMarshalJSON(govGenState)
+		}
+		// migrate mint state
+		if appState[mint.ModuleName] != nil {
+			var mintGenState mint.GenesisState
+			cdc.MustUnmarshalJSON(appState[mint.ModuleName], &mintGenState)
+			mintGenState.Params.MintDenom = truchain.StakeDenom
+			appState[mint.ModuleName] = cdc.MustMarshalJSON(mintGenState)
+		}
+		// migrate crisis state
+		if appState[crisis.ModuleName] != nil {
+			var crisisGenState crisis.GenesisState
+			cdc.MustUnmarshalJSON(appState[crisis.ModuleName], &crisisGenState)
+			crisisGenState.ConstantFee.Denom = truchain.StakeDenom
+			appState[crisis.ModuleName] = cdc.MustMarshalJSON(crisisGenState)
 		}
 		var err error
 		genDoc.AppState, err = cdc.MarshalJSON(appState)
