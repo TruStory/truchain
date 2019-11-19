@@ -460,7 +460,7 @@ func (k Keeper) validateParams(ctx sdk.Context, argumentID uint64, detailedReaso
 
 	a, ok := k.stakingKeeper.Argument(ctx, argumentID)
 	if a.IsUnhelpful {
-		return ErrAlreadyNotHelpful()
+		return ErrAlreadyUnhelpful()
 	}
 
 	if !ok {

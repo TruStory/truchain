@@ -61,7 +61,7 @@ func TestNewSlash_ErrNotEnoughEarnedStake(t *testing.T) {
 	assert.Equal(t, ErrNotEnoughEarnedStake(invalidCreator).Code(), err.Code())
 }
 
-func TestNewSlash_ErrAlreadyNotHelpful(t *testing.T) {
+func TestNewSlash_ErrAlreadyUnhelpful(t *testing.T) {
 	ctx, keeper := mockDB()
 	stakeID := uint64(1)
 	creator := keeper.GetParams(ctx).SlashAdmins[0]
@@ -69,7 +69,7 @@ func TestNewSlash_ErrAlreadyNotHelpful(t *testing.T) {
 	assert.Nil(t, err)
 	_, _, err = keeper.CreateSlash(ctx, stakeID, SlashTypeUnhelpful, SlashReasonPlagiarism, "", creator)
 	assert.NotNil(t, err)
-	assert.Equal(t, ErrAlreadyNotHelpful().Code(), err.Code())
+	assert.Equal(t, ErrAlreadyUnhelpful().Code(), err.Code())
 }
 
 func TestSlash_Success(t *testing.T) {
