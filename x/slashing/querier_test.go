@@ -5,7 +5,9 @@ import (
 	"strings"
 	"testing"
 
+	app "github.com/TruStory/truchain/types"
 	"github.com/TruStory/truchain/x/staking"
+	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	"github.com/stretchr/testify/assert"
 	abci "github.com/tendermint/tendermint/abci/types"
@@ -55,18 +57,31 @@ func TestQuerySlash_ErrNotFound(t *testing.T) {
 
 func TestQuerySlashes_Success(t *testing.T) {
 	ctx, keeper := mockDB()
+	_, _, addr1, _ := getFakeAppAccountParams()
+	_, _, addr2, _ := getFakeAppAccountParams()
+	earned := sdk.NewCoins(sdk.NewInt64Coin("general", 70*app.Shanev))
+	usersEarnings := []staking.UserEarnedCoins{
+		staking.UserEarnedCoins{Address: addr1, Coins: earned},
+		staking.UserEarnedCoins{Address: addr2, Coins: earned},
+	}
+	genesis := staking.DefaultGenesisState()
+	genesis.UsersEarnings = usersEarnings
+	staking.InitGenesis(ctx, keeper.stakingKeeper, genesis)
+
+	p := keeper.GetParams(ctx)
+	p.MinSlashCount = 2
+	keeper.SetParams(ctx, p)
 
 	staker := keeper.GetParams(ctx).SlashAdmins[1]
 	_, err := keeper.stakingKeeper.SubmitArgument(ctx, "arg1", "summary1", staker, 1, staking.StakeBacking)
 	assert.NoError(t, err)
 
 	stakeID := uint64(1)
-	creator := keeper.GetParams(ctx).SlashAdmins[0]
-	first, _, err := keeper.CreateSlash(ctx, stakeID, SlashTypeUnhelpful, SlashReasonPlagiarism, "", creator)
+
+	first, _, err := keeper.CreateSlash(ctx, stakeID, SlashTypeUnhelpful, SlashReasonPlagiarism, "", addr1)
 	assert.Nil(t, err)
 
-	creator2 := keeper.GetParams(ctx).SlashAdmins[1]
-	another, _, err := keeper.CreateSlash(ctx, stakeID, SlashTypeUnhelpful, SlashReasonPlagiarism, "", creator2)
+	another, _, err := keeper.CreateSlash(ctx, stakeID, SlashTypeUnhelpful, SlashReasonPlagiarism, "", addr2)
 	assert.Nil(t, err)
 
 	result, sdkErr := querySlashes(ctx, keeper)
