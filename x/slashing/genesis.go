@@ -25,9 +25,18 @@ func DefaultGenesisState() GenesisState { return NewGenesisState() }
 
 // InitGenesis initializes slashing state from genesis file
 func InitGenesis(ctx sdk.Context, keeper Keeper, data GenesisState) {
+	counter := make(map[uint64]uint64)
 	for _, slash := range data.Slashes {
 		keeper.setSlash(ctx, slash)
+		count, ok := counter[slash.ArgumentID]
+		if !ok {
+			count = 0
+		}
+		count = count + 1
+		counter[slash.ArgumentID] = count
+
 		keeper.setCreatorSlash(ctx, slash.Creator, slash.ID)
+		keeper.setSlashCount(ctx, slash.ArgumentID, count)
 		keeper.setArgumentSlash(ctx, slash.ArgumentID, slash.ID)
 		keeper.setArgumentSlasherSlash(ctx, slash.ArgumentID, slash.ID, slash.Creator)
 
