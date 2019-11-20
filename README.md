@@ -111,10 +111,3 @@ make check
 # Run tests
 make test
 ```
-
-## API Documentation
-
-```sh
-# Generate a website with documentation
-make doc
-```
