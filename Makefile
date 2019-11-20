@@ -48,14 +48,8 @@ create-wallet:
 
 init:
 	rm -rf ~/.truchaind
-	bin/truchaind init trunode
+	bin/truchaind init trunode $(shell bin/truchaincli keys show validator -a --home ~/.octopus)
 	bin/truchaind add-genesis-account $(shell bin/truchaincli keys show validator -a --home ~/.octopus) 10000000000utru
-	sed -i -e 's/registrar.*/registrar": "$(shell bin/truchaincli keys show validator -a --home ~/.octopus)",/' ~/.truchaind/config/genesis.json
-	sed -i -e 's/community_admins.*/community_admins": ["$(shell bin/truchaincli keys show validator -a --home ~/.octopus)"]/' ~/.truchaind/config/genesis.json
-	sed -i -e 's/claim_admins.*/community_admins": ["$(shell bin/truchaincli keys show validator -a --home ~/.octopus)"]/' ~/.truchaind/config/genesis.json
-	sed -i -e 's/staking_admins.*/staking_admins": ["$(shell bin/truchaincli keys show validator -a --home ~/.octopus)"],/' ~/.truchaind/config/genesis.json
-	sed -i -e 's/slash_admins.*/slash_admins": ["$(shell bin/truchaincli keys show validator -a --home ~/.octopus)"],/' ~/.truchaind/config/genesis.json
-	sed -i -e 's/reward_broker_address.*/reward_broker_address": "$(shell bin/truchaincli keys show validator -a --home ~/.octopus)"/' ~/.truchaind/config/genesis.json
 	bin/truchaind gentx --name=validator --amount 10000000000utru --home-client ~/.octopus
 	bin/truchaind collect-gentxs
 
