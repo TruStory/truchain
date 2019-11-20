@@ -8,6 +8,8 @@
 
 TruChain is the application-specific blockchain that powers [beta.trustory.io](https://beta.trustory.io/).
 
+**🚀🚀🚀 Join the testnet at [https://github.com/TruStory/testnets](https://github.com/TruStory/testnets).**
+
 ## Installation
 
 1. Install Go by following the [official docs](https://golang.org/doc/install). 
