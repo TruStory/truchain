@@ -57,8 +57,13 @@ func TestQuerySlash_ErrNotFound(t *testing.T) {
 
 func TestQuerySlashes_Success(t *testing.T) {
 	ctx, keeper := mockDB()
-	_, _, addr1, _ := getFakeAppAccountParams()
-	_, _, addr2, _ := getFakeAppAccountParams()
+	_, publicKey1, addr1, coins1 := getFakeAppAccountParams()
+	_, publicKey2, addr2, coins2 := getFakeAppAccountParams()
+
+	_, err := keeper.accountKeeper.CreateAppAccount(ctx, addr1, coins1, publicKey1)
+	assert.NoError(t, err)
+	_, err = keeper.accountKeeper.CreateAppAccount(ctx, addr2, coins2, publicKey2)
+	assert.NoError(t, err)
 	earned := sdk.NewCoins(sdk.NewInt64Coin("general", 70*app.Shanev))
 	usersEarnings := []staking.UserEarnedCoins{
 		staking.UserEarnedCoins{Address: addr1, Coins: earned},
@@ -73,7 +78,7 @@ func TestQuerySlashes_Success(t *testing.T) {
 	keeper.SetParams(ctx, p)
 
 	staker := keeper.GetParams(ctx).SlashAdmins[1]
-	_, err := keeper.stakingKeeper.SubmitArgument(ctx, "arg1", "summary1", staker, 1, staking.StakeBacking)
+	_, err = keeper.stakingKeeper.SubmitArgument(ctx, "arg1", "summary1", staker, 1, staking.StakeBacking)
 	assert.NoError(t, err)
 
 	stakeID := uint64(1)
