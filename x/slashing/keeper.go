@@ -50,7 +50,10 @@ func (k Keeper) CreateSlash(ctx sdk.Context,
 	slashReason SlashReason,
 	slashDetailedReason string,
 	creator sdk.AccAddress) (slash Slash, results []PunishmentResult, err sdk.Error) {
-
+	err = k.checkJailed(ctx, creator)
+	if err != nil {
+		return
+	}
 	logger := k.Logger(ctx)
 	results = make([]PunishmentResult, 0)
 	err = k.validateParams(ctx, argumentID, slashDetailedReason, creator)
@@ -580,4 +583,15 @@ func (k Keeper) store(ctx sdk.Context) sdk.KVStore {
 
 func (k Keeper) Logger(ctx sdk.Context) log.Logger {
 	return ctx.Logger().With("module", ModuleName)
+}
+
+func (k Keeper) checkJailed(ctx sdk.Context, address sdk.AccAddress) sdk.Error {
+	jailed, err := k.accountKeeper.IsJailed(ctx, address)
+	if err != nil {
+		return err
+	}
+	if jailed {
+		return staking.ErrCodeAccountJailed(address)
+	}
+	return nil
 }
