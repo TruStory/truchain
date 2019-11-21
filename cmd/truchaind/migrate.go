@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"time"
 
+	"github.com/TruStory/truchain/cmd/truchaind/migration/reset"
 	"github.com/TruStory/truchain/cmd/truchaind/migration/v0_3"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
@@ -25,6 +26,7 @@ const (
 )
 
 var migrationMap = extypes.MigrationMap{
+	"reset":  reset.Migrate,
 	"v0.3.1": v0_3.Migrate,
 }
 
