@@ -22,6 +22,20 @@ const (
 	Preethi = 1
 	Shanev  = 1000000 * Preethi
 )
+const (
+	// Bech32PrefixAccAddr defines the Bech32 prefix of an account's address
+	Bech32PrefixAccAddr = "tru"
+	// Bech32PrefixAccPub defines the Bech32 prefix of an account's public key
+	Bech32PrefixAccPub = "trupub"
+	// Bech32PrefixValAddr defines the Bech32 prefix of a validator's operator address
+	Bech32PrefixValAddr = "truvaloper"
+	// Bech32PrefixValPub defines the Bech32 prefix of a validator's operator public key
+	Bech32PrefixValPub = "truvaloperpub"
+	// Bech32PrefixConsAddr defines the Bech32 prefix of a consensus node address
+	Bech32PrefixConsAddr = "truvalcons"
+	// Bech32PrefixConsPub defines the Bech32 prefix of a consensus node public key
+	Bech32PrefixConsPub = "truvalconspub"
+)
 
 // InitialStake is an `sdk.Coins` representing the balance a new user is granted upon registration
 var InitialStake = sdk.Coin{Amount: sdk.NewInt(300 * Shanev), Denom: StakeDenom}

@@ -8,6 +8,7 @@ import (
 	"github.com/spf13/viper"
 
 	"github.com/TruStory/truchain/app"
+	truchain "github.com/TruStory/truchain/types"
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/keys"
 	"github.com/cosmos/cosmos-sdk/client/lcd"
@@ -32,9 +33,9 @@ func main() {
 
 	// Read in the configuration file for the sdk
 	config := sdk.GetConfig()
-	config.SetBech32PrefixForAccount(sdk.Bech32PrefixAccAddr, sdk.Bech32PrefixAccPub)
-	config.SetBech32PrefixForValidator(sdk.Bech32PrefixValAddr, sdk.Bech32PrefixValPub)
-	config.SetBech32PrefixForConsensusNode(sdk.Bech32PrefixConsAddr, sdk.Bech32PrefixConsPub)
+	config.SetBech32PrefixForAccount(truchain.Bech32PrefixAccAddr, truchain.Bech32PrefixAccPub)
+	config.SetBech32PrefixForValidator(truchain.Bech32PrefixValAddr, truchain.Bech32PrefixValPub)
+	config.SetBech32PrefixForConsensusNode(truchain.Bech32PrefixConsAddr, truchain.Bech32PrefixConsPub)
 	config.Seal()
 
 	rootCmd := &cobra.Command{

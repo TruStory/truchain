@@ -8,10 +8,12 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/auth"
 
 	"github.com/TruStory/truchain/app"
+	truchain "github.com/TruStory/truchain/types"
 	"github.com/cosmos/cosmos-sdk/baseapp"
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/server"
 	"github.com/cosmos/cosmos-sdk/store"
+	sdk "github.com/cosmos/cosmos-sdk/types"
 	genutilcli "github.com/cosmos/cosmos-sdk/x/genutil/client/cli"
 	"github.com/cosmos/cosmos-sdk/x/staking"
 	"github.com/spf13/cobra"
@@ -31,6 +33,13 @@ func main() {
 	cobra.EnableCommandSorting = false
 
 	cdc := app.MakeCodec()
+
+	config := sdk.GetConfig()
+	config.SetBech32PrefixForAccount(truchain.Bech32PrefixAccAddr, truchain.Bech32PrefixAccPub)
+	config.SetBech32PrefixForValidator(truchain.Bech32PrefixValAddr, truchain.Bech32PrefixValPub)
+	config.SetBech32PrefixForConsensusNode(truchain.Bech32PrefixConsAddr, truchain.Bech32PrefixConsPub)
+	config.Seal()
+
 	ctx := server.NewDefaultContext()
 
 	rootCmd := &cobra.Command{

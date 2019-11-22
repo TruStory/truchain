@@ -40,11 +40,12 @@ func TestNewSlash_InvalidArgument(t *testing.T) {
 
 func TestNewSlash_InvalidDetailedReason(t *testing.T) {
 	ctx, keeper := mockDB()
-
+	_, publicKey, creator, coins := getFakeAppAccountParams()
+	_, err := keeper.accountKeeper.CreateAppAccount(ctx, creator, coins, publicKey)
+	assert.NoError(t, err)
 	stakeID := uint64(1)
-	creator := keeper.GetParams(ctx).SlashAdmins[0]
 	longDetailedReason := "This is a very very very descriptive reason to slash an argument. I am writing it in this detail to make the validation fail. I hope it works!"
-	_, _, err := keeper.CreateSlash(ctx, stakeID, SlashTypeUnhelpful, SlashReasonOther, longDetailedReason, creator)
+	_, _, err = keeper.CreateSlash(ctx, stakeID, SlashTypeUnhelpful, SlashReasonOther, longDetailedReason, creator)
 
 	assert.NotNil(t, err)
 	assert.Equal(t, ErrInvalidSlashReason("").Code(), err.Code())
@@ -52,13 +53,13 @@ func TestNewSlash_InvalidDetailedReason(t *testing.T) {
 
 func TestNewSlash_ErrNotEnoughEarnedStake(t *testing.T) {
 	ctx, keeper := mockDB()
-
+	_, publicKey, creator, coins := getFakeAppAccountParams()
+	_, err := keeper.accountKeeper.CreateAppAccount(ctx, creator, coins, publicKey)
+	assert.NoError(t, err)
 	stakeID := uint64(1)
-	invalidCreator := sdk.AccAddress([]byte{1, 2})
-	_, _, err := keeper.CreateSlash(ctx, stakeID, SlashTypeUnhelpful, SlashReasonPlagiarism, "", invalidCreator)
-
+	_, _, err = keeper.CreateSlash(ctx, stakeID, SlashTypeUnhelpful, SlashReasonPlagiarism, "", creator)
 	assert.NotNil(t, err)
-	assert.Equal(t, ErrNotEnoughEarnedStake(invalidCreator).Code(), err.Code())
+	assert.Equal(t, ErrNotEnoughEarnedStake(creator).Code(), err.Code())
 }
 
 func TestNewSlash_ErrAlreadyUnhelpful(t *testing.T) {
@@ -101,8 +102,13 @@ func TestSlash_ErrNotFound(t *testing.T) {
 
 func TestSlashes_Success(t *testing.T) {
 	ctx, keeper := mockDB()
-	_, _, addr1, _ := getFakeAppAccountParams()
-	_, _, addr2, _ := getFakeAppAccountParams()
+	_, publicKey1, addr1, coins1 := getFakeAppAccountParams()
+	_, publicKey2, addr2, coins2 := getFakeAppAccountParams()
+
+	_, err := keeper.accountKeeper.CreateAppAccount(ctx, addr1, coins1, publicKey1)
+	assert.NoError(t, err)
+	_, err = keeper.accountKeeper.CreateAppAccount(ctx, addr2, coins2, publicKey2)
+	assert.NoError(t, err)
 	earned := sdk.NewCoins(sdk.NewInt64Coin("general", 70*app.Shanev))
 	usersEarnings := []staking.UserEarnedCoins{
 		staking.UserEarnedCoins{Address: addr1, Coins: earned},
@@ -118,7 +124,7 @@ func TestSlashes_Success(t *testing.T) {
 
 	assert.Equal(t, keeper.GetParams(ctx).MinSlashCount, 2)
 	staker := keeper.GetParams(ctx).SlashAdmins[1]
-	_, err := keeper.stakingKeeper.SubmitArgument(ctx, "arg1", "summary1", staker, 1, staking.StakeBacking)
+	_, err = keeper.stakingKeeper.SubmitArgument(ctx, "arg1", "summary1", staker, 1, staking.StakeBacking)
 	assert.NoError(t, err)
 	stakeID := uint64(1)
 
