@@ -48,7 +48,7 @@ create-wallet:
 
 init:
 	rm -rf ~/.truchaind
-	bin/truchaind init trunode $(shell bin/truchaincli keys show validator -a --home ~/.octopus)
+	bin/truchaind init trunode
 	bin/truchaind add-genesis-account $(shell bin/truchaincli keys show validator -a --home ~/.octopus) 10000000000utru
 	bin/truchaind gentx --name=validator --amount 10000000000utru --home-client ~/.octopus
 	bin/truchaind collect-gentxs
