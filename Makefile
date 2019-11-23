@@ -40,7 +40,7 @@ build-linux:
 
 # i.e: make release VERSION=v0.4.1-beta
 release: build-linux
-	tar -zcvf ~/truchain-$(VERSION).tar.gz ./build/truchaincli ./build/truchaind
+	cd ./build &&  tar -zcvf ~/truchain-$(VERSION).tar.gz *
 
 doc:
 	@echo "--> Wait a few seconds and visit http://localhost:6060/pkg/github.com/TruStory/truchain/"
