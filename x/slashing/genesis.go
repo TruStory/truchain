@@ -67,10 +67,6 @@ func ValidateGenesis(data GenesisState) error {
 		return fmt.Errorf("Param: SlashMinStake, cannot be a negative value")
 	}
 
-	if len(data.Params.SlashAdmins) < 1 {
-		return fmt.Errorf("Param: SlashAdmins, must have atleast one admin")
-	}
-
 	if data.Params.CuratorShare.IsNegative() {
 		return fmt.Errorf("Param: CuratorShare, cannot be a negative value")
 	}
