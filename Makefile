@@ -36,6 +36,10 @@ build-linux:
 	GOOS=linux GOARCH=amd64 go build -mod=readonly $(BUILD_FLAGS) -o build/truchaind cmd/truchaind/*.go
 	GOOS=linux GOARCH=amd64 go build -mod=readonly $(BUILD_FLAGS) -o build/truchaincli cmd/truchaincli/*.go
 
+# i.e: make release RELEASE=v0.4.1-beta
+release: build-linux
+	tar -zcvf ~/truchain-$(RELEASE).tar.gz ./build/truchaincli ./build/truchaind
+
 doc:
 	@echo "--> Wait a few seconds and visit http://localhost:6060/pkg/github.com/TruStory/truchain/"
 	godoc -http=:6060
