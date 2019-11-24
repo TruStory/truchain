@@ -18,10 +18,10 @@ TruChain is the application-specific blockchain that powers [beta.trustory.io](h
 
 2. Install truchain binaries:
 
-```sh
-git clone https://github.com/TruStory/truchain.git
-cd truchain && git checkout master
-make install
+```
+$ git clone https://github.com/TruStory/truchain.git
+$ cd truchain && git checkout master
+$ make install
 ```
 
 This creates:
@@ -36,17 +36,17 @@ This creates:
 
 ```sh
 # Build the binaries
-make build
+$ make build
 
 # Create a wallet and save the mnemonic and passphrase
-make create-wallet
+$ make create-wallet
 
 # Initialize configuration files and genesis file
 # Enter passphrase from above
-make init
+$ make init
 
 # Start the chain
-make start
+$ make start
 ```
 
 ## Run a local 4-node testnet
@@ -57,10 +57,10 @@ NOTE: You will not be able to register accounts because each node won't have a r
 
 ```sh
 # Build daemon for linux so it can run inside a Docker container
-make build-linux
+$ make build-linux
 
 # Create 4-nodes with their own genesis files and configuration
-make localnet-start
+$ make localnet-start
 ```
 
 Go to each config file in `build/nodeN/truchaind/config/config.toml` and replace these:
@@ -72,10 +72,10 @@ addr_book_strict = false
 
 ```sh
 # stop and restart
-make localnet-stop && make localnet-start
+$ make localnet-stop && make localnet-start
 
 # Tail logs
-docker-compose logs -f
+$ docker-compose logs -f
 ```
 
 ## Run a full node
@@ -84,22 +84,22 @@ TruChain can be run as a full node, syncing it's state with another node or vali
 
 ```sh
 # Initialize another chain with a new moniker but same chain-id
-truchaind init <moniker-2> --chain-id betanet-1 --home ~/.devnet
+$ truchaind init <moniker-2> --chain-id betanet-1 --home ~/.devnet
 
 # Copy the genesis file from the first node
-scp ubuntu@devnet:/home/ubuntu/.truchaind/config/genesis.json ~/.devnet/config/
+$ scp ubuntu@devnet:/home/ubuntu/.truchaind/config/genesis.json ~/.devnet/config/
 
 # Get the node id of the first node
-truchaincli status
+$ truchaincli status
 
 # Add first node to `persistent_peers` in config.toml
-sed -i -e 's/persistent_peers.*/persistent_peers = "[ip_address]:26656"/' ~/.devnet/config/config.toml
+$ sed -i -e 's/persistent_peers.*/persistent_peers = "[ip_address]:26656"/' ~/.devnet/config/config.toml
 
 # Optional: Add verbose logging
-sed -i -e 's/log_level.*/log_level = "main:info,state:info,*:error,app:info,account:info,trubank:info,claim:info,community:info,truslashing:info,trustaking:info"/' ~/.devnet/config/config.toml
+$ sed -i -e 's/log_level.*/log_level = "main:info,state:info,*:error,app:info,account:info,trubank:info,claim:info,community:info,truslashing:info,trustaking:info"/' ~/.devnet/config/config.toml
 
 # Start the node
-truchaind start --home ~/.devnet
+$ truchaind start --home ~/.devnet
 ```
 
 If the first node has many blocks, it could take several minutes for the first sync to complete. Now you will have two nodes running in lockstep!
@@ -108,8 +108,8 @@ If the first node has many blocks, it could take several minutes for the first s
 
 ```sh
 # Run linter
-make check
+$ make check
 
 # Run tests
-make test
+$ make test
 ```
