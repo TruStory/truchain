@@ -26,6 +26,12 @@ github.com/OpenPeeDeeP/depguard v1.0.0/go.mod h1:7/4sitnI9YlQgTLLk734QlzXT8DuHVn
 github.com/StackExchange/wmi v0.0.0-20180116203802-5d049714c4a6/go.mod h1:3eOhrUMpNV+6aFIbp5/iudMxNCF27Vw2OZgy4xEx0Fg=
 github.com/TruStory/cosmos-sdk v0.34.4-0.20191114003118-2268a8498fdd h1:ybW1om5P0ge5noPQ5c8F1oAYUexaIFT16QaIK/tPngQ=
 github.com/TruStory/cosmos-sdk v0.34.4-0.20191114003118-2268a8498fdd/go.mod h1:PuN72vbZxlorpnHmoIl6RjzVMXEOMejmwORJlZ74K7Q=
+github.com/TruStory/cosmos-sdk v0.34.4-0.20191124215326-d1033e981ab7 h1:ZDLuIP1X9o4gJ2lhV8YNSQcp+vMKxmbGuo7b4OQCgCI=
+github.com/TruStory/cosmos-sdk v0.34.4-0.20191124215326-d1033e981ab7/go.mod h1:PuN72vbZxlorpnHmoIl6RjzVMXEOMejmwORJlZ74K7Q=
+github.com/TruStory/cosmos-sdk v0.34.4-0.20191124220706-a284c027de7e h1:VBiqxhiAv52cKdquiU6RuLXynVxFLHg8tFiZ/UNbWiI=
+github.com/TruStory/cosmos-sdk v0.34.4-0.20191124220706-a284c027de7e/go.mod h1:PuN72vbZxlorpnHmoIl6RjzVMXEOMejmwORJlZ74K7Q=
+github.com/TruStory/cosmos-sdk v0.34.4-0.20191124221853-388ed268bac3 h1:c8569vfj7g3MwnWV1OJE0F99zlfnjo8tdplsWgrZ2Qo=
+github.com/TruStory/cosmos-sdk v0.34.4-0.20191124221853-388ed268bac3/go.mod h1:PuN72vbZxlorpnHmoIl6RjzVMXEOMejmwORJlZ74K7Q=
 github.com/VividCortex/gohistogram v1.0.0 h1:6+hBz+qvs0JOrrNhhmR7lFxo5sINxBCGXrdtl/UvroE=
 github.com/VividCortex/gohistogram v1.0.0/go.mod h1:Pf5mBqqDxYaXu3hDrrU+w6nw50o/4+TcAqDqk/vUH7g=
 github.com/Workiva/go-datastructures v1.0.50/go.mod h1:Z+F2Rca0qCsVYDS8z7bAGm8f3UkzuWYS/oBZz5a7VVA=
