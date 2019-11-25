@@ -82,6 +82,9 @@ func InitCmd(ctx *server.Context, cdc *codec.Codec, mbm module.BasicManager, def
 			var mintGenState mint.GenesisState
 			cdc.MustUnmarshalJSON(appState[mint.ModuleName], &mintGenState)
 			mintGenState.Params.MintDenom = truchain.StakeDenom
+			mintGenState.Minter.Inflation = sdk.NewDecWithPrec(70, 2)
+			mintGenState.Params.InflationMin = sdk.NewDecWithPrec(70, 2)
+			mintGenState.Params.InflationMax = sdk.NewDecWithPrec(70, 2)
 			appState[mint.ModuleName] = cdc.MustMarshalJSON(mintGenState)
 		}
 		// migrate crisis state
