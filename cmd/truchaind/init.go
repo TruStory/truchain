@@ -5,6 +5,7 @@ import (
 	truchain "github.com/TruStory/truchain/types"
 	"github.com/TruStory/truchain/x/account"
 	trubank "github.com/TruStory/truchain/x/bank"
+	trudist "github.com/TruStory/truchain/x/distribution"
 	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/cosmos/cosmos-sdk/server"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -118,6 +119,15 @@ func InitCmd(ctx *server.Context, cdc *codec.Codec, mbm module.BasicManager, def
 			// guards faucet (user growth pool) use for testnet
 			genState.Params.RewardBrokerAddress = rewardBroker
 			appState[trubank.ModuleName] = cdc.MustMarshalJSON(genState)
+		}
+		// migrate trudistribution state
+		if appState[trudist.ModuleName] != nil {
+			var genState trudist.GenesisState
+			cdc.MustUnmarshalJSON(appState[trudist.ModuleName], &genState)
+			genState.Params.UserGrowthAllocation = sdk.NewDecWithPrec(50, 2)
+			genState.Params.UserRewardAllocation = sdk.NewDecWithPrec(50, 2)
+			genState.Params.StakeholderAllocation = sdk.ZeroDec()
+			appState[trudist.ModuleName] = cdc.MustMarshalJSON(genState)
 		}
 		var err error
 		genDoc.AppState, err = cdc.MarshalJSON(appState)
