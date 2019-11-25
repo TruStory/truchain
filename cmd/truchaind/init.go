@@ -5,11 +5,13 @@ import (
 	truchain "github.com/TruStory/truchain/types"
 	"github.com/TruStory/truchain/x/account"
 	trubank "github.com/TruStory/truchain/x/bank"
+	trudist "github.com/TruStory/truchain/x/distribution"
 	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/cosmos/cosmos-sdk/server"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/module"
 	"github.com/cosmos/cosmos-sdk/x/crisis"
+	"github.com/cosmos/cosmos-sdk/x/distribution"
 	"github.com/cosmos/cosmos-sdk/x/genutil"
 	genutilcli "github.com/cosmos/cosmos-sdk/x/genutil/client/cli"
 	"github.com/cosmos/cosmos-sdk/x/gov"
@@ -81,6 +83,9 @@ func InitCmd(ctx *server.Context, cdc *codec.Codec, mbm module.BasicManager, def
 			var mintGenState mint.GenesisState
 			cdc.MustUnmarshalJSON(appState[mint.ModuleName], &mintGenState)
 			mintGenState.Params.MintDenom = truchain.StakeDenom
+			mintGenState.Minter.Inflation = sdk.NewDecWithPrec(70, 2)
+			mintGenState.Params.InflationMin = sdk.NewDecWithPrec(70, 2)
+			mintGenState.Params.InflationMax = sdk.NewDecWithPrec(70, 2)
 			appState[mint.ModuleName] = cdc.MustMarshalJSON(mintGenState)
 		}
 		// migrate crisis state
@@ -89,6 +94,13 @@ func InitCmd(ctx *server.Context, cdc *codec.Codec, mbm module.BasicManager, def
 			cdc.MustUnmarshalJSON(appState[crisis.ModuleName], &crisisGenState)
 			crisisGenState.ConstantFee.Denom = truchain.StakeDenom
 			appState[crisis.ModuleName] = cdc.MustMarshalJSON(crisisGenState)
+		}
+		// migrate distribution state
+		if appState[distribution.ModuleName] != nil {
+			var genState distribution.GenesisState
+			cdc.MustUnmarshalJSON(appState[distribution.ModuleName], &genState)
+			genState.CommunityTax = sdk.NewDecWithPrec(50, 2)
+			appState[distribution.ModuleName] = cdc.MustMarshalJSON(genState)
 		}
 		// -----------
 
@@ -107,6 +119,15 @@ func InitCmd(ctx *server.Context, cdc *codec.Codec, mbm module.BasicManager, def
 			// guards faucet (user growth pool) use for testnet
 			genState.Params.RewardBrokerAddress = rewardBroker
 			appState[trubank.ModuleName] = cdc.MustMarshalJSON(genState)
+		}
+		// migrate trudistribution state
+		if appState[trudist.ModuleName] != nil {
+			var genState trudist.GenesisState
+			cdc.MustUnmarshalJSON(appState[trudist.ModuleName], &genState)
+			genState.Params.UserGrowthAllocation = sdk.NewDecWithPrec(50, 2)
+			genState.Params.UserRewardAllocation = sdk.NewDecWithPrec(50, 2)
+			genState.Params.StakeholderAllocation = sdk.ZeroDec()
+			appState[trudist.ModuleName] = cdc.MustMarshalJSON(genState)
 		}
 		var err error
 		genDoc.AppState, err = cdc.MarshalJSON(appState)
