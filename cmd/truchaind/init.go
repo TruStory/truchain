@@ -10,6 +10,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/module"
 	"github.com/cosmos/cosmos-sdk/x/crisis"
+	"github.com/cosmos/cosmos-sdk/x/distribution"
 	"github.com/cosmos/cosmos-sdk/x/genutil"
 	genutilcli "github.com/cosmos/cosmos-sdk/x/genutil/client/cli"
 	"github.com/cosmos/cosmos-sdk/x/gov"
@@ -89,6 +90,13 @@ func InitCmd(ctx *server.Context, cdc *codec.Codec, mbm module.BasicManager, def
 			cdc.MustUnmarshalJSON(appState[crisis.ModuleName], &crisisGenState)
 			crisisGenState.ConstantFee.Denom = truchain.StakeDenom
 			appState[crisis.ModuleName] = cdc.MustMarshalJSON(crisisGenState)
+		}
+		// migrate distribution state
+		if appState[distribution.ModuleName] != nil {
+			var genState distribution.GenesisState
+			cdc.MustUnmarshalJSON(appState[distribution.ModuleName], &genState)
+			genState.CommunityTax = sdk.NewDecWithPrec(50, 2)
+			appState[distribution.ModuleName] = cdc.MustMarshalJSON(genState)
 		}
 		// -----------
 
