@@ -5,7 +5,9 @@ MODULES = argument backing category challenge expiration stake story
 VERSION := $(shell echo $(shell git describe --tags) | sed 's/^v//')
 COMMIT := $(shell git log -1 --format='%H')
 
-ldflags = -X github.com/cosmos/cosmos-sdk/version.Name=truchaind \
+ldflags = -X github.com/cosmos/cosmos-sdk/version.Name=truchain \
+	-X github.com/cosmos/cosmos-sdk/version.ServerName=truchaind \
+	-X github.com/cosmos/cosmos-sdk/version.ClientName=truchaincli \
 	-X github.com/cosmos/cosmos-sdk/version.Version=$(VERSION) \
 	-X github.com/cosmos/cosmos-sdk/version.Commit=$(COMMIT)
 
@@ -36,6 +38,10 @@ build-linux:
 	GOOS=linux GOARCH=amd64 go build -mod=readonly $(BUILD_FLAGS) -o build/truchaind cmd/truchaind/*.go
 	GOOS=linux GOARCH=amd64 go build -mod=readonly $(BUILD_FLAGS) -o build/truchaincli cmd/truchaincli/*.go
 
+# i.e: make release VERSION=v0.4.1-beta
+release: build-linux
+	cd ./build &&  tar -zcvf ~/truchain-$(VERSION).tar.gz *
+
 doc:
 	@echo "--> Wait a few seconds and visit http://localhost:6060/pkg/github.com/TruStory/truchain/"
 	godoc -http=:6060
@@ -48,7 +54,7 @@ create-wallet:
 
 init:
 	rm -rf ~/.truchaind
-	bin/truchaind init trunode $(shell bin/truchaincli keys show validator -a --home ~/.octopus)
+	bin/truchaind init trunode
 	bin/truchaind add-genesis-account $(shell bin/truchaincli keys show validator -a --home ~/.octopus) 10000000000utru
 	bin/truchaind gentx --name=validator --amount 10000000000utru --home-client ~/.octopus
 	bin/truchaind collect-gentxs

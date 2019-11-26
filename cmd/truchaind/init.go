@@ -5,15 +5,13 @@ import (
 	truchain "github.com/TruStory/truchain/types"
 	"github.com/TruStory/truchain/x/account"
 	trubank "github.com/TruStory/truchain/x/bank"
-	"github.com/TruStory/truchain/x/claim"
-	"github.com/TruStory/truchain/x/community"
-	truslashing "github.com/TruStory/truchain/x/slashing"
-	trustaking "github.com/TruStory/truchain/x/staking"
+	trudist "github.com/TruStory/truchain/x/distribution"
 	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/cosmos/cosmos-sdk/server"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/module"
 	"github.com/cosmos/cosmos-sdk/x/crisis"
+	"github.com/cosmos/cosmos-sdk/x/distribution"
 	"github.com/cosmos/cosmos-sdk/x/genutil"
 	genutilcli "github.com/cosmos/cosmos-sdk/x/genutil/client/cli"
 	"github.com/cosmos/cosmos-sdk/x/gov"
@@ -29,16 +27,11 @@ import (
 
 func InitCmd(ctx *server.Context, cdc *codec.Codec, mbm module.BasicManager, defaultNodeHome string) *cobra.Command {
 	init := genutilcli.InitCmd(ctx, cdc, app.ModuleBasics, app.DefaultNodeHome)
-	init.Args = cobra.ExactArgs(2)
 	init.PostRunE = func(cmd *cobra.Command, args []string) error {
 		config := ctx.Config
 		config.SetRoot(viper.GetString(cli.HomeFlag))
 		genFile := config.GenesisFile()
 		genDoc := &types.GenesisDoc{}
-		addr, e := sdk.AccAddressFromBech32(args[1])
-		if e != nil {
-			panic(e)
-		}
 
 		if _, err := os.Stat(genFile); err != nil {
 			if !os.IsNotExist(err) {
@@ -61,6 +54,15 @@ func InitCmd(ctx *server.Context, cdc *codec.Codec, mbm module.BasicManager, def
 
 		cdc := codec.New()
 		codec.RegisterCrypto(cdc)
+
+		// temp account for registering users and guarding the faucet
+		// will go away for mainnet
+		rewardBroker, e := sdk.AccAddressFromBech32("tru1tfpcnjzkthft3ynewqvn7mtdk7guf3kn57n000")
+		if e != nil {
+			panic(e)
+		}
+
+		// migrate stake denom ----
 		// migrate staking state
 		if appState[staking.ModuleName] != nil {
 			var stakingGenState staking.GenesisState
@@ -81,6 +83,9 @@ func InitCmd(ctx *server.Context, cdc *codec.Codec, mbm module.BasicManager, def
 			var mintGenState mint.GenesisState
 			cdc.MustUnmarshalJSON(appState[mint.ModuleName], &mintGenState)
 			mintGenState.Params.MintDenom = truchain.StakeDenom
+			mintGenState.Minter.Inflation = sdk.NewDecWithPrec(70, 2)
+			mintGenState.Params.InflationMin = sdk.NewDecWithPrec(70, 2)
+			mintGenState.Params.InflationMax = sdk.NewDecWithPrec(70, 2)
 			appState[mint.ModuleName] = cdc.MustMarshalJSON(mintGenState)
 		}
 		// migrate crisis state
@@ -90,47 +95,39 @@ func InitCmd(ctx *server.Context, cdc *codec.Codec, mbm module.BasicManager, def
 			crisisGenState.ConstantFee.Denom = truchain.StakeDenom
 			appState[crisis.ModuleName] = cdc.MustMarshalJSON(crisisGenState)
 		}
+		// migrate distribution state
+		if appState[distribution.ModuleName] != nil {
+			var genState distribution.GenesisState
+			cdc.MustUnmarshalJSON(appState[distribution.ModuleName], &genState)
+			genState.CommunityTax = sdk.NewDecWithPrec(50, 2)
+			appState[distribution.ModuleName] = cdc.MustMarshalJSON(genState)
+		}
+		// -----------
+
 		// migrate account state
 		if appState[account.ModuleName] != nil {
 			var accountGenState account.GenesisState
 			cdc.MustUnmarshalJSON(appState[account.ModuleName], &accountGenState)
-			accountGenState.Params.Registrar = addr
+			// signing key for server-side account registration
+			accountGenState.Params.Registrar = rewardBroker
 			appState[account.ModuleName] = cdc.MustMarshalJSON(accountGenState)
-		}
-		// migrate community state
-		if appState[community.ModuleName] != nil {
-			var communityGenState community.GenesisState
-			cdc.MustUnmarshalJSON(appState[community.ModuleName], &communityGenState)
-			communityGenState.Params.CommunityAdmins = []sdk.AccAddress{addr}
-			appState[community.ModuleName] = cdc.MustMarshalJSON(communityGenState)
-		}
-		// migrate claim state
-		if appState[claim.ModuleName] != nil {
-			var genState claim.GenesisState
-			cdc.MustUnmarshalJSON(appState[claim.ModuleName], &genState)
-			genState.Params.ClaimAdmins = []sdk.AccAddress{addr}
-			appState[claim.ModuleName] = cdc.MustMarshalJSON(genState)
-		}
-		// migrate staking state
-		if appState[trustaking.ModuleName] != nil {
-			var genState trustaking.GenesisState
-			cdc.MustUnmarshalJSON(appState[trustaking.ModuleName], &genState)
-			genState.Params.StakingAdmins = []sdk.AccAddress{addr}
-			appState[trustaking.ModuleName] = cdc.MustMarshalJSON(genState)
-		}
-		// migrate slashing state
-		if appState[truslashing.ModuleName] != nil {
-			var genState truslashing.GenesisState
-			cdc.MustUnmarshalJSON(appState[truslashing.ModuleName], &genState)
-			genState.Params.SlashAdmins = []sdk.AccAddress{addr}
-			appState[truslashing.ModuleName] = cdc.MustMarshalJSON(genState)
 		}
 		// migrate trubank state
 		if appState[trubank.ModuleName] != nil {
 			var genState trubank.GenesisState
 			cdc.MustUnmarshalJSON(appState[trubank.ModuleName], &genState)
-			genState.Params.RewardBrokerAddress = addr
+			// guards faucet (user growth pool) use for testnet
+			genState.Params.RewardBrokerAddress = rewardBroker
 			appState[trubank.ModuleName] = cdc.MustMarshalJSON(genState)
+		}
+		// migrate trudistribution state
+		if appState[trudist.ModuleName] != nil {
+			var genState trudist.GenesisState
+			cdc.MustUnmarshalJSON(appState[trudist.ModuleName], &genState)
+			genState.Params.UserGrowthAllocation = sdk.NewDecWithPrec(50, 2)
+			genState.Params.UserRewardAllocation = sdk.NewDecWithPrec(50, 2)
+			genState.Params.StakeholderAllocation = sdk.ZeroDec()
+			appState[trudist.ModuleName] = cdc.MustMarshalJSON(genState)
 		}
 		var err error
 		genDoc.AppState, err = cdc.MarshalJSON(appState)
