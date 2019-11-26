@@ -12,16 +12,11 @@ TruChain is the application-specific blockchain that powers [beta.trustory.io](h
 
 ## Installation
 
-1. Install Go 1.13+ by following the [official docs](https://golang.org/doc/install). 
+Install Go 1.13+ by following the [official docs](https://golang.org/doc/install). 
 
-2. Install truchain binaries:
+Install truchain binaries from [releases](https://github.com/TruStory/truchain/releases).
 
-### Download binaries
-
-Download the latest release from [releases](https://github.com/TruStory/truchain/releases).
-
-### Build from source
-
+Or, build from source:
 ```
 $ git clone https://github.com/TruStory/truchain.git
 $ cd truchain && git checkout master
