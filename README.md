@@ -16,6 +16,12 @@ TruChain is the application-specific blockchain that powers [beta.trustory.io](h
 
 2. Install truchain binaries:
 
+### Download binaries
+
+Download the latest release from [releases](https://github.com/TruStory/truchain/releases).
+
+### Build from source
+
 ```
 $ git clone https://github.com/TruStory/truchain.git
 $ cd truchain && git checkout master
