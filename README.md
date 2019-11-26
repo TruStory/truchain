@@ -30,7 +30,7 @@ This creates:
 
 ## Getting Started
 
-## Run a single node
+### Run a single node
 
 ```sh
 # Build the binaries
@@ -47,7 +47,7 @@ $ make init
 $ make start
 ```
 
-## Run a local 4-node testnet
+### Run a local 4-node testnet
 
 A 4-node local testnet can be created with Docker Compose.
 
