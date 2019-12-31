@@ -8,6 +8,8 @@
 
 TruChain is the application-specific blockchain that powers [beta.trustory.io](https://beta.trustory.io/).
 
+Check out an [overview of the architecture](https://blog.cosmos.network/building-a-decentralized-app-with-cosmos-sdk-3c535cdc6a6a).
+
 **🚀🚀🚀 Join the testnet at [https://github.com/TruStory/testnets](https://github.com/TruStory/testnets).**
 
 ## Installation
